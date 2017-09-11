@@ -1,7 +1,7 @@
 version: 2.0
 jobs:
   build:
-    working_directory: /home/dealii/
+    working_directory: /home/dealii/mpm
     docker:
       - image: cbgeo/mpm
     steps:
