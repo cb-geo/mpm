@@ -1,0 +1,15 @@
+version: 2.0
+jobs:
+  build:
+    working_directory: /home/dealii/
+    docker:
+      - image: cbgeo/mpm
+    steps:
+      - checkout
+      # Build MPM
+      - run:
+          name: Build MPM
+          command: echo "Material Point Method"
+          # mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On .. && make clean && make -j8
+
+
