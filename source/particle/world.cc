@@ -1,28 +1,28 @@
 /*
-  Copyright (C) 2015 - 2017 by the authors of the ASPECT code.
+  Copyright (C) 2015 - 2017 by the authors of the ASPECT and CB-Geo MPM code.
 
-  This file is part of ASPECT.
+  This file is part of ASPECT and CB-Geo MPM.
 
-  ASPECT is free software; you can redistribute it and/or modify
+  MPM is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
 
-  ASPECT is distributed in the hope that it will be useful,
+  MPM is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with ASPECT; see the file LICENSE.  If not see
+  along with MPM; see the file LICENSE.  If not see
   <http://www.gnu.org/licenses/>.
 */
 
-#include <aspect/particle/world.h>
-#include <aspect/global.h>
-#include <aspect/utilities.h>
-#include <aspect/compat.h>
-#include <aspect/geometry_model/box.h>
+#include <mpm/particle/world.h>
+#include <mpm/global.h>
+#include <mpm/utilities.h>
+#include <mpm/compat.h>
+#include <mpm/geometry_model/box.h>
 
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -31,7 +31,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-namespace aspect
+namespace mpm
 {
   namespace Particle
   {
@@ -105,7 +105,7 @@ namespace aspect
       connect_to_signals(this->get_signals());
 
       if (particle_load_balancing & ParticleLoadBalancing::repartition)
-        this->get_triangulation().signals.cell_weight.connect(std_cxx11::bind(&aspect::Particle::World<dim>::cell_weight,
+        this->get_triangulation().signals.cell_weight.connect(std_cxx11::bind(&mpm::Particle::World<dim>::cell_weight,
                                                                               std_cxx11::ref(*this),
                                                                               std_cxx11::_1,
                                                                               std_cxx11::_2));
@@ -199,7 +199,7 @@ namespace aspect
 
     template <int dim>
     void
-    World<dim>::connect_to_signals(aspect::SimulatorSignals<dim> &signals)
+    World<dim>::connect_to_signals(mpm::SimulatorSignals<dim> &signals)
     {
       signals.post_set_initial_state.connect(std_cxx11::bind(&World<dim>::setup_initial_state,
                                                              std_cxx11::ref(*this)));
@@ -239,7 +239,7 @@ namespace aspect
         {
           const std_cxx11::function<void(const typename parallel::distributed::Triangulation<dim>::cell_iterator &,
                                          const typename parallel::distributed::Triangulation<dim>::CellStatus, void *) > callback_function
-            = std_cxx11::bind(&aspect::Particle::World<dim>::store_particles,
+            = std_cxx11::bind(&mpm::Particle::World<dim>::store_particles,
                               std_cxx11::ref(*this),
                               std_cxx11::_1,
                               std_cxx11::_2,
@@ -280,7 +280,7 @@ namespace aspect
         {
           const std_cxx11::function<void(const typename parallel::distributed::Triangulation<dim>::cell_iterator &,
                                          const typename parallel::distributed::Triangulation<dim>::CellStatus, void *) > callback_function
-            = std_cxx11::bind(&aspect::Particle::World<dim>::store_particles,
+            = std_cxx11::bind(&mpm::Particle::World<dim>::store_particles,
                               std_cxx11::ref(*this),
                               std_cxx11::_1,
                               std_cxx11::_2,
@@ -300,7 +300,7 @@ namespace aspect
           const std_cxx11::function<void(const typename parallel::distributed::Triangulation<dim>::cell_iterator &,
                                          const typename parallel::distributed::Triangulation<dim>::CellStatus,
                                          const void *) > callback_function
-            = std_cxx11::bind(&aspect::Particle::World<dim>::load_particles,
+            = std_cxx11::bind(&mpm::Particle::World<dim>::load_particles,
                               std_cxx11::ref(*this),
                               std_cxx11::_1,
                               std_cxx11::_2,
@@ -357,7 +357,7 @@ namespace aspect
               // processes with a lower rank.
 
               types::particle_index local_start_index = 0.0;
-              MPI_Scan(&particles_to_add_locally, &local_start_index, 1, ASPECT_PARTICLE_INDEX_MPI_TYPE, MPI_SUM, this->get_mpi_communicator());
+              MPI_Scan(&particles_to_add_locally, &local_start_index, 1, MPM_PARTICLE_INDEX_MPI_TYPE, MPI_SUM, this->get_mpi_communicator());
               local_start_index -= particles_to_add_locally;
               local_next_particle_index += local_start_index;
 
@@ -393,7 +393,7 @@ namespace aspect
                   {
                     for (unsigned int i = n_particles_in_cell; i < min_particles_per_cell; ++i,++local_next_particle_index)
                       {
-                        std::pair<aspect::Particle::types::LevelInd,Particle<dim> > new_particle = generator->generate_particle(cell,local_next_particle_index);
+                        std::pair<mpm::Particle::types::LevelInd,Particle<dim> > new_particle = generator->generate_particle(cell,local_next_particle_index);
                         property_manager->initialize_late_particle(new_particle.second,
                                                                    particle_handler->get_particles(),
                                                                    *interpolator,
@@ -1455,7 +1455,7 @@ namespace aspect
     void
     World<dim>::save (std::ostringstream &os) const
     {
-      aspect::oarchive oa (os);
+      mpm::oarchive oa (os);
       oa << (*this);
 #if !DEAL_II_VERSION_GTE(9,0,0)
       output->save(os);
@@ -1466,7 +1466,7 @@ namespace aspect
     void
     World<dim>::load (std::istringstream &is)
     {
-      aspect::iarchive ia (is);
+      mpm::iarchive ia (is);
       ia >> (*this);
 #if !DEAL_II_VERSION_GTE(9,0,0)
       output->load(is);
@@ -1671,13 +1671,13 @@ namespace aspect
 
 
 // explicit instantiation of the functions we implement in this file
-namespace aspect
+namespace mpm
 {
   namespace Particle
   {
 #define INSTANTIATE(dim) \
   template class World<dim>;
 
-    ASPECT_INSTANTIATE(INSTANTIATE)
+    MPM_INSTANTIATE(INSTANTIATE)
   }
 }

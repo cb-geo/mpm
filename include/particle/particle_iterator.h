@@ -1,31 +1,31 @@
 /*
- Copyright (C) 2017 by the authors of the ASPECT code.
+ Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
 
- This file is part of ASPECT.
+ This file is part of ASPECT and CB-Geo MPM.
 
- ASPECT is free software; you can redistribute it and/or modify
+ MPM is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- ASPECT is distributed in the hope that it will be useful,
+ MPM is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with ASPECT; see the file LICENSE.  If not see
+ along with MPM; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _aspect_particle_particle_iterator_h
-#define _aspect_particle_particle_iterator_h
+#ifndef _MPM_particle_particle_iterator_h
+#define _MPM_particle_particle_iterator_h
 
-#include <aspect/global.h>
-#include <aspect/particle/particle_accessor.h>
+#include <MPM/global.h>
+#include <MPM/particle/particle_accessor.h>
 
 
-namespace aspect
+namespace MPM
 {
   namespace Particle
   {

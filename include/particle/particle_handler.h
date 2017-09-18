@@ -1,32 +1,32 @@
 /*
- Copyright (C) 2017 by the authors of the ASPECT code.
+ Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
 
- This file is part of ASPECT.
+ This file is part of ASPECT and CB-Geo MPM.
 
- ASPECT is free software; you can redistribute it and/or modify
+ MPM is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- ASPECT is distributed in the hope that it will be useful,
+ MPM is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with ASPECT; see the file LICENSE.  If not see
+ along with MPM; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _aspect_particle_particle_handler_h
-#define _aspect_particle_particle_handler_h
+#ifndef _mpm_particle_particle_handler_h
+#define _mpm_particle_particle_handler_h
 
-#include <aspect/global.h>
-#include <aspect/particle/particle.h>
-#include <aspect/particle/particle_accessor.h>
-#include <aspect/particle/particle_iterator.h>
+#include <mpm/global.h>
+#include <mpm/particle/particle.h>
+#include <mpm/particle/particle_accessor.h>
+#include <mpm/particle/particle_iterator.h>
 
-#include <aspect/particle/property_pool.h>
+#include <mpm/particle/property_pool.h>
 
 #include <deal.II/base/subscriptor.h>
 #include <deal.II/base/array_view.h>
@@ -35,7 +35,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace aspect
+namespace mpm
 {
   namespace Particle
   {
