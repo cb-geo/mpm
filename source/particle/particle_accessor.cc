@@ -1,29 +1,38 @@
 /*
-  Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
+  Copyright (C) 2017 by the authors of the ASPECT code.
 
-  This file is part of ASPECT and CB-Geo MPM.
+  This file is part of ASPECT.
 
-  MPM is free software; you can redistribute it and/or modify
+  ASPECT is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
 
-  MPM is distributed in the hope that it will be useful,
+  ASPECT is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with MPM; see the file LICENSE.  If not see
+  along with ASPECT; see the file LICENSE.  If not see
   <http://www.gnu.org/licenses/>.
 */
 
-#include <mpm/particle/particle_accessor.h>
+#include <aspect/particle/particle_accessor.h>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
+    template <int dim, int spacedim>
+    ParticleAccessor<dim,spacedim>::ParticleAccessor ()
+      :
+      map (NULL),
+      particle ()
+    {}
+
+
+
     template <int dim, int spacedim>
     ParticleAccessor<dim,spacedim>::ParticleAccessor (const std::multimap<types::LevelInd, Particle<dim,spacedim> > &map,
                                                       const typename std::multimap<types::LevelInd, Particle<dim,spacedim> >::iterator &particle)
@@ -119,6 +128,18 @@ namespace mpm
 
 
     template <int dim, int spacedim>
+    bool
+    ParticleAccessor<dim,spacedim>::has_properties () const
+    {
+      Assert(particle != map->end(),
+             ExcInternalError());
+
+      return particle->second.has_properties();
+    }
+
+
+
+    template <int dim, int spacedim>
     void
     ParticleAccessor<dim,spacedim>::set_properties (const std::vector<double> &new_properties)
     {
@@ -171,6 +192,18 @@ namespace mpm
 
 
     template <int dim, int spacedim>
+    std::size_t
+    ParticleAccessor<dim,spacedim>::serialized_size_in_bytes () const
+    {
+      Assert(particle != map->end(),
+             ExcInternalError());
+
+      return particle->second.serialized_size_in_bytes();
+    }
+
+
+
+    template <int dim, int spacedim>
     void
     ParticleAccessor<dim,spacedim>::next ()
     {
@@ -210,13 +243,13 @@ namespace mpm
 
 
 // explicit instantiation of the functions we implement in this file
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
 #define INSTANTIATE(dim) \
   template class ParticleAccessor<dim>;
 
-    MPM_INSTANTIATE(INSTANTIATE)
+    ASPECT_INSTANTIATE(INSTANTIATE)
   }
 }

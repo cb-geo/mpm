@@ -1,31 +1,31 @@
 /*
- Copyright (C) 2016 by the authors of the ASPECT and CB-Geo MPM code.
+ Copyright (C) 2016 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _mpm_particle_property_pool_h
-#define _mpm_particle_property_pool_h
+#ifndef _aspect_particle_property_pool_h
+#define _aspect_particle_property_pool_h
 
-#include <mpm/global.h>
+#include <aspect/global.h>
 
 #include <deal.II/base/array_view.h>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
@@ -82,6 +82,11 @@ namespace mpm
          * @p size particles.
          */
         void reserve(const std::size_t size);
+
+        /**
+         * Returns how many properties are stored per slot in the pool.
+         */
+        unsigned int n_properties_per_slot() const;
 
       private:
         /**

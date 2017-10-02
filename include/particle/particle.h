@@ -1,28 +1,28 @@
 /*
- Copyright (C) 2015 - 2017 by the authors of the ASPECT and CB-Geo MPM code.
+ Copyright (C) 2015 - 2017 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _mpm_particle_particle_h
-#define _mpm_particle_particle_h
+#ifndef _aspect_particle_particle_h
+#define _aspect_particle_particle_h
 
-#include <mpm/global.h>
-#include <mpm/particle/property_pool.h>
+#include <aspect/global.h>
+#include <aspect/particle/property_pool.h>
 
 #include <deal.II/base/point.h>
 #include <deal.II/base/types.h>
@@ -30,7 +30,7 @@
 
 #include <boost/serialization/vector.hpp>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
@@ -69,7 +69,7 @@ namespace mpm
        * An identifier that denotes the MPI type associated with
        * types::global_dof_index.
        */
-#  define MPM_PARTICLE_INDEX_MPI_TYPE MPI_UNSIGNED_LONG_LONG
+#  define ASPECT_PARTICLE_INDEX_MPI_TYPE MPI_UNSIGNED_LONG_LONG
 #else
       /**
        * The type used for indices of particles. While in
@@ -88,7 +88,7 @@ namespace mpm
        * An identifier that denotes the MPI type associated with
        * types::global_dof_index.
        */
-#  define MPM_PARTICLE_INDEX_MPI_TYPE MPI_UNSIGNED
+#  define ASPECT_PARTICLE_INDEX_MPI_TYPE MPI_UNSIGNED
 #endif
     }
 
@@ -275,6 +275,14 @@ namespace mpm
          */
         const ArrayView<const double>
         get_properties () const;
+
+        /**
+         * Returns the size in bytes this particle occupies if all of its data is
+         * serialized (i.e. the number of bytes that is written by the write_data
+         * function of this class).
+         */
+        std::size_t
+        serialized_size_in_bytes() const;
 
         /**
          * Write the data of this object to a stream for the purpose of

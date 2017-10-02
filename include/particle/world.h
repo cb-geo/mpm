@@ -1,48 +1,48 @@
 /*
- Copyright (C) 2012 - 2016 by the authors of the ASPECT and CB-Geo MPM code.
+ Copyright (C) 2012 - 2016 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _mpm_particle_world_h
-#define _mpm_particle_world_h
+#ifndef _aspect_particle_world_h
+#define _aspect_particle_world_h
 
-#include <mpm/global.h>
-#include <mpm/particle/particle.h>
-#include <mpm/particle/particle_accessor.h>
-#include <mpm/particle/particle_iterator.h>
-#include <mpm/particle/particle_handler.h>
+#include <aspect/global.h>
+#include <aspect/particle/particle.h>
+#include <aspect/particle/particle_accessor.h>
+#include <aspect/particle/particle_iterator.h>
+#include <aspect/particle/particle_handler.h>
 
-#include <mpm/particle/generator/interface.h>
-#include <mpm/particle/integrator/interface.h>
-#include <mpm/particle/interpolator/interface.h>
-#include <mpm/particle/property/interface.h>
-#include <mpm/particle/property_pool.h>
-#include <mpm/particle/output/interface.h>
+#include <aspect/particle/generator/interface.h>
+#include <aspect/particle/integrator/interface.h>
+#include <aspect/particle/interpolator/interface.h>
+#include <aspect/particle/property/interface.h>
+#include <aspect/particle/property_pool.h>
+#include <aspect/particle/output/interface.h>
 
-#include <mpm/simulator_access.h>
-#include <mpm/simulator_signals.h>
+#include <aspect/simulator_access.h>
+#include <aspect/simulator_signals.h>
 
 #include <deal.II/base/timer.h>
 #include <deal.II/base/array_view.h>
 
 #include <boost/serialization/unique_ptr.hpp>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
@@ -63,11 +63,6 @@ namespace mpm
     class World : public SimulatorAccess<dim>
     {
       public:
-        /**
-         * A type that can be used to iterate over all particles in the domain.
-         */
-        typedef ParticleIterator<dim> particle_iterator;
-
         /**
          * Default World constructor.
          */
@@ -122,26 +117,6 @@ namespace mpm
         void initialize_particles();
 
         /**
-         * Access to particles in this world.
-         */
-        std::multimap<types::LevelInd, Particle<dim> > &
-        get_particles();
-
-        /**
-         * Const access to particles in this world.
-         */
-        const std::multimap<types::LevelInd, Particle<dim> > &
-        get_particles() const;
-
-        /**
-         * Const access to ghost particles in this world.
-         * Ghost particles are all particles that are owned by another process
-         * and live in one of the ghost cells of the local subdomain.
-         */
-        const std::multimap<types::LevelInd, Particle<dim> > &
-        get_ghost_particles() const;
-
-        /**
          * Advance particles by the old timestep using the current
          * integration scheme. This accounts for the fact that the particles
          * are actually still at their old positions and the current timestep
@@ -174,7 +149,7 @@ namespace mpm
          * post_refinement_load_user_data signal respectively.
          */
         void
-        connect_to_signals(mpm::SimulatorSignals<dim> &signals);
+        connect_to_signals(aspect::SimulatorSignals<dim> &signals);
 
         /**
          * Callback function that is called from Simulator before every
@@ -202,25 +177,6 @@ namespace mpm
         unsigned int
         cell_weight(const typename parallel::distributed::Triangulation<dim>::cell_iterator &cell,
                     const typename parallel::distributed::Triangulation<dim>::CellStatus status);
-
-        /**
-         * Called by listener functions from Triangulation for every cell
-         * before a refinement step. All particles have to be attached to their
-         * element to be sent around to the new cell/processes.
-         */
-        void
-        store_particles(const typename parallel::distributed::Triangulation<dim>::cell_iterator &cell,
-                        const typename parallel::distributed::Triangulation<dim>::CellStatus status,
-                        void *data);
-
-        /**
-         * Called by listener functions after a refinement step. The local map
-         * of particles has to be read from the triangulation user_pointer.
-         */
-        void
-        load_particles(const typename parallel::distributed::Triangulation<dim>::cell_iterator &cell,
-                       const typename parallel::distributed::Triangulation<dim>::CellStatus status,
-                       const void *data);
 
         /**
          * Update the particle properties if necessary.
@@ -314,13 +270,6 @@ namespace mpm
         std_cxx11::unique_ptr<ParticleHandler<dim> > particle_handler;
 
         /**
-         * Set of particles currently in the ghost cells of the local domain,
-         * organized by the level/index of the cell they are in. These
-         * particles are marked read-only.
-         */
-        std::multimap<types::LevelInd, Particle<dim> > ghost_particles;
-
-        /**
          * This variable is set by the register_store_callback_function()
          * function and used by the register_load_callback_function() function
          * to check where the particle data was stored.
@@ -388,39 +337,6 @@ namespace mpm
         get_subdomain_id_to_neighbor_map() const;
 
         /**
-         * Exchanges all particles that live in cells adjacent to ghost cells
-         * (i.e. cells that are ghosts to other processes) with the neighboring
-         * domains. Clears and re-populates the ghost_neighbors member variable.
-         */
-        void
-        exchange_ghost_particles();
-
-        /**
-         * Returns a vector that contains a tensor for every vertex-cell
-         * combination of the output of dealii::GridTools::vertex_to_cell_map()
-         * (which is expected as input parameter for this function).
-         * Each tensor represents a geometric vector from the vertex to the
-         * respective cell center.
-         */
-        std::vector<std::vector<Tensor<1,dim> > >
-        vertex_to_cell_centers_directions(const std::vector<std::set<typename parallel::distributed::Triangulation<dim>::active_cell_iterator> > &vertex_to_cells) const;
-
-        /**
-         * Finds the cells containing each particle for all particles in
-         * @p particles_to_sort. If particles moved out of the local subdomain
-         * they will be sent to their new process and inserted there.
-         * After this function call every particle is either on its current
-         * process and in its current cell, or deleted (if it could not find
-         * its new process or cell).
-         *
-         * @param [in] particles_to_sort Vector containing all pairs of
-         * particles and their old cells that will be sorted into the
-         * 'particles' member variable in this function.
-         */
-        void
-        sort_particles_in_subdomains_and_cells(const std::vector<std::pair<types::LevelInd, Particle<dim> > > &particles_to_sort);
-
-        /**
          * Apply the bounds for the maximum and minimum number of particles
          * per cell, if the appropriate @p particle_load_balancing strategy
          * has been selected.
@@ -436,32 +352,7 @@ namespace mpm
          * that can not be found are discarded.
          */
         void
-        move_particles_back_into_mesh(const std::vector<std::pair<types::LevelInd, Particle<dim> > >         &lost_particles,
-                                      std::vector<std::pair<types::LevelInd, Particle<dim> > >               &moved_particles_cell,
-                                      std::vector<std::vector<std::pair<types::LevelInd, Particle<dim> > > > &moved_particles_domain);
-
-        /**
-         * Transfer particles that have crossed subdomain boundaries to other
-         * processors. The transfer occurs in two steps. As a first step all
-         * processes notify their neighbor processes how many particles will
-         * be sent to them. Because neighbor processes are defined as the owner
-         * of ghost cells of the current process, this also handles
-         * periodic boundaries correctly. Afterwards the transfer is done in the
-         * same way as local communication between neighbor processes.
-         * All received particles and their new cells will be appended to the
-         * @p received_particles vector.
-         *
-         * @param [in] sent_particles All particles that should be sent and
-         * their new subdomain_ids are in this map.
-         *
-         * @param [in,out] received_particles Vector that stores all received
-         * particles. Note that it is not required nor checked that the list
-         * is empty, received particles are simply attached to the end of
-         * the vector.
-         */
-        void
-        send_recv_particles(const std::vector<std::vector<std::pair<types::LevelInd,Particle <dim> > > > &sent_particles,
-                            std::vector<std::pair<types::LevelInd, Particle<dim> > >                     &received_particles);
+        move_particles_back_into_mesh();
 
         /**
          * Advect the particle positions by one integration step. Needs to be
@@ -473,16 +364,16 @@ namespace mpm
          * Initialize the particle properties of one cell.
          */
         void
-        local_initialize_particles(const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &begin_particle,
-                                   const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &end_particle);
+        local_initialize_particles(const typename ParticleHandler<dim>::particle_iterator &begin_particle,
+                                   const typename ParticleHandler<dim>::particle_iterator &end_particle);
 
         /**
          * Update the particle properties of one cell.
          */
         void
         local_update_particles(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                               const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &begin_particle,
-                               const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &end_particle);
+                               const typename ParticleHandler<dim>::particle_iterator &begin_particle,
+                               const typename ParticleHandler<dim>::particle_iterator &end_particle);
 
         /**
          * Advect the particles of one cell. Performs only one step for
@@ -494,9 +385,8 @@ namespace mpm
          */
         void
         local_advect_particles(const typename DoFHandler<dim>::active_cell_iterator &cell,
-                               const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &begin_particle,
-                               const typename std::multimap<types::LevelInd, Particle<dim> >::iterator &end_particle,
-                               std::vector<std::pair<types::LevelInd, Particle <dim> > >               &particles_out_of_cell);
+                               const typename ParticleHandler<dim>::particle_iterator &begin_particle,
+                               const typename ParticleHandler<dim>::particle_iterator &end_particle);
     };
 
     /* -------------------------- inline and template functions ---------------------- */
@@ -508,11 +398,6 @@ namespace mpm
       ar
       &particle_handler
       ;
-
-      // Note that initialize is not necessary when saving the particle handler,
-      // but it does not harm either. When loading the triangulation we need to
-      // recreate the links to the triangulation and the MPI communicator.
-      particle_handler->initialize(this->get_triangulation(),this->get_mpi_communicator());
     }
   }
 }

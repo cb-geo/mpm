@@ -1,31 +1,31 @@
 /*
- Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
+ Copyright (C) 2017 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MPM_particle_particle_iterator_h
-#define _MPM_particle_particle_iterator_h
+#ifndef _aspect_particle_particle_iterator_h
+#define _aspect_particle_particle_iterator_h
 
-#include <MPM/global.h>
-#include <MPM/particle/particle_accessor.h>
+#include <aspect/global.h>
+#include <aspect/particle/particle_accessor.h>
 
 
-namespace MPM
+namespace aspect
 {
   namespace Particle
   {
@@ -38,6 +38,11 @@ namespace MPM
     class ParticleIterator: public std::iterator<std::bidirectional_iterator_tag,ParticleAccessor<dim,spacedim> >
     {
       public:
+        /**
+         * Empty constructor. Such an object is not usable!
+         */
+        ParticleIterator ();
+
         /**
          * Constructor of the iterator. Takes a reference to the particle
          * container, and an iterator the the cell-particle pair.
@@ -55,6 +60,11 @@ namespace MPM
          * Dereferencing operator, non-@p const version.
          */
         ParticleAccessor<dim,spacedim> &operator * ();
+
+        /**
+         * Assignment operator.
+         */
+        ParticleIterator &operator = (const ParticleIterator &);
 
         /**
          * Dereferencing operator, returns a pointer of the particle pointed to. Usage

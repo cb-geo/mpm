@@ -1,33 +1,33 @@
 /*
- Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
+ Copyright (C) 2017 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _mpm_particle_particle_accessor_h
-#define _mpm_particle_particle_accessor_h
+#ifndef _aspect_particle_particle_accessor_h
+#define _aspect_particle_particle_accessor_h
 
-#include <mpm/global.h>
-#include <mpm/particle/particle.h>
+#include <aspect/global.h>
+#include <aspect/particle/particle.h>
 
 #include <deal.II/base/array_view.h>
 #include <deal.II/distributed/tria.h>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
@@ -137,6 +137,14 @@ namespace mpm
         get_properties () const;
 
         /**
+         * Returns the size in bytes this particle occupies if all of its data is
+         * serialized (i.e. the number of bytes that is written by the write_data
+         * function of this class).
+         */
+        std::size_t
+        serialized_size_in_bytes() const;
+
+        /**
          * Get a cell iterator to the cell surrounding the current particle.
          * As particles are organized in the structure of a triangulation,
          * but the triangulation itself is not stored in the particle this
@@ -172,6 +180,11 @@ namespace mpm
         bool operator == (const ParticleAccessor<dim,spacedim> &other) const;
 
       protected:
+        /**
+         * Construct an invalid accessor. Such an object is not usable.
+         */
+        ParticleAccessor ();
+
         /**
          * Construct an accessor from a reference to a map and an iterator to the map.
          * This constructor is protected so that it can only be accessed by friend

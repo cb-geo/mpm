@@ -1,26 +1,26 @@
 /*
-  Copyright (C) 2015 - 2016 by the authors of the ASPECT and CB-Geo MPM code.
+  Copyright (C) 2015 - 2016 by the authors of the ASPECT code.
 
- This file is part of ASPECT and CB-Geo MPM.
+ This file is part of ASPECT.
 
- MPM is free software; you can redistribute it and/or modify
+ ASPECT is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2, or (at your option)
  any later version.
 
- MPM is distributed in the hope that it will be useful,
+ ASPECT is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with MPM; see the file LICENSE.  If not see
+ along with ASPECT; see the file LICENSE.  If not see
  <http://www.gnu.org/licenses/>.
  */
 
-#include <mpm/particle/particle.h>
+#include <aspect/particle/particle.h>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
@@ -56,18 +56,14 @@ namespace mpm
       reference_location (particle.get_reference_location()),
       id (particle.get_id()),
       property_pool(particle.property_pool),
-      properties ((property_pool != NULL) ? property_pool->allocate_properties_array() : PropertyPool::invalid_handle)
+      properties ((particle.has_properties()) ? property_pool->allocate_properties_array() : PropertyPool::invalid_handle)
     {
-      if (property_pool != NULL)
+      if (particle.has_properties())
         {
           const ArrayView<double> my_properties = property_pool->get_properties(properties);
+          const ArrayView<const double> their_properties = particle.get_properties();
 
-          if (my_properties.size() != 0)
-            {
-              const ArrayView<const double> their_properties = particle.get_properties();
-
-              std::copy(&their_properties[0],&their_properties[0]+their_properties.size(),&my_properties[0]);
-            }
+          std::copy(&their_properties[0],&their_properties[0]+their_properties.size(),&my_properties[0]);
         }
     }
 
@@ -90,9 +86,12 @@ namespace mpm
       properties = property_pool->allocate_properties_array();
 
       // See if there are properties to load
-      const ArrayView<double> particle_properties = property_pool->get_properties(properties);
-      for (unsigned int i = 0; i < particle_properties.size(); ++i)
-        particle_properties[i] = *pdata++;
+      if (has_properties())
+        {
+          const ArrayView<double> particle_properties = property_pool->get_properties(properties);
+          for (unsigned int i = 0; i < particle_properties.size(); ++i)
+            particle_properties[i] = *pdata++;
+        }
 
       data = static_cast<const void *> (pdata);
     }
@@ -122,16 +121,13 @@ namespace mpm
           id = particle.id;
           property_pool = particle.property_pool;
 
-          if (property_pool != NULL)
+          if (particle.has_properties())
             {
               properties = property_pool->allocate_properties_array();
               const ArrayView<const double> their_properties = particle.get_properties();
+              const ArrayView<double> my_properties = property_pool->get_properties(properties);
 
-              if (their_properties.size() != 0)
-                {
-                  const ArrayView<double> my_properties = property_pool->get_properties(properties);
-                  std::copy(&their_properties[0],&their_properties[0]+their_properties.size(),&my_properties[0]);
-                }
+              std::copy(&their_properties[0],&their_properties[0]+their_properties.size(),&my_properties[0]);
             }
           else
             properties = PropertyPool::invalid_handle;
@@ -181,11 +177,30 @@ namespace mpm
         *pdata = reference_location(i);
 
       // Write property data
-      const ArrayView<double> particle_properties = property_pool->get_properties(properties);
-      for (unsigned int i = 0; i < particle_properties.size(); ++i,++pdata)
-        *pdata = particle_properties[i];
+      if (has_properties())
+        {
+          const ArrayView<double> particle_properties = property_pool->get_properties(properties);
+          for (unsigned int i = 0; i < particle_properties.size(); ++i,++pdata)
+            *pdata = particle_properties[i];
+        }
 
       data = static_cast<void *> (pdata);
+    }
+
+    template <int dim, int spacedim>
+    std::size_t
+    Particle<dim,spacedim>::serialized_size_in_bytes () const
+    {
+      std::size_t size = sizeof(types::particle_index)
+                         + sizeof(location)
+                         + sizeof(reference_location);
+
+      if (has_properties())
+        {
+          const ArrayView<double> particle_properties = property_pool->get_properties(properties);
+          size += sizeof(double) * particle_properties.size();
+        }
+      return size;
     }
 
     template <int dim, int spacedim>
@@ -239,7 +254,14 @@ namespace mpm
 
       const ArrayView<double> old_properties = property_pool->get_properties(properties);
 
-      std::copy(new_properties.begin(),new_properties.end(),&old_properties[0]);
+      Assert (new_properties.size() == old_properties.size(),
+              ExcMessage(std::string("You are trying to assign properties with an incompatible length. ")
+                         + "The particle has space to store " + Utilities::to_string(old_properties.size()) + " properties, "
+                         + "and this function tries to assign" + Utilities::to_string(new_properties.size()) + " properties. "
+                         + "This is not allowed."));
+
+      if (old_properties.size() > 0)
+        std::copy(new_properties.begin(),new_properties.end(),&old_properties[0]);
     }
 
     template <int dim, int spacedim>
@@ -262,19 +284,27 @@ namespace mpm
 
       return property_pool->get_properties(properties);
     }
+
+    template <int dim, int spacedim>
+    bool
+    Particle<dim,spacedim>::has_properties () const
+    {
+      return (property_pool != NULL)
+             && (properties != PropertyPool::invalid_handle);
+    }
   }
 }
 
 
 // explicit instantiation of the functions we implement in this file
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
 #define INSTANTIATE(dim) \
   template class Particle<dim>;
 
-    MPM_INSTANTIATE(INSTANTIATE)
+    ASPECT_INSTANTIATE(INSTANTIATE)
   }
 }
 

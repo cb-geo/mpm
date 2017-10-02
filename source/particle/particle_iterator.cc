@@ -1,29 +1,37 @@
 /*
-  Copyright (C) 2017 by the authors of the ASPECT and CB-Geo MPM code.
+  Copyright (C) 2017 by the authors of the ASPECT code.
 
-  This file is part of ASPECT and CB-Geo MPM.
+  This file is part of ASPECT.
 
-  MPM is free software; you can redistribute it and/or modify
+  ASPECT is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
 
-  MPM is distributed in the hope that it will be useful,
+  ASPECT is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with MPM; see the file LICENSE.  If not see
+  along with ASPECT; see the file LICENSE.  If not see
   <http://www.gnu.org/licenses/>.
 */
 
-#include <mpm/particle/particle_iterator.h>
+#include <aspect/particle/particle_iterator.h>
 
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
+    template <int dim, int spacedim>
+    ParticleIterator<dim,spacedim>::ParticleIterator ()
+      :
+      accessor ()
+    {}
+
+
+
     template <int dim, int spacedim>
     ParticleIterator<dim,spacedim>::ParticleIterator (const std::multimap<types::LevelInd, Particle<dim,spacedim> > &map,
                                                       const typename std::multimap<types::LevelInd, Particle<dim,spacedim> >::iterator &particle)
@@ -65,6 +73,15 @@ namespace mpm
     ParticleIterator<dim,spacedim>::operator ->() const
     {
       return &(this->operator* ());
+    }
+
+
+    template <int dim, int spacedim>
+    ParticleIterator<dim,spacedim> &
+    ParticleIterator<dim,spacedim>::operator =(const ParticleIterator &other)
+    {
+      accessor = other.accessor;
+      return *this;
     }
 
 
@@ -132,13 +149,13 @@ namespace mpm
 }
 
 // explicit instantiation of the functions we implement in this file
-namespace mpm
+namespace aspect
 {
   namespace Particle
   {
 #define INSTANTIATE(dim) \
   template class ParticleIterator<dim>;
 
-    MPM_INSTANTIATE(INSTANTIATE)
+    ASPECT_INSTANTIATE(INSTANTIATE)
   }
 }
