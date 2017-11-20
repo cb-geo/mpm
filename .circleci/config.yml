@@ -1,7 +1,7 @@
 version: 2.0
 jobs:
   build:
-    working_directory: /home/cbgeo/research/
+    working_directory: /home/cbgeo/research/mpm
     docker:
       - image: quay.io/cbgeo/mpm
     steps:
