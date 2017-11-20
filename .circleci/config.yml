@@ -1,15 +1,14 @@
 version: 2.0
 jobs:
   build:
-    working_directory: /home/dealii/mpm
+    working_directory: /home/cbgeo/research/
     docker:
-      - image: cbgeo/mpm
+      - image: quay.io/cbgeo/mpm
     steps:
       - checkout
-      # Build MPM
+      # Set TBB configure CMake and run
       - run:
           name: Build MPM
-          command: echo "Material Point Method"
-          # mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On .. && make clean && make -j8
+          command: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On .. && make clean && make -j8 && ./mpmtest
 
 
