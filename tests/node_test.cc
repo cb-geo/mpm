@@ -1,7 +1,7 @@
 // No-debase test
 #include <limits>
 
-#include "node_base.h"
+#include "node.h"
 
 #include "catch.hpp"
 #include "Eigen/Dense"
@@ -15,21 +15,21 @@ TEST_CASE("Node base is checked for 1D case", "[node][1D]") {
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is negative") {
     //! Check for negative node id
     mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
@@ -38,7 +38,7 @@ TEST_CASE("Node base is checked for 1D case", "[node][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -77,21 +77,21 @@ TEST_CASE("Node base is checked for 2D case", "[node][2D]") {
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is negative") {
     //! Check for negative node id
     mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
@@ -100,7 +100,7 @@ TEST_CASE("Node base is checked for 2D case", "[node][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -139,21 +139,21 @@ TEST_CASE("Node base is checked for 3D case", "[node][3D]") {
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is negative") {
     //! Check for negative node id
     mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
@@ -162,7 +162,7 @@ TEST_CASE("Node base is checked for 3D case", "[node][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();

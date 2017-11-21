@@ -15,10 +15,10 @@ using Index = long long;
 
 // Node Base class
 //! \brief Base class that stores the information about nodes
-//! \details NodeBase class: id_ and coordinates.
+//! \details Node class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class NodeBase {
+class Node {
  public:
   //! Define a vector of size dimension
   typedef Eigen::Matrix<double, Tdim, 1> VectorDim;
@@ -26,7 +26,7 @@ class NodeBase {
   // Constructor with id and coordinates
   //! \param[in] id Node id
   //! \param[in] coord coordinates of the node
-  NodeBase(const Index& id, const VectorDim& coord)
+  Node(const Index& id, const VectorDim& coord)
       : id_{id} {
     // Check if the dimension is between 1 & 3
     static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -34,7 +34,7 @@ class NodeBase {
   };
 
   //! Destructor
-  virtual ~NodeBase(){};
+  virtual ~Node(){};
 
   //! Return id of the node
   long long id() const { return id_; }
@@ -59,10 +59,10 @@ class NodeBase {
 
  private:
   //! Copy constructor
-  NodeBase(const NodeBase<Tdim>&);
+  Node(const Node<Tdim>&);
 
   //! Assignement operator
-  NodeBase& operator=(const NodeBase<Tdim>&);
+  Node& operator=(const Node<Tdim>&);
 
  protected:
   //! node id
@@ -70,6 +70,6 @@ class NodeBase {
 
   //! nodal coordinates
   VectorDim coordinates_;
-}; // NodeBase class
+}; // Node class
 } // mpm namespace
 #endif  // MPM_NODE_BASE_H_

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <memory>
 
-#include "node_base.h"
+#include "node.h"
 
 #include "Eigen/Dense"
 
@@ -12,6 +12,6 @@ int main(int argc, char** argv) {
   Eigen::Matrix<double, Dim, 1> coord;
   coord.setZero();
 
-  auto node = std::make_shared<mpm::NodeBase<Dim>>(id, coord);
+  auto node = std::make_shared<mpm::Node<Dim>>(id, coord);
   node->info();
 }
