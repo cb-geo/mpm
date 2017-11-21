@@ -6,9 +6,43 @@ jobs:
       - image: quay.io/cbgeo/mpm
     steps:
       - checkout
-      # Set TBB configure CMake and run
+      # GCC 6.3
       - run:
-          name: Build MPM
-          command: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On .. && make clean && make -j8 && ./mpmtest
-
+          name: GCC-6 build
+          command: |
+            mkdir -p build
+            [ "$(ls -A build)" ] && rm -rf build/*
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            make -j8 
+            ctest -VV
+      # Clang 3.9
+      - run:
+          name: Clang-3.9 build
+          command: |
+            mkdir -p build
+            [ "$(ls -A build)" ] && rm -rf build/*
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            make -j8 
+            ctest -VV
+      # cppcheck
+      - run:
+          name: cppcheck
+          command: |
+            cppcheck --version
+            cppcheck --enable=warning --inconclusive --force --language=c++ --std=c++11 src/*.cc include/*.h include/*.tcc --error-exitcode=1
+      # codecoverage
+      - run:
+          name: codecov.io
+          command: |
+            mkdir -p build
+            [ "$(ls -A build)" ] && rm -rf build/*
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
+            make -j8
+            ctest -VV
+            make gcov
+            make lcov
+            bash <(curl -s https://codecov.io/bash) -X gcov
 
