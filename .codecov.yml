@@ -4,9 +4,9 @@ codecov:
 
 coverage:
   precision: 2  # 2 = xx.xx%, 0 = xx%
-  round: down # default down|up|nearest
+  round: nearest # default down|up|nearest
   range: 70...90 # default 70...90. red...green
 
-  ignore: # files and folders for processing
-    - external/catch.hpp
-    - src/main.cc
+ignore: # files and folders for processing
+  - external/*
+  - src/main.cc
