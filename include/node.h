@@ -1,5 +1,5 @@
-#ifndef MPM_NODE_BASE_H_
-#define MPM_NODE_BASE_H_
+#ifndef MPM_NODE_H_
+#define MPM_NODE_H_
 
 #include <array>
 #include <iostream>
@@ -64,4 +64,4 @@ class Node {
   VectorDim coordinates_;
 }; // Node class
 } // mpm namespace
-#endif  // MPM_NODE_BASE_H_
+#endif  // MPM_NODE_H_
