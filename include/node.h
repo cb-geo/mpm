@@ -13,7 +13,7 @@ namespace mpm {
 // Global index type for the node
 using Index = long long;
 
-// Node Base class
+// Node class
 //! \brief Base class that stores the information about nodes
 //! \details Node class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -26,7 +26,7 @@ class Node {
   // Constructor with id and coordinates
   //! \param[in] id Node id
   //! \param[in] coord coordinates of the node
-  Node(const Index& id, const VectorDim& coord)
+  Node(Index id, const VectorDim& coord)
       : id_{id} {
     // Check if the dimension is between 1 & 3
     static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
