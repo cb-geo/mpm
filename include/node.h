@@ -21,7 +21,7 @@ template <unsigned Tdim>
 class Node {
  public:
   //! Define a vector of size dimension
-  typedef Eigen::Matrix<double, Tdim, 1> VectorDim;
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
   
   // Constructor with id and coordinates
   //! \param[in] id Node id
@@ -37,7 +37,7 @@ class Node {
   virtual ~Node(){};
 
   //! Return id of the node
-  long long id() const { return id_; }
+  Index id() const { return id_; }
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the node
@@ -48,14 +48,6 @@ class Node {
   //! Return coordinates
   //! \param[out] coordinates_ return coordinates of the node
   VectorDim coordinates() const { return coordinates_; }
-
-  //! Info
-  void info() {
-    std::cout << "Node id: " << id_ << ", coordinates: ";
-    for (unsigned i = 0; i < coordinates_.size(); ++i)
-      std::cout << coordinates_(i) << ", ";
-    std::cout << std::endl;
-  }
 
  private:
   //! Copy constructor

@@ -13,5 +13,5 @@ int main(int argc, char** argv) {
   coord.setZero();
 
   auto node = std::make_shared<mpm::Node<Dim>>(id, coord);
-  node->info();
+  std::cout << "Node id: " << node->id() << '\n';
 }
