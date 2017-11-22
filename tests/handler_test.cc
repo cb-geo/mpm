@@ -6,8 +6,8 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "handler.h"
 #include "node.h"
-#include "node_handler.h"
 
 //! \brief Check node handler class for 2D case
 TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
@@ -27,29 +27,29 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
 
   // Node handler
-  auto nodehandler = std::make_shared<mpm::NodeHandler<Dim>>();
+  auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert_node(node1);
+    bool status1 = nodehandler->insert(node1);
     REQUIRE(status1 == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert_node(node2);
+    bool status2 = nodehandler->insert(node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
-    REQUIRE(nodehandler->nnodes() == 2);
+    REQUIRE(nodehandler->size() == 2);
   }
 
   // Check iterator
   SECTION("Check begin node iterator") {
     // Insert node 1
-    nodehandler->insert_node(node1);
+    nodehandler->insert(node1);
     // Insert node 2
-    nodehandler->insert_node(node2);
+    nodehandler->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->nodes_begin(); itr != nodehandler->nodes_end();
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
          ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
@@ -80,29 +80,29 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
 
   // Node handler
-  auto nodehandler = std::make_shared<mpm::NodeHandler<Dim>>();
+  auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert_node(node1);
+    bool status1 = nodehandler->insert(node1);
     REQUIRE(status1 == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert_node(node2);
+    bool status2 = nodehandler->insert(node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
-    REQUIRE(nodehandler->nnodes() == 2);
+    REQUIRE(nodehandler->size() == 2);
   }
 
   // Check iterator
   SECTION("Check begin node iterator") {
     // Insert node 1
-    nodehandler->insert_node(node1);
+    nodehandler->insert(node1);
     // Insert node 2
-    nodehandler->insert_node(node2);
+    nodehandler->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->nodes_begin(); itr != nodehandler->nodes_end();
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
          ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
