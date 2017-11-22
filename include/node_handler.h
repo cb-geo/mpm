@@ -8,7 +8,7 @@
 namespace mpm {
 
 // Global index type for the node
-using Index = long long;
+using Index = unsigned long long;
 
 // Node handler class
 //! \brief A class that offers a container and iterators for nodes

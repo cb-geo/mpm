@@ -10,8 +10,11 @@
 #include "node_handler.h"
 
 //! \brief Check node handler class for 2D case
-TEST_CASE("Node handler is checked for 2D case", "[node][2D]") {
+TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
+  // Dimension
   const unsigned Dim = 2;
+  // Tolerance
+  const double Tolerance = 1.E-7;
 
   // Node 1
   mpm::Index id1 = 0;
@@ -50,7 +53,8 @@ TEST_CASE("Node handler is checked for 2D case", "[node][2D]") {
          ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
-      for (unsigned i = 0; i < coords.size(); ++i) REQUIRE(coords[i] == 0);
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(0.).epsilon(Tolerance));
       ++counter;
     }
     // Iterate over nodes and check if the number of nodes is good
@@ -60,7 +64,10 @@ TEST_CASE("Node handler is checked for 2D case", "[node][2D]") {
 
 //! \brief Check node handler class for 3D case
 TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
+  // Dimension
   const unsigned Dim = 3;
+  // Tolerance
+  const double Tolerance = 1.E-7;
 
   // Node 1
   mpm::Index id1 = 0;
@@ -99,7 +106,9 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
          ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
-      for (unsigned i = 0; i < coords.size(); ++i) REQUIRE(coords[i] == 0);
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(0.).epsilon(Tolerance));
+
       ++counter;
     }
     // Iterate over nodes and check if the number of nodes is good

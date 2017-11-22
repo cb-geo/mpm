@@ -18,13 +18,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     REQUIRE(node->id() == 0);
   }
 
-  SECTION("Node id is negative") {
-    //! Check for negative node id
-    mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
-  }
-
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
@@ -80,13 +73,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     REQUIRE(node->id() == 0);
   }
 
-  SECTION("Node id is negative") {
-    //! Check for negative node id
-    mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
-  }
-
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
@@ -140,13 +126,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     mpm::Index id = 0;
     auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
     REQUIRE(node->id() == 0);
-  }
-
-  SECTION("Node id is negative") {
-    //! Check for negative node id
-    mpm::Index id = std::numeric_limits<mpm::Index>::min();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::min());
   }
 
   SECTION("Node id is positive") {
