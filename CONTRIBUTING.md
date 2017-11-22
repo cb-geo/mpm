@@ -1,5 +1,10 @@
 ## Styleguides
 
+### Developer Certificate of Origin
+
+Please read the [Developer Certificate of Origin](./dco.md) before contributing.
+The project is licensed under MIT.
+
 ### Git Commit Messages
 
 * Use the present tense ("Add feature" not "Added feature")

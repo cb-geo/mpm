@@ -1,7 +1,11 @@
 # Developer Certificate of Origin
 > Version 1.1
 
-By contributing to CB-Geo, You accept and agree to the following terms and conditions for Your present and future Contributions submitted to CB-Geo Except for the license granted herein to CB-Geo and recipients of software distributed by CB-Geo, You reserve all right, title, and interest in and to Your Contributions.
+By contributing to CB-Geo, You accept and agree to the following 
+terms and conditions for Your present and future Contributions 
+submitted to CB-Geo Except for the license granted herein to 
+CB-Geo and recipients of software distributed by CB-Geo, You 
+reserve all right, title, and interest in and to Your Contributions.
 
 Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
 1 Letterman Drive
