@@ -18,7 +18,11 @@
 ### Prerequisite packages
 > The following prerequisite packages can be found in the docker image:
 
-* [Dealii](http://dealii.org/)
+* [Boost](http://www.boost.org/)
+* [Eigen](http://eigen.tuxfamily.org/)
+* [Intel TBB](https://www.threadingbuildingblocks.org/)
+* [SQLite3](https://sqlite.org/)
+* [VTK](https://www.vtk.org/)
 
 ## Compile and Run
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
@@ -32,8 +36,8 @@
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
 
 ## References
-> [Aspect](https://github.com/geodynamics/aspect)
-> [Dealii](https://github.com/dealii/dealii)
+* [Aspect](https://github.com/geodynamics/aspect)
+* [Dealii](https://github.com/dealii/dealii)
 
 
 
