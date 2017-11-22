@@ -1,8 +1,6 @@
 # 2D/3D Material Point Method (mpm)
 > Cambridge Berkeley - Geomechanics
 
-> Based on [Aspect](https://github.com/geodynamics/aspect)
-
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/cb-geo/mpm/develop/license.md)
 [![Developer docs](https://img.shields.io/badge/developer-docs-blue.svg)](http://cb-geo.github.io/mpm)
 [![User docs](https://img.shields.io/badge/user-docs-blue.svg)](https://mpm.cb-geo.com/)
@@ -28,4 +26,14 @@
 0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
+
+### Run tests
+
+0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
+
+## References
+> [Aspect](https://github.com/geodynamics/aspect)
+> [Dealii](https://github.com/dealii/dealii)
+
+
 
