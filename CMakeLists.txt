@@ -44,6 +44,7 @@ add_executable(mpm
 SET(test_src
   ${mpm_SOURCE_DIR}/tests/test.cc
   ${mpm_SOURCE_DIR}/tests/node_test.cc
+  ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
 )   
 add_executable(mpmtest
   ${test_src}

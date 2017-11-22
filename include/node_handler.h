@@ -21,6 +21,9 @@ class NodeHandler {
   
   //! Insert node
   bool insert_node (const std::shared_ptr<Node<Tdim>>& node);
+
+  //! Return number of nodes
+  std::size_t nnodes() const { return nodes_.size(); }
   
   //! Return begin iterator of nodes
   typename std::unordered_map<Index, std::shared_ptr<Node<Tdim>>>::const_iterator

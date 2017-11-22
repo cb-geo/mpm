@@ -1,4 +1,3 @@
-// No-debase test
 #include <limits>
 
 #include "node.h"
@@ -6,8 +5,8 @@
 #include "catch.hpp"
 #include "Eigen/Dense"
 
-//! \brief Check node base class for 1D case
-TEST_CASE("Node base is checked for 1D case", "[node][1D]") {
+//! \brief Check node class for 1D case
+TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   const unsigned Dim = 1;
   Eigen::Matrix<double, 1, 1> coords;
   coords.setZero();
@@ -68,8 +67,8 @@ TEST_CASE("Node base is checked for 1D case", "[node][1D]") {
   }
 }
 
-//! \brief Check node base class for 2D case
-TEST_CASE("Node base is checked for 2D case", "[node][2D]") {
+//! \brief Check node class for 2D case
+TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   const unsigned Dim = 2;
   Eigen::Vector2d coords;
   coords.setZero();
@@ -130,8 +129,8 @@ TEST_CASE("Node base is checked for 2D case", "[node][2D]") {
   }
 }
 
-//! \brief Check node base class for 3D case
-TEST_CASE("Node base is checked for 3D case", "[node][3D]") {
+//! \brief Check node class for 3D case
+TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   const unsigned Dim = 3;
   Eigen::Vector3d  coords;
   coords.setZero();
