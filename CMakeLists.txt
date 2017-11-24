@@ -42,6 +42,7 @@ add_executable(mpm
 
 # Unit test
 SET(test_src
+  ${mpm_SOURCE_DIR}/tests/cell_test.cc
   ${mpm_SOURCE_DIR}/tests/handler_test.cc
   ${mpm_SOURCE_DIR}/tests/node_test.cc
   ${mpm_SOURCE_DIR}/tests/test.cc
