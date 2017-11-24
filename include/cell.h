@@ -53,6 +53,14 @@ class Cell {
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
 
+  //! Add neighbouring cell
+  void add_neighbour(const std::shared_ptr<Cell<Tdim>>& neighbour) {
+    neighbour_cells_.emplace_back(neighbour);
+  }
+
+  //! Number of neighbours
+  unsigned nneighbours() const { return neighbour_cells_.size(); }
+
  private:
   //! cell id
   Index id_ { std::numeric_limits<Index>::max() };
@@ -62,7 +70,10 @@ class Cell {
 
   //! Container of node pointers (local id, node pointer)
   Handler<Node<Tdim>> nodes_;
-  
+
+  //! Container of cell neighbours
+  std::vector<std::weak_ptr<Cell<Tdim>>> neighbour_cells_;
+
 }; // Cell class
 } // mpm namespace
 
