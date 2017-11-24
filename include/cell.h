@@ -8,6 +8,8 @@
 
 #include "Eigen/Dense"
 
+#include "node.h"
+
 namespace mpm {
   
 // Global index type for the cell
@@ -34,15 +36,14 @@ class Cell {
   //! Destructor
   virtual ~Cell(){};
 
+  //! Delete copy constructor
+  Cell(const Cell<Tdim>&) = delete;
+
+  //! Delete assignement operator
+  Cell& operator=(const Cell<Tdim>&) = delete;
+
   //! Return id of the cell
   Index id() const { return id_; }
-
- private:
-  //! Copy constructor
-  Cell(const Cell<Tdim>&);
-
-  //! Assignement operator
-  Cell& operator=(const Cell<Tdim>&);
 
  protected:
   //! cell id
