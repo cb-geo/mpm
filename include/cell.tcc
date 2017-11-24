@@ -21,3 +21,26 @@ bool mpm::Cell<Tdim>::add_node(unsigned local_id, const std::shared_ptr<mpm::Nod
   }
   return insertion_status;
 }
+
+//! Add a neighbour cell
+//! \param[in] local_id local id of the cell
+//! \param[in] ptr A shared pointer to cell
+//! \retval insertion_status Return the successful addition of a node
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::add_neighbour(
+    unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
+  bool insertion_status = false;
+  try {
+    // If number of cell ptrs id is not the current cell id
+    if (local_id >= 0) {
+      insertion_status = neighbour_cells_.insert(local_id, cell_ptr);
+    } else {
+      throw std::runtime_error(
+          "Invalid local id of a cell neighbour");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << "\n";
+  }
+  return insertion_status;
+}

@@ -56,7 +56,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes);
     REQUIRE(cell->nneighbours() == 0);
-    cell->add_neighbour(neighbourcell);
+    cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
   }
 }
@@ -131,7 +131,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes);
     REQUIRE(cell->nneighbours() == 0);
-    cell->add_neighbour(neighbourcell);
+    cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
   }
 }
