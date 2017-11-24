@@ -57,7 +57,7 @@ class Node {
 
  protected:
   //! node id
-  Index id_;
+  Index id_ { std::numeric_limits<Index>::max() };
 
   //! nodal coordinates
   VectorDim coordinates_;
