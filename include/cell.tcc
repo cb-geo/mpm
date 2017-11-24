@@ -8,7 +8,9 @@ bool mpm::Cell<Tdim>::add_node(unsigned local_id, const std::shared_ptr<mpm::Nod
   bool insertion_status = false;
   try {
     // If number of node ptrs in a cell is less than the maximum number of nodes per cell
-    if (nodes_.size() < this->nnodes_) {
+    // The local id should be between 0 and maximum number of nodes
+    if (nodes_.size() < this->nnodes_ &&
+        (local_id >= 0 && local_id < this->nnodes_)) {
       insertion_status = nodes_.insert(local_id, node_ptr);
     } else {
       throw std::runtime_error(
