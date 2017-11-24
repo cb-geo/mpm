@@ -50,6 +50,9 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Add node to cell
+  bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
+
  private:
   //! cell id
   Index id_ { std::numeric_limits<Index>::max() };
@@ -62,4 +65,7 @@ class Cell {
   
 }; // Cell class
 } // mpm namespace
+
+#include "cell.tcc"
+
 #endif  // MPM_CELL_H_
