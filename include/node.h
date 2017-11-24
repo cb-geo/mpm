@@ -36,6 +36,12 @@ class Node {
   //! Destructor
   virtual ~Node(){};
 
+  //! Delete copy constructor
+  Node(const Node<Tdim>&) = delete;
+
+  //! Delete assignement operator
+  Node& operator=(const Node<Tdim>&) = delete;
+
   //! Return id of the node
   Index id() const { return id_; }
 
@@ -48,13 +54,6 @@ class Node {
   //! Return coordinates
   //! \param[out] coordinates_ return coordinates of the node
   VectorDim coordinates() const { return coordinates_; }
-
- private:
-  //! Copy constructor
-  Node(const Node<Tdim>&);
-
-  //! Assignement operator
-  Node& operator=(const Node<Tdim>&);
 
  protected:
   //! node id
