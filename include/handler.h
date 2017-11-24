@@ -18,8 +18,11 @@ class Handler {
   //! Default constructor
   Handler<T>() = default;
   
-  //! Insert 
+  //! Insert a pointer
   bool insert(const std::shared_ptr<T>&);
+
+  //! Insert an id and a pointer
+  bool insert(Index, const std::shared_ptr<T>&);
 
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }

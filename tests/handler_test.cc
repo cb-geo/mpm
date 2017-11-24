@@ -35,7 +35,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     bool status1 = nodehandler->insert(node1);
     REQUIRE(status1 == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2);
+    bool status2 = nodehandler->insert(node2->id(), node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
@@ -88,7 +88,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     bool status1 = nodehandler->insert(node1);
     REQUIRE(status1 == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2);
+    bool status2 = nodehandler->insert(node2->id(), node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
