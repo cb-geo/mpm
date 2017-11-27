@@ -84,14 +84,13 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     coords << 1., 1.;
 
     // Iterate through node handler to update coordinaates
-    nodehandler->for_each(nodehandler->begin(), nodehandler->end(),
-                          // function structure
-                          std::bind(static_cast<void (mpm::Node<Dim>::*)(
-                                        const Eigen::Matrix<double, Dim, 1>&)>(
-                                        // function
-                                        &mpm::Node<Dim>::coordinates),
-                                    // arguments
-                                    std::placeholders::_1, coords));
+    nodehandler->for_each(  // function structure
+        std::bind(static_cast<void (mpm::Node<Dim>::*)(
+                      const Eigen::Matrix<double, Dim, 1>&)>(
+                      // function
+                      &mpm::Node<Dim>::coordinates),
+                  // arguments
+                  std::placeholders::_1, coords));
 
     // Check if update has gone through
     for (auto itr = nodehandler->begin(); itr != nodehandler->end();
@@ -179,14 +178,14 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     coords << 1., 1., 1.;
 
     // Iterate through node handler to update coordinaates
-    nodehandler->for_each(nodehandler->begin(), nodehandler->end(),
-                          // function structure
-                          std::bind(static_cast<void (mpm::Node<Dim>::*)(
-                                        const Eigen::Matrix<double, Dim, 1>&)>(
-                                        // function
-                                        &mpm::Node<Dim>::coordinates),
-                                    // arguments
-                                    std::placeholders::_1, coords));
+    nodehandler->for_each(
+        // function structure
+        std::bind(static_cast<void (mpm::Node<Dim>::*)(
+                      const Eigen::Matrix<double, Dim, 1>&)>(
+                      // function
+                      &mpm::Node<Dim>::coordinates),
+                  // arguments
+                  std::placeholders::_1, coords));
 
     // Check if update has gone through
     for (auto itr = nodehandler->begin(); itr != nodehandler->end();

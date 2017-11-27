@@ -41,9 +41,9 @@ class Handler {
   }
 
   //! Iterate over elements in the container
-  template <class Titr, class Tfn>
-  Tfn for_each(Titr first, Titr last, Tfn fn);
-  
+  template <class Tfn>
+  Tfn for_each(Tfn fn);
+
  private:
   // Unordered map of index and pointer
   std::unordered_map<Index, std::shared_ptr<T>> elements_;

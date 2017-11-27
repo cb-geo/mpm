@@ -21,10 +21,10 @@ bool mpm::Handler<T>::insert(mpm::Index id, const std::shared_ptr<T>& ptr) {
 //! \tparam T A class with a template argument Tdim
 //! \tparam Tfn A functor
 template <class T>
-template <class Titr, class Tfn>
-Tfn mpm::Handler<T>::for_each(Titr first, Titr last, Tfn fn) {
-  for (; first != last; ++first) {
-    fn((*first).second);
+template <class Tfn>
+Tfn mpm::Handler<T>::for_each(Tfn fn) {
+  for (auto itr = this->begin(); itr != this->end(); ++itr) {
+    fn((*itr).second);
   }
   return fn;
 }
