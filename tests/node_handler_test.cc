@@ -1,6 +1,6 @@
 // No-debase test
+#include <functional>
 #include <limits>
-
 #include <memory>
 
 #include "Eigen/Dense"
@@ -42,7 +42,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   }
 
   // Check iterator
-  SECTION("Check begin node iterator") {
+  SECTION("Check node range iterator") {
     // Insert node 1
     nodehandler->insert(node1);
     // Insert node 2
@@ -57,9 +57,52 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
         REQUIRE(coords[i] == Approx(0.).epsilon(Tolerance));
       ++counter;
     }
+
     // Iterate over nodes and check if the number of nodes is good
     REQUIRE(counter == 2);
   }
+
+  // Check for_each
+  SECTION("Check node for_each") {
+    // Insert node 1
+    nodehandler->insert(node1);
+    // Insert node 2
+    nodehandler->insert(node2);
+    // Check size of node hanlder
+    REQUIRE(nodehandler->size() == 2);
+
+    // Check coordinates before updating
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
+         ++itr) {
+      auto coords = ((*itr).second)->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Set coordinates to unity
+    coords << 1., 1.;
+
+    // Iterate through node handler to update coordinaates
+    nodehandler->for_each(nodehandler->begin(), nodehandler->end(),
+                          // function structure
+                          std::bind(static_cast<void (mpm::Node<Dim>::*)(
+                                        const Eigen::Matrix<double, Dim, 1>&)>(
+                                        // function
+                                        &mpm::Node<Dim>::coordinates),
+                                    // arguments
+                                    std::placeholders::_1, coords));
+
+    // Check if update has gone through
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
+         ++itr) {
+      auto coords = ((*itr).second)->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(1.).epsilon(Tolerance));
+    }
+  }
+
 }
 
 //! \brief Check node handler class for 3D case
@@ -95,7 +138,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   }
 
   // Check iterator
-  SECTION("Check begin node iterator") {
+  SECTION("Check node range iterator") {
     // Insert node 1
     nodehandler->insert(node1);
     // Insert node 2
@@ -113,5 +156,45 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     }
     // Iterate over nodes and check if the number of nodes is good
     REQUIRE(counter == 2);
+  }
+  
+  // Check for_each
+  SECTION("Check node for_each") {
+    // Insert node 1
+    nodehandler->insert(node1);
+    // Insert node 2
+    nodehandler->insert(node2);
+    // Check size of node hanlder
+    REQUIRE(nodehandler->size() == 2);
+    
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
+         ++itr) {
+      auto coords = ((*itr).second)->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Set coordinates to unity
+    coords << 1., 1., 1.;
+
+    // Iterate through node handler to update coordinaates
+    nodehandler->for_each(nodehandler->begin(), nodehandler->end(),
+                          // function structure
+                          std::bind(static_cast<void (mpm::Node<Dim>::*)(
+                                        const Eigen::Matrix<double, Dim, 1>&)>(
+                                        // function
+                                        &mpm::Node<Dim>::coordinates),
+                                    // arguments
+                                    std::placeholders::_1, coords));
+
+    // Check if update has gone through
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
+         ++itr) {
+      auto coords = ((*itr).second)->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < coords.size(); ++i)
+        REQUIRE(coords[i] == Approx(1.).epsilon(Tolerance));
+    }
   }
 }
