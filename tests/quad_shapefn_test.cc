@@ -17,7 +17,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (0,0)
     SECTION("Four noded quadrilateral shape function for coordinates(0,0)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
       auto shapefn = quadsf->shapefn(coords);
 
@@ -46,7 +46,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (-1, -1);
     SECTION("Four noded quadrilateral shape function for coordinates(-1, -1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
       auto shapefn = quadsf->shapefn(coords);
 
@@ -75,7 +75,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (1,1)
     SECTION("Four noded quadrilateral shape function for coordinates(1,1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
       auto shapefn = quadsf->shapefn(coords);
 
@@ -112,7 +112,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (0,0)
     SECTION("Eight noded quadrilateral shape function for coordinates(0,0)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
       auto shapefn = quadsf->shapefn(coords);
 
@@ -154,7 +154,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (-1,-1)
     SECTION("Eight noded quadrilateral shape function for coordinates(-1,-1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
       auto shapefn = quadsf->shapefn(coords);
 
@@ -198,7 +198,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (1,1)
     SECTION("Eight noded quadrilateral shape function for coordinates(1, 1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
       auto shapefn = quadsf->shapefn(coords);
 
@@ -246,7 +246,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (0,0)
     SECTION("Nine noded quadrilateral shape function for coordinates(0,0)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
       auto shapefn = quadsf->shapefn(coords);
 
@@ -292,7 +292,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (-1,-1)
     SECTION("Nine noded quadrilateral shape function for coordinates(-1,-1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
       auto shapefn = quadsf->shapefn(coords);
 
@@ -337,7 +337,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
 
     // Coordinates is (1,1)
     SECTION("Nine noded quadrilateral shape function for coordinates(1, 1)") {
-      Eigen::Matrix<double, 2, 1> coords;
+      Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
       auto shapefn = quadsf->shapefn(coords);
 

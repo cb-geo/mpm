@@ -27,6 +27,10 @@
 //!   |           |
 //!   0-----0-----0
 //!  0      4       1
+
+//! Return shape functions of a cell
+//! \param[in] xi Coordinates of point of interest
+//! \retval shapefn Shape function of a given cell
 template <unsigned Tdim>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::shapefn(
     const mpm::QuadrilateralShapeFn<Tdim>::VectorDim& xi) {
@@ -71,6 +75,9 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::shapefn(
   return shapefn_;
 }
 
+//! Return gradient of shape functions of a cell
+//! \param[in] xi Coordinates of point of interest
+//! \retval grad_shapefn Gradient of shape function of a given cell
 template <unsigned Tdim>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::grad_shapefn(
     const mpm::QuadrilateralShapeFn<Tdim>::VectorDim& xi) {

@@ -1,5 +1,5 @@
-#ifndef MPM_QUADRILATERALSHAPEFN_H_
-#define MPM_QUADRILATERALSHAPEFN_H_
+#ifndef MPM_HEXAHEDRONSHAPEFN_H_
+#define MPM_HEXAHEDRONSHAPEFN_H_
 
 #include <exception>
 #include <iostream>
@@ -8,23 +8,23 @@
 
 #include "shapefn.h"
 
-//! Quadrilateral shape function class derived from ShapeFn class
-//! \brief Shape functions of a quadrilateral element
+//! Hexahedron shape function class derived from ShapeFn class
+//! \brief Shape functions of a hexahedron element
 //! \tparam Tdim Dimension
 namespace mpm {
 
 template <unsigned Tdim>
-class QuadrilateralShapeFn : public ShapeFn<Tdim> {
+class HexahedronShapeFn : public ShapeFn<Tdim> {
 
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
-    static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
+  HexahedronShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
+    static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     try {
-      if (!(nfunctions == 4 ||  nfunctions == 8 || nfunctions == 9)) {
+      if (!(nfunctions == 8 || nfunctions == 20)) {
         throw std::runtime_error("Specified number of shape functions is not defined");
       }
     } catch (std::exception& exception) {
@@ -52,6 +52,6 @@ protected:
 };
 
 } // namespace mpm
-#include "quad_shapefn.tcc"
+#include "hex_shapefn.tcc"
 
-#endif  // MPM_QUADRILATERALSHAPEFN_H_
+#endif  // MPM_HEXAHEDRONSHAPEFN_H_
