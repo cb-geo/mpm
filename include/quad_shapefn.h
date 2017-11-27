@@ -24,10 +24,12 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   QuadrilateralShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     try {
-      if (!(nfunctions == 4 ||  nfunctions == 8 || nfunctions == 9))
+      if (!(nfunctions == 4 ||  nfunctions == 8 || nfunctions == 9)) {
         throw std::runtime_error("Specified number of shape functions is not defined");
+      }
     } catch (std::exception& exception) {
       std::cerr << exception.what() << '\n';
+      std::abort();
     }
  
   }
