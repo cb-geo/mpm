@@ -19,12 +19,12 @@ bool mpm::Handler<T>::insert(mpm::Index id, const std::shared_ptr<T>& ptr) {
 
 //! Iterate over elements in the container
 //! \tparam T A class with a template argument Tdim
-//! \tparam Tfn A functor
+//! \tparam Tunaryfn A unary function
 template <class T>
-template <class Tfn>
-Tfn mpm::Handler<T>::for_each(Tfn fn) {
-  for (auto itr = this->begin(); itr != this->end(); ++itr) {
-    fn((*itr).second);
+template <class Tunaryfn>
+Tunaryfn mpm::Handler<T>::for_each(Tunaryfn fn) {
+  for (const auto& element : elements_) {
+    fn((element).second);
   }
   return fn;
 }

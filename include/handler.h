@@ -41,8 +41,8 @@ class Handler {
   }
 
   //! Iterate over elements in the container
-  template <class Tfn>
-  Tfn for_each(Tfn fn);
+  template <class Tunaryfn>
+  Tunaryfn for_each(Tunaryfn fn);
 
  private:
   // Unordered map of index and pointer
