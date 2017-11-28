@@ -3,8 +3,7 @@
 //! \param[in] nnodes Number of nodes per cell
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes)
-    : id_{id}, nnodes_{nnodes} {
+mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 }
@@ -15,8 +14,8 @@ mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes)
 //! \param[in] shapefnptr Pointer to a shape function
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes,
-                              const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
+mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
+                      const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
     : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -38,7 +37,7 @@ mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes,
 //! \param[in] shapefnptr Pointer to a shape function
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::CellBase<Tdim>::shapefn(
+bool mpm::Cell<Tdim>::shapefn(
     const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr) {
   bool status = false;
   try {
@@ -61,7 +60,7 @@ bool mpm::CellBase<Tdim>::shapefn(
 //! \retval insertion_status Return the successful addition of a node
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::CellBase<Tdim>::add_node(
+bool mpm::Cell<Tdim>::add_node(
     unsigned local_id, const std::shared_ptr<mpm::NodeBase<Tdim>>& node_ptr) {
   bool insertion_status = false;
   try {
@@ -87,8 +86,8 @@ bool mpm::CellBase<Tdim>::add_node(
 //! \retval insertion_status Return the successful addition of a node
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::CellBase<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::CellBase<Tdim>>& cell_ptr) {
+bool mpm::Cell<Tdim>::add_neighbour(
+    unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
   bool insertion_status = false;
   try {
     // If number of cell ptrs id is not the current cell id

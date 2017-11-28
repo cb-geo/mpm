@@ -1,5 +1,5 @@
-#ifndef MPM_CELL_BASE_H_
-#define MPM_CELL_BASE_H_
+#ifndef MPM_CELL_H_
+#define MPM_CELL_H_
 
 #include <array>
 #include <iostream>
@@ -18,31 +18,31 @@ namespace mpm {
 // Global index type for the cell
 using Index = unsigned long long;
 
-// CellBase class
+// Cell class
 //! \brief Base class that stores the information about cells
-//! \details CellBase class: id_ and coordinates.
+//! \details Cell class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class CellBase {
+class Cell {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   // Constructor with id and coordinates
-  CellBase(Index id, unsigned nnodes);
+  Cell(Index id, unsigned nnodes);
 
   // Constructor with id, coordinates and shapefn
-  CellBase(Index id, unsigned nnodes,
-           const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
+  Cell(Index id, unsigned nnodes,
+       const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Destructor
-  virtual ~CellBase(){};
+  virtual ~Cell(){};
 
   //! Delete copy constructor
-  CellBase(const CellBase<Tdim>&) = delete;
+  Cell(const Cell<Tdim>&) = delete;
 
   //! Delete assignement operator
-  CellBase& operator=(const CellBase<Tdim>&) = delete;
+  Cell& operator=(const Cell<Tdim>&) = delete;
 
   //! Return id of the cell
   Index id() const { return id_; }
@@ -60,13 +60,12 @@ class CellBase {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add neighbouring cell
-  bool add_neighbour(unsigned id,
-                     const std::shared_ptr<CellBase<Tdim>>& neighbour);
+  bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
 
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_cells_.size(); }
 
- private:
+ protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
 
@@ -77,13 +76,13 @@ class CellBase {
   Handler<NodeBase<Tdim>> nodes_;
 
   //! Container of cell neighbours
-  Handler<CellBase<Tdim>> neighbour_cells_;
+  Handler<Cell<Tdim>> neighbour_cells_;
 
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_;
-};  // CellBase class
+};  // Cell class
 }  // mpm namespace
 
-#include "cell_base.tcc"
+#include "cell.tcc"
 
-#endif  // MPM_CELL_BASE_H_
+#endif  // MPM_CELL_H_
