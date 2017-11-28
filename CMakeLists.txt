@@ -51,6 +51,8 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/node_container_test.cc
   ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
   ${mpm_SOURCE_DIR}/tests/node_test.cc
+  ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
+  ${mpm_SOURCE_DIR}/tests/particle_test.cc
   ${mpm_SOURCE_DIR}/tests/test.cc
 )   
 add_executable(mpmtest
