@@ -11,6 +11,7 @@
 
 #include "handler.h"
 #include "node.h"
+#include "shapefn.h"
 
 namespace mpm {
   
@@ -28,12 +29,11 @@ class Cell {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
   
   // Constructor with id and coordinates
-  //! \param[in] id Global cell id
-  //! \param[in] nnodes Number of nodes per cell
-  Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
-    // Check if the dimension is between 1 & 3
-    static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
-  };
+  Cell(Index id, unsigned nnodes);
+
+  // Constructor with id, coordinates and shapefn
+  Cell(Index id, unsigned nnodes,
+       const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Destructor
   virtual ~Cell(){};
@@ -50,6 +50,9 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Assign shape function
+  bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
+  
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
 
@@ -71,6 +74,9 @@ class Cell {
 
   //! Container of cell neighbours
   Handler<Cell<Tdim>> neighbour_cells_;
+
+  //! Shape function
+  std::shared_ptr<ShapeFn<Tdim>> shapefn_;
 }; // Cell class
 } // mpm namespace
 

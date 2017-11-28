@@ -21,6 +21,10 @@ class ShapeFn {
   //! Destructor
   virtual ~ShapeFn() {}
 
+  //! Return number of functions
+  //! \retval nfuctions_ Number of shape functions in a cell
+  unsigned nfunctions() const { return nfunctions_; }
+  
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd shapefn(const VectorDim& xi) = 0;
