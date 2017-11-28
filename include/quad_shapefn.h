@@ -28,6 +28,8 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
         throw std::runtime_error(
             "Specified number of shape functions is not defined");
       }
+      shapefn_.resize(this->nfunctions_, 1);
+      grad_shapefn_.resize(this->nfunctions_, Tdim);
     } catch (std::exception& exception) {
       std::cerr << exception.what() << '\n';
       std::abort();

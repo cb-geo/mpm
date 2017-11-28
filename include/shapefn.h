@@ -16,7 +16,10 @@ class ShapeFn {
 
   //! Constructor
   //! Assign variables to zero
-  ShapeFn(unsigned nfunctions) : nfunctions_{nfunctions} {}
+  ShapeFn(unsigned nfunctions) : nfunctions_{nfunctions} {
+    shapefn_.resize(nfunctions, 1);
+    grad_shapefn_.resize(nfunctions, Tdim);
+  }
 
   //! Destructor
   virtual ~ShapeFn() {}
