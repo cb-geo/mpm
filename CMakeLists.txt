@@ -26,6 +26,12 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# TBB
+find_package(TBB REQUIRED)
+add_definitions(${TBB_DEFINITIONS})
+include_directories(${TBB_INCLUDE_DIRS})
+link_libraries(${TBB_LIBRARIES})
+
 # Include directories
 include_directories(
   ${mpm_SOURCE_DIR}/include/

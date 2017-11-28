@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <vector>
 
+// TBB
+#include <tbb/concurrent_vector.h>
+
 namespace mpm {
 
 // Global index type for the node
@@ -26,12 +29,12 @@ class Container {
   std::size_t size() const { return elements_.size(); }
 
   //! Return begin iterator of nodes
-  typename std::vector<std::shared_ptr<T>>::const_iterator begin() const {
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator begin() const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename std::vector<std::shared_ptr<T>>::const_iterator end() const {
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator end() const {
     return elements_.cend();
   }
 
@@ -41,7 +44,7 @@ class Container {
 
  private:
   // Unordered map of index and pointer
-  std::vector<std::shared_ptr<T>> elements_;
+  tbb::concurrent_vector<std::shared_ptr<T>> elements_;
 };  // Container class
 
 #include "container.tcc"
