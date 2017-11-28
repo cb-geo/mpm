@@ -14,7 +14,7 @@
 #include "shapefn.h"
 
 namespace mpm {
-  
+
 // Global index type for the cell
 using Index = unsigned long long;
 
@@ -27,13 +27,13 @@ class CellBase {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
-  
+
   // Constructor with id and coordinates
   CellBase(Index id, unsigned nnodes);
 
   // Constructor with id, coordinates and shapefn
   CellBase(Index id, unsigned nnodes,
-       const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
+           const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Destructor
   virtual ~CellBase(){};
@@ -60,14 +60,15 @@ class CellBase {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add neighbouring cell
-  bool add_neighbour(unsigned id, const std::shared_ptr<CellBase<Tdim>>& neighbour);
+  bool add_neighbour(unsigned id,
+                     const std::shared_ptr<CellBase<Tdim>>& neighbour);
 
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_cells_.size(); }
 
  private:
   //! cell id
-  Index id_ { std::numeric_limits<Index>::max() };
+  Index id_{std::numeric_limits<Index>::max()};
 
   //! Number of nodes
   unsigned nnodes_{0};
@@ -80,8 +81,8 @@ class CellBase {
 
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_;
-}; // CellBase class
-} // mpm namespace
+};  // CellBase class
+}  // mpm namespace
 
 #include "cell_base.tcc"
 

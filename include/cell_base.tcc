@@ -3,7 +3,8 @@
 //! \param[in] nnodes Number of nodes per cell
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
+mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes)
+    : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 }
@@ -15,7 +16,7 @@ mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes) : id_{id}, nnodes_{nnod
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes,
-                      const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
+                              const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
     : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -33,7 +34,7 @@ mpm::CellBase<Tdim>::CellBase(Index id, unsigned nnodes,
   }
 }
 
-// Assign a shape function to cell 
+// Assign a shape function to cell
 //! \param[in] shapefnptr Pointer to a shape function
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
@@ -53,7 +54,6 @@ bool mpm::CellBase<Tdim>::shapefn(
   }
   return status;
 }
-
 
 //! Add a node pointer
 //! \param[in] local_id local id of the node

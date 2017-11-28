@@ -18,7 +18,7 @@ class Handler {
  public:
   //! Default constructor
   Handler<T>() = default;
-  
+
   //! Insert a pointer
   bool insert(const std::shared_ptr<T>&);
 
@@ -27,16 +27,16 @@ class Handler {
 
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
-  
+
   //! Return begin iterator of nodes
-  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator
-      begin() const {
+  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator begin()
+      const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator
-      end() const {
+  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator end()
+      const {
     return elements_.cend();
   }
 
@@ -50,6 +50,6 @@ class Handler {
 };  // Handler class
 
 #include "handler.tcc"
-  
+
 }  // mpm namespace
 #endif  // MPM_HANDLER_H_

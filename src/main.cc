@@ -20,11 +20,12 @@ int main(int argc, char** argv) {
   auto nodebasehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
   nodebasehandler->insert(nodebase);
 
-  for (auto itr = nodebasehandler->begin(); itr != nodebasehandler->end(); ++itr)
+  for (auto itr = nodebasehandler->begin(); itr != nodebasehandler->end();
+       ++itr)
     std::cout << ((*itr).second)->id() << '\n';
 
-  auto nodebasecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
+  auto nodebasecontainer =
+      std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
   nodebasecontainer->insert(nodebase);
   nodebasecontainer->insert(nodebase);
-
 }

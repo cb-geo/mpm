@@ -101,7 +101,6 @@ TEST_CASE("NodeBase handler is checked for 2D case", "[nodebasehandler][2D]") {
         REQUIRE(coords[i] == Approx(1.).epsilon(Tolerance));
     }
   }
-
 }
 
 //! \brief Check nodebase handler class for 3D case
@@ -156,7 +155,7 @@ TEST_CASE("NodeBase handler is checked for 3D case", "[nodebasehandler][3D]") {
     // Iterate over nodebases and check if the number of nodebases is good
     REQUIRE(counter == 2);
   }
-  
+
   // Check for_each
   SECTION("Check nodebase for_each") {
     // Insert nodebase 1
@@ -165,7 +164,7 @@ TEST_CASE("NodeBase handler is checked for 3D case", "[nodebasehandler][3D]") {
     nodebasehandler->insert(nodebase2);
     // Check size of nodebase hanlder
     REQUIRE(nodebasehandler->size() == 2);
-    
+
     for (auto itr = nodebasehandler->begin(); itr != nodebasehandler->end();
          ++itr) {
       auto coords = ((*itr).second)->coordinates();

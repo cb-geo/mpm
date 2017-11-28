@@ -1,7 +1,7 @@
 #include <limits>
 
-#include "catch.hpp"
 #include "Eigen/Dense"
+#include "catch.hpp"
 
 #include "node_base.h"
 
@@ -118,7 +118,7 @@ TEST_CASE("NodeBase is checked for 2D case", "[nodebase][2D]") {
 //! \brief Check nodebase class for 3D case
 TEST_CASE("NodeBase is checked for 3D case", "[nodebase][3D]") {
   const unsigned Dim = 3;
-  Eigen::Vector3d  coords;
+  Eigen::Vector3d coords;
   coords.setZero();
 
   //! Check for id = 0

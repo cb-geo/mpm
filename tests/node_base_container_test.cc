@@ -10,7 +10,8 @@
 #include "node_base.h"
 
 //! \brief Check nodebase container class for 2D case
-TEST_CASE("NodeBase container is checked for 2D case", "[nodebasecontainer][2D]") {
+TEST_CASE("NodeBase container is checked for 2D case",
+          "[nodebasecontainer][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Tolerance
@@ -27,7 +28,8 @@ TEST_CASE("NodeBase container is checked for 2D case", "[nodebasecontainer][2D]"
   auto nodebase2 = std::make_shared<mpm::NodeBase<Dim>>(id2, coords);
 
   // NodeBase container
-  auto nodebasecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
+  auto nodebasecontainer =
+      std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
 
   // Check insert nodebase
   SECTION("Check insert nodebase functionality") {
@@ -101,11 +103,11 @@ TEST_CASE("NodeBase container is checked for 2D case", "[nodebasecontainer][2D]"
         REQUIRE(coords[i] == Approx(1.).epsilon(Tolerance));
     }
   }
-
 }
 
 //! \brief Check nodebase container class for 3D case
-TEST_CASE("NodeBase container is checked for 3D case", "[nodebasecontainer][3D]") {
+TEST_CASE("NodeBase container is checked for 3D case",
+          "[nodebasecontainer][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Tolerance
@@ -122,7 +124,8 @@ TEST_CASE("NodeBase container is checked for 3D case", "[nodebasecontainer][3D]"
   auto nodebase2 = std::make_shared<mpm::NodeBase<Dim>>(id2, coords);
 
   // NodeBase container
-  auto nodebasecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
+  auto nodebasecontainer =
+      std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
 
   // Check insert nodebase
   SECTION("Check insert nodebase functionality") {
@@ -156,7 +159,7 @@ TEST_CASE("NodeBase container is checked for 3D case", "[nodebasecontainer][3D]"
     // Iterate over nodebases and check if the number of nodebases is good
     REQUIRE(counter == 2);
   }
-  
+
   // Check for_each
   SECTION("Check nodebase for_each") {
     // Insert nodebase 1
@@ -165,7 +168,7 @@ TEST_CASE("NodeBase container is checked for 3D case", "[nodebasecontainer][3D]"
     nodebasecontainer->insert(nodebase2);
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
-    
+
     for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
          ++itr) {
       auto coords = (*itr)->coordinates();

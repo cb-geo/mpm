@@ -105,7 +105,6 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
   }
 
-  
   //! Check for 8 noded shape function
   SECTION("Quadrilateral shape function with eight nodes") {
     const unsigned nfunctions = 8;
@@ -288,7 +287,6 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(6, 1) == Approx(0.5).epsilon(Tolerance));
       REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
-
     }
 
     // Coordinates is (-1,-1)

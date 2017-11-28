@@ -24,7 +24,7 @@ class ShapeFn {
   //! Return number of functions
   //! \retval nfuctions_ Number of shape functions in a cell
   unsigned nfunctions() const { return nfunctions_; }
-  
+
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd shapefn(const VectorDim& xi) = 0;
@@ -42,5 +42,5 @@ class ShapeFn {
   Eigen::MatrixXd grad_shapefn_;
 };
 
-} //namespace mpm
+}  // namespace mpm
 #endif  // MPM_SHAPEFN_H_

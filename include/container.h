@@ -18,13 +18,13 @@ class Container {
  public:
   //! Default constructor
   Container<T>() = default;
-  
+
   //! Insert a pointer
   bool insert(const std::shared_ptr<T>&);
 
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
-  
+
   //! Return begin iterator of nodes
   typename std::vector<std::shared_ptr<T>>::const_iterator begin() const {
     return elements_.cbegin();
@@ -45,6 +45,6 @@ class Container {
 };  // Container class
 
 #include "container.tcc"
-  
+
 }  // mpm namespace
 #endif  // MPM_CONTAINER_H_

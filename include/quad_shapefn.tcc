@@ -56,7 +56,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::shapefn(
       shapefn_(7) = 0.5 * (1. - (xi(1) * xi(1))) * (1. - xi(0));
       break;
     case 9:
-      // 9-noded 
+      // 9-noded
       shapefn_.resize(9, 1);
       shapefn_(0) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) - 1.);
       shapefn_(1) = 0.25 * xi(0) * xi(1) * (xi(0) + 1.) * (xi(1) - 1.);
@@ -84,7 +84,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::grad_shapefn(
   Eigen::MatrixXd grad_shapefn;
   switch (this->nfunctions_) {
     case 4:
-      // 4-noded 
+      // 4-noded
       grad_shapefn_.resize(4, 2);
       grad_shapefn_(0, 0) = -0.25 * (1 - xi(1));
       grad_shapefn_(1, 0) = 0.25 * (1 - xi(1));
@@ -97,7 +97,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::grad_shapefn(
       grad_shapefn_(3, 1) = 0.25 * (1 - xi(0));
       break;
     case 8:
-      // 8-noded 
+      // 8-noded
       grad_shapefn_.resize(8, 2);
       grad_shapefn_(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
       grad_shapefn_(1, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. - xi(1));

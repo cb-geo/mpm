@@ -1,7 +1,7 @@
 //! Insert a pointer
-//! \param[in] ptr A shared pointer 
+//! \param[in] ptr A shared pointer
 //! \tparam T A class with a template argument Tdim
-template<class T>
+template <class T>
 bool mpm::Container<T>::insert(const std::shared_ptr<T>& ptr) {
   bool insertion_status = false;
   // Check if it is found in the container

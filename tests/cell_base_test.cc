@@ -1,8 +1,8 @@
 #include <limits>
 #include <memory>
 
-#include "catch.hpp"
 #include "Eigen/Dense"
+#include "catch.hpp"
 
 #include "cell_base.h"
 #include "hex_shapefn.h"
@@ -19,17 +19,17 @@ TEST_CASE("CellBase is checked for 2D case", "[cellbase][2D]") {
 
   Eigen::Vector2d coords;
   coords.setZero();
-  
+
   auto nodebase0 = std::make_shared<mpm::NodeBase<Dim>>(0, coords);
 
   coords << 0, 1;
   auto nodebase1 = std::make_shared<mpm::NodeBase<Dim>>(1, coords);
-  
+
   coords << 1, 1;
   auto nodebase2 = std::make_shared<mpm::NodeBase<Dim>>(2, coords);
 
   coords << 1, 0;
-  auto nodebase3 = std::make_shared<mpm::NodeBase<Dim>>(3, coords);  
+  auto nodebase3 = std::make_shared<mpm::NodeBase<Dim>>(3, coords);
 
   //! Check CellBase IDs
   SECTION("Check cellbase ids") {
@@ -65,11 +65,11 @@ TEST_CASE("CellBase is checked for 2D case", "[cellbase][2D]") {
     cellbase->add_neighbour(0, neighbourcellbase);
     REQUIRE(cellbase->nneighbours() == 1);
   }
-  
+
   SECTION("Check shape functions") {
     mpm::Index id = 0;
     auto shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(Nnodes);
-    auto cellbase = std::make_shared<mpm::CellBase<Dim>>(id, Nnodes,shapefn);
+    auto cellbase = std::make_shared<mpm::CellBase<Dim>>(id, Nnodes, shapefn);
     REQUIRE(cellbase->nfunctions() == 4);
     // Check 8-nodebased function
     shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(8);
@@ -97,24 +97,24 @@ TEST_CASE("CellBase is checked for 3D case", "[cellbase][3D]") {
 
   coords << 1, 0, 0;
   auto nodebase1 = std::make_shared<mpm::NodeBase<Dim>>(1, coords);
-  
+
   coords << 0, 1, 0;
   auto nodebase2 = std::make_shared<mpm::NodeBase<Dim>>(2, coords);
 
   coords << 1, 1, 0;
-  auto nodebase3 = std::make_shared<mpm::NodeBase<Dim>>(3, coords);  
+  auto nodebase3 = std::make_shared<mpm::NodeBase<Dim>>(3, coords);
 
   coords << 0, 0, 1;
   auto nodebase4 = std::make_shared<mpm::NodeBase<Dim>>(4, coords);
 
   coords << 1, 0, 1;
   auto nodebase5 = std::make_shared<mpm::NodeBase<Dim>>(5, coords);
-  
+
   coords << 0, 1, 1;
   auto nodebase6 = std::make_shared<mpm::NodeBase<Dim>>(6, coords);
 
   coords << 1, 1, 1;
-  auto nodebase7 = std::make_shared<mpm::NodeBase<Dim>>(7, coords);  
+  auto nodebase7 = std::make_shared<mpm::NodeBase<Dim>>(7, coords);
 
   //! Check CellBase IDs
   SECTION("Check cellbase ids") {
@@ -159,7 +159,7 @@ TEST_CASE("CellBase is checked for 3D case", "[cellbase][3D]") {
   SECTION("Check shape functions") {
     mpm::Index id = 0;
     auto shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(Nnodes);
-    auto cellbase = std::make_shared<mpm::CellBase<Dim>>(id, Nnodes,shapefn);
+    auto cellbase = std::make_shared<mpm::CellBase<Dim>>(id, Nnodes, shapefn);
     REQUIRE(cellbase->nfunctions() == 8);
     // Check 20-nodebased function
     shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(20);

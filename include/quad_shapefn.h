@@ -24,14 +24,14 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   QuadrilateralShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     try {
-      if (!(nfunctions == 4 ||  nfunctions == 8 || nfunctions == 9)) {
-        throw std::runtime_error("Specified number of shape functions is not defined");
+      if (!(nfunctions == 4 || nfunctions == 8 || nfunctions == 9)) {
+        throw std::runtime_error(
+            "Specified number of shape functions is not defined");
       }
     } catch (std::exception& exception) {
       std::cerr << exception.what() << '\n';
       std::abort();
     }
- 
   }
 
   //! Evaluate shape functions at given local coordinates
@@ -42,7 +42,7 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
 
-protected:
+ protected:
   // Number of functions
   using ShapeFn<Tdim>::nfunctions_;
   // Shape functions
@@ -51,7 +51,7 @@ protected:
   using ShapeFn<Tdim>::grad_shapefn_;
 };
 
-} // namespace mpm
+}  // namespace mpm
 #include "quad_shapefn.tcc"
 
 #endif  // MPM_QUADRILATERALSHAPEFN_H_

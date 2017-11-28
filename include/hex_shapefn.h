@@ -25,13 +25,13 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     try {
       if (!(nfunctions == 8 || nfunctions == 20)) {
-        throw std::runtime_error("Specified number of shape functions is not defined");
+        throw std::runtime_error(
+            "Specified number of shape functions is not defined");
       }
     } catch (std::exception& exception) {
       std::cerr << exception.what() << '\n';
       std::abort();
     }
- 
   }
 
   //! Evaluate shape functions at given local coordinates
@@ -42,7 +42,7 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
 
-protected:
+ protected:
   // Number of functions
   using ShapeFn<Tdim>::nfunctions_;
   // Shape functions
@@ -51,7 +51,7 @@ protected:
   using ShapeFn<Tdim>::grad_shapefn_;
 };
 
-} // namespace mpm
+}  // namespace mpm
 #include "hex_shapefn.tcc"
 
 #endif  // MPM_HEXAHEDRONSHAPEFN_H_
