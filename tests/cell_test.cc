@@ -80,6 +80,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->shapefn(shapefn);
     REQUIRE(cell->nfunctions() == 9);
   }
+
+  SECTION("Test particle addition deletion") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    REQUIRE(cell->status() == false);
+    bool status = cell->add_particle_id(pid);
+    REQUIRE(status == true);
+    REQUIRE(cell->status() == true);
+    cell->remove_particle_id(pid);
+    REQUIRE(cell->status() == false);
+  }
 }
 
 //! \brief Check cell class for 3D case
@@ -165,5 +176,16 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(20);
     cell->shapefn(shapefn);
     REQUIRE(cell->nfunctions() == 20);
+  }
+
+  SECTION("Test particle addition deletion") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    REQUIRE(cell->status() == false);
+    bool status = cell->add_particle_id(pid);
+    REQUIRE(status == true);
+    REQUIRE(cell->status() == true);
+    cell->remove_particle_id(pid);
+    REQUIRE(cell->status() == false);
   }
 }

@@ -101,3 +101,31 @@ bool mpm::Cell<Tdim>::add_neighbour(
   }
   return insertion_status;
 }
+
+//! Add a particle id
+//! \param[in] id Global id of a particle
+//! \retval status Return the successful addition of a particle id
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::add_particle_id(Index id) {
+  bool status = false;
+  // Check if it is found in the container
+  auto itr = std::find(particles_.begin(), particles_.end(), id);
+
+  if (itr == particles_.end()) {
+    particles_.emplace_back(id);
+    status = true;
+  }
+
+  return status;
+}
+
+//! Remove a particle id
+//! \param[in] id Global id of a particle
+//! \retval status Return the successful removal of a particle id
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::remove_particle_id(Index id) {
+  particles_.erase(std::remove(particles_.begin(), particles_.end(), id),
+                   particles_.end());
+}

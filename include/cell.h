@@ -1,3 +1,4 @@
+
 #ifndef MPM_CELL_H_
 #define MPM_CELL_H_
 
@@ -65,12 +66,24 @@ class Cell {
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_cells_.size(); }
 
+  //! Add particle id
+  bool add_particle_id(Index id);
+
+  //! Add particle id
+  void remove_particle_id(Index id);
+
+  //! Active cell (if a particle is present)
+  bool status() const { return particles_.size(); }
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
 
   //! Number of nodes
   unsigned nnodes_{0};
+
+  //! particles ids in cell
+  std::vector<Index> particles_;
 
   //! Container of node pointers (local id, node pointer)
   Handler<Node<Tdim>> nodes_;
