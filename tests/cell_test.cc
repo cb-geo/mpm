@@ -1,10 +1,14 @@
 #include <limits>
-
-#include "cell.h"
-#include "node.h"
+#include <memory>
 
 #include "catch.hpp"
 #include "Eigen/Dense"
+
+#include "cell.h"
+#include "hex_shapefn.h"
+#include "node.h"
+#include "quad_shapefn.h"
+#include "shapefn.h"
 
 //! \brief Check cell class for 2D case
 TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
@@ -43,6 +47,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       REQUIRE(cell->id() == std::numeric_limits<mpm::Index>::max());
     }
   }
+
   SECTION("Add nodes") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
@@ -52,12 +57,28 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->add_node(3, node3);
     REQUIRE(cell->nnodes() == 4);
   }
+
   SECTION("Add neighbours") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes);
     REQUIRE(cell->nneighbours() == 0);
     cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
+  }
+  
+  SECTION("Check shape functions") {
+    mpm::Index id = 0;
+    auto shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes,shapefn);
+    REQUIRE(cell->nfunctions() == 4);
+    // Check 8-noded function
+    shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(8);
+    cell->shapefn(shapefn);
+    REQUIRE(cell->nfunctions() == 8);
+    // Check 9-noded function
+    shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(9);
+    cell->shapefn(shapefn);
+    REQUIRE(cell->nfunctions() == 9);
   }
 }
 
@@ -133,5 +154,16 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->nneighbours() == 0);
     cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
+  }
+
+  SECTION("Check shape functions") {
+    mpm::Index id = 0;
+    auto shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes,shapefn);
+    REQUIRE(cell->nfunctions() == 8);
+    // Check 20-noded function
+    shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(20);
+    cell->shapefn(shapefn);
+    REQUIRE(cell->nfunctions() == 20);
   }
 }

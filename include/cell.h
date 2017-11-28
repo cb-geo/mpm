@@ -52,7 +52,10 @@ class Cell {
 
   //! Assign shape function
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
-  
+
+  //! Number of shape functions
+  unsigned nfunctions() const { return this->shapefn_->nfunctions(); };
+
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
 

@@ -21,7 +21,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
   try {
-    if (this->nnodes_ == shapefnptr->nfunctions()) {
+    if (shapefnptr->nfunctions() >= this->nnodes_) {
       shapefn_ = shapefnptr;
     } else {
       throw std::runtime_error(
@@ -41,7 +41,7 @@ bool mpm::Cell<Tdim>::shapefn(
     const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr) {
   bool status = false;
   try {
-    if (this->nnodes_ == shapefnptr->nfunctions()) {
+    if (shapefnptr->nfunctions() >= this->nnodes_) {
       shapefn_ = shapefnptr;
       status = true;
     } else {

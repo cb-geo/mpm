@@ -1,9 +1,9 @@
 #include <limits>
 
-#include "node.h"
-
 #include "catch.hpp"
 #include "Eigen/Dense"
+
+#include "node.h"
 
 //! \brief Check node class for 1D case
 TEST_CASE("Node is checked for 1D case", "[node][1D]") {

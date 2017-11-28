@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "catch.hpp"
+
 #include "hex_shapefn.h"
 
 //! \brief Check hexahedron shapefn class

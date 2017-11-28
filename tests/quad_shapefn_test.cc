@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "catch.hpp"
+
 #include "quad_shapefn.h"
 
 //! \brief Check quadrilateral shapefn class
