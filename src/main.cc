@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 
+#include "container.h"
 #include "handler.h"
 #include "node.h"
 
@@ -21,4 +22,9 @@ int main(int argc, char** argv) {
 
   for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr)
     std::cout << ((*itr).second)->id() << '\n';
+
+  auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
+  nodecontainer->insert(node);
+  nodecontainer->insert(node);
+
 }
