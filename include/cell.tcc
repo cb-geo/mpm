@@ -91,7 +91,7 @@ bool mpm::Cell<Tdim>::add_neighbour(
   bool insertion_status = false;
   try {
     // If number of cell ptrs id is not the current cell id
-    if (local_id >= 0) {
+    if (cell_ptr->id() != this->id()) {
       insertion_status = neighbour_cells_.insert(local_id, cell_ptr);
     } else {
       throw std::runtime_error("Invalid local id of a cell neighbour");

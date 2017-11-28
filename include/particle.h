@@ -4,9 +4,12 @@
 #include <array>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <vector>
 
 #include "Eigen/Dense"
+
+#include "cell.h"
 
 namespace mpm {
 
@@ -52,12 +55,21 @@ class Particle {
   //! \param[out] coordinates_ return coordinates of the particle
   VectorDim coordinates() const { return coordinates_; }
 
- protected:
+  //! Assign cell
+  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+
+ private:
   //! particle id
   Index id_{std::numeric_limits<Index>::max()};
 
   //! coordinates
   VectorDim coordinates_;
+
+  //! Cell
+  std::shared_ptr<Cell<Tdim>> cell_;
 };  // Particle class
 }  // mpm namespace
+
+#include "particle.tcc"
+
 #endif  // MPM_PARTICLE_H__
