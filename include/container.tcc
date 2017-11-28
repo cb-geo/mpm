@@ -10,7 +10,7 @@ bool mpm::Container<T>::insert(const std::shared_ptr<T>& ptr) {
       [ptr](std::shared_ptr<T> const& i) { return i->id() == ptr->id(); });
 
   if (itr == this->end()) {
-    elements_.emplace_back(ptr);
+    elements_.push_back(ptr);
     insertion_status = true;
   }
 
