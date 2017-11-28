@@ -49,8 +49,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     nodehandler->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -72,8 +71,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     REQUIRE(nodehandler->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -93,8 +91,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -143,8 +140,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     nodehandler->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -165,8 +161,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
 
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -187,8 +182,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-         ++itr) {
+    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)

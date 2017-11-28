@@ -10,8 +10,7 @@
 #include "node.h"
 
 //! \brief Check node container class for 2D case
-TEST_CASE("Node container is checked for 2D case",
-          "[nodecontainer][2D]") {
+TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Tolerance
@@ -28,8 +27,7 @@ TEST_CASE("Node container is checked for 2D case",
   auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
 
   // Node container
-  auto nodecontainer =
-      std::make_shared<mpm::Container<mpm::Node<Dim>>>();
+  auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
@@ -106,8 +104,7 @@ TEST_CASE("Node container is checked for 2D case",
 }
 
 //! \brief Check node container class for 3D case
-TEST_CASE("Node container is checked for 3D case",
-          "[nodecontainer][3D]") {
+TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Tolerance
@@ -124,8 +121,7 @@ TEST_CASE("Node container is checked for 3D case",
   auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
 
   // Node container
-  auto nodecontainer =
-      std::make_shared<mpm::Container<mpm::Node<Dim>>>();
+  auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {

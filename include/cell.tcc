@@ -61,7 +61,7 @@ bool mpm::Cell<Tdim>::shapefn(
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_node(
-    unsigned local_id, const std::shared_ptr<mpm::NodeBase<Tdim>>& node_ptr) {
+    unsigned local_id, const std::shared_ptr<mpm::Node<Tdim>>& node_ptr) {
   bool insertion_status = false;
   try {
     // If number of node ptrs in a cell is less than the maximum number of nodes

@@ -10,7 +10,7 @@
 #include "Eigen/Dense"
 
 #include "handler.h"
-#include "node_base.h"
+#include "node.h"
 #include "shapefn.h"
 
 namespace mpm {
@@ -57,7 +57,7 @@ class Cell {
   unsigned nfunctions() const { return this->shapefn_->nfunctions(); };
 
   //! Add node to cell
-  bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
+  bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
 
   //! Add neighbouring cell
   bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
@@ -73,7 +73,7 @@ class Cell {
   unsigned nnodes_{0};
 
   //! Container of node pointers (local id, node pointer)
-  Handler<NodeBase<Tdim>> nodes_;
+  Handler<Node<Tdim>> nodes_;
 
   //! Container of cell neighbours
   Handler<Cell<Tdim>> neighbour_cells_;
