@@ -1,5 +1,5 @@
-#ifndef MPM_CELL_H_
-#define MPM_CELL_H_
+#ifndef MPM_CELL_BASE_H_
+#define MPM_CELL_BASE_H_
 
 #include <array>
 #include <iostream>
@@ -18,31 +18,31 @@ namespace mpm {
 // Global index type for the cell
 using Index = unsigned long long;
 
-// Cell class
+// CellBase class
 //! \brief Base class that stores the information about cells
-//! \details Cell class: id_ and coordinates.
+//! \details CellBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class Cell {
+class CellBase {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
   
   // Constructor with id and coordinates
-  Cell(Index id, unsigned nnodes);
+  CellBase(Index id, unsigned nnodes);
 
   // Constructor with id, coordinates and shapefn
-  Cell(Index id, unsigned nnodes,
+  CellBase(Index id, unsigned nnodes,
        const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Destructor
-  virtual ~Cell(){};
+  virtual ~CellBase(){};
 
   //! Delete copy constructor
-  Cell(const Cell<Tdim>&) = delete;
+  CellBase(const CellBase<Tdim>&) = delete;
 
   //! Delete assignement operator
-  Cell& operator=(const Cell<Tdim>&) = delete;
+  CellBase& operator=(const CellBase<Tdim>&) = delete;
 
   //! Return id of the cell
   Index id() const { return id_; }
@@ -60,7 +60,7 @@ class Cell {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add neighbouring cell
-  bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
+  bool add_neighbour(unsigned id, const std::shared_ptr<CellBase<Tdim>>& neighbour);
 
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_cells_.size(); }
@@ -76,13 +76,13 @@ class Cell {
   Handler<NodeBase<Tdim>> nodes_;
 
   //! Container of cell neighbours
-  Handler<Cell<Tdim>> neighbour_cells_;
+  Handler<CellBase<Tdim>> neighbour_cells_;
 
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_;
-}; // Cell class
+}; // CellBase class
 } // mpm namespace
 
-#include "cell.tcc"
+#include "cell_base.tcc"
 
-#endif  // MPM_CELL_H_
+#endif  // MPM_CELL_BASE_H_
