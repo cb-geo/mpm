@@ -1,5 +1,5 @@
-#ifndef MPM_NODE_H_
-#define MPM_NODE_H_
+#ifndef MPM_NODEBASE_H_
+#define MPM_NODEBASE_H_
 
 #include <array>
 #include <iostream>
@@ -10,23 +10,23 @@
 
 namespace mpm {
   
-// Global index type for the node
+// Global index type for the nodebase
 using Index = unsigned long long;
 
-// Node class
+// NodeBase class
 //! \brief Base class that stores the information about nodes
-//! \details Node class: id_ and coordinates.
+//! \details NodeBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class Node {
+class NodeBase {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
   
   // Constructor with id and coordinates
   //! \param[in] id Node id
-  //! \param[in] coord coordinates of the node
-  Node(Index id, const VectorDim& coord)
+  //! \param[in] coord coordinates of the nodebase
+  NodeBase(Index id, const VectorDim& coord)
       : id_{id} {
     // Check if the dimension is between 1 & 3
     static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -34,33 +34,33 @@ class Node {
   };
 
   //! Destructor
-  virtual ~Node(){};
+  virtual ~NodeBase(){};
 
   //! Delete copy constructor
-  Node(const Node<Tdim>&) = delete;
+  NodeBase(const NodeBase<Tdim>&) = delete;
 
   //! Delete assignement operator
-  Node& operator=(const Node<Tdim>&) = delete;
+  NodeBase& operator=(const NodeBase<Tdim>&) = delete;
 
-  //! Return id of the node
+  //! Return id of the nodebase
   Index id() const { return id_; }
 
   //! Assign coordinates
-  //! \param[in] coord Assign coord as coordinates of the node
+  //! \param[in] coord Assign coord as coordinates of the nodebase
   void coordinates(const VectorDim& coord) {
     coordinates_ = coord;
   }
 
   //! Return coordinates
-  //! \param[out] coordinates_ return coordinates of the node
+  //! \param[out] coordinates_ return coordinates of the nodebase
   VectorDim coordinates() const { return coordinates_; }
 
  protected:
-  //! node id
+  //! nodebase id
   Index id_ { std::numeric_limits<Index>::max() };
 
   //! nodal coordinates
   VectorDim coordinates_;
-}; // Node class
+}; // NodeBase class
 } // mpm namespace
-#endif  // MPM_NODE_H_
+#endif  // MPM_NODEBASE_H_

@@ -3,26 +3,26 @@
 #include "catch.hpp"
 #include "Eigen/Dense"
 
-#include "node.h"
+#include "node_base.h"
 
-//! \brief Check node class for 1D case
-TEST_CASE("Node is checked for 1D case", "[node][1D]") {
+//! \brief Check nodebasebase class for 1D case
+TEST_CASE("NodeBase is checked for 1D case", "[nodebase][1D]") {
   const unsigned Dim = 1;
   Eigen::Matrix<double, 1, 1> coords;
   coords.setZero();
 
   //! Check for id = 0
-  SECTION("Node id is zero") {
+  SECTION("NodeBase id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == 0);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == 0);
   }
 
-  SECTION("Node id is positive") {
+  SECTION("NodeBase id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   //! Test coordinates function
@@ -30,10 +30,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
 
     //! Check for coordinates being zero
-    auto coordinates = node->coordinates();
+    auto coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
@@ -41,8 +41,8 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     //! Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
@@ -51,8 +51,8 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     //! Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
@@ -60,24 +60,24 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   }
 }
 
-//! \brief Check node class for 2D case
-TEST_CASE("Node is checked for 2D case", "[node][2D]") {
+//! \brief Check nodebase class for 2D case
+TEST_CASE("NodeBase is checked for 2D case", "[nodebase][2D]") {
   const unsigned Dim = 2;
   Eigen::Vector2d coords;
   coords.setZero();
 
   //! Check for id = 0
-  SECTION("Node id is zero") {
+  SECTION("NodeBase id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == 0);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == 0);
   }
 
-  SECTION("Node id is positive") {
+  SECTION("NodeBase id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   //! Test coordinates function
@@ -85,10 +85,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
 
     //! Check for coordinates being zero
-    auto coordinates = node->coordinates();
+    auto coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
@@ -96,8 +96,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     //! Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
@@ -106,8 +106,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     //! Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
@@ -115,24 +115,24 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   }
 }
 
-//! \brief Check node class for 3D case
-TEST_CASE("Node is checked for 3D case", "[node][3D]") {
+//! \brief Check nodebase class for 3D case
+TEST_CASE("NodeBase is checked for 3D case", "[nodebase][3D]") {
   const unsigned Dim = 3;
   Eigen::Vector3d  coords;
   coords.setZero();
 
   //! Check for id = 0
-  SECTION("Node id is zero") {
+  SECTION("NodeBase id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == 0);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == 0);
   }
 
-  SECTION("Node id is positive") {
+  SECTION("NodeBase id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
-    REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
+    REQUIRE(nodebase->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   //! Test coordinates function
@@ -140,10 +140,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto nodebase = std::make_shared<mpm::NodeBase<Dim>>(id, coords);
 
     //! Check for coordinates being zero
-    auto coordinates = node->coordinates();
+    auto coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
@@ -151,8 +151,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     //! Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
@@ -161,8 +161,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     //! Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    node->coordinates(coords);
-    coordinates = node->coordinates();
+    nodebase->coordinates(coords);
+    coordinates = nodebase->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
