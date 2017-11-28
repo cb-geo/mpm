@@ -13,6 +13,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
+            export PATH=/opt/tbb2017_20160916oss/:$PATH
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j8 
             ctest -VV
@@ -23,6 +24,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
+            export PATH=/opt/tbb2017_20160916oss/:$PATH
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j8 
             ctest -VV
@@ -39,6 +41,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
+            export PATH=/opt/tbb2017_20160916oss/:$PATH
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
             make -j8
             ctest -VV
