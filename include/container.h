@@ -29,12 +29,14 @@ class Container {
   std::size_t size() const { return elements_.size(); }
 
   //! Return begin iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator begin() const {
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator begin()
+      const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator end() const {
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator end()
+      const {
     return elements_.cend();
   }
 

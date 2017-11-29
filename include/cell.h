@@ -55,7 +55,9 @@ class Cell {
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Number of shape functions
-  unsigned nfunctions() const { return this->shapefn_->nfunctions(); };
+  unsigned nfunctions() const {
+    return (this->shapefn_ != nullptr ? this->shapefn_->nfunctions() : 0);
+  };
 
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<Node<Tdim>>& node);
@@ -92,7 +94,7 @@ class Cell {
   Handler<Cell<Tdim>> neighbour_cells_;
 
   //! Shape function
-  std::shared_ptr<ShapeFn<Tdim>> shapefn_;
+  std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
 };  // Cell class
 }  // mpm namespace
 

@@ -20,12 +20,10 @@ int main(int argc, char** argv) {
   auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
   nodehandler->insert(node);
 
-  for (auto itr = nodehandler->begin(); itr != nodehandler->end();
-       ++itr)
+  for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr)
     std::cout << ((*itr).second)->id() << '\n';
 
-  auto nodecontainer =
-      std::make_shared<mpm::Container<mpm::Node<Dim>>>();
+  auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
   nodecontainer->insert(node);
   nodecontainer->insert(node);
 }
