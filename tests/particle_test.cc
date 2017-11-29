@@ -135,7 +135,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     coords << 1, 1;
     auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords);
-    
+
     coords << 1, 0;
     auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords);
     cell->add_node(0, node0);

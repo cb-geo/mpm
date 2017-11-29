@@ -7,15 +7,15 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   try {
-    if (nnodes <= Tdim) {
+    // Number of nodes should be greater than dimensions
+    if (!(nnodes > Tdim)) {
       throw std::runtime_error(
-        "Specified number of nodes for a cell is too low");
+          "Specified number of nodes for a cell is too low");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
     std::abort();
   }
-
 }
 
 // Constructor with id, coordinates and shapefn
