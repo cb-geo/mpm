@@ -37,6 +37,9 @@ class Node : public NodeBase<Tdim> {
   //! Delete assignement operator
   Node& operator=(const Node<Tdim>&) = delete;
 
+  //! Initialise properties
+  void initialise();
+
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
@@ -45,6 +48,12 @@ class Node : public NodeBase<Tdim> {
 
   //! Return mass
   double mass() const { return mass_; }
+
+  //! Assign force
+  void assign_force(const Eigen::VectorXd& force);
+
+  //! Return force
+  Eigen::VectorXd force() { return force_; }
 
  protected:
   //! node id
@@ -56,9 +65,10 @@ class Node : public NodeBase<Tdim> {
  private:
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
-  //! Mass
+  //! Mass solid
   double mass_{std::numeric_limits<double>::max()};
-
+  //! Force
+  Eigen::VectorXd force_;
 };  // Node class
 }  // mpm namespace
 

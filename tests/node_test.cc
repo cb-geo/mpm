@@ -77,6 +77,18 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     double mass = 100.5;
     node->assign_mass(mass);
     REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+
+    // Check force
+    Eigen::VectorXd force;
+    force.resize(Dof);
+    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_force(force);
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
   }
 }
 
@@ -152,6 +164,18 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     double mass = 100.5;
     node->assign_mass(mass);
     REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+
+    // Check force
+    Eigen::VectorXd force;
+    force.resize(Dof);
+    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_force(force);
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
   }
 }
 
@@ -228,5 +252,17 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     double mass = 100.5;
     node->assign_mass(mass);
     REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+
+    // Check force
+    Eigen::VectorXd force;
+    force.resize(Dof);
+    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_force(force);
+    for (unsigned i = 0; i < force.size(); ++i)
+      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
   }
 }
