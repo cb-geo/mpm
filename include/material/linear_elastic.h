@@ -35,10 +35,7 @@ class LinearElastic : public Material {
   unsigned id() const { return id_; }
 
   //! Compute elastic tensor
-  Matrix6x6 elastic_tensor() {
-    Matrix6x6 De;
-    return De;
-  }
+  Matrix6x6 elastic_tensor();
 
   //! Compute stress
   void compute_stress(const Vector6d& strain, const Vector6d& stress) {}
@@ -46,7 +43,13 @@ class LinearElastic : public Material {
  protected:
   //! linearelastic id
   using Material::id_;
+  //! Youngs modulus
+  double youngs_modulus_{std::numeric_limits<double>::max()};
+  //! Poisson ratio
+  double poisson_ratio_{std::numeric_limits<double>::max()};
 };  // LinearElastic class
 }  // mpm namespace
+
+#include "linear_elastic.tcc"
 
 #endif  // MPM_LINEAR_ELASTIC_H_
