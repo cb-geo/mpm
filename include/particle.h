@@ -13,10 +13,10 @@
 
 namespace mpm {
 
-// Global index type for the particle
+//! Global index type for the particle
 using Index = unsigned long long;
 
-// Particle class
+//! Particle class
 //! \brief Base class that stores the information about particles
 //! \details Particle class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -26,7 +26,7 @@ class Particle {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor with id and coordinates
+  //! Constructor with id and coordinates
   //! \param[in] id Particle id
   //! \param[in] coord coordinates of the particle
   Particle(Index id, const VectorDim& coord) : id_{id} {
@@ -52,7 +52,7 @@ class Particle {
   void coordinates(const VectorDim& coord) { coordinates_ = coord; }
 
   //! Return coordinates
-  //! \param[out] coordinates_ return coordinates of the particle
+  //! \retval coordinates_ return coordinates of the particle
   VectorDim coordinates() const { return coordinates_; }
 
   //! Assign cell

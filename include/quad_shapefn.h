@@ -8,11 +8,11 @@
 
 #include "shapefn.h"
 
+namespace mpm {
+
 //! Quadrilateral shape function class derived from ShapeFn class
 //! \brief Shape functions of a quadrilateral element
 //! \tparam Tdim Dimension
-namespace mpm {
-
 template <unsigned Tdim>
 class QuadrilateralShapeFn : public ShapeFn<Tdim> {
 

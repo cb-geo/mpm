@@ -14,10 +14,10 @@
 
 namespace mpm {
 
-// Global index type for the cell
+//! Global index type for the cell
 using Index = unsigned long long;
 
-// Cell class
+//! Cell class
 //! \brief Base class that stores the information about cells
 //! \details Cell class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -27,10 +27,10 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor with id and coordinates
+  //! Constructor with id and coordinates
   Cell(Index id, unsigned nnodes);
 
-  // Constructor with id, coordinates and shapefn
+  //! Constructor with id, coordinates and shapefn
   Cell(Index id, unsigned nnodes,
        const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 

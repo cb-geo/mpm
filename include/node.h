@@ -12,7 +12,7 @@
 
 namespace mpm {
 
-// Global index type for the node
+//! Global index type for the node
 using Index = unsigned long long;
 
 // Node class
@@ -25,7 +25,7 @@ class Node : public NodeBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor with id, coordinates and dof
+  //! Constructor with id, coordinates and dof
   Node(Index id, const VectorDim& coord, unsigned dof);
 
   //! Destructor

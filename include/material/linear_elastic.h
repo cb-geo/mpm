@@ -9,7 +9,7 @@
 
 namespace mpm {
 
-// LinearElastic class
+//! LinearElastic class
 //! \brief Linear Elastic material model
 //! \details LinearElastic class stresses and strains
 class LinearElastic : public Material {
@@ -19,7 +19,7 @@ class LinearElastic : public Material {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
-  // Constructor with id
+  //! Constructor with id
   LinearElastic(unsigned id) : Material(id){};
 
   //! Destructor

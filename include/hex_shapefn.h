@@ -8,11 +8,12 @@
 
 #include "shapefn.h"
 
+//! MPM namespace
+namespace mpm {
+
 //! Hexahedron shape function class derived from ShapeFn class
 //! \brief Shape functions of a hexahedron element
 //! \tparam Tdim Dimension
-namespace mpm {
-
 template <unsigned Tdim>
 class HexahedronShapeFn : public ShapeFn<Tdim> {
 

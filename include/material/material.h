@@ -13,7 +13,7 @@ using Json = nlohmann::json;
 
 namespace mpm {
 
-// Material class
+//! Material base class
 //! \brief Base class that stores the information about materials
 //! \details Material class stresses and strains
 class Material {
@@ -23,7 +23,7 @@ class Material {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
-  // Constructor with id
+  //! Constructor with id
   Material(unsigned id);
 
   //! Destructor

@@ -1,3 +1,4 @@
+docs/*
 CMakeCache.txt
 CMakeFiles/*
 CTestTestfile.cmake

@@ -10,10 +10,10 @@
 
 namespace mpm {
 
-// Global index type for the nodebase
+//! Global index type for the nodebase
 using Index = unsigned long long;
 
-// NodeBase class
+//! NodeBase class
 //! \brief Base class that stores the information about nodes
 //! \details NodeBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -23,7 +23,7 @@ class NodeBase {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor with id and coordinates
+  //! Constructor with id and coordinates
   //! \param[in] id Node id
   //! \param[in] coord coordinates of the nodebase
   NodeBase(Index id, const VectorDim& coord) : id_{id} {
@@ -49,7 +49,7 @@ class NodeBase {
   void coordinates(const VectorDim& coord) { coordinates_ = coord; }
 
   //! Return coordinates
-  //! \param[out] coordinates_ return coordinates of the nodebase
+  //! \retval coordinates_ return coordinates of the nodebase
   VectorDim coordinates() const { return coordinates_; }
 
  protected:
