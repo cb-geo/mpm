@@ -25,11 +25,8 @@ class Node : public NodeBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor with id and coordinates
-  //! \param[in] id Node id
-  //! \param[in] coord coordinates of the node
-  Node(Index id, const VectorDim& coord, unsigned dof)
-      : NodeBase<Tdim>(id, coord), dof_{dof} {};
+  // Constructor with id, coordinates and dof
+  Node(Index id, const VectorDim& coord, unsigned dof);
 
   //! Destructor
   virtual ~Node(){};
@@ -43,6 +40,12 @@ class Node : public NodeBase<Tdim> {
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
+  //! Assign nodal mass
+  void assign_mass(double mass) { mass_ = mass; }
+
+  //! Return mass
+  double mass() const { return mass_; }
+
  protected:
   //! node id
   using NodeBase<Tdim>::id_;
@@ -53,7 +56,12 @@ class Node : public NodeBase<Tdim> {
  private:
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
+  //! Mass
+  double mass_{std::numeric_limits<double>::max()};
 
 };  // Node class
 }  // mpm namespace
+
+#include "node.tcc"
+
 #endif  // MPM_NODE_H_

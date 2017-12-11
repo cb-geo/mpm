@@ -66,6 +66,18 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
     REQUIRE(coordinates.size() == Dim);
   }
+
+  SECTION("Check nodal properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+
+    // Check mass
+    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    double mass = 100.5;
+    node->assign_mass(mass);
+    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+  }
 }
 
 //! \brief Check node class for 2D case
@@ -128,6 +140,18 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     REQUIRE(coordinates.size() == Dim);
+  }
+
+  SECTION("Check nodal properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+
+    // Check mass
+    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    double mass = 100.5;
+    node->assign_mass(mass);
+    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
   }
 }
 
@@ -192,5 +216,17 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     REQUIRE(coordinates.size() == Dim);
+  }
+
+  SECTION("Check nodal properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+
+    // Check mass
+    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    double mass = 100.5;
+    node->assign_mass(mass);
+    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
   }
 }
