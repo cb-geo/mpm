@@ -26,7 +26,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   }
 
   //! Read material properties
-  SECTION("LinearElastic") {
+  SECTION("LinearElastic check stiffness matrix") {
     const unsigned id = 0;
     auto material = std::make_shared<mpm::LinearElastic>(id);
     REQUIRE(material->id() == 0);
@@ -86,6 +86,21 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     REQUIRE(de(5,3) ==  Approx(0.).epsilon(Tolerance));
     REQUIRE(de(5,4) ==  Approx(0.).epsilon(Tolerance));
     REQUIRE(de(5,5) ==  Approx(G).epsilon(Tolerance));
+  }
+
+  SECTION("LinearElastic check stresses") {
+    const unsigned id = 0;
+    auto material = std::make_shared<mpm::LinearElastic>(id);
+    REQUIRE(material->id() == 0);
+
+    // Initialise material
+    Json jmaterial;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    material->properties(jmaterial);
+
+    mpm::Material::Matrix6x6 de = material->elastic_tensor();
 
     // Initialise stress
     mpm::Material::Vector6d stress;
@@ -116,7 +131,28 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
+
+    // Initialise strain
+    strain(0) = 0.0010000;
+    strain(1) = 0.0005000;
+    strain(2) = 0.0005000;
+    strain(3) = 0.0000100;
+    strain(4) = 0.0000200;
+    strain(5) = 0.0000300;
+
+    // Reset stress
+    stress.setZero();
       
+    // Compute updated stress
+    material->compute_stress(stress, strain);
+
+    // Check stressees
+    REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
   }
 }
 
