@@ -35,7 +35,7 @@ class LinearElastic : public Material {
   unsigned id() const { return id_; }
 
   //! Read material properties
-  void material_properties(const Json&);
+  void properties(const Json&);
 
   //! Compute elastic tensor
   Matrix6x6 elastic_tensor();

@@ -37,7 +37,7 @@ class Material {
   unsigned id() const { return id_; }
 
   //! Read material properties
-  virtual void material_properties(const Json&) = 0;
+  virtual void properties(const Json&) = 0;
 
   //! Compute elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;
