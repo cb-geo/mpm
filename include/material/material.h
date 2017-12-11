@@ -6,6 +6,8 @@
 #include "Eigen/Dense"
 #include "json.hpp"
 
+#include "factory.h"
+
 // JSON
 using Json = nlohmann::json;
 

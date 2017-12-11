@@ -2,8 +2,10 @@
 //! \param[in] materail_properties Material properties
 void mpm::LinearElastic::properties(const Json& materail_properties) {
   try {
-    youngs_modulus_ = materail_properties["youngs_modulus"].template get<double>();
-    poisson_ratio_ = materail_properties["poisson_ratio"].template get<double>();
+    youngs_modulus_ =
+        materail_properties["youngs_modulus"].template get<double>();
+    poisson_ratio_ =
+        materail_properties["poisson_ratio"].template get<double>();
   } catch (std::exception& except) {
     std::cerr << "Material parameter not set: " << except.what() << '\n';
   }

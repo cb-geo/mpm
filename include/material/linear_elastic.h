@@ -59,4 +59,7 @@ class LinearElastic : public Material {
 
 #include "linear_elastic.tcc"
 
+static Register<mpm::Material, mpm::LinearElastic, unsigned> linearelastic(
+    "LinearElastic");
+
 #endif  // MPM_LINEAR_ELASTIC_H_

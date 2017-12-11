@@ -4,6 +4,7 @@
 #include "catch.hpp"
 #include "json.hpp"
 
+#include "factory.h"
 #include "material/linear_elastic.h"
 
 //! \brief Check linearelastic class
@@ -89,8 +90,9 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   }
 
   SECTION("LinearElastic check stresses") {
-    const unsigned id = 0;
-    auto material = std::make_shared<mpm::LinearElastic>(id);
+    unsigned id = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
 
     // Initialise material
