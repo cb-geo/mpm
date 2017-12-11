@@ -55,6 +55,24 @@ class Node : public NodeBase<Tdim> {
   //! Return force
   Eigen::VectorXd force() { return force_; }
 
+  //! Assign velocity
+  void assign_velocity(const Eigen::VectorXd& velocity);
+
+  //! Return velocity
+  Eigen::VectorXd velocity() { return velocity_; }
+
+  //! Assign momentum
+  void assign_momentum(const Eigen::VectorXd& momentum);
+
+  //! Return momentum
+  Eigen::VectorXd momentum() { return momentum_; }
+
+  //! Assign acceleration
+  void assign_acceleration(const Eigen::VectorXd& acceleration);
+
+  //! Return acceleration
+  Eigen::VectorXd acceleration() { return acceleration_; }
+
  protected:
   //! node id
   using NodeBase<Tdim>::id_;
@@ -69,6 +87,12 @@ class Node : public NodeBase<Tdim> {
   double mass_{std::numeric_limits<double>::max()};
   //! Force
   Eigen::VectorXd force_;
+  //! Velocity
+  Eigen::VectorXd velocity_;
+  //! Momentum
+  Eigen::VectorXd momentum_;
+  //! Acceleration
+  Eigen::VectorXd acceleration_;
 };  // Node class
 }  // mpm namespace
 

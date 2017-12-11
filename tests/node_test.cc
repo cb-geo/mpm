@@ -89,6 +89,42 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     node->assign_force(force);
     for (unsigned i = 0; i < force.size(); ++i)
       REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dof);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_velocity(velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dof);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_momentum(momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dof);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_acceleration(acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
   }
 }
 
@@ -176,6 +212,42 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     node->assign_force(force);
     for (unsigned i = 0; i < force.size(); ++i)
       REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dof);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_velocity(velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dof);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_momentum(momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dof);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_acceleration(acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
   }
 }
 
@@ -264,5 +336,41 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     node->assign_force(force);
     for (unsigned i = 0; i < force.size(); ++i)
       REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dof);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_velocity(velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dof);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_momentum(momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dof);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+
+    node->assign_acceleration(acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
   }
 }

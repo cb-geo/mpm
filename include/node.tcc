@@ -7,6 +7,9 @@ template <unsigned Tdim>
 mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof)
     : NodeBase<Tdim>(id, coord), dof_{dof} {
   force_.resize(dof_);
+  velocity_.resize(dof_);
+  momentum_.resize(dof_);
+  acceleration_.resize(dof_);
   this->initialise();
 }
 
@@ -15,6 +18,9 @@ mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof)
 template <unsigned Tdim>
 void mpm::Node<Tdim>::initialise() {
   force_.setZero();
+  velocity_.setZero();
+  momentum_.setZero();
+  acceleration_.setZero();
 }
 
 // Assign nodal force
@@ -27,6 +33,52 @@ void mpm::Node<Tdim>::assign_force(const Eigen::VectorXd& force) {
     }
     // Assign force
     force_ = force;
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+}
+
+// Assign nodal velocity
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Node<Tdim>::assign_velocity(const Eigen::VectorXd& velocity) {
+  try {
+    if (velocity.size() != velocity_.size()) {
+      throw std::runtime_error("Nodal velocity degrees of freedom don't match");
+    }
+    // Assign velocity
+    velocity_ = velocity;
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+}
+
+// Assign nodal momentum
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Node<Tdim>::assign_momentum(const Eigen::VectorXd& momentum) {
+  try {
+    if (momentum.size() != momentum_.size()) {
+      throw std::runtime_error("Nodal momentum degrees of freedom don't match");
+    }
+    // Assign momentum
+    momentum_ = momentum;
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+}
+
+// Assign nodal acceleration
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Node<Tdim>::assign_acceleration(const Eigen::VectorXd& acceleration) {
+  try {
+    if (acceleration.size() != acceleration_.size()) {
+      throw std::runtime_error(
+          "Nodal acceleration degrees of freedom don't match");
+    }
+    // Assign acceleration
+    acceleration_ = acceleration;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
