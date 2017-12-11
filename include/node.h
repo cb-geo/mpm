@@ -28,7 +28,8 @@ class Node : public NodeBase<Tdim> {
   // Constructor with id and coordinates
   //! \param[in] id Node id
   //! \param[in] coord coordinates of the node
-  Node(Index id, const VectorDim& coord) : NodeBase<Tdim>(id, coord){};
+  Node(Index id, const VectorDim& coord, unsigned dof)
+      : NodeBase<Tdim>(id, coord), dof_{dof} {};
 
   //! Destructor
   virtual ~Node(){};
@@ -39,12 +40,20 @@ class Node : public NodeBase<Tdim> {
   //! Delete assignement operator
   Node& operator=(const Node<Tdim>&) = delete;
 
+  //! Return degrees of freedom
+  unsigned dof() const { return dof_; }
+
  protected:
   //! node id
   using NodeBase<Tdim>::id_;
 
   //! nodal coordinates
   using NodeBase<Tdim>::coordinates_;
+
+ private:
+  //! Degrees of freedom
+  unsigned dof_{std::numeric_limits<unsigned>::max()};
+
 };  // Node class
 }  // mpm namespace
 #endif  // MPM_NODE_H_

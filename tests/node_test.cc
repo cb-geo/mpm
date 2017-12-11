@@ -8,21 +8,29 @@
 //! \brief Check node class for 1D case
 TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   const unsigned Dim = 1;
+  const unsigned Dof = 1;
   Eigen::Matrix<double, 1, 1> coords;
   coords.setZero();
 
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+  }
+
+  SECTION("Check degrees of freedom") {
+    //! Check for degrees of freedom
+    mpm::Index id = 0;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+    REQUIRE(node->dof() == 1);
   }
 
   //! Test coordinates function
@@ -30,7 +38,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -63,21 +71,29 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 //! \brief Check node class for 2D case
 TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   const unsigned Dim = 2;
+  const unsigned Dof = 2;
   Eigen::Vector2d coords;
   coords.setZero();
 
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+  }
+
+  SECTION("Check degrees of freedom") {
+    //! Check for degrees of freedom
+    mpm::Index id = 0;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+    REQUIRE(node->dof() == 2);
   }
 
   //! Test coordinates function
@@ -85,7 +101,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -118,21 +134,30 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 //! \brief Check node class for 3D case
 TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   const unsigned Dim = 3;
+  const unsigned Dof = 6;
+
   Eigen::Vector3d coords;
   coords.setZero();
 
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
+  }
+
+  SECTION("Check degrees of freedom") {
+    //! Check for degrees of freedom
+    mpm::Index id = 0;
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
+    REQUIRE(node->dof() == 6);
   }
 
   //! Test coordinates function
@@ -140,7 +165,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    auto node = std::make_shared<mpm::Node<Dim>>(id, coords);
+    auto node = std::make_shared<mpm::Node<Dim>>(id, coords, Dof);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();

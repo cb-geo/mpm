@@ -1,4 +1,3 @@
-// No-debase test
 #include <functional>
 #include <limits>
 #include <memory>

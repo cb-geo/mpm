@@ -14,22 +14,24 @@
 TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   // Dimension
   const unsigned Dim = 2;
+  // Degrees of freedom
+  const unsigned Dof = 2;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
 
   Eigen::Vector2d coords;
   coords.setZero();
 
-  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords);
+  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
 
   coords << 0, 1;
-  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords);
+  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
 
   coords << 1, 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords);
+  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
 
   coords << 1, 0;
-  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords);
+  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -97,6 +99,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   // Dimension
   const unsigned Dim = 3;
+  // Degrees of freedom
+  const unsigned Dof = 6;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
 
@@ -104,28 +108,28 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   Eigen::Vector3d coords;
 
   coords << 0, 0, 0;
-  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords);
+  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
 
   coords << 1, 0, 0;
-  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords);
+  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
 
   coords << 0, 1, 0;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords);
+  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
 
   coords << 1, 1, 0;
-  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords);
+  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
 
   coords << 0, 0, 1;
-  auto node4 = std::make_shared<mpm::Node<Dim>>(4, coords);
+  auto node4 = std::make_shared<mpm::Node<Dim>>(4, coords, Dof);
 
   coords << 1, 0, 1;
-  auto node5 = std::make_shared<mpm::Node<Dim>>(5, coords);
+  auto node5 = std::make_shared<mpm::Node<Dim>>(5, coords, Dof);
 
   coords << 0, 1, 1;
-  auto node6 = std::make_shared<mpm::Node<Dim>>(6, coords);
+  auto node6 = std::make_shared<mpm::Node<Dim>>(6, coords, Dof);
 
   coords << 1, 1, 1;
-  auto node7 = std::make_shared<mpm::Node<Dim>>(7, coords);
+  auto node7 = std::make_shared<mpm::Node<Dim>>(7, coords, Dof);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {

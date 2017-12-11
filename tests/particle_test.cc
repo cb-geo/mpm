@@ -10,6 +10,8 @@
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   // Dimension
   const unsigned Dim = 1;
+  // Dimension
+  const unsigned Dof = 1;
   // Coordinates
   Eigen::Matrix<double, 1, 1> coords;
   coords.setZero();
@@ -67,6 +69,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   // Dimension
   const unsigned Dim = 2;
+  // Degree of freedom
+  const unsigned Dof = 2;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -128,16 +132,16 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     // Add nodes
-    auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords);
+    auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
 
     coords << 0, 1;
-    auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords);
+    auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
 
     coords << 1, 1;
-    auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords);
+    auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
 
     coords << 1, 0;
-    auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords);
+    auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -155,6 +159,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   // Dimension
   const unsigned Dim = 3;
+  // Dimension
+  const unsigned Dof = 6;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -220,28 +226,28 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     // Add nodes
     coords << 0, 0, 0;
-    auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords);
+    auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
 
     coords << 1, 0, 0;
-    auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords);
+    auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
 
     coords << 0, 1, 0;
-    auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords);
+    auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
 
     coords << 1, 1, 0;
-    auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords);
+    auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
 
     coords << 0, 0, 1;
-    auto node4 = std::make_shared<mpm::Node<Dim>>(4, coords);
+    auto node4 = std::make_shared<mpm::Node<Dim>>(4, coords, Dof);
 
     coords << 1, 0, 1;
-    auto node5 = std::make_shared<mpm::Node<Dim>>(5, coords);
+    auto node5 = std::make_shared<mpm::Node<Dim>>(5, coords, Dof);
 
     coords << 0, 1, 1;
-    auto node6 = std::make_shared<mpm::Node<Dim>>(6, coords);
+    auto node6 = std::make_shared<mpm::Node<Dim>>(6, coords, Dof);
 
     coords << 1, 1, 1;
-    auto node7 = std::make_shared<mpm::Node<Dim>>(7, coords);
+    auto node7 = std::make_shared<mpm::Node<Dim>>(7, coords, Dof);
 
     cell->add_node(0, node0);
     cell->add_node(1, node1);

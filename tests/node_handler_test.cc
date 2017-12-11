@@ -13,6 +13,8 @@
 TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   // Dimension
   const unsigned Dim = 2;
+  // Degrees of freedom
+  const unsigned Dof = 2;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -20,11 +22,11 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   mpm::Index id1 = 0;
   Eigen::Vector2d coords;
   coords.setZero();
-  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords);
+  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
 
   // Node 2
   mpm::Index id2 = 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
+  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
 
   // Node handler
   auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
@@ -104,6 +106,8 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
 TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   // Dimension
   const unsigned Dim = 3;
+  // Degrees of freedom
+  const unsigned Dof = 6;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -111,11 +115,11 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   mpm::Index id1 = 0;
   Eigen::Vector3d coords;
   coords.setZero();
-  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords);
+  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
 
   // Node 2
   mpm::Index id2 = 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords);
+  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
 
   // Node handler
   auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
