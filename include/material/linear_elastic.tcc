@@ -1,8 +1,6 @@
 //! Return elastic tensor
 //! \retval de_ Elastic tensor
 mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
-  // Elastic stiffness matrix
-  Matrix6x6 de;
   // Bulk and shear modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
   const double G = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
@@ -12,13 +10,23 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
 
   // clang-format off
   // compute elasticityTensor
-  de(0,0)=a1;    de(0,1)=a2;    de(0,2)=a2;    de(0,3)=0;    de(0,4)=0;    de(0,5)=0;
-  de(1,0)=a2;    de(1,1)=a1;    de(1,2)=a2;    de(1,3)=0;    de(1,4)=0;    de(1,5)=0;
-  de(2,0)=a2;    de(2,1)=a2;    de(2,2)=a1;    de(2,3)=0;    de(2,4)=0;    de(2,5)=0;
-  de(3,0)= 0;    de(3,1)= 0;    de(3,2)= 0;    de(3,3)=G;    de(3,4)=0;    de(3,5)=0;
-  de(4,0)= 0;    de(4,1)= 0;    de(4,2)= 0;    de(4,3)=0;    de(4,4)=G;    de(4,5)=0;
-  de(5,0)= 0;    de(5,1)= 0;    de(5,2)= 0;    de(5,3)=0;    de(5,4)=0;    de(5,5)=G;
+  de_(0,0)=a1;    de_(0,1)=a2;    de_(0,2)=a2;    de_(0,3)=0;    de_(0,4)=0;    de_(0,5)=0;
+  de_(1,0)=a2;    de_(1,1)=a1;    de_(1,2)=a2;    de_(1,3)=0;    de_(1,4)=0;    de_(1,5)=0;
+  de_(2,0)=a2;    de_(2,1)=a2;    de_(2,2)=a1;    de_(2,3)=0;    de_(2,4)=0;    de_(2,5)=0;
+  de_(3,0)= 0;    de_(3,1)= 0;    de_(3,2)= 0;    de_(3,3)=G;    de_(3,4)=0;    de_(3,5)=0;
+  de_(4,0)= 0;    de_(4,1)= 0;    de_(4,2)= 0;    de_(4,3)=0;    de_(4,4)=G;    de_(4,5)=0;
+  de_(5,0)= 0;    de_(5,1)= 0;    de_(5,2)= 0;    de_(5,3)=0;    de_(5,4)=0;    de_(5,5)=G;
   // clang-format on
 
-  return de;
+  return de_;
+}
+
+//! Compute stress
+//! \param[in] strain Strain
+//! \param[in] stress Stress
+//! \retval updated_stress Updated value of stress
+mpm::Material::Vector6d mpm::LinearElastic::compute_stress(
+    const Vector6d& strain, const Vector6d& stress) {
+  Vector6d dstress = de_ * strain;
+  return stress + dstress;
 }

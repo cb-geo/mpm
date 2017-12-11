@@ -38,11 +38,15 @@ class LinearElastic : public Material {
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
-  void compute_stress(const Vector6d& strain, const Vector6d& stress) {}
+  Vector6d compute_stress(const Vector6d& strain, const Vector6d& stress);
 
  protected:
-  //! linearelastic id
+  //! material id
   using Material::id_;
+
+ private:
+  //! Elastic stiffness matrix
+  Matrix6x6 de_;
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio

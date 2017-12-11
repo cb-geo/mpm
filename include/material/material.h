@@ -36,7 +36,7 @@ class Material {
   virtual Matrix6x6 elastic_tensor() = 0;
 
   //! Compute stress
-  virtual void compute_stress(const Vector6d& strain, const Vector6d& stress) = 0;
+  virtual Vector6d compute_stress(const Vector6d& strain, const Vector6d& stress) = 0;
 
  protected:
   //! material id
