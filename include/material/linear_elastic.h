@@ -41,7 +41,7 @@ class LinearElastic : public Material {
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
-  Vector6d compute_stress(const Vector6d& strain, const Vector6d& stress);
+  void compute_stress(Vector6d& stress, const Vector6d& strain);
 
  protected:
   //! material id

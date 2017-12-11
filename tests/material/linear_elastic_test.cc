@@ -26,7 +26,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   }
 
   //! Read material properties
-  SECTION("LinearElastic material properties") {
+  SECTION("LinearElastic") {
     const unsigned id = 0;
     auto material = std::make_shared<mpm::LinearElastic>(id);
     REQUIRE(material->id() == 0);
@@ -87,6 +87,36 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     REQUIRE(de(5,4) ==  Approx(0.).epsilon(Tolerance));
     REQUIRE(de(5,5) ==  Approx(G).epsilon(Tolerance));
 
-  }
+    // Initialise stress
+    mpm::Material::Vector6d stress;
+    stress.setZero();
+    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
 
+    // Initialise strain
+    mpm::Material::Vector6d strain;
+    strain(0) = 0.0010000;
+    strain(1) = 0.0005000;
+    strain(2) = 0.0005000;
+    strain(3) = 0.0000000;
+    strain(4) = 0.0000000;
+    strain(5) = 0.0000000;
+
+    // Compute updated stress
+    material->compute_stress(stress, strain);
+
+    // Check stressees
+    REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
+      
+  }
 }
+

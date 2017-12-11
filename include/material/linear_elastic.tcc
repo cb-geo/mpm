@@ -36,8 +36,8 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
 //! \param[in] strain Strain
 //! \param[in] stress Stress
 //! \retval updated_stress Updated value of stress
-mpm::Material::Vector6d mpm::LinearElastic::compute_stress(
-    const Vector6d& strain, const Vector6d& stress) {
+void mpm::LinearElastic::compute_stress(Vector6d& stress,
+                                        const Vector6d& strain) {
   Vector6d dstress = de_ * strain;
-  return stress + dstress;
+  stress += dstress;
 }
