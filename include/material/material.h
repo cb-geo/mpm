@@ -32,6 +32,12 @@ class Material {
   //! Return id of the material
   unsigned id() const { return id_; }
 
+  //! Compute elastic tensor
+  virtual Matrix6x6 elastic_tensor() = 0;
+
+  //! Compute stress
+  virtual void compute_stress(const Vector6d& strain, const Vector6d& stress) = 0;
+
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
