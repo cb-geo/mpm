@@ -4,6 +4,10 @@
 #include <limits>
 
 #include "Eigen/Dense"
+#include "json.hpp"
+
+// JSON
+using Json = nlohmann::json;
 
 namespace mpm {
 
@@ -31,6 +35,9 @@ class Material {
 
   //! Return id of the material
   unsigned id() const { return id_; }
+
+  //! Read material properties
+  virtual void material_properties(const Json&) = 0;
 
   //! Compute elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;

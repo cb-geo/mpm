@@ -1,3 +1,14 @@
+//! Read material properties
+//! \param[in] materail_properties Material properties
+void mpm::LinearElastic::material_properties(const Json& materail_properties) {
+  try {
+    youngs_modulus_ = materail_properties["youngs_modulus"].template get<double>();
+    poisson_ratio_ = materail_properties["poisson_ratio"].template get<double>();
+  } catch (std::exception& except) {
+    std::cerr << "Material parameter not set: " << except.what() << '\n';
+  }
+}
+
 //! Return elastic tensor
 //! \retval de_ Elastic tensor
 mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
