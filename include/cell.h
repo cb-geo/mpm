@@ -1,8 +1,6 @@
-
 #ifndef MPM_CELL_H_
 #define MPM_CELL_H_
 
-#include <array>
 #include <iostream>
 #include <limits>
 #include <memory>
