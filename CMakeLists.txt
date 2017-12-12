@@ -58,6 +58,7 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
   ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
   ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
+  ${mpm_SOURCE_DIR}/tests/mesh_test.cc
   ${mpm_SOURCE_DIR}/tests/node_base_container_test.cc
   ${mpm_SOURCE_DIR}/tests/node_base_handler_test.cc
   ${mpm_SOURCE_DIR}/tests/node_base_test.cc
