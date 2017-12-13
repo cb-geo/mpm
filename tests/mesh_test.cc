@@ -105,7 +105,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   SECTION("Check insert / remove particle functionality") {
     // Particle 1
     mpm::Index id1 = 0;
-    Eigen::Vector2d coords;
+    Eigen::Vector3d coords;
     coords.setZero();
     auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
 

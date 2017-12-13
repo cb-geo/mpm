@@ -352,7 +352,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
       boost::archive::text_oarchive oa(ss);
       oa << *particle;
-      std::cout << ss.str();
     }
     // load data from archive
     {
