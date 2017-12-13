@@ -41,6 +41,10 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
     REQUIRE(status2 == true);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
+    // Check clear
+    cellcontainer->clear();
+    // Check size of cell hanlder
+    REQUIRE(cellcontainer->size() == 0);
   }
 
   // Check iterator
@@ -120,6 +124,10 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
     REQUIRE(status2 == true);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
+    // Check clear
+    cellcontainer->clear();
+    // Check size of cell hanlder
+    REQUIRE(cellcontainer->size() == 0);
   }
 
   // Check iterator

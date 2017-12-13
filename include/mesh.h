@@ -8,8 +8,8 @@
 
 #include "Eigen/Dense"
 
-#include "container.h"
 #include "cell.h"
+#include "container.h"
 #include "particle.h"
 
 namespace mpm {
@@ -45,8 +45,14 @@ class Mesh {
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
+  //! Add particle
+  bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle_ptr);
+
+  //! Number of particles
+  mpm::Index nparticles() const { return particles_.size(); }
+
   //! Active mesh (if a particle is present)
-  // bool status() const { return particles_.size(); }
+  bool status() const { return particles_.size(); }
 
  protected:
   //! mesh id
@@ -54,6 +60,9 @@ class Mesh {
 
   //! Container of mesh neighbours
   Handler<Mesh<Tdim>> neighbour_meshes_;
+
+  //! Container of particles
+  Container<Particle<Tdim>> particles_;
 };  // Mesh class
 }  // mpm namespace
 

@@ -41,6 +41,10 @@ TEST_CASE("Particle container is checked for 2D case",
     REQUIRE(status2 == true);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
+    // Clear particle container
+    particlecontainer->clear();
+    // Check size of particle hanlder
+    REQUIRE(particlecontainer->size() == 0);
   }
 
   // Check iterator
@@ -137,6 +141,10 @@ TEST_CASE("Particle container is checked for 3D case",
     REQUIRE(status2 == true);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
+    // Clear particle container
+    particlecontainer->clear();
+    // Check size of particle hanlder
+    REQUIRE(particlecontainer->size() == 0);
   }
 
   // Check iterator

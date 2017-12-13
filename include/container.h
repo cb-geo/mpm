@@ -28,6 +28,9 @@ class Container {
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
 
+  //! Clear
+  void clear() { elements_.clear(); }
+
   //! Return begin iterator of nodes
   typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator begin()
       const {

@@ -8,7 +8,6 @@
 #include "cell.h"
 #include "particle.h"
 
-
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   // Dimension
@@ -67,7 +66,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
   }
 
-  
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -83,7 +81,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
       boost::archive::text_oarchive oa(ss);
       oa << *particle;
-      std::cout << ss.str();
     }
     // load data from archive
     {
@@ -91,7 +88,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       // Coordinates
       Eigen::Matrix<double, 1, 1> coordinates;
       coordinates.setZero();
-      
+
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
       REQUIRE(particle->id() == 1);
 
@@ -194,8 +191,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == true);
   }
 
-  
-  
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -211,7 +206,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
       boost::archive::text_oarchive oa(ss);
       oa << *particle;
-      std::cout << ss.str();
     }
     // load data from archive
     {
@@ -219,7 +213,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       // Coordinates
       Eigen::Vector2d coordinates;
       coordinates.setZero();
-      
+
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
       REQUIRE(particle->id() == 1);
 
@@ -343,8 +337,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == true);
   }
 
-  
-  
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -368,7 +360,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       // Coordinates
       Eigen::Vector3d coordinates;
       coordinates.setZero();
-      
+
       auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
       REQUIRE(particle->id() == 1);
 

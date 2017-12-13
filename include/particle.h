@@ -57,13 +57,12 @@ class Particle {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
-  
   friend class boost::serialization::access;
   template <class Archive>
-  void serialize(Archive & ar, const unsigned int version) {
-    ar & id_;
-    ar & coordinates_;
-}
+  void serialize(Archive& ar, const unsigned int version) {
+    ar& id_;
+    ar& coordinates_;
+  }
 
  private:
   //! particle id

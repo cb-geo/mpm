@@ -41,6 +41,10 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
+    // Clear node container
+    nodecontainer->clear();
+    // Check size of node hanlder
+    REQUIRE(nodecontainer->size() == 0);
   }
 
   // Check iterator
@@ -137,6 +141,10 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
+    // Clear node container
+    nodecontainer->clear();
+    // Check size of node hanlder
+    REQUIRE(nodecontainer->size() == 0);
   }
 
   // Check iterator

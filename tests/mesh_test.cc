@@ -4,8 +4,8 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "mesh.h"
 #include "hex_shapefn.h"
+#include "mesh.h"
 #include "node.h"
 #include "quad_shapefn.h"
 #include "shapefn.h"
@@ -16,7 +16,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  
+
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -40,6 +40,33 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nneighbours() == 0);
     mesh->add_neighbour(0, neighbourmesh);
     REQUIRE(mesh->nneighbours() == 1);
+  }
+
+  // Check insert particle
+  SECTION("Check insert / remove particle functionality") {
+    // Particle 1
+    mpm::Index id1 = 0;
+    Eigen::Vector2d coords;
+    coords.setZero();
+    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+
+    // Particle 2
+    mpm::Index id2 = 1;
+    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+    // Insert particle 1 and check status
+    bool status1 = mesh->add_particle(particle1);
+    REQUIRE(status1 == true);
+    // Insert particle 2 and check status
+    bool status2 = mesh->add_particle(particle2);
+    REQUIRE(status2 == true);
+    // Check mesh is active
+    REQUIRE(mesh->status() == true);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 2);
   }
 }
 
@@ -72,5 +99,32 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->nneighbours() == 0);
     mesh->add_neighbour(0, neighbourmesh);
     REQUIRE(mesh->nneighbours() == 1);
+  }
+
+  // Check insert particle
+  SECTION("Check insert / remove particle functionality") {
+    // Particle 1
+    mpm::Index id1 = 0;
+    Eigen::Vector2d coords;
+    coords.setZero();
+    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+
+    // Particle 2
+    mpm::Index id2 = 1;
+    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+    // Insert particle 1 and check status
+    bool status1 = mesh->add_particle(particle1);
+    REQUIRE(status1 == true);
+    // Insert particle 2 and check status
+    bool status2 = mesh->add_particle(particle2);
+    REQUIRE(status2 == true);
+    // Check mesh is active
+    REQUIRE(mesh->status() == true);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 2);
   }
 }
