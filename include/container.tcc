@@ -22,20 +22,20 @@ bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
 //! \param[in] ptr A shared pointer
 //! \tparam T A class with a template argument Tdim
 template <class T>
-bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
-  bool insertion_status = false;
+bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
+  bool removal_status = false;
   // Check if it is found in the container
   auto itr = std::find_if(this->begin(), this->end(),
                           [ptr](std::shared_ptr<T> const& element) {
                             return element->id() == ptr->id();
                           });
 
-  if (itr == this->end()) {
-    elements_.push_back(ptr);
-    insertion_status = true;
+  if (itr != this->end()) {
+    elements_.erase(itr);
+    removal_status = true;
   }
 
-  return insertion_status;
+  return removal_status;
 }
 
 //! Iterate over elements in the container
