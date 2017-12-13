@@ -31,13 +31,13 @@ TEST_CASE("Particle container is checked for 2D case",
   auto particlecontainer =
       std::make_shared<mpm::Container<mpm::Particle<Dim>>>();
 
-  // Check insert particle
-  SECTION("Check insert particle functionality") {
-    // Insert particle 1 and check status
-    bool status1 = particlecontainer->insert(particle1);
+  // Check add particle
+  SECTION("Check add particle functionality") {
+    // Add particle 1 and check status
+    bool status1 = particlecontainer->add(particle1);
     REQUIRE(status1 == true);
-    // Insert particle 2 and check status
-    bool status2 = particlecontainer->insert(particle2);
+    // Add particle 2 and check status
+    bool status2 = particlecontainer->add(particle2);
     REQUIRE(status2 == true);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
@@ -49,10 +49,10 @@ TEST_CASE("Particle container is checked for 2D case",
 
   // Check iterator
   SECTION("Check particle range iterator") {
-    // Insert particle 1
-    particlecontainer->insert(particle1);
-    // Insert particle 2
-    particlecontainer->insert(particle2);
+    // Add particle 1
+    particlecontainer->add(particle1);
+    // Add particle 2
+    particlecontainer->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
     for (auto itr = particlecontainer->begin(); itr != particlecontainer->end();
@@ -70,10 +70,10 @@ TEST_CASE("Particle container is checked for 2D case",
 
   // Check for_each
   SECTION("Check particle for_each") {
-    // Insert particle 1
-    particlecontainer->insert(particle1);
-    // Insert particle 2
-    particlecontainer->insert(particle2);
+    // Add particle 1
+    particlecontainer->add(particle1);
+    // Add particle 2
+    particlecontainer->add(particle2);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
 
@@ -131,13 +131,13 @@ TEST_CASE("Particle container is checked for 3D case",
   auto particlecontainer =
       std::make_shared<mpm::Container<mpm::Particle<Dim>>>();
 
-  // Check insert particle
-  SECTION("Check insert particle functionality") {
-    // Insert particle 1 and check status
-    bool status1 = particlecontainer->insert(particle1);
+  // Check add particle
+  SECTION("Check add particle functionality") {
+    // Add particle 1 and check status
+    bool status1 = particlecontainer->add(particle1);
     REQUIRE(status1 == true);
-    // Insert particle 2 and check status
-    bool status2 = particlecontainer->insert(particle2);
+    // Add particle 2 and check status
+    bool status2 = particlecontainer->add(particle2);
     REQUIRE(status2 == true);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
@@ -149,10 +149,10 @@ TEST_CASE("Particle container is checked for 3D case",
 
   // Check iterator
   SECTION("Check particle range iterator") {
-    // Insert particle 1
-    particlecontainer->insert(particle1);
-    // Insert particle 2
-    particlecontainer->insert(particle2);
+    // Add particle 1
+    particlecontainer->add(particle1);
+    // Add particle 2
+    particlecontainer->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
     for (auto itr = particlecontainer->begin(); itr != particlecontainer->end();
@@ -170,10 +170,10 @@ TEST_CASE("Particle container is checked for 3D case",
 
   // Check for_each
   SECTION("Check particle for_each") {
-    // Insert particle 1
-    particlecontainer->insert(particle1);
-    // Insert particle 2
-    particlecontainer->insert(particle2);
+    // Add particle 1
+    particlecontainer->add(particle1);
+    // Add particle 2
+    particlecontainer->add(particle2);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
 

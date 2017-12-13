@@ -25,6 +25,6 @@ int main(int argc, char** argv) {
     std::cout << ((*itr).second)->id() << '\n';
 
   auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
-  nodecontainer->insert(node);
-  nodecontainer->insert(node);
+  nodecontainer->add(node);
+  nodecontainer->add(node);
 }

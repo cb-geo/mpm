@@ -37,25 +37,18 @@ bool mpm::Mesh<Tdim>::add_neighbour(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
     const std::shared_ptr<mpm::Particle<Tdim>>& particle_ptr) {
-  bool insertion_status = false;
-  try {
-    // Insert if a particle is not found in the container
-    mpm::Index particleid = particle_ptr->id();
-    // Search container for particles
-    auto particle_itr = std::find_if(
-        particles_.begin(), particles_.end(),
-        [&particleid](const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
-          return (particle->id() == particleid);
-        });
-
-    // Insert if a particle is not found previously
-    if (particle_itr == particles_.end()) {
-      insertion_status = particles_.insert(particle_ptr);
-    } else {
-      throw std::runtime_error("Duplicate particle insertion is not allowed");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
-  }
+  bool insertion_status = particles_.add(particle_ptr);
   return insertion_status;
+}
+
+//! Remove a particle
+//! \param[in] particle_ptr A shared pointer to particle
+//! \retval insertion_status Return the successful addition of a particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_particle(mpm::Index particleid) {
+  // Remove a particle if found in the container
+  bool status;  // = particles_.remove(particle_ptr);
+
+  return status;
 }

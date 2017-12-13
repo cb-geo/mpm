@@ -31,13 +31,13 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   // Node container
   auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
 
-  // Check insert node
-  SECTION("Check insert node functionality") {
-    // Insert node 1 and check status
-    bool status1 = nodecontainer->insert(node1);
+  // Check add node
+  SECTION("Check add node functionality") {
+    // Add node 1 and check status
+    bool status1 = nodecontainer->add(node1);
     REQUIRE(status1 == true);
-    // Insert node 2 and check status
-    bool status2 = nodecontainer->insert(node2);
+    // Add node 2 and check status
+    bool status2 = nodecontainer->add(node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
@@ -49,10 +49,10 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
 
   // Check iterator
   SECTION("Check node range iterator") {
-    // Insert node 1
-    nodecontainer->insert(node1);
-    // Insert node 2
-    nodecontainer->insert(node2);
+    // Add node 1
+    nodecontainer->add(node1);
+    // Add node 2
+    nodecontainer->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
     for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
@@ -70,10 +70,10 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
 
   // Check for_each
   SECTION("Check node for_each") {
-    // Insert node 1
-    nodecontainer->insert(node1);
-    // Insert node 2
-    nodecontainer->insert(node2);
+    // Add node 1
+    nodecontainer->add(node1);
+    // Add node 2
+    nodecontainer->add(node2);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
 
@@ -131,13 +131,13 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
   // Node container
   auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
 
-  // Check insert node
-  SECTION("Check insert node functionality") {
-    // Insert node 1 and check status
-    bool status1 = nodecontainer->insert(node1);
+  // Check add node
+  SECTION("Check add node functionality") {
+    // Add node 1 and check status
+    bool status1 = nodecontainer->add(node1);
     REQUIRE(status1 == true);
-    // Insert node 2 and check status
-    bool status2 = nodecontainer->insert(node2);
+    // Add node 2 and check status
+    bool status2 = nodecontainer->add(node2);
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
@@ -149,10 +149,10 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
 
   // Check iterator
   SECTION("Check node range iterator") {
-    // Insert node 1
-    nodecontainer->insert(node1);
-    // Insert node 2
-    nodecontainer->insert(node2);
+    // Add node 1
+    nodecontainer->add(node1);
+    // Add node 2
+    nodecontainer->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
     for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
@@ -170,10 +170,10 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
 
   // Check for_each
   SECTION("Check node for_each") {
-    // Insert node 1
-    nodecontainer->insert(node1);
-    // Insert node 2
-    nodecontainer->insert(node2);
+    // Add node 1
+    nodecontainer->add(node1);
+    // Add node 2
+    nodecontainer->add(node2);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
 

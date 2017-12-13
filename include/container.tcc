@@ -1,13 +1,14 @@
-//! Insert a pointer
+//! Add a pointer
 //! \param[in] ptr A shared pointer
 //! \tparam T A class with a template argument Tdim
 template <class T>
-bool mpm::Container<T>::insert(const std::shared_ptr<T>& ptr) {
+bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
   bool insertion_status = false;
   // Check if it is found in the container
-  auto itr = std::find_if(
-      this->begin(), this->end(),
-      [ptr](std::shared_ptr<T> const& i) { return i->id() == ptr->id(); });
+  auto itr = std::find_if(this->begin(), this->end(),
+                          [ptr](std::shared_ptr<T> const& element) {
+                            return element->id() == ptr->id();
+                          });
 
   if (itr == this->end()) {
     elements_.push_back(ptr);

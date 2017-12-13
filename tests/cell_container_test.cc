@@ -31,13 +31,13 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
 
-  // Check insert cell
-  SECTION("Check insert cell functionality") {
-    // Insert cell 1 and check status
-    bool status1 = cellcontainer->insert(cell1);
+  // Check add cell
+  SECTION("Check add cell functionality") {
+    // Add cell 1 and check status
+    bool status1 = cellcontainer->add(cell1);
     REQUIRE(status1 == true);
-    // Insert cell 2 and check status
-    bool status2 = cellcontainer->insert(cell2);
+    // Add cell 2 and check status
+    bool status2 = cellcontainer->add(cell2);
     REQUIRE(status2 == true);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
@@ -49,10 +49,10 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
 
   // Check iterator
   SECTION("Check cell range iterator") {
-    // Insert cell 1
-    cellcontainer->insert(cell1);
-    // Insert cell 2
-    cellcontainer->insert(cell2);
+    // Add cell 1
+    cellcontainer->add(cell1);
+    // Add cell 2
+    cellcontainer->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
     for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
@@ -67,10 +67,10 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
 
   // Check for_each
   SECTION("Check cell for_each") {
-    // Insert cell 1
-    cellcontainer->insert(cell1);
-    // Insert cell 2
-    cellcontainer->insert(cell2);
+    // Add cell 1
+    cellcontainer->add(cell1);
+    // Add cell 2
+    cellcontainer->add(cell2);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 
@@ -114,13 +114,13 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
 
-  // Check insert cell
-  SECTION("Check insert cell functionality") {
-    // Insert cell 1 and check status
-    bool status1 = cellcontainer->insert(cell1);
+  // Check add cell
+  SECTION("Check add cell functionality") {
+    // Add cell 1 and check status
+    bool status1 = cellcontainer->add(cell1);
     REQUIRE(status1 == true);
-    // Insert cell 2 and check status
-    bool status2 = cellcontainer->insert(cell2);
+    // Add cell 2 and check status
+    bool status2 = cellcontainer->add(cell2);
     REQUIRE(status2 == true);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
@@ -132,10 +132,10 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
 
   // Check iterator
   SECTION("Check cell range iterator") {
-    // Insert cell 1
-    cellcontainer->insert(cell1);
-    // Insert cell 2
-    cellcontainer->insert(cell2);
+    // Add cell 1
+    cellcontainer->add(cell1);
+    // Add cell 2
+    cellcontainer->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
     for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
@@ -150,10 +150,10 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
 
   // Check for_each
   SECTION("Check cell for_each") {
-    // Insert cell 1
-    cellcontainer->insert(cell1);
-    // Insert cell 2
-    cellcontainer->insert(cell2);
+    // Add cell 1
+    cellcontainer->add(cell1);
+    // Add cell 2
+    cellcontainer->add(cell2);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 

@@ -42,8 +42,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nneighbours() == 1);
   }
 
-  // Check insert particle
-  SECTION("Check insert / remove particle functionality") {
+  // Check add particle
+  SECTION("Check add / remove particle functionality") {
     // Particle 1
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
@@ -57,10 +57,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
-    // Insert particle 1 and check status
+    // Add particle 1 and check status
     bool status1 = mesh->add_particle(particle1);
     REQUIRE(status1 == true);
-    // Insert particle 2 and check status
+    // Add particle 2 and check status
     bool status2 = mesh->add_particle(particle2);
     REQUIRE(status2 == true);
     // Check mesh is active
@@ -101,8 +101,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->nneighbours() == 1);
   }
 
-  // Check insert particle
-  SECTION("Check insert / remove particle functionality") {
+  // Check add particle
+  SECTION("Check add / remove particle functionality") {
     // Particle 1
     mpm::Index id1 = 0;
     Eigen::Vector3d coords;
@@ -116,10 +116,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
-    // Insert particle 1 and check status
+    // Add particle 1 and check status
     bool status1 = mesh->add_particle(particle1);
     REQUIRE(status1 == true);
-    // Insert particle 2 and check status
+    // Add particle 2 and check status
     bool status2 = mesh->add_particle(particle2);
     REQUIRE(status2 == true);
     // Check mesh is active

@@ -48,6 +48,9 @@ class Mesh {
   //! Add particle
   bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle_ptr);
 
+  //! Add particle
+  bool remove_particle(mpm::Index particleid);
+
   //! Number of particles
   mpm::Index nparticles() const { return particles_.size(); }
 

@@ -22,8 +22,8 @@ class Container {
   //! Default constructor
   Container<T>() = default;
 
-  //! Insert a pointer
-  bool insert(const std::shared_ptr<T>&);
+  //! add a pointer
+  bool add(const std::shared_ptr<T>&);
 
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }

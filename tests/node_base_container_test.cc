@@ -31,24 +31,28 @@ TEST_CASE("NodeBase container is checked for 2D case",
   auto nodebasecontainer =
       std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
 
-  // Check insert nodebase
-  SECTION("Check insert nodebase functionality") {
-    // Insert nodebase 1 and check status
-    bool status1 = nodebasecontainer->insert(nodebase1);
+  // Check add nodebase
+  SECTION("Check add nodebase functionality") {
+    // Add nodebase 1 and check status
+    bool status1 = nodebasecontainer->add(nodebase1);
     REQUIRE(status1 == true);
-    // Insert nodebase 2 and check status
-    bool status2 = nodebasecontainer->insert(nodebase2);
+    // Add nodebase 2 and check status
+    bool status2 = nodebasecontainer->add(nodebase2);
     REQUIRE(status2 == true);
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
+    // Clear node container
+    nodebasecontainer->clear();
+    // Check size of node hanlder
+    REQUIRE(nodebasecontainer->size() == 0);
   }
 
   // Check iterator
   SECTION("Check nodebase range iterator") {
-    // Insert nodebase 1
-    nodebasecontainer->insert(nodebase1);
-    // Insert nodebase 2
-    nodebasecontainer->insert(nodebase2);
+    // Add nodebase 1
+    nodebasecontainer->add(nodebase1);
+    // Add nodebase 2
+    nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     std::size_t counter = 0;
     for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
@@ -66,10 +70,10 @@ TEST_CASE("NodeBase container is checked for 2D case",
 
   // Check for_each
   SECTION("Check nodebase for_each") {
-    // Insert nodebase 1
-    nodebasecontainer->insert(nodebase1);
-    // Insert nodebase 2
-    nodebasecontainer->insert(nodebase2);
+    // Add nodebase 1
+    nodebasecontainer->add(nodebase1);
+    // Add nodebase 2
+    nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
 
@@ -127,24 +131,28 @@ TEST_CASE("NodeBase container is checked for 3D case",
   auto nodebasecontainer =
       std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
 
-  // Check insert nodebase
-  SECTION("Check insert nodebase functionality") {
-    // Insert nodebase 1 and check status
-    bool status1 = nodebasecontainer->insert(nodebase1);
+  // Check add nodebase
+  SECTION("Check add nodebase functionality") {
+    // Add nodebase 1 and check status
+    bool status1 = nodebasecontainer->add(nodebase1);
     REQUIRE(status1 == true);
-    // Insert nodebase 2 and check status
-    bool status2 = nodebasecontainer->insert(nodebase2);
+    // Add nodebase 2 and check status
+    bool status2 = nodebasecontainer->add(nodebase2);
     REQUIRE(status2 == true);
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
+    // Clear node container
+    nodebasecontainer->clear();
+    // Check size of node hanlder
+    REQUIRE(nodebasecontainer->size() == 0);
   }
 
   // Check iterator
   SECTION("Check nodebase range iterator") {
-    // Insert nodebase 1
-    nodebasecontainer->insert(nodebase1);
-    // Insert nodebase 2
-    nodebasecontainer->insert(nodebase2);
+    // Add nodebase 1
+    nodebasecontainer->add(nodebase1);
+    // Add nodebase 2
+    nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     std::size_t counter = 0;
     for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
@@ -162,10 +170,10 @@ TEST_CASE("NodeBase container is checked for 3D case",
 
   // Check for_each
   SECTION("Check nodebase for_each") {
-    // Insert nodebase 1
-    nodebasecontainer->insert(nodebase1);
-    // Insert nodebase 2
-    nodebasecontainer->insert(nodebase2);
+    // Add nodebase 1
+    nodebasecontainer->add(nodebase1);
+    // Add nodebase 2
+    nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
 
