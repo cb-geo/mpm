@@ -15,12 +15,12 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::Mesh<Tdim>>& mesh_ptr) {
+    unsigned local_id, const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
   bool insertion_status = false;
   try {
     // If number of mesh ptrs id is not the current mesh id
-    if (mesh_ptr->id() != this->id()) {
-      insertion_status = neighbour_meshes_.insert(local_id, mesh_ptr);
+    if (mesh->id() != this->id()) {
+      insertion_status = neighbour_meshes_.insert(local_id, mesh);
     } else {
       throw std::runtime_error("Invalid local id of a mesh neighbour");
     }
@@ -31,24 +31,24 @@ bool mpm::Mesh<Tdim>::add_neighbour(
 }
 
 //! Add a particle
-//! \param[in] particle_ptr A shared pointer to particle
+//! \param[in] particle A shared pointer to particle
 //! \retval insertion_status Return the successful addition of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::Particle<Tdim>>& particle_ptr) {
-  bool insertion_status = particles_.add(particle_ptr);
+    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
+  bool insertion_status = particles_.add(particle);
   return insertion_status;
 }
 
 //! Remove a particle
-//! \param[in] particle_ptr A shared pointer to particle
+//! \param[in] particle A shared pointer to particle
 //! \retval insertion_status Return the successful addition of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::remove_particle(mpm::Index particleid) {
+bool mpm::Mesh<Tdim>::remove_particle(
+    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
   // Remove a particle if found in the container
-  bool status;  // = particles_.remove(particle_ptr);
-
+  bool status = particles_.remove(particle);
   return status;
 }

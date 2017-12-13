@@ -39,8 +39,22 @@ TEST_CASE("Particle container is checked for 2D case",
     // Add particle 2 and check status
     bool status2 = particlecontainer->add(particle2);
     REQUIRE(status2 == true);
+    // Try and particle 2 again and check status
+    bool status3 = particlecontainer->add(particle2);
+    REQUIRE(status3 == false);
+
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
+
+    // Remove particle 2 and check status
+    bool remove_status = particlecontainer->remove(particle2);
+    REQUIRE(remove_status == true);
+    // Try and remove particle 2 again and check status
+    bool remove_status1 = particlecontainer->remove(particle2);
+    REQUIRE(remove_status1 == false);
+    // Check size of particle hanlder
+    REQUIRE(particlecontainer->size() == 1);
+
     // Clear particle container
     particlecontainer->clear();
     // Check size of particle hanlder
@@ -139,8 +153,22 @@ TEST_CASE("Particle container is checked for 3D case",
     // Add particle 2 and check status
     bool status2 = particlecontainer->add(particle2);
     REQUIRE(status2 == true);
+    // Try and particle 2 again and check status
+    bool status3 = particlecontainer->add(particle2);
+    REQUIRE(status3 == false);
+
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
+
+    // Remove particle 2 and check status
+    bool remove_status = particlecontainer->remove(particle2);
+    REQUIRE(remove_status == true);
+    // Try and remove particle 2 again and check status
+    bool remove_status1 = particlecontainer->remove(particle2);
+    REQUIRE(remove_status1 == false);
+    // Check size of particle hanlder
+    REQUIRE(particlecontainer->size() == 1);
+
     // Clear particle container
     particlecontainer->clear();
     // Check size of particle hanlder

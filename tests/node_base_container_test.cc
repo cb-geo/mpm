@@ -39,11 +39,25 @@ TEST_CASE("NodeBase container is checked for 2D case",
     // Add nodebase 2 and check status
     bool status2 = nodebasecontainer->add(nodebase2);
     REQUIRE(status2 == true);
+    // Try and nodebase 2 again and check status
+    bool status3 = nodebasecontainer->add(nodebase2);
+    REQUIRE(status3 == false);
+
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
-    // Clear node container
+
+    // Remove nodebase 2 and check status
+    bool remove_status = nodebasecontainer->remove(nodebase2);
+    REQUIRE(remove_status == true);
+    // Try and remove nodebase 2 again and check status
+    bool remove_status1 = nodebasecontainer->remove(nodebase2);
+    REQUIRE(remove_status1 == false);
+    // Check size of nodebase hanlder
+    REQUIRE(nodebasecontainer->size() == 1);
+
+    // Clear nodebase container
     nodebasecontainer->clear();
-    // Check size of node hanlder
+    // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 0);
   }
 
@@ -139,11 +153,25 @@ TEST_CASE("NodeBase container is checked for 3D case",
     // Add nodebase 2 and check status
     bool status2 = nodebasecontainer->add(nodebase2);
     REQUIRE(status2 == true);
+    // Try and nodebase 2 again and check status
+    bool status3 = nodebasecontainer->add(nodebase2);
+    REQUIRE(status3 == false);
+
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
-    // Clear node container
+
+    // Remove nodebase 2 and check status
+    bool remove_status = nodebasecontainer->remove(nodebase2);
+    REQUIRE(remove_status == true);
+    // Try and remove nodebase 2 again and check status
+    bool remove_status1 = nodebasecontainer->remove(nodebase2);
+    REQUIRE(remove_status1 == false);
+    // Check size of nodebase hanlder
+    REQUIRE(nodebasecontainer->size() == 1);
+
+    // Clear nodebase container
     nodebasecontainer->clear();
-    // Check size of node hanlder
+    // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 0);
   }
 

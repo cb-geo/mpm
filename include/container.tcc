@@ -24,14 +24,20 @@ bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
 template <class T>
 bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
   bool removal_status = false;
+
   // Check if it is found in the container
   auto itr = std::find_if(this->begin(), this->end(),
                           [ptr](std::shared_ptr<T> const& element) {
                             return element->id() == ptr->id();
                           });
 
+  // If Itr is present create a new set of elements
   if (itr != this->end()) {
-    elements_.erase(itr);
+    tbb::concurrent_vector<std::shared_ptr<T>> new_elements;
+    for (const auto element : elements_) {
+      if (element->id() != ptr->id()) new_elements.push_back(element);
+    }
+    elements_ = new_elements;
     removal_status = true;
   }
 

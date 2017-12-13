@@ -57,16 +57,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
+
     // Add particle 1 and check status
     bool status1 = mesh->add_particle(particle1);
     REQUIRE(status1 == true);
     // Add particle 2 and check status
     bool status2 = mesh->add_particle(particle2);
     REQUIRE(status2 == true);
+    // Add particle 2 again and check status
+    bool status3 = mesh->add_particle(particle2);
+    REQUIRE(status3 == false);
+
     // Check mesh is active
     REQUIRE(mesh->status() == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
+
+    // Remove particle 2 and check status
+    bool remove_status = mesh->remove_particle(particle2);
+    REQUIRE(remove_status == true);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
   }
 }
 
@@ -116,15 +127,26 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
+
     // Add particle 1 and check status
     bool status1 = mesh->add_particle(particle1);
     REQUIRE(status1 == true);
     // Add particle 2 and check status
     bool status2 = mesh->add_particle(particle2);
     REQUIRE(status2 == true);
+    // Add particle 2 again and check status
+    bool status3 = mesh->add_particle(particle2);
+    REQUIRE(status3 == false);
+
     // Check mesh is active
     REQUIRE(mesh->status() == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
+
+    // Remove particle 2 and check status
+    bool remove_status = mesh->remove_particle(particle2);
+    REQUIRE(remove_status == true);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
   }
 }

@@ -46,10 +46,10 @@ class Mesh {
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
   //! Add particle
-  bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle_ptr);
+  bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle);
 
   //! Add particle
-  bool remove_particle(mpm::Index particleid);
+  bool remove_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle);
 
   //! Number of particles
   mpm::Index nparticles() const { return particles_.size(); }

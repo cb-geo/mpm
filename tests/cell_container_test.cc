@@ -39,9 +39,23 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
     // Add cell 2 and check status
     bool status2 = cellcontainer->add(cell2);
     REQUIRE(status2 == true);
+    // Try and cell 2 again and check status
+    bool status3 = cellcontainer->add(cell2);
+    REQUIRE(status3 == false);
+
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
-    // Check clear
+
+    // Remove cell 2 and check status
+    bool remove_status = cellcontainer->remove(cell2);
+    REQUIRE(remove_status == true);
+    // Try and remove cell 2 again and check status
+    bool remove_status1 = cellcontainer->remove(cell2);
+    REQUIRE(remove_status1 == false);
+    // Check size of cell hanlder
+    REQUIRE(cellcontainer->size() == 1);
+
+    // Clear cell container
     cellcontainer->clear();
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 0);
@@ -122,9 +136,23 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
     // Add cell 2 and check status
     bool status2 = cellcontainer->add(cell2);
     REQUIRE(status2 == true);
+    // Try and cell 2 again and check status
+    bool status3 = cellcontainer->add(cell2);
+    REQUIRE(status3 == false);
+
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
-    // Check clear
+
+    // Remove cell 2 and check status
+    bool remove_status = cellcontainer->remove(cell2);
+    REQUIRE(remove_status == true);
+    // Try and remove cell 2 again and check status
+    bool remove_status1 = cellcontainer->remove(cell2);
+    REQUIRE(remove_status1 == false);
+    // Check size of cell hanlder
+    REQUIRE(cellcontainer->size() == 1);
+
+    // Clear cell container
     cellcontainer->clear();
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 0);
