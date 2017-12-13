@@ -6,9 +6,8 @@
 #include <limits>
 #include <vector>
 
-#include "Eigen/Dense"
-
 #include "node_base.h"
+#include "serialize.h"
 
 namespace mpm {
 

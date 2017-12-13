@@ -1,10 +1,13 @@
+#include <iostream>
 #include <limits>
 
-#include "Eigen/Dense"
+#include "serialize.h"
+
 #include "catch.hpp"
 
 #include "cell.h"
 #include "particle.h"
+
 
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
@@ -37,13 +40,13 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    //! Check for coordinates being zero
+    // Check for coordinates being zero
     auto coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
 
-    //! Check for negative value of coordinates
+    // Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
     particle->coordinates(coords);
@@ -53,7 +56,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     REQUIRE(coordinates.size() == Dim);
 
-    //! Check for positive value of coordinates
+    // Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
     particle->coordinates(coords);
@@ -62,6 +65,43 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     REQUIRE(coordinates.size() == Dim);
+  }
+
+  
+  //! Test serialize function
+  SECTION("Serialisation is checked") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+
+    // Check for negative value of coordinates
+    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
+
+    // Create a string stream
+    std::stringstream ss;
+    // save data to archive
+    {
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
+      boost::archive::text_oarchive oa(ss);
+      oa << *particle;
+      std::cout << ss.str();
+    }
+    // load data from archive
+    {
+      mpm::Index id = 1;
+      // Coordinates
+      Eigen::Matrix<double, 1, 1> coordinates;
+      coordinates.setZero();
+      
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
+      REQUIRE(particle->id() == 1);
+
+      // Load from archive
+      boost::archive::text_iarchive(ss) >> *particle;
+      REQUIRE(particle->id() == 0);
+      coordinates = particle->coordinates();
+      for (unsigned i = 0; i < coordinates.size(); ++i)
+        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    }
   }
 }
 
@@ -152,6 +192,44 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
+  }
+
+  
+  
+  //! Test serialize function
+  SECTION("Serialisation is checked") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+
+    // Check for negative value of coordinates
+    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
+
+    // Create a string stream
+    std::stringstream ss;
+    // save data to archive
+    {
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
+      boost::archive::text_oarchive oa(ss);
+      oa << *particle;
+      std::cout << ss.str();
+    }
+    // load data from archive
+    {
+      mpm::Index id = 1;
+      // Coordinates
+      Eigen::Vector2d coordinates;
+      coordinates.setZero();
+      
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
+      REQUIRE(particle->id() == 1);
+
+      // Load from archive
+      boost::archive::text_iarchive(ss) >> *particle;
+      REQUIRE(particle->id() == 0);
+      coordinates = particle->coordinates();
+      for (unsigned i = 0; i < coordinates.size(); ++i)
+        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    }
   }
 }
 
@@ -263,5 +341,43 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
+  }
+
+  
+  
+  //! Test serialize function
+  SECTION("Serialisation is checked") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+
+    // Check for negative value of coordinates
+    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
+
+    // Create a string stream
+    std::stringstream ss;
+    // save data to archive
+    {
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
+      boost::archive::text_oarchive oa(ss);
+      oa << *particle;
+      std::cout << ss.str();
+    }
+    // load data from archive
+    {
+      mpm::Index id = 1;
+      // Coordinates
+      Eigen::Vector3d coordinates;
+      coordinates.setZero();
+      
+      auto particle = std::make_shared<mpm::Particle<Dim>>(id, coordinates);
+      REQUIRE(particle->id() == 1);
+
+      // Load from archive
+      boost::archive::text_iarchive(ss) >> *particle;
+      REQUIRE(particle->id() == 0);
+      coordinates = particle->coordinates();
+      for (unsigned i = 0; i < coordinates.size(); ++i)
+        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    }
   }
 }

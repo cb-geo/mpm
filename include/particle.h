@@ -7,9 +7,8 @@
 #include <memory>
 #include <vector>
 
-#include "Eigen/Dense"
-
 #include "cell.h"
+#include "serialize.h"
 
 namespace mpm {
 
@@ -58,6 +57,14 @@ class Particle {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
+  
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive & ar, const unsigned int version) {
+    ar & id_;
+    ar & coordinates_;
+}
+
  private:
   //! particle id
   Index id_{std::numeric_limits<Index>::max()};
@@ -67,6 +74,18 @@ class Particle {
 
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+
+  //! Serialize
+  //! \tparam Archive Boost Archive
+  //! \param[in] ar Archive
+  //! \param[in] version Version of class
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int version) const {
+    // note, version is always the latest when saving
+    ar& id_;
+    ar& coordinates_;
+  }
 };  // Particle class
 }  // mpm namespace
 
