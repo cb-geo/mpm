@@ -16,6 +16,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
+  // Number of nodes per cell
+  const unsigned Nnodes = 4;
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -114,6 +116,42 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(remove_status == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
+  }
+
+  // Check add / remove cell
+  SECTION("Check add / remove cell functionality") {
+    // Cell 1
+    mpm::Index id1 = 0;
+    Eigen::Vector2d coords;
+    coords.setZero();
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+
+    // Cell 2
+    mpm::Index id2 = 1;
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+
+    // Add cell 1 and check status
+    bool status1 = mesh->add_cell(cell1);
+    REQUIRE(status1 == true);
+    // Add cell 2 and check status
+    bool status2 = mesh->add_cell(cell2);
+    REQUIRE(status2 == true);
+    // Add cell 2 again and check status
+    bool status3 = mesh->add_cell(cell2);
+    REQUIRE(status3 == false);
+
+    // Check number of cells in mesh
+    REQUIRE(mesh->ncells() == 2);
+
+    // Remove cell 2 and check status
+    bool remove_status = mesh->remove_cell(cell2);
+    REQUIRE(remove_status == true);
+    // Check number of cells in mesh
+    REQUIRE(mesh->ncells() == 1);
   }
 }
 
@@ -123,6 +161,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
+  // Number of nodes per cell
+  const unsigned Nnodes = 8;
+  
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -220,5 +261,42 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(remove_status == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
+  }
+
+
+  // Check add / remove cell
+  SECTION("Check add / remove cell functionality") {
+    // Cell 1
+    mpm::Index id1 = 0;
+    Eigen::Vector3d coords;
+    coords.setZero();
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+
+    // Cell 2
+    mpm::Index id2 = 1;
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+
+    // Add cell 1 and check status
+    bool status1 = mesh->add_cell(cell1);
+    REQUIRE(status1 == true);
+    // Add cell 2 and check status
+    bool status2 = mesh->add_cell(cell2);
+    REQUIRE(status2 == true);
+    // Add cell 2 again and check status
+    bool status3 = mesh->add_cell(cell2);
+    REQUIRE(status3 == false);
+
+    // Check number of cells in mesh
+    REQUIRE(mesh->ncells() == 2);
+
+    // Remove cell 2 and check status
+    bool remove_status = mesh->remove_cell(cell2);
+    REQUIRE(remove_status == true);
+    // Check number of cells in mesh
+    REQUIRE(mesh->ncells() == 1);
   }
 }

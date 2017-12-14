@@ -74,3 +74,25 @@ bool mpm::Mesh<Tdim>::remove_node(
   bool status = nodes_.remove(node);
   return status;
 }
+
+//! Add a cell
+//! \param[in] cell A shared pointer to cell
+//! \retval insertion_status Return the successful addition of a cell
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
+  bool insertion_status = cells_.add(cell);
+  return insertion_status;
+}
+
+//! Remove a cell
+//! \param[in] cell A shared pointer to cell
+//! \retval insertion_status Return the successful addition of a cell
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_cell(
+    const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
+  // Remove a cell if found in the container
+  bool status = cells_.remove(cell);
+  return status;
+}

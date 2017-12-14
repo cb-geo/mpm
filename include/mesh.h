@@ -64,6 +64,15 @@ class Mesh {
   //! Number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
 
+  //! Add cell
+  bool add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
+
+  //! Add cell
+  bool remove_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
+
+  //! Number of cells
+  mpm::Index ncells() const { return cells_.size(); }
+
   //! Active mesh (if a particle is present)
   bool status() const { return particles_.size(); }
 
@@ -79,6 +88,9 @@ class Mesh {
 
   //! Container of nodes
   Container<Node<Tdim>> nodes_;
+
+  //! Container of cells
+  Container<Cell<Tdim>> cells_;
 };  // Mesh class
 }  // mpm namespace
 
