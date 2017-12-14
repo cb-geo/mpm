@@ -52,3 +52,25 @@ bool mpm::Mesh<Tdim>::remove_particle(
   bool status = particles_.remove(particle);
   return status;
 }
+
+//! Add a node
+//! \param[in] node A shared pointer to node
+//! \retval insertion_status Return the successful addition of a node
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::Node<Tdim>>& node) {
+  bool insertion_status = nodes_.add(node);
+  return insertion_status;
+}
+
+//! Remove a node
+//! \param[in] node A shared pointer to node
+//! \retval insertion_status Return the successful addition of a node
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_node(
+    const std::shared_ptr<mpm::Node<Tdim>>& node) {
+  // Remove a node if found in the container
+  bool status = nodes_.remove(node);
+  return status;
+}

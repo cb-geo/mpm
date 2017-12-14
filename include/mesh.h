@@ -10,6 +10,7 @@
 
 #include "cell.h"
 #include "container.h"
+#include "node.h"
 #include "particle.h"
 
 namespace mpm {
@@ -54,6 +55,15 @@ class Mesh {
   //! Number of particles
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Add node
+  bool add_node(const std::shared_ptr<mpm::Node<Tdim>>& node);
+
+  //! Add node
+  bool remove_node(const std::shared_ptr<mpm::Node<Tdim>>& node);
+
+  //! Number of nodes
+  mpm::Index nnodes() const { return nodes_.size(); }
+
   //! Active mesh (if a particle is present)
   bool status() const { return particles_.size(); }
 
@@ -66,6 +76,9 @@ class Mesh {
 
   //! Container of particles
   Container<Particle<Tdim>> particles_;
+
+  //! Container of nodes
+  Container<Node<Tdim>> nodes_;
 };  // Mesh class
 }  // mpm namespace
 

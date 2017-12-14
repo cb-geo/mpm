@@ -42,7 +42,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nneighbours() == 1);
   }
 
-  // Check add particle
+  // Check add / remove particle
   SECTION("Check add / remove particle functionality") {
     // Particle 1
     mpm::Index id1 = 0;
@@ -79,6 +79,42 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
   }
+
+  // Check add / remove node
+  SECTION("Check add / remove node functionality") {
+    // Node 1
+    mpm::Index id1 = 0;
+    Eigen::Vector2d coords;
+    coords.setZero();
+    auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+
+    // Node 2
+    mpm::Index id2 = 1;
+    auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+
+    // Add node 1 and check status
+    bool status1 = mesh->add_node(node1);
+    REQUIRE(status1 == true);
+    // Add node 2 and check status
+    bool status2 = mesh->add_node(node2);
+    REQUIRE(status2 == true);
+    // Add node 2 again and check status
+    bool status3 = mesh->add_node(node2);
+    REQUIRE(status3 == false);
+
+    // Check number of nodes in mesh
+    REQUIRE(mesh->nnodes() == 2);
+
+    // Remove node 2 and check status
+    bool remove_status = mesh->remove_node(node2);
+    REQUIRE(remove_status == true);
+    // Check number of nodes in mesh
+    REQUIRE(mesh->nnodes() == 1);
+  }
 }
 
 //! \brief Check mesh class for 3D case
@@ -112,7 +148,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->nneighbours() == 1);
   }
 
-  // Check add particle
+  // Check add / remove particle
   SECTION("Check add / remove particle functionality") {
     // Particle 1
     mpm::Index id1 = 0;
@@ -148,5 +184,41 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(remove_status == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+  }
+
+  // Check add / remove node
+  SECTION("Check add / remove node functionality") {
+    // Node 1
+    mpm::Index id1 = 0;
+    Eigen::Vector3d coords;
+    coords.setZero();
+    auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+
+    // Node 2
+    mpm::Index id2 = 1;
+    auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+
+    // Add node 1 and check status
+    bool status1 = mesh->add_node(node1);
+    REQUIRE(status1 == true);
+    // Add node 2 and check status
+    bool status2 = mesh->add_node(node2);
+    REQUIRE(status2 == true);
+    // Add node 2 again and check status
+    bool status3 = mesh->add_node(node2);
+    REQUIRE(status3 == false);
+
+    // Check number of nodes in mesh
+    REQUIRE(mesh->nnodes() == 2);
+
+    // Remove node 2 and check status
+    bool remove_status = mesh->remove_node(node2);
+    REQUIRE(remove_status == true);
+    // Check number of nodes in mesh
+    REQUIRE(mesh->nnodes() == 1);
   }
 }
