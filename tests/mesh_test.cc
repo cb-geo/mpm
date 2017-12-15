@@ -163,7 +163,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Dof = 6;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
-  
+
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -262,7 +262,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
   }
-
 
   // Check add / remove cell
   SECTION("Check add / remove cell functionality") {

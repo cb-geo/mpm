@@ -26,13 +26,10 @@ class Particle {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor with id and coordinates
-  //! \param[in] id Particle id
-  //! \param[in] coord coordinates of the particle
-  Particle(Index id, const VectorDim& coord) : id_{id} {
-    // Check if the dimension is between 1 & 3
-    static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
-    coordinates_ = coord;
-  };
+  Particle(Index id, const VectorDim& coord);
+
+  //! Constructor with id, coordinates and status
+  Particle(Index id, const VectorDim& coord, bool status);
 
   //! Destructor
   virtual ~Particle(){};
@@ -57,6 +54,12 @@ class Particle {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
+  //! Assign status
+  void assign_status(bool status) { status_ = status; }
+
+  //! Status
+  bool status() const { return status_; }
+
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
@@ -73,6 +76,9 @@ class Particle {
 
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+
+  //! Status
+  bool status_{true};
 
   //! Serialize
   //! \tparam Archive Boost Archive

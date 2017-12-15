@@ -23,6 +23,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = 0;
     auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == 0);
+    REQUIRE(particle->status() == true);
   }
 
   SECTION("Particle id is positive") {
@@ -30,6 +31,18 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
     auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
+    REQUIRE(particle->status() == true);
+  }
+
+  //! Construct with id, coordinates and status
+  SECTION("Particle with id, coordinates, and status") {
+    mpm::Index id = 0;
+    bool status = true;
+    auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+    REQUIRE(particle->id() == 0);
+    REQUIRE(particle->status() == true);
+    particle->assign_status(false);
+    REQUIRE(particle->status() == false);
   }
 
   //! Test coordinates function
@@ -247,6 +260,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     mpm::Index id = 0;
     auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == 0);
+    REQUIRE(particle->status() == true);
   }
 
   SECTION("Particle id is positive") {
@@ -254,6 +268,18 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
     auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
+    REQUIRE(particle->status() == true);
+  }
+
+  //! Construct with id, coordinates and status
+  SECTION("Particle with id, coordinates, and status") {
+    mpm::Index id = 0;
+    bool status = true;
+    auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+    REQUIRE(particle->id() == 0);
+    REQUIRE(particle->status() == true);
+    particle->assign_status(false);
+    REQUIRE(particle->status() == false);
   }
 
   //! Test coordinates function

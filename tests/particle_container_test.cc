@@ -68,8 +68,8 @@ TEST_CASE("Particle container is checked for 2D case",
     particlecontainer->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -91,8 +91,8 @@ TEST_CASE("Particle container is checked for 2D case",
     REQUIRE(particlecontainer->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -112,8 +112,8 @@ TEST_CASE("Particle container is checked for 2D case",
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -182,8 +182,8 @@ TEST_CASE("Particle container is checked for 3D case",
     particlecontainer->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -204,8 +204,8 @@ TEST_CASE("Particle container is checked for 3D case",
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
 
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -226,8 +226,8 @@ TEST_CASE("Particle container is checked for 3D case",
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = particlecontainer->cbegin(); itr != particlecontainer->cend();
-         ++itr) {
+    for (auto itr = particlecontainer->cbegin();
+         itr != particlecontainer->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
