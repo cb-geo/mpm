@@ -68,7 +68,7 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
     nodecontainer->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
@@ -91,7 +91,7 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
     REQUIRE(nodecontainer->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
@@ -112,7 +112,7 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
@@ -182,7 +182,7 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
     nodecontainer->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
@@ -204,7 +204,7 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
 
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
@@ -226,7 +226,7 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodecontainer->begin(); itr != nodecontainer->end();
+    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero

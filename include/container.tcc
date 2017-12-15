@@ -5,12 +5,12 @@ template <class T>
 bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
   bool insertion_status = false;
   // Check if it is found in the container
-  auto itr = std::find_if(this->begin(), this->end(),
+  auto itr = std::find_if(this->cbegin(), this->cend(),
                           [ptr](std::shared_ptr<T> const& element) {
                             return element->id() == ptr->id();
                           });
 
-  if (itr == this->end()) {
+  if (itr == this->cend()) {
     elements_.push_back(ptr);
     insertion_status = true;
   }
@@ -26,13 +26,13 @@ bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
   bool removal_status = false;
 
   // Check if it is found in the container
-  auto itr = std::find_if(this->begin(), this->end(),
+  auto itr = std::find_if(this->cbegin(), this->cend(),
                           [ptr](std::shared_ptr<T> const& element) {
                             return element->id() == ptr->id();
                           });
 
   // If Itr is present create a new set of elements
-  if (itr != this->end()) {
+  if (itr != this->cend()) {
     tbb::concurrent_vector<std::shared_ptr<T>> new_elements;
     new_elements.reserve(elements_.size() - 1);
     auto it = std::copy_if(elements_.begin(), elements_.end(),
@@ -53,5 +53,5 @@ bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
 template <class T>
 template <class Tunaryfn>
 Tunaryfn mpm::Container<T>::for_each(Tunaryfn fn) {
-  return std::for_each(this->begin(), this->end(), fn);
+  return std::for_each(elements_.begin(), elements_.end(), fn);
 }

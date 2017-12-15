@@ -69,7 +69,7 @@ TEST_CASE("NodeBase container is checked for 2D case",
     nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     std::size_t counter = 0;
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero
@@ -92,7 +92,7 @@ TEST_CASE("NodeBase container is checked for 2D case",
     REQUIRE(nodebasecontainer->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero
@@ -113,7 +113,7 @@ TEST_CASE("NodeBase container is checked for 2D case",
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero
@@ -183,7 +183,7 @@ TEST_CASE("NodeBase container is checked for 3D case",
     nodebasecontainer->add(nodebase2);
     // Check size of nodebase hanlder
     std::size_t counter = 0;
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero
@@ -205,7 +205,7 @@ TEST_CASE("NodeBase container is checked for 3D case",
     // Check size of nodebase hanlder
     REQUIRE(nodebasecontainer->size() == 2);
 
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero
@@ -227,7 +227,7 @@ TEST_CASE("NodeBase container is checked for 3D case",
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodebasecontainer->begin(); itr != nodebasecontainer->end();
+    for (auto itr = nodebasecontainer->cbegin(); itr != nodebasecontainer->cend();
          ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each nodebase is zero

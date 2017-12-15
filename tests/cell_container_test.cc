@@ -69,7 +69,7 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
     cellcontainer->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nnodes() == 0);
       ++counter;
@@ -88,7 +88,7 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nfunctions() == 0);
     }
@@ -100,7 +100,7 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
         std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, quadsf));
 
     // Check if update has gone through
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nfunctions() == 4);
     }
@@ -166,7 +166,7 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
     cellcontainer->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nnodes() == 0);
       ++counter;
@@ -185,7 +185,7 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nfunctions() == 0);
     }
@@ -197,7 +197,7 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
         std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, hexsf));
 
     // Check if update has gone through
-    for (auto itr = cellcontainer->begin(); itr != cellcontainer->end();
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
       REQUIRE((*itr)->nfunctions() == 8);
     }

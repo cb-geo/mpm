@@ -35,13 +35,13 @@ class Container {
   void clear() { elements_.clear(); }
 
   //! Return begin iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator begin()
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator cbegin()
       const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator end()
+  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator cend()
       const {
     return elements_.cend();
   }
