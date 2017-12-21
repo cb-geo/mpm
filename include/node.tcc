@@ -6,12 +6,24 @@
 template <unsigned Tdim>
 mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof)
     : NodeBase<Tdim>(id, coord), dof_{dof} {
+  nphases_ = 1.;
   force_.resize(dof_);
   velocity_.resize(dof_);
   momentum_.resize(dof_);
   acceleration_.resize(dof_);
   this->initialise();
 }
+
+// Constructor with id, coordinates, dof and nphases
+//! \param[in] id Node id
+//! \param[in] coord coordinates of the node
+//! \param[in] dof Degrees of freedom
+//! \param[in] nphases Number of phases
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof,
+                      unsigned nphases)
+    : NodeBase<Tdim>(id, coord, dof), nphases_{nphases} {}
 
 // Initialise nodal properties
 //! \tparam Tdim Dimension

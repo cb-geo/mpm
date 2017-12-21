@@ -27,6 +27,9 @@ class Node : public NodeBase<Tdim> {
   //! Constructor with id, coordinates and dof
   Node(Index id, const VectorDim& coord, unsigned dof);
 
+  //! Constructor with id, coordinates and dof
+  Node(Index id, const VectorDim& coord, unsigned dof, unsigned nphases);
+
   //! Destructor
   virtual ~Node(){};
 
@@ -78,6 +81,9 @@ class Node : public NodeBase<Tdim> {
 
   //! nodal coordinates
   using NodeBase<Tdim>::coordinates_;
+
+  //! Number of phases
+  double nphases_{1};
 
  private:
   //! Degrees of freedom

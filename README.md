@@ -21,8 +21,6 @@
 * [Boost](http://www.boost.org/)
 * [Eigen](http://eigen.tuxfamily.org/)
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
-* [SQLite3](https://sqlite.org/)
-* [VTK](https://www.vtk.org/)
 
 ## Compile and Run
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
