@@ -83,7 +83,7 @@ class Node : public NodeBase<Tdim> {
   using NodeBase<Tdim>::coordinates_;
 
   //! Number of phases
-  double nphases_{1};
+  unsigned nphases_{1};
 
  private:
   //! Degrees of freedom

@@ -23,7 +23,13 @@ mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof)
 template <unsigned Tdim>
 mpm::Node<Tdim>::Node(Index id, const VectorDim& coord, unsigned dof,
                       unsigned nphases)
-    : NodeBase<Tdim>(id, coord, dof), nphases_{nphases} {}
+    : NodeBase<Tdim>(id, coord), dof_{dof}, nphases_{nphases} {
+  force_.resize(dof_ * nphases_);
+  velocity_.resize(dof_ * nphases_);
+  momentum_.resize(dof_ * nphases_);
+  acceleration_.resize(dof_ * nphases_);
+  this->initialise();
+}
 
 // Initialise nodal properties
 //! \tparam Tdim Dimension
