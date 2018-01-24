@@ -4,6 +4,11 @@
 #include <memory>
 #include <vector>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "mesh.h"
 
 namespace mpm {
@@ -14,13 +19,21 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPM {
-  //! Default constructor
-  MPM(){};
+  //! Constructor
+  MPM() {
+    // Unique id
+    uuid_ =
+        boost::lexical_cast<std::string>(boost::uuids::random_generator()());
+    meshes_.clear();
+  };
 
  private:
+  // A unique id for the analysis
+  std::string uuid_;
+
   //! Mesh object
   std::vector<std::unique_ptr<lem::Mesh<Tdim>>> meshes_;
 };
-}
+}  // namespace mpm
 
 #endif  // MPM_MPM_H_
