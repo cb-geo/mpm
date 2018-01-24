@@ -1,8 +1,6 @@
 The library is licensed under the MIT License 
 <http://opensource.org/licenses/MIT>:
 
-MIT License 
-
 Copyright (c) 2013-2017 Niels Lohmann
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

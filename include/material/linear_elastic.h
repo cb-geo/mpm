@@ -2,6 +2,7 @@
 #define MPM_LINEAR_ELASTIC_H_
 
 #include <limits>
+#include <iostream>
 
 #include "Eigen/Dense"
 

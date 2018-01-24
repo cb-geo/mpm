@@ -1,4 +1,5 @@
 #include <limits>
+#include <memory>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
