@@ -14,7 +14,8 @@ namespace mpm {
 //! Hexahedron shape function class derived from ShapeFn class
 //! \brief Shape functions of a hexahedron element
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
+//! \tparam Tnfunctions Number of functions
+template <unsigned Tdim, unsigned Tnfunctions>
 class HexahedronShapeFn : public ShapeFn<Tdim> {
 
  public:
@@ -22,32 +23,27 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  HexahedronShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
+  HexahedronShapeFn() : mpm::ShapeFn<Tdim>() {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
-    try {
-      if (!(nfunctions == 8 || nfunctions == 20)) {
-        throw std::runtime_error(
+    static_assert((Tnfunctions == 8 || Tnfunctions == 20), 
             "Specified number of shape functions is not defined");
-      }
-      shapefn_.resize(this->nfunctions_, 1);
-      grad_shapefn_.resize(this->nfunctions_, Tdim);
-    } catch (std::exception& exception) {
-      std::cerr << exception.what() << '\n';
-      std::abort();
-    }
+    shapefn_.resize(Tnfunctions, 1);
+    grad_shapefn_.resize(Tnfunctions, Tdim);
+    
   }
+
+  //! Return number of functions
+  unsigned nfunctions() const { return Tnfunctions; }
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  Eigen::MatrixXd shapefn(const VectorDim& xi);
+  Eigen::VectorXd shapefn(const VectorDim& xi);
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
 
  protected:
-  // Number of functions
-  using ShapeFn<Tdim>::nfunctions_;
   // Shape functions
   using ShapeFn<Tdim>::shapefn_;
   // Gradient shape functions

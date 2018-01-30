@@ -14,7 +14,6 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(Index id, const Eigen::Matrix<double, Tdim
   momentum_.resize(Tdof);
   acceleration_.resize(Tdof);
   this->initialise();
-  std::cout << "In derived class\n";
 }
 
 // Initialise nodal properties

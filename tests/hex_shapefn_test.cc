@@ -14,7 +14,7 @@ TEST_CASE("Hexahedron shape functions are checked",
   //! Check for 8 noded shape function
   SECTION("Hexahedron shape function with eight nodes") {
     const unsigned nfunctions = 8;
-    auto hexsf = std::make_shared<mpm::HexahedronShapeFn<Dim>>(nfunctions);
+    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf = std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0, 0, 0)
     SECTION("Eight noded hexahedron shape function for coordinates(0, 0, 0)") {
@@ -174,7 +174,8 @@ TEST_CASE("Hexahedron shape functions are checked",
   //! Check for 8 noded shape function
   SECTION("Hexahedron shape function with twenty nodes") {
     const unsigned nfunctions = 20;
-    auto hexsf = std::make_shared<mpm::HexahedronShapeFn<Dim>>(nfunctions);
+    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0, 0, 0)
     SECTION("Twenty noded hexahedron shape function for coordinates(0, 0, 0)") {
