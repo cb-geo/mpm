@@ -15,6 +15,8 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -22,14 +24,16 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   mpm::Index id1 = 0;
   Eigen::Vector2d coords;
   coords.setZero();
-  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
 
   // Node 2
   mpm::Index id2 = 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
   // Node handler
-  auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
+  auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
@@ -85,10 +89,10 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
 
     // Iterate through node handler to update coordinaates
     nodehandler->for_each(  // function structure
-        std::bind(static_cast<void (mpm::Node<Dim>::*)(
+        std::bind(static_cast<void (mpm::NodeBase<Dim>::*)(
                       const Eigen::Matrix<double, Dim, 1>&)>(
                       // function
-                      &mpm::Node<Dim>::coordinates),
+                      &mpm::NodeBase<Dim>::coordinates),
                   // arguments
                   std::placeholders::_1, coords));
 
@@ -108,6 +112,8 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -115,14 +121,16 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   mpm::Index id1 = 0;
   Eigen::Vector3d coords;
   coords.setZero();
-  auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
 
   // Node 2
   mpm::Index id2 = 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
   // Node handler
-  auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
+  auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
@@ -178,10 +186,10 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     // Iterate through node handler to update coordinaates
     nodehandler->for_each(
         // function structure
-        std::bind(static_cast<void (mpm::Node<Dim>::*)(
+        std::bind(static_cast<void (mpm::NodeBase<Dim>::*)(
                       const Eigen::Matrix<double, Dim, 1>&)>(
                       // function
-                      &mpm::Node<Dim>::coordinates),
+                      &mpm::NodeBase<Dim>::coordinates),
                   // arguments
                   std::placeholders::_1, coords));
 
