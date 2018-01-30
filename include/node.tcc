@@ -8,6 +8,7 @@
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(Index id, const Eigen::Matrix<double, Tdim, 1>& coord)
     : NodeBase<Tdim>(id, coord) {
+  dof_ = Tdof;
   force_.resize(Tdof);
   velocity_.resize(Tdof);
   momentum_.resize(Tdof);
