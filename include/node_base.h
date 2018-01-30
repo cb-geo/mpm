@@ -6,15 +6,15 @@
 #include <limits>
 #include <vector>
 
-#include "Eigen/Dense"
+#include "serialize.h"
 
 namespace mpm {
 
-//! Global index type for the nodebase
+//! Global index type for the node_base
 using Index = unsigned long long;
 
-//! NodeBase class
-//! \brief Base class that stores the information about nodes
+// NodeBase base class for nodes
+//! \brief Base class that stores the information about node_bases
 //! \details NodeBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
@@ -52,12 +52,49 @@ class NodeBase {
   //! \retval coordinates_ return coordinates of the nodebase
   VectorDim coordinates() const { return coordinates_; }
 
+  //! Initialise properties
+  virtual void initialise() = 0;
+
+  //! Return degrees of freedom
+  virtual unsigned dof() const = 0;
+
+  //! Assign nodal mass
+  virtual void assign_mass(double mass) = 0;
+
+  //! Return mass
+  virtual double mass() const = 0;
+
+  //! Assign force
+  virtual void assign_force(const Eigen::VectorXd& force) = 0;
+
+  //! Return force
+  virtual Eigen::VectorXd force() const = 0;
+
+  //! Assign velocity
+  virtual void assign_velocity(const Eigen::VectorXd& velocity) = 0;
+
+  //! Return velocity
+  virtual Eigen::VectorXd velocity() const = 0;
+
+  //! Assign momentum
+  virtual void assign_momentum(const Eigen::VectorXd& momentum) = 0;
+
+  //! Return momentum
+  virtual Eigen::VectorXd momentum() const = 0;
+
+  //! Assign acceleration
+  virtual void assign_acceleration(const Eigen::VectorXd& acceleration) = 0;
+
+  //! Return acceleration
+  virtual Eigen::VectorXd acceleration() const = 0;
+
  protected:
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
-
   //! nodal coordinates
   VectorDim coordinates_;
+
 };  // NodeBase class
-}  // mpm namespace
+}  // namespace mpm
+
 #endif  // MPM_NODE_BASE_H_

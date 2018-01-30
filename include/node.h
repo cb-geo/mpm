@@ -14,30 +14,29 @@ namespace mpm {
 //! Global index type for the node
 using Index = unsigned long long;
 
-// Node class
+// Node base class
 //! \brief Base class that stores the information about nodes
 //! \details Node class: id_ and coordinates.
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
+//! \tparam Tdof Degrees of Freedom
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 class Node : public NodeBase<Tdim> {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor with id, coordinates and dof
-  Node(Index id, const VectorDim& coord, unsigned dof);
-
-  //! Constructor with id, coordinates and dof
-  Node(Index id, const VectorDim& coord, unsigned dof, unsigned nphases);
+  Node(Index id, const VectorDim& coord);
 
   //! Destructor
   virtual ~Node(){};
 
   //! Delete copy constructor
-  Node(const Node<Tdim>&) = delete;
+  Node(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
   //! Delete assignement operator
-  Node& operator=(const Node<Tdim>&) = delete;
+  Node& operator=(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
   //! Initialise properties
   void initialise();
@@ -55,35 +54,31 @@ class Node : public NodeBase<Tdim> {
   void assign_force(const Eigen::VectorXd& force);
 
   //! Return force
-  Eigen::VectorXd force() { return force_; }
+  Eigen::VectorXd force() const { return force_; }
 
   //! Assign velocity
   void assign_velocity(const Eigen::VectorXd& velocity);
 
   //! Return velocity
-  Eigen::VectorXd velocity() { return velocity_; }
+  Eigen::VectorXd velocity() const { return velocity_; }
 
   //! Assign momentum
   void assign_momentum(const Eigen::VectorXd& momentum);
 
   //! Return momentum
-  Eigen::VectorXd momentum() { return momentum_; }
+  Eigen::VectorXd momentum() const { return momentum_; }
 
   //! Assign acceleration
   void assign_acceleration(const Eigen::VectorXd& acceleration);
 
   //! Return acceleration
-  Eigen::VectorXd acceleration() { return acceleration_; }
+  Eigen::VectorXd acceleration() const { return acceleration_; }
 
- protected:
+protected:
   //! node id
   using NodeBase<Tdim>::id_;
-
   //! nodal coordinates
   using NodeBase<Tdim>::coordinates_;
-
-  //! Number of phases
-  unsigned nphases_{1};
 
  private:
   //! Degrees of freedom
@@ -99,7 +94,7 @@ class Node : public NodeBase<Tdim> {
   //! Acceleration
   Eigen::VectorXd acceleration_;
 };  // Node class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "node.tcc"
 

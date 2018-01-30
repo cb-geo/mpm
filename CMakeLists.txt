@@ -51,29 +51,29 @@ add_executable(mpm
   ${mpm_src}
 )
 
-# Unit test
-SET(test_src
-  ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
-  ${mpm_SOURCE_DIR}/tests/cell_test.cc
-  ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
-  ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
-  ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
-  ${mpm_SOURCE_DIR}/tests/mesh_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_base_container_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_base_handler_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_base_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_container_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
-  ${mpm_SOURCE_DIR}/tests/node_test.cc
-  ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
-  ${mpm_SOURCE_DIR}/tests/particle_test.cc
-  ${mpm_SOURCE_DIR}/tests/test.cc
-)   
-add_executable(mpmtest
-  ${test_src}
-)
-add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-enable_testing()
+## Unit test
+#SET(test_src
+#  ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
+#  ${mpm_SOURCE_DIR}/tests/cell_test.cc
+#  ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
+#  ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
+#  ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
+#  ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_base_container_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_base_handler_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_base_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_container_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
+#  ${mpm_SOURCE_DIR}/tests/node_test.cc
+#  ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
+#  ${mpm_SOURCE_DIR}/tests/particle_test.cc
+#  ${mpm_SOURCE_DIR}/tests/test.cc
+#)   
+#add_executable(mpmtest
+#  ${test_src}
+#)
+#add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+#enable_testing()
 
 # Coverage
 find_package(codecov)
