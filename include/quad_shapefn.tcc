@@ -6,6 +6,40 @@
 //!   |          |
 //! 0 0----------0 1
 
+//! Return shape functions of a 4-node Quadrilateral Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval shapefn Shape function of a given cell
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 4, 1> shapefn;
+  shapefn(0) = 0.25 * (1 - xi(0)) * (1 - xi(1));
+  shapefn(1) = 0.25 * (1 + xi(0)) * (1 - xi(1));
+  shapefn(2) = 0.25 * (1 + xi(0)) * (1 + xi(1));
+  shapefn(3) = 0.25 * (1 - xi(0)) * (1 + xi(1));
+  return shapefn;
+}
+
+//! Return gradient of shape functions of a 4-node Quadrilateral Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval grad_shapefn Gradient of shape function of a given cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 4, 2> grad_shapefn;
+  grad_shapefn(0, 0) = -0.25 * (1 - xi(1));
+  grad_shapefn(1, 0) = 0.25 * (1 - xi(1));
+  grad_shapefn(2, 0) = 0.25 * (1 + xi(1));
+  grad_shapefn(3, 0) = -0.25 * (1 + xi(1));
+
+  grad_shapefn(0, 1) = -0.25 * (1 - xi(0));
+  grad_shapefn(1, 1) = -0.25 * (1 + xi(0));
+  grad_shapefn(2, 1) = 0.25 * (1 + xi(0));
+  grad_shapefn(3, 1) = 0.25 * (1 - xi(0));
+
+  return grad_shapefn;
+}
+
 // 8-node Quadrilateral Element
 //!  3      6       2
 //!   0-----0-----0
@@ -16,6 +50,51 @@
 //!   |           |
 //!   0-----0-----0
 //! 0       4       1
+
+//! Return shape functions of a 8-node Quadrilateral Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval shapefn Shape function of a given cell
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 8, 1> shapefn;
+  shapefn(0) = -0.25 * (1. - xi(0)) * (1. - xi(1)) * (xi(0) + xi(1) + 1.);
+  shapefn(1) = 0.25 * (1. + xi(0)) * (1. - xi(1)) * (xi(0) - xi(1) - 1.);
+  shapefn(2) = 0.25 * (1. + xi(0)) * (1. + xi(1)) * (xi(0) + xi(1) - 1.);
+  shapefn(3) = -0.25 * (1. - xi(0)) * (1. + xi(1)) * (xi(0) - xi(1) + 1.);
+  shapefn(4) = 0.5 * (1. - (xi(0) * xi(0))) * (1. - xi(1));
+  shapefn(5) = 0.5 * (1. - (xi(1) * xi(1))) * (1. + xi(0));
+  shapefn(6) = 0.5 * (1. - (xi(0) * xi(0))) * (1. + xi(1));
+  shapefn(7) = 0.5 * (1. - (xi(1) * xi(1))) * (1. - xi(0));
+  return shapefn;
+}
+
+//! Return gradient of shape functions of a 8-node Quadrilateral Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval grad_shapefn Gradient of shape function of a given cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 8, 2> grad_shapefn;
+  grad_shapefn(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
+  grad_shapefn(1, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. - xi(1));
+  grad_shapefn(2, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. + xi(1));
+  grad_shapefn(3, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. + xi(1));
+  grad_shapefn(4, 0) = -xi(0) * (1. - xi(1));
+  grad_shapefn(5, 0) = 0.5 * (1. - (xi(1) * xi(1)));
+  grad_shapefn(6, 0) = -xi(0) * (1. + xi(1));
+  grad_shapefn(7, 0) = -0.5 * (1. - (xi(1) * xi(1)));
+
+  grad_shapefn(0, 1) = 0.25 * (2. * xi(1) + xi(0)) * (1. - xi(0));
+  grad_shapefn(1, 1) = 0.25 * (2. * xi(1) - xi(0)) * (1. + xi(0));
+  grad_shapefn(2, 1) = 0.25 * (2. * xi(1) + xi(0)) * (1. + xi(0));
+  grad_shapefn(3, 1) = 0.25 * (2. * xi(1) - xi(0)) * (1. - xi(0));
+  grad_shapefn(4, 1) = -0.5 * (1. - (xi(0) * xi(0)));
+  grad_shapefn(5, 1) = -xi(1) * (1. + xi(0));
+  grad_shapefn(6, 1) = 0.5 * (1 - (xi(0) * xi(0)));
+  grad_shapefn(7, 1) = -xi(1) * (1. - xi(0));
+  return grad_shapefn;
+}
 
 // 9-node Quadrilateral Element
 //! 3       6       2
@@ -28,124 +107,52 @@
 //!   0-----0-----0
 //!  0      4       1
 
-//! Return shape functions of a cell
+//! Return shape functions of a 9-node Quadrilateral Element
 //! \param[in] xi Coordinates of point of interest
 //! \retval shapefn Shape function of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of functions
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::shapefn(
-    const Eigen::Matrix<double, Tdim, 1>& xi) {
-  switch (Tnfunctions) {
-    case 4:
-      // 4-noded
-      shapefn_.resize(4, 1);
-      shapefn_(0) = 0.25 * (1 - xi(0)) * (1 - xi(1));
-      shapefn_(1) = 0.25 * (1 + xi(0)) * (1 - xi(1));
-      shapefn_(2) = 0.25 * (1 + xi(0)) * (1 + xi(1));
-      shapefn_(3) = 0.25 * (1 - xi(0)) * (1 + xi(1));
-      break;
-    case 8:
-      // 8-noded
-      shapefn_.resize(8, 1);
-      shapefn_(0) = -0.25 * (1. - xi(0)) * (1. - xi(1)) * (xi(0) + xi(1) + 1.);
-      shapefn_(1) = 0.25 * (1. + xi(0)) * (1. - xi(1)) * (xi(0) - xi(1) - 1.);
-      shapefn_(2) = 0.25 * (1. + xi(0)) * (1. + xi(1)) * (xi(0) + xi(1) - 1.);
-      shapefn_(3) = -0.25 * (1. - xi(0)) * (1. + xi(1)) * (xi(0) - xi(1) + 1.);
-      shapefn_(4) = 0.5 * (1. - (xi(0) * xi(0))) * (1. - xi(1));
-      shapefn_(5) = 0.5 * (1. - (xi(1) * xi(1))) * (1. + xi(0));
-      shapefn_(6) = 0.5 * (1. - (xi(0) * xi(0))) * (1. + xi(1));
-      shapefn_(7) = 0.5 * (1. - (xi(1) * xi(1))) * (1. - xi(0));
-      break;
-    case 9:
-      // 9-noded
-      shapefn_.resize(9, 1);
-      shapefn_(0) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) - 1.);
-      shapefn_(1) = 0.25 * xi(0) * xi(1) * (xi(0) + 1.) * (xi(1) - 1.);
-      shapefn_(2) = 0.25 * xi(0) * xi(1) * (xi(0) + 1.) * (xi(1) + 1.);
-      shapefn_(3) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) + 1.);
-      shapefn_(4) = -0.5 * xi(1) * (xi(1) - 1.) * ((xi(0) * xi(0)) - 1.);
-      shapefn_(5) = -0.5 * xi(0) * (xi(0) + 1.) * ((xi(1) * xi(1)) - 1.);
-      shapefn_(6) = -0.5 * xi(1) * (xi(1) + 1.) * ((xi(0) * xi(0)) - 1.);
-      shapefn_(7) = -0.5 * xi(0) * (xi(0) - 1.) * ((xi(1) * xi(1)) - 1.);
-      shapefn_(8) = ((xi(0) * xi(0)) - 1.) * ((xi(1) * xi(1)) - 1.);
-      break;
-    default:
-      // Throw error
-      break;
-  }
-  return shapefn_;
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 9, 1> shapefn;
+
+  shapefn(0) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) - 1.);
+  shapefn(1) = 0.25 * xi(0) * xi(1) * (xi(0) + 1.) * (xi(1) - 1.);
+  shapefn(2) = 0.25 * xi(0) * xi(1) * (xi(0) + 1.) * (xi(1) + 1.);
+  shapefn(3) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) + 1.);
+  shapefn(4) = -0.5 * xi(1) * (xi(1) - 1.) * ((xi(0) * xi(0)) - 1.);
+  shapefn(5) = -0.5 * xi(0) * (xi(0) + 1.) * ((xi(1) * xi(1)) - 1.);
+  shapefn(6) = -0.5 * xi(1) * (xi(1) + 1.) * ((xi(0) * xi(0)) - 1.);
+  shapefn(7) = -0.5 * xi(0) * (xi(0) - 1.) * ((xi(1) * xi(1)) - 1.);
+  shapefn(8) = ((xi(0) * xi(0)) - 1.) * ((xi(1) * xi(1)) - 1.);
+
+  return shapefn;
 }
 
-//! Return gradient of shape functions of a cell
+//! Return gradient of shape functions of a 9-node Quadrilateral Element
 //! \param[in] xi Coordinates of point of interest
 //! \retval grad_shapefn Gradient of shape function of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of functions
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::grad_shapefn(
-  const Eigen::Matrix<double, Tdim, 1>& xi) {
-  Eigen::MatrixXd grad_shapefn;
-  switch (Tnfunctions) {
-    case 4:
-      // 4-noded
-      grad_shapefn_.resize(4, 2);
-      grad_shapefn_(0, 0) = -0.25 * (1 - xi(1));
-      grad_shapefn_(1, 0) = 0.25 * (1 - xi(1));
-      grad_shapefn_(2, 0) = 0.25 * (1 + xi(1));
-      grad_shapefn_(3, 0) = -0.25 * (1 + xi(1));
-
-      grad_shapefn_(0, 1) = -0.25 * (1 - xi(0));
-      grad_shapefn_(1, 1) = -0.25 * (1 + xi(0));
-      grad_shapefn_(2, 1) = 0.25 * (1 + xi(0));
-      grad_shapefn_(3, 1) = 0.25 * (1 - xi(0));
-      break;
-    case 8:
-      // 8-noded
-      grad_shapefn_.resize(8, 2);
-      grad_shapefn_(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
-      grad_shapefn_(1, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. - xi(1));
-      grad_shapefn_(2, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. + xi(1));
-      grad_shapefn_(3, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. + xi(1));
-      grad_shapefn_(4, 0) = -xi(0) * (1. - xi(1));
-      grad_shapefn_(5, 0) = 0.5 * (1. - (xi(1) * xi(1)));
-      grad_shapefn_(6, 0) = -xi(0) * (1. + xi(1));
-      grad_shapefn_(7, 0) = -0.5 * (1. - (xi(1) * xi(1)));
-
-      grad_shapefn_(0, 1) = 0.25 * (2. * xi(1) + xi(0)) * (1. - xi(0));
-      grad_shapefn_(1, 1) = 0.25 * (2. * xi(1) - xi(0)) * (1. + xi(0));
-      grad_shapefn_(2, 1) = 0.25 * (2. * xi(1) + xi(0)) * (1. + xi(0));
-      grad_shapefn_(3, 1) = 0.25 * (2. * xi(1) - xi(0)) * (1. - xi(0));
-      grad_shapefn_(4, 1) = -0.5 * (1. - (xi(0) * xi(0)));
-      grad_shapefn_(5, 1) = -xi(1) * (1. + xi(0));
-      grad_shapefn_(6, 1) = 0.5 * (1 - (xi(0) * xi(0)));
-      grad_shapefn_(7, 1) = -xi(1) * (1. - xi(0));
-      break;
-    case 9:
-      // 9-noded
-      grad_shapefn_.resize(9, 2);
-      grad_shapefn_(0, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) - 1.);
-      grad_shapefn_(1, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) + 1.);
-      grad_shapefn_(2, 0) = 0.25 * xi(1) * (xi(1) + 1.) * (2 * xi(0) + 1.);
-      grad_shapefn_(3, 0) = 0.25 * xi(1) * (xi(1) + 1.) * (2 * xi(0) - 1.);
-      grad_shapefn_(4, 0) = -xi(0) * xi(1) * (xi(1) - 1.);
-      grad_shapefn_(5, 0) = -0.5 * (2. * xi(0) + 1.) * ((xi(1) * xi(1)) - 1.);
-      grad_shapefn_(6, 0) = -xi(0) * xi(1) * (xi(1) + 1.);
-      grad_shapefn_(7, 0) = -0.5 * (2. * xi(0) - 1.) * ((xi(1) * xi(1)) - 1.);
-      grad_shapefn_(8, 0) = 2. * xi(0) * ((xi(1) * xi(1)) - 1.);
-      grad_shapefn_(0, 1) = 0.25 * xi(0) * (xi(0) - 1.) * (2. * xi(1) - 1.);
-      grad_shapefn_(1, 1) = 0.25 * xi(0) * (xi(0) + 1.) * (2. * xi(1) - 1.);
-      grad_shapefn_(2, 1) = 0.25 * xi(0) * (xi(0) + 1.) * (2. * xi(1) + 1.);
-      grad_shapefn_(3, 1) = 0.25 * xi(0) * (xi(0) - 1.) * (2. * xi(1) + 1.);
-      grad_shapefn_(4, 1) = -0.5 * (2. * xi(1) - 1.) * ((xi(0) * xi(0)) - 1.);
-      grad_shapefn_(5, 1) = -xi(0) * xi(1) * (xi(0) + 1.);
-      grad_shapefn_(6, 1) = -0.5 * (2. * xi(1) + 1.) * ((xi(0) * xi(0)) - 1.);
-      grad_shapefn_(7, 1) = -xi(0) * xi(1) * (xi(0) - 1.);
-      grad_shapefn_(8, 1) = 2. * xi(1) * ((xi(0) * xi(0)) - 1.);
-      break;
-    default:
-      // Throw error
-      break;
-  }
-  return grad_shapefn_;
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) {
+  Eigen::Matrix<double, 9, 2> grad_shapefn;
+  // 9-noded
+  grad_shapefn(0, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) - 1.);
+  grad_shapefn(1, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) + 1.);
+  grad_shapefn(2, 0) = 0.25 * xi(1) * (xi(1) + 1.) * (2 * xi(0) + 1.);
+  grad_shapefn(3, 0) = 0.25 * xi(1) * (xi(1) + 1.) * (2 * xi(0) - 1.);
+  grad_shapefn(4, 0) = -xi(0) * xi(1) * (xi(1) - 1.);
+  grad_shapefn(5, 0) = -0.5 * (2. * xi(0) + 1.) * ((xi(1) * xi(1)) - 1.);
+  grad_shapefn(6, 0) = -xi(0) * xi(1) * (xi(1) + 1.);
+  grad_shapefn(7, 0) = -0.5 * (2. * xi(0) - 1.) * ((xi(1) * xi(1)) - 1.);
+  grad_shapefn(8, 0) = 2. * xi(0) * ((xi(1) * xi(1)) - 1.);
+  grad_shapefn(0, 1) = 0.25 * xi(0) * (xi(0) - 1.) * (2. * xi(1) - 1.);
+  grad_shapefn(1, 1) = 0.25 * xi(0) * (xi(0) + 1.) * (2. * xi(1) - 1.);
+  grad_shapefn(2, 1) = 0.25 * xi(0) * (xi(0) + 1.) * (2. * xi(1) + 1.);
+  grad_shapefn(3, 1) = 0.25 * xi(0) * (xi(0) - 1.) * (2. * xi(1) + 1.);
+  grad_shapefn(4, 1) = -0.5 * (2. * xi(1) - 1.) * ((xi(0) * xi(0)) - 1.);
+  grad_shapefn(5, 1) = -xi(0) * xi(1) * (xi(0) + 1.);
+  grad_shapefn(6, 1) = -0.5 * (2. * xi(1) + 1.) * ((xi(0) * xi(0)) - 1.);
+  grad_shapefn(7, 1) = -xi(0) * xi(1) * (xi(0) - 1.);
+  grad_shapefn(8, 1) = 2. * xi(1) * ((xi(0) * xi(0)) - 1.);
+  return grad_shapefn;
 }
