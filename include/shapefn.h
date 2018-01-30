@@ -31,12 +31,6 @@ class ShapeFn {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
-
- protected:
-  //! Shape function
-  Eigen::VectorXd shapefn_;
-  //! Gradient shape functions
-  Eigen::MatrixXd grad_shapefn_;
 };
 
 }  // namespace mpm

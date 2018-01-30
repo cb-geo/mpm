@@ -12,6 +12,63 @@
 //!       0_ _ _ _ _ _ 0
 //!     4               5
 
+//! Return shape function of a 8-noded hexahedron
+//! \param[in] xi Coordinates of point of interest
+//! \retval shapefn Shape function of a given cell
+template <>
+inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 8>::shapefn(
+    const Eigen::Matrix<double, 3, 1>& xi) {
+  // 8-noded
+  Eigen::Matrix<double, 8, 1> shapefn;
+  shapefn(0) = 0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2));
+  shapefn(1) = 0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 - xi(2));
+  shapefn(2) = 0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 - xi(2));
+  shapefn(3) = 0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 - xi(2));
+  shapefn(4) = 0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 + xi(2));
+  shapefn(5) = 0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 + xi(2));
+  shapefn(6) = 0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 + xi(2));
+  shapefn(7) = 0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 + xi(2));
+  return shapefn;
+}
+
+
+//! Return gradient of shape functions of a 8-noded hexahedron
+//! \param[in] xi Coordinates of point of interest
+//! \retval grad_shapefn Gradient of shape function of a given cell
+template <>
+inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::grad_shapefn(
+    const Eigen::Matrix<double, 3, 1>& xi) {
+  Eigen::Matrix<double, 8, 3> grad_shapefn;
+  grad_shapefn(0, 0) = -0.125 * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(1, 0) = 0.125 * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(2, 0) = 0.125 * (1 + xi(1)) * (1 - xi(2));
+  grad_shapefn(3, 0) = -0.125 * (1 + xi(1)) * (1 - xi(2));
+  grad_shapefn(4, 0) = -0.125 * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(5, 0) = 0.125 * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(6, 0) = 0.125 * (1 + xi(1)) * (1 + xi(2));
+  grad_shapefn(7, 0) = -0.125 * (1 + xi(1)) * (1 + xi(2));
+
+  grad_shapefn(0, 1) = -0.125 * (1 - xi(0)) * (1 - xi(2));
+  grad_shapefn(1, 1) = -0.125 * (1 + xi(0)) * (1 - xi(2));
+  grad_shapefn(2, 1) = 0.125 * (1 + xi(0)) * (1 - xi(2));
+  grad_shapefn(3, 1) = 0.125 * (1 - xi(0)) * (1 - xi(2));
+  grad_shapefn(4, 1) = -0.125 * (1 - xi(0)) * (1 + xi(2));
+  grad_shapefn(5, 1) = -0.125 * (1 + xi(0)) * (1 + xi(2));
+  grad_shapefn(6, 1) = 0.125 * (1 + xi(0)) * (1 + xi(2));
+  grad_shapefn(7, 1) = 0.125 * (1 - xi(0)) * (1 + xi(2));
+
+  grad_shapefn(0, 2) = -0.125 * (1 - xi(0)) * (1 - xi(1));
+  grad_shapefn(1, 2) = -0.125 * (1 + xi(0)) * (1 - xi(1));
+  grad_shapefn(2, 2) = -0.125 * (1 + xi(0)) * (1 + xi(1));
+  grad_shapefn(3, 2) = -0.125 * (1 - xi(0)) * (1 + xi(1));
+  grad_shapefn(4, 2) = 0.125 * (1 - xi(0)) * (1 - xi(1));
+  grad_shapefn(5, 2) = 0.125 * (1 + xi(0)) * (1 - xi(1));
+  grad_shapefn(6, 2) = 0.125 * (1 + xi(0)) * (1 + xi(1));
+  grad_shapefn(7, 2) = 0.125 * (1 - xi(0)) * (1 + xi(1));
+  return grad_shapefn;
+}
+
+
 // 20-node (Serendipity) Hexahedron Element
 //!        3       13          2
 //!          0_ _ _ 0 _ _ _  0
@@ -27,6 +84,142 @@
 //!       |/             | /
 //!       0_ _ _ 0 _ _ _ 0
 //!     4        16         5
+
+//! Return shape function of a 20-noded hexahedron
+//! \param[in] xi Coordinates of point of interest
+//! \retval shapefn Shape function of a given cell
+template <>
+inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 20>::shapefn(
+    const Eigen::Matrix<double, 3, 1>& xi) {
+  Eigen::Matrix<double, 20, 1> shapefn;
+  shapefn(0) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
+               (2 + xi(0) + xi(1) + xi(2));
+  shapefn(1) = -0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
+               (2 - xi(0) + xi(1) + xi(2));
+  shapefn(2) = -0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 - xi(2)) *
+               (2 - xi(0) - xi(1) + xi(2));
+  shapefn(3) = -0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 - xi(2)) *
+               (2 + xi(0) - xi(1) + xi(2));
+  shapefn(4) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 + xi(2)) *
+               (2 + xi(0) + xi(1) - xi(2));
+  shapefn(5) = -0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 + xi(2)) *
+               (2 - xi(0) + xi(1) - xi(2));
+  shapefn(6) = -0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 + xi(2)) *
+               (2 - xi(0) - xi(1) - xi(2));
+  shapefn(7) = -0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 + xi(2)) *
+               (2 + xi(0) - xi(1) - xi(2));
+
+  shapefn(8) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1)) * (1 - xi(2));
+  shapefn(11) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0)) * (1 - xi(2));
+  shapefn(13) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1)) * (1 - xi(2));
+  shapefn(9) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0)) * (1 - xi(2));
+  shapefn(10) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0)) * (1 - xi(1));
+  shapefn(12) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0)) * (1 - xi(1));
+  shapefn(14) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0)) * (1 + xi(1));
+  shapefn(15) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0)) * (1 + xi(1));
+  shapefn(16) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1)) * (1 + xi(2));
+  shapefn(18) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0)) * (1 + xi(2));
+  shapefn(19) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1)) * (1 + xi(2));
+  shapefn(17) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0)) * (1 + xi(2));
+  return shapefn;
+}
+
+//! Return gradient of shape functions of a 20-noded hexahedron
+//! \param[in] xi Coordinates of point of interest
+//! \retval grad_shapefn Gradient of shape function of a given cell
+template <>
+inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
+    const Eigen::Matrix<double, 3, 1>& xi) {
+  Eigen::Matrix<double, 20, 3> grad_shapefn;
+
+  grad_shapefn(0, 0) =
+      0.125 * (2 * xi(0) + xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(1, 0) =
+      -0.125 * (-2 * xi(0) + xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(2, 0) =
+      -0.125 * (-2 * xi(0) - xi(1) + xi(2) + 1) * (1 + xi(1)) * (1 - xi(2));
+  grad_shapefn(3, 0) =
+      0.125 * (2 * xi(0) - xi(1) + xi(2) + 1) * (1 + xi(1)) * (1 - xi(2));
+  grad_shapefn(4, 0) =
+      0.125 * (2 * xi(0) + xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(5, 0) =
+      -0.125 * (-2 * xi(0) + xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(6, 0) =
+      -0.125 * (-2 * xi(0) - xi(1) - xi(2) + 1) * (1 + xi(1)) * (1 + xi(2));
+  grad_shapefn(7, 0) =
+      0.125 * (2 * xi(0) - xi(1) - xi(2) + 1) * (1 + xi(1)) * (1 + xi(2));
+  grad_shapefn(8, 0) = -0.5 * xi(0) * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(11, 0) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(2));
+  grad_shapefn(13, 0) = -0.5 * xi(0) * (1 + xi(1)) * (1 - xi(2));
+  grad_shapefn(9, 0) = -0.25 * (1 - xi(1) * xi(1)) * (1 - xi(2));
+  grad_shapefn(10, 0) = -0.25 * (1 - xi(2) * xi(2)) * (1 - xi(1));
+  grad_shapefn(12, 0) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(1));
+  grad_shapefn(14, 0) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(1));
+  grad_shapefn(15, 0) = -0.25 * (1 - xi(2) * xi(2)) * (1 + xi(1));
+  grad_shapefn(16, 0) = -0.5 * xi(0) * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(18, 0) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(2));
+  grad_shapefn(19, 0) = -0.5 * xi(0) * (1 + xi(1)) * (1 + xi(2));
+  grad_shapefn(17, 0) = -0.25 * (1 - xi(1) * xi(1)) * (1 + xi(2));
+
+  grad_shapefn(0, 1) =
+      0.125 * (xi(0) + 2 * xi(1) + xi(2) + 1) * (1 - xi(0)) * (1 - xi(2));
+  grad_shapefn(1, 1) =
+      0.125 * (-xi(0) + 2 * xi(1) + xi(2) + 1) * (1 + xi(0)) * (1 - xi(2));
+  grad_shapefn(2, 1) =
+      -0.125 * (-xi(0) - 2 * xi(1) + xi(2) + 1) * (1 + xi(0)) * (1 - xi(2));
+  grad_shapefn(3, 1) =
+      -0.125 * (xi(0) - 2 * xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
+  grad_shapefn(4, 1) =
+      0.125 * (xi(0) + 2 * xi(1) - xi(2) + 1) * (1 - xi(0)) * (1 + xi(2));
+  grad_shapefn(5, 1) =
+      0.125 * (-xi(0) + 2 * xi(1) - xi(2) + 1) * (1 + xi(0)) * (1 + xi(2));
+  grad_shapefn(6, 1) =
+      -0.125 * (-xi(0) - 2 * xi(1) - xi(2) + 1) * (1 + xi(0)) * (1 + xi(2));
+  grad_shapefn(7, 1) =
+      -0.125 * (xi(0) - 2 * xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
+  grad_shapefn(8, 1) = -0.25 * (1 - xi(0) * xi(0)) * (1 - xi(2));
+  grad_shapefn(11, 1) = -0.5 * xi(1) * (1 + xi(0)) * (1 - xi(2));
+  grad_shapefn(13, 1) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(2));
+  grad_shapefn(9, 1) = -0.5 * xi(1) * (1 - xi(0)) * (1 - xi(2));
+  grad_shapefn(10, 1) = -0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0));
+  grad_shapefn(12, 1) = -0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0));
+  grad_shapefn(14, 1) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0));
+  grad_shapefn(15, 1) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0));
+  grad_shapefn(16, 1) = -0.25 * (1 - xi(0) * xi(0)) * (1 + xi(2));
+  grad_shapefn(18, 1) = -0.5 * xi(1) * (1 + xi(0)) * (1 + xi(2));
+  grad_shapefn(19, 1) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(2));
+  grad_shapefn(17, 1) = -0.5 * xi(1) * (1 - xi(0)) * (1 + xi(2));
+
+  grad_shapefn(0, 2) =
+      0.125 * (xi(0) + xi(1) + 2 * xi(2) + 1) * (1 - xi(0)) * (1 - xi(1));
+  grad_shapefn(1, 2) =
+      0.125 * (-xi(0) + xi(1) + 2 * xi(2) + 1) * (1 + xi(0)) * (1 - xi(1));
+  grad_shapefn(2, 2) =
+      0.125 * (-xi(0) - xi(1) + 2 * xi(2) + 1) * (1 + xi(0)) * (1 + xi(1));
+  grad_shapefn(3, 2) =
+      0.125 * (xi(0) - xi(1) + 2 * xi(2) + 1) * (1 - xi(1)) * (1 + xi(1));
+  grad_shapefn(4, 2) =
+      -0.125 * (xi(0) + xi(1) - 2 * xi(2) + 1) * (1 - xi(0)) * (1 - xi(1));
+  grad_shapefn(5, 2) =
+      -0.125 * (-xi(0) + xi(1) - 2 * xi(2) + 1) * (1 + xi(0)) * (1 - xi(1));
+  grad_shapefn(6, 2) =
+      -0.125 * (-xi(0) - xi(1) - 2 * xi(2) + 1) * (1 + xi(0)) * (1 + xi(1));
+  grad_shapefn(7, 2) =
+      -0.125 * (xi(0) - xi(1) - 2 * xi(2) + 1) * (1 - xi(1)) * (1 + xi(1));
+  grad_shapefn(8, 2) = -0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1));
+  grad_shapefn(11, 2) = -0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0));
+  grad_shapefn(13, 2) = -0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1));
+  grad_shapefn(9, 2) = -0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0));
+  grad_shapefn(10, 2) = -0.5 * xi(2) * (1 - xi(0)) * (1 - xi(1));
+  grad_shapefn(12, 2) = -0.5 * xi(2) * (1 + xi(0)) * (1 - xi(1));
+  grad_shapefn(14, 2) = -0.5 * xi(2) * (1 + xi(0)) * (1 + xi(1));
+  grad_shapefn(15, 2) = -0.5 * xi(2) * (1 - xi(0)) * (1 + xi(1));
+  grad_shapefn(16, 2) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1));
+  grad_shapefn(18, 2) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0));
+  grad_shapefn(19, 2) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1));
+  grad_shapefn(17, 2) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0));
+  return grad_shapefn;
+}
 
 // 27-node (Triquadratic) Hexahedron Element
 //! Check with GMSH
@@ -54,202 +247,3 @@
 //!     0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!   4           16            5
 
-//! Return shape function of nodes
-//! \param[in] xi Coordinates of point of interest
-//! \retval shapefn Shape function of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of functions
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXd mpm::HexahedronShapeFn<Tdim, Tnfunctions>::shapefn(
-  const Eigen::Matrix<double, Tdim, 1>& xi) {
-  switch (Tnfunctions) {
-    case 8:
-      // 8-noded
-      shapefn_.resize(8, 1);
-      shapefn_(0) = 0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2));
-      shapefn_(1) = 0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 - xi(2));
-      shapefn_(2) = 0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 - xi(2));
-      shapefn_(3) = 0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 - xi(2));
-      shapefn_(4) = 0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 + xi(2));
-      shapefn_(5) = 0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 + xi(2));
-      shapefn_(6) = 0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 + xi(2));
-      shapefn_(7) = 0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 + xi(2));
-      break;
-    case 20:
-      // 20-noded
-      shapefn_.resize(20, 1);
-      shapefn_(0) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
-                    (2 + xi(0) + xi(1) + xi(2));
-      shapefn_(1) = -0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
-                    (2 - xi(0) + xi(1) + xi(2));
-      shapefn_(2) = -0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 - xi(2)) *
-                    (2 - xi(0) - xi(1) + xi(2));
-      shapefn_(3) = -0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 - xi(2)) *
-                    (2 + xi(0) - xi(1) + xi(2));
-      shapefn_(4) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 + xi(2)) *
-                    (2 + xi(0) + xi(1) - xi(2));
-      shapefn_(5) = -0.125 * (1 + xi(0)) * (1 - xi(1)) * (1 + xi(2)) *
-                    (2 - xi(0) + xi(1) - xi(2));
-      shapefn_(6) = -0.125 * (1 + xi(0)) * (1 + xi(1)) * (1 + xi(2)) *
-                    (2 - xi(0) - xi(1) - xi(2));
-      shapefn_(7) = -0.125 * (1 - xi(0)) * (1 + xi(1)) * (1 + xi(2)) *
-                    (2 + xi(0) - xi(1) - xi(2));
-
-      shapefn_(8) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1)) * (1 - xi(2));
-      shapefn_(11) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0)) * (1 - xi(2));
-      shapefn_(13) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1)) * (1 - xi(2));
-      shapefn_(9) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0)) * (1 - xi(2));
-      shapefn_(10) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0)) * (1 - xi(1));
-      shapefn_(12) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0)) * (1 - xi(1));
-      shapefn_(14) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0)) * (1 + xi(1));
-      shapefn_(15) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0)) * (1 + xi(1));
-      shapefn_(16) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1)) * (1 + xi(2));
-      shapefn_(18) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0)) * (1 + xi(2));
-      shapefn_(19) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1)) * (1 + xi(2));
-      shapefn_(17) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0)) * (1 + xi(2));
-      break;
-    default:
-      // Throw error
-      break;
-  }
-  return shapefn_;
-}
-
-//! Return gradient of shape functions of a cell
-//! \param[in] xi Coordinates of point of interest
-//! \retval grad_shapefn Gradient of shape function of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of functions
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd mpm::HexahedronShapeFn<Tdim, Tnfunctions>::grad_shapefn(
-  const Eigen::Matrix<double, Tdim, 1>& xi) {
-  Eigen::MatrixXd grad_shapefn;
-  switch (Tnfunctions) {
-    case 8:
-      // 8-noded
-      grad_shapefn_.resize(8, 3);
-      grad_shapefn_(0, 0) = -0.125 * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(1, 0) = 0.125 * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(2, 0) = 0.125 * (1 + xi(1)) * (1 - xi(2));
-      grad_shapefn_(3, 0) = -0.125 * (1 + xi(1)) * (1 - xi(2));
-      grad_shapefn_(4, 0) = -0.125 * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(5, 0) = 0.125 * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(6, 0) = 0.125 * (1 + xi(1)) * (1 + xi(2));
-      grad_shapefn_(7, 0) = -0.125 * (1 + xi(1)) * (1 + xi(2));
-
-      grad_shapefn_(0, 1) = -0.125 * (1 - xi(0)) * (1 - xi(2));
-      grad_shapefn_(1, 1) = -0.125 * (1 + xi(0)) * (1 - xi(2));
-      grad_shapefn_(2, 1) = 0.125 * (1 + xi(0)) * (1 - xi(2));
-      grad_shapefn_(3, 1) = 0.125 * (1 - xi(0)) * (1 - xi(2));
-      grad_shapefn_(4, 1) = -0.125 * (1 - xi(0)) * (1 + xi(2));
-      grad_shapefn_(5, 1) = -0.125 * (1 + xi(0)) * (1 + xi(2));
-      grad_shapefn_(6, 1) = 0.125 * (1 + xi(0)) * (1 + xi(2));
-      grad_shapefn_(7, 1) = 0.125 * (1 - xi(0)) * (1 + xi(2));
-
-      grad_shapefn_(0, 2) = -0.125 * (1 - xi(0)) * (1 - xi(1));
-      grad_shapefn_(1, 2) = -0.125 * (1 + xi(0)) * (1 - xi(1));
-      grad_shapefn_(2, 2) = -0.125 * (1 + xi(0)) * (1 + xi(1));
-      grad_shapefn_(3, 2) = -0.125 * (1 - xi(0)) * (1 + xi(1));
-      grad_shapefn_(4, 2) = 0.125 * (1 - xi(0)) * (1 - xi(1));
-      grad_shapefn_(5, 2) = 0.125 * (1 + xi(0)) * (1 - xi(1));
-      grad_shapefn_(6, 2) = 0.125 * (1 + xi(0)) * (1 + xi(1));
-      grad_shapefn_(7, 2) = 0.125 * (1 - xi(0)) * (1 + xi(1));
-      return grad_shapefn_;
-      break;
-    case 20:
-      // 20-noded
-      grad_shapefn_.resize(20, 3);
-
-      grad_shapefn_(0, 0) =
-          0.125 * (2 * xi(0) + xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(1, 0) =
-          -0.125 * (-2 * xi(0) + xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(2, 0) =
-          -0.125 * (-2 * xi(0) - xi(1) + xi(2) + 1) * (1 + xi(1)) * (1 - xi(2));
-      grad_shapefn_(3, 0) =
-          0.125 * (2 * xi(0) - xi(1) + xi(2) + 1) * (1 + xi(1)) * (1 - xi(2));
-      grad_shapefn_(4, 0) =
-          0.125 * (2 * xi(0) + xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(5, 0) =
-          -0.125 * (-2 * xi(0) + xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(6, 0) =
-          -0.125 * (-2 * xi(0) - xi(1) - xi(2) + 1) * (1 + xi(1)) * (1 + xi(2));
-      grad_shapefn_(7, 0) =
-          0.125 * (2 * xi(0) - xi(1) - xi(2) + 1) * (1 + xi(1)) * (1 + xi(2));
-      grad_shapefn_(8, 0) = -0.5 * xi(0) * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(11, 0) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(2));
-      grad_shapefn_(13, 0) = -0.5 * xi(0) * (1 + xi(1)) * (1 - xi(2));
-      grad_shapefn_(9, 0) = -0.25 * (1 - xi(1) * xi(1)) * (1 - xi(2));
-      grad_shapefn_(10, 0) = -0.25 * (1 - xi(2) * xi(2)) * (1 - xi(1));
-      grad_shapefn_(12, 0) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(1));
-      grad_shapefn_(14, 0) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(1));
-      grad_shapefn_(15, 0) = -0.25 * (1 - xi(2) * xi(2)) * (1 + xi(1));
-      grad_shapefn_(16, 0) = -0.5 * xi(0) * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(18, 0) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(2));
-      grad_shapefn_(19, 0) = -0.5 * xi(0) * (1 + xi(1)) * (1 + xi(2));
-      grad_shapefn_(17, 0) = -0.25 * (1 - xi(1) * xi(1)) * (1 + xi(2));
-
-      grad_shapefn_(0, 1) =
-          0.125 * (xi(0) + 2 * xi(1) + xi(2) + 1) * (1 - xi(0)) * (1 - xi(2));
-      grad_shapefn_(1, 1) =
-          0.125 * (-xi(0) + 2 * xi(1) + xi(2) + 1) * (1 + xi(0)) * (1 - xi(2));
-      grad_shapefn_(2, 1) =
-          -0.125 * (-xi(0) - 2 * xi(1) + xi(2) + 1) * (1 + xi(0)) * (1 - xi(2));
-      grad_shapefn_(3, 1) =
-          -0.125 * (xi(0) - 2 * xi(1) + xi(2) + 1) * (1 - xi(1)) * (1 - xi(2));
-      grad_shapefn_(4, 1) =
-          0.125 * (xi(0) + 2 * xi(1) - xi(2) + 1) * (1 - xi(0)) * (1 + xi(2));
-      grad_shapefn_(5, 1) =
-          0.125 * (-xi(0) + 2 * xi(1) - xi(2) + 1) * (1 + xi(0)) * (1 + xi(2));
-      grad_shapefn_(6, 1) =
-          -0.125 * (-xi(0) - 2 * xi(1) - xi(2) + 1) * (1 + xi(0)) * (1 + xi(2));
-      grad_shapefn_(7, 1) =
-          -0.125 * (xi(0) - 2 * xi(1) - xi(2) + 1) * (1 - xi(1)) * (1 + xi(2));
-      grad_shapefn_(8, 1) = -0.25 * (1 - xi(0) * xi(0)) * (1 - xi(2));
-      grad_shapefn_(11, 1) = -0.5 * xi(1) * (1 + xi(0)) * (1 - xi(2));
-      grad_shapefn_(13, 1) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(2));
-      grad_shapefn_(9, 1) = -0.5 * xi(1) * (1 - xi(0)) * (1 - xi(2));
-      grad_shapefn_(10, 1) = -0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0));
-      grad_shapefn_(12, 1) = -0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0));
-      grad_shapefn_(14, 1) = 0.25 * (1 - xi(2) * xi(2)) * (1 + xi(0));
-      grad_shapefn_(15, 1) = 0.25 * (1 - xi(2) * xi(2)) * (1 - xi(0));
-      grad_shapefn_(16, 1) = -0.25 * (1 - xi(0) * xi(0)) * (1 + xi(2));
-      grad_shapefn_(18, 1) = -0.5 * xi(1) * (1 + xi(0)) * (1 + xi(2));
-      grad_shapefn_(19, 1) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(2));
-      grad_shapefn_(17, 1) = -0.5 * xi(1) * (1 - xi(0)) * (1 + xi(2));
-
-      grad_shapefn_(0, 2) =
-          0.125 * (xi(0) + xi(1) + 2 * xi(2) + 1) * (1 - xi(0)) * (1 - xi(1));
-      grad_shapefn_(1, 2) =
-          0.125 * (-xi(0) + xi(1) + 2 * xi(2) + 1) * (1 + xi(0)) * (1 - xi(1));
-      grad_shapefn_(2, 2) =
-          0.125 * (-xi(0) - xi(1) + 2 * xi(2) + 1) * (1 + xi(0)) * (1 + xi(1));
-      grad_shapefn_(3, 2) =
-          0.125 * (xi(0) - xi(1) + 2 * xi(2) + 1) * (1 - xi(1)) * (1 + xi(1));
-      grad_shapefn_(4, 2) =
-          -0.125 * (xi(0) + xi(1) - 2 * xi(2) + 1) * (1 - xi(0)) * (1 - xi(1));
-      grad_shapefn_(5, 2) =
-          -0.125 * (-xi(0) + xi(1) - 2 * xi(2) + 1) * (1 + xi(0)) * (1 - xi(1));
-      grad_shapefn_(6, 2) =
-          -0.125 * (-xi(0) - xi(1) - 2 * xi(2) + 1) * (1 + xi(0)) * (1 + xi(1));
-      grad_shapefn_(7, 2) =
-          -0.125 * (xi(0) - xi(1) - 2 * xi(2) + 1) * (1 - xi(1)) * (1 + xi(1));
-      grad_shapefn_(8, 2) = -0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1));
-      grad_shapefn_(11, 2) = -0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0));
-      grad_shapefn_(13, 2) = -0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1));
-      grad_shapefn_(9, 2) = -0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0));
-      grad_shapefn_(10, 2) = -0.5 * xi(2) * (1 - xi(0)) * (1 - xi(1));
-      grad_shapefn_(12, 2) = -0.5 * xi(2) * (1 + xi(0)) * (1 - xi(1));
-      grad_shapefn_(14, 2) = -0.5 * xi(2) * (1 + xi(0)) * (1 + xi(1));
-      grad_shapefn_(15, 2) = -0.5 * xi(2) * (1 - xi(0)) * (1 + xi(1));
-      grad_shapefn_(16, 2) = 0.25 * (1 - xi(0) * xi(0)) * (1 - xi(1));
-      grad_shapefn_(18, 2) = 0.25 * (1 - xi(1) * xi(1)) * (1 + xi(0));
-      grad_shapefn_(19, 2) = 0.25 * (1 - xi(0) * xi(0)) * (1 + xi(1));
-      grad_shapefn_(17, 2) = 0.25 * (1 - xi(1) * xi(1)) * (1 - xi(0));
-      break;
-    default:
-      // Throw error
-      break;
-  }
-  return grad_shapefn_;
-}

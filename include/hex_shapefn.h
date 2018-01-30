@@ -26,10 +26,7 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   HexahedronShapeFn() : mpm::ShapeFn<Tdim>() {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     static_assert((Tnfunctions == 8 || Tnfunctions == 20), 
-            "Specified number of shape functions is not defined");
-    shapefn_.resize(Tnfunctions, 1);
-    grad_shapefn_.resize(Tnfunctions, Tdim);
-    
+            "Specified number of shape functions is not defined");    
   }
 
   //! Return number of functions
@@ -42,12 +39,6 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
-
- protected:
-  // Shape functions
-  using ShapeFn<Tdim>::shapefn_;
-  // Gradient shape functions
-  using ShapeFn<Tdim>::grad_shapefn_;
 };
 
 }  // namespace mpm

@@ -26,8 +26,6 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
             "Specified number of shape functions is not defined");
-    shapefn_.resize(Tnfunctions, 1);
-    grad_shapefn_.resize(Tnfunctions, Tdim);
   }
 
   //! Return number of functions
@@ -40,12 +38,6 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
-
- protected:
-  // Shape functions
-  using ShapeFn<Tdim>::shapefn_;
-  // Gradient shape functions
-  using ShapeFn<Tdim>::grad_shapefn_;
 };
 
 }  // namespace mpm
