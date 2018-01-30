@@ -31,10 +31,12 @@
 //! Return shape functions of a cell
 //! \param[in] xi Coordinates of point of interest
 //! \retval shapefn Shape function of a given cell
-template <unsigned Tdim>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::shapefn(
-    const mpm::QuadrilateralShapeFn<Tdim>::VectorDim& xi) {
-  switch (this->nfunctions_) {
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::shapefn(
+    const Eigen::Matrix<double, Tdim, 1>& xi) {
+  switch (Tnfunctions) {
     case 4:
       // 4-noded
       shapefn_.resize(4, 1);
@@ -78,11 +80,13 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::shapefn(
 //! Return gradient of shape functions of a cell
 //! \param[in] xi Coordinates of point of interest
 //! \retval grad_shapefn Gradient of shape function of a given cell
-template <unsigned Tdim>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim>::grad_shapefn(
-    const mpm::QuadrilateralShapeFn<Tdim>::VectorDim& xi) {
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::grad_shapefn(
+  const Eigen::Matrix<double, Tdim, 1>& xi) {
   Eigen::MatrixXd grad_shapefn;
-  switch (this->nfunctions_) {
+  switch (Tnfunctions) {
     case 4:
       // 4-noded
       grad_shapefn_.resize(4, 2);

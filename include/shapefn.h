@@ -16,17 +16,13 @@ class ShapeFn {
 
   //! Constructor
   //! Assign variables to zero
-  ShapeFn(unsigned nfunctions) : nfunctions_{nfunctions} {
-    shapefn_.resize(nfunctions, 1);
-    grad_shapefn_.resize(nfunctions, Tdim);
-  }
+  ShapeFn(){};
 
   //! Destructor
   virtual ~ShapeFn() {}
 
   //! Return number of functions
-  //! \retval nfuctions_ Number of shape functions in a cell
-  unsigned nfunctions() const { return nfunctions_; }
+  virtual unsigned nfunctions() const = 0;
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
@@ -37,8 +33,6 @@ class ShapeFn {
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
 
  protected:
-  //! Number of functions
-  unsigned nfunctions_;
   //! Shape function
   Eigen::VectorXd shapefn_;
   //! Gradient shape functions

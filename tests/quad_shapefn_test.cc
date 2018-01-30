@@ -14,7 +14,8 @@ TEST_CASE("Quadrilateral shape functions are checked",
   //! Check for 4 noded shape function
   SECTION("Quadrilateral shape function with four nodes") {
     const unsigned nfunctions = 4;
-    auto quadsf = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(nfunctions);
+    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0,0)
     SECTION("Four noded quadrilateral shape function for coordinates(0,0)") {
@@ -108,7 +109,8 @@ TEST_CASE("Quadrilateral shape functions are checked",
   //! Check for 8 noded shape function
   SECTION("Quadrilateral shape function with eight nodes") {
     const unsigned nfunctions = 8;
-    auto quadsf = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(nfunctions);
+    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0,0)
     SECTION("Eight noded quadrilateral shape function for coordinates(0,0)") {
@@ -242,7 +244,8 @@ TEST_CASE("Quadrilateral shape functions are checked",
   //! Check for 9 noded shape function
   SECTION("Quadrilateral shape function with nine nodes") {
     const unsigned nfunctions = 9;
-    auto quadsf = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(nfunctions);
+    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0,0)
     SECTION("Nine noded quadrilateral shape function for coordinates(0,0)") {
