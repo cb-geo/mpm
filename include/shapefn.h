@@ -30,7 +30,7 @@ class ShapeFn {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::MatrixXd shapefn(const VectorDim& xi) = 0;
+  virtual Eigen::VectorXd shapefn(const VectorDim& xi) = 0;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
@@ -40,7 +40,7 @@ class ShapeFn {
   //! Number of functions
   unsigned nfunctions_;
   //! Shape function
-  Eigen::MatrixXd shapefn_;
+  Eigen::VectorXd shapefn_;
   //! Gradient shape functions
   Eigen::MatrixXd grad_shapefn_;
 };
