@@ -36,7 +36,7 @@ bool mpm::Mesh<Tdim>::add_neighbour(
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   bool insertion_status = particles_.add(particle);
   return insertion_status;
 }
@@ -47,7 +47,7 @@ bool mpm::Mesh<Tdim>::add_particle(
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
-    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   // Remove a particle if found in the container
   bool status = particles_.remove(particle);
   return status;
@@ -58,7 +58,7 @@ bool mpm::Mesh<Tdim>::remove_particle(
 //! \retval insertion_status Return the successful addition of a node
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::Node<Tdim>>& node) {
+bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
   bool insertion_status = nodes_.add(node);
   return insertion_status;
 }
@@ -69,7 +69,7 @@ bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::Node<Tdim>>& node) {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_node(
-    const std::shared_ptr<mpm::Node<Tdim>>& node) {
+    const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
   // Remove a node if found in the container
   bool status = nodes_.remove(node);
   return status;

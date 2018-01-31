@@ -11,6 +11,7 @@
 #include "cell.h"
 #include "container.h"
 #include "node.h"
+#include "particle_base.h"
 #include "particle.h"
 
 namespace mpm {
@@ -47,19 +48,19 @@ class Mesh {
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
   //! Add particle
-  bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle);
+  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
   //! Add particle
-  bool remove_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle);
+  bool remove_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
   //! Number of particles
   mpm::Index nparticles() const { return particles_.size(); }
 
   //! Add node
-  bool add_node(const std::shared_ptr<mpm::Node<Tdim>>& node);
+  bool add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node);
 
   //! Add node
-  bool remove_node(const std::shared_ptr<mpm::Node<Tdim>>& node);
+  bool remove_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node);
 
   //! Number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
@@ -84,10 +85,10 @@ class Mesh {
   Handler<Mesh<Tdim>> neighbour_meshes_;
 
   //! Container of particles
-  Container<Particle<Tdim>> particles_;
+  Container<ParticleBase<Tdim>> particles_;
 
   //! Container of nodes
-  Container<Node<Tdim>> nodes_;
+  Container<NodeBase<Tdim>> nodes_;
 
   //! Container of cells
   Container<Cell<Tdim>> cells_;

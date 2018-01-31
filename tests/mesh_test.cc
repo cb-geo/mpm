@@ -16,6 +16,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
 
@@ -50,11 +52,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
     coords.setZero();
-    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
-    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -88,11 +92,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
     coords.setZero();
-    auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
 
     // Node 2
     mpm::Index id2 = 1;
-    auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -161,6 +167,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
 
@@ -195,11 +203,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mpm::Index id1 = 0;
     Eigen::Vector3d coords;
     coords.setZero();
-    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
-    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -233,11 +243,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mpm::Index id1 = 0;
     Eigen::Vector3d coords;
     coords.setZero();
-    auto node1 = std::make_shared<mpm::Node<Dim>>(id1, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
 
     // Node 2
     mpm::Index id2 = 1;
-    auto node2 = std::make_shared<mpm::Node<Dim>>(id2, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
