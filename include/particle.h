@@ -45,14 +45,13 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
-  /*
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;
     ar& coordinates_;
+    std::cout << "Derived\n";
   }
-  */
 
  private:
   //! particle id
@@ -67,7 +66,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Status
   using ParticleBase<Tdim>::status_;
 
-  /*
   //! Serialize
   //! \tparam Archive Boost Archive
   //! \param[in] ar Archive
@@ -78,10 +76,10 @@ class Particle : public ParticleBase<Tdim> {
     // note, version is always the latest when saving
     ar& id_;
     ar& coordinates_;
+    std::cout << "Derived\n";
   }
-  */
 };  // Particle class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "particle.tcc"
 

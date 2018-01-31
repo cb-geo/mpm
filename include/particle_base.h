@@ -60,14 +60,15 @@ class ParticleBase {
   //! Status
   bool status() const { return status_; }
 
-  /*
+  //! Serialize
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;
     ar& coordinates_;
+    std::cout << "Base\n";
   }
-  */
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};

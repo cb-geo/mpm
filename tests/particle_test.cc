@@ -220,7 +220,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == true);
   }
 
-  /*
+  
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -233,7 +233,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     std::stringstream ss;
     // save data to archive
     {
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+      auto particle =
+          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
       boost::archive::text_oarchive oa(ss);
       oa << *particle;
     }
@@ -256,7 +257,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     }
   }
-  */
 }
 
 //! \brief Check particle class for 3D case
@@ -397,7 +397,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == true);
   }
 
-  /*
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -433,5 +432,4 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     }
   }
-  */
 }
