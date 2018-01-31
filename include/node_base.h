@@ -59,10 +59,10 @@ class NodeBase {
   virtual unsigned dof() const = 0;
 
   //! Assign nodal mass
-  virtual void assign_mass(double mass) = 0;
+  virtual void assign_mass(unsigned nphase, double mass) = 0;
 
   //! Return mass
-  virtual double mass() const = 0;
+  virtual double mass(unsigned nphase) const = 0;
 
   //! Assign force
   virtual void assign_force(unsigned nphase, const Eigen::VectorXd& force) = 0;

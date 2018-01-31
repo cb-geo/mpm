@@ -45,10 +45,10 @@ class Node : public NodeBase<Tdim> {
   unsigned dof() const { return dof_; }
 
   //! Assign nodal mass
-  void assign_mass(double mass) { mass_ = mass; }
+  void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
   //! Return mass
-  double mass() const { return mass_; }
+  double mass(unsigned nphase) const { return mass_(0, nphase); }
 
   //! Assign force
   void assign_force(unsigned nphase, const Eigen::VectorXd& force);
@@ -84,7 +84,7 @@ class Node : public NodeBase<Tdim> {
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Mass solid
-  double mass_{std::numeric_limits<double>::max()};
+  Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Force
   Eigen::Matrix<double, Tdof, Tnphases> force_;
   //! Velocity

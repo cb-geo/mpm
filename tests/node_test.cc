@@ -75,10 +75,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
-    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(mass);
-    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+    node->assign_mass(Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
 
     // Check force
     Eigen::VectorXd force;
@@ -202,10 +202,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
-    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(mass);
-    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+    node->assign_mass(Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
 
     // Check force
     Eigen::VectorXd force;
@@ -328,10 +328,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
-    REQUIRE(node->mass() == std::numeric_limits<double>::max());
+    REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(mass);
-    REQUIRE(node->mass() == Approx(100.5).epsilon(Tolerance));
+    node->assign_mass(Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
 
     // Check force
     Eigen::VectorXd force;
