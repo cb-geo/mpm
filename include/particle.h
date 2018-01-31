@@ -65,19 +65,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Status
   using ParticleBase<Tdim>::status_;
-
-  //! Serialize
-  //! \tparam Archive Boost Archive
-  //! \param[in] ar Archive
-  //! \param[in] version Version of class
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, const unsigned int version) const {
-    // note, version is always the latest when saving
-    ar& id_;
-    ar& coordinates_;
-    std::cout << "Derived\n";
-  }
 };  // Particle class
 }  // namespace mpm
 
