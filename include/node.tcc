@@ -32,14 +32,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_force(const Eigen::VectorXd& force) {
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_force(unsigned nphase, const Eigen::VectorXd& force) {
   try {
     if (force.size() != force_.size()) {
       std::cout << force_.size() << "\t" << force.size() << "\n";
       throw std::runtime_error("Nodal force degrees of freedom don't match");
     }
     // Assign force
-    force_ = force;
+    force_.col(nphase) = force;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
@@ -50,13 +50,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_force(const Eigen::VectorXd& force)
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity(const Eigen::VectorXd& velocity) {
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity) {
   try {
     if (velocity.size() != velocity_.size()) {
       throw std::runtime_error("Nodal velocity degrees of freedom don't match");
     }
     // Assign velocity
-    velocity_ = velocity;
+    velocity_.col(nphase) = velocity;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
@@ -67,13 +67,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity(const Eigen::VectorXd& vel
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_momentum(const Eigen::VectorXd& momentum) {
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum) {
   try {
     if (momentum.size() != momentum_.size()) {
       throw std::runtime_error("Nodal momentum degrees of freedom don't match");
     }
     // Assign momentum
-    momentum_ = momentum;
+    momentum_.col(nphase) = momentum;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
@@ -84,14 +84,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_momentum(const Eigen::VectorXd& mom
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration(const Eigen::VectorXd& acceleration) {
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration) {
   try {
     if (acceleration.size() != acceleration_.size()) {
       throw std::runtime_error(
           "Nodal acceleration degrees of freedom don't match");
     }
     // Assign acceleration
-    acceleration_ = acceleration;
+    acceleration_.col(nphase) = acceleration;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }

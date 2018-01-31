@@ -10,6 +10,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   const unsigned Dim = 1;
   const unsigned Dof = 1;
   const unsigned Nphases = 1;
+  const unsigned Nphase = 0;
   Eigen::Matrix<double, 1, 1> coords;
   coords.setZero();
 
@@ -85,11 +86,11 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_force(force);
+    node->assign_force(Nphase, force);
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -97,11 +98,11 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_velocity(velocity);
+    node->assign_velocity(Nphase, velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check momentum
     Eigen::VectorXd momentum;
@@ -109,23 +110,25 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_momentum(momentum);
+    node->assign_momentum(Nphase, momentum);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
+    /*
     // Check acceleration
     Eigen::VectorXd acceleration;
     acceleration.resize(Dof);
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(acceleration);
+    node->assign_acceleration(Nphase, acceleration);
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+    */
   }
 }
 
@@ -134,6 +137,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   const unsigned Dim = 2;
   const unsigned Dof = 2;
   const unsigned Nphases = 1;
+  const unsigned Nphase = 0;  
   Eigen::Vector2d coords;
   coords.setZero();
 
@@ -209,11 +213,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_force(force);
+    node->assign_force(Nphase, force);
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -221,11 +225,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_velocity(velocity);
+    node->assign_velocity(Nphase, velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check momentum
     Eigen::VectorXd momentum;
@@ -233,11 +237,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_momentum(momentum);
+    node->assign_momentum(Nphase, momentum);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check acceleration
     Eigen::VectorXd acceleration;
@@ -245,11 +249,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(acceleration);
+    node->assign_acceleration(Nphase, acceleration);
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
   }
 }
 
@@ -258,6 +262,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   const unsigned Dim = 3;
   const unsigned Dof = 3;
   const unsigned Nphases = 1;
+  const unsigned Nphase = 0;
 
   Eigen::Vector3d coords;
   coords.setZero();
@@ -334,11 +339,11 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_force(force);
+    node->assign_force(Nphase, force);
     for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -346,11 +351,11 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_velocity(velocity);
+    node->assign_velocity(Nphase, velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(node->velocity()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->velocity(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check momentum
     Eigen::VectorXd momentum;
@@ -358,11 +363,11 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_momentum(momentum);
+    node->assign_momentum(Nphase, momentum);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(node->momentum()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->momentum(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check acceleration
     Eigen::VectorXd acceleration;
@@ -370,10 +375,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(acceleration);
+    node->assign_acceleration(Nphase, acceleration);
     for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration()(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
   }
 }

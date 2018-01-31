@@ -51,28 +51,28 @@ class Node : public NodeBase<Tdim> {
   double mass() const { return mass_; }
 
   //! Assign force
-  void assign_force(const Eigen::VectorXd& force);
+  void assign_force(unsigned nphase, const Eigen::VectorXd& force);
 
   //! Return force
-  Eigen::VectorXd force() const { return force_; }
+  Eigen::VectorXd force(unsigned nphase) const { return force_.col(nphase); }
 
   //! Assign velocity
-  void assign_velocity(const Eigen::VectorXd& velocity);
+  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
   //! Return velocity
-  Eigen::VectorXd velocity() const { return velocity_; }
+  Eigen::VectorXd velocity(unsigned nphase) const { return velocity_.col(nphase); }
 
   //! Assign momentum
-  void assign_momentum(const Eigen::VectorXd& momentum);
+  void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
 
   //! Return momentum
-  Eigen::VectorXd momentum() const { return momentum_; }
+  Eigen::VectorXd momentum(unsigned nphase) const { return momentum_.col(nphase); }
 
   //! Assign acceleration
-  void assign_acceleration(const Eigen::VectorXd& acceleration);
+  void assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration);
 
   //! Return acceleration
-  Eigen::VectorXd acceleration() const { return acceleration_; }
+  Eigen::VectorXd acceleration(unsigned nphase) const { return acceleration_.col(nphase); }
 
  protected:
   //! node id
@@ -86,13 +86,13 @@ class Node : public NodeBase<Tdim> {
   //! Mass solid
   double mass_{std::numeric_limits<double>::max()};
   //! Force
-  Eigen::Matrix<double, Tdof, 1> force_;
+  Eigen::Matrix<double, Tdof, Tnphases> force_;
   //! Velocity
-  Eigen::Matrix<double, Tdof, 1> velocity_;
+  Eigen::Matrix<double, Tdof, Tnphases> velocity_;
   //! Momentum
-  Eigen::Matrix<double, Tdof, 1> momentum_;
+  Eigen::Matrix<double, Tdof, Tnphases> momentum_;
   //! Acceleration
-  Eigen::Matrix<double, Tdof, 1> acceleration_;
+  Eigen::Matrix<double, Tdof, Tnphases> acceleration_;
 };  // Node class
 }  // namespace mpm
 
