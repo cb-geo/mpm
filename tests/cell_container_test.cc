@@ -93,7 +93,8 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
       REQUIRE((*itr)->nfunctions() == 0);
     }
 
-    auto quadsf = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(Nnodes);
+    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, Nnodes>>();
 
     // Iterate through cell container to update coordinaates
     cellcontainer->for_each(
@@ -190,7 +191,8 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
       REQUIRE((*itr)->nfunctions() == 0);
     }
 
-    auto hexsf = std::make_shared<mpm::HexahedronShapeFn<Dim>>(Nnodes);
+    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, Nnodes>>();
 
     // Iterate through cell container to update coordinaates
     cellcontainer->for_each(

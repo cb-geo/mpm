@@ -13,7 +13,8 @@ namespace mpm {
 //! Quadrilateral shape function class derived from ShapeFn class
 //! \brief Shape functions of a quadrilateral element
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
+//! \tparam Tnfunctions Number of functions
+template <unsigned Tdim, unsigned Tnfunctions>
 class QuadrilateralShapeFn : public ShapeFn<Tdim> {
 
  public:
@@ -21,36 +22,22 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralShapeFn(unsigned nfunctions) : mpm::ShapeFn<Tdim>(nfunctions) {
+  QuadrilateralShapeFn() : mpm::ShapeFn<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-    try {
-      if (!(nfunctions == 4 || nfunctions == 8 || nfunctions == 9)) {
-        throw std::runtime_error(
+    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
             "Specified number of shape functions is not defined");
-      }
-      shapefn_.resize(this->nfunctions_, 1);
-      grad_shapefn_.resize(this->nfunctions_, Tdim);
-    } catch (std::exception& exception) {
-      std::cerr << exception.what() << '\n';
-      std::abort();
-    }
   }
+
+  //! Return number of functions
+  unsigned nfunctions() const { return Tnfunctions; }
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  Eigen::MatrixXd shapefn(const VectorDim& xi);
+  Eigen::VectorXd shapefn(const VectorDim& xi);
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
-
- protected:
-  // Number of functions
-  using ShapeFn<Tdim>::nfunctions_;
-  // Shape functions
-  using ShapeFn<Tdim>::shapefn_;
-  // Gradient shape functions
-  using ShapeFn<Tdim>::grad_shapefn_;
 };
 
 }  // namespace mpm

@@ -16,22 +16,24 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
 
   Eigen::Vector2d coords;
   coords.setZero();
 
-  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node0 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
   coords << 0, 1;
-  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node1 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
   coords << 1, 1;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node2 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
   coords << 1, 0;
-  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -70,17 +72,27 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
   SECTION("Check shape functions") {
     mpm::Index id = 0;
-    auto shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(Nnodes);
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
-    REQUIRE(cell->nfunctions() == 4);
+    // Check 4-noded function
+    SECTION("Check 4-noded Quadrilateral") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      REQUIRE(cell->nfunctions() == 4);
+    }
     // Check 8-noded function
-    shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(8);
-    cell->shapefn(shapefn);
-    REQUIRE(cell->nfunctions() == 8);
+    SECTION("Check 8-noded Quadrilateral") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 8>>();
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      REQUIRE(cell->nfunctions() == 8);
+    }
     // Check 9-noded function
-    shapefn = std::make_shared<mpm::QuadrilateralShapeFn<Dim>>(9);
-    cell->shapefn(shapefn);
-    REQUIRE(cell->nfunctions() == 9);
+    SECTION("Check 9-noded Quadrilateral") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 9>>();
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      REQUIRE(cell->nfunctions() == 9);
+    }
   }
 
   SECTION("Test particle addition deletion") {
@@ -101,6 +113,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
+  // Number of phases
+  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
 
@@ -108,28 +122,28 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   Eigen::Vector3d coords;
 
   coords << 0, 0, 0;
-  auto node0 = std::make_shared<mpm::Node<Dim>>(0, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node0 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
   coords << 1, 0, 0;
-  auto node1 = std::make_shared<mpm::Node<Dim>>(1, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node1 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
   coords << 0, 1, 0;
-  auto node2 = std::make_shared<mpm::Node<Dim>>(2, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node2 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
   coords << 1, 1, 0;
-  auto node3 = std::make_shared<mpm::Node<Dim>>(3, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
   coords << 0, 0, 1;
-  auto node4 = std::make_shared<mpm::Node<Dim>>(4, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node4 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
 
   coords << 1, 0, 1;
-  auto node5 = std::make_shared<mpm::Node<Dim>>(5, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node5 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
 
   coords << 0, 1, 1;
-  auto node6 = std::make_shared<mpm::Node<Dim>>(6, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node6 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
 
   coords << 1, 1, 1;
-  auto node7 = std::make_shared<mpm::Node<Dim>>(7, coords, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node7 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -173,13 +187,20 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   SECTION("Check shape functions") {
     mpm::Index id = 0;
-    auto shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(Nnodes);
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
-    REQUIRE(cell->nfunctions() == 8);
+    // Check 8-noded function
+    SECTION("Check 8-noded Hexahedron") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      REQUIRE(cell->nfunctions() == 8);
+    }
     // Check 20-noded function
-    shapefn = std::make_shared<mpm::HexahedronShapeFn<Dim>>(20);
-    cell->shapefn(shapefn);
-    REQUIRE(cell->nfunctions() == 20);
+    SECTION("Check 20-noded Hexahedron") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 20>>();
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      REQUIRE(cell->nfunctions() == 20);
+    }
   }
 
   SECTION("Test particle addition deletion") {

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "particle_base.h"
 #include "serialize.h"
 
 namespace mpm {
@@ -19,8 +20,9 @@ using Index = unsigned long long;
 //! \brief Base class that stores the information about particles
 //! \details Particle class: id_ and coordinates.
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
-class Particle {
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tnphases>
+class Particle : public ParticleBase<Tdim> {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
@@ -35,51 +37,37 @@ class Particle {
   virtual ~Particle(){};
 
   //! Delete copy constructor
-  Particle(const Particle<Tdim>&) = delete;
+  Particle(const Particle<Tdim, Tnphases>&) = delete;
 
   //! Delete assignement operator
-  Particle& operator=(const Particle<Tdim>&) = delete;
-
-  //! Return id of the particle
-  Index id() const { return id_; }
-
-  //! Assign coordinates
-  //! \param[in] coord Assign coord as coordinates of the particle
-  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
-
-  //! Return coordinates
-  //! \retval coordinates_ return coordinates of the particle
-  VectorDim coordinates() const { return coordinates_; }
+  Particle& operator=(const Particle<Tdim, Tnphases>&) = delete;
 
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
-  //! Assign status
-  void assign_status(bool status) { status_ = status; }
-
-  //! Status
-  bool status() const { return status_; }
-
+  /*
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;
     ar& coordinates_;
   }
+  */
 
  private:
   //! particle id
-  Index id_{std::numeric_limits<Index>::max()};
+  using ParticleBase<Tdim>::id_;
 
   //! coordinates
-  VectorDim coordinates_;
+  using ParticleBase<Tdim>::coordinates_;
 
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
 
   //! Status
-  bool status_{true};
+  using ParticleBase<Tdim>::status_;
 
+  /*
   //! Serialize
   //! \tparam Archive Boost Archive
   //! \param[in] ar Archive
@@ -91,6 +79,7 @@ class Particle {
     ar& id_;
     ar& coordinates_;
   }
+  */
 };  // Particle class
 }  // mpm namespace
 

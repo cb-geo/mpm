@@ -2,9 +2,8 @@
 #include <iostream>
 #include <memory>
 
-#include "container.h"
-#include "handler.h"
 #include "node.h"
+#include "node_base.h"
 
 #include "Eigen/Dense"
 
@@ -12,19 +11,11 @@ int main(int argc, char** argv) {
   unsigned long long id = 0;
   const unsigned Dim = 3;
   const unsigned Dof = 6;
+  const unsigned Nphases = 1;
   Eigen::Matrix<double, Dim, 1> coord;
   coord.setZero();
 
-  auto node = std::make_shared<mpm::Node<Dim>>(id, coord, Dof);
+  std::shared_ptr<mpm::NodeBase<Dim>> node =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coord);
   std::cout << "Node id: " << node->id() << '\n';
-
-  auto nodehandler = std::make_shared<mpm::Handler<mpm::Node<Dim>>>();
-  nodehandler->insert(node);
-
-  for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr)
-    std::cout << ((*itr).second)->id() << '\n';
-
-  auto nodecontainer = std::make_shared<mpm::Container<mpm::Node<Dim>>>();
-  nodecontainer->add(node);
-  nodecontainer->add(node);
 }

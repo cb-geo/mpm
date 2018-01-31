@@ -22,14 +22,14 @@ class MPM {
   //! Constructor
   MPM() {
     // Unique id
-    uuid_ =
+    analysis_uuid_ =
         boost::lexical_cast<std::string>(boost::uuids::random_generator()());
     meshes_.clear();
   };
 
  private:
   // A unique id for the analysis
-  std::string uuid_;
+  std::string analysis_uuid_;
 
   //! Mesh object
   std::vector<std::unique_ptr<lem::Mesh<Tdim>>> meshes_;

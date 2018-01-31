@@ -16,33 +16,21 @@ class ShapeFn {
 
   //! Constructor
   //! Assign variables to zero
-  ShapeFn(unsigned nfunctions) : nfunctions_{nfunctions} {
-    shapefn_.resize(nfunctions, 1);
-    grad_shapefn_.resize(nfunctions, Tdim);
-  }
+  ShapeFn(){};
 
   //! Destructor
   virtual ~ShapeFn() {}
 
   //! Return number of functions
-  //! \retval nfuctions_ Number of shape functions in a cell
-  unsigned nfunctions() const { return nfunctions_; }
+  virtual unsigned nfunctions() const = 0;
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::MatrixXd shapefn(const VectorDim& xi) = 0;
+  virtual Eigen::VectorXd shapefn(const VectorDim& xi) = 0;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
-
- protected:
-  //! Number of functions
-  unsigned nfunctions_;
-  //! Shape function
-  Eigen::MatrixXd shapefn_;
-  //! Gradient shape functions
-  Eigen::MatrixXd grad_shapefn_;
 };
 
 }  // namespace mpm
