@@ -60,6 +60,39 @@ class ParticleBase {
   //! Status
   bool status() const { return status_; }
 
+  //! Initialise properties
+  virtual void initialise() = 0;
+  
+  //! Assign mass
+  virtual void assign_mass(unsigned nphase, double mass) = 0;
+
+  //! Return mass
+  virtual double mass(unsigned nphase) const = 0;
+
+  //! Assign stress
+  virtual void assign_stress(unsigned nphase, const Eigen::VectorXd& stress) = 0;
+
+  //! Return stress
+  virtual Eigen::VectorXd stress(unsigned nphase) const = 0;
+
+  //! Assign velocity
+  virtual void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity) = 0;
+
+  //! Return velocity
+  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
+
+  //! Assign momentum
+  virtual void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum) = 0;
+
+  //! Return momentum
+  virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
+
+  //! Assign acceleration
+  virtual void assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration) = 0;
+
+  //! Return acceleration
+  virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
+
   //! Serialize
   friend class boost::serialization::access;
   template <class Archive>

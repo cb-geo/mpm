@@ -42,8 +42,48 @@ class Particle : public ParticleBase<Tdim> {
   //! Delete assignement operator
   Particle& operator=(const Particle<Tdim, Tnphases>&) = delete;
 
+  //! Initialise properties
+  void initialise();
+
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+
+  //! Assign nodal mass
+  void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
+
+  //! Return mass
+  double mass(unsigned nphase) const { return mass_(0, nphase); }
+
+  //! Assign stress
+  void assign_stress(unsigned nphase, const Eigen::VectorXd& stress);
+
+  //! Return stress
+  Eigen::VectorXd stress(unsigned nphase) const { return stress_.col(nphase); }
+
+  //! Assign velocity
+  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
+
+  //! Return velocity
+  Eigen::VectorXd velocity(unsigned nphase) const {
+    return velocity_.col(nphase);
+  }
+
+  //! Assign momentum
+  void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
+
+  //! Return momentum
+  Eigen::VectorXd momentum(unsigned nphase) const {
+    return momentum_.col(nphase);
+  }
+
+  //! Assign acceleration
+  void assign_acceleration(unsigned nphase,
+                           const Eigen::VectorXd& acceleration);
+
+  //! Return acceleration
+  Eigen::VectorXd acceleration(unsigned nphase) const {
+    return acceleration_.col(nphase);
+  }
 
   friend class boost::serialization::access;
   template <class Archive>
@@ -56,15 +96,23 @@ class Particle : public ParticleBase<Tdim> {
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;
-
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
-
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
-
   //! Status
   using ParticleBase<Tdim>::status_;
+  //! Mass
+  Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Stresses
+  Eigen::Matrix<double, Tdim, Tnphases> stress_;
+  //! Velocity
+  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Momentum
+  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
+  //! Acceleration
+  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+
 };  // Particle class
 }  // namespace mpm
 

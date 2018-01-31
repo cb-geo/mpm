@@ -17,6 +17,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   const unsigned Dof = 1;
   // Phases
   const unsigned Nphases = 1;
+  // Phase
+  const unsigned Phase = 0;
 
   // Coordinates
   Eigen::Matrix<double, 1, 1> coords;
@@ -87,7 +89,69 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
   }
 
-  /*
+  SECTION("Check particle properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    // Check mass
+    REQUIRE(particle->mass(Phase) == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(Phase, mass);
+    REQUIRE(particle->mass(Phase) == Approx(100.5).epsilon(Tolerance));
+
+    // Check stress
+    Eigen::VectorXd stress;
+    stress.resize(Dim);
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_velocity(Phase, velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dim);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_momentum(Phase, momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->assign_acceleration(Phase, acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(1.).epsilon(Tolerance));
+  }
+
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -111,8 +175,9 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       Eigen::Matrix<double, 1, 1> coordinates;
       coordinates.setZero();
 
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id,
-  coordinates); REQUIRE(particle->id() == 1);
+      auto particle =
+          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
+      REQUIRE(particle->id() == 1);
 
       // Load from archive
       boost::archive::text_iarchive(ss) >> *particle;
@@ -122,7 +187,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
         REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     }
   }
-  */
 }
 
 //! \brief Check particle class for 2D case
@@ -133,6 +197,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   const unsigned Dof = 2;
   // Number of phases
   const unsigned Nphases = 1;
+  // Phase
+  const unsigned Phase = 0;  
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -220,7 +286,69 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == true);
   }
 
-  
+  SECTION("Check particle properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    // Check mass
+    REQUIRE(particle->mass(Phase) == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(Phase, mass);
+    REQUIRE(particle->mass(Phase) == Approx(100.5).epsilon(Tolerance));
+
+    // Check stress
+    Eigen::VectorXd stress;
+    stress.resize(Dim);
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_velocity(Phase, velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dim);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_momentum(Phase, momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->assign_acceleration(Phase, acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(1.).epsilon(Tolerance));
+  }
+
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -233,8 +361,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     std::stringstream ss;
     // save data to archive
     {
-      auto particle =
-          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
       boost::archive::text_oarchive oa(ss);
       oa << *particle;
     }
@@ -267,6 +394,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   const unsigned Dof = 6;
   // Nnumber of phases
   const unsigned Nphases = 1;
+  // Phase
+  const unsigned Phase = 0;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -395,6 +524,69 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
+  }
+
+  SECTION("Check particle properties") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    // Check mass
+    REQUIRE(particle->mass(Phase) == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(Phase, mass);
+    REQUIRE(particle->mass(Phase) == Approx(100.5).epsilon(Tolerance));
+
+    // Check stress
+    Eigen::VectorXd stress;
+    stress.resize(Dim);
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_velocity(Phase, velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check momentum
+    Eigen::VectorXd momentum;
+    momentum.resize(Dim);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_momentum(Phase, momentum);
+    for (unsigned i = 0; i < momentum.size(); ++i)
+      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+
+    // Check acceleration
+    Eigen::VectorXd acceleration;
+    acceleration.resize(Dim);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->assign_acceleration(Phase, acceleration);
+    for (unsigned i = 0; i < acceleration.size(); ++i)
+      REQUIRE(particle->acceleration(Phase)(i) ==
+              Approx(1.).epsilon(Tolerance));
   }
 
   //! Test serialize function
