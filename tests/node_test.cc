@@ -256,7 +256,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 //! \brief Check node class for 3D case
 TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   const unsigned Dim = 3;
-  const unsigned Dof = 6;
+  const unsigned Dof = 3;
   const unsigned Nphases = 1;
 
   Eigen::Vector3d coords;
@@ -280,7 +280,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     //! Check for degrees of freedom
     mpm::Index id = 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
-    REQUIRE(node->dof() == 6);
+    REQUIRE(node->dof() == 3);
   }
 
   //! Test coordinates function
