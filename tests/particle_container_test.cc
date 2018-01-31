@@ -15,20 +15,24 @@ TEST_CASE("Particle container is checked for 2D case",
   const unsigned Dim = 2;
   // Tolerance
   const double Tolerance = 1.E-7;
+  // Phases
+  const unsigned Nphases = 1;
 
   // Particle 1
   mpm::Index id1 = 0;
   Eigen::Vector2d coords;
   coords.setZero();
-  auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+  std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+      std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
-  auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+  std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+      std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
   // Particle container
   auto particlecontainer =
-      std::make_shared<mpm::Container<mpm::Particle<Dim>>>();
+      std::make_shared<mpm::Container<mpm::ParticleBase<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
@@ -104,10 +108,10 @@ TEST_CASE("Particle container is checked for 2D case",
 
     // Iterate through particle container to update coordinaates
     particlecontainer->for_each(  // function structure
-        std::bind(static_cast<void (mpm::Particle<Dim>::*)(
+        std::bind(static_cast<void (mpm::ParticleBase<Dim>::*)(
                       const Eigen::Matrix<double, Dim, 1>&)>(
                       // function
-                      &mpm::Particle<Dim>::coordinates),
+                      &mpm::ParticleBase<Dim>::coordinates),
                   // arguments
                   std::placeholders::_1, coords));
 
@@ -127,6 +131,8 @@ TEST_CASE("Particle container is checked for 3D case",
           "[particlecontainer][3D]") {
   // Dimension
   const unsigned Dim = 3;
+  // Phases
+  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -134,15 +140,17 @@ TEST_CASE("Particle container is checked for 3D case",
   mpm::Index id1 = 0;
   Eigen::Vector3d coords;
   coords.setZero();
-  auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+  std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+      std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
-  auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+  std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+      std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
   // Particle container
   auto particlecontainer =
-      std::make_shared<mpm::Container<mpm::Particle<Dim>>>();
+      std::make_shared<mpm::Container<mpm::ParticleBase<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
@@ -218,10 +226,10 @@ TEST_CASE("Particle container is checked for 3D case",
     // Iterate through particle container to update coordinaates
     particlecontainer->for_each(
         // function structure
-        std::bind(static_cast<void (mpm::Particle<Dim>::*)(
+        std::bind(static_cast<void (mpm::ParticleBase<Dim>::*)(
                       const Eigen::Matrix<double, Dim, 1>&)>(
                       // function
-                      &mpm::Particle<Dim>::coordinates),
+                      &mpm::ParticleBase<Dim>::coordinates),
                   // arguments
                   std::placeholders::_1, coords));
 
