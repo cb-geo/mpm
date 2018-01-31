@@ -17,14 +17,13 @@ template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord, bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {}
 
-/*
 // Assign a cell to particle
 //! \param[in] cellptr Pointer to a cell
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::assign_cell(
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   cell_ = cellptr;
   return cell_->add_particle_id(this->id());
 }
-*/

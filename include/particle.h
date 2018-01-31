@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-//#include "cell.h"
+#include "cell.h"
 #include "particle_base.h"
 #include "serialize.h"
 
@@ -43,7 +43,7 @@ class Particle : public ParticleBase<Tdim> {
   Particle& operator=(const Particle<Tdim, Tnphases>&) = delete;
 
   //! Assign cell
-  // bool assign_cell(const std::shared_ptr<Cell<Tdim, Tnphases>>& cellptr);
+  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
   /*
   friend class boost::serialization::access;
@@ -62,7 +62,7 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::coordinates_;
 
   //! Cell
-  // std::shared_ptr<Cell<Tdim> cell_;
+  std::shared_ptr<Cell<Tdim>> cell_;
 
   //! Status
   using ParticleBase<Tdim>::status_;

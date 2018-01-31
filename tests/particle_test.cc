@@ -5,7 +5,8 @@
 
 #include "catch.hpp"
 
-// #include "cell.h"
+#include "cell.h"
+#include "node.h"
 #include "particle.h"
 
 //! \brief Check particle class for 1D case
@@ -33,7 +34,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   SECTION("Particle id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
     REQUIRE(particle->status() == true);
   }
@@ -55,7 +57,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     // Check for coordinates being zero
     auto coordinates = particle->coordinates();
@@ -108,8 +111,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       Eigen::Matrix<double, 1, 1> coordinates;
       coordinates.setZero();
 
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
-      REQUIRE(particle->id() == 1);
+      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id,
+  coordinates); REQUIRE(particle->id() == 1);
 
       // Load from archive
       boost::archive::text_iarchive(ss) >> *particle;
@@ -183,25 +186,28 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     REQUIRE(coordinates.size() == Dim);
   }
-  
-  /*
+
   SECTION("Add a pointer to a cell to particle") {
     // Add particle
     mpm::Index id = 0;
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim, Nphases>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     // Add nodes
-    auto node0 = std::make_shared<mpm::Node<Dim, Nphases>>(0, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
     coords << 0, 1;
-    auto node1 = std::make_shared<mpm::Node<Dim, Nphases>>(1, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
     coords << 1, 1;
-    auto node2 = std::make_shared<mpm::Node<Dim, Nphases>>(2, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
     coords << 1, 0;
-    auto node3 = std::make_shared<mpm::Node<Dim, Nphases>>(3, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -214,6 +220,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == true);
   }
 
+  /*
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -237,7 +244,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       Eigen::Vector2d coordinates;
       coordinates.setZero();
 
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
+      auto particle =
+          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
       REQUIRE(particle->id() == 1);
 
       // Load from archive
@@ -271,7 +279,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   //! Check for id = 0
   SECTION("Particle id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
   }
@@ -279,7 +288,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Particle id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
     REQUIRE(particle->status() == true);
   }
@@ -288,7 +298,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Particle with id, coordinates, and status") {
     mpm::Index id = 0;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
     particle->assign_status(false);
@@ -299,7 +310,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("coordinates function is checked") {
     mpm::Index id = 0;
     // Create particle
-    std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = particle->coordinates();
@@ -328,38 +340,46 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(coordinates.size() == Dim);
   }
 
-  /*
   //! Test assign cell pointer to particle
   SECTION("Add a pointer to a cell to particle") {
     // Add particle
     mpm::Index id = 0;
-        std::shared_ptr<mpm::ParticleBase<Dim>>  particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim, Nphases>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
     // Add nodes
     coords << 0, 0, 0;
-    auto node0 = std::make_shared<mpm::Node<Dim, Nphases>>(0, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
     coords << 1, 0, 0;
-    auto node1 = std::make_shared<mpm::Node<Dim, Nphases>>(1, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
     coords << 0, 1, 0;
-    auto node2 = std::make_shared<mpm::Node<Dim, Nphases>>(2, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
     coords << 1, 1, 0;
-    auto node3 = std::make_shared<mpm::Node<Dim, Nphases>>(3, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
     coords << 0, 0, 1;
-    auto node4 = std::make_shared<mpm::Node<Dim, Nphases>>(4, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
 
     coords << 1, 0, 1;
-    auto node5 = std::make_shared<mpm::Node<Dim, Nphases>>(5, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
 
     coords << 0, 1, 1;
-    auto node6 = std::make_shared<mpm::Node<Dim, Nphases>>(6, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
 
     coords << 1, 1, 1;
-    auto node7 = std::make_shared<mpm::Node<Dim, Nphases>>(7, coords, Dof);
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     cell->add_node(0, node0);
     cell->add_node(1, node1);
@@ -377,6 +397,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == true);
   }
 
+  /*
   //! Test serialize function
   SECTION("Serialisation is checked") {
     mpm::Index id = 0;
@@ -400,7 +421,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       Eigen::Vector3d coordinates;
       coordinates.setZero();
 
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
+      auto particle =
+          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
       REQUIRE(particle->id() == 1);
 
       // Load from archive
@@ -409,7 +431,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       coordinates = particle->coordinates();
       for (unsigned i = 0; i < coordinates.size(); ++i)
         REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
-
     }
   }
   */

@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-// #include "cell.h"
+#include "cell.h"
 #include "serialize.h"
 
 namespace mpm {
@@ -52,7 +52,7 @@ class ParticleBase {
   VectorDim coordinates() const { return coordinates_; }
 
   //! Assign cell
-  // bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+  virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
