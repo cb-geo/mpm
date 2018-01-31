@@ -116,7 +116,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     for (unsigned i = 0; i < momentum.size(); ++i)
       REQUIRE(node->momentum(Nphase)(i) == Approx(1.).epsilon(Tolerance));
 
-    /*
     // Check acceleration
     Eigen::VectorXd acceleration;
     acceleration.resize(Dof);
@@ -128,7 +127,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     node->assign_acceleration(Nphase, acceleration);
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
-    */
   }
 }
 
