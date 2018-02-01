@@ -38,6 +38,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
+  mass_.setZero();
   stress_.setZero();
   velocity_.setZero();
   momentum_.setZero();

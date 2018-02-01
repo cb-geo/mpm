@@ -25,8 +25,8 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! constructor with number of shape functions
   HexahedronShapeFn() : mpm::ShapeFn<Tdim>() {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
-    static_assert((Tnfunctions == 8 || Tnfunctions == 20), 
-            "Specified number of shape functions is not defined");    
+    static_assert((Tnfunctions == 8 || Tnfunctions == 20),
+                  "Specified number of shape functions is not defined");
   }
 
   //! Return number of functions
@@ -39,6 +39,11 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
+
+  //! Return indices of a sub-tetrahedrons in a volume
+  //! to check if a point is inside /outside of a hedron
+  //! \retval indices Indices that form sub-tetrahedrons
+  Eigen::MatrixXi inhedron_indices();
 };
 
 }  // namespace mpm

@@ -25,7 +25,7 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   QuadrilateralShapeFn() : mpm::ShapeFn<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
-            "Specified number of shape functions is not defined");
+                  "Specified number of shape functions is not defined");
   }
 
   //! Return number of functions
@@ -38,6 +38,11 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
+
+  //! Return indices of a sub-tetrahedrons in a volume
+  //! to check if a point is inside /outside of a hedron
+  //! \retval indices Indices that form sub-tetrahedrons
+  Eigen::MatrixXi inhedron_indices();
 };
 
 }  // namespace mpm

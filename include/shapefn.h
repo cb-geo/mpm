@@ -1,6 +1,8 @@
 #ifndef MPM_SHAPEFN_H_
 #define MPM_SHAPEFN_H_
 
+#include <vector>
+
 #include <Eigen/Dense>
 
 namespace mpm {
@@ -31,6 +33,11 @@ class ShapeFn {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
+
+  //! Return indices of a sub-tetrahedrons in a volume
+  //! to check if a point is inside /outside of a hedron
+  //! \retval indices Indices that form sub-tetrahedrons
+  virtual Eigen::MatrixXi inhedron_indices() = 0;
 };
 
 }  // namespace mpm

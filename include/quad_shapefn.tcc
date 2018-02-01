@@ -156,3 +156,22 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   grad_shapefn(8, 1) = 2. * xi(1) * ((xi(0) * xi(0)) - 1.);
   return grad_shapefn;
 }
+
+
+//! Return indices of a sub-tetrahedrons in a volume
+//! to check if a point is inside /outside of a hedron
+//! \retval indices Indices that form sub-tetrahedrons
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXi
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::inhedron_indices() {
+  Eigen::Matrix<int, 4, Tdim, Eigen::RowMajor> indices;
+
+  // clang-format off
+  indices << 0, 1,
+             1, 2,
+             2, 3,
+             3, 0;
+  //clang-format on
+  return indices;
+}
+  
