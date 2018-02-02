@@ -33,7 +33,7 @@ class MPM {
   std::string analysis_uuid_;
 
   //! Mesh object
-  std::vector<std::unique_ptr<lem::Mesh<Tdim>>> meshes_;
+  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
 };
 }  // namespace mpm
 
