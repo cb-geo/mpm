@@ -19,6 +19,7 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPM {
+ public:
   //! Constructor
   MPM() {
     // Unique id
