@@ -28,7 +28,7 @@ class MPM {
     meshes_.clear();
   };
 
- private:
+ protected:
   // A unique id for the analysis
   std::string analysis_uuid_;
 
