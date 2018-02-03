@@ -19,6 +19,7 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPM {
+ public:
   //! Constructor
   MPM() {
     // Unique id
@@ -27,12 +28,12 @@ class MPM {
     meshes_.clear();
   };
 
- private:
+ protected:
   // A unique id for the analysis
   std::string analysis_uuid_;
 
   //! Mesh object
-  std::vector<std::unique_ptr<lem::Mesh<Tdim>>> meshes_;
+  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
 };
 }  // namespace mpm
 
