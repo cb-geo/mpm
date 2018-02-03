@@ -117,6 +117,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
+  // Tolerance
+  const double Tolerance = 1.E-7;
 
   // Coordinaates
   Eigen::Vector3d coords;
@@ -127,10 +129,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   coords << 1, 0, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-  coords << 0, 1, 0;
+  coords << 1, 1, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-  coords << 1, 1, 0;
+  coords << 0, 1, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
   coords << 0, 0, 1;
@@ -139,10 +141,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   coords << 1, 0, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node5 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
 
-  coords << 0, 1, 1;
+  coords << 1, 1, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node6 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
 
-  coords << 1, 1, 1;
+  coords << 0, 1, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node7 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
   //! Check Cell IDs
@@ -175,6 +177,17 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell->add_node(6, node6);
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
+
+    SECTION("Compute volume of a cell") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+      cell->shapefn(shapefn);
+      REQUIRE(cell->nfunctions() == 8);
+      // Compute volume
+      REQUIRE(cell->volume() == Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+      cell->compute_volume();
+      REQUIRE(cell->volume() == Approx(1.0).epsilon(Tolerance));
+    }
   }
 
   SECTION("Add neighbours") {
