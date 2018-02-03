@@ -171,6 +171,20 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
     }
 
+    SECTION("Eight noded hexahedron shape function for volume indices") {
+      // Check for volume indices
+      Eigen::VectorXi indices = hexsf->volume_indices();
+      REQUIRE(indices.size() == 8);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
+      REQUIRE(indices(4) == 4);
+      REQUIRE(indices(5) == 5);
+      REQUIRE(indices(6) == 6);
+      REQUIRE(indices(7) == 7);
+    }
+    
     SECTION("Eight noded hexahedron shape function for inhedron indices") {
       // Check for inhedron indices
       Eigen::MatrixXi indices = hexsf->inhedron_indices();
@@ -817,7 +831,21 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(18, 2) == Approx(0.28125).epsilon(Tolerance));
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
     }
-  
+
+    SECTION("20-noded hexahedron shape function for volume indices") {
+      // Check for volume indices
+      Eigen::VectorXi indices = hexsf->volume_indices();
+      REQUIRE(indices.size() == 8);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
+      REQUIRE(indices(4) == 4);
+      REQUIRE(indices(5) == 5);
+      REQUIRE(indices(6) == 6);
+      REQUIRE(indices(7) == 7);
+    }
+
     SECTION("20-noded hexahedron shape function for inhedron indices") {
       // Check for inhedron indices
       Eigen::MatrixXi indices = hexsf->inhedron_indices();
