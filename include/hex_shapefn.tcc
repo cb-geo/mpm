@@ -245,6 +245,19 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 //!     0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!   4           16            5
 
+
+//! Return indices of to calculate the cell volume / area
+//! \retval indices Outer-indices that form the cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::volume_indices() {
+  Eigen::Matrix<int, 8, 1> indices;
+  indices << 0, 1, 2, 3, 4, 5, 6, 7;
+  return indices;
+}
+
 //! Return indices of a sub-tetrahedrons in a volume
 //! to check if a point is inside /outside of a hedron
 //! \retval indices Indices that form sub-tetrahedrons

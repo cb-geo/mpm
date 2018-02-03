@@ -157,6 +157,17 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return indices of to calculate the cell volume / area
+//! \retval indices Outer-indices that form the cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::volume_indices() {
+  Eigen::Matrix<int, 8, 1> indices;
+  indices << 0, 1, 2, 3;
+  return indices;
+}
 
 //! Return indices of a sub-tetrahedrons in a volume
 //! to check if a point is inside /outside of a hedron

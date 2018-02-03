@@ -34,6 +34,10 @@ class ShapeFn {
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
 
+  //! Return indices of to calculate the cell volume / area
+  //! \retval indices Outer-indices that form the cell
+  virtual Eigen::VectorXi volume_indices() = 0;
+
   //! Return indices of a sub-tetrahedrons in a volume
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
