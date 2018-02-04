@@ -143,50 +143,51 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_volume() {
-  Eigen::VectorXi indices = shapefn_->volume_indices();
   try {
-    // Hexahedron
-    if (indices.size() == 8) {
-      // Node numbering as read in by mesh file
-      //        d               c
-      //          *_ _ _ _ _ _*
-      //         /|           /|
-      //        / |          / |
-      //     a *_ |_ _ _ _ _* b|
-      //       |  |         |  |
-      //       |  |         |  |
-      //       |  *_ _ _ _ _|_ *
-      //       | / h        | / g
-      //       |/           |/
-      //       *_ _ _ _ _ _ *
-      //     e               f
-      //
-      // Calculation of hexahedron volume from
-      // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
+    Eigen::VectorXi indices = shapefn_->volume_indices();
+    switch (indices.size()) {
+        // Hexahedron
+      case 8: {
+        // Node numbering as read in by mesh file
+        //        d               c
+        //          *_ _ _ _ _ _*
+        //         /|           /|
+        //        / |          / |
+        //     a *_ |_ _ _ _ _* b|
+        //       |  |         |  |
+        //       |  |         |  |
+        //       |  *_ _ _ _ _|_ *
+        //       | / h        | / g
+        //       |/           |/
+        //       *_ _ _ _ _ _ *
+        //     e               f
+        //
+        // Calculation of hexahedron volume from
+        // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
 
-      const Eigen::Vector3d a = nodes_[indices[7]]->coordinates();
-      const Eigen::Vector3d b = nodes_[indices[6]]->coordinates();
-      const Eigen::Vector3d c = nodes_[indices[2]]->coordinates();
-      const Eigen::Vector3d d = nodes_[indices[3]]->coordinates();
-      const Eigen::Vector3d e = nodes_[indices[4]]->coordinates();
-      const Eigen::Vector3d f = nodes_[indices[5]]->coordinates();
-      const Eigen::Vector3d g = nodes_[indices[1]]->coordinates();
-      const Eigen::Vector3d h = nodes_[indices[0]]->coordinates();
+        const Eigen::Vector3d a = nodes_[indices[7]]->coordinates();
+        const Eigen::Vector3d b = nodes_[indices[6]]->coordinates();
+        const Eigen::Vector3d c = nodes_[indices[2]]->coordinates();
+        const Eigen::Vector3d d = nodes_[indices[3]]->coordinates();
+        const Eigen::Vector3d e = nodes_[indices[4]]->coordinates();
+        const Eigen::Vector3d f = nodes_[indices[5]]->coordinates();
+        const Eigen::Vector3d g = nodes_[indices[1]]->coordinates();
+        const Eigen::Vector3d h = nodes_[indices[0]]->coordinates();
 
-      volume_ =
-          (1.0 / 12) *
-              (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
-                          ((d - e).cross(h - a))) +
-          (1.0 / 12) *
-              (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
-          (1.0 / 12) *
-              (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
-          (1.0 / 12) *
-              (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
-
-    } else {
-      throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
+        volume_ =
+            (1.0 / 12) *
+                (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
+                            ((d - e).cross(h - a))) +
+            (1.0 / 12) *
+                (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
+            (1.0 / 12) *
+                (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
+            (1.0 / 12) *
+                (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
+      }
+      default:
+        throw std::runtime_error(
+            "Unable to compute volume, number of vertices is incorrect");
     }
   } catch (std::exception& except) {
     std::cout << "Compute volume of a cell: " << except.what() << '\n';
