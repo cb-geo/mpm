@@ -54,5 +54,5 @@ class Handler {
 
 #include "handler.tcc"
 
-}  // mpm namespace
+}  // namespace mpm
 #endif  // MPM_HANDLER_H_

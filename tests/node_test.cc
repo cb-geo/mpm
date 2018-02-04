@@ -17,21 +17,24 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   SECTION("Check degrees of freedom") {
     //! Check for degrees of freedom
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->dof() == 1);
   }
 
@@ -40,7 +43,8 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -72,7 +76,8 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
   SECTION("Check nodal properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
@@ -135,28 +140,31 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   const unsigned Dim = 2;
   const unsigned Dof = 2;
   const unsigned Nphases = 1;
-  const unsigned Nphase = 0;  
+  const unsigned Nphase = 0;
   Eigen::Vector2d coords;
   coords.setZero();
 
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   SECTION("Check degrees of freedom") {
     //! Check for degrees of freedom
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->dof() == 2);
   }
 
@@ -165,7 +173,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -197,7 +206,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
   SECTION("Check nodal properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
@@ -268,21 +278,24 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   //! Check for id = 0
   SECTION("Node id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == 0);
   }
 
   SECTION("Node id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->id() == std::numeric_limits<mpm::Index>::max());
   }
 
   SECTION("Check degrees of freedom") {
     //! Check for degrees of freedom
     mpm::Index id = 0;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
     REQUIRE(node->dof() == 3);
   }
 
@@ -291,7 +304,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     //! Check for coordinates being zero
     auto coordinates = node->coordinates();
@@ -323,7 +337,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
   SECTION("Check nodal properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::NodeBase<Dim>> node = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));

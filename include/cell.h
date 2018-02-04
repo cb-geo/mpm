@@ -102,7 +102,7 @@ class Cell {
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
 };  // Cell class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "cell.tcc"
 

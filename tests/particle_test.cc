@@ -198,7 +198,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   // Number of phases
   const unsigned Nphases = 1;
   // Phase
-  const unsigned Phase = 0;  
+  const unsigned Phase = 0;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance

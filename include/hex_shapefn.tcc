@@ -245,7 +245,6 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 //!     0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!   4           16            5
 
-
 //! Return indices of to calculate the cell volume / area
 //! \retval indices Outer-indices that form the cell
 //! \tparam Tdim Dimension
