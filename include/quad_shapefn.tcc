@@ -164,7 +164,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::volume_indices() {
-  Eigen::Matrix<int, 8, 1> indices;
+  Eigen::Matrix<int, 4, 1> indices;
   indices << 0, 1, 2, 3;
   return indices;
 }
