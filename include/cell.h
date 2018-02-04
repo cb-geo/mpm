@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include "Eigen/LU"
 
 #include "handler.h"
 #include "node_base.h"
