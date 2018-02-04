@@ -138,7 +138,59 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
                    particles_.end());
 }
 
-//! Compute volume of cell
+//! Compute volume of a 2D cell
+//! \retval volume Cell volume / area
+//! \tparam Tdim Dimension
+template <>
+inline void mpm::Cell<2>::compute_volume() {
+  try {
+    Eigen::VectorXi indices = shapefn_->volume_indices();
+    std::cout << indices.size();
+    // Quadrilateral
+    if (indices.size() == 4) {
+
+      //        b
+      // 3 0---------0 2
+      //   | \   q / |
+      // a |   \  /  | c
+      //   |   p \   |
+      //   |  /    \ |
+      // 0 0---------0 1
+      //         d
+      const double a = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
+      const double b = (nodes_[indices[2]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
+      const double c = (nodes_[indices[1]]->coordinates() -
+                        nodes_[indices[2]]->coordinates())
+                           .norm();
+      const double d = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[1]]->coordinates())
+                           .norm();
+      const double p = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[2]]->coordinates())
+                           .norm();
+      const double q = (nodes_[indices[1]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
+
+      // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
+      volume_ =
+          0.25 * std::sqrt(4 * p * p * q * q -
+                           std::pow((a * a + c * c - b * b - d * d), 2.0));
+    } else {
+      throw std::runtime_error(
+          "Unable to compute volume, number of vertices is incorrect");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute volume of a cell: " << except.what() << '\n';
+  }
+}
+
+//! Compute volume of a 3D cell
 //! \retval volume Cell volume / area
 //! \tparam Tdim Dimension
 template <>
@@ -189,57 +241,5 @@ inline void mpm::Cell<3>::compute_volume() {
     }
   } catch (std::exception& except) {
     std::cout << "Compute volume of a cell: " << except.what() << '\n';
-  }
-}
-
-//! Compute volume of cell
-//! \retval volume Cell volume / area
-//! \tparam Tdim Dimension
-template <>
-inline void mpm::Cell<2>::compute_volume() {
-  try {
-    Eigen::VectorXi indices = shapefn_->volume_indices();
-    std::cout << indices.size();
-    // Quadrilateral
-    if (indices.size() == 4) {
-
-      //        b
-      // 3 0---------0 2
-      //   | \   q / |
-      // a |   \  /  | c
-      //   |   p \   |
-      //   |  /    \ |
-      // 0 0---------0 1
-      //         d
-      const double a = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
-      const double b = (nodes_[indices[2]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
-      const double c = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
-                           .norm();
-      const double d = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[1]]->coordinates())
-                           .norm();
-      const double p = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
-                           .norm();
-      const double q = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
-
-      // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
-      volume_ =
-          0.25 * std::sqrt(4 * p * p * q * q -
-                           std::pow((a * a + c * c - b * b - d * d), 2.0));
-    } else {
-      throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
-    }
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute volume of a cell: " << except.what() << '\n';
   }
 }
