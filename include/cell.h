@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include "Eigen/LU"
 
 #include "handler.h"
 #include "node_base.h"
@@ -81,6 +82,9 @@ class Cell {
   //! Return volume
   double volume() const { return volume_; }
 
+  //! Point in cell
+  bool point_in_cell(const VectorDim& point);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -102,7 +106,7 @@ class Cell {
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
 };  // Cell class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "cell.tcc"
 

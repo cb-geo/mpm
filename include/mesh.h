@@ -11,8 +11,8 @@
 #include "cell.h"
 #include "container.h"
 #include "node.h"
-#include "particle_base.h"
 #include "particle.h"
+#include "particle_base.h"
 
 namespace mpm {
 
@@ -51,7 +51,8 @@ class Mesh {
   bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
   //! Add particle
-  bool remove_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+  bool remove_particle(
+      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
   //! Number of particles
   mpm::Index nparticles() const { return particles_.size(); }
@@ -93,7 +94,7 @@ class Mesh {
   //! Container of cells
   Container<Cell<Tdim>> cells_;
 };  // Mesh class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "mesh.tcc"
 

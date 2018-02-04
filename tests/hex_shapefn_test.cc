@@ -66,7 +66,6 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(5, 2) == Approx(0.125).epsilon(Tolerance));
       REQUIRE(gradsf(6, 2) == Approx(0.125).epsilon(Tolerance));
       REQUIRE(gradsf(7, 2) == Approx(0.125).epsilon(Tolerance));
-
     }
 
     // Coordinates is (-1, -1, -1);
@@ -184,7 +183,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(indices(6) == 6);
       REQUIRE(indices(7) == 7);
     }
-    
+
     SECTION("Eight noded hexahedron shape function for inhedron indices") {
       // Check for inhedron indices
       Eigen::MatrixXi indices = hexsf->inhedron_indices();

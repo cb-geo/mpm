@@ -57,5 +57,5 @@ class Container {
 
 #include "container.tcc"
 
-}  // mpm namespace
+}  // namespace mpm
 #endif  // MPM_CONTAINER_H_

@@ -141,11 +141,13 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
   mpm::Index id1 = 0;
   Eigen::Vector3d coords;
   coords.setZero();
-  std::shared_ptr<mpm::NodeBase<Dim>> node1 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
+  std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
 
   // Node 2
   mpm::Index id2 = 1;
-  std::shared_ptr<mpm::NodeBase<Dim>> node2 = std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
+  std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
   // Node container
   auto nodecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
