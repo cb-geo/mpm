@@ -1,4 +1,4 @@
-// Constructor with id and coordinates
+//! Constructor with id and coordinates
 //! \param[in] id Global cell id
 //! \param[in] nnodes Number of nodes per cell
 //! \tparam Tdim Dimension
@@ -18,7 +18,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   }
 }
 
-// Constructor with id, coordinates and shapefn
+//! Constructor with id, coordinates and shapefn
 //! \param[in] id Global cell id
 //! \param[in] nnodes Number of nodes per cell
 //! \param[in] shapefnptr Pointer to a shape function
@@ -41,7 +41,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   }
 }
 
-// Assign a shape function to cell
+//! Assign a shape function to cell
 //! \param[in] shapefnptr Pointer to a shape function
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
@@ -242,4 +242,50 @@ inline void mpm::Cell<3>::compute_volume() {
   } catch (std::exception& except) {
     std::cout << "Compute volume of a cell: " << except.what() << '\n';
   }
+}
+
+//! Check if a point is in a cell
+//! \param[in] point Coordinates of a point
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::point_in_cell(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+
+  // Get the indices of sub-tetrahedron
+  Eigen::MatrixXi indices = shapefn_->inhedron_indices();
+
+  // Initialise sub-tetrahedra volumes to 0
+  double tetvolumes = 0.;
+
+  // Return status
+  bool status = false;
+
+  // Iterate over each sub-tetrahedrons to calculate the volume
+  // of each sub-tetrahedrons. If the sum of volume of all
+  // sub-tetrahedron is equal to the volume of hexahedron then
+  // the point is inside the Hexahedron, if not the point is outside
+  for (unsigned i = 0; i < indices.rows(); ++i) {
+
+    // Get the 3 vertices of the sub-tetrahedron
+    const VectorDim a = nodes_[indices(i, 0)]->coordinates();
+    const VectorDim b = nodes_[indices(i, 1)]->coordinates();
+    const VectorDim c = nodes_[indices(i, 2)]->coordinates();
+
+    // Compute the volume of a tetrahedron
+    // Volume = 1/6 | (a - d).((b - d) x (c - d)) |
+    const double tetvolume =
+        (1. / 6.) * std::fabs((a - point).dot((b - point).cross(c - point)));
+
+    tetvolumes += tetvolume;
+    // Optimisation check, if the sub-tetrahedra volume exceeds the volume of
+    // hexahedron, abort and return false (point is outside).
+    if ((tetvolumes > volume_) && (std::fabs(tetvolumes - volume_) > 1.E-7)) {
+      return false;
+    }
+  }
+  // Check if the point is inside the hedron
+  if (std::fabs(tetvolumes - volume_) < 1.E-7) {
+    status = true;
+  }
+  return status;
 }

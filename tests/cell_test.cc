@@ -213,6 +213,29 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
               Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
       cell->compute_volume();
       REQUIRE(cell->volume() == Approx(1.0).epsilon(Tolerance));
+
+      SECTION("Check if a point is in a cell") {
+        // Check point in cell
+        Eigen::Vector3d point;
+        point << 0.5, 0.5, 0.5;
+        REQUIRE(cell->point_in_cell(point) == true);
+
+        // Check point on vertex
+        point << 0., 0., 0.;
+        REQUIRE(cell->point_in_cell(point) == true);
+
+        // Check point on edge
+        point << 0.5, 0., 0.;
+        REQUIRE(cell->point_in_cell(point) == true);
+
+        // Check point on surface
+        point << 0.5, 0.5, 0.;
+        REQUIRE(cell->point_in_cell(point) == true);
+
+        // Check point outside
+        point << 2., 2., 2.;
+        REQUIRE(cell->point_in_cell(point) == false);
+      }
     }
   }
 

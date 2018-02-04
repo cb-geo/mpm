@@ -81,6 +81,9 @@ class Cell {
   //! Return volume
   double volume() const { return volume_; }
 
+  //! Point in cell
+  bool point_in_cell(const VectorDim& point);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};

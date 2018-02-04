@@ -1,8 +1,8 @@
 #ifndef MPM_LINEAR_ELASTIC_H_
 #define MPM_LINEAR_ELASTIC_H_
 
-#include <limits>
 #include <iostream>
+#include <limits>
 
 #include "Eigen/Dense"
 
@@ -56,7 +56,7 @@ class LinearElastic : public Material {
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
 };  // LinearElastic class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "linear_elastic.tcc"
 
