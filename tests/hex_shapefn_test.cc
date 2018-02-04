@@ -14,7 +14,8 @@ TEST_CASE("Hexahedron shape functions are checked",
   //! Check for 8 noded shape function
   SECTION("Hexahedron shape function with eight nodes") {
     const unsigned nfunctions = 8;
-    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf = std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
+    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
 
     // Coordinates is (0, 0, 0)
     SECTION("Eight noded hexahedron shape function for coordinates(0, 0, 0)") {
@@ -65,6 +66,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(5, 2) == Approx(0.125).epsilon(Tolerance));
       REQUIRE(gradsf(6, 2) == Approx(0.125).epsilon(Tolerance));
       REQUIRE(gradsf(7, 2) == Approx(0.125).epsilon(Tolerance));
+
     }
 
     // Coordinates is (-1, -1, -1);
@@ -167,6 +169,74 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(5, 2) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(6, 2) == Approx(0.5).epsilon(Tolerance));
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
+    }
+
+    SECTION("Eight noded hexahedron shape function for volume indices") {
+      // Check for volume indices
+      Eigen::VectorXi indices = hexsf->volume_indices();
+      REQUIRE(indices.size() == 8);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
+      REQUIRE(indices(4) == 4);
+      REQUIRE(indices(5) == 5);
+      REQUIRE(indices(6) == 6);
+      REQUIRE(indices(7) == 7);
+    }
+    
+    SECTION("Eight noded hexahedron shape function for inhedron indices") {
+      // Check for inhedron indices
+      Eigen::MatrixXi indices = hexsf->inhedron_indices();
+      REQUIRE(indices.rows() == 12);
+      REQUIRE(indices.cols() == 3);
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 5);
+      REQUIRE(indices(0, 2) == 4);
+
+      REQUIRE(indices(1, 0) == 0);
+      REQUIRE(indices(1, 1) == 1);
+      REQUIRE(indices(1, 2) == 5);
+
+      REQUIRE(indices(2, 0) == 3);
+      REQUIRE(indices(2, 1) == 6);
+      REQUIRE(indices(2, 2) == 7);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 2);
+      REQUIRE(indices(3, 2) == 6);
+
+      REQUIRE(indices(4, 0) == 2);
+      REQUIRE(indices(4, 1) == 1);
+      REQUIRE(indices(4, 2) == 6);
+
+      REQUIRE(indices(5, 0) == 6);
+      REQUIRE(indices(5, 1) == 1);
+      REQUIRE(indices(5, 2) == 5);
+
+      REQUIRE(indices(6, 0) == 7);
+      REQUIRE(indices(6, 1) == 6);
+      REQUIRE(indices(6, 2) == 5);
+
+      REQUIRE(indices(7, 0) == 5);
+      REQUIRE(indices(7, 1) == 4);
+      REQUIRE(indices(7, 2) == 7);
+
+      REQUIRE(indices(8, 0) == 7);
+      REQUIRE(indices(8, 1) == 4);
+      REQUIRE(indices(8, 2) == 0);
+
+      REQUIRE(indices(9, 0) == 7);
+      REQUIRE(indices(9, 1) == 0);
+      REQUIRE(indices(9, 2) == 3);
+
+      REQUIRE(indices(10, 0) == 3);
+      REQUIRE(indices(10, 1) == 0);
+      REQUIRE(indices(10, 2) == 1);
+
+      REQUIRE(indices(11, 0) == 3);
+      REQUIRE(indices(11, 1) == 1);
+      REQUIRE(indices(11, 2) == 2);
     }
   }
 
@@ -760,6 +830,74 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(17, 2) == Approx(0.09375).epsilon(Tolerance));
       REQUIRE(gradsf(18, 2) == Approx(0.28125).epsilon(Tolerance));
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
+    }
+
+    SECTION("20-noded hexahedron shape function for volume indices") {
+      // Check for volume indices
+      Eigen::VectorXi indices = hexsf->volume_indices();
+      REQUIRE(indices.size() == 8);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
+      REQUIRE(indices(4) == 4);
+      REQUIRE(indices(5) == 5);
+      REQUIRE(indices(6) == 6);
+      REQUIRE(indices(7) == 7);
+    }
+
+    SECTION("20-noded hexahedron shape function for inhedron indices") {
+      // Check for inhedron indices
+      Eigen::MatrixXi indices = hexsf->inhedron_indices();
+      REQUIRE(indices.rows() == 12);
+      REQUIRE(indices.cols() == 3);
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 5);
+      REQUIRE(indices(0, 2) == 4);
+
+      REQUIRE(indices(1, 0) == 0);
+      REQUIRE(indices(1, 1) == 1);
+      REQUIRE(indices(1, 2) == 5);
+
+      REQUIRE(indices(2, 0) == 3);
+      REQUIRE(indices(2, 1) == 6);
+      REQUIRE(indices(2, 2) == 7);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 2);
+      REQUIRE(indices(3, 2) == 6);
+
+      REQUIRE(indices(4, 0) == 2);
+      REQUIRE(indices(4, 1) == 1);
+      REQUIRE(indices(4, 2) == 6);
+
+      REQUIRE(indices(5, 0) == 6);
+      REQUIRE(indices(5, 1) == 1);
+      REQUIRE(indices(5, 2) == 5);
+
+      REQUIRE(indices(6, 0) == 7);
+      REQUIRE(indices(6, 1) == 6);
+      REQUIRE(indices(6, 2) == 5);
+
+      REQUIRE(indices(7, 0) == 5);
+      REQUIRE(indices(7, 1) == 4);
+      REQUIRE(indices(7, 2) == 7);
+
+      REQUIRE(indices(8, 0) == 7);
+      REQUIRE(indices(8, 1) == 4);
+      REQUIRE(indices(8, 2) == 0);
+
+      REQUIRE(indices(9, 0) == 7);
+      REQUIRE(indices(9, 1) == 0);
+      REQUIRE(indices(9, 2) == 3);
+
+      REQUIRE(indices(10, 0) == 3);
+      REQUIRE(indices(10, 1) == 0);
+      REQUIRE(indices(10, 2) == 1);
+
+      REQUIRE(indices(11, 0) == 3);
+      REQUIRE(indices(11, 1) == 1);
+      REQUIRE(indices(11, 2) == 2);
     }
   }
 }

@@ -75,6 +75,12 @@ class Cell {
   //! Active cell (if a particle is present)
   bool status() const { return particles_.size(); }
 
+  //! Compute volume
+  void compute_volume();
+
+  //! Return volume
+  double volume() const { return volume_; }
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -82,6 +88,8 @@ class Cell {
   //! Number of nodes
   unsigned nnodes_{0};
 
+  //! Volume
+  double volume_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
 
