@@ -30,6 +30,7 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   cell_ = cellptr;
+  cell_id_ = cellptr->id();
   return cell_->add_particle_id(this->id());
 }
 

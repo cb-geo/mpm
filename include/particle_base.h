@@ -54,6 +54,9 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Return cell id
+  virtual Index cell_id() const = 0;
+
   //! Assign status
   void assign_status(bool status) { status_ = status; }
 
@@ -112,6 +115,9 @@ class ParticleBase {
 
   //! coordinates
   VectorDim coordinates_;
+
+  //! Cell id
+  Index cell_id_{std::numeric_limits<Index>::max()};
 
   //! Status
   bool status_{true};

@@ -48,6 +48,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
+  //! Return cell id
+  Index cell_id() const { return cell_id_; }
+
   //! Assign nodal mass
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
@@ -100,6 +103,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::coordinates_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+  //! Cell id
+  using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
   //! Mass
