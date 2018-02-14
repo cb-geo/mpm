@@ -27,7 +27,7 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Constructor with id and coordinates
+  //! Constructor with id and number of nodes
   Cell(Index id, unsigned nnodes);
 
   //! Constructor with id, coordinates and shapefn
@@ -74,6 +74,9 @@ class Cell {
 
   //! Active cell (if a particle is present)
   bool status() const { return particles_.size(); }
+
+  //! Assign particle mass to nodes
+  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
 
  protected:
   //! cell id

@@ -48,7 +48,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
-  //! Assign nodal mass
+  //! Assign mass
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
   //! Return mass
@@ -84,6 +84,9 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
   }
+
+  //! Map particle mass to cell
+  void map_mass_to_nodes();
 
   friend class boost::serialization::access;
   template <class Archive>

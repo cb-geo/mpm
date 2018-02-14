@@ -1,4 +1,4 @@
-// Constructor with id and coordinates
+// Constructor with id and number of nodes
 //! \param[in] id Global cell id
 //! \param[in] nnodes Number of nodes per cell
 //! \tparam Tdim Dimension
@@ -136,4 +136,13 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::remove_particle_id(Index id) {
   particles_.erase(std::remove(particles_.begin(), particles_.end(), id),
                    particles_.end());
+}
+
+//! Assign mass to nodes
+//! param[in] xi local coordinates of particle
+//! param[in] pmass mass of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass) {
+Eigen::MatrixXd shapefns = shapefn_->shapefn(xi);
 }

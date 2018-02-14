@@ -116,3 +116,11 @@ void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     std::cerr << exception.what() << '\n';
   }
 }
+
+// Map particle mass to cell
+//! \tparam Tdim Dimension
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::map_mass_to_nodes() {
+
+}

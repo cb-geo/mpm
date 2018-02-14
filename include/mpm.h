@@ -10,6 +10,8 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "mesh.h"
+#include "container.h"
+#include "particle.h"
 
 namespace mpm {
 
@@ -19,6 +21,7 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPM {
+ public:
   //! Constructor
   MPM() {
     // Unique id
@@ -27,12 +30,21 @@ class MPM {
     meshes_.clear();
   };
 
+  //! Map particle mass to nodes
+// particles.for_each(std::bind(
+
  private:
   // A unique id for the analysis
   std::string analysis_uuid_;
 
   //! Mesh object
-  std::vector<std::unique_ptr<lem::Mesh<Tdim>>> meshes_;
+  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  //! Particle container
+  mpm::Container<mpm::ParticleBase<Tdim>> particles_;
+  //! Nodes container
+  mpm::Container<mpm::NodeBase<Tdim>> nodes_;
+  //! Cells container
+  mpm::Container<mpm::Cell<Tdim>> cells_;
 };
 }  // namespace mpm
 
