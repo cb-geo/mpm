@@ -71,19 +71,22 @@ class NodeBase {
   virtual Eigen::VectorXd force(unsigned nphase) const = 0;
 
   //! Assign velocity
-  virtual void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity) = 0;
+  virtual void assign_velocity(unsigned nphase,
+                               const Eigen::VectorXd& velocity) = 0;
 
   //! Return velocity
   virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
 
   //! Assign momentum
-  virtual void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum) = 0;
+  virtual void assign_momentum(unsigned nphase,
+                               const Eigen::VectorXd& momentum) = 0;
 
   //! Return momentum
   virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
 
   //! Assign acceleration
-  virtual void assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration) = 0;
+  virtual void assign_acceleration(unsigned nphase,
+                                   const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;

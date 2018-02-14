@@ -60,19 +60,26 @@ class Node : public NodeBase<Tdim> {
   void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
   //! Return velocity
-  Eigen::VectorXd velocity(unsigned nphase) const { return velocity_.col(nphase); }
+  Eigen::VectorXd velocity(unsigned nphase) const {
+    return velocity_.col(nphase);
+  }
 
   //! Assign momentum
   void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
 
   //! Return momentum
-  Eigen::VectorXd momentum(unsigned nphase) const { return momentum_.col(nphase); }
+  Eigen::VectorXd momentum(unsigned nphase) const {
+    return momentum_.col(nphase);
+  }
 
   //! Assign acceleration
-  void assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration);
+  void assign_acceleration(unsigned nphase,
+                           const Eigen::VectorXd& acceleration);
 
   //! Return acceleration
-  Eigen::VectorXd acceleration(unsigned nphase) const { return acceleration_.col(nphase); }
+  Eigen::VectorXd acceleration(unsigned nphase) const {
+    return acceleration_.col(nphase);
+  }
 
  protected:
   //! node id

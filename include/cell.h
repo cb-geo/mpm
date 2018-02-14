@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include "Eigen/LU"
 
 #include "handler.h"
 #include "node_base.h"
@@ -75,6 +76,15 @@ class Cell {
   //! Active cell (if a particle is present)
   bool status() const { return particles_.size(); }
 
+  //! Compute volume
+  void compute_volume();
+
+  //! Return volume
+  double volume() const { return volume_; }
+
+  //! Point in cell
+  bool point_in_cell(const VectorDim& point);
+
   //! Assign particle mass to nodes
   void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
 
@@ -85,6 +95,8 @@ class Cell {
   //! Number of nodes
   unsigned nnodes_{0};
 
+  //! Volume
+  double volume_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
 
@@ -97,7 +109,7 @@ class Cell {
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
 };  // Cell class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "cell.tcc"
 

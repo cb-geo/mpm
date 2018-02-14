@@ -51,7 +51,7 @@ class Material {
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
 };  // Material class
-}  // mpm namespace
+}  // namespace mpm
 
 #include "material.tcc"
 

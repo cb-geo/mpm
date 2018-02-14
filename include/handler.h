@@ -28,6 +28,9 @@ class Handler {
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
 
+  //! Return value at a given index
+  std::shared_ptr<T> operator[](Index id) const { return elements_.at(id); }
+
   //! Return begin iterator of nodes
   typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator begin()
       const {
@@ -51,5 +54,5 @@ class Handler {
 
 #include "handler.tcc"
 
-}  // mpm namespace
+}  // namespace mpm
 #endif  // MPM_HANDLER_H_

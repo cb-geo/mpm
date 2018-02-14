@@ -198,7 +198,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   // Number of phases
   const unsigned Nphases = 1;
   // Phase
-  const unsigned Phase = 0;  
+  const unsigned Phase = 0;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -258,7 +258,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     mpm::Index id = 0;
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
     // Add nodes
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
@@ -284,6 +284,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
+    REQUIRE(particle->cell_id() == 10);
   }
 
   SECTION("Check particle properties") {
@@ -476,7 +477,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
     // Add nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -524,6 +525,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
+    REQUIRE(particle->cell_id() == 10);
   }
 
   SECTION("Check particle properties") {

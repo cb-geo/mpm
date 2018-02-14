@@ -47,6 +47,17 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     REQUIRE(nodehandler->size() == 2);
   }
 
+  SECTION("Check operator []") {
+    // Insert node 1
+    nodehandler->insert(id1, node1);
+    // Insert node 2
+    nodehandler->insert(id2, node2);
+
+    // Check operator []
+    REQUIRE((*nodehandler)[0]->id() == id1);
+    REQUIRE((*nodehandler)[1]->id() == id2);
+  }
+
   // Check iterator
   SECTION("Check node range iterator") {
     // Insert node 1
@@ -142,6 +153,17 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     REQUIRE(status2 == true);
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
+  }
+
+  SECTION("Check operator []") {
+    // Insert node 1
+    nodehandler->insert(id1, node1);
+    // Insert node 2
+    nodehandler->insert(id2, node2);
+
+    // Check operator []
+    REQUIRE((*nodehandler)[0]->id() == id1);
+    REQUIRE((*nodehandler)[1]->id() == id2);
   }
 
   // Check iterator

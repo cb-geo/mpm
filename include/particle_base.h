@@ -54,6 +54,9 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Return cell id
+  virtual Index cell_id() const = 0;
+
   //! Assign status
   void assign_status(bool status) { status_ = status; }
 
@@ -62,7 +65,7 @@ class ParticleBase {
 
   //! Initialise properties
   virtual void initialise() = 0;
-  
+
   //! Assign mass
   virtual void assign_mass(unsigned nphase, double mass) = 0;
 
@@ -70,25 +73,29 @@ class ParticleBase {
   virtual double mass(unsigned nphase) const = 0;
 
   //! Assign stress
-  virtual void assign_stress(unsigned nphase, const Eigen::VectorXd& stress) = 0;
+  virtual void assign_stress(unsigned nphase,
+                             const Eigen::VectorXd& stress) = 0;
 
   //! Return stress
   virtual Eigen::VectorXd stress(unsigned nphase) const = 0;
 
   //! Assign velocity
-  virtual void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity) = 0;
+  virtual void assign_velocity(unsigned nphase,
+                               const Eigen::VectorXd& velocity) = 0;
 
   //! Return velocity
   virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
 
   //! Assign momentum
-  virtual void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum) = 0;
+  virtual void assign_momentum(unsigned nphase,
+                               const Eigen::VectorXd& momentum) = 0;
 
   //! Return momentum
   virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
 
   //! Assign acceleration
-  virtual void assign_acceleration(unsigned nphase, const Eigen::VectorXd& acceleration) = 0;
+  virtual void assign_acceleration(unsigned nphase,
+                                   const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
@@ -108,6 +115,9 @@ class ParticleBase {
 
   //! coordinates
   VectorDim coordinates_;
+
+  //! Cell id
+  Index cell_id_{std::numeric_limits<Index>::max()};
 
   //! Status
   bool status_{true};

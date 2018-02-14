@@ -58,7 +58,8 @@ bool mpm::Mesh<Tdim>::remove_particle(
 //! \retval insertion_status Return the successful addition of a node
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
+bool mpm::Mesh<Tdim>::add_node(
+    const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
   bool insertion_status = nodes_.add(node);
   return insertion_status;
 }

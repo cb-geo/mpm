@@ -48,7 +48,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
-  //! Assign mass
+  //! Return cell id
+  Index cell_id() const { return cell_id_; }
+
+  //! Assign nodal mass
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
   //! Return mass
@@ -85,9 +88,6 @@ class Particle : public ParticleBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! Map particle mass to cell
-  void map_mass_to_nodes();
-
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
@@ -103,6 +103,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::coordinates_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+  //! Cell id
+  using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
   //! Mass

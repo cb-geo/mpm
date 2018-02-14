@@ -30,6 +30,7 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   cell_ = cellptr;
+  cell_id_ = cellptr->id();
   return cell_->add_particle_id(this->id());
 }
 
@@ -38,6 +39,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
+  mass_.setZero();
   stress_.setZero();
   velocity_.setZero();
   momentum_.setZero();
@@ -117,6 +119,7 @@ void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
   }
 }
 
+/*
 // Map particle mass to cell
 //! \tparam Tdim Dimension
 //! \tparam Tnphases Number of phases
@@ -124,3 +127,4 @@ template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::map_mass_to_nodes() {
 
 }
+*/

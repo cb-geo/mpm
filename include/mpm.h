@@ -9,8 +9,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "mesh.h"
 #include "container.h"
+#include "mesh.h"
 #include "particle.h"
 
 namespace mpm {
@@ -30,10 +30,7 @@ class MPM {
     meshes_.clear();
   };
 
-  //! Map particle mass to nodes
-// particles.for_each(std::bind(
-
- private:
+ protected:
   // A unique id for the analysis
   std::string analysis_uuid_;
 
