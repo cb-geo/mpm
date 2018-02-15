@@ -86,7 +86,7 @@ class Cell {
   bool point_in_cell(const VectorDim& point);
 
   //! Assign particle mass to nodes
-  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
+  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const unsigned& nphases);
 
  protected:
   //! cell id
