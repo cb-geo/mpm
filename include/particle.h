@@ -9,6 +9,7 @@
 
 #include "cell.h"
 #include "particle_base.h"
+#include "node_base.h"
 #include "serialize.h"
 
 namespace mpm {
@@ -87,6 +88,9 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
   }
+
+  //! map particle mass to background nodes
+  void map_mass_to_nodes();
 
   friend class boost::serialization::access;
   template <class Archive>

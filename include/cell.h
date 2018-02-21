@@ -53,6 +53,9 @@ class Cell {
   //! Assign shape function
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
+  //! Return shape functions at given local coordinates
+  Eigen::VectorXd shape_function(const VectorDim& xi) const { return shapefn_->shapefn(xi); }
+
   //! Number of shape functions
   unsigned nfunctions() const {
     return (this->shapefn_ != nullptr ? this->shapefn_->nfunctions() : 0);
@@ -60,6 +63,9 @@ class Cell {
 
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
+
+  //! Return node at given local id
+  std::shared_ptr<NodeBase<Tdim>> give_node(const unsigned& id) { return nodes_.operator[](id); }
 
   //! Add neighbouring cell
   bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
@@ -70,7 +76,7 @@ class Cell {
   //! Add particle id
   bool add_particle_id(Index id);
 
-  //! Add particle id
+  //! Remove particle id
   void remove_particle_id(Index id);
 
   //! Active cell (if a particle is present)
@@ -86,7 +92,7 @@ class Cell {
   bool point_in_cell(const VectorDim& point);
 
   //! Assign particle mass to nodes
-  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const unsigned& nphases);
+  // void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const unsigned& nphases);
 
  protected:
   //! cell id

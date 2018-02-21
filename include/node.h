@@ -81,6 +81,11 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
+  //! Add to nodal mass
+  void add_mass(const Eigen::Matrix<double, 1, Tnphases>& mass) {
+    mass_ += mass;
+  }
+
  protected:
   //! node id
   using NodeBase<Tdim>::id_;

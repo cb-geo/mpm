@@ -346,7 +346,7 @@ inline bool mpm::Cell<3>::point_in_cell(
   }
   return status;
 }
-
+/*
 //! Assign mass to nodes
 //! param[in] xi local coordinates of particle
 //! param[in] pmass mass of particle
@@ -357,11 +357,10 @@ void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi,
 					   const unsigned& nphases) {
   Eigen::MatrixXd shapefns = shapefn_->shapefn(xi);
   unsigned numshapefns = this->nfunctions();
-  for (unsigned i = 0; i < nphases; ++i) {
-      Eigen::MatrixXd nmass = pmass(0,i) * shapefns;
-      for (unsigned j = 0; j < numshapefns; ++j) {
-          auto nptr = nodes_.operator[](j);
-	  nptr->assign_mass(i, nmass(j));
-      }
+  for (unsigned i = 0; i < numshapefns; ++i) {
+      auto nptr = nodes_.operator[](i);
+      Eigen::VectorXd nmass = shapefns(i) * pmass;
+      nptr->add_mass(nmass);
   }
 }
+*/

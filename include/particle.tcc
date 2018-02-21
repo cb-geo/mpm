@@ -119,12 +119,20 @@ void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
   }
 }
 
-/*
+
 // Map particle mass to cell
 //! \tparam Tdim Dimension
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::map_mass_to_nodes() {
+  Eigen::Matrix<double, Tdim, 1> xi; // to be removed
+  unsigned num_shapefns = cell_->nfunctions();
+  Eigen::VectorXd shapefns = cell_->shape_functions(xi);
+  for (unsigned i = 0; i < num_shapefns; ++i) {
+      auto nptr = cell_.give_node(i);
+      Eigen::Matrix<double, 1, Tnphases> nmass = shapefns(i) * mass_;
+      nptr->add_mass(nmass);
+  }
 
 }
-*/
+
