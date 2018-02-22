@@ -102,3 +102,16 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration(
     std::cerr << exception.what() << '\n';
   }
 }
+
+// Compute velocity from momentum
+// velocity = momentum / mass
+//! \tparam Tdim Dimension
+//! \tparam Tdof Degrees of Freedom
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
+  for (unsigned nphase = 0; nphase < Tnphases; ++nphase) {
+      if (mass_(nphase) > 1.E-12)
+          velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
+  }
+}

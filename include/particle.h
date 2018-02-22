@@ -89,8 +89,20 @@ class Particle : public ParticleBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! map particle mass to background nodes
-  void map_mass_to_nodes();
+  //! Map particle mass to background nodes
+  void map_mass_to_nodes() { cell_->assign_mass_to_nodes(xi_, mass_); }
+
+  //! Map particle momentum to background nodes
+  void map_momentum_to_nodes() { cell_->assign_momentum_to_nodes(xi_,  mass_, velocity_); }
+
+  //! Map body force to nodes
+  void map_body_force_to_nodes() { cell_->assign_body_force_to_nodes(xi_, mass_, gravity_); }
+
+  //! Map traction force to nodes
+
+
+  //! Map internal force to nodes
+  
 
   friend class boost::serialization::access;
   template <class Archive>
@@ -111,6 +123,10 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
+  //! Local coordinates
+  Eigen::Matrix<double, Tdim, 1> xi_;
+  //! Gravity
+  Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses

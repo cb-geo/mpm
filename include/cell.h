@@ -92,7 +92,13 @@ class Cell {
   bool point_in_cell(const VectorDim& point);
 
   //! Assign particle mass to nodes
-  // void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const unsigned& nphases);
+  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
+
+  //! Assign particle momentum to nodes
+  void assign_momentum_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const Eigen::MatrixXd& pvelocity);
+
+  //! Assign body force to nodes
+  void assign_body_force_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const VectorDim& pgravity);
 
  protected:
   //! cell id
