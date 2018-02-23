@@ -356,7 +356,7 @@ void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi,
                                            const Eigen::VectorXd& pmass) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->add_mass(shapefns(i) * pmass);
+    nodes_[i]->update_mass(shapefns(i) * pmass);
 }
 
 //! Assign momentum to nodes
@@ -372,7 +372,7 @@ void mpm::Cell<Tdim>::assign_momentum_to_nodes(
   Eigen::MatrixXd mass;
   if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
-    nodes_[i]->add_momentum(shapefns(i) * mass * pvelocity);
+    nodes_[i]->update_momentum(shapefns(i) * mass * pvelocity);
   }
 }
 
@@ -387,5 +387,5 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
                                                  const VectorDim& pgravity) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->add_body_force(shapefns(i) * pgravity * pmass);
+    nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
 }

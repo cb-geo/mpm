@@ -97,10 +97,12 @@ class Particle : public ParticleBase<Tdim> {
     cell_->assign_momentum_to_nodes(xi_, mass_, velocity_);
   }
 
+  /*
   //! Map body force to nodes
   void map_body_force_to_nodes() {
     cell_->assign_body_force_to_nodes(xi_, mass_, gravity_);
   }
+  */
 
   //! Map traction force to nodes
 
@@ -128,7 +130,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Local coordinates
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Gravity
-  Eigen::Matrix<double, Tdim, 1> gravity_;
+  // Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
