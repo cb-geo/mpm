@@ -8,5 +8,4 @@ coverage:
   range: 70...90 # default 70...90. red...green
 
 ignore: # files and folders for processing
-  - external/catch.hpp
-  - src/main.cc
+  - external/**/*
