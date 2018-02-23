@@ -81,33 +81,31 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! Add to nodal mass
-  void add_mass(const Eigen::Matrix<double, 1, Tnphases>& mass) {
-    mass_ += mass;
+  //! Update nodal mass
+  void update_mass(const Eigen::VectorXd& mass) { mass_ += mass; }
+
+  //! Update nodal momentum
+  void update_momentum(const Eigen::MatrixXd& momentum) {
+    momentum_ += momentum;
   }
 
-  //! Add to nodal momentum
-  void add_momentum(const Eigen::Matrix<double, Tdim, Tnphases>& momentum) {
-    momentum_ += momentum;
+  //! Update body force
+  void update_body_force(const Eigen::MatrixXd& body_force) {
+    ext_force_ += body_force;
+  }
+
+  //! Update traction force
+  void update_traction_force(const Eigen::MatrixXd& traction_force) {
+    ext_force_ += traction_force;
+  }
+
+  //! Update internal force
+  void update_internal_force(const Eigen::MatrixXd& internal_force) {
+    int_force_ += internal_force;
   }
 
   //! Compute velocity from the momentum
   void compute_velocity();
-
-  //! Add to body force
-  void add_body_force(const Eigen::Matrix<double, Tdim, Tnphases>& body_force) {
-    ext_force_ += body_force;
-  }
-
-  //! Add to traction force
-  void add_traction_force(const Eigen::Matrix<double, Tdim, Tnphases>& traction_force) {
-    ext_force_ += traction_force;
-  }
-
-  //! Add to internal force
-  void add_internal_force(const Eigen::Matrix<double, Tdim, Tnphases>& internal_force) {
-    int_force_ += internal_force;
-  }
 
  protected:
   //! node id

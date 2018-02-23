@@ -111,7 +111,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   for (unsigned nphase = 0; nphase < Tnphases; ++nphase) {
-      if (mass_(nphase) > 1.E-12)
-          velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
+    if (mass_(nphase) > 1.E-12)
+      velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
   }
 }

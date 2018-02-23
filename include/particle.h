@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "cell.h"
-#include "particle_base.h"
 #include "node_base.h"
+#include "particle_base.h"
 #include "serialize.h"
 
 namespace mpm {
@@ -93,16 +93,18 @@ class Particle : public ParticleBase<Tdim> {
   void map_mass_to_nodes() { cell_->assign_mass_to_nodes(xi_, mass_); }
 
   //! Map particle momentum to background nodes
-  void map_momentum_to_nodes() { cell_->assign_momentum_to_nodes(xi_,  mass_, velocity_); }
+  void map_momentum_to_nodes() {
+    cell_->assign_momentum_to_nodes(xi_, mass_, velocity_);
+  }
 
   //! Map body force to nodes
-  void map_body_force_to_nodes() { cell_->assign_body_force_to_nodes(xi_, mass_, gravity_); }
+  void map_body_force_to_nodes() {
+    cell_->assign_body_force_to_nodes(xi_, mass_, gravity_);
+  }
 
   //! Map traction force to nodes
 
-
   //! Map internal force to nodes
-  
 
   friend class boost::serialization::access;
   template <class Archive>

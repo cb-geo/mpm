@@ -386,6 +386,6 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
                                                  const Eigen::VectorXd& pmass,
                                                  const VectorDim& pgravity) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  for (unsigned i = 0; i < this->nfunctions(); ++i) 
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->add_body_force(shapefns(i) * pgravity * pmass);
 }

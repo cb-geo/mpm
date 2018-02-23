@@ -91,6 +91,24 @@ class NodeBase {
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
 
+  //! Update nodal mass
+  virtual void update_mass(const Eigen::VectorXd& mass) = 0;
+
+  //! Update nodal momentum
+  virtual void update_momentum(const Eigen::MatrixXd& momentum) = 0;
+
+  //! Update body force
+  virtual void update_body_force(const Eigen::MatrixXd& body_force) = 0;
+
+  //! Update traction force
+  virtual void update_traction_force(const Eigen::MatrixXd& traction_force) = 0;
+
+  //! Update internal force
+  virtual void update_internal_force(const Eigen::MatrixXd& internal_force) = 0;
+
+  //! Compute velocity from the momentum
+  virtual void compute_velocity() = 0;
+
  protected:
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};

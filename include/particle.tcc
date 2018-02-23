@@ -118,5 +118,3 @@ void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     std::cerr << exception.what() << '\n';
   }
 }
-
-
