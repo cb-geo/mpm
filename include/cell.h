@@ -54,7 +54,9 @@ class Cell {
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Return shape functions at given local coordinates
-  Eigen::VectorXd shape_function(const VectorDim& xi) const { return shapefn_->shapefn(xi); }
+  Eigen::VectorXd shape_function(const VectorDim& xi) const {
+    return shapefn_->shapefn(xi);
+  }
 
   //! Number of shape functions
   unsigned nfunctions() const {
@@ -65,7 +67,9 @@ class Cell {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Return node at given local id
-  std::shared_ptr<NodeBase<Tdim>> give_node(const unsigned& id) { return nodes_.operator[](id); }
+  std::shared_ptr<NodeBase<Tdim>> give_node(const unsigned& id) {
+    return nodes_.operator[](id);
+  }
 
   //! Add neighbouring cell
   bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
@@ -95,10 +99,14 @@ class Cell {
   void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
 
   //! Assign particle momentum to nodes
-  void assign_momentum_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const Eigen::MatrixXd& pvelocity);
+  void assign_momentum_to_nodes(const VectorDim& xi,
+                                const Eigen::VectorXd& pmass,
+                                const Eigen::MatrixXd& pvelocity);
 
   //! Assign body force to nodes
-  void assign_body_force_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass, const VectorDim& pgravity);
+  void assign_body_force_to_nodes(const VectorDim& xi,
+                                  const Eigen::VectorXd& pmass,
+                                  const VectorDim& pgravity);
 
  protected:
   //! cell id

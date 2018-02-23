@@ -348,56 +348,44 @@ inline bool mpm::Cell<3>::point_in_cell(
 }
 
 //! Assign mass to nodes
-//! param[in] xi local coordinates of particle
-//! param[in] pmass mass of particle
+//! \param[in] xi local coordinates of particle
+//! \param[in] pmass mass of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi,
                                            const Eigen::VectorXd& pmass) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  unsigned numshapefns = this->nfunctions();
-  for (unsigned i = 0; i < numshapefns; ++i) {
-      auto nptr = nodes_.operator[](i);
-      Eigen::VectorXd nmass = shapefns(i) * pmass;
-      nptr->add_mass(nmass);
-  }
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->add_mass(shapefns(i) * pmass);
 }
 
 //! Assign momentum to nodes
-//! param[in] xi local coordinates of particle
-//! param[in] pmass mass of particle
-//! param[in] pvelocity velocity of particle
+//! \param[in] xi local coordinates of particle
+//! \param[in] pmass mass of particle
+//! \param[in] pvelocity velocity of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_momentum_to_nodes(const VectorDim& xi,
-                                           const Eigen::VectorXd& pmass,
-					   const Eigen::MatrixXd& pvelocity) {
+void mpm::Cell<Tdim>::assign_momentum_to_nodes(
+    const VectorDim& xi, const Eigen::VectorXd& pmass,
+    const Eigen::MatrixXd& pvelocity) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  unsigned numshapefns = this->nfunctions();
   Eigen::MatrixXd mass;
-  if (pmass.size() == pvelocity.cols())
-     mass = pmass.asDiagonal();
-  for (unsigned i = 0; i < numshapefns; ++i) {
-      auto nptr = nodes_.operator[](i);
-      Eigen::MatrixXd nmomentum = shapefns(i) * mass * pvelocity;
-      nptr->add_momentum(nmomentum);
+  if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    nodes_[i]->add_momentum(shapefns(i) * mass * pvelocity);
   }
 }
 
 //! Assign body force to nodes
-//! param[in] xi local coordinates of particle
-//! param[in] pmass mass of particle
-//! param[in] pgravity gravity of particle
+//! \param[in] xi local coordinates of particle
+//! \param[in] pmass mass of particle
+//! \param[in] pgravity gravity of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
-                                           const Eigen::VectorXd& pmass,
-					   const VectorDim& pgravity) {
+                                                 const Eigen::VectorXd& pmass,
+                                                 const VectorDim& pgravity) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  unsigned numshapefns = this->nfunctions();
-  for (unsigned i = 0; i < numshapefns; ++i) {
-      auto nptr = nodes_.operator[](i);
-      Eigen::MatrixXd nbodyforce = shapefns(i) * pgravity * pmass;
-      nptr->add_body_force(nbodyforce);
-  }
+  for (unsigned i = 0; i < this->nfunctions(); ++i) 
+    nodes_[i]->add_body_force(shapefns(i) * pgravity * pmass);
 }
