@@ -41,7 +41,8 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
 
   //! Evaluate B matrix at given local coordinates
   //! \param[in] xi given local coordinates
-  std::vector<Eigen::Matrix<double,3,Tdim>> B_matrix(const VectorDim& xi);
+  //! \retval B_matrix
+  std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi);
 
   //! Return indices of to calculate the cell volume / area
   //! \retval indices Outer-indices that form the cell

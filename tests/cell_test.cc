@@ -159,7 +159,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check particle mass and velocity mapping") {
       cell->assign_mass_to_nodes(xi, pmass);
       cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
-      // cell->interpolate_velocity() == pvelocity
+      // cell->interpolate_velocity(xi, ) == pvelocity
     }
   }
 }

@@ -108,6 +108,9 @@ class Cell {
                                   const Eigen::VectorXd& pmass,
                                   const VectorDim& pgravity);
 
+  //! Assign internal force to nodes
+  void assign_internal_force_to_nodes(const VectorDim& xi);
+
   //! Return velocity at given location by interpolating from nodes
   Eigen::VectorXd interpolate_velocity(const VectorDim& xi, unsigned nphase);
 

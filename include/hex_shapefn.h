@@ -17,7 +17,7 @@ namespace mpm {
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
 class HexahedronShapeFn : public ShapeFn<Tdim> {
-
+  
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
@@ -39,6 +39,11 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
+
+  //! Evaluate B matrix at given local coordinates
+  //! \param[in] xi given local coordinates
+  //! \retval B_matrix 
+  std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi);
 
   //! Return indices of to calculate the cell volume / area
   //! \retval indices Outer-indices that form the cell

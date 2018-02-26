@@ -157,19 +157,19 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
-//! Return B-matrix of a 4-node Quadrilateral Element
+//! Return B-matrix of a Quadrilateral Element
 //! \param[in] xi Coordinates of point of interest
 //! \retval B_matrix B-matrix of a given cell
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
-inline std::vector<Eigen::Matrix<double,3,Tdim>>
+inline std::vector<Eigen::MatrixXd>
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::B_matrix(
     const VectorDim& xi) {
 
   Eigen::MatrixXd grad_shape_fun = this->grad_shapefn(xi);
-  Eigen::Matrix<double, 3, 2> B_i;
-  std::vector<Eigen::Matrix<double,3,Tdim>> B_matrix;
+  Eigen::Matrix<double, 3, Tdim> B_i;
+  std::vector<Eigen::MatrixXd> B_matrix;
   for (unsigned i = 0; i < Tnfunctions; ++i) {
       B_i(0,0) = grad_shape_fun(i,0);
       B_i(0,1) = 0.;

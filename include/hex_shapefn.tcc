@@ -219,6 +219,43 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return B-matrix of a Hexahedron Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval B_matrix B-matrix of a given cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::B_matrix(
+    const VectorDim& xi) {
+
+  Eigen::MatrixXd grad_shape_fun = this->grad_shapefn(xi);
+  Eigen::Matrix<double, 6, Tdim> B_i;
+  std::vector<Eigen::MatrixXd> B_matrix;
+  for (unsigned i = 0; i < Tnfunctions; ++i) {
+      B_i(0,0) = grad_shape_fun(i,0);
+      B_i(0,1) = 0.;
+      B_i(0,2) = 0.;
+      B_i(1,0) = 0.;
+      B_i(1,1) = grad_shape_fun(i,1);
+      B_i(1,2) = 0.;
+      B_i(2,0) = 0.;
+      B_i(2,1) = 0.;
+      B_i(2,2) = grad_shape_fun(i,2);
+      B_i(3,0) = grad_shape_fun(i,1);
+      B_i(3,1) = grad_shape_fun(i,0);
+      B_i(3,2) = 0.;
+      B_i(4,0) = 0.;
+      B_i(4,1) = grad_shape_fun(i,2);
+      B_i(4,2) = grad_shape_fun(i,1);
+      B_i(5,0) = grad_shape_fun(i,2);
+      B_i(5,1) = 0.;
+      B_i(5,2) = grad_shape_fun(i,0);
+      B_matrix.push_back(B_i);
+  }
+  return B_matrix;
+}
+
 // 27-node (Triquadratic) Hexahedron Element
 //! Check with GMSH
 //!          7           18             6

@@ -12,7 +12,9 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class ShapeFn {
+
  public:
+  static const unsigned Nsize = Tdim * (Tdim + 1) / 2;
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
@@ -33,6 +35,11 @@ class ShapeFn {
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
+
+  //! Evaluate B-matrix
+  //! \param[in] xi given local coordinates
+  //! \retval B_matrix 
+  virtual std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi) = 0;
 
   //! Return indices of to calculate the cell volume / area
   //! \retval indices Outer-indices that form the cell
