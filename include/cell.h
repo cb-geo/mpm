@@ -31,7 +31,7 @@ class Cell {
   //! Constructor with id and number of nodes
   Cell(Index id, unsigned nnodes);
 
-  //! Constructor with id, coordinates and shapefn
+  //! Constructor with id, number of nodes and shapefn
   Cell(Index id, unsigned nnodes,
        const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
@@ -107,6 +107,9 @@ class Cell {
   void assign_body_force_to_nodes(const VectorDim& xi,
                                   const Eigen::VectorXd& pmass,
                                   const VectorDim& pgravity);
+
+  //! Return velocity at given location by interpolating from nodes
+  Eigen::VectorXd interpolate_velocity(const VectorDim& xi, unsigned nphase);
 
  protected:
   //! cell id

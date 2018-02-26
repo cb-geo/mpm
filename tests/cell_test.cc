@@ -142,7 +142,29 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
   }
+
+  SECTION("Test particle information mapping") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    cell->add_node(0, node0);
+    cell->add_node(1, node3);
+    cell->add_node(2, node2);
+    cell->add_node(3, node1);
+    Eigen::Vector2d xi;
+    xi << 0., 0.;
+    Eigen::Matrix<double,0,1> pmass;
+    pmass << 4.;
+    Eigen::Vector2d pvelocity;
+    pvelocity << 1., 1.;
+    SECTION("Check particle mass and velocity mapping") {
+      cell->assign_mass_to_nodes(xi, pmass);
+      cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
+      // cell->interpolate_velocity() == pvelocity
+    }
+  }
 }
+
+
 
 //! \brief Check cell class for 3D case
 TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {

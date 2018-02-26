@@ -377,9 +377,9 @@ void mpm::Cell<Tdim>::assign_momentum_to_nodes(
 }
 
 //! Assign body force to nodes
-//! \param[in] xi local coordinates of particle
-//! \param[in] pmass mass of particle
-//! \param[in] pgravity gravity of particle
+//! \param[in] xi Local coordinates of particle
+//! \param[in] pmass Mass of particle
+//! \param[in] pgravity Gravity of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
@@ -388,4 +388,17 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
+}
+
+//! Return velocity at a poing by interpolating from nodes
+//! \param[in] xi Local coordinates of point
+//! \retval velocity Interpolated velocity
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi, unsigned nphase) {
+  Eigen::Matrix<double,Tdim,1> velocity = Eigen::Matrix<double,Tdim,1>::Zero();
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+      velocity += shapefns(i) * nodes_[i]->velocity(nphase);
+  return velocity;
 }

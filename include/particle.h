@@ -24,6 +24,9 @@ using Index = unsigned long long;
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 class Particle : public ParticleBase<Tdim> {
+ protected:
+  static const unsigned dof = 3 * (Tdim - 1);
+  
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
@@ -134,7 +137,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
-  Eigen::Matrix<double, Tdim, Tnphases> stress_;
+  Eigen::Matrix<double, dof, Tnphases> stress_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
