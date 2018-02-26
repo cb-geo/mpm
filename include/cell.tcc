@@ -290,6 +290,7 @@ inline bool mpm::Cell<2>::point_in_cell(
       return false;
     }
   }
+
   // Check if the point is inside the hedron
   if (std::fabs(triareas - volume_) < tolerance) {
     status = true;
@@ -345,4 +346,116 @@ inline bool mpm::Cell<3>::point_in_cell(
     status = true;
   }
   return status;
+}
+
+//! Return the local coordinates of a point in a 2D cell
+//! \param[in] point Coordinates of a point
+//! \retval xi Local coordinates of a point
+//! \tparam Tdim Dimension
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
+    const Eigen::Matrix<double, 2, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  try {
+    // Quadrilateral
+    if (indices.size() == 4) {
+      //        b
+      // 3 0--------0 2
+      //   | \   / |
+      // a |  \ /  | c
+      //   |  / \  |
+      //   | /   \ |
+      // 0 0---------0 1
+      //         d
+      const double xlength = (nodes_[indices[0]]->coordinates() -
+                              nodes_[indices[1]]->coordinates())
+                                 .norm();
+      const double ylength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[2]]->coordinates())
+                                 .norm();
+
+      const Eigen::Matrix<double, 2, 1> centre =
+          (nodes_[indices[0]]->coordinates() +
+           nodes_[indices[1]]->coordinates() +
+           nodes_[indices[2]]->coordinates() +
+           nodes_[indices[3]]->coordinates()) /
+          4.0;
+
+      Eigen::Matrix<double, 2, 1> xi;
+      xi(0) = 2. * (point(0) - centre(0)) / xlength;
+      xi(1) = 2. * (point(1) - centre(1)) / ylength;
+      return xi;
+    } else {
+      throw std::runtime_error(
+          "Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: " << except.what() << '\n';
+  }
+}
+
+
+//! Return the local coordinates of a point in a 3D cell
+//! \param[in] point Coordinates of a point
+//! \retval xi Local coordinates of a point
+//! \tparam Tdim Dimension
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
+    const Eigen::Matrix<double, 3, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 3, 1> xi;
+
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  try {
+    // Hexahedron
+    if (indices.size() == 8) {
+      // Node numbering as read in by mesh file
+      //        3               2
+      //          *_ _ _ _ _ _*
+      //         /|           /|
+      //        / |          / |
+      //     7 *_ |_ _ _ _ _* 6|
+      //       |  |         |  |
+      //       |  |         |  |
+      //       |  *_ _ _ _ _|_ *
+      //       | / 0        | / 1
+      //       |/           |/
+      //       *_ _ _ _ _ _ *
+      //     4               5
+      //
+
+      const double xlength = (nodes_[indices[0]]->coordinates() -
+                              nodes_[indices[1]]->coordinates())
+                                 .norm();
+      const double ylength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[2]]->coordinates())
+                                 .norm();
+      const double zlength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[5]]->coordinates())
+                                 .norm();
+
+      // Compute centre
+      Eigen::Matrix<double, 3, 1> centre;
+      centre.setZero();
+      for (unsigned i = 0; i < indices.size(); ++i)
+        centre += nodes_[indices[i]]->coordinates();
+      centre /= 4.0;
+
+      Eigen::Matrix<double, 3, 1> xi;
+      xi(0) = 2. * (point(0) - centre(0)) / xlength;
+      xi(1) = 2. * (point(1) - centre(1)) / ylength;
+      xi(2) = 2. * (point(2) - centre(2)) / ylength;
+      return xi;
+    } else {
+      throw std::runtime_error(
+          "Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: " << except.what() << '\n';
+  }
 }

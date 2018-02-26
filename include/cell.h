@@ -85,6 +85,9 @@ class Cell {
   //! Point in cell
   bool point_in_cell(const VectorDim& point);
 
+  //! Return the local coordinates of a point in a cell
+  VectorDim local_coordinates_point(const VectorDim& point);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -105,7 +108,7 @@ class Cell {
 
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
-};  // Cell class
+  };  // Cell class
 }  // namespace mpm
 
 #include "cell.tcc"
