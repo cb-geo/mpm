@@ -144,7 +144,7 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->volume_indices();
+    Eigen::VectorXi indices = shapefn_->corner_indices();
     // Quadrilateral
     if (indices.size() == 4) {
 
@@ -195,7 +195,7 @@ inline void mpm::Cell<2>::compute_volume() {
 template <>
 inline void mpm::Cell<3>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->volume_indices();
+    Eigen::VectorXi indices = shapefn_->corner_indices();
     // Hexahedron
     if (indices.size() == 8) {
       // Node numbering as read in by mesh file

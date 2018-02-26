@@ -157,13 +157,13 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
-//! Return indices of to calculate the cell volume / area
+//! Return the corner indices of a cell to calculate the cell volume
 //! \retval indices Outer-indices that form the cell
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::volume_indices() {
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::corner_indices() {
   Eigen::Matrix<int, 4, 1> indices;
   indices << 0, 1, 2, 3;
   return indices;

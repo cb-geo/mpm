@@ -104,6 +104,16 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(2, 1) == Approx(0.5).epsilon(Tolerance));
       REQUIRE(gradsf(3, 1) == Approx(0.0).epsilon(Tolerance));
     }
+   
+    SECTION("Four noded quadrilateral shape function for corner indices") {
+      // Check for corner indices
+      Eigen::VectorXi indices = quadsf->corner_indices();
+      REQUIRE(indices.size() == 4);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
+    }
   }
 
   //! Check for 8 noded shape function
@@ -238,6 +248,16 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(5, 1) == Approx(-2.0).epsilon(Tolerance));
       REQUIRE(gradsf(6, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
+    }
+   
+    SECTION("8-noded quadrilateral shape function for corner indices") {
+      // Check for corner indices
+      Eigen::VectorXi indices = quadsf->corner_indices();
+      REQUIRE(indices.size() == 4);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
     }
   }
 
@@ -380,6 +400,16 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(6, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
+    }
+       
+    SECTION("Nine noded quadrilateral shape function for corner indices") {
+      // Check for corner indices
+      Eigen::VectorXi indices = quadsf->corner_indices();
+      REQUIRE(indices.size() == 4);
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 2);
+      REQUIRE(indices(3) == 3);
     }
   }
 }
