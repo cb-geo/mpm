@@ -24,6 +24,8 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   force_.setZero();
+  ext_force_.setZero();
+  int_force_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();

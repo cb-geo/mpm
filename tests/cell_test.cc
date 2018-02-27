@@ -156,10 +156,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     pmass << 4.;
     Eigen::Vector2d pvelocity;
     pvelocity << 1., 1.;
-    SECTION("Check particle mass and velocity mapping") {
+    unsigned phase = 0;
+    SECTION("Check particle mass mapping") {
       cell->assign_mass_to_nodes(xi, pmass);
+      for (unsigned i = 0; i < Nnodes; ++i)
+	REQUIRE((cell->give_node(i))->mass(phase) ==  Approx(1.0).epsilon(Tolerance));
+    }
+    
+    SECTION("Check particle momentum mapping") {
       cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
-      // cell->interpolate_velocity(xi, ) == pvelocity
+      for (unsigned i = 0; i < Nnodes; ++i) {
+	for (unsigned j = 0; j < pvelocity.size(); ++j)
+	  REQUIRE((cell->give_node(i))->momentum(phase)(j) ==  Approx(1.0).epsilon(Tolerance));
+      }
     }
   }
 }
