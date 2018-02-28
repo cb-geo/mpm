@@ -12,7 +12,6 @@ namespace mpm {
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class ShapeFn {
-
  public:
   static const unsigned Nsize = Tdim * (Tdim + 1) / 2;
   //! Define a vector of size dimension
@@ -41,9 +40,9 @@ class ShapeFn {
   //! \retval B_matrix
   virtual std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi) = 0;
 
-  //! Return indices of to calculate the cell volume / area
+  //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
-  virtual Eigen::VectorXi volume_indices() = 0;
+  virtual Eigen::VectorXi corner_indices() = 0;
 
   //! Return indices of a sub-tetrahedrons in a volume
   //! to check if a point is inside /outside of a hedron

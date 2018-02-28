@@ -170,9 +170,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
     }
 
-    SECTION("Eight noded hexahedron shape function for volume indices") {
+    SECTION("Eight noded hexahedron shape function for corner indices") {
       // Check for volume indices
-      Eigen::VectorXi indices = hexsf->volume_indices();
+      Eigen::VectorXi indices = hexsf->corner_indices();
       REQUIRE(indices.size() == 8);
       REQUIRE(indices(0) == 0);
       REQUIRE(indices(1) == 1);
@@ -831,9 +831,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
     }
 
-    SECTION("20-noded hexahedron shape function for volume indices") {
+    SECTION("20-noded hexahedron shape function for corner indices") {
       // Check for volume indices
-      Eigen::VectorXi indices = hexsf->volume_indices();
+      Eigen::VectorXi indices = hexsf->corner_indices();
       REQUIRE(indices.size() == 8);
       REQUIRE(indices(0) == 0);
       REQUIRE(indices(1) == 1);
