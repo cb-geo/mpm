@@ -390,8 +390,35 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
     nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
 }
 
-//! Return velocity at a poing by interpolating from nodes
+//! Assign internal force to nodes
+//! \param[in] xi Local coordinates of particle
+//! \param[in] pvolume Volume of particle
+//! \param[in] pstress Stress of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_internal_force_to_nodes(const VectorDim& xi,
+                                                 double pvolume,
+                                                 const Eigen::MatrixXd& pstress) {
+  const unsigned nSize = Tdim * (Tdim + 1 ) / 2;
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  std::vector<Eigen::MatrixXd> B_matrix = shapefn_->B_matrix(xi);
+  Eigen::MatrixXd temp_stress = Eigen::Matrix<double, nSize, 1>::Zero(); 
+  for (unsigned i = 0; i < pstress.cols(); ++i) {
+      if (Tdim == 2) {
+         temp_stress(0) = pstress(0,i);
+	 temp_stress(1) = pstress(1,i);
+	 temp_stress(2) = pstress(3,i);
+      }
+      else if (Tdim == 3)
+         temp_stress = pstress.col(i);
+      for (unsigned j = 0; j < this->nfunctions(); ++j)
+          nodes_[j]->update_internal_force(i, (pvolume * B_matrix.at(j).transpose() * temp_stress));
+  }
+}
+
+//! Return velocity at a given point by interpolating from nodes
 //! \param[in] xi Local coordinates of point
+//! \param[in] nphase Phase
 //! \retval velocity Interpolated velocity
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
@@ -401,4 +428,18 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi, unsig
   for (unsigned i = 0; i < this->nfunctions(); ++i)
       velocity += shapefns(i) * nodes_[i]->velocity(nphase);
   return velocity;
+}
+
+//! Return acceleration at a given point by interpolating from nodes
+//! \param[in] xi Local coordinates of point
+//! \param[in] nphase Phase
+//! \retval acceleration Interpolated acceleration
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_acceleration(const VectorDim& xi, unsigned nphase) {
+  Eigen::Matrix<double,Tdim,1> acceleration = Eigen::Matrix<double,Tdim,1>::Zero();
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+      acceleration += shapefns(i) * nodes_[i]->acceleration(nphase);
+  return acceleration;
 }

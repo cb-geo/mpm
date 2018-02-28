@@ -124,6 +124,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::id_;
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
+  //! volume
+  using ParticleBase<Tdim>::volume_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Cell id
@@ -137,7 +139,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
-  Eigen::Matrix<double, nSize, Tnphases> stress_;
+  Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

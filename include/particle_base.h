@@ -123,6 +123,9 @@ class ParticleBase {
   //! coordinates
   VectorDim coordinates_;
 
+  //! Volume
+  double volume_;
+  
   //! Cell id
   Index cell_id_{std::numeric_limits<Index>::max()};
 
