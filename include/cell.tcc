@@ -469,8 +469,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi,
                                            const Eigen::VectorXd& pmass) {
-  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  for (unsigned i = 0; i < this->nfunctions(); ++i)
+  auto shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < shapefns.size(); ++i)
     nodes_[i]->update_mass(shapefns(i) * pmass);
 }
 
