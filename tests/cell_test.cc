@@ -29,7 +29,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-  coords << 0., 2.;
+  coords << 2., 0.;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
@@ -37,7 +37,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-  coords << 2., 0.;
+  coords << 0., 2.;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
@@ -253,7 +253,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         REQUIRE(cell->point_in_cell(point) == true);
 
         // Check point outside
-        point << 2., 2., 2.;
+        point << 2.5, 2.5, 2.5;
         REQUIRE(cell->point_in_cell(point) == false);
       }
     }

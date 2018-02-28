@@ -138,118 +138,140 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
                    particles_.end());
 }
 
-//! Compute volume of a 2D cell
+//! Compute volume of a cell
 //! \retval volume Cell volume / area
 //! \tparam Tdim Dimension
-template <>
-inline void mpm::Cell<2>::compute_volume() {
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::compute_volume() {
   try {
     Eigen::VectorXi indices = shapefn_->corner_indices();
-    // Quadrilateral
-    if (indices.size() == 4) {
+    switch (Tdim) {
+      // 2D
+      case (2): {
+        // Quadrilateral
+        if (indices.size() == 4) {
 
-      //        b
-      // 3 0---------0 2
-      //   | \   q / |
-      // a |   \  /  | c
-      //   |   p \   |
-      //   |  /    \ |
-      // 0 0---------0 1
-      //         d
-      const double a = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
-      const double b = (nodes_[indices[2]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
-      const double c = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
-                           .norm();
-      const double d = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[1]]->coordinates())
-                           .norm();
-      const double p = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
-                           .norm();
-      const double q = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
-                           .norm();
+          //        b
+          // 3 0---------0 2
+          //   | \   q / |
+          // a |   \  /  | c
+          //   |   p \   |
+          //   |  /    \ |
+          // 0 0---------0 1
+          //         d
+          const double a = (nodes_[indices[0]]->coordinates() -
+                            nodes_[indices[3]]->coordinates())
+                               .norm();
+          const double b = (nodes_[indices[2]]->coordinates() -
+                            nodes_[indices[3]]->coordinates())
+                               .norm();
+          const double c = (nodes_[indices[1]]->coordinates() -
+                            nodes_[indices[2]]->coordinates())
+                               .norm();
+          const double d = (nodes_[indices[0]]->coordinates() -
+                            nodes_[indices[1]]->coordinates())
+                               .norm();
+          const double p = (nodes_[indices[0]]->coordinates() -
+                            nodes_[indices[2]]->coordinates())
+                               .norm();
+          const double q = (nodes_[indices[1]]->coordinates() -
+                            nodes_[indices[3]]->coordinates())
+                               .norm();
 
-      // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
-      volume_ =
-          0.25 * std::sqrt(4 * p * p * q * q -
-                           std::pow((a * a + c * c - b * b - d * d), 2.0));
-    } else {
-      throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
+          // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
+          volume_ =
+              0.25 * std::sqrt(4 * p * p * q * q -
+                               std::pow((a * a + c * c - b * b - d * d), 2.0));
+        }
+        break;
+      }
+      // 3D
+      case (3): {
+        // Hexahedron
+        if (indices.size() == 8) {
+          // Node numbering as read in by mesh file
+          //        d               c
+          //          *_ _ _ _ _ _*
+          //         /|           /|
+          //        / |          / |
+          //     a *_ |_ _ _ _ _* b|
+          //       |  |         |  |
+          //       |  |         |  |2
+          //       |  *_ _ _ _ _|_ *
+          //       | / h        | / g
+          //       |/           |/
+          //       *_ _ _ _ _ _ *
+          //     e               f
+          //
+          // Calculation of hexahedron volume from
+          // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
+
+          const Eigen::Matrix<double, 3, 1> a =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[7]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> b =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[6]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> c =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[2]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> d =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[3]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> e =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[4]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> f =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[5]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> g =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[1]]->coordinates().data());
+          const Eigen::Matrix<double, 3, 1> h =
+              static_cast<Eigen::Matrix<double, 3, 1>>(
+                  nodes_[indices[0]]->coordinates().data());
+
+          /*
+          const auto a = nodes_[indices[7]]->coordinates();
+          const auto b = nodes_[indices[6]]->coordinates();
+          const auto c = nodes_[indices[2]]->coordinates();
+          const auto d = nodes_[indices[3]]->coordinates();
+          const auto e = nodes_[indices[4]]->coordinates();
+          const auto f = nodes_[indices[5]]->coordinates();
+          const auto g = nodes_[indices[1]]->coordinates();
+          const auto h = nodes_[indices[0]]->coordinates();
+          */
+          volume_ =
+              (1.0 / 12) *
+                  (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
+                              ((d - e).cross(h - a))) +
+              (1.0 / 12) *
+                  (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
+              (1.0 / 12) *
+                  (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
+              (1.0 / 12) *
+                  (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
+        }
+        break;
+      }
+      default:
+        throw std::runtime_error(
+            "Unable to compute volume, number of vertices is incorrect");
+        break;
     }
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
               << "Compute volume of a cell: " << except.what() << '\n';
   }
 }
-
-//! Compute volume of a 3D cell
-//! \retval volume Cell volume / area
-//! \tparam Tdim Dimension
-template <>
-inline void mpm::Cell<3>::compute_volume() {
-  try {
-    Eigen::VectorXi indices = shapefn_->corner_indices();
-    // Hexahedron
-    if (indices.size() == 8) {
-      // Node numbering as read in by mesh file
-      //        d               c
-      //          *_ _ _ _ _ _*
-      //         /|           /|
-      //        / |          / |
-      //     a *_ |_ _ _ _ _* b|
-      //       |  |         |  |
-      //       |  |         |  |
-      //       |  *_ _ _ _ _|_ *
-      //       | / h        | / g
-      //       |/           |/
-      //       *_ _ _ _ _ _ *
-      //     e               f
-      //
-      // Calculation of hexahedron volume from
-      // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
-
-      const Eigen::Vector3d a = nodes_[indices[7]]->coordinates();
-      const Eigen::Vector3d b = nodes_[indices[6]]->coordinates();
-      const Eigen::Vector3d c = nodes_[indices[2]]->coordinates();
-      const Eigen::Vector3d d = nodes_[indices[3]]->coordinates();
-      const Eigen::Vector3d e = nodes_[indices[4]]->coordinates();
-      const Eigen::Vector3d f = nodes_[indices[5]]->coordinates();
-      const Eigen::Vector3d g = nodes_[indices[1]]->coordinates();
-      const Eigen::Vector3d h = nodes_[indices[0]]->coordinates();
-
-      volume_ =
-          (1.0 / 12) *
-              (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
-                          ((d - e).cross(h - a))) +
-          (1.0 / 12) *
-              (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
-          (1.0 / 12) *
-              (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
-          (1.0 / 12) *
-              (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
-    } else {
-      throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
-    }
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute volume of a cell: " << except.what() << '\n';
-  }
-}
-
 //! Check if a point is in a 2D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline bool mpm::Cell<2>::point_in_cell(
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
+
+  std::cout << __FILE__ << __LINE__ << " 2D!\n";
 
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
@@ -279,7 +301,7 @@ inline bool mpm::Cell<2>::point_in_cell(
     // clang-format off
     area << 1.  , 1.  , 1.,
             a(0), b(0), point(0),
-            a(1), b(1), point(3);
+            a(1), b(1), point(1);
     // clang-format on
     const double triarea = 0.5 * std::fabs(area.determinant());
 
@@ -301,10 +323,11 @@ inline bool mpm::Cell<2>::point_in_cell(
 //! Check if a point is in a 3D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline bool mpm::Cell<3>::point_in_cell(
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
+  std::cout << __FILE__ << __LINE__ << " 3D!\n";
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
 
@@ -352,8 +375,8 @@ inline bool mpm::Cell<3>::point_in_cell(
 //! \param[in] point Coordinates of a point
 //! \retval xi Local coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 2, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 2, 1> xi;
@@ -389,23 +412,25 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
       return xi;
     } else {
-      throw std::runtime_error(
-          "Unable to compute local coordinates");
+      throw std::runtime_error("Unable to compute local coordinates");
     }
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
-              << "Compute local coordinate of a point in a cell: " << except.what() << '\n';
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
   }
 }
-
 
 //! Return the local coordinates of a point in a 3D cell
 //! \param[in] point Coordinates of a point
 //! \retval xi Local coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 3, 1>& point) {
+
+  std::cout << __FILE__ << __LINE__ << " 3D!\n";
+
   // Local point coordinates
   Eigen::Matrix<double, 3, 1> xi;
 
@@ -451,11 +476,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
       xi(2) = 2. * (point(2) - centre(2)) / ylength;
       return xi;
     } else {
-      throw std::runtime_error(
-          "Unable to compute local coordinates");
+      throw std::runtime_error("Unable to compute local coordinates");
     }
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
-              << "Compute local coordinate of a point in a cell: " << except.what() << '\n';
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
   }
 }
