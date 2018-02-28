@@ -28,10 +28,10 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Constructor with id and coordinates
+  //! Constructor with id and number of nodes
   Cell(Index id, unsigned nnodes);
 
-  //! Constructor with id, coordinates and shapefn
+  //! Constructor with id, number of nodes and shapefn
   Cell(Index id, unsigned nnodes,
        const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
@@ -70,7 +70,7 @@ class Cell {
   //! Add particle id
   bool add_particle_id(Index id);
 
-  //! Add particle id
+  //! Remove particle id
   void remove_particle_id(Index id);
 
   //! Active cell (if a particle is present)

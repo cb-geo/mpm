@@ -1,4 +1,4 @@
-//! Constructor with id and coordinates
+//! Constructor with id and number of nodes
 //! \param[in] id Global cell id
 //! \param[in] nnodes Number of nodes per cell
 //! \tparam Tdim Dimension
@@ -18,7 +18,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   }
 }
 
-//! Constructor with id, coordinates and shapefn
+//! Constructor with id, number of nodes and shapefn
 //! \param[in] id Global cell id
 //! \param[in] nnodes Number of nodes per cell
 //! \param[in] shapefnptr Pointer to a shape function
