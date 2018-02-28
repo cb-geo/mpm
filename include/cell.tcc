@@ -395,10 +395,12 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
 //! \retval velocity Interpolated velocity
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi, unsigned nphase) {
-  Eigen::Matrix<double,Tdim,1> velocity = Eigen::Matrix<double,Tdim,1>::Zero();
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi,
+                                                      unsigned nphase) {
+  Eigen::Matrix<double, Tdim, 1> velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-      velocity += shapefns(i) * nodes_[i]->velocity(nphase);
+    velocity += shapefns(i) * nodes_[i]->velocity(nphase);
   return velocity;
 }

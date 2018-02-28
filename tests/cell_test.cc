@@ -152,7 +152,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->add_node(3, node1);
     Eigen::Vector2d xi;
     xi << 0., 0.;
-    Eigen::Matrix<double,0,1> pmass;
+    Eigen::Matrix<double, 0, 1> pmass;
     pmass << 4.;
     Eigen::Vector2d pvelocity;
     pvelocity << 1., 1.;
@@ -160,20 +160,20 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check particle mass mapping") {
       cell->assign_mass_to_nodes(xi, pmass);
       for (unsigned i = 0; i < Nnodes; ++i)
-	REQUIRE((cell->give_node(i))->mass(phase) ==  Approx(1.0).epsilon(Tolerance));
+        REQUIRE((cell->give_node(i))->mass(phase) ==
+                Approx(1.0).epsilon(Tolerance));
     }
-    
+
     SECTION("Check particle momentum mapping") {
       cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
       for (unsigned i = 0; i < Nnodes; ++i) {
-	for (unsigned j = 0; j < pvelocity.size(); ++j)
-	  REQUIRE((cell->give_node(i))->momentum(phase)(j) ==  Approx(1.0).epsilon(Tolerance));
+        for (unsigned j = 0; j < pvelocity.size(); ++j)
+          REQUIRE((cell->give_node(i))->momentum(phase)(j) ==
+                  Approx(1.0).epsilon(Tolerance));
       }
     }
   }
 }
-
-
 
 //! \brief Check cell class for 3D case
 TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {

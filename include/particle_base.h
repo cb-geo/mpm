@@ -100,10 +100,9 @@ class ParticleBase {
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
 
-  
   //! Map particle mass to background nodes
   virtual void map_mass_to_nodes() = 0;
-  
+
   //! Map particle momentum to background nodes
   virtual void map_momentum_to_nodes() = 0;
 

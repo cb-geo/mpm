@@ -38,7 +38,7 @@ class ShapeFn {
 
   //! Evaluate B-matrix
   //! \param[in] xi given local coordinates
-  //! \retval B_matrix 
+  //! \retval B_matrix
   virtual std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi) = 0;
 
   //! Return indices of to calculate the cell volume / area
