@@ -141,115 +141,102 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 //! Compute volume of a cell
 //! \retval volume Cell volume / area
 //! \tparam Tdim Dimension
-template <unsigned Tdim>
-inline void mpm::Cell<Tdim>::compute_volume() {
+template <>
+inline void mpm::Cell<2>::compute_volume() {
   try {
     Eigen::VectorXi indices = shapefn_->corner_indices();
-    switch (Tdim) {
-      // 2D
-      case (2): {
-        // Quadrilateral
-        if (indices.size() == 4) {
+    // Quadrilateral
+    if (indices.size() == 4) {
 
-          //        b
-          // 3 0---------0 2
-          //   | \   q / |
-          // a |   \  /  | c
-          //   |   p \   |
-          //   |  /    \ |
-          // 0 0---------0 1
-          //         d
-          const double a = (nodes_[indices[0]]->coordinates() -
-                            nodes_[indices[3]]->coordinates())
-                               .norm();
-          const double b = (nodes_[indices[2]]->coordinates() -
-                            nodes_[indices[3]]->coordinates())
-                               .norm();
-          const double c = (nodes_[indices[1]]->coordinates() -
-                            nodes_[indices[2]]->coordinates())
-                               .norm();
-          const double d = (nodes_[indices[0]]->coordinates() -
-                            nodes_[indices[1]]->coordinates())
-                               .norm();
-          const double p = (nodes_[indices[0]]->coordinates() -
-                            nodes_[indices[2]]->coordinates())
-                               .norm();
-          const double q = (nodes_[indices[1]]->coordinates() -
-                            nodes_[indices[3]]->coordinates())
-                               .norm();
+      //        b
+      // 3 0---------0 2
+      //   | \   q / |
+      // a |   \  /  | c
+      //   |   p \   |
+      //   |  /    \ |
+      // 0 0---------0 1
+      //         d
+      const double a = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
+      const double b = (nodes_[indices[2]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
+      const double c = (nodes_[indices[1]]->coordinates() -
+                        nodes_[indices[2]]->coordinates())
+                           .norm();
+      const double d = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[1]]->coordinates())
+                           .norm();
+      const double p = (nodes_[indices[0]]->coordinates() -
+                        nodes_[indices[2]]->coordinates())
+                           .norm();
+      const double q = (nodes_[indices[1]]->coordinates() -
+                        nodes_[indices[3]]->coordinates())
+                           .norm();
 
-          // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
-          volume_ =
-              0.25 * std::sqrt(4 * p * p * q * q -
-                               std::pow((a * a + c * c - b * b - d * d), 2.0));
-        }
-        break;
-      }
-      // 3D
-      case (3): {
-        // Hexahedron
-        if (indices.size() == 8) {
-          // Node numbering as read in by mesh file
-          //        d               c
-          //          *_ _ _ _ _ _*
-          //         /|           /|
-          //        / |          / |
-          //     a *_ |_ _ _ _ _* b|
-          //       |  |         |  |
-          //       |  |         |  |2
-          //       |  *_ _ _ _ _|_ *
-          //       | / h        | / g
-          //       |/           |/
-          //       *_ _ _ _ _ _ *
-          //     e               f
-          //
-          // Calculation of hexahedron volume from
-          // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
+      // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
+      volume_ =
+          0.25 * std::sqrt(4 * p * p * q * q -
+                           std::pow((a * a + c * c - b * b - d * d), 2.0));
+    } else {
+      throw std::runtime_error(
+          "Unable to compute volume, number of vertices is incorrect");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute volume of a cell: " << except.what() << '\n';
+  }
+}
 
-          const auto a = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[7]]->coordinates().data());
-          const auto b = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[6]]->coordinates().data());
-          const auto c = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[2]]->coordinates().data());
-          const auto d = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[3]]->coordinates().data());
-          const auto e = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[4]]->coordinates().data());
-          const auto f = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[5]]->coordinates().data());
-          const auto g = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[1]]->coordinates().data());
-          const auto h = static_cast<Eigen::Matrix<double, 3, 1>>(
-              nodes_[indices[0]]->coordinates().data());
+//! Compute volume of a cell
+//! \retval volume Cell volume / area
+//! \tparam Tdim Dimension
+template <>
+inline void mpm::Cell<3>::compute_volume() {
+  try {
+    Eigen::VectorXi indices = shapefn_->corner_indices();
+    // Hexahedron
+    if (indices.size() == 8) {
+      // Node numbering as read in by mesh file
+      //        d               c
+      //          *_ _ _ _ _ _*
+      //         /|           /|
+      //        / |          / |
+      //     a *_ |_ _ _ _ _* b|
+      //       |  |         |  |
+      //       |  |         |  |2
+      //       |  *_ _ _ _ _|_ *
+      //       | / h        | / g
+      //       |/           |/
+      //       *_ _ _ _ _ _ *
+      //     e               f
+      //
+      // Calculation of hexahedron volume from
+      // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
 
-          /*
-          const auto a = nodes_[indices[7]]->coordinates();
-          const auto b = nodes_[indices[6]]->coordinates();
-          const auto c = nodes_[indices[2]]->coordinates();
-          const auto d = nodes_[indices[3]]->coordinates();
-          const auto e = nodes_[indices[4]]->coordinates();
-          const auto f = nodes_[indices[5]]->coordinates();
-          const auto g = nodes_[indices[1]]->coordinates();
-          const auto h = nodes_[indices[0]]->coordinates();
-          */
-          volume_ =
-              (1.0 / 12) *
-                  (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
-                              ((d - e).cross(h - a))) +
-              (1.0 / 12) *
-                  (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
-              (1.0 / 12) *
-                  (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
-              (1.0 / 12) *
-                  (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
-        }
-        break;
-      }
-      default:
-        throw std::runtime_error(
-            "Unable to compute volume, number of vertices is incorrect");
-        break;
+      const auto a = nodes_[indices[7]]->coordinates();
+      const auto b = nodes_[indices[6]]->coordinates();
+      const auto c = nodes_[indices[2]]->coordinates();
+      const auto d = nodes_[indices[3]]->coordinates();
+      const auto e = nodes_[indices[4]]->coordinates();
+      const auto f = nodes_[indices[5]]->coordinates();
+      const auto g = nodes_[indices[1]]->coordinates();
+      const auto h = nodes_[indices[0]]->coordinates();
+
+      volume_ =
+          (1.0 / 12) *
+              (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
+                          ((d - e).cross(h - a))) +
+          (1.0 / 12) *
+              (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
+          (1.0 / 12) *
+              (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
+          (1.0 / 12) *
+              (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
+    } else {
+      throw std::runtime_error(
+          "Unable to compute volume, number of vertices is incorrect");
     }
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
@@ -262,8 +249,6 @@ inline void mpm::Cell<Tdim>::compute_volume() {
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
-
-  std::cout << __FILE__ << __LINE__ << " 2D!\n";
 
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
@@ -319,7 +304,6 @@ template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
-  std::cout << __FILE__ << __LINE__ << " 3D!\n";
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
 
