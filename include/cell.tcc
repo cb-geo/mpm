@@ -301,8 +301,8 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
 //! Check if a point is in a 3D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline bool mpm::Cell<3>::point_in_cell(
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Tolerance for volume / area comparison
