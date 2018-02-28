@@ -206,30 +206,22 @@ inline void mpm::Cell<Tdim>::compute_volume() {
           // Calculation of hexahedron volume from
           // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
 
-          const Eigen::Matrix<double, 3, 1> a =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[7]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> b =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[6]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> c =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[2]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> d =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[3]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> e =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[4]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> f =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[5]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> g =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[1]]->coordinates().data());
-          const Eigen::Matrix<double, 3, 1> h =
-              static_cast<Eigen::Matrix<double, 3, 1>>(
-                  nodes_[indices[0]]->coordinates().data());
+          const auto a = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[7]]->coordinates().data());
+          const auto b = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[6]]->coordinates().data());
+          const auto c = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[2]]->coordinates().data());
+          const auto d = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[3]]->coordinates().data());
+          const auto e = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[4]]->coordinates().data());
+          const auto f = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[5]]->coordinates().data());
+          const auto g = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[1]]->coordinates().data());
+          const auto h = static_cast<Eigen::Matrix<double, 3, 1>>(
+              nodes_[indices[0]]->coordinates().data());
 
           /*
           const auto a = nodes_[indices[7]]->coordinates();
