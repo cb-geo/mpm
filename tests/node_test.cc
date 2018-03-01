@@ -189,17 +189,19 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
     }
 
-    // Check acceleration
-    Eigen::VectorXd acceleration;
-    acceleration.resize(Dof);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    SECTION ("Check acceleration") {
+      // Check acceleration
+      Eigen::VectorXd acceleration;
+      acceleration.resize(Dof);
+      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(Nphase, acceleration);
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      node->update_acceleration(true, Nphase, acceleration);
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
+    }
   }
 }
 
@@ -387,17 +389,19 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
     }
 
-    // Check acceleration
-    Eigen::VectorXd acceleration;
-    acceleration.resize(Dof);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    SECTION ("Check acceleration") {
+      // Check acceleration
+      Eigen::VectorXd acceleration;
+      acceleration.resize(Dof);
+      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(Nphase, acceleration);
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      node->update_acceleration(true, Nphase, acceleration);
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
+    }
   }
 }
 
@@ -585,16 +589,18 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
     }
     
-    // Check acceleration
-    Eigen::VectorXd acceleration;
-    acceleration.resize(Dof);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    SECTION ("Check acceleration") {
+      // Check acceleration
+      Eigen::VectorXd acceleration;
+      acceleration.resize(Dof);
+      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-    node->assign_acceleration(Nphase, acceleration);
-    for (unsigned i = 0; i < acceleration.size(); ++i)
-      REQUIRE(node->acceleration(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      node->update_acceleration(true, Nphase, acceleration);
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
+    }
   }
 }

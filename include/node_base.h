@@ -85,7 +85,7 @@ class NodeBase {
   virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
 
   //! Assign acceleration
-  virtual void assign_acceleration(unsigned nphase,
+  virtual void update_acceleration(bool update, unsigned nphase,
                                    const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration

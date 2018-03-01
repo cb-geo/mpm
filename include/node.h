@@ -91,7 +91,7 @@ class Node : public NodeBase<Tdim> {
   }
 
   //! Assign acceleration
-  void assign_acceleration(unsigned nphase,
+  void update_acceleration(bool update, unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
   //! Return acceleration
