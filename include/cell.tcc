@@ -138,7 +138,7 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
                    particles_.end());
 }
 
-//! Compute volume of a cell
+//! Compute volume of a 2D cell
 //! \retval volume Cell volume / area
 //! \tparam Tdim Dimension
 template <>
@@ -189,7 +189,7 @@ inline void mpm::Cell<2>::compute_volume() {
   }
 }
 
-//! Compute volume of a cell
+//! Compute volume of a 3D cell
 //! \retval volume Cell volume / area
 //! \tparam Tdim Dimension
 template <>
@@ -243,6 +243,7 @@ inline void mpm::Cell<3>::compute_volume() {
               << "Compute volume of a cell: " << except.what() << '\n';
   }
 }
+
 //! Check if a point is in a 2D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
