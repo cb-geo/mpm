@@ -74,21 +74,8 @@ class Node : public NodeBase<Tdim> {
   //! Return internal force
   Eigen::VectorXd internal_force(unsigned nphase) const { return internal_force_.col(nphase); }
 
-  //! Assign velocity
-  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
-
-  //! Return velocity
-  Eigen::VectorXd velocity(unsigned nphase) const {
-    return velocity_.col(nphase);
-  }
-
-  //! Assign momentum
-  void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
-
-  //! Update nodal momentum
-  void update_momentum(const Eigen::MatrixXd& momentum) {
-    momentum_ += momentum;
-  }
+  //! Update momentum
+  void update_momentum(bool update, unsigned nphase, const Eigen::VectorXd& momentum);
 
   //! Return momentum
   Eigen::VectorXd momentum(unsigned nphase) const {
@@ -106,6 +93,14 @@ class Node : public NodeBase<Tdim> {
 
   //! Compute velocity from the momentum
   void compute_velocity();
+
+  //! Assign velocity
+  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
+
+  //! Return velocity
+  Eigen::VectorXd velocity(unsigned nphase) const {
+    return velocity_.col(nphase);
+  }
 
  private:
   //! nodebase id
