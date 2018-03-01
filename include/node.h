@@ -64,11 +64,11 @@ class Node : public NodeBase<Tdim> {
   //! Return mass
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
-  //! Assign force
-  void assign_force(unsigned nphase, const Eigen::VectorXd& force);
+  //! Update external force (body force / traction force)
+  void update_external_force(bool update, unsigned nphase, const Eigen::VectorXd& force);
 
   //! Return force
-  Eigen::VectorXd force(unsigned nphase) const { return force_.col(nphase); }
+  Eigen::VectorXd external_force(unsigned nphase) const { return external_force_.col(nphase); }
 
   //! Assign velocity
   void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
@@ -100,11 +100,6 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! Update external force (body force / traction force)
-  void update_external_force(const Eigen::MatrixXd& external_force) {
-    ext_force_ += external_force;
-  }
-
   //! Update internal force
   void update_internal_force(const Eigen::MatrixXd& internal_force) {
     int_force_ += internal_force;
@@ -122,10 +117,8 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Mass solid
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Force
-  Eigen::Matrix<double, Tdof, Tnphases> force_;
   //! External force
-  Eigen::Matrix<double, Tdim, Tnphases> ext_force_;
+  Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> int_force_;
   //! Velocity

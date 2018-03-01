@@ -85,18 +85,37 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     node->assign_mass(Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
 
-    // Check force
-    Eigen::VectorXd force;
-    force.resize(Dof);
-    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+    SECTION("Check external force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
-    node->assign_force(Nphase, force);
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      // Check current external force is zero
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
 
+      // Update unit force
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+
+      // Update force to 2.0
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
+
+      // Assign force as 1.0
+      node->update_external_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
+    
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dof);
@@ -215,17 +234,35 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     node->assign_mass(Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
 
-    // Check force
-    Eigen::VectorXd force;
-    force.resize(Dof);
-    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+    SECTION("Check external force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+      // Check current external force is zero
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
 
-    node->assign_force(Nphase, force);
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      // Update unit force
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+
+      // Update force to 2.0
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
+
+      // Assign force as 1.0
+      node->update_external_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -345,19 +382,37 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     double mass = 100.5;
     node->assign_mass(Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
+    
+    SECTION("Check external force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
 
-    // Check force
-    Eigen::VectorXd force;
-    force.resize(Dof);
-    for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+      // Check current external force
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
 
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(0.).epsilon(Tolerance));
+      // Update unit force to 1.0
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
 
-    node->assign_force(Nphase, force);
-    for (unsigned i = 0; i < force.size(); ++i)
-      REQUIRE(node->force(Nphase)(i) == Approx(1.).epsilon(Tolerance));
+      // Update force to 2.0
+      node->update_external_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
 
+      // Assign force as 1.0
+      node->update_external_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
+    
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dof);

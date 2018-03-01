@@ -16,7 +16,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 
   dof_ = Tdof;
   mass_.setZero();
-  force_.setZero();
+  external_force_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -28,28 +28,31 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
-  force_.setZero();
-  ext_force_.setZero();
+  external_force_.setZero();
   int_force_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
 }
 
-//! Assign nodal force
+//! Update external force (body force / traction force)
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_force(
-    unsigned nphase, const Eigen::VectorXd& force) {
+void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
+  bool update, unsigned nphase, const Eigen::VectorXd& force) {
   try {
-    if (force.size() != force_.size()) {
-      std::cout << force_.size() << "\t" << force.size() << "\n";
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+    
+    if (force.size() != external_force_.size()) {
+      std::cout << external_force_.size() << "\t" << force.size() << "\n";
       throw std::runtime_error("Nodal force degrees of freedom don't match");
     }
     // Assign force
-    force_.col(nphase) = force;
+    external_force_.col(nphase) = external_force_.col(nphase) * factor + force;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }

@@ -57,11 +57,12 @@ class NodeBase {
   //! Return mass
   virtual double mass(unsigned nphase) const = 0;
 
-  //! Assign force
-  virtual void assign_force(unsigned nphase, const Eigen::VectorXd& force) = 0;
+  //! Update external force (body force / traction force)
+  virtual void update_external_force(bool update, unsigned nphase,
+                                     const Eigen::VectorXd& force) = 0;
 
   //! Return force
-  virtual Eigen::VectorXd force(unsigned nphase) const = 0;
+  virtual Eigen::VectorXd external_force(unsigned nphase) const = 0;
 
   //! Assign velocity
   virtual void assign_velocity(unsigned nphase,
@@ -89,9 +90,6 @@ class NodeBase {
 
   //! Update nodal momentum
   virtual void update_momentum(const Eigen::MatrixXd& momentum) = 0;
-
-  //! Update external force (body force / traction force)
-  virtual void update_external_force(const Eigen::MatrixXd& body_force) = 0;
 
   //! Update internal force
   virtual void update_internal_force(const Eigen::MatrixXd& internal_force) = 0;
