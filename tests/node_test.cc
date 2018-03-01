@@ -116,6 +116,36 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(1.).epsilon(Tolerance));
     }
     
+    SECTION("Check internal force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+      // Check current internal force is zero
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+
+      // Update unit force
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+
+      // Update force to 2.0
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
+
+      // Assign force as 1.0
+      node->update_internal_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
+    
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dof);
@@ -261,6 +291,36 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       node->update_external_force(false, Nphase, force);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
+
+    SECTION("Check internal force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+      // Check current internal force is zero
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+
+      // Update unit force
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+
+      // Update force to 2.0
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
+
+      // Assign force as 1.0
+      node->update_internal_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(1.).epsilon(Tolerance));
     }
 
@@ -410,6 +470,36 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       node->update_external_force(false, Nphase, force);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+    }
+    
+    SECTION("Check internal force") {
+      // Create a force vector
+      Eigen::VectorXd force;
+      force.resize(Dof);
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 1.;
+
+      // Check current internal force
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+
+      // Update unit force to 1.0
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(1.).epsilon(Tolerance));
+
+      // Update force to 2.0
+      node->update_internal_force(true, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(2.).epsilon(Tolerance));
+
+      // Assign force as 1.0
+      node->update_internal_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(1.).epsilon(Tolerance));
     }
     

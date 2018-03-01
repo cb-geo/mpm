@@ -70,6 +70,13 @@ class Node : public NodeBase<Tdim> {
   //! Return force
   Eigen::VectorXd external_force(unsigned nphase) const { return external_force_.col(nphase); }
 
+  //! Update internal force (body force / traction force)
+  void update_internal_force(bool update, unsigned nphase,
+                             const Eigen::VectorXd& force);
+
+  //! Return force
+  Eigen::VectorXd internal_force(unsigned nphase) const { return internal_force_.col(nphase); }
+
   //! Assign velocity
   void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
@@ -100,11 +107,6 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! Update internal force
-  void update_internal_force(const Eigen::MatrixXd& internal_force) {
-    int_force_ += internal_force;
-  }
-
   //! Compute velocity from the momentum
   void compute_velocity();
 
@@ -120,7 +122,7 @@ class Node : public NodeBase<Tdim> {
   //! External force
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
-  Eigen::Matrix<double, Tdim, Tnphases> int_force_;
+  Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
