@@ -36,7 +36,7 @@ class NodeBase {
   NodeBase& operator=(const NodeBase<Tdim>&) = delete;
 
   //! Return id of the nodebase
-  virtual Index id() const { return id_; }
+  virtual Index id() const = 0;
 
   //! Assign coordinates
   virtual void coordinates(const VectorDim& coord) = 0;
@@ -98,12 +98,6 @@ class NodeBase {
 
   //! Compute velocity from the momentum
   virtual void compute_velocity() = 0;
-
- protected:
-  //! nodebase id
-  Index id_{std::numeric_limits<Index>::max()};
-  //! nodal coordinates
-  VectorDim coordinates_;
 
 };  // NodeBase class
 }  // namespace mpm
