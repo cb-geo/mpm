@@ -166,13 +166,11 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle mass mapping") {
       cell->assign_mass_to_nodes(xi, pmass);
-      
-      //for (unsigned i = 0; i < Nnodes; ++i)
-      //  REQUIRE((cell->give_node(i))->mass(phase) ==
-      //          Approx(1.0).epsilon(Tolerance));
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE((cell->give_node(i))->mass(phase) ==
+                Approx(1.0).epsilon(Tolerance));
     }
     /*
-
     SECTION("Check particle momentum mapping") {
       cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
       for (unsigned i = 0; i < Nnodes; ++i) {
