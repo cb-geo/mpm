@@ -23,14 +23,8 @@ class NodeBase {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Constructor with id and coordinates
-  //! \param[in] id Node id
-  //! \param[in] coord coordinates of the nodebase
-  NodeBase(Index id, const VectorDim& coord) : id_{id} {
-    // Check if the dimension is between 1 & 3
-    static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
-    coordinates_ = coord;
-  };
+  //! Default constructor
+  NodeBase() = default;
 
   //! Destructor
   virtual ~NodeBase(){};
@@ -42,15 +36,14 @@ class NodeBase {
   NodeBase& operator=(const NodeBase<Tdim>&) = delete;
 
   //! Return id of the nodebase
-  Index id() const { return id_; }
+  virtual Index id() const { return id_; }
 
   //! Assign coordinates
-  //! \param[in] coord Assign coord as coordinates of the nodebase
-  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+  virtual void coordinates(const VectorDim& coord) = 0;
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase
-  VectorDim coordinates() const { return coordinates_; }
+  virtual VectorDim coordinates() const = 0;
 
   //! Initialise properties
   virtual void initialise() = 0;

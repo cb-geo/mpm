@@ -41,6 +41,17 @@ class Node : public NodeBase<Tdim> {
   //! Initialise properties
   void initialise();
 
+  //! Return id of the nodebase
+  Index id() const { return id_; }
+
+  //! Assign coordinates
+  //! \param[in] coord Assign coord as coordinates of the nodebase
+  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+
+  //! Return coordinates
+  //! \retval coordinates_ return coordinates of the nodebase
+  VectorDim coordinates() const { return coordinates_; }
+
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
@@ -102,13 +113,11 @@ class Node : public NodeBase<Tdim> {
   //! Compute velocity from the momentum
   void compute_velocity();
 
- protected:
-  //! node id
-  using NodeBase<Tdim>::id_;
-  //! nodal coordinates
-  using NodeBase<Tdim>::coordinates_;
-
  private:
+  //! nodebase id
+  Index id_{std::numeric_limits<Index>::max()};
+  //! nodal coordinates
+  VectorDim coordinates_;
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Mass solid
