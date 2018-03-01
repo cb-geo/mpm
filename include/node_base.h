@@ -52,7 +52,7 @@ class NodeBase {
   virtual unsigned dof() const = 0;
 
   //! Assign nodal mass
-  virtual void assign_mass(unsigned nphase, double mass) = 0;
+  virtual void update_mass(bool update, unsigned nphase, double mass) = 0;
 
   //! Return mass
   virtual double mass(unsigned nphase) const = 0;
@@ -91,9 +91,6 @@ class NodeBase {
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
-
-  //! Update nodal mass
-  virtual void update_mass(const Eigen::VectorXd& mass) = 0;
 
   //! Update nodal momentum
   virtual void update_momentum(const Eigen::MatrixXd& momentum) = 0;

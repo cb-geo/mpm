@@ -82,8 +82,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(Nphase, mass);
+    node->update_mass(true, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
+    node->update_mass(true, Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
 
 
     SECTION("Check external force") {
@@ -261,8 +263,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(Nphase, mass);
+    node->update_mass(true, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
+    node->update_mass(true, Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
 
     SECTION("Check external force") {
       // Create a force vector
@@ -440,8 +444,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
-    node->assign_mass(Nphase, mass);
+    node->update_mass(true, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
+    node->update_mass(true, Nphase, mass);
+    REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
     
     SECTION("Check external force") {
       // Create a force vector

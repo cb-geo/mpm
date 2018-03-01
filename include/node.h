@@ -55,11 +55,8 @@ class Node : public NodeBase<Tdim> {
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
-  //! Assign nodal mass
-  void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
-
   //! Update nodal mass
-  void update_mass(const Eigen::VectorXd& mass) { mass_ += mass; }
+  void update_mass(bool update, unsigned nphase, double mass);
 
   //! Return mass
   double mass(unsigned nphase) const { return mass_(0, nphase); }
@@ -67,14 +64,14 @@ class Node : public NodeBase<Tdim> {
   //! Update external force (body force / traction force)
   void update_external_force(bool update, unsigned nphase, const Eigen::VectorXd& force);
 
-  //! Return force
+  //! Return external force
   Eigen::VectorXd external_force(unsigned nphase) const { return external_force_.col(nphase); }
 
   //! Update internal force (body force / traction force)
   void update_internal_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
-  //! Return force
+  //! Return internal force
   Eigen::VectorXd internal_force(unsigned nphase) const { return internal_force_.col(nphase); }
 
   //! Assign velocity

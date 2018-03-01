@@ -36,6 +36,20 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   acceleration_.setZero();
 }
 
+//! Update mass
+//! \tparam Tdim Dimension
+//! \tparam Tdof Degrees of Freedom
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(
+  bool update, unsigned nphase, double mass) {
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    mass_(0, nphase) = mass_(0, nphase) * factor + mass; 
+}
+
 //! Update external force (body force / traction force)
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
