@@ -47,6 +47,9 @@ class Node : public NodeBase<Tdim> {
   //! Assign nodal mass
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
+  //! Update nodal mass
+  void update_mass(const Eigen::VectorXd& mass) { mass_ += mass; }
+
   //! Return mass
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
@@ -67,6 +70,11 @@ class Node : public NodeBase<Tdim> {
   //! Assign momentum
   void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
 
+  //! Update nodal momentum
+  void update_momentum(const Eigen::MatrixXd& momentum) {
+    momentum_ += momentum;
+  }
+
   //! Return momentum
   Eigen::VectorXd momentum(unsigned nphase) const {
     return momentum_.col(nphase);
@@ -81,6 +89,19 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
+  //! Update external force (body force / traction force)
+  void update_external_force(const Eigen::MatrixXd& external_force) {
+    ext_force_ += external_force;
+  }
+
+  //! Update internal force
+  void update_internal_force(const Eigen::MatrixXd& internal_force) {
+    int_force_ += internal_force;
+  }
+
+  //! Compute velocity from the momentum
+  void compute_velocity();
+
  protected:
   //! node id
   using NodeBase<Tdim>::id_;
@@ -94,12 +115,16 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Force
   Eigen::Matrix<double, Tdof, Tnphases> force_;
+  //! External force
+  Eigen::Matrix<double, Tdim, Tnphases> ext_force_;
+  //! Internal force
+  Eigen::Matrix<double, Tdim, Tnphases> int_force_;
   //! Velocity
-  Eigen::Matrix<double, Tdof, Tnphases> velocity_;
+  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
-  Eigen::Matrix<double, Tdof, Tnphases> momentum_;
+  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
-  Eigen::Matrix<double, Tdof, Tnphases> acceleration_;
+  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
 };  // Node class
 }  // namespace mpm
 

@@ -13,7 +13,7 @@ namespace mpm {
 //! Global index type for the node_base
 using Index = unsigned long long;
 
-// NodeBase base class for nodes
+//! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
 //! \details NodeBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -90,6 +90,21 @@ class NodeBase {
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
+
+  //! Update nodal mass
+  virtual void update_mass(const Eigen::VectorXd& mass) = 0;
+
+  //! Update nodal momentum
+  virtual void update_momentum(const Eigen::MatrixXd& momentum) = 0;
+
+  //! Update external force (body force / traction force)
+  virtual void update_external_force(const Eigen::MatrixXd& body_force) = 0;
+
+  //! Update internal force
+  virtual void update_internal_force(const Eigen::MatrixXd& internal_force) = 0;
+
+  //! Compute velocity from the momentum
+  virtual void compute_velocity() = 0;
 
  protected:
   //! nodebase id

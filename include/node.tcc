@@ -1,4 +1,4 @@
-// Constructor with id, coordinates and dof
+//! Constructor with id, coordinates and dof
 //! \param[in] id Node id
 //! \param[in] coord coordinates of the node
 //! \param[in] dof Degrees of freedom
@@ -17,19 +17,21 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   acceleration_.setZero();
 }
 
-// Initialise nodal properties
+//! Initialise nodal properties
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   force_.setZero();
+  ext_force_.setZero();
+  int_force_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
 }
 
-// Assign nodal force
+//! Assign nodal force
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
@@ -48,7 +50,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_force(
   }
 }
 
-// Assign nodal velocity
+//! Assign nodal velocity
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
@@ -66,7 +68,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity(
   }
 }
 
-// Assign nodal momentum
+//! Assign nodal momentum
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
@@ -84,7 +86,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_momentum(
   }
 }
 
-// Assign nodal acceleration
+//! Assign nodal acceleration
 //! \tparam Tdim Dimension
 //! \tparam Tdof Degrees of Freedom
 //! \tparam Tnphases Number of phases
@@ -96,9 +98,23 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_acceleration(
       throw std::runtime_error(
           "Nodal acceleration degrees of freedom don't match");
     }
-    // Assign acceleration
+    //! Assign acceleration
     acceleration_.col(nphase) = acceleration;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+  }
+}
+
+//! Compute velocity from momentum
+//! velocity = momentum / mass
+//! \tparam Tdim Dimension
+//! \tparam Tdof Degrees of Freedom
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
+  const double tolerance = std::numeric_limits<double>::lowest();
+  for (unsigned nphase = 0; nphase < Tnphases; ++nphase) {
+    if (mass_(nphase) > tolerance)
+      velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
   }
 }
