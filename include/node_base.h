@@ -78,22 +78,18 @@ class NodeBase {
   //! Return momentum
   virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
 
+  //! Compute velocity from the momentum
+  virtual void compute_velocity() = 0;
+
+  //! Return velocity
+  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
+
   //! Assign acceleration
   virtual void assign_acceleration(unsigned nphase,
                                    const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
-
-  //! Compute velocity from the momentum
-  virtual void compute_velocity() = 0;
-
-  //! Assign velocity
-  virtual void assign_velocity(unsigned nphase,
-                               const Eigen::VectorXd& velocity) = 0;
-
-  //! Return velocity
-  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
 
 };  // NodeBase class
 }  // namespace mpm

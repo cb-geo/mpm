@@ -82,6 +82,14 @@ class Node : public NodeBase<Tdim> {
     return momentum_.col(nphase);
   }
 
+  //! Compute velocity from the momentum
+  void compute_velocity();
+
+  //! Return velocity
+  Eigen::VectorXd velocity(unsigned nphase) const {
+    return velocity_.col(nphase);
+  }
+
   //! Assign acceleration
   void assign_acceleration(unsigned nphase,
                            const Eigen::VectorXd& acceleration);
@@ -89,17 +97,6 @@ class Node : public NodeBase<Tdim> {
   //! Return acceleration
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
-  }
-
-  //! Compute velocity from the momentum
-  void compute_velocity();
-
-  //! Assign velocity
-  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
-
-  //! Return velocity
-  Eigen::VectorXd velocity(unsigned nphase) const {
-    return velocity_.col(nphase);
   }
 
  private:

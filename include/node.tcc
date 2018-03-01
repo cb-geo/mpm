@@ -152,21 +152,3 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
       velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
   }
 }
-
-//! Assign nodal velocity
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity(
-    unsigned nphase, const Eigen::VectorXd& velocity) {
-  try {
-    if (velocity.size() != velocity_.size()) {
-      throw std::runtime_error("Nodal velocity degrees of freedom don't match");
-    }
-    // Assign velocity
-    velocity_.col(nphase) = velocity;
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-  }
-}
