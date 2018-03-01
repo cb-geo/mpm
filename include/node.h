@@ -41,39 +41,57 @@ class Node : public NodeBase<Tdim> {
   //! Initialise properties
   void initialise();
 
+  //! Return id of the nodebase
+  Index id() const { return id_; }
+
+  //! Assign coordinates
+  //! \param[in] coord Assign coord as coordinates of the nodebase
+  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+
+  //! Return coordinates
+  //! \retval coordinates_ return coordinates of the nodebase
+  VectorDim coordinates() const { return coordinates_; }
+
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
-  //! Assign nodal mass
-  void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
+  //! Update nodal mass
+  void update_mass(bool update, unsigned nphase, double mass);
 
   //! Return mass
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
-  //! Assign force
-  void assign_force(unsigned nphase, const Eigen::VectorXd& force);
+  //! Update external force (body force / traction force)
+  void update_external_force(bool update, unsigned nphase, const Eigen::VectorXd& force);
 
-  //! Return force
-  Eigen::VectorXd force(unsigned nphase) const { return force_.col(nphase); }
+  //! Return external force
+  Eigen::VectorXd external_force(unsigned nphase) const { return external_force_.col(nphase); }
 
-  //! Assign velocity
-  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
+  //! Update internal force (body force / traction force)
+  void update_internal_force(bool update, unsigned nphase,
+                             const Eigen::VectorXd& force);
 
-  //! Return velocity
-  Eigen::VectorXd velocity(unsigned nphase) const {
-    return velocity_.col(nphase);
-  }
+  //! Return internal force
+  Eigen::VectorXd internal_force(unsigned nphase) const { return internal_force_.col(nphase); }
 
-  //! Assign momentum
-  void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
+  //! Update momentum
+  void update_momentum(bool update, unsigned nphase, const Eigen::VectorXd& momentum);
 
   //! Return momentum
   Eigen::VectorXd momentum(unsigned nphase) const {
     return momentum_.col(nphase);
   }
 
+  //! Compute velocity from the momentum
+  void compute_velocity();
+
+  //! Return velocity
+  Eigen::VectorXd velocity(unsigned nphase) const {
+    return velocity_.col(nphase);
+  }
+
   //! Assign acceleration
-  void assign_acceleration(unsigned nphase,
+  void update_acceleration(bool update, unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
   //! Return acceleration
@@ -81,25 +99,25 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
- protected:
-  //! node id
-  using NodeBase<Tdim>::id_;
-  //! nodal coordinates
-  using NodeBase<Tdim>::coordinates_;
-
  private:
+  //! nodebase id
+  Index id_{std::numeric_limits<Index>::max()};
+  //! nodal coordinates
+  VectorDim coordinates_;
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Mass solid
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Force
-  Eigen::Matrix<double, Tdof, Tnphases> force_;
+  //! External force
+  Eigen::Matrix<double, Tdim, Tnphases> external_force_;
+  //! Internal force
+  Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Velocity
-  Eigen::Matrix<double, Tdof, Tnphases> velocity_;
+  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
-  Eigen::Matrix<double, Tdof, Tnphases> momentum_;
+  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
-  Eigen::Matrix<double, Tdof, Tnphases> acceleration_;
+  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
 };  // Node class
 }  // namespace mpm
 
