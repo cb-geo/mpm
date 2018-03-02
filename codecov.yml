@@ -9,4 +9,5 @@ coverage:
 
 ignore: # files and folders for processing
   - external/catch.hpp
+  - external/json.hpp
   - src/main.cc

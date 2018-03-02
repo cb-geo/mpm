@@ -226,32 +226,31 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::B_matrix(
-    const VectorDim& xi) {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::B_matrix(const VectorDim& xi) {
 
   Eigen::MatrixXd grad_shape_fun = this->grad_shapefn(xi);
   Eigen::Matrix<double, 6, Tdim> B_i;
   std::vector<Eigen::MatrixXd> B_matrix;
   for (unsigned i = 0; i < Tnfunctions; ++i) {
-      B_i(0,0) = grad_shape_fun(i,0);
-      B_i(0,1) = 0.;
-      B_i(0,2) = 0.;
-      B_i(1,0) = 0.;
-      B_i(1,1) = grad_shape_fun(i,1);
-      B_i(1,2) = 0.;
-      B_i(2,0) = 0.;
-      B_i(2,1) = 0.;
-      B_i(2,2) = grad_shape_fun(i,2);
-      B_i(3,0) = grad_shape_fun(i,1);
-      B_i(3,1) = grad_shape_fun(i,0);
-      B_i(3,2) = 0.;
-      B_i(4,0) = 0.;
-      B_i(4,1) = grad_shape_fun(i,2);
-      B_i(4,2) = grad_shape_fun(i,1);
-      B_i(5,0) = grad_shape_fun(i,2);
-      B_i(5,1) = 0.;
-      B_i(5,2) = grad_shape_fun(i,0);
-      B_matrix.push_back(B_i);
+    B_i(0, 0) = grad_shape_fun(i, 0);
+    B_i(0, 1) = 0.;
+    B_i(0, 2) = 0.;
+    B_i(1, 0) = 0.;
+    B_i(1, 1) = grad_shape_fun(i, 1);
+    B_i(1, 2) = 0.;
+    B_i(2, 0) = 0.;
+    B_i(2, 1) = 0.;
+    B_i(2, 2) = grad_shape_fun(i, 2);
+    B_i(3, 0) = grad_shape_fun(i, 1);
+    B_i(3, 1) = grad_shape_fun(i, 0);
+    B_i(3, 2) = 0.;
+    B_i(4, 0) = 0.;
+    B_i(4, 1) = grad_shape_fun(i, 2);
+    B_i(4, 2) = grad_shape_fun(i, 1);
+    B_i(5, 0) = grad_shape_fun(i, 2);
+    B_i(5, 1) = 0.;
+    B_i(5, 2) = grad_shape_fun(i, 0);
+    B_matrix.push_back(B_i);
   }
   return B_matrix;
 }
@@ -282,13 +281,13 @@ inline std::vector<Eigen::MatrixXd>
 //!     0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!   4           16            5
 
-//! Return indices of to calculate the cell volume / area
+//! Return the corner indices of a cell to calculate the cell volume
 //! \retval indices Outer-indices that form the cell
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::volume_indices() {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::corner_indices() {
   Eigen::Matrix<int, 8, 1> indices;
   indices << 0, 1, 2, 3, 4, 5, 6, 7;
   return indices;

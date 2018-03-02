@@ -144,7 +144,7 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->volume_indices();
+    Eigen::VectorXi indices = shapefn_->corner_indices();
     // Quadrilateral
     if (indices.size() == 4) {
 
@@ -195,7 +195,7 @@ inline void mpm::Cell<2>::compute_volume() {
 template <>
 inline void mpm::Cell<3>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->volume_indices();
+    Eigen::VectorXi indices = shapefn_->corner_indices();
     // Hexahedron
     if (indices.size() == 8) {
       // Node numbering as read in by mesh file
@@ -215,14 +215,14 @@ inline void mpm::Cell<3>::compute_volume() {
       // Calculation of hexahedron volume from
       // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
 
-      const Eigen::Vector3d a = nodes_[indices[7]]->coordinates();
-      const Eigen::Vector3d b = nodes_[indices[6]]->coordinates();
-      const Eigen::Vector3d c = nodes_[indices[2]]->coordinates();
-      const Eigen::Vector3d d = nodes_[indices[3]]->coordinates();
-      const Eigen::Vector3d e = nodes_[indices[4]]->coordinates();
-      const Eigen::Vector3d f = nodes_[indices[5]]->coordinates();
-      const Eigen::Vector3d g = nodes_[indices[1]]->coordinates();
-      const Eigen::Vector3d h = nodes_[indices[0]]->coordinates();
+      const auto a = nodes_[indices[7]]->coordinates();
+      const auto b = nodes_[indices[6]]->coordinates();
+      const auto c = nodes_[indices[2]]->coordinates();
+      const auto d = nodes_[indices[3]]->coordinates();
+      const auto e = nodes_[indices[4]]->coordinates();
+      const auto f = nodes_[indices[5]]->coordinates();
+      const auto g = nodes_[indices[1]]->coordinates();
+      const auto h = nodes_[indices[0]]->coordinates();
 
       volume_ =
           (1.0 / 12) *
@@ -247,8 +247,8 @@ inline void mpm::Cell<3>::compute_volume() {
 //! Check if a point is in a 2D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline bool mpm::Cell<2>::point_in_cell(
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -279,7 +279,7 @@ inline bool mpm::Cell<2>::point_in_cell(
     // clang-format off
     area << 1.  , 1.  , 1.,
             a(0), b(0), point(0),
-            a(1), b(1), point(3);
+            a(1), b(1), point(1);
     // clang-format on
     const double triarea = 0.5 * std::fabs(area.determinant());
 
@@ -290,6 +290,7 @@ inline bool mpm::Cell<2>::point_in_cell(
       return false;
     }
   }
+
   // Check if the point is inside the hedron
   if (std::fabs(triareas - volume_) < tolerance) {
     status = true;
@@ -300,8 +301,8 @@ inline bool mpm::Cell<2>::point_in_cell(
 //! Check if a point is in a 3D cell
 //! \param[in] point Coordinates of a point
 //! \tparam Tdim Dimension
-template <>
-inline bool mpm::Cell<3>::point_in_cell(
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -347,6 +348,120 @@ inline bool mpm::Cell<3>::point_in_cell(
   return status;
 }
 
+//! Return the local coordinates of a point in a 2D cell
+//! \param[in] point Coordinates of a point
+//! \retval xi Local coordinates of a point
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
+    const Eigen::Matrix<double, 2, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  try {
+    // Quadrilateral
+    if (indices.size() == 4) {
+      //        b
+      // 3 0--------0 2
+      //   | \   / |
+      // a |  \ /  | c
+      //   |  / \  |
+      //   | /   \ |
+      // 0 0---------0 1
+      //         d
+      const double xlength = (nodes_[indices[0]]->coordinates() -
+                              nodes_[indices[1]]->coordinates())
+                                 .norm();
+      const double ylength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[2]]->coordinates())
+                                 .norm();
+
+      const Eigen::Matrix<double, 2, 1> centre =
+          (nodes_[indices[0]]->coordinates() +
+           nodes_[indices[1]]->coordinates() +
+           nodes_[indices[2]]->coordinates() +
+           nodes_[indices[3]]->coordinates()) /
+          4.0;
+
+      Eigen::Matrix<double, 2, 1> xi;
+      xi(0) = 2. * (point(0) - centre(0)) / xlength;
+      xi(1) = 2. * (point(1) - centre(1)) / ylength;
+      return xi;
+    } else {
+      throw std::runtime_error("Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
+  }
+}
+
+//! Return the local coordinates of a point in a 3D cell
+//! \param[in] point Coordinates of a point
+//! \retval xi Local coordinates of a point
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
+    const Eigen::Matrix<double, 3, 1>& point) {
+
+  std::cout << __FILE__ << __LINE__ << " 3D!\n";
+
+  // Local point coordinates
+  Eigen::Matrix<double, 3, 1> xi;
+
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  try {
+    // Hexahedron
+    if (indices.size() == 8) {
+      // Node numbering as read in by mesh file
+      //        3               2
+      //          *_ _ _ _ _ _*
+      //         /|           /|
+      //        / |          / |
+      //     7 *_ |_ _ _ _ _* 6|
+      //       |  |         |  |
+      //       |  |         |  |
+      //       |  *_ _ _ _ _|_ *
+      //       | / 0        | / 1
+      //       |/           |/
+      //       *_ _ _ _ _ _ *
+      //     4               5
+      //
+
+      const double xlength = (nodes_[indices[0]]->coordinates() -
+                              nodes_[indices[1]]->coordinates())
+                                 .norm();
+      const double ylength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[2]]->coordinates())
+                                 .norm();
+      const double zlength = (nodes_[indices[1]]->coordinates() -
+                              nodes_[indices[5]]->coordinates())
+                                 .norm();
+
+      // Compute centre
+      Eigen::Matrix<double, 3, 1> centre;
+      centre.setZero();
+      for (unsigned i = 0; i < indices.size(); ++i)
+        centre += nodes_[indices[i]]->coordinates();
+      centre /= 4.0;
+
+      Eigen::Matrix<double, 3, 1> xi;
+      xi(0) = 2. * (point(0) - centre(0)) / xlength;
+      xi(1) = 2. * (point(1) - centre(1)) / ylength;
+      xi(2) = 2. * (point(2) - centre(2)) / ylength;
+      return xi;
+    } else {
+      throw std::runtime_error("Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
+  }
+}
+
 //! Assign mass to nodes
 //! \param[in] xi local coordinates of particle
 //! \param[in] pmass mass of particle
@@ -354,8 +469,8 @@ inline bool mpm::Cell<3>::point_in_cell(
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_mass_to_nodes(const VectorDim& xi,
                                            const Eigen::VectorXd& pmass) {
-  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  for (unsigned i = 0; i < this->nfunctions(); ++i)
+  auto shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < shapefns.size(); ++i)
     nodes_[i]->update_mass(shapefns(i) * pmass);
 }
 
@@ -390,6 +505,7 @@ void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
     nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
 }
 
+
 //! Assign internal force to nodes
 //! \param[in] xi Local coordinates of particle
 //! \param[in] pvolume Volume of particle
@@ -417,16 +533,19 @@ void mpm::Cell<Tdim>::assign_internal_force_to_nodes(const VectorDim& xi,
 }
 
 //! Return velocity at a given point by interpolating from nodes
+//! Return velocity at a point by interpolating from nodes
 //! \param[in] xi Local coordinates of point
 //! \param[in] nphase Phase
 //! \retval velocity Interpolated velocity
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi, unsigned nphase) {
-  Eigen::Matrix<double,Tdim,1> velocity = Eigen::Matrix<double,Tdim,1>::Zero();
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi,
+                                                      unsigned nphase) {
+  Eigen::Matrix<double, Tdim, 1> velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-      velocity += shapefns(i) * nodes_[i]->velocity(nphase);
+    velocity += shapefns(i) * nodes_[i]->velocity(nphase);
   return velocity;
 }
 

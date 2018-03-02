@@ -26,7 +26,7 @@ template <unsigned Tdim, unsigned Tnphases>
 class Particle : public ParticleBase<Tdim> {
  protected:
   static const unsigned nSize = Tdim * (Tdim + 1) / 2;
-  
+
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;

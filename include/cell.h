@@ -92,8 +92,19 @@ class Cell {
   //! Return volume
   double volume() const { return volume_; }
 
-  //! Point in cell
-  bool point_in_cell(const VectorDim& point);
+  //! Point in cell 2D
+  bool point_in_cell(const Eigen::Matrix<double, 2, 1>& point);
+
+  //! Point in cell 3D
+  bool point_in_cell(const Eigen::Matrix<double, 3, 1>& point);
+
+  //! Return the local coordinates of a point in a 2D cell
+  Eigen::Matrix<double, 2, 1> local_coordinates_point(
+      const Eigen::Matrix<double, 2, 1>& point);
+
+  //! Return the local coordinates of a point in a 3D cell
+  Eigen::Matrix<double, 3, 1> local_coordinates_point(
+      const Eigen::Matrix<double, 3, 1>& point);
 
   //! Assign particle mass to nodes
   void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
