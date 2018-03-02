@@ -142,6 +142,39 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
   }
+
+  SECTION("Test particle information mapping") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+
+    // Create a vector of node pointers
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{node0, node1, node2,
+                                                           node3};
+
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+    cell->shapefn(shapefn);
+
+    // Local coordinate of a particle
+    Eigen::Vector2d xi = Eigen::Vector2d::Zero();
+    // Particle mass
+    double pmass = 4.;
+    // Particle velocity
+    Eigen::Vector2d pvelocity;
+    pvelocity << 1., 1.;
+    // Phase
+    unsigned phase = 1;
+
+    SECTION("Check particle mass mapping") {
+      cell->update_nodal_mass(xi, phase, pmass);
+      for (unsigned i = 0; i < Nnodes; ++i)
+        REQUIRE((nodes.at(i))->mass(phase) == Approx(1.0).epsilon(Tolerance));
+    }
+  }
 }
 
 //! \brief Check cell class for 3D case

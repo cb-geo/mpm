@@ -62,20 +62,26 @@ class Node : public NodeBase<Tdim> {
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
   //! Update external force (body force / traction force)
-  void update_external_force(bool update, unsigned nphase, const Eigen::VectorXd& force);
+  void update_external_force(bool update, unsigned nphase,
+                             const Eigen::VectorXd& force);
 
   //! Return external force
-  Eigen::VectorXd external_force(unsigned nphase) const { return external_force_.col(nphase); }
+  Eigen::VectorXd external_force(unsigned nphase) const {
+    return external_force_.col(nphase);
+  }
 
   //! Update internal force (body force / traction force)
   void update_internal_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
   //! Return internal force
-  Eigen::VectorXd internal_force(unsigned nphase) const { return internal_force_.col(nphase); }
+  Eigen::VectorXd internal_force(unsigned nphase) const {
+    return internal_force_.col(nphase);
+  }
 
   //! Update momentum
-  void update_momentum(bool update, unsigned nphase, const Eigen::VectorXd& momentum);
+  void update_momentum(bool update, unsigned nphase,
+                       const Eigen::VectorXd& momentum);
 
   //! Return momentum
   Eigen::VectorXd momentum(unsigned nphase) const {

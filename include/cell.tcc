@@ -205,7 +205,7 @@ inline void mpm::Cell<3>::compute_volume() {
       //        / |          / |
       //     a *_ |_ _ _ _ _* b|
       //       |  |         |  |
-      //       |  |         |  |2
+      //       |  |         |  |
       //       |  *_ _ _ _ _|_ *
       //       | / h        | / g
       //       |/           |/
@@ -461,3 +461,66 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
               << except.what() << '\n';
   }
 }
+
+//! Assign mass to nodes
+//! \param[in] xi local coordinates of particle
+//! \param[in] pmass mass of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::update_nodal_mass(const VectorDim& xi, unsigned nphase,
+                                        double pmass) {
+  bool update = true;
+  auto shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < shapefns.size(); ++i) {
+    double mass = shapefns(i) * pmass;
+    nodes_[i]->update_mass(true, nphase, mass);
+  }
+}
+
+/*
+//! Assign momentum to nodes
+//! \param[in] xi local coordinates of particle
+//! \param[in] pmass mass of particle
+//! \param[in] pvelocity velocity of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_momentum_to_nodes(
+    const VectorDim& xi, const Eigen::VectorXd& pmass,
+    const Eigen::MatrixXd& pvelocity) {
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  Eigen::MatrixXd mass;
+  if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    nodes_[i]->update_momentum(shapefns(i) * mass * pvelocity);
+  }
+}
+
+//! Assign body force to nodes
+//! \param[in] xi Local coordinates of particle
+//! \param[in] pmass Mass of particle
+//! \param[in] pgravity Gravity of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
+                                                 const Eigen::VectorXd& pmass,
+                                                 const VectorDim& pgravity) {
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
+}
+
+//! Return velocity at a point by interpolating from nodes
+//! \param[in] xi Local coordinates of point
+//! \retval velocity Interpolated velocity
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi,
+                                                      unsigned nphase) {
+  Eigen::Matrix<double, Tdim, 1> velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    velocity += shapefns(i) * nodes_[i]->velocity(nphase);
+  return velocity;
+}
+*/
