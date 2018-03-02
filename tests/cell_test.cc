@@ -174,6 +174,14 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
     }
+    SECTION("Check particle momentum mapping") {
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned j = 0; j < pvelocity.size(); ++j)
+          REQUIRE(node->momentum(phase)(j) == Approx(1.0).epsilon(Tolerance));
+      }
+    }
   }
 }
 
@@ -365,6 +373,14 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+    }
+    SECTION("Check particle momentum mapping") {
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned j = 0; j < pvelocity.size(); ++j)
+          REQUIRE(node->momentum(phase)(j) == Approx(0.5).epsilon(Tolerance));
+      }
     }
   }
 }

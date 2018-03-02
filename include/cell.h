@@ -100,11 +100,10 @@ class Cell {
   void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
                                   double pmass);
 
+  //! Assign particle momentum to nodes
+  void map_momentum_to_nodes(const VectorDim& xi, unsigned nphase, double pmass,
+                             const Eigen::VectorXd& pvelocity);
   /*
-    //! Assign particle momentum to nodes
-    void assign_momentum_to_nodes(const VectorDim& xi,
-                                  const Eigen::VectorXd& pmass,
-                                  const Eigen::MatrixXd& pvelocity);
 
     //! Assign body force to nodes
     void assign_body_force_to_nodes(const VectorDim& xi,
