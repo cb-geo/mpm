@@ -462,18 +462,17 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
   }
 }
 
-//! Assign mass to nodes
+//! Map particle mass to nodes
 //! \param[in] xi local coordinates of particle
 //! \param[in] pmass mass of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::update_nodal_mass(const VectorDim& xi, unsigned nphase,
-                                        double pmass) {
-  bool update = true;
+void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
+                                                 unsigned nphase,
+                                                 double pmass) {
   auto shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < shapefns.size(); ++i) {
-    double mass = shapefns(i) * pmass;
-    nodes_[i]->update_mass(true, nphase, mass);
+    nodes_[i]->update_mass(true, nphase, shapefns(i) * pmass);
   }
 }
 

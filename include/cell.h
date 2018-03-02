@@ -96,8 +96,9 @@ class Cell {
   Eigen::Matrix<double, 3, 1> local_coordinates_point(
       const Eigen::Matrix<double, 3, 1>& point);
 
-  //! Assign particle mass to nodes
-  void update_nodal_mass(const VectorDim& xi, unsigned nphase, double pmass);
+  //! Map particle mass to nodes
+  void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
+                                  double pmass);
 
   /*
     //! Assign particle momentum to nodes
