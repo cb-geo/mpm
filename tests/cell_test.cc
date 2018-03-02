@@ -171,8 +171,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle mass mapping") {
       cell->update_nodal_mass(xi, phase, pmass);
-      for (unsigned i = 0; i < Nnodes; ++i)
-        REQUIRE((nodes.at(i))->mass(phase) == Approx(1.0).epsilon(Tolerance));
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
     }
   }
 }
@@ -327,5 +327,44 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->status() == true);
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
+  }
+
+  SECTION("Test particle information mapping") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+    cell->add_node(4, node4);
+    cell->add_node(5, node5);
+    cell->add_node(6, node6);
+    cell->add_node(7, node7);
+    REQUIRE(cell->nnodes() == 8);
+
+    // Create a vector of node pointers
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{
+        node0, node1, node2, node3, node4, node5, node6, node7};
+
+    // Assign shape function to cell
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+          std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+      cell->shapefn(shapefn);
+
+    // Local coordinate of a particle
+    Eigen::Vector3d xi = Eigen::Vector3d::Zero();
+    // Particle mass
+    double pmass = 4.;
+    // Particle velocity
+    Eigen::Vector3d pvelocity;
+    pvelocity << 1., 1., 1.;
+    // Phase
+    unsigned phase = 1;
+
+    SECTION("Check particle mass mapping") {
+      cell->update_nodal_mass(xi, phase, pmass);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+    }
   }
 }
