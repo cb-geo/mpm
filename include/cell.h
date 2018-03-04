@@ -103,19 +103,18 @@ class Cell {
   //! Assign particle momentum to nodes
   void map_momentum_to_nodes(const VectorDim& xi, unsigned nphase, double pmass,
                              const Eigen::VectorXd& pvelocity);
+
+  //! Map body force to nodes
+  void map_body_force_to_nodes(const VectorDim& xi, unsigned nphase,
+                               double pmass, const VectorDim& pgravity);
   /*
 
-    //! Assign body force to nodes
-    void assign_body_force_to_nodes(const VectorDim& xi,
-                                    const Eigen::VectorXd& pmass,
-                                    const VectorDim& pgravity);
+  //! Assign internal force to nodes
+  void assign_internal_force_to_nodes(const VectorDim& xi);
 
-    //! Assign internal force to nodes
-    void assign_internal_force_to_nodes(const VectorDim& xi);
-
-    //! Return velocity at given location by interpolating from nodes
-    Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi, unsigned
-    nphase);
+  //! Return velocity at given location by interpolating from nodes
+  Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
+                                             unsigned nphase);
   */
 
  protected:

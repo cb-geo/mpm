@@ -166,6 +166,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Particle velocity
     Eigen::Vector2d pvelocity;
     pvelocity << 1., 1.;
+    // Particle gravity
+    Eigen::Vector2d pgravity;
+    pgravity << 0., 9.814;
     // Phase
     unsigned phase = 1;
 
@@ -178,8 +181,18 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
       cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
-        for (unsigned j = 0; j < pvelocity.size(); ++j)
-          REQUIRE(node->momentum(phase)(j) == Approx(1.0).epsilon(Tolerance));
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
+      }
+    }
+    SECTION("Check particle body force mapping") {
+      // Assign body force to nodes
+      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      Eigen::Vector2d bodyforce;
+      bodyforce << 0., 9.814;
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < bodyforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) == Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
   }
@@ -366,6 +379,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Particle velocity
     Eigen::Vector3d pvelocity;
     pvelocity << 1., 1., 1.;
+    // Particle gravity
+    Eigen::Vector3d pgravity;
+    pgravity << 0., 0., 9.814;
     // Phase
     unsigned phase = 1;
 
@@ -378,8 +394,18 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
       cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
-        for (unsigned j = 0; j < pvelocity.size(); ++j)
-          REQUIRE(node->momentum(phase)(j) == Approx(0.5).epsilon(Tolerance));
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(0.5).epsilon(Tolerance));
+      }
+    }
+    SECTION("Check particle body force mapping") {
+      // Assign body force to nodes
+      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      Eigen::Vector3d bodyforce;
+      bodyforce << 0., 0., 0.5 * 9.814;
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < bodyforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) == Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
   }

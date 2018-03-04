@@ -492,21 +492,22 @@ void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
   }
 }
 
-/*
-//! Assign body force to nodes
+//! Map body force to nodes
 //! \param[in] xi Local coordinates of particle
 //! \param[in] pmass Mass of particle
 //! \param[in] pgravity Gravity of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_body_force_to_nodes(const VectorDim& xi,
-                                                 const Eigen::VectorXd& pmass,
-                                                 const VectorDim& pgravity) {
+void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
+                                              unsigned nphase, double pmass,
+                                              const VectorDim& pgravity) {
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->update_body_force(shapefns(i) * pgravity * pmass);
+    nodes_[i]->update_external_force(true, nphase,
+                                     shapefns(i) * pgravity * pmass);
 }
 
+/*
 //! Return velocity at a point by interpolating from nodes
 //! \param[in] xi Local coordinates of point
 //! \retval velocity Interpolated velocity
