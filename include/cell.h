@@ -114,7 +114,7 @@ class Cell {
 
   //! Assign internal force to nodes
   // void assign_internal_force_to_nodes(const VectorDim& xi);
-  
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
