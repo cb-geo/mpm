@@ -477,9 +477,9 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
 }
 
 //! Map momentum to nodes
-//! \param[in] xi local coordinates of particle
-//! \param[in] pmass mass of particle
-//! \param[in] pvelocity velocity of particle
+//! \param[in] xi local coordinates of a particle
+//! \param[in] pmass mass of a particle
+//! \param[in] pvelocity velocity of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
@@ -493,9 +493,9 @@ void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
 }
 
 //! Map body force to nodes
-//! \param[in] xi Local coordinates of particle
-//! \param[in] pmass Mass of particle
-//! \param[in] pgravity Gravity of particle
+//! \param[in] xi Local coordinates of a particle
+//! \param[in] pmass Mass of a particle
+//! \param[in] pgravity Gravity of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
@@ -507,14 +507,13 @@ void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-/*
 //! Return velocity at a point by interpolating from nodes
-//! \param[in] xi Local coordinates of point
-//! \retval velocity Interpolated velocity
+//! \param[in] xi Local coordinates of a point
+//! \retval velocity Interpolated velocity at xi
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi,
-                                                      unsigned nphase) {
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
+                                                            unsigned nphase) {
   Eigen::Matrix<double, Tdim, 1> velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
@@ -522,4 +521,3 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_velocity(const VectorDim& xi,
     velocity += shapefns(i) * nodes_[i]->velocity(nphase);
   return velocity;
 }
-*/

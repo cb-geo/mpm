@@ -107,16 +107,14 @@ class Cell {
   //! Map body force to nodes
   void map_body_force_to_nodes(const VectorDim& xi, unsigned nphase,
                                double pmass, const VectorDim& pgravity);
-  /*
-
-  //! Assign internal force to nodes
-  void assign_internal_force_to_nodes(const VectorDim& xi);
 
   //! Return velocity at given location by interpolating from nodes
   Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
                                              unsigned nphase);
-  */
 
+  //! Assign internal force to nodes
+  // void assign_internal_force_to_nodes(const VectorDim& xi);
+  
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};

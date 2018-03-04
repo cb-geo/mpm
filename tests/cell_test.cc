@@ -170,7 +170,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     Eigen::Vector2d pgravity;
     pgravity << 0., 9.814;
     // Phase
-    unsigned phase = 1;
+    unsigned phase = 0;
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
@@ -194,6 +194,59 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         for (unsigned i = 0; i < bodyforce.size(); ++i)
           REQUIRE(node->external_force(phase)(i) == Approx(bodyforce(i)).epsilon(Tolerance));
       }
+    }
+    SECTION("Check interpolate velocity") {
+      // Assign mass to 100
+      const double mass = 100.;
+
+      // Apply momentum
+      Eigen::Matrix<double, Dim, 1> momentum;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply momentum
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          momentum(i) = 10. * static_cast<double>(j);
+
+        // Nodal mass
+        node->update_mass(false, phase, mass);
+        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+
+        // Nodal momentum
+        node->update_momentum(false, phase, momentum);
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        // Compute and check velocity
+        node->compute_velocity();
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(phase)(i) ==
+                  Approx(0.1 * static_cast<double>(j)).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate velocity (0, 0)
+      Eigen::Vector2d interpolated_velocity;
+      interpolated_velocity << 0.25, 0.25;
+      
+      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(xi, phase);
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (0.5, 0.5)
+      interpolated_velocity << 0.2875, 0.2875;
+
+      xi << 0.5, 0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
     }
   }
 }
@@ -383,7 +436,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     Eigen::Vector3d pgravity;
     pgravity << 0., 0., 9.814;
     // Phase
-    unsigned phase = 1;
+    unsigned phase = 0;
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
