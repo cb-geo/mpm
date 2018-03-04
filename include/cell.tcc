@@ -517,7 +517,10 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
   Eigen::Matrix<double, Tdim, 1> velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  for (unsigned i = 0; i < this->nfunctions(); ++i)
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    // std::cout << "i: " << i << "\t" << shapefns(i) << "\n";
     velocity += shapefns(i) * nodes_[i]->velocity(nphase);
+  }
+  
   return velocity;
 }

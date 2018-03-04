@@ -229,21 +229,29 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         // Increment j
         ++j;
       }
-      // Check interpolate velocity (0, 0)
+      // Check interpolate velocity (0, 0)   
+      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(xi, phase);
+      
       Eigen::Vector2d interpolated_velocity;
       interpolated_velocity << 0.25, 0.25;
-      
-      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(xi, phase);
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(velocity(i) ==
                 Approx(interpolated_velocity(i)).epsilon(Tolerance));
 
       // Check interpolate velocity (0.5, 0.5)
-      interpolated_velocity << 0.2875, 0.2875;
-
       xi << 0.5, 0.5;
       velocity = cell->interpolate_nodal_velocity(xi, phase);
 
+      interpolated_velocity << 0.2875, 0.2875;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (-0.5, -0.5)
+      xi << -0.5, -0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      interpolated_velocity << 0.1875, 0.1875;
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(velocity(i) ==
                 Approx(interpolated_velocity(i)).epsilon(Tolerance));
