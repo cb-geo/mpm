@@ -93,7 +93,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     node->update_mass(false, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
-
     SECTION("Check external force") {
       // Create a force vector
       Eigen::VectorXd force;
@@ -123,7 +122,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
     }
-    
+
     SECTION("Check internal force") {
       // Create a force vector
       Eigen::VectorXd force;
@@ -169,7 +168,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
-      // Check update momentum to 20      
+      // Check update momentum to 20
       node->update_momentum(true, Nphase, momentum);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
@@ -189,7 +188,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
     }
 
-    SECTION ("Check acceleration") {
+    SECTION("Check acceleration") {
       // Check acceleration
       Eigen::VectorXd acceleration;
       acceleration.resize(Dof);
@@ -368,7 +367,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
-      // Check update momentum to 20      
+      // Check update momentum to 20
       node->update_momentum(true, Nphase, momentum);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
@@ -386,10 +385,9 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       node->compute_velocity();
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
-
     }
 
-    SECTION ("Check acceleration") {
+    SECTION("Check acceleration") {
       // Check acceleration
       Eigen::VectorXd acceleration;
       acceleration.resize(Dof);
@@ -523,7 +521,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
     }
-    
+
     SECTION("Check internal force") {
       // Create a force vector
       Eigen::VectorXd force;
@@ -569,7 +567,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
-      // Check update momentum to 20      
+      // Check update momentum to 20
       node->update_momentum(true, Nphase, momentum);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
@@ -588,8 +586,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
     }
-    
-    SECTION ("Check acceleration") {
+
+    SECTION("Check acceleration") {
       // Check acceleration
       Eigen::VectorXd acceleration;
       acceleration.resize(Dof);

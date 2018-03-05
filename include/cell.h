@@ -96,6 +96,25 @@ class Cell {
   Eigen::Matrix<double, 3, 1> local_coordinates_point(
       const Eigen::Matrix<double, 3, 1>& point);
 
+  //! Map particle mass to nodes
+  void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
+                                  double pmass);
+
+  //! Assign particle momentum to nodes
+  void map_momentum_to_nodes(const VectorDim& xi, unsigned nphase, double pmass,
+                             const Eigen::VectorXd& pvelocity);
+
+  //! Map body force to nodes
+  void map_body_force_to_nodes(const VectorDim& xi, unsigned nphase,
+                               double pmass, const VectorDim& pgravity);
+
+  //! Return velocity at given location by interpolating from nodes
+  Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
+                                             unsigned nphase);
+
+  //! Assign internal force to nodes
+  // void assign_internal_force_to_nodes(const VectorDim& xi);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
