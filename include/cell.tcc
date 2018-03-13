@@ -522,3 +522,19 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
 
   return velocity;
 }
+
+//! Return acceleration at a point by interpolating from nodes
+//! \param[in] xi Local coordinates of a point
+//! \retval acceleration Interpolated acceleration at xi
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
+    const VectorDim& xi, unsigned nphase) {
+  Eigen::Matrix<double, Tdim, 1> acceleration =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    acceleration += shapefns(i) * nodes_[i]->acceleration(nphase);
+
+  return acceleration;
+}

@@ -257,6 +257,53 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         REQUIRE(velocity(i) ==
                 Approx(interpolated_velocity(i)).epsilon(Tolerance));
     }
+
+    SECTION("Check interpolate acceleration") {
+
+      // Apply acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply acceleration
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          acceleration(i) = 10. * static_cast<double>(j);
+
+        // Nodal acceleration
+        node->update_acceleration(false, phase, acceleration);
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate acceleration (0, 0)
+      Eigen::Vector2d check_acceleration =
+          cell->interpolate_nodal_acceleration(xi, phase);
+
+      Eigen::Vector2d interpolated_acceleration;
+      interpolated_acceleration << 25., 25.;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (0.5, 0.5)
+      xi << 0.5, 0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 28.75, 28.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (-0.5, -0.5)
+      xi << -0.5, -0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 18.75, 18.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+    }
   }
 }
 
@@ -506,6 +553,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         ++j;
       }
       // Check interpolate velocity (0, 0)
+      xi.setZero();
       Eigen::Vector3d velocity = cell->interpolate_nodal_velocity(xi, phase);
 
       Eigen::Vector3d interpolated_velocity;
@@ -531,6 +579,55 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(velocity(i) ==
                 Approx(interpolated_velocity(i)).epsilon(Tolerance));
+    }
+
+    SECTION("Check interpolate acceleration") {
+      // Apply acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply acceleration
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          acceleration(i) = 10. * static_cast<double>(j);
+
+        // Nodal acceleration
+        node->update_acceleration(false, phase, acceleration);
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        // Increment j
+        ++j;
+      }
+      // Set coordinates as zero
+      xi.setZero();
+      // Check interpolate acceleration (0, 0, 0)
+      Eigen::Vector3d check_acceleration =
+          cell->interpolate_nodal_acceleration(xi, phase);
+
+      Eigen::Vector3d interpolated_acceleration;
+      interpolated_acceleration << 45.0, 45.0, 45.0;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (0.5, 0.5, 0.5)
+      xi << 0.5, 0.5, 0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 58.75, 58.75, 58.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (-0.5, -0.5, -0.5)
+      xi << -0.5, -0.5, -0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 28.75, 28.75, 28.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
     }
   }
 }
