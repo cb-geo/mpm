@@ -157,6 +157,33 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return the B-matrix of a Quadrilateral Element
+//! \param[in] xi Coordinates of point of interest
+//! \retval bmatrix B-matrix of a given cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(const VectorDim& xi) {
+
+  Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
+  for (unsigned i = 0; i < Tnfunctions; ++i) {
+    Eigen::Matrix<double, 3, Tdim> bi;
+    // clang-format off
+    bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;
+    bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1);
+    bi(2, 0) = grad_shapefn(i, 1); bi(2, 1) = grad_shapefn(i, 0);
+    bmatrix.push_back(bi);
+    // clang-format on
+  }
+  return bmatrix;
+}
+
 //! Return the corner indices of a cell to calculate the cell volume
 //! \retval indices Outer-indices that form the cell
 //! \tparam Tdim Dimension

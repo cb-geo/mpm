@@ -39,6 +39,11 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
 
+  //! Evaluate the B matrix at given local coordinates
+  //! \param[in] xi given local coordinates
+  //! \retval bmatrix B matrix
+  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi);
+
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
   Eigen::VectorXi corner_indices();
