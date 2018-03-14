@@ -105,6 +105,78 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(3, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Coordinates is (0,0)
+    SECTION("Four noded quadrilateral Bmatrix for coordinates(0,0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(coords);
+
+      // Check gradient of shape functions
+      auto gradsf = quadsf->grad_shapefn(coords);
+
+      // Check size of Bmatrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    // Coordinates is (0.5,0.5)
+    SECTION("Four noded quadrilateral Bmatrix for coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords << 0.5, 0.5;
+
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(coords);
+
+      // Check gradient of shape functions
+      auto gradsf = quadsf->grad_shapefn(coords);
+
+      // Check size of Bmatrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    // Coordinates is (-0.5,-0.5)
+    SECTION("Four noded quadrilateral Bmatrix for coordinates(-0.5,-0.5)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords << -0.5, -0.5;
+
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(coords);
+
+      // Check gradient of shape functions
+      auto gradsf = quadsf->grad_shapefn(coords);
+
+      // Check size of Bmatrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
     SECTION("Four noded quadrilateral shape function for corner indices") {
       // Check for corner indices
       Eigen::VectorXi indices = quadsf->corner_indices();
