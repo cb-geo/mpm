@@ -151,35 +151,159 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->add_node(2, node2);
     cell->add_node(3, node3);
 
+    // Create a vector of node pointers
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{node0, node1, node2,
+                                                           node3};
+
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
     cell->shapefn(shapefn);
 
-    Eigen::Vector2d xi;
-    xi.setZero();
-    Eigen::VectorXd pmass;
-    pmass.resize(1);
-    pmass << 4.;
+    // Local coordinate of a particle
+    Eigen::Vector2d xi = Eigen::Vector2d::Zero();
+    // Particle mass
+    double pmass = 4.;
+    // Particle velocity
     Eigen::Vector2d pvelocity;
     pvelocity << 1., 1.;
+    // Particle gravity
+    Eigen::Vector2d pgravity;
+    pgravity << 0., 9.814;
+    // Phase
     unsigned phase = 0;
 
     SECTION("Check particle mass mapping") {
-      cell->assign_mass_to_nodes(xi, pmass);
-      for (unsigned i = 0; i < Nnodes; ++i)
-        REQUIRE((cell->give_node(i))->mass(phase) ==
-                Approx(1.0).epsilon(Tolerance));
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
     }
-    /*
     SECTION("Check particle momentum mapping") {
-      cell->assign_momentum_to_nodes(xi, pmass, pvelocity);
-      for (unsigned i = 0; i < Nnodes; ++i) {
-        for (unsigned j = 0; j < pvelocity.size(); ++j)
-          REQUIRE((cell->give_node(i))->momentum(phase)(j) ==
-                  Approx(1.0).epsilon(Tolerance));
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
       }
     }
-    */
+    SECTION("Check particle body force mapping") {
+      // Assign body force to nodes
+      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      Eigen::Vector2d bodyforce;
+      bodyforce << 0., 9.814;
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < bodyforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(bodyforce(i)).epsilon(Tolerance));
+      }
+    }
+    SECTION("Check interpolate velocity") {
+      // Assign mass to 100
+      const double mass = 100.;
+
+      // Apply momentum
+      Eigen::Matrix<double, Dim, 1> momentum;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply momentum
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          momentum(i) = 10. * static_cast<double>(j);
+
+        // Nodal mass
+        node->update_mass(false, phase, mass);
+        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+
+        // Nodal momentum
+        node->update_momentum(false, phase, momentum);
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        // Compute and check velocity
+        node->compute_velocity();
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(phase)(i) ==
+                  Approx(0.1 * static_cast<double>(j)).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate velocity (0, 0)
+      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      Eigen::Vector2d interpolated_velocity;
+      interpolated_velocity << 0.25, 0.25;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (0.5, 0.5)
+      xi << 0.5, 0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      interpolated_velocity << 0.2875, 0.2875;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (-0.5, -0.5)
+      xi << -0.5, -0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      interpolated_velocity << 0.1875, 0.1875;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+    }
+
+    SECTION("Check interpolate acceleration") {
+
+      // Apply acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply acceleration
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          acceleration(i) = 10. * static_cast<double>(j);
+
+        // Nodal acceleration
+        node->update_acceleration(false, phase, acceleration);
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate acceleration (0, 0)
+      Eigen::Vector2d check_acceleration =
+          cell->interpolate_nodal_acceleration(xi, phase);
+
+      Eigen::Vector2d interpolated_acceleration;
+      interpolated_acceleration << 25., 25.;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (0.5, 0.5)
+      xi << 0.5, 0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 28.75, 28.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (-0.5, -0.5)
+      xi << -0.5, -0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 18.75, 18.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+    }
   }
 }
 
@@ -333,5 +457,177 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->status() == true);
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
+  }
+
+  SECTION("Test particle information mapping") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+    cell->add_node(4, node4);
+    cell->add_node(5, node5);
+    cell->add_node(6, node6);
+    cell->add_node(7, node7);
+    REQUIRE(cell->nnodes() == 8);
+
+    // Create a vector of node pointers
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{
+        node0, node1, node2, node3, node4, node5, node6, node7};
+
+    // Assign shape function to cell
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+    cell->shapefn(shapefn);
+
+    // Local coordinate of a particle
+    Eigen::Vector3d xi = Eigen::Vector3d::Zero();
+    // Particle mass
+    double pmass = 4.;
+    // Particle velocity
+    Eigen::Vector3d pvelocity;
+    pvelocity << 1., 1., 1.;
+    // Particle gravity
+    Eigen::Vector3d pgravity;
+    pgravity << 0., 0., 9.814;
+    // Phase
+    unsigned phase = 0;
+
+    SECTION("Check particle mass mapping") {
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+    }
+    SECTION("Check particle momentum mapping") {
+      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(0.5).epsilon(Tolerance));
+      }
+    }
+    SECTION("Check particle body force mapping") {
+      // Assign body force to nodes
+      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      Eigen::Vector3d bodyforce;
+      bodyforce << 0., 0., 0.5 * 9.814;
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < bodyforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(bodyforce(i)).epsilon(Tolerance));
+      }
+    }
+    SECTION("Check interpolate velocity") {
+      // Assign mass to 100
+      const double mass = 100.;
+
+      // Apply momentum
+      Eigen::Matrix<double, Dim, 1> momentum;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply momentum
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          momentum(i) = 10. * static_cast<double>(j);
+
+        // Nodal mass
+        node->update_mass(false, phase, mass);
+        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+
+        // Nodal momentum
+        node->update_momentum(false, phase, momentum);
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        for (unsigned i = 0; i < momentum.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        // Compute and check velocity
+        node->compute_velocity();
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(phase)(i) ==
+                  Approx(0.1 * static_cast<double>(j)).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate velocity (0, 0)
+      xi.setZero();
+      Eigen::Vector3d velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      Eigen::Vector3d interpolated_velocity;
+      interpolated_velocity << 0.45, 0.45, 0.45;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (0.5, 0.5)
+      xi << 0.5, 0.5, 0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      interpolated_velocity << 0.5875, 0.5875, 0.5875;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+
+      // Check interpolate velocity (-0.5, -0.5)
+      xi << -0.5, -0.5, -0.5;
+      velocity = cell->interpolate_nodal_velocity(xi, phase);
+
+      interpolated_velocity << 0.2875, 0.2875, 0.2875;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(velocity(i) ==
+                Approx(interpolated_velocity(i)).epsilon(Tolerance));
+    }
+
+    SECTION("Check interpolate acceleration") {
+      // Apply acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply acceleration
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          acceleration(i) = 10. * static_cast<double>(j);
+
+        // Nodal acceleration
+        node->update_acceleration(false, phase, acceleration);
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(phase)(i) ==
+                  Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
+
+        // Increment j
+        ++j;
+      }
+      // Set coordinates as zero
+      xi.setZero();
+      // Check interpolate acceleration (0, 0, 0)
+      Eigen::Vector3d check_acceleration =
+          cell->interpolate_nodal_acceleration(xi, phase);
+
+      Eigen::Vector3d interpolated_acceleration;
+      interpolated_acceleration << 45.0, 45.0, 45.0;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (0.5, 0.5, 0.5)
+      xi << 0.5, 0.5, 0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 58.75, 58.75, 58.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+
+      // Check interpolate acceleration (-0.5, -0.5, -0.5)
+      xi << -0.5, -0.5, -0.5;
+      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+
+      interpolated_acceleration << 28.75, 28.75, 28.75;
+      for (unsigned i = 0; i < check_acceleration.size(); ++i)
+        REQUIRE(check_acceleration(i) ==
+                Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+    }
   }
 }

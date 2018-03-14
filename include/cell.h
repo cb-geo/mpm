@@ -53,11 +53,6 @@ class Cell {
   //! Assign shape function
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
-  //! Return shape functions at given local coordinates
-  Eigen::VectorXd shape_function(const VectorDim& xi) const {
-    return shapefn_->shapefn(xi);
-  }
-
   //! Number of shape functions
   unsigned nfunctions() const {
     return (this->shapefn_ != nullptr ? this->shapefn_->nfunctions() : 0);
@@ -65,11 +60,6 @@ class Cell {
 
   //! Add node to cell
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
-
-  //! Return node at given local id
-  std::shared_ptr<NodeBase<Tdim>> give_node(const unsigned& id) {
-    return nodes_.operator[](id);
-  }
 
   //! Add neighbouring cell
   bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
@@ -106,31 +96,28 @@ class Cell {
   Eigen::Matrix<double, 3, 1> local_coordinates_point(
       const Eigen::Matrix<double, 3, 1>& point);
 
-  //! Assign particle mass to nodes
-  void assign_mass_to_nodes(const VectorDim& xi, const Eigen::VectorXd& pmass);
+  //! Map particle mass to nodes
+  void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
+                                  double pmass);
 
   //! Assign particle momentum to nodes
-  void assign_momentum_to_nodes(const VectorDim& xi,
-                                const Eigen::VectorXd& pmass,
-                                const Eigen::MatrixXd& pvelocity);
+  void map_momentum_to_nodes(const VectorDim& xi, unsigned nphase, double pmass,
+                             const Eigen::VectorXd& pvelocity);
 
-  //! Assign body force to nodes
-  void assign_body_force_to_nodes(const VectorDim& xi,
-                                  const Eigen::VectorXd& pmass,
-                                  const VectorDim& pgravity);
-
-  //! Assign internal force to nodes
-  void assign_internal_force_to_nodes(const VectorDim& xi,
-                                      double pvolume,
-                                      const Eigen::MatrixXd& pstress);
+  //! Map body force to nodes
+  void map_body_force_to_nodes(const VectorDim& xi, unsigned nphase,
+                               double pmass, const VectorDim& pgravity);
 
   //! Return velocity at given location by interpolating from nodes
-  Eigen::VectorXd interpolate_velocity(const VectorDim& xi, unsigned nphase);
+  Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
+                                             unsigned nphase);
 
   //! Return acceleration at given location by interpolating from nodes
-  Eigen::VectorXd interpolate_acceleration(const VectorDim& xi, unsigned nphase);
+  Eigen::VectorXd interpolate_nodal_acceleration(const VectorDim& xi,
+                                                 unsigned nphase);
 
-  
+  //! Assign internal force to nodes
+  // void assign_internal_force_to_nodes(const VectorDim& xi);
 
  protected:
   //! cell id

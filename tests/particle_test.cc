@@ -289,7 +289,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
   SECTION("Check particle properties") {
     mpm::Index id = 0;
-    const unsigned stress_dof = 3;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
@@ -302,7 +301,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check stress
     Eigen::VectorXd stress;
-    stress.resize(stress_dof);
+    stress.resize(Dim);
     for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
 
     for (unsigned i = 0; i < stress.size(); ++i)
@@ -531,7 +530,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
   SECTION("Check particle properties") {
     mpm::Index id = 0;
-    const unsigned stress_dof = 6;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
@@ -544,7 +542,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check stress
     Eigen::VectorXd stress;
-    stress.resize(stress_dof);
+    stress.resize(Dim);
     for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
 
     for (unsigned i = 0; i < stress.size(); ++i)

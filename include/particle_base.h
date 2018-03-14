@@ -100,12 +100,6 @@ class ParticleBase {
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
 
-  //! Map particle mass to background nodes
-  virtual void map_mass_to_nodes() = 0;
-
-  //! Map particle momentum to background nodes
-  virtual void map_momentum_to_nodes() = 0;
-
   //! Serialize
   friend class boost::serialization::access;
   template <class Archive>
@@ -122,9 +116,6 @@ class ParticleBase {
   //! coordinates
   VectorDim coordinates_;
 
-  //! Volume
-  double volume_;
-  
   //! Cell id
   Index cell_id_{std::numeric_limits<Index>::max()};
 

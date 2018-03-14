@@ -13,7 +13,7 @@ namespace mpm {
 //! Global index type for the node_base
 using Index = unsigned long long;
 
-// NodeBase base class for nodes
+//! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
 //! \details NodeBase class: id_ and coordinates.
 //! \tparam Tdim Dimension
@@ -23,14 +23,8 @@ class NodeBase {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Constructor with id and coordinates
-  //! \param[in] id Node id
-  //! \param[in] coord coordinates of the nodebase
-  NodeBase(Index id, const VectorDim& coord) : id_{id} {
-    // Check if the dimension is between 1 & 3
-    static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
-    coordinates_ = coord;
-  };
+  //! Default constructor
+  NodeBase() = default;
 
   //! Destructor
   virtual ~NodeBase(){};
@@ -42,15 +36,14 @@ class NodeBase {
   NodeBase& operator=(const NodeBase<Tdim>&) = delete;
 
   //! Return id of the nodebase
-  Index id() const { return id_; }
+  virtual Index id() const = 0;
 
   //! Assign coordinates
-  //! \param[in] coord Assign coord as coordinates of the nodebase
-  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+  virtual void coordinates(const VectorDim& coord) = 0;
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase
-  VectorDim coordinates() const { return coordinates_; }
+  virtual VectorDim coordinates() const = 0;
 
   //! Initialise properties
   virtual void initialise() = 0;
@@ -59,61 +52,44 @@ class NodeBase {
   virtual unsigned dof() const = 0;
 
   //! Assign nodal mass
-  virtual void assign_mass(unsigned nphase, double mass) = 0;
+  virtual void update_mass(bool update, unsigned nphase, double mass) = 0;
 
   //! Return mass
   virtual double mass(unsigned nphase) const = 0;
 
-  //! Assign force
-  virtual void assign_force(unsigned nphase, const Eigen::VectorXd& force) = 0;
+  //! Update external force (body force / traction force)
+  virtual void update_external_force(bool update, unsigned nphase,
+                                     const Eigen::VectorXd& force) = 0;
 
-  //! Return force
-  virtual Eigen::VectorXd force(unsigned nphase) const = 0;
+  //! Return external force
+  virtual Eigen::VectorXd external_force(unsigned nphase) const = 0;
 
-  //! Assign velocity
-  virtual void assign_velocity(unsigned nphase,
-                               const Eigen::VectorXd& velocity) = 0;
+  //! Update internal force (body force / traction force)
+  virtual void update_internal_force(bool update, unsigned nphase,
+                                     const Eigen::VectorXd& force) = 0;
 
-  //! Return velocity
-  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
+  //! Return internal force
+  virtual Eigen::VectorXd internal_force(unsigned nphase) const = 0;
 
-  //! Assign momentum
-  virtual void assign_momentum(unsigned nphase,
+  //! Update momentum
+  virtual void update_momentum(bool update, unsigned nphase,
                                const Eigen::VectorXd& momentum) = 0;
 
   //! Return momentum
   virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
 
+  //! Compute velocity from the momentum
+  virtual void compute_velocity() = 0;
+
+  //! Return velocity
+  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
+
   //! Assign acceleration
-  virtual void assign_acceleration(unsigned nphase,
+  virtual void update_acceleration(bool update, unsigned nphase,
                                    const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
-
-  //! Update nodal mass
-  virtual void update_mass(const Eigen::VectorXd& mass) = 0;
-
-  //! Update nodal momentum
-  virtual void update_momentum(const Eigen::MatrixXd& momentum) = 0;
-
-  //! Update body force
-  virtual void update_body_force(const Eigen::MatrixXd& body_force) = 0;
-
-  //! Update traction force
-  virtual void update_traction_force(const Eigen::MatrixXd& traction_force) = 0;
-
-  //! Update internal force
-  virtual void update_internal_force(const Eigen::MatrixXd& internal_force) = 0;
-
-  //! Compute velocity from the momentum
-  virtual void compute_velocity() = 0;
-
- protected:
-  //! nodebase id
-  Index id_{std::numeric_limits<Index>::max()};
-  //! nodal coordinates
-  VectorDim coordinates_;
 
 };  // NodeBase class
 }  // namespace mpm

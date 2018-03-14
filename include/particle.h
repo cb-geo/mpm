@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "cell.h"
-#include "node_base.h"
 #include "particle_base.h"
 #include "serialize.h"
 
@@ -24,9 +23,6 @@ using Index = unsigned long long;
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 class Particle : public ParticleBase<Tdim> {
- protected:
-  static const unsigned nSize = Tdim * (Tdim + 1) / 2;
-
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
@@ -92,25 +88,6 @@ class Particle : public ParticleBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  //! Map particle mass to background nodes
-  void map_mass_to_nodes() { cell_->assign_mass_to_nodes(xi_, mass_); }
-
-  //! Map particle momentum to background nodes
-  void map_momentum_to_nodes() {
-    cell_->assign_momentum_to_nodes(xi_, mass_, velocity_);
-  }
-
-  /*
-  //! Map body force to nodes
-  void map_body_force_to_nodes() {
-    cell_->assign_body_force_to_nodes(xi_, mass_, gravity_);
-  }
-  */
-
-  //! Map traction force to nodes
-
-  //! Map internal force to nodes
-
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
@@ -124,22 +101,16 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::id_;
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
-  //! volume
-  using ParticleBase<Tdim>::volume_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Cell id
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Local coordinates
-  Eigen::Matrix<double, Tdim, 1> xi_;
-  //! Gravity
-  // Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
-  Eigen::Matrix<double, 6, Tnphases> stress_;
+  Eigen::Matrix<double, Tdim, Tnphases> stress_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
