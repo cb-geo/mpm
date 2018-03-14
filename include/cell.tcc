@@ -516,21 +516,19 @@ void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::assign_internal_force_to_nodes(const VectorDim& xi,
                                                  double pvolume,
-                                                 const Eigen::MatrixXd& pstress) {
-  const unsigned nSize = Tdim * (Tdim + 1 ) / 2;
-  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  std::vector<Eigen::MatrixXd> B_matrix = shapefn_->B_matrix(xi);
-  Eigen::MatrixXd temp_stress = Eigen::Matrix<double, nSize, 1>::Zero(); 
-  for (unsigned i = 0; i < pstress.cols(); ++i) {
-      if (Tdim == 2) {
-         temp_stress(0) = pstress(0,i);
-	 temp_stress(1) = pstress(1,i);
-	 temp_stress(2) = pstress(3,i);
+                                                 const Eigen::MatrixXd& pstress)
+{ const unsigned nSize = Tdim * (Tdim + 1 ) / 2; Eigen::VectorXd shapefns =
+shapefn_->shapefn(xi); std::vector<Eigen::MatrixXd> B_matrix =
+shapefn_->B_matrix(xi); Eigen::MatrixXd temp_stress = Eigen::Matrix<double,
+nSize, 1>::Zero(); for (unsigned i = 0; i < pstress.cols(); ++i) { if (Tdim ==
+2) { temp_stress(0) = pstress(0,i); temp_stress(1) = pstress(1,i);
+         temp_stress(2) = pstress(3,i);
       }
       else if (Tdim == 3)
          temp_stress = pstress.col(i);
       for (unsigned j = 0; j < this->nfunctions(); ++j)
-          nodes_[j]->update_internal_force(i, (pvolume * B_matrix.at(j).transpose() * temp_stress));
+          nodes_[j]->update_internal_force(i, (pvolume *
+B_matrix.at(j).transpose() * temp_stress));
   }
 }
 */

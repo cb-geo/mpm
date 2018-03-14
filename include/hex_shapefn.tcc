@@ -221,38 +221,31 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 
 //! Return B-matrix of a Hexahedron Element
 //! \param[in] xi Coordinates of point of interest
-//! \retval B_matrix B-matrix of a given cell
+//! \retval bmatrix B-matrix of a given cell
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::B_matrix(const VectorDim& xi) {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(const VectorDim& xi) {
 
-  Eigen::MatrixXd grad_shape_fun = this->grad_shapefn(xi);
-  Eigen::Matrix<double, 6, Tdim> B_i;
-  std::vector<Eigen::MatrixXd> B_matrix;
+  Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
   for (unsigned i = 0; i < Tnfunctions; ++i) {
-    B_i(0, 0) = grad_shape_fun(i, 0);
-    B_i(0, 1) = 0.;
-    B_i(0, 2) = 0.;
-    B_i(1, 0) = 0.;
-    B_i(1, 1) = grad_shape_fun(i, 1);
-    B_i(1, 2) = 0.;
-    B_i(2, 0) = 0.;
-    B_i(2, 1) = 0.;
-    B_i(2, 2) = grad_shape_fun(i, 2);
-    B_i(3, 0) = grad_shape_fun(i, 1);
-    B_i(3, 1) = grad_shape_fun(i, 0);
-    B_i(3, 2) = 0.;
-    B_i(4, 0) = 0.;
-    B_i(4, 1) = grad_shape_fun(i, 2);
-    B_i(4, 2) = grad_shape_fun(i, 1);
-    B_i(5, 0) = grad_shape_fun(i, 2);
-    B_i(5, 1) = 0.;
-    B_i(5, 2) = grad_shape_fun(i, 0);
-    B_matrix.push_back(B_i);
+    // clang-format off
+    Eigen::Matrix<double, 6, Tdim> bi;
+    bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;                 bi(0, 2) = 0.;
+    bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1); bi(1, 2) = 0.;
+    bi(2, 0) = 0.;                 bi(2, 1) = 0.;                 bi(2, 2) = grad_shapefn(i, 2);
+    bi(3, 0) = grad_shapefn(i, 1); bi(3, 1) = grad_shapefn(i, 0); bi(3, 2) = 0.;
+    bi(4, 0) = 0.;                 bi(4, 1) = grad_shapefn(i, 2); bi(4, 2) = grad_shapefn(i, 1);
+    bi(5, 0) = grad_shapefn(i, 2); bi(5, 1) = 0.;                 bi(5, 2) = grad_shapefn(i, 0);
+    bmatrix.push_back(bi);
   }
-  return B_matrix;
+  return bmatrix;
 }
 
 // 27-node (Triquadratic) Hexahedron Element

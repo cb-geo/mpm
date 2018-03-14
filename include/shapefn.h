@@ -34,10 +34,10 @@ class ShapeFn {
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
 
-  //! Evaluate B-matrix
+  //! Evaluate and return the B-matrix
   //! \param[in] xi given local coordinates
-  //! \retval B_matrix
-  virtual std::vector<Eigen::MatrixXd> B_matrix(const VectorDim& xi) = 0;
+  //! \retval bmatrix B matrix
+  virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) = 0;
 
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
