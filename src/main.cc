@@ -2,7 +2,7 @@
 #include <iostream>
 #include <memory>
 
-#include "explicitonephase_mpm.h"
+#include "mpm_explicit.h"
 #include "node.h"
 #include "node_base.h"
 
@@ -21,5 +21,5 @@ int main(int argc, char** argv) {
   std::cout << "Node id: " << node->id() << '\n';
 
   std::shared_ptr<mpm::MPM<Dim>> explicit_solver =
-      std::make_shared<mpm::MPMExplicitSinglePhase<Dim>>();
+      std::make_shared<mpm::MPMExplicit<Dim>>();
 }

@@ -1,5 +1,5 @@
-#ifndef MPM_MPM_EXPLICIT_SINGLE_PHASE_H_
-#define MPM_MPM_EXPLICIT_SINGLE_PHASE_H_
+#ifndef MPM_MPM_EXPLICIT_H_
+#define MPM_MPM_EXPLICIT_H_
 
 #include "container.h"
 #include "mpm.h"
@@ -7,18 +7,15 @@
 
 namespace mpm {
 
-//! MPMExplicitSinglePhase class
+//! MPMExplicit class
 //! \brief A class that implements the fully explicit one phase mpm
-//! \details ExplicitOnePhaseMpm class: dt
+//! \details A single-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMExplicitSinglePhase : public MPM<Tdim> {
+class MPMExplicit : public MPM<Tdim> {
  public:
   //! Default constructor
-  MPMExplicitSinglePhase(){};
-
-  // container 1: container of particles
-  // container 2: container of cells or nodes?
+  MPMExplicit() = default;
 
   // map particle mass to nodes
   // map particle momentum to nodes
@@ -32,7 +29,7 @@ class MPMExplicitSinglePhase : public MPM<Tdim> {
 
   // update particles (stress , velocity, position)
 
-};  // MPMExplicitSinglePhase class
+};  // MPMExplicit class
 }  // namespace mpm
 
-#endif  // MPM_EXPLICITONEPHASE_MPM_H_
+#endif  // MPM_MPM_EXPLICIT_H_
