@@ -9,9 +9,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "container.h"
 #include "mesh.h"
-#include "particle.h"
 
 namespace mpm {
 
@@ -36,12 +34,6 @@ class MPM {
 
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
-  //! Particle container
-  mpm::Container<mpm::ParticleBase<Tdim>> particles_;
-  //! Nodes container
-  mpm::Container<mpm::NodeBase<Tdim>> nodes_;
-  //! Cells container
-  mpm::Container<mpm::Cell<Tdim>> cells_;
 };
 }  // namespace mpm
 
