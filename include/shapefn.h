@@ -13,7 +13,6 @@ namespace mpm {
 template <unsigned Tdim>
 class ShapeFn {
  public:
-  static const unsigned Nsize = Tdim * (Tdim + 1) / 2;
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
