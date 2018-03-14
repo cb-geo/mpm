@@ -106,7 +106,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0,0)
-    SECTION("Four noded quadrilateral Bmatrix for coordinates(0,0)") {
+    SECTION("Four noded quadrilateral B-matrix for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
 
@@ -116,7 +116,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -130,7 +130,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0.5,0.5)
-    SECTION("Four noded quadrilateral Bmatrix for coordinates(0.5,0.5)") {
+    SECTION("Four noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 0.5, 0.5;
 
@@ -140,7 +140,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -154,7 +154,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (-0.5,-0.5)
-    SECTION("Four noded quadrilateral Bmatrix for coordinates(-0.5,-0.5)") {
+    SECTION("Four noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -0.5, -0.5;
 
@@ -164,7 +164,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -342,7 +342,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0,0)
-    SECTION("Eight noded quadrilateral Bmatrix for coordinates(0,0)") {
+    SECTION("Eight noded quadrilateral B-matrix for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
 
@@ -352,7 +352,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -366,7 +366,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0.5,0.5)
-    SECTION("Eight noded quadrilateral Bmatrix for coordinates(0.5,0.5)") {
+    SECTION("Eight noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 0.5, 0.5;
 
@@ -376,7 +376,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -390,7 +390,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (-0.5,-0.5)
-    SECTION("Eight noded quadrilateral Bmatrix for coordinates(-0.5,-0.5)") {
+    SECTION("Eight noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -0.5, -0.5;
 
@@ -400,7 +400,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -585,7 +585,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0,0)
-    SECTION("Nine noded quadrilateral Bmatrix for coordinates(0,0)") {
+    SECTION("Nine noded quadrilateral B-matrix for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
 
@@ -595,7 +595,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -609,7 +609,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (0.5,0.5)
-    SECTION("Nine noded quadrilateral Bmatrix for coordinates(0.5,0.5)") {
+    SECTION("Nine noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 0.5, 0.5;
 
@@ -619,7 +619,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -633,7 +633,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     // Coordinates is (-0.5,-0.5)
-    SECTION("Nine noded quadrilateral Bmatrix for coordinates(-0.5,-0.5)") {
+    SECTION("Nine noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -0.5, -0.5;
 
@@ -643,7 +643,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
       // Check gradient of shape functions
       auto gradsf = quadsf->grad_shapefn(coords);
 
-      // Check size of Bmatrix
+      // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
       for (unsigned i = 0; i < nfunctions; ++i) {
