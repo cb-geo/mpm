@@ -196,26 +196,40 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
-    /*
+    
     SECTION("Check particle internal force mapping") {
       // Assign internal force to nodes
-      double pvolume = 0.5;
-      Eigen::Vector2d pinternal_stress;
-      pinternal_stress << 0.5, 0.5;
+      const double pvolume = 0.5;
+      Eigen::Vector3d pinternal_stress;
+      pinternal_stress << 0.5, 0.5, 0.5;
       
       cell->map_internal_force_to_nodes(phase, pvolume, xi, pinternal_stress);
 
       // Check internal force
-      Eigen::Vector2d internal_force;
-      internal_force << 0.5, 0.5;
+      std::vector<Eigen::Vector2d> internal_forces;
+      Eigen::Vector2d intforce;
+      // Node 0
+      intforce << -0.125, -0.125;
+      internal_forces.push_back(intforce);
+      // Node 1
+      intforce << 0., 0.;
+      internal_forces.push_back(intforce);
+      // Node 2
+      intforce << 0.125, 0.125;
+      internal_forces.push_back(intforce);
+      // Node 3
+      intforce << 0, 0;
+      internal_forces.push_back(intforce);
 
+      unsigned j = 0;
       for (const auto& node : nodes) {
-        for (unsigned i = 0; i < internal_force.size(); ++i)
+        for (unsigned i = 0; i < intforce.size(); ++i)
           REQUIRE(node->internal_force(phase)(i) ==
-                  Approx(internal_force(i)).epsilon(Tolerance));
+                  Approx(internal_forces.at(j)(i)).epsilon(Tolerance));
+        ++j;
       }
     }
-    */
+    
     SECTION("Check interpolate velocity") {
       // Assign mass to 100
       const double mass = 100.;

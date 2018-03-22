@@ -523,12 +523,16 @@ void mpm::Cell<Tdim>::map_internal_force_to_nodes(
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   // Get B-matrix
   std::vector<Eigen::MatrixXd> bmatrix = shapefn_->bmatrix(xi);
-  //  for (const auto bm : bmatrix)
-  //  std::cout << "\n\n" << bm << "\n";
+  for (const auto& bm : bmatrix) std::cout << "\n\n" << bm << "\n";
   // Map internal forces from particle to nodes
-  for (unsigned j = 0; j < this->nfunctions(); ++j)
+  std::cout <<"\n Forces \n";
+  for (unsigned j = 0; j < this->nfunctions(); ++j) {
+    std::cout << pvolume << "\n"
+              << bmatrix.at(j).transpose() << "\n"
+              << pstress << "\n forces\n:" << pvolume * bmatrix.at(j).transpose() * pstress << "\n\n\n";
     nodes_[j]->update_internal_force(
         true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
+  }
 }
 
 //! Return velocity at a given point by interpolating from nodes
