@@ -190,7 +190,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check particle body force mapping") {
       // Assign body force to nodes
       cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
-      Eigen::Vector3d bodyforce;
+      Eigen::Vector2d bodyforce;
       bodyforce << 0., 9.814;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < bodyforce.size(); ++i)

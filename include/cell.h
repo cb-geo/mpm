@@ -28,6 +28,9 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
+  //! Define DOF for stresses
+  static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
+
   //! Constructor with id and number of nodes
   Cell(Index id, unsigned nnodes);
 

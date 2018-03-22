@@ -510,7 +510,7 @@ void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-//! Map internal force to nodes in a 2D cell
+//! Map internal force to nodes of a cell
 //! \param[in] xi Local coordinates of particle
 //! \param[in] pvolume Volume of particle
 //! \param[in] pstress Stress of particle
@@ -519,14 +519,24 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_internal_force_to_nodes(
     unsigned nphase, double pvolume, const VectorDim& xi,
     const Eigen::VectorXd& pstress) {
-  // Get shape functions
-  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
-  // Get B-matrix
-  std::vector<Eigen::MatrixXd> bmatrix = shapefn_->bmatrix(xi);
-  // Map internal forces from particle to nodes
-  for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    nodes_[j]->update_internal_force(
-        true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
+  try {
+    if (pstress.size() == Tdof) {
+      // Get shape functions
+      Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+      // Get B-matrix
+      std::vector<Eigen::MatrixXd> bmatrix = shapefn_->bmatrix(xi);
+      // Map internal forces from particle to nodes
+      for (unsigned j = 0; j < this->nfunctions(); ++j)
+        nodes_[j]->update_internal_force(
+            true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
+    } else {
+      throw std::runtime_error(
+          "Particle stress size mismatch for internal force at nodes "
+          "computation");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+    std::abort();
   }
 }
 
