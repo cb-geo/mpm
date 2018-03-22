@@ -188,7 +188,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check particle body force mapping") {
       // Assign body force to nodes
       cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
-      Eigen::Vector2d bodyforce;
+      Eigen::Vector3d bodyforce;
       bodyforce << 0., 9.814;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < bodyforce.size(); ++i)
@@ -196,6 +196,26 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
+    /*
+    SECTION("Check particle internal force mapping") {
+      // Assign internal force to nodes
+      double pvolume = 0.5;
+      Eigen::Vector2d pinternal_stress;
+      pinternal_stress << 0.5, 0.5;
+      
+      cell->map_internal_force_to_nodes(phase, pvolume, xi, pinternal_stress);
+
+      // Check internal force
+      Eigen::Vector2d internal_force;
+      internal_force << 0.5, 0.5;
+
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < internal_force.size(); ++i)
+          REQUIRE(node->internal_force(phase)(i) ==
+                  Approx(internal_force(i)).epsilon(Tolerance));
+      }
+    }
+    */
     SECTION("Check interpolate velocity") {
       // Assign mass to 100
       const double mass = 100.;

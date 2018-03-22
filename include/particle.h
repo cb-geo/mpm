@@ -27,6 +27,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
+  //! Define DOF for stresses
+  static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
+
   //! Constructor with id and coordinates
   Particle(Index id, const VectorDim& coord);
 
@@ -110,7 +113,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
-  Eigen::Matrix<double, Tdim, Tnphases> stress_;
+  Eigen::Matrix<double, Tdof, Tnphases> stress_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
