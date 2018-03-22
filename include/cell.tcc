@@ -4,8 +4,8 @@
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
-  // Check if the dimension is between 1 & 3
-  static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
+  // Check if the dimension is 2 or 3
+  static_assert((Tdim == 2 || Tdim == 3), "Invalid global dimension");
   try {
     // Number of nodes should be greater than dimensions
     if (!(nnodes > Tdim)) {
