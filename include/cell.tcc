@@ -485,6 +485,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
                                             unsigned nphase, double pmass,
                                             const Eigen::VectorXd& pvelocity) {
+  // Get shape functions
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
   // if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
@@ -501,37 +502,32 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
                                               unsigned nphase, double pmass,
                                               const VectorDim& pgravity) {
+  // Get shape functions
   Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, nphase,
                                      shapefns(i) * pgravity * pmass);
 }
 
-/*
-//! Assign internal force to nodes
+//! Map internal force to nodes in a 2D cell
 //! \param[in] xi Local coordinates of particle
 //! \param[in] pvolume Volume of particle
 //! \param[in] pstress Stress of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_internal_force_to_nodes(const VectorDim& xi,
-                                                 double pvolume,
-                                                 const Eigen::MatrixXd& pstress)
-{ const unsigned nSize = Tdim * (Tdim + 1 ) / 2; Eigen::VectorXd shapefns =
-shapefn_->shapefn(xi); std::vector<Eigen::MatrixXd> B_matrix =
-shapefn_->B_matrix(xi); Eigen::MatrixXd temp_stress = Eigen::Matrix<double,
-nSize, 1>::Zero(); for (unsigned i = 0; i < pstress.cols(); ++i) { if (Tdim ==
-2) { temp_stress(0) = pstress(0,i); temp_stress(1) = pstress(1,i);
-         temp_stress(2) = pstress(3,i);
-      }
-      else if (Tdim == 3)
-         temp_stress = pstress.col(i);
-      for (unsigned j = 0; j < this->nfunctions(); ++j)
-          nodes_[j]->update_internal_force(i, (pvolume *
-B_matrix.at(j).transpose() * temp_stress));
-  }
+void mpm::Cell<Tdim>::map_internal_force_to_nodes(
+    unsigned nphase, double pvolume, const VectorDim& xi,
+    const Eigen::VectorXd& pstress) {
+  // Get shape functions
+  Eigen::VectorXd shapefns = shapefn_->shapefn(xi);
+  // Get B-matrix
+  std::vector<Eigen::MatrixXd> B_matrix = shapefn_->B_matrix(xi);
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force(
+        nphase, (pvolume * B_matrix.at(j).transpose() * pstress));
 }
-*/
 
 //! Return velocity at a given point by interpolating from nodes
 //! Return velocity at a point by interpolating from nodes
