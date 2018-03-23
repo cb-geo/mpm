@@ -57,6 +57,12 @@ class NodeBase {
   //! Return mass
   virtual double mass(unsigned nphase) const = 0;
 
+  //! Assign volume
+  virtual void update_volume(bool update, unsigned nphase, double volume) = 0;
+
+  //! Return volume
+  virtual double volume(unsigned nphase) const = 0;
+
   //! Update external force (body force / traction force)
   virtual void update_external_force(bool update, unsigned nphase,
                                      const Eigen::VectorXd& force) = 0;

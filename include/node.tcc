@@ -16,12 +16,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   coordinates_ = coord;
   dof_ = Tdof;
 
-  mass_.setZero();
-  external_force_.setZero();
-  internal_force_.setZero();
-  velocity_.setZero();
-  momentum_.setZero();
-  acceleration_.setZero();
+  this->initialise();
 }
 
 //! Initialise nodal properties
@@ -30,6 +25,8 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 //! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
+  mass_.setZero();
+  volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
   velocity_.setZero();
@@ -50,6 +47,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
 
   // Update/assign mass
   mass_(0, nphase) = mass_(0, nphase) * factor + mass;
+}
+
+//! Update volume
+//! \tparam Tdim Dimension
+//! \tparam Tdof Degrees of Freedom
+//! \tparam Tnphases Number of phases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
+                                                    unsigned nphase,
+                                                    double volume) {
+  // Decide to update or assign
+  double factor = 1.0;
+  if (!update) factor = 0.;
+
+  // Update/assign volume
+  volume_(0, nphase) = volume_(0, nphase) * factor + volume;
 }
 
 //! Update external force (body force / traction force)
