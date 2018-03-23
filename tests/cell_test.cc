@@ -163,6 +163,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     Eigen::Vector2d xi = Eigen::Vector2d::Zero();
     // Particle mass
     double pmass = 4.;
+    // Particle volume
+    double pvolume = 8.;
     // Particle velocity
     Eigen::Vector2d pvelocity;
     pvelocity << 1., 1.;
@@ -176,6 +178,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
+    }
+
+    SECTION("Check particle volume mapping") {
+      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      for (const auto& node : nodes)
+        REQUIRE(node->volume(phase) == Approx(2.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle momentum mapping") {
@@ -521,6 +529,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     Eigen::Vector3d xi = Eigen::Vector3d::Zero();
     // Particle mass
     double pmass = 4.;
+    // Particle volume
+    double pvolume = 8.;
     // Particle velocity
     Eigen::Vector3d pvelocity;
     pvelocity << 1., 1., 1.;
@@ -534,6 +544,13 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+    }
+
+    SECTION("Check particle volume mapping") {
+      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      REQUIRE(nodes.size() == 8);
+      for (const auto& node : nodes)
+        REQUIRE(node->volume(phase) == Approx(1.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle momentum mapping") {

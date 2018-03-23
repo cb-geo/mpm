@@ -55,11 +55,17 @@ class Node : public NodeBase<Tdim> {
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
-  //! Update nodal mass
+  //! Update mass
   void update_mass(bool update, unsigned nphase, double mass);
 
   //! Return mass
   double mass(unsigned nphase) const { return mass_(0, nphase); }
+
+  //! Update volume
+  void update_volume(bool update, unsigned nphase, double volume);
+
+  //! Return volume
+  double volume(unsigned nphase) const { return volume_(0, nphase); }
 
   //! Update external force (body force / traction force)
   void update_external_force(bool update, unsigned nphase,
@@ -112,8 +118,10 @@ class Node : public NodeBase<Tdim> {
   VectorDim coordinates_;
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
-  //! Mass solid
+  //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Volume
+  Eigen::Matrix<double, 1, Tnphases> volume_;
   //! External force
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force

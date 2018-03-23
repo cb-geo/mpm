@@ -476,6 +476,20 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
   }
 }
 
+//! Map particle volume to nodes
+//! \param[in] xi local coordinates of particle
+//! \param[in] pvolume volume of particle
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
+                                                   unsigned nphase,
+                                                   double pvolume) {
+  auto shapefns = shapefn_->shapefn(xi);
+  for (unsigned i = 0; i < shapefns.size(); ++i) {
+    nodes_[i]->update_volume(true, nphase, shapefns(i) * pvolume);
+  }
+}
+
 //! Map momentum to nodes
 //! \param[in] xi local coordinates of a particle
 //! \param[in] pmass mass of a particle

@@ -93,6 +93,22 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     node->update_mass(false, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
+    SECTION("Check volume") {
+      // Check volume
+      REQUIRE(node->volume(Nphase) == Approx(0.0).epsilon(Tolerance));
+      double volume = 100.5;
+      // Update volume to 100.5
+      node->update_volume(true, Nphase, volume);
+      REQUIRE(node->volume(Nphase) == Approx(100.5).epsilon(Tolerance));
+      // Update volume to 201
+      node->update_volume(true, Nphase, volume);
+      REQUIRE(node->volume(Nphase) == Approx(201.0).epsilon(Tolerance));
+      // Assign volume to 100
+      volume = 100.;
+      node->update_volume(false, Nphase, volume);
+      REQUIRE(node->volume(Nphase) == Approx(100.0).epsilon(Tolerance));
+    }
+
     SECTION("Check external force") {
       // Create a force vector
       Eigen::VectorXd force;

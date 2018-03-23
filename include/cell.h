@@ -103,6 +103,10 @@ class Cell {
   void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
                                   double pmass);
 
+  //! Map particle volume to nodes
+  void map_particle_volume_to_nodes(const VectorDim& xi, unsigned nphase,
+                                    double pvolume);
+
   //! Assign particle momentum to nodes
   void map_momentum_to_nodes(const VectorDim& xi, unsigned nphase, double pmass,
                              const Eigen::VectorXd& pvelocity);
