@@ -490,15 +490,15 @@ void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
   }
 }
 
-//! Map momentum to nodes
+//! Compute momentum at nodes
 //! \param[in] xi local coordinates of a particle
 //! \param[in] pmass mass of a particle
 //! \param[in] pvelocity velocity of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
-                                            unsigned nphase, double pmass,
-                                            const Eigen::VectorXd& pvelocity) {
+void mpm::Cell<Tdim>::compute_nodal_momentum(const VectorDim& xi,
+                                             unsigned nphase, double pmass,
+                                             const Eigen::VectorXd& pvelocity) {
   // Get shape functions
   const auto shapefns = shapefn_->shapefn(xi);
   // if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
@@ -507,15 +507,15 @@ void mpm::Cell<Tdim>::map_momentum_to_nodes(const VectorDim& xi,
   }
 }
 
-//! Map body force to nodes
+//! Compute body force at nodes of a cell
 //! \param[in] xi Local coordinates of a particle
 //! \param[in] pmass Mass of a particle
 //! \param[in] pgravity Gravity of a particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
-                                              unsigned nphase, double pmass,
-                                              const VectorDim& pgravity) {
+void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
+                                               unsigned nphase, double pmass,
+                                               const VectorDim& pgravity) {
   // Get shape functions
   const auto shapefns = shapefn_->shapefn(xi);
   // Map external forces from particle to nodes
@@ -524,13 +524,13 @@ void mpm::Cell<Tdim>::map_body_force_to_nodes(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-//! Map internal force to nodes of a cell
+//! Compute internal force at nodes of a cell
 //! \param[in] xi Local coordinates of particle
 //! \param[in] pvolume Volume of particle
 //! \param[in] pstress Stress of particle
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_internal_force_to_nodes(
+void mpm::Cell<Tdim>::compute_nodal_internal_force(
     unsigned nphase, double pvolume, const VectorDim& xi,
     const Eigen::VectorXd& pstress) {
   try {
