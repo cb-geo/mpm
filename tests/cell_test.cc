@@ -188,7 +188,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle momentum mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
-      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
@@ -196,8 +196,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     }
 
     SECTION("Check particle body force mapping") {
-      // Assign body force to nodes
-      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      // Calculate body force at nodes
+      cell->compute_nodal_body_force(xi, phase, pmass, pgravity);
       Eigen::Vector2d bodyforce;
       bodyforce << 0., 9.814;
       for (const auto& node : nodes) {
@@ -213,7 +213,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       Eigen::Vector3d pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5;
 
-      cell->map_internal_force_to_nodes(phase, pvolume, xi, pinternal_stress);
+      cell->compute_nodal_internal_force(phase, pvolume, xi, pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector2d> internal_forces;
@@ -555,7 +555,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     SECTION("Check particle momentum mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
-      cell->map_momentum_to_nodes(xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(0.5).epsilon(Tolerance));
@@ -563,8 +563,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     }
 
     SECTION("Check particle body force mapping") {
-      // Assign body force to nodes
-      cell->map_body_force_to_nodes(xi, phase, pmass, pgravity);
+      // Compute body force at nodes
+      cell->compute_nodal_body_force(xi, phase, pmass, pgravity);
       Eigen::Vector3d bodyforce;
       bodyforce << 0., 0., 0.5 * 9.814;
       for (const auto& node : nodes) {
@@ -580,7 +580,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->map_internal_force_to_nodes(phase, pvolume, xi, pinternal_stress);
+      cell->compute_nodal_internal_force(phase, pvolume, xi, pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector3d> internal_forces;
