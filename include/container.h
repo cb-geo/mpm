@@ -15,7 +15,6 @@ using Index = unsigned long long;
 // container class
 //! \brief A class that offers a container and iterators
 //! \tparam T A class with a template argument Tdim
-//! \tparam Tdim Dimension
 template <class T>
 class Container {
  public:
