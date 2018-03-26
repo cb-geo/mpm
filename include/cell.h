@@ -39,7 +39,7 @@ class Cell {
        const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
   //! Destructor
-  ~Cell(){};
+  ~Cell() = default;
 
   //! Delete copy constructor
   Cell(const Cell<Tdim>&) = delete;
