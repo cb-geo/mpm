@@ -130,7 +130,6 @@ bool mpm::Cell<Tdim>::add_particle_id(Index id) {
 
 //! Remove a particle id
 //! \param[in] id Global id of a particle
-//! \retval status Return the successful removal of a particle id
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::remove_particle_id(Index id) {
@@ -139,7 +138,7 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 }
 
 //! Compute volume of a 2D cell
-//! \retval volume Cell volume / area
+//! Computes the volume of a quadrilateral
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
@@ -189,7 +188,7 @@ inline void mpm::Cell<2>::compute_volume() {
 }
 
 //! Compute volume of a 3D cell
-//! \retval volume Cell volume / area
+//! Computes the volume of a hexahedron
 template <>
 inline void mpm::Cell<3>::compute_volume() {
   try {
