@@ -138,15 +138,14 @@ class Cell {
   void map_particle_volume_to_nodes(const VectorDim& xi, unsigned nphase,
                                     double pvolume);
 
-  //! Compute nodal momentum
-  //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
-  //! \param[in] pmass mass of a particle
-  //! \param[in] pvelocity velocity of a particle
+  //! Compute the nodal momentum from particle mass and velocity for a given
+  //! phase \param[in] xi local coordinates of particle \param[in] nphase Phase
+  //! associate to the particle \param[in] pmass mass of a particle \param[in]
+  //! pvelocity velocity of a particle
   void compute_nodal_momentum(const VectorDim& xi, unsigned nphase,
                               double pmass, const Eigen::VectorXd& pvelocity);
 
-  //! Compute body force at nodes
+  //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] xi local coordinates of particle
   //! \param[in] nphase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
@@ -154,7 +153,7 @@ class Cell {
   void compute_nodal_body_force(const VectorDim& xi, unsigned nphase,
                                 double pmass, const VectorDim& pgravity);
 
-  //! Compute internal force at nodes
+  //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] xi local coordinates of particle
   //! \param[in] nphase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
