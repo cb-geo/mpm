@@ -43,7 +43,7 @@ OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
 OPTIMIZE_OUTPUT_VHDL   = NO
-EXTENSION_MAPPING  tcc = YES
+EXTENSION_MAPPING      = NO
 MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 0
 AUTOLINK_SUPPORT       = YES
@@ -114,55 +114,11 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = ./
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.c \
-                         *.cc \
-                         *.cxx \
-                         *.cpp \
-                         *.c++ \
-			 *.tcc \
-                         *.java \
-                         *.ii \
-                         *.ixx \
-                         *.ipp \
-                         *.i++ \
-                         *.inl \
-                         *.idl \
-                         *.ddl \
-                         *.odl \
-                         *.h \
-                         *.hh \
-                         *.hxx \
-                         *.hpp \
-                         *.h++ \
-                         *.cs \
-                         *.d \
-                         *.php \
-                         *.php4 \
-                         *.php5 \
-                         *.phtml \
-                         *.inc \
-                         *.m \
-                         *.markdown \
-                         *.md \
-                         *.mm \
-                         *.dox \
-                         *.py \
-                         *.pyw \
-                         *.f90 \
-                         *.f95 \
-                         *.f03 \
-                         *.f08 \
-                         *.f \
-                         *.for \
-                         *.tcl \
-                         *.vhd \
-                         *.vhdl \
-                         *.ucf \
-                         *.qsf
+FILE_PATTERNS          = *.tcc *.cc *.h
 RECURSIVE              = YES
 EXCLUDE                = YES
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = */external/*\
+EXCLUDE_PATTERNS       = */external/* \
                          */opt/*\
                          */usr/*
 EXCLUDE_SYMBOLS        = 

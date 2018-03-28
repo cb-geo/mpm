@@ -20,7 +20,6 @@ using Index = unsigned long long;
 
 //! Cell class
 //! \brief Base class that stores the information about cells
-//! \details Cell class: id_ and coordinates.
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class Cell {
