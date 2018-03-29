@@ -1,10 +1,4 @@
 //! Constructor with id, coordinates and dof
-//! \param[in] id Node id
-//! \param[in] coord coordinates of the node
-//! \param[in] dof Degrees of freedom
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(
     Index id, const Eigen::Matrix<double, Tdim, 1>& coord)
@@ -20,9 +14,6 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 }
 
 //! Initialise nodal properties
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   mass_.setZero();
@@ -34,10 +25,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   acceleration_.setZero();
 }
 
-//! Update mass
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
+//! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
                                                   double mass) {
@@ -49,10 +37,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
   mass_(0, nphase) = mass_(0, nphase) * factor + mass;
 }
 
-//! Update volume
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
+//! Update volume at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
                                                     unsigned nphase,

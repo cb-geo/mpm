@@ -27,9 +27,12 @@ class Node : public NodeBase<Tdim> {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor with id, coordinates and dof
+  //! \param[in] id Node id
+  //! \param[in] coord coordinates of the node
+  //! \param[in] dof Degrees of freedom
   Node(Index id, const VectorDim& coord);
 
-  //! Destructor
+  //! Virtual destructor
   virtual ~Node(){};
 
   //! Delete copy constructor
@@ -38,7 +41,7 @@ class Node : public NodeBase<Tdim> {
   //! Delete assignement operator
   Node& operator=(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
-  //! Initialise properties
+  //! Initialise nodal properties
   void initialise();
 
   //! Return id of the nodebase
@@ -55,41 +58,61 @@ class Node : public NodeBase<Tdim> {
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
-  //! Update mass
+  //! Update mass at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] mass Mass from the particles in a cell
   void update_mass(bool update, unsigned nphase, double mass);
 
-  //! Return mass
+  //! Return mass at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
-  //! Update volume
+  //! Update volume at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] mass Mass from the particles in a cell
   void update_volume(bool update, unsigned nphase, double volume);
 
-  //! Return volume
+  //! Return volume at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   double volume(unsigned nphase) const { return volume_(0, nphase); }
 
   //! Update external force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] force External force from the particles in a cell
   void update_external_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
-  //! Return external force
+  //! Return external force at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd external_force(unsigned nphase) const {
     return external_force_.col(nphase);
   }
 
   //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] force Internal force from the particles in a cell
   void update_internal_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
-  //! Return internal force
+  //! Return internal force at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd internal_force(unsigned nphase) const {
     return internal_force_.col(nphase);
   }
 
-  //! Update momentum
+  //! Update momentum at the nodes
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] momentum Momentum from the particles in a cell
   void update_momentum(bool update, unsigned nphase,
                        const Eigen::VectorXd& momentum);
 
-  //! Return momentum
+  //! Return momentum at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd momentum(unsigned nphase) const {
     return momentum_.col(nphase);
   }
@@ -97,16 +120,21 @@ class Node : public NodeBase<Tdim> {
   //! Compute velocity from the momentum
   void compute_velocity();
 
-  //! Return velocity
+  //! Return velocity at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd velocity(unsigned nphase) const {
     return velocity_.col(nphase);
   }
 
   //! Assign acceleration
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in[ nphase Index corresponding to the phase
+  //! \param[in] acceleration Acceleration from the particles in a cell
   void update_acceleration(bool update, unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
-  //! Return acceleration
+  //! Return acceleration at a given node for a given phase
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
   }
