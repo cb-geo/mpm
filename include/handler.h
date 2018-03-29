@@ -19,10 +19,13 @@ class Handler {
   Handler<T>() = default;
 
   //! Insert a pointer
-  bool insert(const std::shared_ptr<T>&);
+  //! \param[in] ptr A shared pointer
+  bool insert(const std::shared_ptr<T>& ptr);
 
-  //! Insert an id and a pointer
-  bool insert(Index, const std::shared_ptr<T>&);
+  //! Insert a pointer at a given id
+  //! \param[in] id Global/local index of the pointer
+  //! \param[in] ptr A shared pointer
+  bool insert(Index id, const std::shared_ptr<T>& ptr);
 
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
@@ -43,6 +46,7 @@ class Handler {
   }
 
   //! Iterate over elements in the container
+  //! \tparam Tunaryfn A unary function
   template <class Tunaryfn>
   Tunaryfn for_each(Tunaryfn fn);
 

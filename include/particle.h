@@ -30,10 +30,15 @@ class Particle : public ParticleBase<Tdim> {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id and coordinates
+  //! Construct a particle with id and coordinates
+  //! \param[in] id Particle id
+  //! \param[in] coord coordinates of the particle
   Particle(Index id, const VectorDim& coord);
 
-  //! Constructor with id, coordinates and status
+  //! Construct a particle with id, coordinates and status
+  //! \param[in] id Particle id
+  //! \param[in] coord coordinates of the particle
+  //! \param[in] status Particle status (active / inactive)
   Particle(Index id, const VectorDim& coord, bool status);
 
   //! Destructor
@@ -48,50 +53,70 @@ class Particle : public ParticleBase<Tdim> {
   //! Initialise properties
   void initialise();
 
-  //! Assign cell
+  // Assign a cell to particle
+  //! \param[in] cellptr Pointer to a cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
   //! Return cell id
   Index cell_id() const { return cell_id_; }
 
-  //! Assign nodal mass
+  //! Assign nodal mass to particles
+  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] mass Mass from the particles in a cell
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
-  //! Return mass
+  //! Return mass of the particlesx
+  //! \param[in] nphase Index corresponding to the phase
   double mass(unsigned nphase) const { return mass_(0, nphase); }
 
-  //! Assign stress
+  //! Assign stress to the particle
+  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] stress A vector of particle stress
   void assign_stress(unsigned nphase, const Eigen::VectorXd& stress);
 
-  //! Return stress
+  //! Return stress of the particle
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd stress(unsigned nphase) const { return stress_.col(nphase); }
 
-  //! Assign velocity
+  //! Assign velocity to the particle
+  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] velocity A vector of particle velocity
   void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
-  //! Return velocity
+  //! Return velocity of the particle
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd velocity(unsigned nphase) const {
     return velocity_.col(nphase);
   }
 
-  //! Assign momentum
+  //! Assign momentum to the particle
+  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] momentum A vector of particle momentum
   void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
 
-  //! Return momentum
+  //! Return momentum of the particle
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd momentum(unsigned nphase) const {
     return momentum_.col(nphase);
   }
 
-  //! Assign acceleration
+  //! Assign acceleration to the particle
+  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] acceleration A vector of particle acceleration
   void assign_acceleration(unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
-  //! Return acceleration
+  //! Return acceleration of the particle
+  //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
   }
 
   friend class boost::serialization::access;
+  //! Serialization / desierailization of particle
+  //! \tparam Archive Boost archive object
+  //! \param[in] ar Boost archive type
+  //! \param[in] version Version numbering for the class object
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;

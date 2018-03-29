@@ -1,6 +1,4 @@
 // Constructor with id
-//! \param[in] id Global mesh id
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
   // Check if the dimension is between 1 & 3
@@ -8,17 +6,13 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
   particles_.clear();
 }
 
-//! Add a neighbour mesh
-//! \param[in] local_id local id of the mesh
-//! \param[in] ptr A shared pointer to mesh
-//! \retval insertion_status Return the successful addition of a node
-//! \tparam Tdim Dimension
+//! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_neighbour(
     unsigned local_id, const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
   bool insertion_status = false;
   try {
-    // If number of mesh ptrs id is not the current mesh id
+    // If the mesh id is not the current mesh id
     if (mesh->id() != this->id()) {
       insertion_status = neighbour_meshes_.insert(local_id, mesh);
     } else {
@@ -30,10 +24,7 @@ bool mpm::Mesh<Tdim>::add_neighbour(
   return insertion_status;
 }
 
-//! Add a particle
-//! \param[in] particle A shared pointer to particle
-//! \retval insertion_status Return the successful addition of a particle
-//! \tparam Tdim Dimension
+//! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
@@ -41,10 +32,7 @@ bool mpm::Mesh<Tdim>::add_particle(
   return insertion_status;
 }
 
-//! Remove a particle
-//! \param[in] particle A shared pointer to particle
-//! \retval insertion_status Return the successful addition of a particle
-//! \tparam Tdim Dimension
+//! Remove a particle pointer from the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
@@ -53,10 +41,7 @@ bool mpm::Mesh<Tdim>::remove_particle(
   return status;
 }
 
-//! Add a node
-//! \param[in] node A shared pointer to node
-//! \retval insertion_status Return the successful addition of a node
-//! \tparam Tdim Dimension
+//! Add a node to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_node(
     const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
@@ -64,10 +49,7 @@ bool mpm::Mesh<Tdim>::add_node(
   return insertion_status;
 }
 
-//! Remove a node
-//! \param[in] node A shared pointer to node
-//! \retval insertion_status Return the successful addition of a node
-//! \tparam Tdim Dimension
+//! Remove a node from the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_node(
     const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
@@ -76,20 +58,14 @@ bool mpm::Mesh<Tdim>::remove_node(
   return status;
 }
 
-//! Add a cell
-//! \param[in] cell A shared pointer to cell
-//! \retval insertion_status Return the successful addition of a cell
-//! \tparam Tdim Dimension
+//! Add a cell to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   bool insertion_status = cells_.add(cell);
   return insertion_status;
 }
 
-//! Remove a cell
-//! \param[in] cell A shared pointer to cell
-//! \retval insertion_status Return the successful addition of a cell
-//! \tparam Tdim Dimension
+//! Remove a cell from the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {

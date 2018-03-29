@@ -13,6 +13,73 @@ namespace mpm {
 
 //! Hexahedron shape function class derived from ShapeFn class
 //! \brief Shape functions of a hexahedron element
+//! \details 8-noded and 20-noded hexahedron element \n
+//! Shape function, gradient shape function, B-matrix, indices \n
+//! 8-node (Trilinear) Hexahedron Element \n
+//! <pre>
+//!        3               2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!       |  |         |  |
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/           |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
+//!
+//!
+//! </pre>
+//! 20-node (Serendipity) Hexahedron Element \n
+//! <pre>
+//!        3       13          2
+//!          0_ _ _ 0 _ _ _  0
+//!          /|             / |
+//!      15 0 |         14 0  |
+//!        /  0 9         /   |
+//!     7 0_ _| _ 0 _ _ _ 0 6 0 11
+//!       |   |   19     |    |
+//!       |   |      8   |    |
+//!       | 0 0_ _ _ 0 _ |_ _ 0  1
+//!    17 0  /           0 18 /
+//!       | 0 10         |  0 12
+//!       |/             | /
+//!       0_ _ _ 0 _ _ _ 0
+//!     4        16         5
+//!
+//! </pre>
+//!
+//! 27-node (Triquadratic) Hexahedron Element \n
+//! Check with GMSH \n
+//! <pre>
+//!          7           18             6
+//!            0_ _ _ _ _ 0 _ _ _ _ _ 0
+//!            /|                     /|
+//!           / |                    / |
+//!          /  |    25             /  |
+//!      19 0   |     0         17 0   |
+//!        /    |      23 0       /    |
+//!       /  15 0                /     0 14
+//!      /      |               /      |
+//!  4  0_ _ _ _|_ 0 _ _ _ _ _ 0 5     |
+//!     |       | 16           |       |
+//!     |  0 24 |              |   0 22|
+//!     |       |          8   |       |
+//!     |     0 0_ _ _ _ _ 0_ _|_ _ _  0  1
+//!     |      /               |      /
+//!  17 0     /    0 25        0 18  /
+//!     |    /                 |    /
+//!     |10 0         0        |   0 12
+//!     |  /         21        |  /
+//!     | /                    | /
+//!     |/                     |/
+//!     0_ _ _ _ _ 0 _ _ _ _ _ 0
+//!   4           16            5
+//!
+//!
+//! </pre>
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>

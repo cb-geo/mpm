@@ -1,20 +1,11 @@
-//! Constructor with id and coordinates
-//! \param[in] id Particle id
-//! \param[in] coord coordinates of the particle
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+//! Construct a particle with id and coordinates
 template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
 }
 
-//! Constructor with id, coordinates and status
-//! \param[in] id Particle id
-//! \param[in] coord coordinates of the particle
-//! \param[in] status Particle status (active / inactive)
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+//! Construct a particle with id, coordinates and status
 template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
                                         bool status)
@@ -22,21 +13,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
   this->initialise();
 }
 
-// Assign a cell to particle
-//! \param[in] cellptr Pointer to a cell
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_cell(
-    const std::shared_ptr<Cell<Tdim>>& cellptr) {
-  cell_ = cellptr;
-  cell_id_ = cellptr->id();
-  return cell_->add_particle_id(this->id());
-}
-
 // Initialise particle properties
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
@@ -46,9 +23,16 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   acceleration_.setZero();
 }
 
-// Assign particle stress
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+// Assign a cell to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell(
+    const std::shared_ptr<Cell<Tdim>>& cellptr) {
+  cell_ = cellptr;
+  cell_id_ = cellptr->id();
+  return cell_->add_particle_id(this->id());
+}
+
+// Assign stress to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_stress(
     unsigned nphase, const Eigen::VectorXd& stress) {
@@ -65,9 +49,7 @@ void mpm::Particle<Tdim, Tnphases>::assign_stress(
   }
 }
 
-// Assign particle velocity
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+// Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_velocity(
     unsigned nphase, const Eigen::VectorXd& velocity) {
@@ -83,9 +65,7 @@ void mpm::Particle<Tdim, Tnphases>::assign_velocity(
   }
 }
 
-// Assign particle momentum
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+// Assign momentum to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_momentum(
     unsigned nphase, const Eigen::VectorXd& momentum) {
@@ -101,9 +81,7 @@ void mpm::Particle<Tdim, Tnphases>::assign_momentum(
   }
 }
 
-// Assign particle acceleration
-//! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
+//! Assign acceleration to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     unsigned nphase, const Eigen::VectorXd& acceleration) {

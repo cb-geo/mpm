@@ -1,7 +1,4 @@
 //! Constructor with id and coordinates
-//! \param[in] id Particle id
-//! \param[in] coord coordinates of the particle
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord)
     : id_{id} {
@@ -12,10 +9,6 @@ mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord)
 }
 
 //! Constructor with id, coordinates and status
-//! \param[in] id Particle id
-//! \param[in] coord coordinates of the particle
-//! \param[in] status Particle status (active / inactive)
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord,
                                       bool status)

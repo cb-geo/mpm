@@ -1,7 +1,4 @@
-//! Constructor with id and number of nodes
-//! \param[in] id Global cell id
-//! \param[in] nnodes Number of nodes per cell
-//! \tparam Tdim Dimension
+//! Constructor with global cell id and number of nodes
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is 2 or 3
@@ -18,11 +15,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
   }
 }
 
-//! Constructor with id, number of nodes and shapefn
-//! \param[in] id Global cell id
-//! \param[in] nnodes Number of nodes per cell
-//! \param[in] shapefnptr Pointer to a shape function
-//! \tparam Tdim Dimension
+//! Constructor with cell id, number of nodes and shapefn
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
                       const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
@@ -42,8 +35,6 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
 }
 
 //! Assign a shape function to cell
-//! \param[in] shapefnptr Pointer to a shape function
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::shapefn(
     const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr) {
@@ -62,11 +53,7 @@ bool mpm::Cell<Tdim>::shapefn(
   return status;
 }
 
-//! Add a node pointer
-//! \param[in] local_id local id of the node
-//! \param[in] ptr A shared pointer
-//! \retval insertion_status Return the successful addition of a node
-//! \tparam Tdim Dimension
+//! Add a node pointer and return the status of addition of a node
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_node(
     unsigned local_id, const std::shared_ptr<mpm::NodeBase<Tdim>>& node_ptr) {
@@ -88,11 +75,7 @@ bool mpm::Cell<Tdim>::add_node(
   return insertion_status;
 }
 
-//! Add a neighbour cell
-//! \param[in] local_id local id of the cell
-//! \param[in] ptr A shared pointer to cell
-//! \retval insertion_status Return the successful addition of a node
-//! \tparam Tdim Dimension
+//! Add a neighbour cell and return the status of addition of a node
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_neighbour(
     unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
@@ -110,10 +93,7 @@ bool mpm::Cell<Tdim>::add_neighbour(
   return insertion_status;
 }
 
-//! Add a particle id
-//! \param[in] id Global id of a particle
-//! \retval status Return the successful addition of a particle id
-//! \tparam Tdim Dimension
+//! Add a particle id and return the status of addition of a particle id
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_particle_id(Index id) {
   bool status = false;
@@ -129,8 +109,6 @@ bool mpm::Cell<Tdim>::add_particle_id(Index id) {
 }
 
 //! Remove a particle id
-//! \param[in] id Global id of a particle
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::remove_particle_id(Index id) {
   particles_.erase(std::remove(particles_.begin(), particles_.end(), id),
@@ -241,9 +219,7 @@ inline void mpm::Cell<3>::compute_volume() {
   }
 }
 
-//! Check if a point is in a 2D cell
-//! \param[in] point Coordinates of a point
-//! \tparam Tdim Dimension
+//! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
@@ -295,9 +271,7 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
   return status;
 }
 
-//! Check if a point is in a 3D cell
-//! \param[in] point Coordinates of a point
-//! \tparam Tdim Dimension
+//! Check if a point is in a 3D cell by breaking the cell into sub-volumes
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
@@ -346,9 +320,6 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
 }
 
 //! Return the local coordinates of a point in a 2D cell
-//! \param[in] point Coordinates of a point
-//! \retval xi Local coordinates of a point
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 2, 1>& point) {
@@ -396,9 +367,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
 }
 
 //! Return the local coordinates of a point in a 3D cell
-//! \param[in] point Coordinates of a point
-//! \retval xi Local coordinates of a point
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 3, 1>& point) {
@@ -460,9 +428,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
 }
 
 //! Map particle mass to nodes
-//! \param[in] xi local coordinates of particle
-//! \param[in] pmass mass of particle
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
                                                  unsigned nphase,
@@ -474,9 +439,6 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
 }
 
 //! Map particle volume to nodes
-//! \param[in] xi local coordinates of particle
-//! \param[in] pvolume volume of particle
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
                                                    unsigned nphase,
@@ -487,11 +449,7 @@ void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
   }
 }
 
-//! Compute momentum at nodes
-//! \param[in] xi local coordinates of a particle
-//! \param[in] pmass mass of a particle
-//! \param[in] pvelocity velocity of a particle
-//! \tparam Tdim Dimension
+//! Compute nodal momentum from particle mass and velocity for a given phase
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_momentum(const VectorDim& xi,
                                              unsigned nphase, double pmass,
@@ -504,11 +462,7 @@ void mpm::Cell<Tdim>::compute_nodal_momentum(const VectorDim& xi,
   }
 }
 
-//! Compute body force at nodes of a cell
-//! \param[in] xi Local coordinates of a particle
-//! \param[in] pmass Mass of a particle
-//! \param[in] pgravity Gravity of a particle
-//! \tparam Tdim Dimension
+//! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
                                                unsigned nphase, double pmass,
@@ -521,11 +475,7 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-//! Compute internal force at nodes of a cell
-//! \param[in] xi Local coordinates of particle
-//! \param[in] pvolume Volume of particle
-//! \param[in] pstress Stress of particle
-//! \tparam Tdim Dimension
+//! Compute the noal internal force  of a cell from particle stress and volume
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_internal_force(
     unsigned nphase, double pvolume, const VectorDim& xi,
@@ -552,10 +502,6 @@ void mpm::Cell<Tdim>::compute_nodal_internal_force(
 }
 
 //! Return velocity at a given point by interpolating from nodes
-//! Return velocity at a point by interpolating from nodes
-//! \param[in] xi Local coordinates of a point
-//! \retval velocity Interpolated velocity at xi
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
                                                             unsigned nphase) {
@@ -569,9 +515,6 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
 }
 
 //! Return acceleration at a point by interpolating from nodes
-//! \param[in] xi Local coordinates of a point
-//! \retval acceleration Interpolated acceleration at xi
-//! \tparam Tdim Dimension
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     const VectorDim& xi, unsigned nphase) {
