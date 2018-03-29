@@ -26,9 +26,14 @@ class ParticleBase {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor with id and coordinates
+  //! \param[in] id Particle id
+  //! \param[in] coord coordinates of the particle
   ParticleBase(Index id, const VectorDim& coord);
 
   //! Constructor with id, coordinates and status
+  //! \param[in] id Particle id
+  //! \param[in] coord coordinates of the particle
+  //! \param[in] status Particle status (active / inactive)
   ParticleBase(Index id, const VectorDim& coord, bool status);
 
   //! Destructor
