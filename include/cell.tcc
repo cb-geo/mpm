@@ -475,29 +475,37 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-//! Compute the noal internal force  of a cell from particle stress and volume
+//! Compute the nodal internal force  of a cell from particle stress and
+//! volume
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_internal_force(
     unsigned nphase, double pvolume, const VectorDim& xi,
-    const Eigen::VectorXd& pstress) {
-  try {
-    if (pstress.size() == Tdof) {
-      // Get shape functions
-      const auto shapefns = shapefn_->shapefn(xi);
-      // Get B-matrix
-      const auto bmatrix = shapefn_->bmatrix(xi);
-      // Map internal forces from particle to nodes
-      for (unsigned j = 0; j < this->nfunctions(); ++j)
-        nodes_[j]->update_internal_force(
-            true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
-    } else {
-      throw std::runtime_error(
-          "Particle stress size mismatch for internal force at nodes "
-          "computation");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-    std::abort();
+    const Eigen::Matrix<double, 6, 1>& pstress) {
+
+  if (Tdim == 2) {
+    // Copy normal stresses
+    Eigen::Matrix<double, 3, 1> stress;
+    stress(0) = pstress(0);
+    stress(1) = pstress(1);
+    stress(2) = pstress(3);
+
+    // Get shape functions
+    const auto shapefns = shapefn_->shapefn(xi);
+    // Get B-matrix
+    const auto bmatrix = shapefn_->bmatrix(xi);
+    // Map internal forces from particle to nodes
+    for (unsigned j = 0; j < this->nfunctions(); ++j)
+      nodes_[j]->update_internal_force(
+          true, nphase, (pvolume * bmatrix.at(j).transpose() * stress));
+  } else {
+    // Get shape functions
+    const auto shapefns = shapefn_->shapefn(xi);
+    // Get B-matrix
+    const auto bmatrix = shapefn_->bmatrix(xi);
+    // Map internal forces from particle to nodes
+    for (unsigned j = 0; j < this->nfunctions(); ++j)
+      nodes_[j]->update_internal_force(
+          true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
   }
 }
 

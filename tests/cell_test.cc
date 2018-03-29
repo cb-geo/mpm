@@ -210,8 +210,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check particle internal force mapping") {
       // Assign internal force to nodes
       const double pvolume = 0.5;
-      Eigen::Vector3d pinternal_stress;
-      pinternal_stress << 0.5, 0.5, 0.5;
+      Eigen::Matrix<double, 6, 1> pinternal_stress;
+      pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
       cell->compute_nodal_internal_force(phase, pvolume, xi, pinternal_stress);
 

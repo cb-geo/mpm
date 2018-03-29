@@ -161,7 +161,7 @@ class Cell {
   //! \param[in] pstress Stress of particle
   void compute_nodal_internal_force(unsigned nphase, double pvolume,
                                     const VectorDim& xi,
-                                    const Eigen::VectorXd& pstress);
+                                    const Eigen::Matrix<double, 6, 1>& pstress);
 
   //! Return velocity at given location by interpolating from nodes
   //! \param[in] xi local coordinates of particle
