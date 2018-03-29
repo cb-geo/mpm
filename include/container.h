@@ -22,9 +22,11 @@ class Container {
   Container<T>() = default;
 
   //! Add a pointer to an element
+  //! \param[in] ptr A shared pointer
   bool add(const std::shared_ptr<T>&);
 
   //! Remove an element pointer
+  //! \param[in] ptr A shared pointer
   bool remove(const std::shared_ptr<T>&);
 
   //! Return number of elements in the container
@@ -46,6 +48,9 @@ class Container {
   }
 
   //! Iterate over elements in the container
+  //! \tparam T A class with a template argument Tdim
+  //! \tparam Tunaryfn A unary function
+
   template <class Tunaryfn>
   Tunaryfn for_each(Tunaryfn fn);
 
