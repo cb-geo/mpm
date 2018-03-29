@@ -299,7 +299,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->mass(Phase) == Approx(100.5).epsilon(Tolerance));
 
     // Check stress
-    Eigen::Matrix<double, 3, 1> stress;
+    Eigen::Matrix<double, 6, 1> stress;
     for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
 
     for (unsigned i = 0; i < stress.size(); ++i)
