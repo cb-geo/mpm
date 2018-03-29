@@ -12,6 +12,47 @@ namespace mpm {
 
 //! Quadrilateral shape function class derived from ShapeFn class
 //! \brief Shape functions of a quadrilateral element
+//! \details 4-noded, 8-noded, and 9-noded quadrilateral element \n
+//! Shape function, gradient shape function, B-matrix, indices \n
+//! 4-node Quadrilateral Element \n
+//! <pre>
+//!
+//! 3 0----------0 2
+//!   |          |
+//!   |          |
+//!   |          |
+//!   |          |
+//! 0 0----------0 1
+//!
+//! </pre>
+//! 8-node Quadrilateral Element
+//! <pre>
+//!
+//!  3      6       2
+//!   0-----0-----0
+//!   |           |
+//!   |           |
+//! 7 0           0 5
+//!   |           |
+//!   |           |
+//!   0-----0-----0
+//! 0       4       1
+//!
+//! </pre>
+//! 9-node Quadrilateral Element
+//! <pre>
+//!
+//! 3       6       2
+//!   0-----0-----0
+//!   |           |
+//!   |           |
+//! 7 0   8 0     0 5
+//!   |           |
+//!   |           |
+//!   0-----0-----0
+//!  0      4       1
+//!
+//! </pre>
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -28,15 +69,17 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
                   "Specified number of shape functions is not defined");
   }
 
-  //! Return number of functions
+  //! Return number of shape functions
   unsigned nfunctions() const { return Tnfunctions; }
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
+  //! \retval shapefn Shape function of a given cell
   Eigen::VectorXd shapefn(const VectorDim& xi);
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
+  //! \retval grad_shapefn Gradient of shape function of a given cell
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
 
   //! Evaluate the B matrix at given local coordinates

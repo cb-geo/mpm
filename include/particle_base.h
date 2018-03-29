@@ -107,6 +107,10 @@ class ParticleBase {
 
   //! Serialize
   friend class boost::serialization::access;
+  //! Serialization / desierailization of particle base
+  //! \tparam Archive Boost archive object
+  //! \param[in] ar Boost archive type
+  //! \param[in] version Version numbering for the class object
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;

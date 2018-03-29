@@ -6,9 +6,8 @@
 //!   |          |
 //! 0 0----------0 1
 
-//! Return shape functions of a 4-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval shapefn Shape function of a given cell
+//! Return shape functions of a 4-node Quadrilateral Element at a given local
+//! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -20,9 +19,8 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
   return shapefn;
 }
 
-//! Return gradient of shape functions of a 4-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval grad_shapefn Gradient of shape function of a given cell
+//! Return gradient of shape functions of a 4-node Quadrilateral Element at a
+//! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -51,9 +49,8 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
 //!   0-----0-----0
 //! 0       4       1
 
-//! Return shape functions of a 8-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval shapefn Shape function of a given cell
+//! Return shape functions of a 8-node Quadrilateral Element at a given local
+//! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -69,9 +66,8 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
   return shapefn;
 }
 
-//! Return gradient of shape functions of a 8-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval grad_shapefn Gradient of shape function of a given cell
+//! Return gradient of shape functions of a 8-node Quadrilateral Element at a
+//! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -107,9 +103,8 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
 //!   0-----0-----0
 //!  0      4       1
 
-//! Return shape functions of a 9-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval shapefn Shape function of a given cell
+//! Return shape functions of a 9-node Quadrilateral Element at a given local
+//! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -128,9 +123,8 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
   return shapefn;
 }
 
-//! Return gradient of shape functions of a 9-node Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval grad_shapefn Gradient of shape function of a given cell
+//! Return gradient of shape functions of a 9-node Quadrilateral Element at a
+//! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) {
@@ -157,11 +151,8 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
-//! Return the B-matrix of a Quadrilateral Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval bmatrix B-matrix of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of shape functions
+//! Return the B-matrix of a Quadrilateral Element at a given local
+//! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(const VectorDim& xi) {
@@ -185,9 +176,6 @@ inline std::vector<Eigen::MatrixXd>
 }
 
 //! Return the corner indices of a cell to calculate the cell volume
-//! \retval indices Outer-indices that form the cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::corner_indices() {
@@ -197,8 +185,6 @@ inline Eigen::VectorXi
 }
 
 //! Return indices of a sub-tetrahedrons in a volume
-//! to check if a point is inside /outside of a hedron
-//! \retval indices Indices that form sub-tetrahedrons
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::inhedron_indices() {

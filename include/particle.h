@@ -80,7 +80,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign velocity to the particle
   //! \param[in] nphase Index corresponding to the phase
-  //! \param[in] velcoity A vector of particle velocity
+  //! \param[in] velocity A vector of particle velocity
   void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
   //! Return velocity of the particle
@@ -112,11 +112,11 @@ class Particle : public ParticleBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
+  friend class boost::serialization::access;
   //! Serialization / desierailization of particle
   //! \tparam Archive Boost archive object
   //! \param[in] ar Boost archive type
   //! \param[in] version Version numbering for the class object
-  friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
     ar& id_;
