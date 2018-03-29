@@ -29,7 +29,6 @@ class Node : public NodeBase<Tdim> {
   //! Constructor with id, coordinates and dof
   //! \param[in] id Node id
   //! \param[in] coord coordinates of the node
-  //! \param[in] dof Degrees of freedom
   Node(Index id, const VectorDim& coord);
 
   //! Virtual destructor
@@ -71,7 +70,7 @@ class Node : public NodeBase<Tdim> {
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
-  //! \param[in] mass Mass from the particles in a cell
+  //! \param[in] volume Volume from the particles in a cell
   void update_volume(bool update, unsigned nphase, double volume);
 
   //! Return volume at a given node for a given phase

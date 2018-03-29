@@ -69,15 +69,16 @@ class Cell {
 
   //! Add a node pointer to cell
   //! \param[in] local_id local id of the node
-  //! \param[in] ptr A shared pointer
+  //! \param[in] node A shared pointer to the node
   //! \retval insertion_status Return the successful addition of a node
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add a neighbour cell
-  //! \param[in] local_id local id of the cell
-  //! \param[in] ptr A shared pointer to cell
+  //! \param[in] local_id local id of the neighbouring cell
+  //! \param[in] neighbour A shared pointer to the neighbouring cell
   //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(unsigned id, const std::shared_ptr<Cell<Tdim>>& neighbour);
+  bool add_neighbour(unsigned local_id,
+                     const std::shared_ptr<Cell<Tdim>>& neighbour);
 
   //! Number of neighbours
   unsigned nneighbours() const { return neighbour_cells_.size(); }

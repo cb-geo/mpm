@@ -29,7 +29,7 @@ class MPM {
   };
 
  protected:
-  // A unique id for the analysis
+  //! A unique id for the analysis
   std::string analysis_uuid_;
 
   //! Mesh object

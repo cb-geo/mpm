@@ -45,9 +45,10 @@ class Mesh {
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
-  //! \param[in] ptr A shared pointer to mesh
+  //! \param[in] neighbour A shared pointer to the neighbouring mesh
   //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(unsigned id, const std::shared_ptr<Mesh<Tdim>>& neighbour);
+  bool add_neighbour(unsigned local_id,
+                     const std::shared_ptr<Mesh<Tdim>>& neighbour);
 
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }

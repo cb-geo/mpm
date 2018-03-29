@@ -63,7 +63,7 @@ class NodeBase {
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
-  //! \param[in] mass Mass from the particles in a cell
+  //! \param[in] volume Volume from the particles in a cell
   virtual void update_volume(bool update, unsigned nphase, double volume) = 0;
 
   //! Return volume at a given node for a given phase
