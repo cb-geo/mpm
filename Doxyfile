@@ -119,7 +119,7 @@ RECURSIVE              = YES
 EXCLUDE                = YES
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = */external/* \
-                         */opt/*\
+                         */opt/* \
                          */usr/*
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = 
