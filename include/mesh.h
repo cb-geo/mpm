@@ -18,19 +18,20 @@ namespace mpm {
 
 //! Mesh class
 //! \brief Base class that stores the information about meshes
-//! \details Mesh class: id_ and coordinates.
-//! \tparam Tdim Dimension
+//! \details Mesh class which stores the particles, nodes, cells and its
+//! neighbours \tparam Tdim Dimension
 template <unsigned Tdim>
 class Mesh {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Constructor with id
+  // Construct a mesh with a global unique id
+  //! \param[in] id Global mesh id
   Mesh(unsigned id);
 
-  //! Destructor
-  ~Mesh(){};
+  //! Default destructor
+  ~Mesh() = default;
 
   //! Delete copy constructor
   Mesh(const Mesh<Tdim>&) = delete;
@@ -41,41 +42,58 @@ class Mesh {
   //! Return id of the mesh
   unsigned id() const { return id_; }
 
-  //! Add neighbouring mesh
+  //! Add a neighbour mesh, using the local id for the new mesh and a mesh
+  //! pointer
+  //! \param[in] local_id local id of the mesh
+  //! \param[in] ptr A shared pointer to mesh
+  //! \retval insertion_status Return the successful addition of a node
   bool add_neighbour(unsigned id, const std::shared_ptr<Mesh<Tdim>>& neighbour);
 
-  //! Number of neighbours
+  //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
-  //! Add particle
+  //! Add a particle to the mesh
+  //! \param[in] particle A shared pointer to particle
+  //! \retval insertion_status Return the successful addition of a particle
   bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
-  //! Add particle
+  //! Remove a particle from the mesh
+  //! \param[in] particle A shared pointer to particle
+  //! \retval insertion_status Return the successful addition of a particle
   bool remove_particle(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
-  //! Number of particles
+  //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
-  //! Add node
+  //! Add a node to the mesh
+  //! \param[in] node A shared pointer to node
+  //! \retval insertion_status Return the successful addition of a node
   bool add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node);
 
-  //! Add node
+  //! Remove a node from the mesh
+  //! \param[in] node A shared pointer to node
+  //! \retval insertion_status Return the successful addition of a node
   bool remove_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node);
 
-  //! Number of nodes
+  //! Return the number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
 
-  //! Add cell
+  //! Add a cell from the mesh
+  //! \param[in] cell A shared pointer to cell
+  //! \retval insertion_status Return the successful addition of a cell
   bool add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
 
-  //! Add cell
+  //! Remove a cell from the mesh
+  //! \param[in] cell A shared pointer to cell
+  //! \retval insertion_status Return the successful addition of a cell
   bool remove_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
 
-  //! Number of cells
+  //! Number of cells in the mesh
   mpm::Index ncells() const { return cells_.size(); }
 
-  //! Active mesh (if a particle is present)
+  //! Return status of the mesh. A mesh is active, if at least one particle is
+  //! present
   bool status() const { return particles_.size(); }
 
  protected:
