@@ -35,7 +35,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 // Assign stress to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_stress(
-    unsigned nphase, const Eigen::VectorXd& stress) {
+    unsigned nphase, const Eigen::Matrix<double, 6, 1>& stress) {
   try {
     if (stress.size() != stress_.size()) {
       std::cout << stress_.size() << "\t" << stress.size() << "\n";

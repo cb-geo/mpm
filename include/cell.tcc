@@ -1,8 +1,8 @@
 //! Constructor with global cell id and number of nodes
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes) : id_{id}, nnodes_{nnodes} {
-  // Check if the dimension is 2 or 3
-  static_assert((Tdim == 2 || Tdim == 3), "Invalid global dimension");
+  // Check if the dimension is between 1 & 3
+  static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   try {
     // Number of nodes should be greater than dimensions
     if (!(nnodes > Tdim)) {
@@ -475,30 +475,44 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
                                      shapefns(i) * pgravity * pmass);
 }
 
-//! Compute the noal internal force  of a cell from particle stress and volume
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_internal_force(
+//! Compute the nodal internal force  of a cell from particle stress and
+//! volume
+template <>
+inline void mpm::Cell<2>::compute_nodal_internal_force(
     unsigned nphase, double pvolume, const VectorDim& xi,
-    const Eigen::VectorXd& pstress) {
-  try {
-    if (pstress.size() == Tdof) {
-      // Get shape functions
-      const auto shapefns = shapefn_->shapefn(xi);
-      // Get B-matrix
-      const auto bmatrix = shapefn_->bmatrix(xi);
-      // Map internal forces from particle to nodes
-      for (unsigned j = 0; j < this->nfunctions(); ++j)
-        nodes_[j]->update_internal_force(
-            true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
-    } else {
-      throw std::runtime_error(
-          "Particle stress size mismatch for internal force at nodes "
-          "computation");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-    std::abort();
-  }
+    const Eigen::Matrix<double, 6, 1>& pstress) {
+
+  // Copy normal stresses
+  Eigen::Matrix<double, 3, 1> stress;
+  stress(0) = pstress(0);
+  stress(1) = pstress(1);
+  stress(2) = pstress(3);
+
+  // Get shape functions
+  const auto shapefns = shapefn_->shapefn(xi);
+  // Get B-matrix
+  const auto bmatrix = shapefn_->bmatrix(xi);
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force(
+        true, nphase, (pvolume * bmatrix.at(j).transpose() * stress));
+}
+
+//! Compute the nodal internal force  of a cell from particle stress and
+//! volume
+template <>
+inline void mpm::Cell<3>::compute_nodal_internal_force(
+    unsigned nphase, double pvolume, const VectorDim& xi,
+    const Eigen::Matrix<double, 6, 1>& pstress) {
+
+  // Get shape functions
+  const auto shapefns = shapefn_->shapefn(xi);
+  // Get B-matrix
+  const auto bmatrix = shapefn_->bmatrix(xi);
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force(
+        true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
 }
 
 //! Return velocity at a given point by interpolating from nodes

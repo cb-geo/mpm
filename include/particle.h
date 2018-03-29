@@ -27,9 +27,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Define DOF for stresses
-  static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
-
   //! Construct a particle with id and coordinates
   //! \param[in] id Particle id
   //! \param[in] coord coordinates of the particle
@@ -72,11 +69,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign stress to the particle
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] stress A vector of particle stress
-  void assign_stress(unsigned nphase, const Eigen::VectorXd& stress);
+  void assign_stress(unsigned nphase,
+                     const Eigen::Matrix<double, 6, 1>& stress);
 
   //! Return stress of the particle
   //! \param[in] nphase Index corresponding to the phase
-  Eigen::VectorXd stress(unsigned nphase) const { return stress_.col(nphase); }
+  Eigen::Matrix<double, 6, 1> stress(unsigned nphase) const {
+    return stress_.col(nphase);
+  }
 
   //! Assign velocity to the particle
   //! \param[in] nphase Index corresponding to the phase
@@ -138,7 +138,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
-  Eigen::Matrix<double, Tdof, Tnphases> stress_;
+  Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

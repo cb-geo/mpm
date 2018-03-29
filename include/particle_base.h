@@ -79,10 +79,10 @@ class ParticleBase {
 
   //! Assign stress
   virtual void assign_stress(unsigned nphase,
-                             const Eigen::VectorXd& stress) = 0;
+                             const Eigen::Matrix<double, 6, 1>& stress) = 0;
 
   //! Return stress
-  virtual Eigen::VectorXd stress(unsigned nphase) const = 0;
+  virtual Eigen::Matrix<double, 6, 1> stress(unsigned nphase) const = 0;
 
   //! Assign velocity
   virtual void assign_velocity(unsigned nphase,
