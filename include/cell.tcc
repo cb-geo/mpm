@@ -477,36 +477,42 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
 
 //! Compute the nodal internal force  of a cell from particle stress and
 //! volume
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_internal_force(
+template <>
+inline void mpm::Cell<2>::compute_nodal_internal_force(
     unsigned nphase, double pvolume, const VectorDim& xi,
     const Eigen::Matrix<double, 6, 1>& pstress) {
 
-  if (Tdim == 2) {
-    // Copy normal stresses
-    Eigen::Matrix<double, 3, 1> stress;
-    stress(0) = pstress(0);
-    stress(1) = pstress(1);
-    stress(2) = pstress(3);
+  // Copy normal stresses
+  Eigen::Matrix<double, 3, 1> stress;
+  stress(0) = pstress(0);
+  stress(1) = pstress(1);
+  stress(2) = pstress(3);
 
-    // Get shape functions
-    const auto shapefns = shapefn_->shapefn(xi);
-    // Get B-matrix
-    const auto bmatrix = shapefn_->bmatrix(xi);
-    // Map internal forces from particle to nodes
-    for (unsigned j = 0; j < this->nfunctions(); ++j)
-      nodes_[j]->update_internal_force(
-          true, nphase, (pvolume * bmatrix.at(j).transpose() * stress));
-  } else {
-    // Get shape functions
-    const auto shapefns = shapefn_->shapefn(xi);
-    // Get B-matrix
-    const auto bmatrix = shapefn_->bmatrix(xi);
-    // Map internal forces from particle to nodes
-    for (unsigned j = 0; j < this->nfunctions(); ++j)
-      nodes_[j]->update_internal_force(
-          true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
-  }
+  // Get shape functions
+  const auto shapefns = shapefn_->shapefn(xi);
+  // Get B-matrix
+  const auto bmatrix = shapefn_->bmatrix(xi);
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force(
+        true, nphase, (pvolume * bmatrix.at(j).transpose() * stress));
+}
+
+//! Compute the nodal internal force  of a cell from particle stress and
+//! volume
+template <>
+inline void mpm::Cell<3>::compute_nodal_internal_force(
+    unsigned nphase, double pvolume, const VectorDim& xi,
+    const Eigen::Matrix<double, 6, 1>& pstress) {
+
+  // Get shape functions
+  const auto shapefns = shapefn_->shapefn(xi);
+  // Get B-matrix
+  const auto bmatrix = shapefn_->bmatrix(xi);
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force(
+        true, nphase, (pvolume * bmatrix.at(j).transpose() * pstress));
 }
 
 //! Return velocity at a given point by interpolating from nodes
