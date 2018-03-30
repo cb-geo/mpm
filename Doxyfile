@@ -114,7 +114,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = ./
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.tcc *.cc *.h
+FILE_PATTERNS          = *.tcc *.cc *.h index.md
 RECURSIVE              = YES
 EXCLUDE                = YES
 EXCLUDE_SYMLINKS       = NO
@@ -167,7 +167,7 @@ HTML_TIMESTAMP         = NO
 HTML_DYNAMIC_SECTIONS  = NO
 HTML_INDEX_NUM_ENTRIES = 100
 GENERATE_DOCSET        = NO
-DOCSET_FEEDNAME        = "Doxygen generated docs"
+DOCSET_FEEDNAME        = "MPM docs"
 DOCSET_BUNDLE_ID       = org.doxygen.Project
 DOCSET_PUBLISHER_ID    = org.doxygen.Publisher
 DOCSET_PUBLISHER_NAME  = Publisher
