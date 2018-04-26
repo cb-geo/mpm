@@ -81,6 +81,31 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
 
+    // Update coordinates
+    Eigen::Vector2d coordinates;
+    coordinates << 1., 1.;
+    // Check iterate over functionality
+    mesh->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
+                  std::placeholders::_1, coordinates));
+
+    // Particle 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = particle1->coordinates();
+      // Check if coordinates for each particle is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
+    }
+    // Particle 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = particle2->coordinates();
+      // Check if coordinates for each particle is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
+    }
+
     // Remove particle 2 and check status
     bool remove_status = mesh->remove_particle(particle2);
     REQUIRE(remove_status == true);
