@@ -62,7 +62,7 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 Toper mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for_each(nodes_.begin(), nodes_.end(), oper);
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
 }
 
 

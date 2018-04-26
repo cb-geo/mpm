@@ -117,6 +117,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
 
+    // Update coordinates
+    Eigen::Vector2d coordinates;
+    coordinates << 1., 1.;
+    // Check iterate over functionality
+    mesh->iterate_over_nodes(
+        std::bind(&mpm::NodeBase<Dim>::id, std::placeholders::_1));
+
     // Remove node 2 and check status
     bool remove_status = mesh->remove_node(node2);
     REQUIRE(remove_status == true);
