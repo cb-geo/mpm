@@ -204,6 +204,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
 
+    // Check iterate over functionality
+    mesh->iterate_over_cells(
+        std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
+
     // Remove cell 2 and check status
     bool remove_status = mesh->remove_cell(cell2);
     REQUIRE(remove_status == true);
@@ -380,6 +384,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
+
+    // Check iterate over functionality
+    mesh->iterate_over_cells(
+        std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
 
     // Remove cell 2 and check status
     bool remove_status = mesh->remove_cell(cell2);
