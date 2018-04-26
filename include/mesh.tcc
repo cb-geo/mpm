@@ -58,6 +58,14 @@ bool mpm::Mesh<Tdim>::remove_node(
   return status;
 }
 
+//! Iterate over nodes
+template <unsigned Tdim>
+template <typename Toper>
+Toper mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
+  tbb::parallel_for_each(nodes_.begin(), nodes_.end(), oper);
+}
+
+
 //! Add a cell to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {

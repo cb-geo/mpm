@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "Eigen/Dense"
+#include <tbb/parallel_for.h>
+#include <tbb/parallel_for_each.h>
 
 #include "cell.h"
 #include "container.h"
@@ -79,6 +81,10 @@ class Mesh {
 
   //! Return the number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
+
+  //! Iterate over nodes
+  template <typename Toper>
+  Toper iterate_over_nodes(Toper oper);
 
   //! Add a cell from the mesh
   //! \param[in] cell A shared pointer to cell
