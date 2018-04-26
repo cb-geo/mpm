@@ -84,7 +84,7 @@ class Mesh {
 
   //! Iterate over nodes
   template <typename Toper>
-  Toper iterate_over_nodes(Toper oper);
+  void iterate_over_nodes(Toper oper);
 
   //! Add a cell from the mesh
   //! \param[in] cell A shared pointer to cell
