@@ -50,7 +50,7 @@ class ParticleBase {
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the particleBase
-  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+  void assign_coordinates(const VectorDim& coord) { coordinates_ = coord; }
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the particleBase

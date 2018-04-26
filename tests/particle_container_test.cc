@@ -108,11 +108,7 @@ TEST_CASE("Particle container is checked for 2D case",
 
     // Iterate through particle container to update coordinaates
     particlecontainer->for_each(  // function structure
-        std::bind(static_cast<void (mpm::ParticleBase<Dim>::*)(
-                      const Eigen::Matrix<double, Dim, 1>&)>(
-                      // function
-                      &mpm::ParticleBase<Dim>::coordinates),
-                  // arguments
+        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
@@ -225,12 +221,7 @@ TEST_CASE("Particle container is checked for 3D case",
 
     // Iterate through particle container to update coordinaates
     particlecontainer->for_each(
-        // function structure
-        std::bind(static_cast<void (mpm::ParticleBase<Dim>::*)(
-                      const Eigen::Matrix<double, Dim, 1>&)>(
-                      // function
-                      &mpm::ParticleBase<Dim>::coordinates),
-                  // arguments
+        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through

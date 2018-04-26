@@ -71,7 +71,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -81,7 +81,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -234,7 +234,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     //! Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -244,7 +244,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     //! Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -450,7 +450,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     //! Check for negative value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = -1. * std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -460,7 +460,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     //! Check for positive value of coordinates
     for (unsigned i = 0; i < coordinates.size(); ++i)
       coords(i) = std::numeric_limits<double>::max();
-    particle->coordinates(coords);
+    particle->assign_coordinates(coords);
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));

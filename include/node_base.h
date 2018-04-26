@@ -39,7 +39,7 @@ class NodeBase {
   virtual Index id() const = 0;
 
   //! Assign coordinates
-  virtual void coordinates(const VectorDim& coord) = 0;
+  virtual void assign_coordinates(const VectorDim& coord) = 0;
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase

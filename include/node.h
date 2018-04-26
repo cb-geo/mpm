@@ -48,7 +48,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase
-  void coordinates(const VectorDim& coord) { coordinates_ = coord; }
+  void assign_coordinates(const VectorDim& coord) { coordinates_ = coord; }
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase

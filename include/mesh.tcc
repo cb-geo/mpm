@@ -41,6 +41,13 @@ bool mpm::Mesh<Tdim>::remove_particle(
   return status;
 }
 
+//! Iterate over particles
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
+  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
+}
+
 //! Add a node to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_node(
@@ -61,10 +68,9 @@ bool mpm::Mesh<Tdim>::remove_node(
 //! Iterate over nodes
 template <unsigned Tdim>
 template <typename Toper>
-Toper mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for_each(nodes_.begin(), nodes_.end(), oper);
+void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
 }
-
 
 //! Add a cell to the mesh
 template <unsigned Tdim>
@@ -80,4 +86,11 @@ bool mpm::Mesh<Tdim>::remove_cell(
   // Remove a cell if found in the container
   bool status = cells_.remove(cell);
   return status;
+}
+
+//! Iterate over cells
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
+  tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
 }
