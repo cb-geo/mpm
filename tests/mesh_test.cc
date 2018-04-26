@@ -296,7 +296,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
 
-        // Update coordinates
+    // Update coordinates
     Eigen::Vector3d coordinates;
     coordinates << 7., 7., 7.;
     // Check iterate over functionality

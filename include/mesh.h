@@ -69,6 +69,11 @@ class Mesh {
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Iterate over particles
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_particles(Toper oper);
+
   //! Add a node to the mesh
   //! \param[in] node A shared pointer to node
   //! \retval insertion_status Return the successful addition of a node
@@ -83,6 +88,7 @@ class Mesh {
   mpm::Index nnodes() const { return nodes_.size(); }
 
   //! Iterate over nodes
+  //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
   void iterate_over_nodes(Toper oper);
 
@@ -98,6 +104,11 @@ class Mesh {
 
   //! Number of cells in the mesh
   mpm::Index ncells() const { return cells_.size(); }
+
+  //! Iterate over cells
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_cells(Toper oper);
 
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
