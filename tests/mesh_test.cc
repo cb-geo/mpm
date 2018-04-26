@@ -197,6 +197,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
+  // Tolerance
+  const double Tolerance = 1.E-9;
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -293,6 +295,30 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
+
+        // Update coordinates
+    Eigen::Vector3d coordinates;
+    coordinates << 7., 7., 7.;
+    // Check iterate over functionality
+    mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                                       std::placeholders::_1, coordinates));
+
+    // Node 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
 
     // Remove node 2 and check status
     bool remove_status = mesh->remove_node(node2);
