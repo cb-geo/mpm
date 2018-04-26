@@ -100,11 +100,7 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
 
     // Iterate through node handler to update coordinaates
     nodehandler->for_each(  // function structure
-        std::bind(static_cast<void (mpm::NodeBase<Dim>::*)(
-                      const Eigen::Matrix<double, Dim, 1>&)>(
-                      // function
-                      &mpm::NodeBase<Dim>::coordinates),
-                  // arguments
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
@@ -208,11 +204,7 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     // Iterate through node handler to update coordinaates
     nodehandler->for_each(
         // function structure
-        std::bind(static_cast<void (mpm::NodeBase<Dim>::*)(
-                      const Eigen::Matrix<double, Dim, 1>&)>(
-                      // function
-                      &mpm::NodeBase<Dim>::coordinates),
-                  // arguments
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
