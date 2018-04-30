@@ -8,17 +8,15 @@
 
 #include <Eigen/Dense>
 
+//! MPM namespace
 namespace mpm {
-template <unsigned Tdim, unsigned Tnquadratures>
-class QuadratureBase;
-}
 
 // Quadrature base class
 //! \brief Base class for quadrature
 //! \tparam Tdim Dimension
 //! \tparam Tnquadratures number of quadratures
 template <unsigned Tdim, unsigned Tnquadratures>
-class mpm::QuadratureBase {
+class QuadratureBase {
  public:
   //! Constructor
   //! Assign variables to zero
@@ -34,15 +32,17 @@ class mpm::QuadratureBase {
 
   //! Return quadrature points
   //! \param[out] qpoints Quadrature points in local coordinates
-  Eigen::Matrix<double, Tnquadratures, Tdim> quadratures() { return qpoints_; }
+  virtual Eigen::Matrix<double, Tnquadratures, Tdim> quadratures() { return qpoints_; }
 
   //! Return weights
   //! \param[out] weights Weights for quadrature points
-  std::vector<double> weights() { return weights_; }
+  virtual std::vector<double> weights() { return weights_; }
 
  protected:
   Eigen::Matrix<double, Tnquadratures, Tdim> qpoints_;
   std::vector<double> weights_;
 };
+
+}  // namespace mpm
 
 #endif  // MPM_QUADRATURE_BASE_H_
