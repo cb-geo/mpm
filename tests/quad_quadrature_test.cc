@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "catch.hpp"
-#include "quad_quad.h"
+#include "quad_quadrature.h"
 
 //! \brief Check QuadrilateralQuadratures class
 TEST_CASE("Quadrilateral quadratures are checked",

@@ -6,7 +6,7 @@
 
 #include <Eigen/Dense>
 
-#include "quad_base.h"
+#include "quadrature.h"
 
 //! MPM namespace
 namespace mpm {
@@ -28,6 +28,6 @@ class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
 }  // namespace mpm
 
-#include "hex_quad.tcc"
+#include "hex_quadrature.tcc"
 
 #endif  // MPM_HEXAHEDRON_QUADRATURE_H_

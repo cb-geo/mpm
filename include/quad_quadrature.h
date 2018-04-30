@@ -6,7 +6,7 @@
 
 #include <Eigen/Dense>
 
-#include "quad_base.h"
+#include "quadrature.h"
 
 //! MPM namespace
 namespace mpm {
@@ -28,6 +28,6 @@ class QuadrilateralQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
 }  // namespace mpm
 
-#include "quad_quad.tcc"
+#include "quad_quadrature.tcc"
 
 #endif  // MPM_QUADRILATERAL_QUADRATURE_H_
