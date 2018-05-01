@@ -19,11 +19,21 @@ template <unsigned Tdim, unsigned Tnquadratures>
 class QuadrilateralQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
  public:
-  QuadrilateralQuadrature();
+  QuadrilateralQuadrature() : QuadratureBase<Tdim, Tnquadratures>() {
+  	static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
+  	static_assert(
+      ((Tnquadratures == 1) || (Tnquadratures == 4) || (Tnquadratures == 9)),
+      "Invalid number of quadratures");
+  }
 
- private:
-  using QuadratureBase<Tdim, Tnquadratures>::qpoints_;
-  using QuadratureBase<Tdim, Tnquadratures>::weights_;
+  //! Return quadrature points
+  //! \param[out] qpoints Quadrature points in local coordinates
+  Eigen::MatrixXd quadratures();
+
+  //! Return weights
+  //! \param[out] weights Weights for quadrature points
+  Eigen::VectorXd weights();
+  
 };
 
 }  // namespace mpm

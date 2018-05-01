@@ -19,11 +19,21 @@ template <unsigned Tdim, unsigned Tnquadratures>
 class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
  public:
-  HexahedronQuadrature();
+  HexahedronQuadrature() : mpm::QuadratureBase<Tdim, Tnquadratures>() {
+  	static_assert(Tdim == 3, "Invalid dimension for a 3D hexahedron element");
+  	static_assert(
+      (Tnquadratures == 1) || (Tnquadratures == 8) || (Tnquadratures == 27),
+      "Invalid number of quadratures");
+  }
 
- private:
-  using QuadratureBase<Tdim, Tnquadratures>::qpoints_;
-  using QuadratureBase<Tdim, Tnquadratures>::weights_;
+  //! Return quadrature points
+  //! \param[out] qpoints Quadrature points in local coordinates
+  Eigen::MatrixXd quadratures();
+
+  //! Return weights
+  //! \param[out] weights Weights for quadrature points
+  Eigen::VectorXd weights();
+
 };
 
 }  // namespace mpm

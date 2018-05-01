@@ -20,27 +20,19 @@ class QuadratureBase {
  public:
   //! Constructor
   //! Assign variables to zero
-  QuadratureBase() {
-    qpoints_.fill(std::numeric_limits<double>::quiet_NaN());
-    weights_.resize(Tnquadratures);
-    std::fill(weights_.begin(), weights_.end(),
-              std::numeric_limits<double>::quiet_NaN());
-  }
+  QuadratureBase() {}
 
   //! Destructor
   virtual ~QuadratureBase() {}
 
   //! Return quadrature points
   //! \param[out] qpoints Quadrature points in local coordinates
-  virtual Eigen::Matrix<double, Tnquadratures, Tdim> quadratures() { return qpoints_; }
+  virtual Eigen::MatrixXd quadratures() = 0;
 
   //! Return weights
   //! \param[out] weights Weights for quadrature points
-  virtual std::vector<double> weights() { return weights_; }
+  virtual Eigen::VectorXd weights() = 0;
 
- protected:
-  Eigen::Matrix<double, Tnquadratures, Tdim> qpoints_;
-  std::vector<double> weights_;
 };
 
 }  // namespace mpm

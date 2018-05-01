@@ -39,7 +39,7 @@ TEST_CASE("Hexahedron quadratures are checked",
     REQUIRE(weights.size() == 1);
 
     // Check weights
-    REQUIRE(weights.at(0) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(weights(0) == Approx(8.0).epsilon(Tolerance));
   }
 
   //! Check for eight quadrature points
@@ -96,14 +96,14 @@ TEST_CASE("Hexahedron quadratures are checked",
     REQUIRE(weights.size() == 8);
 
     // Check weights
-    REQUIRE(weights.at(0) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(1) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(2) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(3) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(4) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(5) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(6) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(7) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(0) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(1) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(2) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(3) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(4) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(5) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(6) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(7) == Approx(1.0).epsilon(Tolerance));
   }
 
   //! Check for twenty seven quadrature points
@@ -236,61 +236,61 @@ TEST_CASE("Hexahedron quadratures are checked",
     REQUIRE(weights.size() == 27);
 
     // Check weights
-    REQUIRE(weights.at(0) ==
+    REQUIRE(weights(0) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(1) ==
+    REQUIRE(weights(1) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(2) ==
+    REQUIRE(weights(2) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(3) ==
+    REQUIRE(weights(3) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(4) ==
+    REQUIRE(weights(4) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(5) ==
+    REQUIRE(weights(5) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(6) ==
+    REQUIRE(weights(6) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(7) ==
+    REQUIRE(weights(7) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(8) ==
+    REQUIRE(weights(8) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
 
-    REQUIRE(weights.at(9) ==
+    REQUIRE(weights(9) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(10) ==
+    REQUIRE(weights(10) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(11) ==
+    REQUIRE(weights(11) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(12) ==
+    REQUIRE(weights(12) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(13) ==
+    REQUIRE(weights(13) ==
             Approx((8. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(14) ==
+    REQUIRE(weights(14) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(15) ==
+    REQUIRE(weights(15) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(16) ==
+    REQUIRE(weights(16) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(17) ==
+    REQUIRE(weights(17) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
 
-    REQUIRE(weights.at(18) ==
+    REQUIRE(weights(18) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(19) ==
+    REQUIRE(weights(19) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(20) ==
+    REQUIRE(weights(20) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(21) ==
+    REQUIRE(weights(21) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(22) ==
+    REQUIRE(weights(22) ==
             Approx((5. / 9.) * (8. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(23) ==
+    REQUIRE(weights(23) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(24) ==
+    REQUIRE(weights(24) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(25) ==
+    REQUIRE(weights(25) ==
             Approx((5. / 9.) * (5. / 9.) * (8. / 9.)).epsilon(Tolerance));
-    REQUIRE(weights.at(26) ==
+    REQUIRE(weights(26) ==
             Approx((5. / 9.) * (5. / 9.) * (5. / 9.)).epsilon(Tolerance));
   }
 }

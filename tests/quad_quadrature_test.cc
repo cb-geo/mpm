@@ -38,7 +38,7 @@ TEST_CASE("Quadrilateral quadratures are checked",
     REQUIRE(weights.size() == 1);
 
     // Check weights
-    REQUIRE(weights.at(0) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(weights(0) == Approx(4.0).epsilon(Tolerance));
   }
 
   //! Check for four quadrature points
@@ -72,10 +72,10 @@ TEST_CASE("Quadrilateral quadratures are checked",
     REQUIRE(weights.size() == 4);
 
     // Check weights
-    REQUIRE(weights.at(0) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(1) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(2) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(weights.at(3) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(0) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(1) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(2) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(weights(3) == Approx(1.0).epsilon(Tolerance));
   }
 
   //! Check for four quadrature points
@@ -124,14 +124,14 @@ TEST_CASE("Quadrilateral quadratures are checked",
     REQUIRE(weights.size() == 9);
 
     // Check weights
-    REQUIRE(weights.at(0) == Approx(25. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(1) == Approx(25. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(2) == Approx(25. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(3) == Approx(25. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(4) == Approx(40. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(5) == Approx(40. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(6) == Approx(40. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(7) == Approx(40. / 81.).epsilon(Tolerance));
-    REQUIRE(weights.at(8) == Approx(64. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(0) == Approx(25. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(1) == Approx(25. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(2) == Approx(25. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(3) == Approx(25. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(4) == Approx(40. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(5) == Approx(40. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(6) == Approx(40. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(7) == Approx(40. / 81.).epsilon(Tolerance));
+    REQUIRE(weights(8) == Approx(64. / 81.).epsilon(Tolerance));
   }
 }
