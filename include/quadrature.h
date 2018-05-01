@@ -18,9 +18,8 @@ namespace mpm {
 template <unsigned Tdim, unsigned Tnquadratures>
 class QuadratureBase {
  public:
-  //! Constructor
-  //! Assign variables to zero
-  QuadratureBase() {}
+  //! Default constructor
+  QuadratureBase() = default;
 
   //! Destructor
   virtual ~QuadratureBase() {}
