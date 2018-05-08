@@ -43,12 +43,16 @@ bool mpm::Mesh<Tdim>::remove_particle(
 
 //! Locate particles in a cell
 template <unsigned Tdim>
-mpm::Container<mpm::ParticleBase<Tdim>>
-    mpm::Mesh<Tdim>::locate_particles_mesh() {
-  // Initialise a list of all unknown particles
-  // Particles that cannot be located in any cell in this mesh
-  mpm::Container<mpm::ParticleBase<Tdim>> unknown_particles;
-  return unknown_particles;
+void mpm::Mesh<Tdim>::locate_particles_mesh() {
+  // Iterate through each particle and 
+  for (const auto& pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    for (const auto& citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      if ((*citr)->point_in_cell((*pitr)->coordinates())) {
+        (*pitr)->assign_cell(*citr);
+        (*citr)->add_particle_id((*pitr)->id());
+      }
+    }
+  }
 }
 
 //! Iterate over particles
