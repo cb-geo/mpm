@@ -17,7 +17,12 @@ class MPMExplicit : public MPM<Tdim> {
   //! Default constructor
   MPMExplicit() = default;
 
+  //! Initialise
+  bool initialise();
+
 };  // MPMExplicit class
 }  // namespace mpm
+
+#include "mpm_explicit.tcc"
 
 #endif  // MPM_MPM_EXPLICIT_H_

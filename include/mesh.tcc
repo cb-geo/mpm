@@ -41,6 +41,16 @@ bool mpm::Mesh<Tdim>::remove_particle(
   return status;
 }
 
+//! Locate particles in a cell
+template <unsigned Tdim>
+mpm::Container<mpm::ParticleBase<Tdim>>
+    mpm::Mesh<Tdim>::locate_particles_mesh() {
+  // Initialise a list of all unknown particles
+  // Particles that cannot be located in any cell in this mesh
+  mpm::Container<mpm::ParticleBase<Tdim>> unknown_particles;
+  return unknown_particles;
+}
+
 //! Iterate over particles
 template <unsigned Tdim>
 template <typename Toper>

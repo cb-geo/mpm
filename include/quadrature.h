@@ -31,7 +31,6 @@ class QuadratureBase {
   //! Return weights
   //! \param[out] weights Weights for quadrature points
   virtual Eigen::VectorXd weights() = 0;
-
 };
 
 }  // namespace mpm

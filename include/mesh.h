@@ -69,6 +69,13 @@ class Mesh {
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Locate particles in a cell
+  //! Iterate over all cells in a mesh to find the cell in which particles
+  //! are located.
+  //! \retval unknown_particles List of particles which couldn't be located in
+  //! the mesh
+  Container<ParticleBase<Tdim>> locate_particles_mesh();
+
   //! Iterate over particles
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>

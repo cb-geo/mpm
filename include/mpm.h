@@ -28,6 +28,9 @@ class MPM {
     meshes_.clear();
   };
 
+  //! Initialise mesh
+  virtual bool initialise() = 0;
+
  protected:
   //! A unique id for the analysis
   std::string analysis_uuid_;
