@@ -47,10 +47,9 @@ void mpm::Mesh<Tdim>::locate_particles_mesh() {
   // Iterate through each particle and 
   for (const auto& pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     for (const auto& citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      if ((*citr)->point_in_cell((*pitr)->coordinates())) {
+      // Check if co-ordinates lie within the cell, if true add particle to cell
+      if ((*citr)->point_in_cell((*pitr)->coordinates()))
         (*pitr)->assign_cell(*citr);
-        (*citr)->add_particle_id((*pitr)->id());
-      }
     }
   }
 }
