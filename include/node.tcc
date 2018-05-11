@@ -33,6 +33,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
   if (!update) factor = 0.;
 
   // Update/assign mass
+  std::lock_guard<std::mutex> guard(node_mutex_);
   mass_(0, nphase) = mass_(0, nphase) * factor + mass;
 }
 
@@ -46,6 +47,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
   if (!update) factor = 0.;
 
   // Update/assign volume
+  std::lock_guard<std::mutex> guard(node_mutex_);
   volume_(0, nphase) = volume_(0, nphase) * factor + volume;
 }
 
@@ -67,6 +69,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     if (!update) factor = 0.;
 
     // Update/assign external force
+    std::lock_guard<std::mutex> guard(node_mutex_);
     external_force_.col(nphase) = external_force_.col(nphase) * factor + force;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -91,6 +94,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     if (!update) factor = 0.;
 
     // Update/assign internal force
+    std::lock_guard<std::mutex> guard(node_mutex_);
     internal_force_.col(nphase) = internal_force_.col(nphase) * factor + force;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -114,6 +118,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     if (!update) factor = 0.;
 
     // Update/assign momentum
+    std::lock_guard<std::mutex> guard(node_mutex_);
     momentum_.col(nphase) = momentum_.col(nphase) * factor + momentum;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -152,6 +157,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     if (!update) factor = 0.;
 
     //! Update/assign acceleration
+    std::lock_guard<std::mutex> guard(node_mutex_);
     acceleration_.col(nphase) =
         acceleration_.col(nphase) * factor + acceleration;
   } catch (std::exception& exception) {
