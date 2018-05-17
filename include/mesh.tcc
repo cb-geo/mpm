@@ -41,6 +41,19 @@ bool mpm::Mesh<Tdim>::remove_particle(
   return status;
 }
 
+//! Locate particles in a cell
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::locate_particles_mesh() {
+  // Iterate through each particle and
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      // Check if co-ordinates lie within the cell, if true add particle to cell
+      if ((*citr)->point_in_cell((*pitr)->coordinates()))
+        (*pitr)->assign_cell(*citr);
+    }
+  }
+}
+
 //! Iterate over particles
 template <unsigned Tdim>
 template <typename Toper>

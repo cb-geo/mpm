@@ -257,6 +257,7 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
     const double triarea = 0.5 * std::fabs(area.determinant());
 
     triareas += triarea;
+
     // Optimisation check, if the sub-tetrahedra area exceeds the area of
     // hexahedron, abort and return false (point is outside).
     if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
