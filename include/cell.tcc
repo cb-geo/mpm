@@ -227,6 +227,9 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
 
+  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
+    this->compute_volume();
+
   // Get the indices of sub-triangles
   Eigen::MatrixXi indices = shapefn_->inhedron_indices();
 
@@ -279,6 +282,9 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
 
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
+
+  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
+    this->compute_volume();
 
   // Get the indices of sub-tetrahedron
   Eigen::MatrixXi indices = shapefn_->inhedron_indices();
