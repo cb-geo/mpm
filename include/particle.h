@@ -52,7 +52,7 @@ class Particle : public ParticleBase<Tdim> {
 
   // Assign a cell to particle
   //! \param[in] cellptr Pointer to a cell
-  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+  bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr);
 
   //! Return cell id
   Index cell_id() const { return cell_id_; }

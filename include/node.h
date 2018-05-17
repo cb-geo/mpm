@@ -4,6 +4,7 @@
 #include <array>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <vector>
 
 #include "node_base.h"
@@ -139,6 +140,8 @@ class Node : public NodeBase<Tdim> {
   }
 
  private:
+  //! Mutex
+  std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
