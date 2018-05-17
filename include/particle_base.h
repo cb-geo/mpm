@@ -57,7 +57,7 @@ class ParticleBase {
   VectorDim coordinates() const { return coordinates_; }
 
   //! Assign cell
-  virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
+  virtual bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr) = 0;
 
   //! Return cell id
   virtual Index cell_id() const = 0;
