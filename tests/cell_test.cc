@@ -364,7 +364,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  // Coordinaates
+  // Coordinates
   Eigen::Vector3d coords;
 
   coords << 0, 0, 0;
