@@ -61,22 +61,35 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   SECTION("Add nodes") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell->is_initialised() == false);
+
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
     cell->add_node(3, node3);
     REQUIRE(cell->nnodes() == 4);
 
+    // Check if cell is initialised, after addition of nodes
+    REQUIRE(cell->is_initialised() == false);
+
     SECTION("Compute volume of a cell") {
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
       cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 4);
+
+      // Check if cell is initialised, after addition of shapefn
+      REQUIRE(cell->is_initialised() == false);
+
       // Compute volume
       REQUIRE(cell->volume() ==
               Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
       cell->compute_volume();
       REQUIRE(cell->volume() == Approx(4.0).epsilon(Tolerance));
+
+      // Check if cell is initialised, after volume calculation
+      REQUIRE(cell->is_initialised() == true);
 
       SECTION("Check if a point is in a cell") {
         // Check point in cell
@@ -420,6 +433,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   SECTION("Add nodes") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell->is_initialised() == false);
+
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -430,16 +447,26 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
 
+    // Check if cell is initialised, after addition of nodes
+    REQUIRE(cell->is_initialised() == false);
+
     SECTION("Compute volume of a cell") {
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
       cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 8);
+
+      // Check if cell is initialised, after addition of shapefn
+      REQUIRE(cell->is_initialised() == false);
+
       // Compute volume
       REQUIRE(cell->volume() ==
               Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
       cell->compute_volume();
       REQUIRE(cell->volume() == Approx(8.0).epsilon(Tolerance));
+
+      // Check if cell is initialised, after volume computation
+      REQUIRE(cell->is_initialised() == true);
 
       SECTION("Check if a point is in a cell") {
         // Check point in cell

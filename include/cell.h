@@ -54,6 +54,13 @@ class Cell {
   //! Return id of the cell
   Index id() const { return id_; }
 
+  //! Return the initialisation status of cells
+  //! \retval initialisation_status Cell has nodes, shape functions and volumes
+  bool is_initialised() const;
+
+  //! Return the status of a cell: active (if a particle is present)
+  bool status() const { return particles_.size(); }
+
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
@@ -91,9 +98,6 @@ class Cell {
   //! Remove a particle id from the cell (moved to a different cell / killed)
   //! \param[in] id Global id of a particle
   void remove_particle_id(Index id);
-
-  //! Return the status of a cell: active (if a particle is present)
-  bool status() const { return particles_.size(); }
 
   //! Compute the volume of a cell
   void compute_volume();

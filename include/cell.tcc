@@ -34,6 +34,19 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   }
 }
 
+//! Return the initialisation status of cells
+//! \retval initialisation_status Cell has nodes, shape functions and volumes
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::is_initialised() const {
+  // Check if node pointers are present and are equal to the # shape_fns
+  return ((this->nnodes_ != 0 && this->nfunctions() == this->nodes_.size()) &&
+          // Check if shape function is assigned
+          this->nfunctions() != 0 &&
+          // Check if volume of a cell is initialised
+          (std::fabs(this->volume_ - std::numeric_limits<double>::max()) >
+           1.0E-10));
+}
+
 //! Assign a shape function to cell
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::shapefn(
