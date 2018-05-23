@@ -1,6 +1,11 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "container.h"
 #include "mpm.h"
 #include "particle.h"
@@ -19,6 +24,13 @@ class MPMExplicit : public MPM<Tdim> {
 
   //! Initialise
   bool initialise();
+
+ private:
+  // Generate a unique id for the analysis
+  std::string uuid_;
+
+  //! Mesh object
+  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
 
 };  // MPMExplicit class
 }  // namespace mpm
