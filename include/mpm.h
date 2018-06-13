@@ -12,7 +12,6 @@
 #include "mesh.h"
 
 namespace mpm {
-
 //! MPM class
 //! \brief MPM class calls solver and algorithm
 //! \details MPM class: implicit and explicit MPM
@@ -34,6 +33,12 @@ class MPM {
  protected:
   //! A unique id for the analysis
   std::string analysis_uuid_;
+
+  //! Time step size
+  double dt_{std::numeric_limits<double>::max()};
+
+  //! Number of steps
+  unsigned long long nsteps_{std::numeric_limits<unsigned long long>::max()};
 
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
