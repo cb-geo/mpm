@@ -8,7 +8,6 @@
 #include <utility>
 
 #include <boost/filesystem.hpp>
-#include <eigen3/Eigen/Dense>
 
 #include "tclap/CmdLine.h"
 //! Alias for JSON
@@ -50,7 +49,7 @@ class IO {
   bool gravity_flag() const;
 
   //! Return boundary friction miu
-  double boundary_friction() const; 
+  double boundary_friction() const;
 
   //! Return soil particle spacing
   double soil_particle_spacing() const;
@@ -77,8 +76,7 @@ class IO {
   double newmark_gamma() const;
 
   //! Return beta - newmark integration coefficient
-  double newmark_beta() const;  
-
+  double newmark_beta() const;
 
  private:
   //! Input directory
@@ -86,7 +84,6 @@ class IO {
 
   //! Input json object
   json json_;
-
 };
 
 #endif  // MPM_IO_H_

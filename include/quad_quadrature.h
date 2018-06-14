@@ -20,10 +20,10 @@ class QuadrilateralQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
  public:
   QuadrilateralQuadrature() : QuadratureBase<Tdim, Tnquadratures>() {
-  	static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-  	static_assert(
-      ((Tnquadratures == 1) || (Tnquadratures == 4) || (Tnquadratures == 9)),
-      "Invalid number of quadratures");
+    static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
+    static_assert(
+        ((Tnquadratures == 1) || (Tnquadratures == 4) || (Tnquadratures == 9)),
+        "Invalid number of quadratures");
   }
 
   //! Return quadrature points
@@ -33,7 +33,6 @@ class QuadrilateralQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
   //! Return weights
   //! \param[out] weights Weights for quadrature points
   Eigen::VectorXd weights();
-  
 };
 
 }  // namespace mpm
