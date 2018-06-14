@@ -1,20 +1,22 @@
 {
   "title": "Example JSON Input for MPM",
-  "input_directory" : "/inputFiles/", 
-  "output_directory" : "/results/",
+  "input_directory" : "./path/to/input_files/", 
+  "post_processing" : {
+    "output_directory" : "./results/",
+    "output_steps" : 10
+  },
   "input_files" : {
     "mesh_filename" : "mesh.smf",
     "submesh_filename" : "submesh.dat",
     "constraints_filename" : "mesh.constraints",
-    "soil_particle_filename" : "soilParticles.dat",
-    "init_stress_soil_particle_filename" : "initStressSoilP.dat",
+    "soil_particle_filename" : "soil_particles.dat",
+    "init_stress_soil_particle_filename" : "init_stress_soil_p.dat",
     "material_filename" : "material.dat",
-    "traction_filename" : "Traction.dat"
+    "traction_filename" : "traction.dat"
   },
   "analysis" : {
     "dt" : 0.001,
     "number_steps" : 1000,
-    "number_substeps" : 10,
     "gravity_flag" : 0,
     "soil_particle_spacing" : 0.01,
     "boundary_friction" : 0.5,
