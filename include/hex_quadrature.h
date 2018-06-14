@@ -20,10 +20,10 @@ class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
  public:
   HexahedronQuadrature() : mpm::QuadratureBase<Tdim, Tnquadratures>() {
-  	static_assert(Tdim == 3, "Invalid dimension for a 3D hexahedron element");
-  	static_assert(
-      (Tnquadratures == 1) || (Tnquadratures == 8) || (Tnquadratures == 27),
-      "Invalid number of quadratures");
+    static_assert(Tdim == 3, "Invalid dimension for a 3D hexahedron element");
+    static_assert(
+        (Tnquadratures == 1) || (Tnquadratures == 8) || (Tnquadratures == 27),
+        "Invalid number of quadratures");
   }
 
   //! Return quadrature points
@@ -33,7 +33,6 @@ class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
   //! Return weights
   //! \param[out] weights Weights for quadrature points
   Eigen::VectorXd weights();
-
 };
 
 }  // namespace mpm
