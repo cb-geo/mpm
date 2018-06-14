@@ -42,7 +42,7 @@ TEST_CASE("IO for input string, boolean and double",
                       };
                       
     //! Make pointers to io
-    auto io = std::unique_ptr<IO>(new IO(json_file));
+    // auto io = std::unique_ptr<IO>(new IO(json_file));
 
     //! Check for only string inputs
     // REQUIRE(io->inputMeshFileName() == "folder/inputFiles/mesh.smf");

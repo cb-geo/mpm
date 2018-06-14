@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <eigen3/Eigen/Dense>
 
+#include "tclap/CmdLine.h"
 //! Alias for JSON
 #include "json.hpp"
 using json = nlohmann::json;
@@ -18,64 +19,66 @@ using json = nlohmann::json;
 class IO {
  public:
   //! Constructor
-  IO(json json_filename);
+  IO(int argc, char** argv);
 
   //! Return input mesh file name
-  std::string inputMeshFileName() const { return inputMeshFileName_; }
+  std::string mesh_file_name() const;
 
   //! Return input sub mesh file name
-  std::string inputSubMeshFileName() const { return inputSubMeshFileName_; }
+  std::string submesh_file_name() const;
 
   //! Return input constraint file name
-  std::string constraintsFileName() const { return constraintsFileName_; }
+  std::string constraints_file_name() const;
 
   //! Return input soil particle file name
-  std::string inputSoilParticleFileName() const { return inputSoilParticleFileName_; }
+  std::string soil_particle_file_name() const;
 
   //! Return initial stress soil particle file name
-  std::string initStressSoilPFileName() const { return initStressSoilPFileName_; }
+  std::string initial_stress_file_name() const;
 
   //! Return material file name
-  std::string materialFileName() const { return materialFileName_; }
+  std::string material_file_name() const;
 
   //! Return traction soil particle file name
-  std::string tractionsSoilPFileName() const { return tractionsSoilPFileName_; }
+  std::string traction_file_name() const;
 
-  //! Return output file name
-  std::string outputFileName() const { return outputFileName_; }  
+  //! Create output file names
+  boost::filesystem::path output_file(const std::string& attribute,
+                                      const std::string& file_extension);
 
   //! Return gravity flag
-  bool gravityFlag() const { return gravityFlag_; }
+  bool gravity_flag() const;
 
   //! Return boundary friction miu
-  double boundaryMiu() const { return boundaryMiu_; }  
+  double boundary_friction() const; 
 
   //! Return soil particle spacing
-  double soilParticleSpacing() const { return soilParticleSpacing_; }
+  double soil_particle_spacing() const;
 
   //! Return time step or interval
-  double dt() const { return dt_; }
+  double dt() const;
 
   //! Return number of steps of the problem
-  unsigned numberOfSteps() const { return numberOfSteps_; }
+  unsigned number_steps() const;
 
   //! Return number of substeps of the problem
-  unsigned numberOfSubStepsOS() const { return numberOfSubStepsOS_; }
-
-  //! Return newmark flag
-  bool newmarkMethod() const { return newmarkMethod_; }
-
-  //! Return gamma - newmark integration coefficient
-  double gamma() const { return gamma_; }
-
-  //! Return beta - newmark integration coefficient
-  double beta() const { return beta_; }  
+  unsigned number_substeps() const;
 
   //! Return Cundall Damping flag
-  bool dampingFlag() const { return dampingFlag_; }
+  bool damping_flag() const;
 
   //! Return damping ratio for Cundall Damping
-  double dampingRatio() const { return dampingRatio_; }
+  double damping_ratio() const;
+
+  //! Return newmark flag
+  bool newmark_flag() const;
+
+  //! Return gamma - newmark integration coefficient
+  double newmark_gamma() const;
+
+  //! Return beta - newmark integration coefficient
+  double newmark_beta() const;  
+
 
  private:
   //! Input directory
@@ -83,66 +86,6 @@ class IO {
 
   //! Input json object
   json json_;
-
-  //! Material properties json object
-  json json_material_properties_;
-
-  //! Input mesh file name
-  std::string inputMeshFileName_;
-
-  //! Input submesh file name
-  std::string inputSubMeshFileName_;
-
-  //! Input mesh constraints file name
-  std::string constraintsFileName_;
-
-  //! Input soil particle file name
-  std::string inputSoilParticleFileName_;
-
-  //! Input initial stress soil particle file name
-  std::string initStressSoilPFileName_;
-
-  //! Input material file name
-  std::string materialFileName_;
-
-  //! Input traction soil particle file name
-  std::string tractionsSoilPFileName_;
-
-  //! Input output file name
-  std::string outputFileName_;
-
-  //! Input gravity flag
-  bool gravityFlag_;
-
-  //! Input boundary friction miu
-  double boundaryMiu_;
-
-  //! Input soil particle spacing
-  double soilParticleSpacing_;
-
-  //! Input time step or interval
-  double dt_;
-
-  //! Input number of steps of the problem
-  unsigned numberOfSteps_;
-
-  //! Input number of substeps where it saves
-  unsigned numberOfSubStepsOS_;
-
-  //! Input newmark flag
-  bool newmarkMethod_;
-
-  //! Input gamma - newmark integration coefficient
-  double gamma_;
-
-  //! Input beta - newmark integration coefficient
-  double beta_; 
-
-  //! Input Cundall Damping flag
-  bool dampingFlag_;
-
-  //! Input damping ratio for Cundall Damping
-  double dampingRatio_;
 
 };
 
