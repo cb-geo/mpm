@@ -45,7 +45,6 @@ IO::IO(int argc, char** argv) {
   //! Store json object as private variable
   //! Read json file and store to private variables
   json_ = json::parse(inputFile);
-
 }
 
 //! \brief Return user-specified mesh file name
@@ -55,7 +54,8 @@ std::string IO::mesh_file_name() const {
 
   //! Check if file is present
   mesh_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["mesh_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["mesh_filename"].template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -75,7 +75,8 @@ std::string IO::submesh_file_name() const {
 
   //! Check if file is present
   submesh_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["submesh_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["submesh_filename"].template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -95,7 +96,8 @@ std::string IO::constraints_file_name() const {
 
   //! Check if file is present
   constraints_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["constraints_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["constraints_filename"].template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -115,7 +117,9 @@ std::string IO::soil_particle_file_name() const {
 
   //! Check if file is present
   soil_particle_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["soil_particle_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["soil_particle_filename"]
+          .template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -135,7 +139,9 @@ std::string IO::initial_stress_file_name() const {
 
   //! Check if file is present
   initial_stress_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["initial_stress_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["initial_stress_filename"]
+          .template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -155,7 +161,8 @@ std::string IO::material_file_name() const {
 
   //! Check if file is present
   material_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["material_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["material_filename"].template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -175,7 +182,8 @@ std::string IO::traction_file_name() const {
 
   //! Check if file is present
   traction_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() + json_["input_files"]["traction_filename"].template get<std::string>();
+      working_dir_ + json_["input_directory"].template get<std::string>() +
+      json_["input_files"]["traction_filename"].template get<std::string>();
   std::ifstream meshfile;
   meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
@@ -198,7 +206,8 @@ boost::filesystem::path IO::output_file(const std::string& attribute,
   std::string path{"results/"};
 
   try {
-    std::string results = json_["post_processing"]["output_directory"].template get<std::string>();
+    std::string results = json_["post_processing"]["output_directory"]
+                              .template get<std::string>();
     if (!results.empty()) path = results;
 
   } catch (std::exception& except) {
@@ -249,10 +258,12 @@ double IO::boundary_friction() const {
   //! If not specified, set default value of 0
   try {
     if (json_.at("analysis").at("boundary_friction").size())
-      boundary_friction = json_["analysis"]["boundary_friction"].template get<double>();
+      boundary_friction =
+          json_["analysis"]["boundary_friction"].template get<double>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
-    std::cout << "boundary_friction not specified. Using a default value of 0\n";
+    std::cout
+        << "boundary_friction not specified. Using a default value of 0\n";
     boundary_friction = 0;
   }
 
@@ -267,10 +278,12 @@ double IO::soil_particle_spacing() const {
   //! If not specified, set default value of 1
   try {
     if (json_.at("analysis").at("soil_particle_spacing").size())
-      soil_particle_spacing = json_["analysis"]["soil_particle_spacing"].template get<double>();
+      soil_particle_spacing =
+          json_["analysis"]["soil_particle_spacing"].template get<double>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
-    std::cout << "soil_particle_spacing not specified. Using a default value of 1\n";
+    std::cout
+        << "soil_particle_spacing not specified. Using a default value of 1\n";
     soil_particle_spacing = 1;
   }
 
@@ -321,10 +334,12 @@ unsigned IO::number_substeps() const {
   //! If not specified, set default value of 10
   try {
     if (json_.at("post_processing").at("output_steps").size())
-      number_substeps = json_["post_processing"]["output_steps"].template get<unsigned>();
+      number_substeps =
+          json_["post_processing"]["output_steps"].template get<unsigned>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
-    std::cout << "number_substeps not specified. Using a default value of 1000\n";
+    std::cout
+        << "number_substeps not specified. Using a default value of 1000\n";
     number_substeps = 10;
   }
 
@@ -339,7 +354,8 @@ bool IO::damping_flag() const {
   //! If not specified, set default value of 0
   try {
     if (json_.at("analysis").at("damping").at("damping_flag").size())
-      damping_flag = json_["analysis"]["damping"]["damping_flag"].template get<bool>();
+      damping_flag =
+          json_["analysis"]["damping"]["damping_flag"].template get<bool>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
     std::cout << "damping_flag not specified. Using a default value of 0\n";
@@ -357,7 +373,8 @@ double IO::damping_ratio() const {
   //! If not specified, set default value of 0.05
   try {
     if (json_.at("analysis").at("damping").at("damping_ratio").size())
-      damping_ratio = json_["analysis"]["damping"]["damping_ratio"].template get<double>();
+      damping_ratio =
+          json_["analysis"]["damping"]["damping_ratio"].template get<double>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
     std::cout << "damping_ratio not specified. Using a default value of 0.05\n";
@@ -375,7 +392,8 @@ bool IO::newmark_flag() const {
   //! If not specified, set default value of 0
   try {
     if (json_.at("analysis").at("newmark").at("newmark_flag").size())
-      newmark_flag = json_["analysis"]["newmark"]["newmark_flag"].template get<bool>();
+      newmark_flag =
+          json_["analysis"]["newmark"]["newmark_flag"].template get<bool>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
     std::cout << "newmark_flag not specified. Using a default value of 0\n";
@@ -393,7 +411,8 @@ double IO::newmark_gamma() const {
   //! If not specified, set default value of 0.5
   try {
     if (json_.at("analysis").at("newmark").at("newmark_gamma").size())
-      newmark_gamma = json_["analysis"]["newmark"]["newmark_gamma"].template get<double>();
+      newmark_gamma =
+          json_["analysis"]["newmark"]["newmark_gamma"].template get<double>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
     std::cout << "newmark_gamma not specified. Using a default value of 0.5\n";
@@ -411,7 +430,8 @@ double IO::newmark_beta() const {
   //! If not specified, set default value of 0.25
   try {
     if (json_.at("analysis").at("newmark").at("newmark_beta").size())
-      newmark_beta = json_["analysis"]["newmark"]["newmark_beta"].template get<double>();
+      newmark_beta =
+          json_["analysis"]["newmark"]["newmark_beta"].template get<double>();
   } catch (json::out_of_range& out_of_range) {
     std::cerr << out_of_range.what() << '\n';
     std::cout << "newmark_beta not specified. Using a default value of 0.25\n";
