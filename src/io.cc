@@ -50,7 +50,8 @@ IO::IO(int argc, char** argv) {
   json_ = Json::parse(ifs);
 }
 
-//! \brief Return user-specified mesh file name
+//! Return input file name of mesh/submesh/soil particles
+//! or an empty string if specified file for the key is not found
 std::string IO::file_name(const std::string& filename) {
 
   std::string file_name;
@@ -68,11 +69,11 @@ std::string IO::file_name(const std::string& filename) {
   return file_name;
 }
 
-// Check if a file is present
+//! Check if a file is present
 bool IO::check_file(const std::string& filename) {
   bool status = false;
 
-  //! Check if file is present
+  // Check if file is present
   std::ifstream file;
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   try {
