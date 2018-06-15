@@ -1,6 +1,6 @@
 #include "io.h"
 
-//! Constructor
+//! Constructor with argc and argv
 IO::IO(int argc, char** argv) {
   try {
 
@@ -70,6 +70,7 @@ std::string IO::file_name(const std::string& filename) {
 // Check if a file is present
 bool IO::check_file(const std::string& filename) {
   bool status = false;
+
   //! Check if file is present
   std::ifstream file;
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
