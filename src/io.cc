@@ -50,13 +50,6 @@ IO::IO(int argc, char** argv) {
   json_ = Json::parse(ifs);
 }
 
-//! Constructor with JSON object for unit testing
-IO::IO(const Json& json) {
-  console_ = spdlog::stdout_color_mt("IO");
-  console_->warn("This IO::(const Json&) constructor should be only used for unit testing!");
-  json_ = json;
-}
-
 //! \brief Return user-specified mesh file name
 std::string IO::file_name(const std::string& filename) {
 
@@ -64,7 +57,6 @@ std::string IO::file_name(const std::string& filename) {
   // Read input file name from the JSON object
   try {
     file_name = working_dir_ +
-                json_["input_files"]["path"].template get<std::string>() +
                 json_["input_files"][filename].template get<std::string>();
   } catch (const std::exception& except) {
     console_->warn("Invalid JSON argument: {}", except.what());

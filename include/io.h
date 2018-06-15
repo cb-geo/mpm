@@ -25,10 +25,6 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
-  //! Constructor with JSON object for unit testing
-  //! \param[in] json Input JSON object
-  explicit IO(const Json& json);
-
   //! Return input file name of mesh/submesh/soil particles
   //! \param[in] key Input key in JSON for the filename of
   //! mesh/submesh/soilparticles
