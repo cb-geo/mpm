@@ -1,10 +1,3 @@
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <utility>
-
 #include "catch.hpp"
 
 //! Alias for JSON
@@ -22,8 +15,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     Json json_file = {
         {"title", "Example JSON Input for MPM"},
         {"input_files",
-         {{"path", "../"},
-          {"cmake", "CMakeLists.txt"},
+         {{"input", "mpm.json"},
           {"mesh", "mesh.dat"},
           {"submesh", "submesh.dat"},
           {"constraints", "mesh_constraints.dat"},
@@ -41,11 +33,22 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
         {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
 
+    // Dump JSON as an input file to be read
+    std::ofstream file;
+    file.open("mpm.json");
+    file << json_file.dump(2);
+    file.close();
+
+    // Assign argc and argv to input arguments of MPM
+    int argc = 5;
+    char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
+                    (char*)"mpm.json"};
+
     //! Create an IO object
-    auto io = std::make_unique<IO>(json_file);
+    auto io = std::make_unique<IO>(argc, argv);
 
     //! Check cmake JSON object
-    REQUIRE(io->file_name("cmake") == "../CMakeLists.txt");
+    REQUIRE(io->file_name("input") == "./mpm.json");
 
     //! Material file should return an empty string, as file is missing
     std::string material_file = io->file_name("material");
@@ -60,16 +63,18 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
     //! Get analysis object
     Json analysis = io->analysis();
-    //! Check analysis dt 
+    //! Check analysis dt
     REQUIRE(analysis["dt"] == json_file["analysis"]["dt"]);
-    //! Check analysis number_steps 
+    //! Check analysis number_steps
     REQUIRE(analysis["number_steps"] == json_file["analysis"]["number_steps"]);
     //! Check analysis gravity
     REQUIRE(analysis["gravity"] == json_file["analysis"]["gravity"]);
-    //! Check analysis soil_particle_spacing 
-    REQUIRE(analysis["soil_particle_spacing"] == json_file["analysis"]["soil_particle_spacing"]);
+    //! Check analysis soil_particle_spacing
+    REQUIRE(analysis["soil_particle_spacing"] ==
+            json_file["analysis"]["soil_particle_spacing"]);
     //! Check analysis boundary_friction
-    REQUIRE(analysis["boundary_friction"] == json_file["analysis"]["boundary_friction"]);
+    REQUIRE(analysis["boundary_friction"] ==
+            json_file["analysis"]["boundary_friction"]);
     //! Check analysis gravity
     REQUIRE(analysis["damping"] == json_file["analysis"]["damping"]);
     //! Check analysis gravity
@@ -77,7 +82,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
     //! Get post processing object
     Json post_processing = io->post_processing();
-    //! Check post processing data 
+    //! Check post processing data
     REQUIRE(post_processing == json_file["post_processing"]);
   }
 }
