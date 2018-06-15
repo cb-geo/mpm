@@ -25,7 +25,7 @@
 ## Compile and Run
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
+0. Run `mkdir build && cmake -B /path/to/build/folder -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
