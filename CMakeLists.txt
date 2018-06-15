@@ -1,7 +1,7 @@
 project(mpm LANGUAGES CXX)
 
-# Require C++11-compliant compiler; only available for CMake v. 3.1 and up
-set(CMAKE_CXX_STANDARD 11)
+# Require C++14-compliant compiler; only available for CMake v. 3.1 and up
+set(CMAKE_CXX_STANDARD 14)
 
 cmake_minimum_required(VERSION 3.1)
 
@@ -45,6 +45,7 @@ include_directories(
 
 # mpm executable
 SET(mpm_src
+  src/io.cc
   src/main.cc
 )
 add_executable(mpm
@@ -57,6 +58,7 @@ SET(test_src
    ${mpm_SOURCE_DIR}/tests/cell_test.cc
    ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
    ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
+   ${mpm_SOURCE_DIR}/tests/io_test.cc
    ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
    ${mpm_SOURCE_DIR}/tests/mesh_test.cc
    ${mpm_SOURCE_DIR}/tests/node_container_test.cc
