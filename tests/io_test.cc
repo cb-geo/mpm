@@ -74,5 +74,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(analysis["damping"] == json_file["analysis"]["damping"]);
     //! Check analysis gravity
     REQUIRE(analysis["newmark"] == json_file["analysis"]["newmark"]);
+
+    //! Get post processing object
+    Json post_processing = io->post_processing();
+    //! Check post processing data 
+    REQUIRE(post_processing == json_file["post_processing"]);
   }
 }
