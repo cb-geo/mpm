@@ -4,23 +4,21 @@
 #include <sstream>
 #include <utility>
 
-#include "Eigen/Dense"
 #include "catch.hpp"
 
 //! Alias for JSON
 #include "json.hpp"
-using json = nlohmann::json;
+using Json = nlohmann::json;
 
 #include "io.h"
 
 //! \brief Check IO for input string
-TEST_CASE("IO for input string, boolean and double",
-          "[IO][string][boolean][double]") {
+TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
-  // Check add particle
-  SECTION("Check for string input") {
+  // Check input JSON
+  SECTION("Check input JSON object") {
     //! Make json object with input files
-    json json_file = {
+    Json json_file = {
         {"inputMeshFileName", "/inputFiles/mesh.smf"},
         {"inputSubMeshFileName", "/inputFiles/submesh.dat"},
         {"constraintsFileName", "/inputFiles/mesh.constraints"},
@@ -36,9 +34,9 @@ TEST_CASE("IO for input string, boolean and double",
         {"gamma", 0},
         {"beta", 0},
         {"dampingRatio", 0},
-        {"gravityFlag", 0},
-        {"newmarkMethod", 0},
-        {"dampingFlag", 0}};
+        {"gravityFlag", true},
+        {"newmarkMethod", true},
+        {"dampingFlag", true}};
 
     //! Make pointers to io
     // auto io = std::unique_ptr<IO>(new IO(json_file));

@@ -1,32 +1,33 @@
 {
-  "title": "Example JSON Input for MPM",
-  "input_directory" : "input_files/", 
-  "post_processing" : {
-    "output_directory" : "results/",
-    "output_steps" : 10
+  "title":"Example JSON Input for MPM",
+  "input_files":{
+    "path":"input/",
+    "mesh":"mesh.dat",
+    "submesh":"submesh.dat",
+    "constraints":"mesh_constraints.dat",
+    "soil_particles":"soil_particles.dat",
+    "initial_stress":"initial_soil_stress.dat",
+    "material":"material.dat",
+    "traction":"traction.dat"
   },
-  "input_files" : {
-    "mesh_filename" : "mesh.smf",
-    "submesh_filename" : "submesh.dat",
-    "constraints_filename" : "mesh.constraints",
-    "soil_particle_filename" : "soil_particles.dat",
-    "initial_stress_filename" : "init_stress_soil_p.dat",
-    "material_filename" : "material.dat",
-    "traction_filename" : "traction.dat"
-  },
-  "analysis" : {
-    "dt" : 0.001,
-    "number_steps" : 1000,
-    "gravity_flag" : 0,
-    "soil_particle_spacing" : 0.01,
-    "boundary_friction" : 0.5,
-    "damping" : {
-      "damping_flag" : 0,
-      "damping_ratio" : 0.02
+  "analysis":{
+    "dt":0.001,
+    "number_steps":1000,
+    "gravity_flag":true,
+    "soil_particle_spacing":0.01,
+    "boundary_friction":0.5,
+    "damping":{
+      "damping_flag":true,
+      "damping_ratio":0.02
     },
-    "newmark" : {
-      "newmark_flag" : 0,
-      "newmark_gamma" : 0.5,
-      "newmark_beta" : 0.25
+    "newmark":{
+      "newmark_flag":true,
+      "newmark_gamma":0.5,
+      "newmark_beta":0.25
     }
+  },
+  "post_processing":{
+    "path":"results/",
+    "output_steps":10
+  }
 }
