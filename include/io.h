@@ -23,6 +23,7 @@ class IO {
   IO(int argc, char** argv);
 
   //! Return input file name of mesh/submesh/soil particles
+  //! or an empty string if specified file for the key is not found
   //! \param[in] key Input key in JSON for the filename of
   //! mesh/submesh/soilparticles
   std::string file_name(const std::string& key);
