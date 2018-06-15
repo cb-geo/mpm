@@ -38,6 +38,9 @@ class IO {
   //! \param[in] file_name Name of the file to check if it is present
   bool check_file(const std::string& file_name);
 
+  //! Return json analysis object
+  Json analysis() const { return json_["analysis"]; }
+
  private:
   //! Working directory
   std::string working_dir_;
