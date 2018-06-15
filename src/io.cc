@@ -2,6 +2,8 @@
 
 //! Constructor with argc and argv
 IO::IO(int argc, char** argv) {
+  //! Logger
+  console_ = spdlog::stdout_color_mt("IO");
   try {
 
     // Set title
@@ -48,6 +50,13 @@ IO::IO(int argc, char** argv) {
   json_ = Json::parse(ifs);
 }
 
+//! Constructor with JSON object for unit testing
+IO::IO(const Json& json) {
+  console_ = spdlog::stdout_color_mt("IO");
+  console_->warn("This IO::(const Json&) constructor should be only used for unit testing!");
+  json_ = json;
+}
+
 //! \brief Return user-specified mesh file name
 std::string IO::file_name(const std::string& filename) {
 
@@ -77,10 +86,10 @@ bool IO::check_file(const std::string& filename) {
   try {
     file.open(filename);
     status = true;
-  } catch (std::ifstream::failure& except) {
+    file.close();
+  } catch (std::ifstream::failure& exception) {
     status = false;
-    console_->error("Failed to find file: {}", except.what());
+    console_->error("Failed to find file: {}", exception.what());
   }
-  file.close();
   return status;
 }

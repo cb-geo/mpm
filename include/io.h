@@ -27,7 +27,7 @@ class IO {
 
   //! Constructor with JSON object for unit testing
   //! \param[in] json Input JSON object
-  explicit IO(const Json& json) { json_ = json; }
+  explicit IO(const Json& json);
 
   //! Return input file name of mesh/submesh/soil particles
   //! \param[in] key Input key in JSON for the filename of

@@ -44,8 +44,11 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     //! Create an IO object
     auto io = std::make_unique<IO>(json_file);
 
-    //! Check file is present
-    std::string file = "../CMakeLists.txt";
-    REQUIRE(io->check_file(file) == true);
+    //! Check if CMake and README files are present
+    REQUIRE(io->check_file("../CMakeLists.txt") == true);
+    REQUIRE(io->check_file("../README.md") == true);
+
+    // Check if a non-existant file is present
+    REQUIRE(io->check_file("../fail.txt") == false);
   }
 }
