@@ -54,6 +54,7 @@ add_executable(mpm
 
 # Unit test
 SET(test_src
+   ${mpm_SOURCE_DIR}/src/io.cc
    ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
    ${mpm_SOURCE_DIR}/tests/cell_test.cc
    ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  

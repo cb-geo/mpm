@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include <boost/filesystem.hpp>
@@ -24,12 +25,16 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
+  //! Constructor with JSON object for unit testing
+  //! \param[in] json Input JSON object
+  explicit IO(const Json& json) { json_ = json; }
+
   //! Return input file name of mesh/submesh/soil particles
   //! \param[in] key Input key in JSON for the filename of
   //! mesh/submesh/soilparticles
   std::string file_name(const std::string& key);
 
-  //! Check if a file is present
+  //! Check if a file is present and valid
   //! \param[in] file_name Name of the file to check if it is present
   bool check_file(const std::string& file_name);
 
