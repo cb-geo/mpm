@@ -24,8 +24,14 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
-  //! Return input mesh file name
-  std::string file_name(const std::string& file);
+  //! Return input file name of mesh/submesh/soil particles
+  //! \param[in] key Input key in JSON for the filename of
+  //! mesh/submesh/soilparticles
+  std::string file_name(const std::string& key);
+
+  //! Check if a file is present
+  //! \param[in] file_name Name of the file to check if it is present
+  bool check_file(const std::string& file_name);
 
  private:
   //! Working directory

@@ -49,22 +49,37 @@ IO::IO(int argc, char** argv) {
 }
 
 //! \brief Return user-specified mesh file name
-std::string IO::file_name(const std::string& file) {
+std::string IO::file_name(const std::string& filename) {
 
-  std::string mesh_file_name;
-
-  //! Check if file is present
-  mesh_file_name =
-      working_dir_ + json_["input_directory"].template get<std::string>() +
-      json_["input_files"]["mesh_filename"].template get<std::string>();
-  std::ifstream meshfile;
-  meshfile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  std::string file_name;
+  // Read input file name from the JSON object
   try {
-    meshfile.open(mesh_file_name);
-  } catch (const std::ifstream::failure& except) {
-    std::cerr << "Exception opening/reading mesh file";
+    file_name = working_dir_ +
+                json_["input_files"]["path"].template get<std::string>() +
+                json_["input_files"][filename].template get<std::string>();
+  } catch (const std::exception& except) {
+    console_->warn("Invalid JSON argument: {}", except.what());
   }
-  meshfile.close();
 
-  return mesh_file_name;
+  // Check if a file is present, if not set file_name to empty
+  if (!this->check_file(file_name)) file_name.clear();
+
+  return file_name;
+}
+
+// Check if a file is present
+bool IO::check_file(const std::string& filename) {
+  bool status = false;
+  //! Check if file is present
+  std::ifstream file;
+  file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  try {
+    file.open(filename);
+    status = true;
+  } catch (std::ifstream::failure& except) {
+    status = false;
+    console_->error("Failed to find file: {}", except.what());
+  }
+  file.close();
+  return status;
 }
