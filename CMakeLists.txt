@@ -37,12 +37,9 @@ add_definitions(${TBB_DEFINITIONS})
 include_directories(${TBB_INCLUDE_DIRS})
 link_libraries(${TBB_LIBRARIES})
 
-# OpenMP
-find_package(OpenMP)
-if (OPENMP_FOUND)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
+# pthreads
+find_package (Threads)
+link_libraries (${CMAKE_THREAD_LIBS_INIT})
 
 # Include directories
 include_directories(
