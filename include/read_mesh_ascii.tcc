@@ -143,19 +143,19 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
     if (file.is_open() && file.good()) {
       // Line
       std::string line;
-      // Coordinates
-      Eigen::Matrix<double, Tdim, 1> coords;
-
       while (std::getline(file, line)) {
         std::istringstream istream(line);
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
+          // Coordinates
+          Eigen::Matrix<double, Tdim, 1> coords;
           while (istream.good()) {
             // Read to coordinates
             for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
-            coordinates.emplace_back(coords);
+            break;
           }
+          coordinates.emplace_back(coords);
         }
       }
     }
