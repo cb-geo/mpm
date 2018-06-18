@@ -121,8 +121,14 @@ TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
     }
 
     // Check node ids in cell
-    auto node_ids = read_mesh->read_mesh_cells("./mesh.txt");
+    auto check_node_ids = read_mesh->read_mesh_cells("./mesh.txt");
     // Check number of cells
-    REQUIRE(node_ids.size() == cells.size());
+    REQUIRE(check_node_ids.size() == cells.size());
+    // Check node ids of cells
+    for (unsigned i = 0; i < cells.size(); ++i) {
+      for (unsigned j = 0; j < cells[i].size(); ++j) {
+        REQUIRE(check_node_ids[i][j] == cells[i][j]);
+      }
+    }
   }
 }
