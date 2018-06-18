@@ -38,16 +38,18 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
               break;
             }
             // Read until nodal information is present
-            if (nlines < nnodes) {
+            if (nlines <= nnodes) {
               // Read to coordinates
               for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
               coordinates.emplace_back(coords);
+              break;
+
             } else {
               // Ignore stream
               istream >> ignore;
             }
-            ++nlines;
           }
+          ++nlines;
         }
       }
     }

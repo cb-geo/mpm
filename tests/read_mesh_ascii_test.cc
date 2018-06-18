@@ -13,6 +13,8 @@ TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
   SECTION("Check read mesh nodes") {
     const unsigned dim = 3;
 
+    const double Tolerance = 1.E-7;
+
     // Vector of nodal coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
 
@@ -80,11 +82,47 @@ TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
     // Dump JSON as an input file to be read
     std::ofstream file;
     file.open("mesh.txt");
+    file << "! elementShape hexahedron\n";
+    file << "! elementNumPoints 8\n";
+    file << coordinates.size() << "\t" << cells.size() << "\n";
+
+    // Write nodal coordinates
+    for (const auto& coord : coordinates) {
+      for (unsigned i = 0; i < coord.size(); ++i) {
+        file << coord[i] << "\t";
+      }
+      file << "\n";
+    }
+
+    // Write cell node ids
+    for (const auto& cell : cells) {
+      for (const auto nid : cell) {
+        file << nid << "\t";
+      }
+      file << "\n";
+    }
+
     file.close();
 
     // Create a read_mesh object
     auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
-    auto nodes = read_mesh->read_mesh_cells("./mesh.dat");
+    // Check node ids in cell
+    auto check_coords = read_mesh->read_mesh_nodes("./mesh.txt");
+    // Check number of nodal coordinates
+    REQUIRE(check_coords.size() == coordinates.size());
+
+    // Check coordinates of nodes
+    for (unsigned i = 0; i < coordinates.size(); ++i) {
+      for (unsigned j = 0; j < dim; ++j) {
+        REQUIRE(check_coords[i][j] ==
+                Approx(coordinates[i][j]).epsilon(Tolerance));
+      }
+    }
+
+    // Check node ids in cell
+    auto node_ids = read_mesh->read_mesh_cells("./mesh.txt");
+    // Check number of cells
+    REQUIRE(node_ids.size() == cells.size());
   }
 }
