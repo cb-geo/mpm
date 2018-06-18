@@ -20,8 +20,8 @@ namespace mpm {
 
 //! Mesh class
 //! \brief Base class that stores the information about meshes
-//! \details Mesh class which stores the particles, nodes, cells and its
-//! neighbours \tparam Tdim Dimension
+//! \details Mesh class which stores the particles, nodes, cells and neighbours
+//! \tparam Tdim Dimension
 template <unsigned Tdim>
 class Mesh {
  public:
