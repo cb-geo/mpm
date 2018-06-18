@@ -9,11 +9,8 @@ using Json = nlohmann::json;
 // Check ReadMeshAscii
 TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
 
-  // Check read mesh nodes
-  SECTION("Check read mesh nodes") {
+  SECTION("ReadMeshAscii in 3D") {
     const unsigned dim = 3;
-
-    const double Tolerance = 1.E-7;
 
     // Vector of nodal coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
@@ -104,30 +101,45 @@ TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
 
     file.close();
 
-    // Create a read_mesh object
-    auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+    // Check read mesh nodes
+    SECTION("Check read mesh nodes and cell ids") {
+      const unsigned dim = 3;
 
-    // Check node ids in cell
-    auto check_coords = read_mesh->read_mesh_nodes("./mesh.txt");
-    // Check number of nodal coordinates
-    REQUIRE(check_coords.size() == coordinates.size());
+      const double Tolerance = 1.E-7;
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
-    // Check coordinates of nodes
-    for (unsigned i = 0; i < coordinates.size(); ++i) {
-      for (unsigned j = 0; j < dim; ++j) {
-        REQUIRE(check_coords[i][j] ==
-                Approx(coordinates[i][j]).epsilon(Tolerance));
+      // Check node ids in cell
+      auto check_coords = read_mesh->read_mesh_nodes("./mesh.txt");
+      // Check number of nodal coordinates
+      REQUIRE(check_coords.size() == coordinates.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < coordinates.size(); ++i) {
+        for (unsigned j = 0; j < dim; ++j) {
+          REQUIRE(check_coords[i][j] ==
+                  Approx(coordinates[i][j]).epsilon(Tolerance));
+        }
       }
     }
 
-    // Check node ids in cell
-    auto check_node_ids = read_mesh->read_mesh_cells("./mesh.txt");
-    // Check number of cells
-    REQUIRE(check_node_ids.size() == cells.size());
-    // Check node ids of cells
-    for (unsigned i = 0; i < cells.size(); ++i) {
-      for (unsigned j = 0; j < cells[i].size(); ++j) {
-        REQUIRE(check_node_ids[i][j] == cells[i][j]);
+    // Check read mesh cells
+    SECTION("Check read mesh nodes and cell ids") {
+      const unsigned dim = 3;
+
+      const double Tolerance = 1.E-7;
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Check node ids in cell
+      auto check_node_ids = read_mesh->read_mesh_cells("./mesh.txt");
+      // Check number of cells
+      REQUIRE(check_node_ids.size() == cells.size());
+      // Check node ids of cells
+      for (unsigned i = 0; i < cells.size(); ++i) {
+        for (unsigned j = 0; j < cells[i].size(); ++j) {
+          REQUIRE(check_node_ids[i][j] == cells[i][j]);
+        }
       }
     }
   }

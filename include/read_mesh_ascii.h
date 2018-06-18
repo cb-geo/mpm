@@ -11,6 +11,9 @@
 //! MPM namespace
 namespace mpm {
 
+// Create a logger for reading ascii mesh
+auto read_mesh_ascii_logger = spdlog::stdout_color_st("ReadMeshAscii");
+
 //! ReadMeshAscii class
 //! \brief Derived class that returns mesh and particles locataions from ascii
 //! file \tparam Tdim Dimension
@@ -23,7 +26,7 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   //! Constructor
   ReadMeshAscii() : mpm::ReadMesh<Tdim>() {
     //! Logger
-    console_ = spdlog::stdout_color_st("ReadMeshAscii");
+    console_ = spdlog::get("ReadMeshAscii");
   }
 
   //! Destructor
