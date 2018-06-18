@@ -10,11 +10,12 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
   std::fstream file;
   file.open(mesh.c_str(), std::ios::in);
 
-  // bool to check firstline
-  bool read_first_line = false;
   try {
     if (file.is_open() && file.good()) {
+      // Line
       std::string line;
+      // bool to check firstline
+      bool read_first_line = false;
       // Number of coordinate lines
       unsigned nlines = 0;
       // Coordinates
@@ -31,24 +32,21 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
             (line.find('!') == std::string::npos) && (line != "")) {
           while (istream.good()) {
             if (!read_first_line) {
-
+              // Read number of nodes and cells
               istream >> nnodes >> ncells;
               read_first_line = true;
               break;
             }
+            // Read until nodal information is present
             if (nlines < nnodes) {
               // Read to coordinates
               for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
               coordinates.emplace_back(coords);
-
-              std::cout << "\nCoordinates: \n";
-              for (unsigned i = 0; i < coords.size(); ++i)
-                std::cout << coords[i] << "\t";
-
-              ++nlines;
             } else {
+              // Ignore stream
               istream >> ignore;
             }
+            ++nlines;
           }
         }
       }
@@ -74,22 +72,48 @@ std::vector<std::vector<unsigned>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
   try {
     if (file.is_open() && file.good()) {
       std::string line;
+      // bool to check firstline
+      bool read_first_line = false;
+      // Number of coordinate lines
+      unsigned nlines = 0;
+      // Coordinates
+      Eigen::Matrix<double, Tdim, 1> coords;
+      // # of nodes and cells
+      unsigned nnodes = 0, ncells = 0;
+      // ignore stream
+      double ignore;
 
       while (std::getline(file, line)) {
-        // Create a vector of node ids of each cell
+        std::istringstream istream(line);
+        // Vector of node ids for a cell
         std::vector<unsigned> nodes;
         nodes.clear();
-        std::istringstream istream(line);
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
           while (istream.good()) {
-            // Read node id
-            unsigned nid;
-            istream >> nid;
-            nodes.emplace_back(nid);
+            if (!read_first_line) {
+              // Read number of nodes and cells
+              istream >> nnodes >> ncells;
+              read_first_line = true;
+              break;
+            }
+            // Ignore nodal coordinates
+            if (nlines > nnodes) {
+              // Read node ids of each cell
+              unsigned nid;
+              istream >> nid;
+              nodes.emplace_back(nid);
+            } else {
+              // Ignore stream not related to node ids of cells
+              istream >> ignore;
+            }
           }
-          cells.emplace_back(nodes);
+          ++nlines;
+          // Check if nodes is not empty, before adding to cell
+          if (!nodes.empty()) {
+            cells.emplace_back(nodes);
+          }
         }
       }
     }
