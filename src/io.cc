@@ -1,7 +1,7 @@
 #include "io.h"
 
 //! Constructor with argc and argv
-IO::IO(int argc, char** argv) {
+mpm::IO::IO(int argc, char** argv) {
   //! Logger
   console_ = spdlog::stdout_color_st("IO");
   try {
@@ -52,7 +52,7 @@ IO::IO(int argc, char** argv) {
 
 //! Return input file name of mesh/submesh/soil particles
 //! or an empty string if specified file for the key is not found
-std::string IO::file_name(const std::string& filename) {
+std::string mpm::IO::file_name(const std::string& filename) {
 
   std::string file_name;
   // Read input file name from the JSON object
@@ -70,7 +70,7 @@ std::string IO::file_name(const std::string& filename) {
 }
 
 //! Check if a file is present
-bool IO::check_file(const std::string& filename) {
+bool mpm::IO::check_file(const std::string& filename) {
   bool status = false;
 
   // Check if file is present
