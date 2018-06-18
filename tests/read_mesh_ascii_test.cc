@@ -15,6 +15,6 @@ TEST_CASE("ReadMeshAscii is checked", "[ReadMesh][ReadMeshAscii]") {
     // Create a read_mesh object
     auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
-    auto nodes = read_mesh->read_mesh_nodes("./mesh.dat");
+    auto nodes = read_mesh->read_mesh_cells("./mesh.dat");
   }
 }
