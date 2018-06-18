@@ -44,7 +44,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
                     (char*)"mpm.json"};
 
     // Create an IO object
-    auto io = std::make_unique<IO>(argc, argv);
+    auto io = std::make_unique<mpm::IO>(argc, argv);
 
     // Check cmake JSON object
     REQUIRE(io->file_name("input") == "./mpm.json");

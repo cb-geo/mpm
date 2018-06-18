@@ -14,6 +14,7 @@ using Json = nlohmann::json;
 //! Speed Logger
 #include "spdlog/spdlog.h"
 
+namespace mpm {
 //! \brief Input/Output handler
 class IO {
  public:
@@ -49,4 +50,5 @@ class IO {
   std::shared_ptr<spdlog::logger> console_;
 };
 
+}  // namespace mpm
 #endif  // MPM_IO_H_
