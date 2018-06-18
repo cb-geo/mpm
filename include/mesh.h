@@ -20,8 +20,8 @@ namespace mpm {
 
 //! Mesh class
 //! \brief Base class that stores the information about meshes
-//! \details Mesh class which stores the particles, nodes, cells and its
-//! neighbours \tparam Tdim Dimension
+//! \details Mesh class which stores the particles, nodes, cells and neighbours
+//! \tparam Tdim Dimension
 template <unsigned Tdim>
 class Mesh {
  public:
@@ -43,6 +43,10 @@ class Mesh {
 
   //! Return id of the mesh
   unsigned id() const { return id_; }
+
+  //! Read mesh file
+  //! \param[in] Input mesh file name with nodes and cells
+  bool read_mesh(const std::string& mesh_file);
 
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
