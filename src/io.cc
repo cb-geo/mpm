@@ -3,7 +3,7 @@
 //! Constructor with argc and argv
 IO::IO(int argc, char** argv) {
   //! Logger
-  console_ = spdlog::stdout_color_mt("IO");
+  console_ = spdlog::stdout_color_st("IO");
   try {
 
     // Set title
