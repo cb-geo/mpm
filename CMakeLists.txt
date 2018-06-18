@@ -73,6 +73,7 @@ SET(test_src
    ${mpm_SOURCE_DIR}/tests/particle_test.cc
    ${mpm_SOURCE_DIR}/tests/quad_quadrature_test.cc    
    ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
+   ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
    ${mpm_SOURCE_DIR}/tests/test.cc
 )   
 add_executable(mpmtest

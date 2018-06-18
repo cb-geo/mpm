@@ -26,7 +26,7 @@ class ReadMesh {
   ReadMesh() = default;
 
   //! Default destructor
-  virutal ~ReadMesh() = default;
+  virtual ~ReadMesh() = default;
 
   //! Delete copy constructor
   ReadMesh(const ReadMesh<Tdim>&) = delete;
