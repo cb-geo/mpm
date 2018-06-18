@@ -13,6 +13,9 @@
 
 namespace mpm {
 
+// Create a logger for reading mesh
+auto read_mesh_logger = spdlog::stdout_color_st("ReadMesh");
+
 //! ReadMesh class
 //! \brief Abstract Base class that returns mesh and particles locataions
 //! \tparam Tdim Dimension
