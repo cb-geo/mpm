@@ -44,10 +44,6 @@ class Mesh {
   //! Return id of the mesh
   unsigned id() const { return id_; }
 
-  //! Read mesh file
-  //! \param[in] Input mesh file name with nodes and cells
-  bool read_mesh(const std::string& mesh_file);
-
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
