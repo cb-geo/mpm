@@ -3,16 +3,26 @@ template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
     mpm::ReadMeshAscii<Tdim>::read_mesh_nodes(const std::string& mesh) {
   // Nodal coordinates
-  std::vector<std::array<double, Tdim>> coordinates;
+  std::vector<VectorDim> coordinates;
   coordinates.clear();
 
+  // input file stream
   std::fstream file;
   file.open(mesh.c_str(), std::ios::in);
 
+  // bool to check firstline
+  bool read_first_line = false;
   try {
     if (file.is_open() && file.good()) {
       std::string line;
+      // Number of coordinate lines
+      unsigned nlines = 0;
+      // Coordinates
       Eigen::Matrix<double, Tdim, 1> coords;
+      // # of nodes and cells
+      unsigned nnodes = 0, ncells = 0;
+      // ignore stream
+      double ignore;
 
       while (std::getline(file, line)) {
         std::istringstream istream(line);
@@ -20,10 +30,26 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
           while (istream.good()) {
-            // Read to coordinates
-            for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
+            if (!read_first_line) {
+
+              istream >> nnodes >> ncells;
+              read_first_line = true;
+              break;
+            }
+            if (nlines < nnodes) {
+              // Read to coordinates
+              for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
+              coordinates.emplace_back(coords);
+
+              std::cout << "\nCoordinates: \n";
+              for (unsigned i = 0; i < coords.size(); ++i)
+                std::cout << coords[i] << "\t";
+
+              ++nlines;
+            } else {
+              istream >> ignore;
+            }
           }
-          coordinates.emplace_back(coords);
         }
       }
     }
