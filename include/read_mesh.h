@@ -11,10 +11,9 @@
 // Speed log
 #include "spdlog/spdlog.h"
 
-namespace mpm {
+#include "logger.h"
 
-// Create a logger for reading mesh
-auto read_mesh_logger = spdlog::stdout_color_st("ReadMesh");
+namespace mpm {
 
 //! ReadMesh class
 //! \brief Abstract Base class that returns mesh and particles locataions
@@ -38,17 +37,21 @@ class ReadMesh {
   ReadMesh& operator=(const ReadMesh<Tdim>&) = delete;
 
   //! Read mesh nodes file
-  //! \param[in] read_mesh file name with nodes and cells
+  //! \param[in] mesh file name with nodes and cells
   //! \retval coordinates Vector of nodal coordinates
-  virtual std::vector<VectorDim> read_mesh_nodes(
-      const std::string& mesh_file) = 0;
+  virtual std::vector<VectorDim> read_mesh_nodes(const std::string& mesh) = 0;
 
   //! Read mesh cells file
-  //! \param[in] read_mesh file name with nodes and cells
+  //! \param[in] mesh file name with nodes and cells
   //! \retval cells Vector of nodal indices of cells
   virtual std::vector<std::vector<unsigned>> read_mesh_cells(
-      const std::string& mesh_file) = 0;
+      const std::string& mesh) = 0;
 
+  //! Read mesh particles file
+  //! \param[in] particles_files file name with particle coordinates
+  //! \retval coordinates Vector of particle coordinates
+  virtual std::vector<VectorDim> read_mesh_particles(
+      const std::string& particles_file) = 0;
 };  // ReadMesh class
 }  // namespace mpm
 

@@ -11,9 +11,6 @@
 //! MPM namespace
 namespace mpm {
 
-// Create a logger for reading ascii mesh
-auto read_mesh_ascii_logger = spdlog::stdout_color_st("ReadMeshAscii");
-
 //! ReadMeshAscii class
 //! \brief Derived class that returns mesh and particles locataions from ascii
 //! file \tparam Tdim Dimension
@@ -33,15 +30,19 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   ~ReadMeshAscii() = default;
 
   //! Read mesh nodes file
-  //! \param[in] mesh_file file name with nodes and cells
+  //! \param[in] mesh file name with nodes and cells
   //! \retval coordinates Vector of nodal coordinates
-  std::vector<VectorDim> read_mesh_nodes(const std::string& mesh_file);
+  std::vector<VectorDim> read_mesh_nodes(const std::string& mesh);
 
   //! Read mesh cells file
-  //! \param[in] mesh_file file name with nodes and cells
+  //! \param[in] mesh file name with nodes and cells
   //! \retval cells Vector of nodal indices of cells
-  std::vector<std::vector<unsigned>> read_mesh_cells(
-      const std::string& mesh_file);
+  std::vector<std::vector<unsigned>> read_mesh_cells(const std::string& mesh);
+
+  //! Read mesh particles file
+  //! \param[in] particles_files file name with particle coordinates
+  //! \retval coordinates Vector of particle coordinates
+  std::vector<VectorDim> read_mesh_particles(const std::string& particles_file);
 
  private:
   //! Logger

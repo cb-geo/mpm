@@ -125,3 +125,43 @@ std::vector<std::vector<unsigned>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
 
   return cells;
 }
+
+//! Return coordinates of particles
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>>
+    mpm::ReadMeshAscii<Tdim>::read_mesh_particles(
+        const std::string& particles_file) {
+  // Nodal coordinates
+  std::vector<VectorDim> coordinates;
+  coordinates.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(particles_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      // Coordinates
+      Eigen::Matrix<double, Tdim, 1> coords;
+
+      while (std::getline(file, line)) {
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // Read to coordinates
+            for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
+            coordinates.emplace_back(coords);
+          }
+        }
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("Read mesh nodes: {}", exception.what());
+  }
+
+  return coordinates;
+}
