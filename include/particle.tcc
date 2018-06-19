@@ -29,7 +29,26 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     std::shared_ptr<Cell<Tdim>> cellptr) {
   cell_ = cellptr;
   cell_id_ = cellptr->id();
+  this->compute_reference_location();
   return cell_->add_particle_id(this->id());
+}
+
+// Compute reference location cell to particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
+  try {
+    // Get reference location of a particle
+    if (cell_->is_initialised()) {
+      this->reference_location_ =
+          cell_->local_coordinates_point(this->coordinates_);
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "Cannot compute local reference coordinates of the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
 }
 
 // Assign stress to the particle

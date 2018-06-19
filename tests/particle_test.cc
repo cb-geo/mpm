@@ -6,8 +6,11 @@
 #include "catch.hpp"
 
 #include "cell.h"
+#include "hex_shapefn.h"
 #include "node.h"
 #include "particle.h"
+#include "quad_shapefn.h"
+#include "shapefn.h"
 
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
@@ -255,22 +258,30 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   SECTION("Add a pointer to a cell to particle") {
     // Add particle
     mpm::Index id = 0;
+    coords << 0.75, 0.75;
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    // Check particle coordinates
+    auto coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
     // Create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
-    // Add nodes
+    // Add nodes to cell
+    coords << 0.5, 0.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    coords << 0, 1;
+    coords << 1.5, 0.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    coords << 1, 1;
+    coords << 1.5, 1.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    coords << 1, 0;
+    coords << 0.5, 1.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
     cell->add_node(0, node0);
@@ -284,6 +295,22 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
+
+    // Assign shapefunction to cell
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+    cell->shapefn(shapefn);
+    cell->compute_volume();
+
+    // Check if cell is initialised
+    REQUIRE(cell->is_initialised() == true);
+
+    // Check reference location
+    coords << -0.5, -0.5;
+    particle->compute_reference_location();
+    auto ref_coordinates = particle->reference_location();
+    for (unsigned i = 0; i < ref_coordinates.size(); ++i)
+      REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check particle properties") {
@@ -472,8 +499,15 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Add a pointer to a cell to particle") {
     // Add particle
     mpm::Index id = 0;
+    coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    // Check particle coordinates
+    auto coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
     // Create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
     // Add nodes
@@ -481,31 +515,31 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    coords << 1, 0, 0;
+    coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    coords << 0, 1, 0;
+    coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    coords << 1, 1, 0;
+    coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    coords << 0, 0, 1;
+    coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
 
-    coords << 1, 0, 1;
+    coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
 
-    coords << 0, 1, 1;
+    coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
 
-    coords << 1, 1, 1;
+    coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
@@ -519,11 +553,26 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
 
+    // Assign shapefunction to cell
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+    cell->shapefn(shapefn);
+    cell->compute_volume();
+    // Check if cell is initialised
+    REQUIRE(cell->is_initialised() == true);
+
     // Add cell to particle
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
+
+    // Check reference location
+    coords << 0.5, 0.5, 0.5;
+    particle->compute_reference_location();
+    auto ref_coordinates = particle->reference_location();
+    for (unsigned i = 0; i < ref_coordinates.size(); ++i)
+      REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check particle properties") {

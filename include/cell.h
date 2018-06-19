@@ -123,6 +123,12 @@ class Cell {
   //! for a point to be in the cell
   bool point_in_cell(const Eigen::Matrix<double, 3, 1>& point);
 
+  //! Return the local coordinates of a point in a 1D cell
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 1, 1> local_coordinates_point(
+      const Eigen::Matrix<double, 1, 1>& point);
+
   //! Return the local coordinates of a point in a 2D cell
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point

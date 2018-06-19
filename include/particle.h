@@ -50,6 +50,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Initialise properties
   void initialise();
 
+  //! Compute reference coordinates in a cell
+  void compute_reference_location();
+
+  //! Return reference location
+  VectorDim reference_location() const { return reference_location_; }
+
   // Assign a cell to particle
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr);
@@ -129,6 +135,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::id_;
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
+  //! Reference coordinates (in a cell)
+  Eigen::Matrix<double, Tdim, 1> reference_location_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Cell id
