@@ -73,6 +73,30 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
+    // Check centroid calculation
+    SECTION("Compute centroid of a cell") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+          std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+      cell->shapefn(shapefn);
+      REQUIRE(cell->nfunctions() == 4);
+
+      // Compute centroid
+      cell->compute_centroid();
+      auto check_centroid = cell->centroid();
+
+      // Centroid
+      Eigen::Matrix<double, Dim, 1> centroid;
+      centroid << 1.0, 1.0;
+
+      // Check number of coordinates
+      REQUIRE(check_centroid.size() == centroid.size());
+
+      // Check centroid calculations
+      for (unsigned i = 0; i < check_centroid.size(); ++i)
+        REQUIRE(check_centroid[i] == Approx(centroid[i]).epsilon(Tolerance));
+    }
+
+    // Check cell volume
     SECTION("Compute volume of a cell") {
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
@@ -450,6 +474,30 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
+    // Check centroid calculation
+    SECTION("Compute centroid of a cell") {
+      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+          std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+      cell->shapefn(shapefn);
+      REQUIRE(cell->nfunctions() == 8);
+
+      // Compute centroid
+      cell->compute_centroid();
+      auto check_centroid = cell->centroid();
+
+      // Centroid
+      Eigen::Matrix<double, Dim, 1> centroid;
+      centroid << 1.0, 1.0, 1.0;
+
+      // Check number of coordinates
+      REQUIRE(check_centroid.size() == centroid.size());
+
+      // Check centroid calculations
+      for (unsigned i = 0; i < check_centroid.size(); ++i)
+        REQUIRE(check_centroid[i] == Approx(centroid[i]).epsilon(Tolerance));
+    }
+
+    // Check cell volume calculation
     SECTION("Compute volume of a cell") {
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
