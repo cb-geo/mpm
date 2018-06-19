@@ -99,11 +99,17 @@ class Cell {
   //! \param[in] id Global id of a particle
   void remove_particle_id(Index id);
 
-  //! Compute the volume of a cell
+  //! Compute the volume of the cell
   void compute_volume();
 
-  //! Return the volume of a cell
+  //! Return the volume of the cell
   double volume() const { return volume_; }
+
+  //! Compute the centroid of the cell
+  void compute_centroid();
+
+  //! Return the centroid of the cell
+  Eigen::Matrix<double, Tdim, 1> centroid() const { return centroid_; }
 
   //! Check if a point is in a 2D cell
   //! Cell is broken into sub-triangles with point as one of the
@@ -190,6 +196,9 @@ class Cell {
 
   //! Volume
   double volume_{std::numeric_limits<double>::max()};
+
+  //! Centroid
+  VectorDim centroid_;
 
   //! particles ids in cell
   std::vector<Index> particles_;
