@@ -357,6 +357,7 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 1, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 1, 1> xi;
+
   try {
     // Indices of corner nodes
     Eigen::VectorXi indices = shapefn_->corner_indices();
@@ -439,8 +440,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
     const Eigen::Matrix<double, 3, 1>& point) {
-
-  std::cout << __FILE__ << __LINE__ << " 3D!\n";
 
   // Local point coordinates
   Eigen::Matrix<double, 3, 1> xi;
