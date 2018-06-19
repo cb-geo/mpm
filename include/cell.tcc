@@ -480,11 +480,12 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
       centre.setZero();
       for (unsigned i = 0; i < indices.size(); ++i)
         centre += nodes_[indices[i]]->coordinates();
-      centre /= 4.0;
+      centre /= indices.size();
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
       xi(2) = 2. * (point(2) - centre(2)) / ylength;
+
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
