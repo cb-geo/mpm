@@ -290,22 +290,24 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     cell->add_node(3, node3);
     REQUIRE(cell->nnodes() == 4);
 
-    // Assign shapefunction to cell
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
-    cell->shapefn(shapefn);
-    cell->compute_volume();
-    // Check if cell is initialised
-    REQUIRE(cell->is_initialised() == true);
-
     // Add cell to particle
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
 
+    // Assign shapefunction to cell
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+    cell->shapefn(shapefn);
+    cell->compute_volume();
+
+    // Check if cell is initialised
+    REQUIRE(cell->is_initialised() == true);
+
     // Check reference location
     coords << -0.5, -0.5;
+    particle->compute_reference_location();
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
