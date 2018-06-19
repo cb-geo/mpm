@@ -232,6 +232,18 @@ inline void mpm::Cell<3>::compute_volume() {
   }
 }
 
+//! Compute the centroid of the cell
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_centroid() {
+  // Get indices of corner nodes
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  // Calculate the centroid of the cell
+  for (unsigned i = 0; i < indices.size(); ++i)
+    centroid_ += nodes_[indices[i]]->coordinates();
+
+  centroid_ /= indices.size();
+}
+
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(
