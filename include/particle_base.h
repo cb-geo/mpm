@@ -56,6 +56,12 @@ class ParticleBase {
   //! \retval coordinates_ return coordinates of the particleBase
   VectorDim coordinates() const { return coordinates_; }
 
+  //! Compute reference coordinates in a cell
+  virtual void compute_reference_location() = 0;
+
+  //! Return reference location
+  virtual VectorDim reference_location() const = 0;
+
   //! Assign cell
   virtual bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr) = 0;
 
@@ -121,13 +127,10 @@ class ParticleBase {
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
-
   //! coordinates
   VectorDim coordinates_;
-
   //! Cell id
   Index cell_id_{std::numeric_limits<Index>::max()};
-
   //! Status
   bool status_{true};
 
