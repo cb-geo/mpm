@@ -351,6 +351,42 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
   return status;
 }
 
+//! Return the local coordinates of a point in a 1D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::local_coordinates_point(
+    const Eigen::Matrix<double, 1, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 1, 1> xi;
+  try {
+    // Indices of corner nodes
+    Eigen::VectorXi indices = shapefn_->corner_indices();
+
+    // Linear
+    if (indices.size() == 2) {
+      //
+      // 0 0---------0 1
+      //        l
+      const double length = (nodes_[indices[0]]->coordinates() -
+                             nodes_[indices[1]]->coordinates())
+                                .norm();
+
+      const Eigen::Matrix<double, 1, 1> centre =
+          (nodes_[indices[0]]->coordinates() +
+           nodes_[indices[1]]->coordinates()) /
+          2.0;
+
+      xi(0) = 2. * (point(0) - centre(0)) / length;
+    } else {
+      throw std::runtime_error("Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
+  }
+  return xi;
+}
+
 //! Return the local coordinates of a point in a 2D cell
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
@@ -358,8 +394,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
   // Local point coordinates
   Eigen::Matrix<double, 2, 1> xi;
 
-  Eigen::VectorXi indices = shapefn_->corner_indices();
   try {
+    // Indices of corner nodes
+    Eigen::VectorXi indices = shapefn_->corner_indices();
+
     // Quadrilateral
     if (indices.size() == 4) {
       //        b
@@ -384,10 +422,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
            nodes_[indices[3]]->coordinates()) /
           4.0;
 
-      Eigen::Matrix<double, 2, 1> xi;
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
-      return xi;
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
@@ -396,6 +432,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
               << "Compute local coordinate of a point in a cell: "
               << except.what() << '\n';
   }
+  return xi;
 }
 
 //! Return the local coordinates of a point in a 3D cell
@@ -408,8 +445,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
   // Local point coordinates
   Eigen::Matrix<double, 3, 1> xi;
 
-  Eigen::VectorXi indices = shapefn_->corner_indices();
   try {
+    // Indices of corner nodes
+    Eigen::VectorXi indices = shapefn_->corner_indices();
+
     // Hexahedron
     if (indices.size() == 8) {
       // Node numbering as read in by mesh file
@@ -444,11 +483,9 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
         centre += nodes_[indices[i]]->coordinates();
       centre /= 4.0;
 
-      Eigen::Matrix<double, 3, 1> xi;
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
       xi(2) = 2. * (point(2) - centre(2)) / ylength;
-      return xi;
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
@@ -457,6 +494,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
               << "Compute local coordinate of a point in a cell: "
               << except.what() << '\n';
   }
+  return xi;
 }
 
 //! Map particle mass to nodes
