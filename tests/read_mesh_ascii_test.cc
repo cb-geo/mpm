@@ -9,10 +9,12 @@ using Json = nlohmann::json;
 // Check ReadMeshAscii
 TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
-  SECTION("Check mesh file ") {
-    // Dimension
-    const unsigned dim = 2;
+  // Dimension
+  const unsigned dim = 2;
+  // Tolerance
+  const double Tolerance = 1.E-7;
 
+  SECTION("Check mesh file ") {
     // Vector of nodal coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
 
@@ -56,17 +58,13 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Write nodal coordinates
     for (const auto& coord : coordinates) {
-      for (unsigned i = 0; i < coord.size(); ++i) {
-        file << coord[i] << "\t";
-      }
+      for (unsigned i = 0; i < coord.size(); ++i) file << coord[i] << "\t";
       file << "\n";
     }
 
     // Write cell node ids
     for (const auto& cell : cells) {
-      for (const auto nid : cell) {
-        file << nid << "\t";
-      }
+      for (auto nid : cell) file << nid << "\t";
       file << "\n";
     }
 
@@ -74,10 +72,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read mesh nodes
     SECTION("Check read mesh nodes") {
-      // Dimension
-      const unsigned dim = 2;
-      // Tolerance
-      const double Tolerance = 1.E-7;
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
@@ -97,10 +91,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read mesh cells
     SECTION("Check read mesh cell ids") {
-      // Dimension
-      const unsigned dim = 2;
-      // Tolerance
-      const double Tolerance = 1.E-7;
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
@@ -118,11 +108,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
   }
 
   SECTION("Check particles file") {
-    // Dimension
-    const unsigned dim = 2;
-    // Tolerance
-    const double Tolerance = 1.E-7;
-
     // Vector of particle coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
     coordinates.clear();
@@ -173,8 +158,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read particle coordinates
     SECTION("Check particle coordinates") {
-      const unsigned dim = 2;
-
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
@@ -197,10 +180,12 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 // Check ReadMeshAscii
 TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
-  SECTION("Check mesh file ") {
-    // Dimension
-    const unsigned dim = 3;
+  // Dimension
+  const unsigned dim = 3;
+  // Tolerance
+  const double Tolerance = 1.E-7;
 
+  SECTION("Check mesh file ") {
     // Vector of nodal coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
 
@@ -262,17 +247,13 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Write nodal coordinates
     for (const auto& coord : coordinates) {
-      for (unsigned i = 0; i < coord.size(); ++i) {
-        file << coord[i] << "\t";
-      }
+      for (unsigned i = 0; i < coord.size(); ++i) file << coord[i] << "\t";
       file << "\n";
     }
 
     // Write cell node ids
     for (const auto& cell : cells) {
-      for (const auto nid : cell) {
-        file << nid << "\t";
-      }
+      for (auto nid : cell) file << nid << "\t";
       file << "\n";
     }
 
@@ -280,10 +261,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read mesh nodes
     SECTION("Check read mesh nodes") {
-      // Dimension
-      const unsigned dim = 3;
-      // Tolerance
-      const double Tolerance = 1.E-7;
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
@@ -303,10 +280,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read mesh cells
     SECTION("Check read mesh cell ids") {
-      // Dimension
-      const unsigned dim = 3;
-      // Tolerance
-      const double Tolerance = 1.E-7;
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
@@ -324,11 +297,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
   }
 
   SECTION("Check particles file") {
-    // Dimension
-    const unsigned dim = 3;
-    // Tolerance
-    const double Tolerance = 1.E-7;
-
     // Vector of particle coordinates
     std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
 
@@ -402,8 +370,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read particles
     SECTION("Check particle coordinates") {
-      const unsigned dim = 3;
-
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
