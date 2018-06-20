@@ -235,35 +235,23 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Cell 1
     // Node 8
-    node << 0.5, 0., 0.;
-    coordinates.emplace_back(node);
-    // Node 9
     node << 1.0, 0., 0.;
     coordinates.emplace_back(node);
-    // Node 10
+    // Node 9
     node << 1.0, 0.5, 0.;
     coordinates.emplace_back(node);
-    // Node 11
-    node << 0.5, 0.5, 0.;
-    coordinates.emplace_back(node);
-    // Node 12
-    node << 0.5, 0., 0.5;
-    coordinates.emplace_back(node);
-    // Node 13
+    // Node 10
     node << 1.0, 0., 0.5;
     coordinates.emplace_back(node);
-    // Node 14
+    // Node 11
     node << 1.0, 0.5, 0.5;
-    coordinates.emplace_back(node);
-    // Node 15
-    node << 0.5, 0.5, 0.5;
     coordinates.emplace_back(node);
 
     // Cell with node ids
     std::vector<std::vector<unsigned>> cells{// cell #0
                                              {0, 1, 2, 3, 4, 5, 6, 7},
                                              // cell #1
-                                             {8, 9, 10, 11, 12, 13, 14, 15}};
+                                             {1, 8, 9, 2, 5, 10, 11, 6}};
 
     // Dump mesh file as an input file to be read
     std::ofstream file;
