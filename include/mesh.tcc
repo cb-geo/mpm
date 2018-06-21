@@ -20,7 +20,8 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid, const std::string& ntype,
         bool insert_status = this->nodes_.add(
             Factory<mpm::NodeBase<Tdim>, mpm::Index,
                     const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(ntype, std::move(gnid), node_coordinates));
+                ->create(ntype, static_cast<mpm::Index>(gnid),
+                         node_coordinates));
 
         if (insert_status) {
           // Increament node id
