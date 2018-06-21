@@ -44,41 +44,6 @@ class Mesh {
   //! Return id of the mesh
   unsigned id() const { return id_; }
 
-  //! Add a neighbour mesh, using the local id for the new mesh and a mesh
-  //! pointer
-  //! \param[in] local_id local id of the mesh
-  //! \param[in] neighbour A shared pointer to the neighbouring mesh
-  //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(unsigned local_id,
-                     const std::shared_ptr<Mesh<Tdim>>& neighbour);
-
-  //! Return the number of neighbouring meshes
-  unsigned nneighbours() const { return neighbour_meshes_.size(); }
-
-  //! Add a particle to the mesh
-  //! \param[in] particle A shared pointer to particle
-  //! \retval insertion_status Return the successful addition of a particle
-  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
-
-  //! Remove a particle from the mesh
-  //! \param[in] particle A shared pointer to particle
-  //! \retval insertion_status Return the successful addition of a particle
-  bool remove_particle(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
-
-  //! Number of particles in the mesh
-  mpm::Index nparticles() const { return particles_.size(); }
-
-  //! Locate particles in a cell
-  //! Iterate over all cells in a mesh to find the cell in which particles
-  //! are located.
-  void locate_particles_mesh();
-
-  //! Iterate over particles
-  //! \tparam Toper Callable object typically a baseclass functor
-  template <typename Toper>
-  void iterate_over_particles(Toper oper);
-
   //! Add a node to the mesh
   //! \param[in] node A shared pointer to node
   //! \retval insertion_status Return the successful addition of a node
@@ -115,9 +80,44 @@ class Mesh {
   template <typename Toper>
   void iterate_over_cells(Toper oper);
 
+  //! Add a particle to the mesh
+  //! \param[in] particle A shared pointer to particle
+  //! \retval insertion_status Return the successful addition of a particle
+  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+
+  //! Remove a particle from the mesh
+  //! \param[in] particle A shared pointer to particle
+  //! \retval insertion_status Return the successful addition of a particle
+  bool remove_particle(
+      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+
+  //! Number of particles in the mesh
+  mpm::Index nparticles() const { return particles_.size(); }
+
+  //! Locate particles in a cell
+  //! Iterate over all cells in a mesh to find the cell in which particles
+  //! are located.
+  void locate_particles_mesh();
+
+  //! Iterate over particles
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_particles(Toper oper);
+
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }
+
+  //! Add a neighbour mesh, using the local id for the new mesh and a mesh
+  //! pointer
+  //! \param[in] local_id local id of the mesh
+  //! \param[in] neighbour A shared pointer to the neighbouring mesh
+  //! \retval insertion_status Return the successful addition of a node
+  bool add_neighbour(unsigned local_id,
+                     const std::shared_ptr<Mesh<Tdim>>& neighbour);
+
+  //! Return the number of neighbouring meshes
+  unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
  protected:
   //! mesh id
