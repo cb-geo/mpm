@@ -50,6 +50,7 @@ include_directories(
 # mpm executable
 SET(mpm_src
   src/io.cc
+  src/node.cc
   src/main.cc
 )
 add_executable(mpm
@@ -59,6 +60,7 @@ add_executable(mpm
 # Unit test
 SET(test_src
    ${mpm_SOURCE_DIR}/src/io.cc
+   ${mpm_SOURCE_DIR}/src/node.cc
    ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
    ${mpm_SOURCE_DIR}/tests/cell_test.cc
    ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  

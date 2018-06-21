@@ -309,6 +309,46 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check location of particle 2
     REQUIRE(particle2->cell_id() == 0);
   }
+
+  //! Check create nodes in a mesh
+  SECTION("Check create nodes") {
+    // Vector of nodal coordinates
+    std::vector<Eigen::Matrix<double, Dim, 1>> coordinates;
+
+    // Nodal coordinates
+    Eigen::Matrix<double, Dim, 1> node;
+
+    // Cell 0
+    // Node 0
+    node << 0., 0.;
+    coordinates.emplace_back(node);
+    // Node 1
+    node << 0.5, 0.;
+    coordinates.emplace_back(node);
+    // Node 2
+    node << 0.5, 0.5;
+    coordinates.emplace_back(node);
+    // Node 3
+    node << 0., 0.5;
+    coordinates.emplace_back(node);
+
+    // Cell 1
+    // Node 4
+    node << 1.0, 0.;
+    coordinates.emplace_back(node);
+    // Node 5
+    node << 1.0, 0.5;
+    coordinates.emplace_back(node);
+
+    unsigned id = 0;
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(id);
+
+    const std::string node_type = "Node2D";
+    mpm::Index gnid = 0;
+    mesh->create_nodes(gnid, node_type, coordinates);
+    // Check if mesh has added nodes
+    REQUIRE(mesh->nnodes() == coordinates.size());
+  }
 }
 
 //! \brief Check mesh class for 3D case
