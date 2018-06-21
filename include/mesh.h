@@ -12,6 +12,7 @@
 
 #include "cell.h"
 #include "container.h"
+#include "factory.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -43,6 +44,14 @@ class Mesh {
 
   //! Return id of the mesh
   unsigned id() const { return id_; }
+
+  //! Create nodes from coordinates
+  //! \param[in] gnid Global node id
+  //! \param[in] ntype Node type
+  //! \param[in] coordinates Nodal coordinates
+  //! \retval status Create node status
+  bool create_nodes(mpm::Index gnid, const std::string& node_name,
+                    const std::vector<VectorDim>& coordinates);
 
   //! Add a node to the mesh
   //! \param[in] node A shared pointer to node

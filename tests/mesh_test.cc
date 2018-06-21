@@ -309,6 +309,55 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check location of particle 2
     REQUIRE(particle2->cell_id() == 0);
   }
+
+  //! Check create nodes and cells in a mesh
+  SECTION("Check create nodes and cells") {
+    // Vector of nodal coordinates
+    std::vector<Eigen::Matrix<double, Dim, 1>> coordinates;
+
+    // Nodal coordinates
+    Eigen::Matrix<double, Dim, 1> node;
+
+    // Cell 0
+    // Node 0
+    node << 0., 0.;
+    coordinates.emplace_back(node);
+    // Node 1
+    node << 0.5, 0.;
+    coordinates.emplace_back(node);
+    // Node 2
+    node << 0.5, 0.5;
+    coordinates.emplace_back(node);
+    // Node 3
+    node << 0., 0.5;
+    coordinates.emplace_back(node);
+
+    // Cell 1
+    // Node 4
+    node << 1.0, 0.;
+    coordinates.emplace_back(node);
+    // Node 5
+    node << 1.0, 0.5;
+    coordinates.emplace_back(node);
+
+    // Create a new mesh
+    unsigned meshid = 0;
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(meshid);
+
+    SECTION("Check creation of nodes") {
+      // Node type 2D
+      const std::string node_type = "Node2D";
+      // Global node index
+      mpm::Index gnid = 0;
+      mesh->create_nodes(gnid, node_type, coordinates);
+      // Check if mesh has added nodes
+      REQUIRE(mesh->nnodes() == coordinates.size());
+      // Try again this shouldn't add more coordinates
+      mesh->create_nodes(gnid, node_type, coordinates);
+      // Check if mesh has added nodes
+      REQUIRE(mesh->nnodes() == coordinates.size());
+    }
+  }
 }
 
 //! \brief Check mesh class for 3D case
@@ -592,5 +641,72 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(particle1->cell_id() == 0);
     // Check location of particle 2
     REQUIRE(particle2->cell_id() == 0);
+  }
+
+  //! Check create nodes and cells in a mesh
+  SECTION("Check create nodes and cells") {
+    // Vector of nodal coordinates
+    std::vector<Eigen::Matrix<double, Dim, 1>> coordinates;
+
+    // Nodal coordinates
+    Eigen::Matrix<double, Dim, 1> node;
+
+    // Cell 0
+    // Node 0
+    node << 0., 0., 0.;
+    coordinates.emplace_back(node);
+    // Node 1
+    node << 0.5, 0., 0.;
+    coordinates.emplace_back(node);
+    // Node 2
+    node << 0.5, 0.5, 0.;
+    coordinates.emplace_back(node);
+    // Node 3
+    node << 0., 0.5, 0.;
+    coordinates.emplace_back(node);
+    // Node 4
+    node << 0., 0., 0.5;
+    coordinates.emplace_back(node);
+    // Node 5
+    node << 0.5, 0., 0.5;
+    coordinates.emplace_back(node);
+    // Node 6
+    node << 0.5, 0.5, 0.5;
+    coordinates.emplace_back(node);
+    // Node 7
+    node << 0., 0.5, 0.5;
+    coordinates.emplace_back(node);
+
+    // Cell 1
+    // Node 8
+    node << 1.0, 0., 0.;
+    coordinates.emplace_back(node);
+    // Node 9
+    node << 1.0, 0.5, 0.;
+    coordinates.emplace_back(node);
+    // Node 10
+    node << 1.0, 0., 0.5;
+    coordinates.emplace_back(node);
+    // Node 11
+    node << 1.0, 0.5, 0.5;
+    coordinates.emplace_back(node);
+
+    // Create a new mesh
+    unsigned meshid = 0;
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(meshid);
+
+    SECTION("Check creation of nodes") {
+      // Node type 3D
+      const std::string node_type = "Node3D";
+      // Global node index
+      mpm::Index gnid = 0;
+      mesh->create_nodes(gnid, node_type, coordinates);
+      // Check if mesh has added nodes
+      REQUIRE(mesh->nnodes() == coordinates.size());
+      // Try again this shouldn't add more coordinates
+      mesh->create_nodes(gnid, node_type, coordinates);
+      // Check if mesh has added nodes
+      REQUIRE(mesh->nnodes() == coordinates.size());
+    }
   }
 }
