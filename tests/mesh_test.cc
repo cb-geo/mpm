@@ -356,6 +356,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       mesh->create_nodes(gnid, node_type, coordinates);
       // Check if mesh has added nodes
       REQUIRE(mesh->nnodes() == coordinates.size());
+      // Clear coordinates and try creating a list of nodes with an empty list
+      unsigned nnodes = coordinates.size();
+      coordinates.clear();
+      // This fails with empty list error in node creation
+      mesh->create_nodes(gnid, node_type, coordinates);
+      REQUIRE(mesh->nnodes() == nnodes);
     }
   }
 }
@@ -707,6 +713,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       mesh->create_nodes(gnid, node_type, coordinates);
       // Check if mesh has added nodes
       REQUIRE(mesh->nnodes() == coordinates.size());
+      // Clear coordinates and try creating a list of nodes with an empty list
+      unsigned nnodes = coordinates.size();
+      coordinates.clear();
+      // This fails with empty list error in node creation
+      mesh->create_nodes(gnid, node_type, coordinates);
+      REQUIRE(mesh->nnodes() == nnodes);
     }
   }
 }
