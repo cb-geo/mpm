@@ -16,12 +16,11 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid, const std::string& ntype,
     // Check if nodal coordinates is not empty
     if (!coordinates.empty()) {
       for (const auto& node_coordinates : coordinates) {
-        auto node = Factory<mpm::NodeBase<Tdim>, mpm::Index,
-                            const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                        ->create(ntype, std::move(gnid), node_coordinates);
-
         // Check if node creation is successful
-        bool insert_status = this->nodes_.add(node);
+        bool insert_status = this->nodes_.add(
+            Factory<mpm::NodeBase<Tdim>, mpm::Index,
+                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                ->create(ntype, std::move(gnid), node_coordinates));
         if (insert_status) {
           // Increament node id
           ++gnid;
