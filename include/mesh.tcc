@@ -6,6 +6,42 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
   particles_.clear();
 }
 
+//! Create nodes from coordinates
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid, const std::string& ntype,
+                                   const std::vector<VectorDim>& coordinates) {
+  bool status = false;
+  // Global node id
+  try {
+    // Check if nodal coordinates is not empty
+    if (!coordinates.empty()) {
+      for (const auto& node_coordinates : coordinates) {
+        auto node = Factory<mpm::NodeBase<Tdim>, mpm::Index,
+                            const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                        ->create(ntype, std::move(gnid), node_coordinates);
+
+        // Check if node creation is successful
+        bool insert_status = this->nodes_.add(node);
+        if (insert_status) {
+          // Increament node id
+          ++gnid;
+        } else {
+          // Throw  insertion failed error
+          throw std::runtime_error("Addition of node to mesh failed!");
+        }
+      }
+      // When successful
+      status = true;
+    } else {
+      // If the coordinates vector is empty
+      throw std::runtime_error("List of coordinates is empty");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+  return status;
+}
+
 //! Add a node to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_node(

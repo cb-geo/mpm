@@ -23,8 +23,10 @@ class NodeBase {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Default constructor
-  NodeBase() = default;
+  // Constructor with id and coordinates
+  //! \param[in] id assign as the id_ of the node
+  //! \param[in] coords coordinates of the node
+  NodeBase(mpm::Index id, const VectorDim& coords){};
 
   //! Destructor
   virtual ~NodeBase(){};

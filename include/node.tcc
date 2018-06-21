@@ -2,7 +2,7 @@
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 mpm::Node<Tdim, Tdof, Tnphases>::Node(
     Index id, const Eigen::Matrix<double, Tdim, 1>& coord)
-    : NodeBase<Tdim>() {
+    : NodeBase<Tdim>(id, coord) {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   id_ = id;
