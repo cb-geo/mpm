@@ -6,61 +6,6 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
   particles_.clear();
 }
 
-//! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
-  bool insertion_status = false;
-  try {
-    // If the mesh id is not the current mesh id
-    if (mesh->id() != this->id()) {
-      insertion_status = neighbour_meshes_.insert(local_id, mesh);
-    } else {
-      throw std::runtime_error("Invalid local id of a mesh neighbour");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
-  }
-  return insertion_status;
-}
-
-//! Add a particle pointer to the mesh
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-  bool insertion_status = particles_.add(particle);
-  return insertion_status;
-}
-
-//! Remove a particle pointer from the mesh
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::remove_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-  // Remove a particle if found in the container
-  bool status = particles_.remove(particle);
-  return status;
-}
-
-//! Locate particles in a cell
-template <unsigned Tdim>
-void mpm::Mesh<Tdim>::locate_particles_mesh() {
-  // Iterate through each particle and
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      // Check if co-ordinates lie within the cell, if true add particle to cell
-      if ((*citr)->point_in_cell((*pitr)->coordinates()))
-        (*pitr)->assign_cell(*citr);
-    }
-  }
-}
-
-//! Iterate over particles
-template <unsigned Tdim>
-template <typename Toper>
-void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
-}
-
 //! Add a node to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_node(
@@ -106,4 +51,59 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
   tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
+}
+
+//! Add a particle pointer to the mesh
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::add_particle(
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+  bool insertion_status = particles_.add(particle);
+  return insertion_status;
+}
+
+//! Remove a particle pointer from the mesh
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_particle(
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+  // Remove a particle if found in the container
+  bool status = particles_.remove(particle);
+  return status;
+}
+
+//! Locate particles in a cell
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::locate_particles_mesh() {
+  // Iterate through each particle and
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      // Check if co-ordinates lie within the cell, if true add particle to cell
+      if ((*citr)->point_in_cell((*pitr)->coordinates()))
+        (*pitr)->assign_cell(*citr);
+    }
+  }
+}
+
+//! Iterate over particles
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
+  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
+}
+
+//! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::add_neighbour(
+    unsigned local_id, const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
+  bool insertion_status = false;
+  try {
+    // If the mesh id is not the current mesh id
+    if (mesh->id() != this->id()) {
+      insertion_status = neighbour_meshes_.insert(local_id, mesh);
+    } else {
+      throw std::runtime_error("Invalid local id of a mesh neighbour");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << "\n";
+  }
+  return insertion_status;
 }
