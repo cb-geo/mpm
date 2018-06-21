@@ -8,28 +8,27 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
 
 //! Create nodes from coordinates
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid, const std::string& ntype,
+bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
+                                   const std::string& node_type,
                                    const std::vector<VectorDim>& coordinates) {
   bool status = false;
-  // Global node id
   try {
     // Check if nodal coordinates is not empty
     if (!coordinates.empty()) {
       for (const auto& node_coordinates : coordinates) {
         // Add node to mesh and check
-        bool insert_status = this->nodes_.add(
+        bool insert_status = this->add_node(
+            // Create a node of particular
             Factory<mpm::NodeBase<Tdim>, mpm::Index,
                     const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(ntype, static_cast<mpm::Index>(gnid),
+                ->create(node_type, static_cast<mpm::Index>(gnid),
                          node_coordinates));
 
-        if (insert_status) {
-          // Increament node id
-          ++gnid;
-        } else {
-          // When addition of node fails
+        // Increament node id
+        if (insert_status) ++gnid;
+        // When addition of node fails
+        else
           throw std::runtime_error("Addition of node to mesh failed!");
-        }
       }
       // When successful
       status = true;
@@ -48,6 +47,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_node(
     const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
   bool insertion_status = nodes_.add(node);
+  // Add node to map
+  if (insertion_status) map_nodes_.insert(node->id(), node);
   return insertion_status;
 }
 
@@ -57,6 +58,7 @@ bool mpm::Mesh<Tdim>::remove_node(
     const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
   // Remove a node if found in the container
   bool status = nodes_.remove(node);
+  // TODO: Remove node from map_nodes_
   return status;
 }
 
@@ -65,6 +67,52 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
   tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
+}
+
+//! Create cells from node lists
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_cells(
+    mpm::Index gcid, const std::vector<std::vector<mpm::Index>>& cells) {
+  bool status = false;
+  try {
+    // Check if node id list is not empty
+    if (!cells.empty()) {
+      for (const auto& nodes : cells) {
+        // Create cell
+        auto cell = std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size());
+
+        // Cell local node id
+        unsigned local_nid = 0;
+        // For nodeids in a given cell
+        for (auto nid : nodes) {
+          cell->add_node(local_nid, map_nodes_[nid]);
+          ++local_nid;
+        }
+
+        // Add cell to mesh
+        bool insert_cell = false;
+        // Check if cell has all nodes before inserting to mesh
+        if (cell->nnodes() == nodes.size())
+          insert_cell = this->add_cell(cell);
+        else
+          throw std::runtime_error("Invalid node ids for cell!");
+
+        // Increament global cell id
+        if (insert_cell) ++gcid;
+        // When addition of cell fails
+        else
+          throw std::runtime_error("Addition of cell to mesh failed!");
+      }
+      // When successful
+      status = true;
+    } else {
+      // If the coordinates vector is empty
+      throw std::runtime_error("List of nodes of cells is empty");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+  return status;
 }
 
 //! Add a cell to the mesh

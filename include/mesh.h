@@ -47,10 +47,10 @@ class Mesh {
 
   //! Create nodes from coordinates
   //! \param[in] gnid Global node id
-  //! \param[in] ntype Node type
+  //! \param[in] node_type Node type
   //! \param[in] coordinates Nodal coordinates
   //! \retval status Create node status
-  bool create_nodes(mpm::Index gnid, const std::string& node_name,
+  bool create_nodes(mpm::Index gnid, const std::string& node_type,
                     const std::vector<VectorDim>& coordinates);
 
   //! Add a node to the mesh
@@ -70,6 +70,13 @@ class Mesh {
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
   void iterate_over_nodes(Toper oper);
+
+  //! Create cells from list of nodes
+  //! \param[in] gcid Global cell id
+  //! \param[in] cells Node ids of cells
+  //! \retval status Create cells status
+  bool create_cells(mpm::Index gnid,
+                    const std::vector<std::vector<mpm::Index>>& cells);
 
   //! Add a cell from the mesh
   //! \param[in] cell A shared pointer to cell
@@ -140,6 +147,9 @@ class Mesh {
 
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+
+  //! Map of nodes for fast retrieval
+  Handler<NodeBase<Tdim>> map_nodes_;
 
   //! Container of cells
   Container<Cell<Tdim>> cells_;
