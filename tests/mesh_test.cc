@@ -362,6 +362,39 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       // This fails with empty list error in node creation
       mesh->create_nodes(gnid, node_type, coordinates);
       REQUIRE(mesh->nnodes() == nnodes);
+
+      SECTION("Check creation of cells") {
+        // Cell with node ids
+        std::vector<std::vector<mpm::Index>> cells{// cell #0
+                                                   {0, 1, 2, 3},
+                                                   // cell #1
+                                                   {1, 4, 5, 2}};
+        // Global cell index
+        mpm::Index gcid = 0;
+        mesh->create_cells(gcid, cells);
+        // Check if mesh has added cells
+        REQUIRE(mesh->ncells() == cells.size());
+        // Try again this shouldn't add more cells
+        mesh->create_cells(gcid, cells);
+        // Check if mesh has added cells
+        REQUIRE(mesh->ncells() == cells.size());
+        // Clear cells and try creating a list of empty cells
+        unsigned ncells = cells.size();
+        cells.clear();
+        // This fails with empty list error in node creation
+        gcid = 10;
+        mesh->create_cells(gcid, cells);
+        REQUIRE(mesh->ncells() == ncells);
+
+        // Try with invalid node ids
+        cells = {// cell #0
+                 {10, 11, 12, 13},
+                 // cell #1
+                 {11, 14, 15, 12}};
+        gcid = 20;
+        mesh->create_cells(gcid, cells);
+        REQUIRE(mesh->ncells() == ncells);
+      }
     }
   }
 }
@@ -719,6 +752,39 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       // This fails with empty list error in node creation
       mesh->create_nodes(gnid, node_type, coordinates);
       REQUIRE(mesh->nnodes() == nnodes);
+
+      SECTION("Check creation of cells") {
+        // Cell with node ids
+        std::vector<std::vector<mpm::Index>> cells{// cell #0
+                                                   {0, 1, 2, 3, 4, 5, 6, 7},
+                                                   // cell #1
+                                                   {1, 8, 9, 2, 5, 10, 11, 6}};
+        // Global cell index
+        mpm::Index gcid = 0;
+        mesh->create_cells(gcid, cells);
+        // Check if mesh has added cells
+        REQUIRE(mesh->ncells() == cells.size());
+        // Try again this shouldn't add more cells
+        mesh->create_cells(gcid, cells);
+        // Check if mesh has added cells
+        REQUIRE(mesh->ncells() == cells.size());
+        // Clear cells and try creating a list of empty cells
+        unsigned ncells = cells.size();
+        cells.clear();
+        // This fails with empty list error in node creation
+        gcid = 100;
+        mesh->create_cells(gcid, cells);
+        REQUIRE(mesh->ncells() == ncells);
+
+        // Try with invalid node ids
+        cells = {// cell #0
+                 {90, 91, 92, 93, 94, 95, 96, 97},
+                 // cell #1
+                 {71, 88, 89, 82, 85, 80, 81, 86}};
+        gcid = 200;
+        mesh->create_cells(gcid, cells);
+        REQUIRE(mesh->ncells() == ncells);
+      }
     }
   }
 }
