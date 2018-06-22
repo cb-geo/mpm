@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 //! \brief Singleton factory implementation
 //! \tparam Tbaseclass Base class

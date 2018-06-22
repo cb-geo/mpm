@@ -394,6 +394,64 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         gcid = 20;
         mesh->create_cells(gcid, cells);
         REQUIRE(mesh->ncells() == ncells);
+
+        SECTION("Check creation of particles") {
+          // Vector of particle coordinates
+          std::vector<Eigen::Matrix<double, Dim, 1>> coordinates;
+          coordinates.clear();
+
+          // Particle coordinates
+          Eigen::Matrix<double, Dim, 1> particle;
+
+          // Cell 0
+          // Particle 0
+          particle << 0.125, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 1
+          particle << 0.25, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 2
+          particle << 0.25, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 3
+          particle << 0.125, 0.25;
+          coordinates.emplace_back(particle);
+
+          // Cell 1
+          // Particle 4
+          particle << 0.675, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 5
+          particle << 0.85, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 6
+          particle << 0.85, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 7
+          particle << 0.675, 0.25;
+          coordinates.emplace_back(particle);
+
+          SECTION("Check addition of particles to mesh") {
+            // Particle type 2D
+            const std::string particle_type = "Particle2D";
+            // Global particle index
+            mpm::Index gpid = 0;
+            mesh->create_particles(gpid, particle_type, coordinates);
+            // Check if mesh has added particles
+            REQUIRE(mesh->nparticles() == coordinates.size());
+            // Try again this shouldn't add more coordinates
+            mesh->create_particles(gpid, particle_type, coordinates);
+            // Check if mesh has added particles
+            REQUIRE(mesh->nparticles() == coordinates.size());
+            // Clear coordinates and try creating a list of particles with an
+            // empty list
+            unsigned nparticles = coordinates.size();
+            coordinates.clear();
+            // This fails with empty list error in particle creation
+            mesh->create_particles(gpid, particle_type, coordinates);
+            REQUIRE(mesh->nparticles() == nparticles);
+          }
+        }
       }
     }
   }
@@ -784,6 +842,88 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         gcid = 200;
         mesh->create_cells(gcid, cells);
         REQUIRE(mesh->ncells() == ncells);
+
+        SECTION("Check creation of particles") {
+          // Vector of particle coordinates
+          std::vector<Eigen::Matrix<double, Dim, 1>> coordinates;
+          coordinates.clear();
+
+          // Particle coordinates
+          Eigen::Matrix<double, Dim, 1> particle;
+
+          // Cell 0
+          // Particle 0
+          particle << 0.125, 0.125, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 1
+          particle << 0.25, 0.125, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 2
+          particle << 0.25, 0.25, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 3
+          particle << 0.125, 0.25, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 4
+          particle << 0.125, 0.125, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 5
+          particle << 0.25, 0.125, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 6
+          particle << 0.25, 0.25, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 7
+          particle << 0.125, 0.25, 0.25;
+          coordinates.emplace_back(particle);
+
+          // Cell 1
+          // Particle 8
+          particle << 0.675, 0.125, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 9
+          particle << 0.85, 0.125, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 10
+          particle << 0.85, 0.25, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 11
+          particle << 0.675, 0.25, 0.125;
+          coordinates.emplace_back(particle);
+          // Particle 12
+          particle << 0.675, 0.125, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 13
+          particle << 0.85, 0.125, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 14
+          particle << 0.85, 0.25, 0.25;
+          coordinates.emplace_back(particle);
+          // Particle 15
+          particle << 0.675, 0.25, 0.25;
+          coordinates.emplace_back(particle);
+
+          SECTION("Check addition of particles to mesh") {
+            // Particle type 3D
+            const std::string particle_type = "Particle3D";
+            // Global particle index
+            mpm::Index gpid = 0;
+            mesh->create_particles(gpid, particle_type, coordinates);
+            // Check if mesh has added particles
+            REQUIRE(mesh->nparticles() == coordinates.size());
+            // Try again this shouldn't add more coordinates
+            mesh->create_particles(gpid, particle_type, coordinates);
+            // Check if mesh has added particles
+            REQUIRE(mesh->nparticles() == coordinates.size());
+            // Clear coordinates and try creating a list of particles with an
+            // empty list
+            unsigned nparticles = coordinates.size();
+            coordinates.clear();
+            // This fails with empty list error in particle creation
+            mesh->create_particles(gpid, particle_type, coordinates);
+            REQUIRE(mesh->nparticles() == nparticles);
+          }
+        }
       }
     }
   }
