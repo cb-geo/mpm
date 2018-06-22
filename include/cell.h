@@ -30,11 +30,6 @@ class Cell {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id and number of nodes
-  //! \param[in] id Global cell id
-  //! \param[in] nnodes Number of nodes per cell
-  Cell(Index id, unsigned nnodes);
-
   //! Constructor with id, number of nodes and shapefn
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
