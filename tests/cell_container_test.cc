@@ -98,15 +98,18 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
       REQUIRE((*itr)->nfunctions() == 4);
     }
 
-    // Iterate through cell container to update coordinaates
-    // TODO: Remove shapefn call
+    // Iterate through cell container to update shapefn
+    // 8-noded quadrilateral shape function
+    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 8>>();
+
     cellcontainer->for_each(
-        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, shapefn));
+        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, quadsf));
 
     // Check if update has gone through
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
-      REQUIRE((*itr)->nfunctions() == 4);
+      REQUIRE((*itr)->nfunctions() == 8);
     }
   }
 }
@@ -114,7 +117,7 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
 //! \brief Check cell container class for 3D case
 TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Dimension
-  const unsigned Dim = 3;  // Dimension
+  const unsigned Dim = 3;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
 
@@ -198,15 +201,18 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
       REQUIRE((*itr)->nfunctions() == 8);
     }
 
-    // Iterate through cell container to update coordinaates
-    // TODO: Remove functions
+    // Iterate through cell container to update shape function
+    // Hexahedron 20 noded function
+    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 20>>();
+
     cellcontainer->for_each(
-        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, shapefn));
+        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, hexsf));
 
     // Check if update has gone through
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
-      REQUIRE((*itr)->nfunctions() == 8);
+      REQUIRE((*itr)->nfunctions() == 20);
     }
   }
 }
