@@ -465,6 +465,23 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               // Should find all particles in mesh
               REQUIRE(particles.size() == 0);
+
+              // Create particle 100
+              Eigen::Vector2d coords;
+              coords << 100., 100.;
+
+              mpm::Index pid = 100;
+              std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
+                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+
+              // Add particle100 and check status
+              bool particle100_status = mesh->add_particle(particle100);
+              REQUIRE(particle100_status == true);
+
+              // Locate particles in a mesh
+              particles = mesh->locate_particles_mesh();
+              // Should miss particle100
+              REQUIRE(particles.size() == 1);
             }
           }
         }
@@ -948,6 +965,22 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               // Should find all particles in mesh
               REQUIRE(particles.size() == 0);
+              // Create particle 100
+              Eigen::Vector3d coords;
+              coords << 100., 100., 100.;
+
+              mpm::Index pid = 100;
+              std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
+                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+
+              // Add particle100 and check status
+              bool particle100_status = mesh->add_particle(particle100);
+              REQUIRE(particle100_status == true);
+
+              // Locate particles in a mesh
+              particles = mesh->locate_particles_mesh();
+              // Should miss particle100
+              REQUIRE(particles.size() == 1);
             }
           }
         }
