@@ -73,9 +73,11 @@ class Mesh {
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
+  //! \param[in] shapefn Shape function of the cell
   //! \param[in] cells Node ids of cells
   //! \retval status Create cells status
   bool create_cells(mpm::Index gnid,
+                    const std::shared_ptr<mpm::ShapeFn<Tdim>>& shapefn,
                     const std::vector<std::vector<mpm::Index>>& cells);
 
   //! Add a cell from the mesh
@@ -121,7 +123,8 @@ class Mesh {
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
-  void locate_particles_mesh();
+  //! \retval particles Particles which cannot be located in the mesh
+  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> locate_particles_mesh();
 
   //! Iterate over particles
   //! \tparam Toper Callable object typically a baseclass functor
