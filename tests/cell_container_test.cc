@@ -9,6 +9,7 @@
 #include "container.h"
 #include "hex_shapefn.h"
 #include "quad_shapefn.h"
+#include "shapefn.h"
 
 //! \brief Check cell container class for 2D case
 TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
@@ -20,13 +21,17 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
+  // Shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+
   // Cell 1
   mpm::Index id1 = 0;
-  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
   // Cell 2
   mpm::Index id2 = 1;
-  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
 
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
@@ -90,15 +95,13 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
 
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
-      REQUIRE((*itr)->nfunctions() == 0);
+      REQUIRE((*itr)->nfunctions() == 4);
     }
 
-    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, Nnodes>>();
-
     // Iterate through cell container to update coordinaates
+    // TODO: Remove shapefn call
     cellcontainer->for_each(
-        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, quadsf));
+        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, shapefn));
 
     // Check if update has gone through
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
@@ -118,13 +121,17 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
+  // Shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+
   // Cell 1
   mpm::Index id1 = 0;
-  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
   // Cell 2
   mpm::Index id2 = 1;
-  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
 
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
@@ -188,15 +195,13 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
 
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
          ++itr) {
-      REQUIRE((*itr)->nfunctions() == 0);
+      REQUIRE((*itr)->nfunctions() == 8);
     }
 
-    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, Nnodes>>();
-
     // Iterate through cell container to update coordinaates
+    // TODO: Remove functions
     cellcontainer->for_each(
-        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, hexsf));
+        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, shapefn));
 
     // Check if update has gone through
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();

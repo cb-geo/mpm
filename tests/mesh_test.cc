@@ -23,6 +23,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Tolerance
   const double Tolerance = 1.E-9;
 
+  // Shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -178,15 +182,16 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
   // Check add / remove cell
   SECTION("Check add / remove cell functionality") {
+
     // Cell 1
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
     // Cell 2
     mpm::Index id2 = 1;
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -261,7 +266,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Create cell1
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
@@ -503,6 +508,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   // Tolerance
   const double Tolerance = 1.E-9;
 
+  // Shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -636,11 +645,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mpm::Index id1 = 0;
     Eigen::Vector3d coords;
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
     // Cell 2
     mpm::Index id2 = 1;
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -718,7 +727,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Create cell1
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
