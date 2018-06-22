@@ -138,6 +138,42 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
   tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
 }
 
+//! Create particles from coordinates
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_particles(
+    mpm::Index gpid, const std::string& particle_type,
+    const std::vector<VectorDim>& coordinates) {
+  bool status = false;
+  try {
+    // Check if particle coordinates is not empty
+    if (!coordinates.empty()) {
+      for (const auto& particle_coordinates : coordinates) {
+        // Add particle to mesh and check
+        bool insert_status = this->add_particle(
+            // Create a particle of particular
+            Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                ->create(particle_type, static_cast<mpm::Index>(gpid),
+                         particle_coordinates));
+
+        // Increament particle id
+        if (insert_status) ++gpid;
+        // When addition of particle fails
+        else
+          throw std::runtime_error("Addition of particle to mesh failed!");
+      }
+      // When successful
+      status = true;
+    } else {
+      // If the coordinates vector is empty
+      throw std::runtime_error("List of coordinates is empty");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+  return status;
+}
+
 //! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
