@@ -72,14 +72,16 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
-    mpm::Index gcid, const std::vector<std::vector<mpm::Index>>& cells) {
+    mpm::Index gcid, const std::shared_ptr<mpm::ShapeFn<Tdim>>& shapefn,
+    const std::vector<std::vector<mpm::Index>>& cells) {
   bool status = false;
   try {
     // Check if node id list is not empty
     if (!cells.empty()) {
       for (const auto& nodes : cells) {
-        // Create cell
-        auto cell = std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size());
+        // Create cell with shapefn
+        auto cell =
+            std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), shapefn);
 
         // Cell local node id
         unsigned local_nid = 0;
@@ -193,15 +195,25 @@ bool mpm::Mesh<Tdim>::remove_particle(
 
 //! Locate particles in a cell
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::locate_particles_mesh() {
+std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
+    mpm::Mesh<Tdim>::locate_particles_mesh() {
+
+  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
+
   // Iterate through each particle and
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    bool find_cell = false;
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      // Check if co-ordinates lie within the cell, if true add particle to cell
-      if ((*citr)->point_in_cell((*pitr)->coordinates()))
+      // Check if co-ordinates is within the cell, if true add particle to cell
+      if ((*citr)->point_in_cell((*pitr)->coordinates())) {
         (*pitr)->assign_cell(*citr);
+        find_cell = true;
+      }
     }
+    // If particle is not found in mesh add to a list of particles
+    if (!find_cell) particles.emplace_back(*pitr);
   }
+  return particles;
 }
 
 //! Iterate over particles

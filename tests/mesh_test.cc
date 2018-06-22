@@ -302,7 +302,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->status() == true);
 
     // Locate particles in a mesh
-    mesh->locate_particles_mesh();
+    auto particles = mesh->locate_particles_mesh();
+
+    // Should find all particles in mesh
+    REQUIRE(particles.size() == 0);
 
     // Check location of particle 1
     REQUIRE(particle1->cell_id() == 0);
@@ -369,13 +372,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                                                    {0, 1, 2, 3},
                                                    // cell #1
                                                    {1, 4, 5, 2}};
+        // Assign quadrilateral shapefn to cell
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Clear cells and try creating a list of empty cells
@@ -383,7 +390,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         cells.clear();
         // This fails with empty list error in node creation
         gcid = 10;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         // Try with invalid node ids
@@ -392,7 +399,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                  // cell #1
                  {11, 14, 15, 12}};
         gcid = 20;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         SECTION("Check creation of particles") {
@@ -443,13 +450,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
-            // Clear coordinates and try creating a list of particles with an
-            // empty list
+            // Clear coordinates and try creating a list of particles with
+            // an empty list
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
+
+            // Locate particles in mesh
+            SECTION("Locate particles in mesh") {
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+
+              // Should find all particles in mesh
+              REQUIRE(particles.size() == 0);
+            }
           }
         }
       }
@@ -699,7 +715,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     REQUIRE(cell1->nnodes() == 8);
 
-    // Assign quadrilateral shapefn to cell
+    // Assign hexahedron shapefn to cell
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
         std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
     cell1->shapefn(shapefn);
@@ -817,13 +833,16 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                                                    {0, 1, 2, 3, 4, 5, 6, 7},
                                                    // cell #1
                                                    {1, 8, 9, 2, 5, 10, 11, 6}};
+        // Assign hexahedron shapefn to cell
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Clear cells and try creating a list of empty cells
@@ -831,7 +850,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         cells.clear();
         // This fails with empty list error in node creation
         gcid = 100;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         // Try with invalid node ids
@@ -840,7 +859,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                  // cell #1
                  {71, 88, 89, 82, 85, 80, 81, 86}};
         gcid = 200;
-        mesh->create_cells(gcid, cells);
+        mesh->create_cells(gcid, shapefn, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         SECTION("Check creation of particles") {
@@ -922,6 +941,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // This fails with empty list error in particle creation
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
+
+            SECTION("Locate particles in mesh") {
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+
+              // Should find all particles in mesh
+              REQUIRE(particles.size() == 0);
+            }
           }
         }
       }
