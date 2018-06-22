@@ -141,7 +141,7 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
-    mpm::Index gnid, const std::string& particle_type,
+    mpm::Index gpid, const std::string& particle_type,
     const std::vector<VectorDim>& coordinates) {
   bool status = false;
   try {
@@ -153,11 +153,11 @@ bool mpm::Mesh<Tdim>::create_particles(
             // Create a particle of particular
             Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                     const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(particle_type, static_cast<mpm::Index>(gnid),
+                ->create(particle_type, static_cast<mpm::Index>(gpid),
                          particle_coordinates));
 
         // Increament particle id
-        if (insert_status) ++gnid;
+        if (insert_status) ++gpid;
         // When addition of particle fails
         else
           throw std::runtime_error("Addition of particle to mesh failed!");

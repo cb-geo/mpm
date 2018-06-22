@@ -97,11 +97,11 @@ class Mesh {
   void iterate_over_cells(Toper oper);
 
   //! Create particles from coordinates
-  //! \param[in] gnid Global particle id
+  //! \param[in] gpid Global particle id
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
   //! \retval status Create particle status
-  bool create_particles(mpm::Index gnid, const std::string& particle_type,
+  bool create_particles(mpm::Index gpid, const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates);
 
   //! Add a particle to the mesh
