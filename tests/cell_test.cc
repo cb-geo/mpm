@@ -23,6 +23,10 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
+  // Shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+
   Eigen::Vector2d coords;
   coords.setZero();
 
@@ -46,21 +50,21 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     //! Check for id = 0
     SECTION("Cell id is zero") {
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->id() == 0);
     }
 
     SECTION("Cell id is positive") {
       //! Check for id is a positive value
       mpm::Index id = std::numeric_limits<mpm::Index>::max();
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->id() == std::numeric_limits<mpm::Index>::max());
     }
   }
 
   SECTION("Add nodes") {
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
@@ -75,9 +79,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     // Check centroid calculation
     SECTION("Compute centroid of a cell") {
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
-      cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 4);
 
       // Compute centroid
@@ -98,9 +99,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     // Check cell volume
     SECTION("Compute volume of a cell") {
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
-      cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 4);
 
       // Check if cell is initialised, after addition of shapefn
@@ -137,8 +135,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   }
 
   SECTION("Add neighbours") {
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
-    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
+    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, shapefn);
     REQUIRE(cell->nneighbours() == 0);
     cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
@@ -171,7 +169,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
   SECTION("Test particle addition deletion") {
     mpm::Index pid = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
     REQUIRE(cell->status() == false);
     bool status = cell->add_particle_id(pid);
     REQUIRE(status == true);
@@ -182,7 +180,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
   SECTION("Test particle information mapping") {
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -194,7 +192,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
         std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
-    cell->shapefn(shapefn);
 
     // Local coordinate of a particle
     Eigen::Vector2d xi = Eigen::Vector2d::Zero();
@@ -436,19 +433,23 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node7 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
+  // Assign hexahedron shape function
+  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+      std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+
   //! Check Cell IDs
   SECTION("Check cell ids") {
     //! Check for id = 0
     SECTION("Cell id is zero") {
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->id() == 0);
     }
 
     SECTION("Cell id is positive") {
       //! Check for id is a positive value
       mpm::Index id = std::numeric_limits<mpm::Index>::max();
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->id() == std::numeric_limits<mpm::Index>::max());
     }
   }
@@ -456,7 +457,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   // Check node additions
   SECTION("Add nodes") {
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
 
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
@@ -476,9 +477,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Check centroid calculation
     SECTION("Compute centroid of a cell") {
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
-      cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 8);
 
       // Compute centroid
@@ -499,9 +497,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Check cell volume calculation
     SECTION("Compute volume of a cell") {
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
-      cell->shapefn(shapefn);
       REQUIRE(cell->nfunctions() == 8);
 
       // Check if cell is initialised, after addition of shapefn
@@ -542,8 +537,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   }
 
   SECTION("Add neighbours") {
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
-    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
+    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, shapefn);
     REQUIRE(cell->nneighbours() == 0);
     cell->add_neighbour(0, neighbourcell);
     REQUIRE(cell->nneighbours() == 1);
@@ -569,7 +564,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   SECTION("Test particle addition deletion") {
     mpm::Index pid = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
     REQUIRE(cell->status() == false);
     bool status = cell->add_particle_id(pid);
     REQUIRE(status == true);
@@ -580,7 +575,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   SECTION("Test particle information mapping") {
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -594,11 +589,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Create a vector of node pointers
     std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{
         node0, node1, node2, node3, node4, node5, node6, node7};
-
-    // Assign shape function to cell
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
-    cell->shapefn(shapefn);
 
     // Local coordinate of a particle
     Eigen::Vector3d xi = Eigen::Vector3d::Zero();

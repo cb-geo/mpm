@@ -266,8 +266,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
+    // Shape function
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
     // Add nodes to cell
     coords << 0.5, 0.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -297,9 +301,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->cell_id() == 10);
 
     // Assign shapefunction to cell
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
-    cell->shapefn(shapefn);
     cell->compute_volume();
 
     // Check if cell is initialised
@@ -508,8 +509,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
+    // Assign hexahedron shape function
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
     // Add nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -554,9 +559,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->nnodes() == 8);
 
     // Assign shapefunction to cell
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
-    cell->shapefn(shapefn);
     cell->compute_volume();
     // Check if cell is initialised
     REQUIRE(cell->is_initialised() == true);
