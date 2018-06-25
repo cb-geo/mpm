@@ -55,23 +55,15 @@ void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_stress(
     unsigned nphase, const Eigen::Matrix<double, 6, 1>& stress) {
-  try {
-    if (stress.size() != stress_.size()) {
-      std::cout << stress_.size() << "\t" << stress.size() << "\n";
-      throw std::runtime_error(
-          "Particle stress degrees of freedom don't match");
-    }
-    // Assign stress
-    stress_.col(nphase) = stress;
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-  }
+  // Assign stress
+  stress_.col(nphase) = stress;
 }
 
 // Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::assign_velocity(
+bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
     unsigned nphase, const Eigen::VectorXd& velocity) {
+  bool status = false;
   try {
     if (velocity.size() != velocity_.size()) {
       throw std::runtime_error(
@@ -79,15 +71,19 @@ void mpm::Particle<Tdim, Tnphases>::assign_velocity(
     }
     // Assign velocity
     velocity_.col(nphase) = velocity;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
 
 // Assign momentum to the particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::assign_momentum(
+bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
     unsigned nphase, const Eigen::VectorXd& momentum) {
+  bool status = false;
   try {
     if (momentum.size() != momentum_.size()) {
       throw std::runtime_error(
@@ -95,15 +91,19 @@ void mpm::Particle<Tdim, Tnphases>::assign_momentum(
     }
     // Assign momentum
     momentum_.col(nphase) = momentum;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
 
 //! Assign acceleration to the particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
+bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     unsigned nphase, const Eigen::VectorXd& acceleration) {
+  bool status = false;
   try {
     if (acceleration.size() != acceleration_.size()) {
       throw std::runtime_error(
@@ -111,7 +111,10 @@ void mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     }
     // Assign acceleration
     acceleration_.col(nphase) = acceleration;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }

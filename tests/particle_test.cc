@@ -106,52 +106,70 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
-    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 17.51;
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
     particle->assign_stress(Phase, stress);
     for (unsigned i = 0; i < stress.size(); ++i)
-      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->stress(Phase)(i) == Approx(17.51).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_velocity(Phase, velocity);
+    bool status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->velocity(Phase)(i) == Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of velocity
+    velocity.resize(Dim * 2);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
+    status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == false);
 
     // Check momentum
     Eigen::VectorXd momentum;
     momentum.resize(Dim);
-    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 17.51;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
       REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_momentum(Phase, momentum);
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->momentum(Phase)(i) == Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of momentum
+    momentum.resize(Dim * 2);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 17.51;
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == false);
 
     // Check acceleration
     Eigen::VectorXd acceleration;
     acceleration.resize(Dim);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
               Approx(0.).epsilon(Tolerance));
 
-    particle->assign_acceleration(Phase, acceleration);
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
-              Approx(1.).epsilon(Tolerance));
+              Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of acceleration
+    acceleration.resize(Dim * 2);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == false);
   }
 
   //! Test serialize function
@@ -328,52 +346,72 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
-    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 17.52;
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
     particle->assign_stress(Phase, stress);
     for (unsigned i = 0; i < stress.size(); ++i)
-      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->stress(Phase)(i) == Approx(17.52).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 19.745;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_velocity(Phase, velocity);
+    bool status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(19.745).epsilon(Tolerance));
+    // Check for incorrect dimension of velocity
+    velocity.resize(Dim * 2);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 19.745;
+    status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == false);
 
     // Check momentum
     Eigen::VectorXd momentum;
     momentum.resize(Dim);
-    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 19.745;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
       REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_momentum(Phase, momentum);
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->momentum(Phase)(i) ==
+              Approx(19.745).epsilon(Tolerance));
+    // Check for incorrect dimension of momentum
+    momentum.resize(Dim * 2);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 19.745;
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == false);
 
     // Check acceleration
     Eigen::VectorXd acceleration;
     acceleration.resize(Dim);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 19.745;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
               Approx(0.).epsilon(Tolerance));
 
-    particle->assign_acceleration(Phase, acceleration);
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
-              Approx(1.).epsilon(Tolerance));
+              Approx(19.745).epsilon(Tolerance));
+    // Check for incorrect dimension of acceleration
+    acceleration.resize(Dim * 2);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 19.745;
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == false);
   }
 
   //! Test serialize function
@@ -603,40 +641,58 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 1.;
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
 
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_velocity(Phase, velocity);
+    bool status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
-      REQUIRE(particle->velocity(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->velocity(Phase)(i) == Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of velocity
+    velocity.resize(Dim * 2);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
+    status = particle->assign_velocity(Phase, velocity);
+    REQUIRE(status == false);
 
     // Check momentum
     Eigen::VectorXd momentum;
     momentum.resize(Dim);
-    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 1.;
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 17.51;
 
     for (unsigned i = 0; i < momentum.size(); ++i)
       REQUIRE(particle->momentum(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_momentum(Phase, momentum);
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < momentum.size(); ++i)
-      REQUIRE(particle->momentum(Phase)(i) == Approx(1.).epsilon(Tolerance));
+      REQUIRE(particle->momentum(Phase)(i) == Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of momentum
+    momentum.resize(Dim * 2);
+    for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 17.51;
+    status = particle->assign_momentum(Phase, momentum);
+    REQUIRE(status == false);
 
     // Check acceleration
     Eigen::VectorXd acceleration;
     acceleration.resize(Dim);
-    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 1.;
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
 
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
               Approx(0.).epsilon(Tolerance));
 
-    particle->assign_acceleration(Phase, acceleration);
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == true);
     for (unsigned i = 0; i < acceleration.size(); ++i)
       REQUIRE(particle->acceleration(Phase)(i) ==
-              Approx(1.).epsilon(Tolerance));
+              Approx(17.51).epsilon(Tolerance));
+    // Check for incorrect dimension of acceleration
+    acceleration.resize(Dim * 2);
+    for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
+    status = particle->assign_acceleration(Phase, acceleration);
+    REQUIRE(status == false);
   }
 
   //! Test serialize function

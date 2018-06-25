@@ -66,6 +66,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign nodal mass to particles
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
+  //! \retval status Assignment status
   void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
 
   //! Return mass of the particlesx
@@ -87,7 +88,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign velocity to the particle
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
-  void assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
+  //! \retval status Assignment status
+  bool assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
 
   //! Return velocity of the particle
   //! \param[in] nphase Index corresponding to the phase
@@ -98,7 +100,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign momentum to the particle
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] momentum A vector of particle momentum
-  void assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
+  //! \retval status Assignment status
+  bool assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
 
   //! Return momentum of the particle
   //! \param[in] nphase Index corresponding to the phase
@@ -109,7 +112,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign acceleration to the particle
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] acceleration A vector of particle acceleration
-  void assign_acceleration(unsigned nphase,
+  //! \retval status Assignment status
+  bool assign_acceleration(unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
   //! Return acceleration of the particle
