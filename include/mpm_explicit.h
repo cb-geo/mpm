@@ -20,17 +20,26 @@ template <unsigned Tdim>
 class MPMExplicit : public MPM<Tdim> {
  public:
   //! Default constructor
-  MPMExplicit() = default;
+  MPMExplicit(std::unique_ptr<IO>&& io);
 
   //! Initialise
   bool initialise();
 
- private:
+ protected:
   // Generate a unique id for the analysis
-  std::string uuid_;
-
+  using mpm::MPM<Tdim>::uuid_;
+  //! Time step size
+  using mpm::MPM<Tdim>::dt_;
+  //! Number of steps
+  using mpm::MPM<Tdim>::nsteps_;
   //! Mesh object
-  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
+  using mpm::MPM<Tdim>::meshes_;
+  //! A unique ptr to IO object
+  using mpm::MPM<Tdim>::io_;
+  //! JSON analysis object
+  using mpm::MPM<Tdim>::analysis_;
+  //! Logger
+  using mpm::MPM<Tdim>::console_;
 
 };  // MPMExplicit class
 }  // namespace mpm
