@@ -75,7 +75,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  virtual void update_external_force(bool update, unsigned nphase,
+  //! \retval status Update status
+  virtual bool update_external_force(bool update, unsigned nphase,
                                      const Eigen::VectorXd& force) = 0;
 
   //! Return external force
@@ -86,7 +87,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  virtual void update_internal_force(bool update, unsigned nphase,
+  //! \retval status Update status
+  virtual bool update_internal_force(bool update, unsigned nphase,
                                      const Eigen::VectorXd& force) = 0;
 
   //! Return internal force
@@ -97,7 +99,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  virtual void update_momentum(bool update, unsigned nphase,
+  //! \retval status Update status
+  virtual bool update_momentum(bool update, unsigned nphase,
                                const Eigen::VectorXd& momentum) = 0;
 
   //! Return momentum
@@ -115,7 +118,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  virtual void update_acceleration(bool update, unsigned nphase,
+  //! \retval status Update status
+  virtual bool update_acceleration(bool update, unsigned nphase,
                                    const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration

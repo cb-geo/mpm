@@ -82,7 +82,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  void update_external_force(bool update, unsigned nphase,
+  //! \retval status Update status
+  bool update_external_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
   //! Return external force at a given node for a given phase
@@ -95,7 +96,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  void update_internal_force(bool update, unsigned nphase,
+  //! \retval status Update status
+  bool update_internal_force(bool update, unsigned nphase,
                              const Eigen::VectorXd& force);
 
   //! Return internal force at a given node for a given phase
@@ -108,7 +110,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  void update_momentum(bool update, unsigned nphase,
+  //! \retval status Update status
+  bool update_momentum(bool update, unsigned nphase,
                        const Eigen::VectorXd& momentum);
 
   //! Return momentum at a given node for a given phase
@@ -130,7 +133,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  void update_acceleration(bool update, unsigned nphase,
+  //! \retval status Update status
+  bool update_acceleration(bool update, unsigned nphase,
                            const Eigen::VectorXd& acceleration);
 
   //! Return acceleration at a given node for a given phase
