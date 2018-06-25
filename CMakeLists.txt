@@ -52,6 +52,7 @@ SET(mpm_src
   src/io.cc
   src/node.cc
   src/particle.cc
+  src/shapefn.cc
   src/main.cc
 )
 add_executable(mpm
@@ -63,6 +64,7 @@ SET(test_src
    ${mpm_SOURCE_DIR}/src/io.cc
    ${mpm_SOURCE_DIR}/src/node.cc
    ${mpm_SOURCE_DIR}/src/particle.cc
+   ${mpm_SOURCE_DIR}/src/shapefn.cc
    ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
    ${mpm_SOURCE_DIR}/tests/cell_test.cc
    ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
