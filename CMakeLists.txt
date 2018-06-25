@@ -72,6 +72,7 @@ SET(test_src
    ${mpm_SOURCE_DIR}/tests/io_test.cc
    ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
    ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+   ${mpm_SOURCE_DIR}/tests/mpm_explicit_test.cc
    ${mpm_SOURCE_DIR}/tests/node_container_test.cc
    ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
    ${mpm_SOURCE_DIR}/tests/node_test.cc
