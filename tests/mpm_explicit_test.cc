@@ -6,11 +6,7 @@ using Json = nlohmann::json;
 
 #include "mpm_explicit.h"
 
-// Check MPM Explicit
-TEST_CASE("MPM Explicit implementation is checked", "[MPM][Explicit][2D]") {
-  // Dimension
-  const unsigned Dim = 2;
-
+bool write_json_2d(const std::string& file_name) {
   // Make json object with input files
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
@@ -34,9 +30,23 @@ TEST_CASE("MPM Explicit implementation is checked", "[MPM][Explicit][2D]") {
 
   // Dump JSON as an input file to be read
   std::ofstream file;
-  file.open("mpm-explicit-2d.json");
+  file.open(file_name.c_str());
   file << json_file.dump(2);
   file.close();
+
+  return true;
+}
+
+// Check MPM Explicit
+TEST_CASE("MPM Explicit implementation is checked",
+          "[MPM][2D][Explicit][1Phase]") {
+  // Dimension
+  const unsigned Dim = 2;
+
+  // Write JSON file
+  const std::string fname = "mpm-explicit-2d.json";
+  bool status = write_json_2d(fname);
+  REQUIRE(status == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
