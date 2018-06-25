@@ -52,12 +52,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
 }
 
 //! Update external force (body force / traction force)
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     bool update, unsigned nphase, const Eigen::VectorXd& force) {
+  bool status = false;
   try {
     if (force.size() != external_force_.size()) {
       std::cout << external_force_.size() << "\t" << force.size() << "\n";
@@ -71,18 +69,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     // Update/assign external force
     std::lock_guard<std::mutex> guard(node_mutex_);
     external_force_.col(nphase) = external_force_.col(nphase) * factor + force;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
 
 //! Update internal force (body force / traction force)
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     bool update, unsigned nphase, const Eigen::VectorXd& force) {
+  bool status = false;
   try {
     if (force.size() != internal_force_.size()) {
       std::cout << internal_force_.size() << "\t" << force.size() << "\n";
@@ -96,18 +95,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     // Update/assign internal force
     std::lock_guard<std::mutex> guard(node_mutex_);
     internal_force_.col(nphase) = internal_force_.col(nphase) * factor + force;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
 
 //! Assign nodal momentum
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     bool update, unsigned nphase, const Eigen::VectorXd& momentum) {
+  bool status = false;
   try {
     if (momentum.size() != momentum_.size()) {
       throw std::runtime_error("Nodal momentum degrees of freedom don't match");
@@ -120,16 +120,16 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     // Update/assign momentum
     std::lock_guard<std::mutex> guard(node_mutex_);
     momentum_.col(nphase) = momentum_.col(nphase) * factor + momentum;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
 
 //! Compute velocity from momentum
 //! velocity = momentum / mass
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   const double tolerance = std::numeric_limits<double>::lowest();
@@ -140,12 +140,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
 }
 
 //! Update nodal acceleration
-//! \tparam Tdim Dimension
-//! \tparam Tdof Degrees of Freedom
-//! \tparam Tnphases Number of phases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     bool update, unsigned nphase, const Eigen::VectorXd& acceleration) {
+  bool status = false;
   try {
     if (acceleration.size() != acceleration_.size()) {
       throw std::runtime_error(
@@ -160,7 +158,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     std::lock_guard<std::mutex> guard(node_mutex_);
     acceleration_.col(nphase) =
         acceleration_.col(nphase) * factor + acceleration;
+    status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
+  return status;
 }
