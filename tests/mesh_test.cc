@@ -24,8 +24,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const double Tolerance = 1.E-9;
 
   // Shape function
+  // 4-noded quadrilateral shape functions
   std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -275,8 +276,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(3, node3);
 
     // Assign quadrilateral shapefn to cell
+    // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+
     cell1->shapefn(shapefn);
 
     // Compute cell volume
@@ -378,8 +381,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                                                    // cell #1
                                                    {1, 4, 5, 2}};
         // Assign quadrilateral shapefn to cell
+        // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-            std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
 
         // Global cell index
         mpm::Index gcid = 0;
@@ -509,8 +513,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const double Tolerance = 1.E-9;
 
   // Shape function
+  // 8-noded hexahedron shape functions
   std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -742,8 +747,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(cell1->nnodes() == 8);
 
     // Assign hexahedron shapefn to cell
+    // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
     cell1->shapefn(shapefn);
 
     // Compute cell volume
@@ -860,8 +867,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                                                    // cell #1
                                                    {1, 8, 9, 2, 5, 10, 11, 6}};
         // Assign hexahedron shapefn to cell
+        // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-            std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
         // Global cell index
         mpm::Index gcid = 0;
         mesh->create_cells(gcid, shapefn, cells);
