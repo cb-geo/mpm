@@ -6,8 +6,11 @@ using Json = nlohmann::json;
 
 #include "mpm_explicit.h"
 
-bool write_json_2d(const std::string& file_name) {
+bool write_json(unsigned dim, const std::string& file_name) {
   // Make json object with input files
+  std::string dimension = "2d";
+  if (dim == 3) dimension = "3d";
+
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
       {"input_files",
@@ -30,7 +33,7 @@ bool write_json_2d(const std::string& file_name) {
 
   // Dump JSON as an input file to be read
   std::ofstream file;
-  file.open(file_name.c_str());
+  file.open((file_name + "-" + dimension + ".json").c_str());
   file << json_file.dump(2);
   file.close();
 
@@ -38,20 +41,43 @@ bool write_json_2d(const std::string& file_name) {
 }
 
 // Check MPM Explicit
-TEST_CASE("MPM Explicit implementation is checked",
+TEST_CASE("MPM 2D Explicit implementation is checked",
           "[MPM][2D][Explicit][1Phase]") {
   // Dimension
   const unsigned Dim = 2;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit-2d.json";
-  bool status = write_json_2d(fname);
+  const std::string fname = "mpm-explicit";
+  bool status = write_json(2, fname);
   REQUIRE(status == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
   char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
                   (char*)"mpm-explicit-2d.json"};
+
+  // Create an IO object
+  auto io = std::make_unique<mpm::IO>(argc, argv);
+
+  auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+  REQUIRE(mpm->initialise() == true);
+}
+
+// Check MPM Explicit
+TEST_CASE("MPM 3D Explicit implementation is checked",
+          "[MPM][3D][Explicit][1Phase]") {
+  // Dimension
+  const unsigned Dim = 3;
+
+  // Write JSON file
+  const std::string fname = "mpm-explicit";
+  bool status = write_json(3, fname);
+  REQUIRE(status == true);
+
+  // Assign argc and argv to input arguments of MPM
+  int argc = 5;
+  char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
+                  (char*)"mpm-explicit-3d.json"};
 
   // Create an IO object
   auto io = std::make_unique<mpm::IO>(argc, argv);
