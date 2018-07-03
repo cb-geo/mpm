@@ -32,6 +32,8 @@ class MPMExplicit : public MPM<Tdim> {
   using mpm::MPM<Tdim>::dt_;
   //! Number of steps
   using mpm::MPM<Tdim>::nsteps_;
+  //! Gravity
+  using mpm::MPM<Tdim>::gravity_;
   //! Mesh object
   using mpm::MPM<Tdim>::meshes_;
   //! A unique ptr to IO object
