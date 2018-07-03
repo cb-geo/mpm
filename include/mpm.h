@@ -38,6 +38,8 @@ class MPM {
   double dt_{std::numeric_limits<double>::max()};
   //! Number of steps
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
+  //! Gravity
+  Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
   //! A unique ptr to IO object
