@@ -67,6 +67,25 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 8, 3> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1., -1.,
+                1., -1., -1.,
+                1.,  1., -1.,
+               -1.,  1., -1.,
+               -1., -1.,  1.,
+                1., -1.,  1.,
+                1.,  1.,  1.,
+               -1.,  1.,  1.;
+  // clang-format on
+  return unit_cell;
+}
+
 // 20-node (Serendipity) Hexahedron Element
 //!        3       13          2
 //!          0_ _ _ 0 _ _ _  0
@@ -246,6 +265,36 @@ inline std::vector<Eigen::MatrixXd>
     bmatrix.push_back(bi);
   }
   return bmatrix;
+}
+
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 20, 3> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1., -1.,
+                1., -1., -1.,
+                1.,  1., -1.,
+               -1.,  1., -1.,
+               -1., -1.,  1.,
+                1., -1.,  1.,
+                1.,  1.,  1.,
+               -1.,  1.,  1.;
+                0., -1., -1.,
+               -1.,  0., -1.,
+               -1., -1.,  0.,
+                1.,  0., -1.,
+                1., -1.,  0.,
+                0.,  1., -1.,
+                1.,  1.,  0.,
+               -1.,  1.,  0.,
+                0., -1.,  1.,
+               -1.,  0.,  1.,
+                1.,  0.,  1.,
+                0.,  1.,  1.;
+  // clang-format on
+  return unit_cell;
 }
 
 // 27-node (Triquadratic) Hexahedron Element
