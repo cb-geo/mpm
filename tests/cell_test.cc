@@ -141,13 +141,71 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << 0.5, 1.5;
 
         // Coordinates of the point in an unit cell
-        Eigen::Matrix<double, 2, 1> punit_cell;
-        punit_cell << -0.5, 0.5;
+        Eigen::Matrix<double, 2, 1> point_unit_cell;
+        point_unit_cell << -0.5, 0.5;
 
         // Get local coordinates of the point
-        auto local = cell->local_coordinates_point(point);
-        for (unsigned i = 0; i < local.size(); ++i)
-          REQUIRE(local[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+        auto local_point = cell->local_coordinates_point(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+        // Use Newton-raphson iteration
+        local_point = cell->transform_real_to_unit_cell(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Transform real to unit cell, locate point in cell") {
+        // Number of nodes in cell
+        const unsigned Nnodes = 4;
+
+        // Coordinates
+        Eigen::Vector2d coords;
+
+        coords << 2, 1;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 4, 2;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 2, 4;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 1, 3;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        // 4-noded quadrilateral shape functions
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+
+        mpm::Index id = 0;
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+
+        cell->add_node(0, node0);
+        cell->add_node(1, node1);
+        cell->add_node(2, node2);
+        cell->add_node(3, node3);
+        REQUIRE(cell->nnodes() == 4);
+
+        // Coordinates of a point in real cell
+        Eigen::Vector2d point;
+        point << 2.1875, 3.25;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 2, 1> point_unit_cell;
+        point_unit_cell << 0.5, 0.5;
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point = cell->transform_real_to_unit_cell(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
       }
     }
   }
@@ -580,6 +638,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       }
 
       SECTION("Transform real to unit cell, locate point in cell") {
+        // Number of nodes in cell
         const unsigned Nnodes = 8;
 
         // Coordinates

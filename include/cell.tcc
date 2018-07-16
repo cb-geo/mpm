@@ -486,21 +486,14 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
   return xi;
 }
 
-//! Return the local coordinates of a point in a 2D cell
+//! Return the local coordinates of a point in a 2D/3D cell
 template <unsigned Tdim>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
-    const Eigen::Matrix<double, 2, 1>& point) {
-  Eigen::Matrix<double, 2, 1> local;
-  return local;
-}
-
-//! Return the local coordinates of a point in a 3D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
-    const Eigen::Matrix<double, 3, 1>& point) {
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::transform_real_to_unit_cell(
+        const Eigen::Matrix<double, Tdim, 1>& point) {
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, 3, 1> local;
+  Eigen::Matrix<double, Tdim, 1> local;
   local.setZero();
 
   // Maximum iterations of newton raphson
@@ -510,17 +503,17 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(3, this->nfunctions());
+  nodal_coords.resize(Tdim, this->nfunctions());
 
   for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
+    Eigen::Matrix<double, Tdim, 1> node = nodes_[j]->coordinates();
     for (unsigned i = 0; i < Tdim; ++i) {
       nodal_coords(i, j) = node[i];
     }
   }
 
   // Coordinates of a unit cell
-  Eigen::Matrix<double, 8, 3> unit_cell = shapefn_->unit_cell_coordinates();
+  const auto unit_cell = shapefn_->unit_cell_coordinates();
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
@@ -529,7 +522,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
-    Eigen::Matrix3d jacobian;
+    Eigen::Matrix<double, Tdim, Tdim> jacobian;
     const auto grad_sf = shapefn_->grad_shapefn(local);
     jacobian = unit_cell.transpose() * grad_sf;
 
@@ -537,7 +530,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const auto sf = shapefn_->shapefn(local);
 
     // Residual
-    Eigen::Vector3d residual;
+    Eigen::Matrix<double, Tdim, 1> residual;
     residual = (nodal_coords * sf) - point;
     // std::cout << iter << " residual: " << residual << "\n";
 
