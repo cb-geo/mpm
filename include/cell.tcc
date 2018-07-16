@@ -504,59 +504,58 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   local.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned niterations = 500;
+  const unsigned max_iterations = 100;
   // Tolerance for newton raphson
-  const double tolerance = 1.e-12;
+  const double tolerance = 1.e-11;
 
-  // 8-noded hexahedron
-  if (this->nfunctions() == 8) {
-    // Matrix of nodal coordinates
-    Eigen::Matrix<double, 3, 8> nodal_coords;
-    for (unsigned j = 0; j < this->nfunctions(); ++j) {
-      Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
-      for (unsigned i = 0; i < Tdim; ++i) {
-        nodal_coords(i, j) = node[i];
-      }
+  // Matrix of nodal coordinates
+  Eigen::MatrixXd nodal_coords;
+  nodal_coords.resize(3, this->nfunctions());
+
+  for (unsigned j = 0; j < this->nfunctions(); ++j) {
+    Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
+    for (unsigned i = 0; i < Tdim; ++i) {
+      nodal_coords(i, j) = node[i];
     }
+  }
 
-    Eigen::Matrix<double, 8, 3> unit_cell;
-    // clang-format off
-    unit_cell << -1., -1., -1.,
-                  1., -1., -1.,
-                  1.,  1., -1.,
-                 -1.,  1., -1.,
-                 -1., -1.,  1.,
-                  1., -1.,  1.,
-                  1.,  1.,  1.,
-                 -1.,  1.,  1.;
-    // clang-format on
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 8, 3> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1., -1.,
+                1., -1., -1.,
+                1.,  1., -1.,
+               -1.,  1., -1.,
+               -1., -1.,  1.,
+                1., -1.,  1.,
+                1.,  1.,  1.,
+               -1.,  1.,  1.;
+  // clang-format on
 
-    // Newton Raphson iteration to solve for x
+  // Newton Raphson iteration to solve for x
+  // x_{n+1} = x_n - f(x)/f'(x)
+  // f(x) = p(x) - p, where p is the real point
+  // p(x) is the computed point.
+  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+
+    // Calculate Jacobian
+    Eigen::Matrix3d jacobian;
+    const auto grad_sf = shapefn_->grad_shapefn(local);
+    jacobian = unit_cell.transpose() * grad_sf;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(local);
+
+    // Residual
+    Eigen::Vector3d residual;
+    residual = (nodal_coords * sf) - point;
+    // std::cout << iter << " residual: " << residual << "\n";
+
+    // Convergence criteria
+    if (residual.norm() < tolerance) break;
+
     // x_{n+1} = x_n - f(x)/f'(x)
-    // f(x) = p(x) - p, where p is the real point
-    // p(x) is the computed point.
-    for (unsigned iter = 0; iter < niterations; ++iter) {
-
-      std::cout << "Local coordinates: " << iter << " \n";
-      for (unsigned j = 0; j < Tdim; ++j) std::cout << local[j] << "\t";
-      std::cout << "\n";
-
-      // Calculate Jacobian
-      Eigen::Matrix3d jacobian;
-      const Eigen::Matrix<double, 8, 3> grad_sf = shapefn_->grad_shapefn(local);
-      jacobian = unit_cell.transpose() * grad_sf;
-
-      // Shape function
-      const auto sf = shapefn_->shapefn(local);
-
-      // Residual
-      Eigen::Vector3d residual;
-      residual = (nodal_coords * sf) - point;
-
-      std::cout << iter << " residual: " << residual << "\n";
-      if (residual.norm() < tolerance) break;
-      local -= (jacobian.inverse() * residual);
-    }
+    local -= (jacobian.inverse() * residual);
   }
   return local;
 }

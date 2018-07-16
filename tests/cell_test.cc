@@ -642,18 +642,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         Eigen::Matrix<double, 3, 1> point_unit_cell;
         point_unit_cell << 0.5, 0.5, 0.;
 
-        // Use Newton-raphson iteration
-        std::cout << __FILE__ << __LINE__ << "\n";
-        cell->compute_volume();
-        std::cout << __FILE__ << __LINE__ << "\n";
-        cell->compute_centroid();
-        std::cout << __FILE__ << __LINE__ << "\n";
+        // Use Newton-raphson iteration to find local coordinates
         auto local_point = cell->transform_real_to_unit_cell(point);
-        std::cout << __FILE__ << __LINE__ << "\n";
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
-        std::cout << __FILE__ << __LINE__ << "\n";
       }
     }
   }
