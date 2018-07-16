@@ -486,6 +486,25 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
   return xi;
 }
 
+//! Return the local coordinates of a point in a 2D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 2, 1>& point) {
+  Eigen::Matrix<double, 2, 1> local;
+  return local;
+}
+
+//! Return the local coordinates of a point in a 3D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 3, 1>& point) {
+  Eigen::Matrix<double, 3, 1> local;
+
+  Eigen::Matrix<double, 3, this->shapefn_->nfunctions()> edges;
+
+  return local;
+}
+
 //! Map particle mass to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,

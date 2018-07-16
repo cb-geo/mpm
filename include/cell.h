@@ -136,6 +136,20 @@ class Cell {
   Eigen::Matrix<double, 3, 1> local_coordinates_point(
       const Eigen::Matrix<double, 3, 1>& point);
 
+  //! Return the local coordinates of a point in an unit 2D cell
+  //! Using newton iteration
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 2, 1> transform_real_to_unit_cell(
+      const Eigen::Matrix<double, 2, 1>& point);
+
+  //! Return the local coordinates of a point in an unit 3D cell
+  //! Using newton iteration
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 3, 1> transform_real_to_unit_cell(
+      const Eigen::Matrix<double, 3, 1>& point);
+
   //! Map particle mass to nodes
   //! \param[in] xi local coordinates of particle
   //! \param[in] nphase Phase associate to the particle

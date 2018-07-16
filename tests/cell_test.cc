@@ -133,6 +133,22 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << -2, 2.;
         REQUIRE(cell->point_in_cell(point) == false);
       }
+      // Find local coordinates of a point in a cell
+      SECTION("Find local coordinates of a point in cell") {
+        // Coordinates of a point in real cell
+        Eigen::Vector2d point;
+        point << 0.5, 1.5;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 2, 1> punit_cell;
+        punit_cell << -0.5, 0.5;
+
+        // Get local coordinates of the point
+        Eigen::Matrix<double, 2, 1> local =
+            cell->local_coordinates_point(point);
+        for (unsigned i = 0; i < local.size(); ++i)
+          REQUIRE(local[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+      }
     }
   }
 
@@ -539,6 +555,22 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point << 2.5, 2.5, 2.5;
         REQUIRE(cell->point_in_cell(point) == false);
       }
+      // Find local coordinates of a point in a cell
+      SECTION("Find local coordinates of a point in cell") {
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point;
+        point << 0.5, 1.0, 1.5;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> punit_cell;
+        punit_cell << -0.5, 0., 0.5;
+
+        // Get local coordinates of the point
+        Eigen::Matrix<double, 3, 1> local =
+            cell->local_coordinates_point(point);
+        for (unsigned i = 0; i < local.size(); ++i)
+          REQUIRE(local[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+      }
     }
   }
 
@@ -602,6 +634,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Local coordinate of a particle
     Eigen::Vector3d xi = Eigen::Vector3d::Zero();
+
     // Particle mass
     double pmass = 4.;
     // Particle volume
