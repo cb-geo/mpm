@@ -14,7 +14,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == Tdim) {
       for (unsigned i = 0; i < analysis_.at("gravity").size(); ++i) {
-        gravity_.at(i) = analysis_.at("gravity").at(i);
+        gravity_[i] = analysis_.at("gravity").at(i);
       }
     }
   } catch (std::domain_error& domain_error) {
