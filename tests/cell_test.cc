@@ -563,18 +563,97 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point << 0.5, 1.0, 1.5;
 
         // Coordinates of the point in an unit cell
-        Eigen::Matrix<double, 3, 1> punit_cell;
-        punit_cell << -0.5, 0., 0.5;
+        Eigen::Matrix<double, 3, 1> point_unit_cell;
+        point_unit_cell << -0.5, 0., 0.5;
 
         // Get local coordinates of the point
-        auto local = cell->local_coordinates_point(point);
-        for (unsigned i = 0; i < local.size(); ++i)
-          REQUIRE(local[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+        auto local_point = cell->local_coordinates_point(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
 
         // Use Newton-raphson iteration
-        auto lpoint = cell->transform_real_to_unit_cell(point);
-        for (unsigned i = 0; i < lpoint.size(); ++i)
-          REQUIRE(lpoint[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+        local_point = cell->transform_real_to_unit_cell(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Transform real to unit cell, locate point in cell") {
+        const unsigned Nnodes = 8;
+
+        // Coordinates
+        Eigen::Vector3d coords;
+
+        coords << 2, 1, -1;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 4, 2, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 2, 4, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 1, 3, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        coords << 2, 1, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+        coords << 4, 2, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+        coords << 2, 4, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+        coords << 1, 3, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+        // 8-noded hexahedron shape functions
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
+        mpm::Index id = 0;
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+
+        cell->add_node(0, node0);
+        cell->add_node(1, node1);
+        cell->add_node(2, node2);
+        cell->add_node(3, node3);
+        cell->add_node(4, node4);
+        cell->add_node(5, node5);
+        cell->add_node(6, node6);
+        cell->add_node(7, node7);
+        REQUIRE(cell->nnodes() == 8);
+
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point;
+        point << 2.1875, 3.25, 0.;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell;
+        point_unit_cell << 0.5, 0.5, 0.;
+
+        // Use Newton-raphson iteration
+        std::cout << __FILE__ << __LINE__ << "\n";
+        cell->compute_volume();
+        std::cout << __FILE__ << __LINE__ << "\n";
+        cell->compute_centroid();
+        std::cout << __FILE__ << __LINE__ << "\n";
+        auto local_point = cell->transform_real_to_unit_cell(point);
+        std::cout << __FILE__ << __LINE__ << "\n";
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+        std::cout << __FILE__ << __LINE__ << "\n";
       }
     }
   }

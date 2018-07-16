@@ -504,7 +504,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   local.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned niterations = 20;
+  const unsigned niterations = 500;
   // Tolerance for newton raphson
   const double tolerance = 1.e-12;
 
@@ -553,6 +553,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
       Eigen::Vector3d residual;
       residual = (nodal_coords * sf) - point;
 
+      std::cout << iter << " residual: " << residual << "\n";
       if (residual.norm() < tolerance) break;
       local -= (jacobian.inverse() * residual);
     }
