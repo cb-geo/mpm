@@ -133,7 +133,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << -2, 2.;
         REQUIRE(cell->point_in_cell(point) == false);
       }
-      
+
       // Find local coordinates of a point in a cell
       SECTION("Find local coordinates of a point in cell") {
         // Coordinates of a point in real cell
@@ -555,7 +555,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point << 2.5, 2.5, 2.5;
         REQUIRE(cell->point_in_cell(point) == false);
       }
-      
+
       // Find local coordinates of a point in a cell
       SECTION("Find local coordinates of a point in cell") {
         // Coordinates of a point in real cell
@@ -570,6 +570,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         auto local = cell->local_coordinates_point(point);
         for (unsigned i = 0; i < local.size(); ++i)
           REQUIRE(local[i] == Approx(punit_cell[i]).epsilon(Tolerance));
+
+        // Use Newton-raphson iteration
+        auto lpoint = cell->transform_real_to_unit_cell(point);
+        for (unsigned i = 0; i < lpoint.size(); ++i)
+          REQUIRE(lpoint[i] == Approx(punit_cell[i]).epsilon(Tolerance));
       }
     }
   }
