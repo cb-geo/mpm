@@ -38,6 +38,21 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 4, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.;
+  // clang-format on
+  return unit_cell;
+}
+
 // 8-node Quadrilateral Element
 //!  3      6       2
 //!   0-----0-----0
@@ -90,6 +105,25 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
   grad_shapefn(6, 1) = 0.5 * (1 - (xi(0) * xi(0)));
   grad_shapefn(7, 1) = -xi(1) * (1. - xi(0));
   return grad_shapefn;
+}
+
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 8, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.,
+                0., -1.,
+                1.,  0.,
+                0.,  1.,
+               -1.,  0.;
+  // clang-format on
+  return unit_cell;
 }
 
 // 9-node Quadrilateral Element
@@ -149,6 +183,26 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   grad_shapefn(7, 1) = -xi(0) * xi(1) * (xi(0) - 1.);
   grad_shapefn(8, 1) = 2. * xi(1) * ((xi(0) * xi(0)) - 1.);
   return grad_shapefn;
+}
+
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 9, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.,
+                0., -1.,
+                1.,  0.,
+                0.,  1.,
+               -1.,  0.,
+                0.,  0.;
+  // clang-format on
+  return unit_cell;
 }
 
 //! Return the B-matrix of a Quadrilateral Element at a given local
