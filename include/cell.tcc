@@ -499,12 +499,13 @@ template <unsigned Tdim>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
+  // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 3, 1> local;
   local.setZero();
 
   // Maximum iterations of newton raphson
   const unsigned niterations = 20;
-  // Tolerance
+  // Tolerance for newton raphson
   const double tolerance = 1.e-12;
 
   // 8-noded hexahedron
@@ -530,6 +531,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
                  -1.,  1.,  1.;
     // clang-format on
 
+    // Newton Raphson iteration to solve for x
+    // x_{n+1} = x_n - f(x)/f'(x)
+    // f(x) = p(x) - p, where p is the real point
+    // p(x) is the computed point.
     for (unsigned iter = 0; iter < niterations; ++iter) {
 
       std::cout << "Local coordinates: " << iter << " \n";
@@ -542,7 +547,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
       jacobian = unit_cell.transpose() * grad_sf;
 
       // Shape function
-      const Eigen::Matrix<double, 8, 1> sf = shapefn_->shapefn(local);
+      const auto sf = shapefn_->shapefn(local);
 
       // Residual
       Eigen::Vector3d residual;
