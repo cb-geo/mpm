@@ -520,17 +520,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   }
 
   // Coordinates of a unit cell
-  Eigen::Matrix<double, 8, 3> unit_cell;
-  // clang-format off
-  unit_cell << -1., -1., -1.,
-                1., -1., -1.,
-                1.,  1., -1.,
-               -1.,  1., -1.,
-               -1., -1.,  1.,
-                1., -1.,  1.,
-                1.,  1.,  1.,
-               -1.,  1.,  1.;
-  // clang-format on
+  Eigen::Matrix<double, 8, 3> unit_cell = shapefn_->unit_cell_coordinates();
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)

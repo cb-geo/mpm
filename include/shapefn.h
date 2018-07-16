@@ -39,6 +39,9 @@ class ShapeFn {
   //! \retval bmatrix B matrix
   virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) = 0;
 
+  //! Return nodal coordinates of a unit cell
+  virtual Eigen::MatrixXd unit_cell_coordinates() const = 0;
+
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
   virtual Eigen::VectorXi corner_indices() = 0;
