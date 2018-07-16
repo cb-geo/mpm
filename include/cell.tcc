@@ -498,10 +498,60 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
+
   Eigen::Matrix<double, 3, 1> local;
+  local.setZero();
 
-  Eigen::Matrix<double, 3, this->shapefn_->nfunctions()> edges;
+  // Maximum iterations of newton raphson
+  const unsigned niterations = 20;
+  // Tolerance
+  const double tolerance = 1.e-12;
 
+  // 8-noded hexahedron
+  if (this->nfunctions() == 8) {
+    // Matrix of nodal coordinates
+    Eigen::Matrix<double, 3, 8> nodal_coords;
+    for (unsigned j = 0; j < this->nfunctions(); ++j) {
+      Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
+      for (unsigned i = 0; i < Tdim; ++i) {
+        nodal_coords(i, j) = node[i];
+      }
+    }
+
+    Eigen::Matrix<double, 8, 3> unit_cell;
+    // clang-format off
+    unit_cell << -1., -1., -1.,
+                  1., -1., -1.,
+                  1.,  1., -1.,
+                 -1.,  1., -1.,
+                 -1., -1.,  1.,
+                  1., -1.,  1.,
+                  1.,  1.,  1.,
+                 -1.,  1.,  1.;
+    // clang-format on
+
+    for (unsigned iter = 0; iter < niterations; ++iter) {
+
+      std::cout << "Local coordinates: " << iter << " \n";
+      for (unsigned j = 0; j < Tdim; ++j) std::cout << local[j] << "\t";
+      std::cout << "\n";
+
+      // Calculate Jacobian
+      Eigen::Matrix3d jacobian;
+      const Eigen::Matrix<double, 8, 3> grad_sf = shapefn_->grad_shapefn(local);
+      jacobian = unit_cell.transpose() * grad_sf;
+
+      // Shape function
+      const Eigen::Matrix<double, 8, 1> sf = shapefn_->shapefn(local);
+
+      // Residual
+      Eigen::Vector3d residual;
+      residual = (nodal_coords * sf) - point;
+
+      if (residual.norm() < tolerance) break;
+      local -= (jacobian.inverse() * residual);
+    }
+  }
   return local;
 }
 
