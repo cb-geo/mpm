@@ -516,11 +516,37 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   // Coordinates of a unit cell
   const auto unit_cell = shapefn_->unit_cell_coordinates();
 
+  // Affine transformation, using linear interpolation for the initial guess
+  if (this->nfunctions() == 4) {
+    // A = vertex * KA
+    Eigen::Matrix<double, 2, 2> A;
+    A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+
+    // b = vertex * Kb
+    Eigen::Matrix<double, 2, 1> b =
+        point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
+
+    Eigen::Matrix<double, 2, 1> local_point = A.inverse() * b;
+
+    // Check for nan
+    bool local_nan = false;
+
+    std::cout << "affine: ";
+    for (unsigned i = 0; i < b.size(); ++i) {
+      std::cout << local_point(i) << "\t";
+      if (std::isnan(std::fabs(local_point(i)))) bool local_nan = true;
+    }
+    if (!local_nan) local = local_point;
+    std::cout << "\n";
+  }
+
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+  unsigned iter = 0;
+  double threshold_norm;
+  for (iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
@@ -530,17 +556,23 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     // Shape function
     const auto sf = shapefn_->shapefn(local);
 
-    // Residual
+    // Residual (f(x))
     Eigen::Matrix<double, Tdim, 1> residual;
+    // f(x) = p(x) - p, where p is the real point
     residual = (nodal_coords * sf) - point;
     // std::cout << iter << " residual: " << residual << "\n";
 
-    // Convergence criteria
-    if (residual.norm() < tolerance) break;
-
     // x_{n+1} = x_n - f(x)/f'(x)
     local -= (jacobian.inverse() * residual);
+
+    // Convergence criteria
+    if (residual.norm() < tolerance) break;
+    threshold_norm = residual.norm();
   }
+  std::cout << "Real to unit: \t" << iter << "\t" << threshold_norm << "\n";
+  for (unsigned i = 0; i < local.size(); ++i) std::cout << local(i) << "\t";
+  std::cout << "\n";
+
   return local;
 }
 
@@ -612,17 +644,19 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     // Shape function
     const auto sf = shapefn_->shapefn(local);
 
-    // Residual
+    // Residual f(x)
     Eigen::Matrix<double, Tdim, 1> residual;
+    // f(x) = p(x) - p
     residual = (nodal_coords * sf) - point;
     // std::cout << iter << " residual: " << residual << "\n";
 
     // Convergence criteria
     threshold_norm = residual.norm();
-    if (residual.norm() < tolerance) break;
 
     // x_{n+1} = x_n - f(x)/f'(x)
     local -= (jacobian.inverse() * residual);
+
+    if (residual.norm() < tolerance) break;
   }
   std::cout << "Real to unit: \t" << iter << "\t" << threshold_norm << "\n";
   for (unsigned i = 0; i < local.size(); ++i) std::cout << local(i) << "\t";
