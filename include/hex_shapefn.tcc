@@ -280,7 +280,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() co
                -1., -1.,  1.,
                 1., -1.,  1.,
                 1.,  1.,  1.,
-               -1.,  1.,  1.;
+               -1.,  1.,  1.,
                 0., -1., -1.,
                -1.,  0., -1.,
                -1., -1.,  0.,
