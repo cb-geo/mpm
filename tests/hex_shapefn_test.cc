@@ -278,6 +278,32 @@ TEST_CASE("Hexahedron shape functions are checked",
       }
     }
 
+    SECTION("Eight noded hexahedron coordinates of unit cell") {
+      const unsigned nfunctions = 8;
+      // Coordinates of a unit cell
+      Eigen::Matrix<double, nfunctions, Dim> unit_cell;
+      // clang-format off
+      unit_cell << -1., -1., -1.,
+                    1., -1., -1.,
+                    1.,  1., -1.,
+                   -1.,  1., -1.,
+                   -1., -1.,  1.,
+                    1., -1.,  1.,
+                    1.,  1.,  1.,
+                   -1.,  1.,  1.;
+      // clang-format on
+
+      auto coordinates = hexsf->unit_cell_coordinates();
+      REQUIRE(coordinates.rows() == nfunctions);
+      REQUIRE(coordinates.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
+        for (unsigned j = 0; j < Dim; ++j) {       // Dimension
+          REQUIRE(coordinates(i, j) ==
+                  Approx(unit_cell(i, j)).epsilon(Tolerance));
+        }
+      }
+    }
+
     SECTION("Eight noded hexahedron shape function for corner indices") {
       // Check for volume indices
       Eigen::VectorXi indices = hexsf->corner_indices();
@@ -1043,6 +1069,45 @@ TEST_CASE("Hexahedron shape functions are checked",
         REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    SECTION("20-noded hexahedron coordinates of unit cell") {
+      const unsigned nfunctions = 20;
+
+      // Coordinates of a unit cell
+      Eigen::Matrix<double, nfunctions, Dim> unit_cell;
+      // clang-format off
+      unit_cell << -1., -1., -1.,
+                    1., -1., -1.,
+                    1.,  1., -1.,
+                   -1.,  1., -1.,
+                   -1., -1.,  1.,
+                    1., -1.,  1.,
+                    1.,  1.,  1.,
+                   -1.,  1.,  1.,
+                    0., -1., -1.,
+                   -1.,  0., -1.,
+                   -1., -1.,  0.,
+                    1.,  0., -1.,
+                    1., -1.,  0.,
+                    0.,  1., -1.,
+                    1.,  1.,  0.,
+                   -1.,  1.,  0.,
+                    0., -1.,  1.,
+                   -1.,  0.,  1.,
+                    1.,  0.,  1.,
+                    0.,  1.,  1.;
+      // clang-format on
+
+      auto coordinates = hexsf->unit_cell_coordinates();
+      REQUIRE(coordinates.rows() == nfunctions);
+      REQUIRE(coordinates.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
+        for (unsigned j = 0; j < Dim; ++j) {       // Dimension
+          REQUIRE(coordinates(i, j) ==
+                  Approx(unit_cell(i, j)).epsilon(Tolerance));
+        }
       }
     }
 

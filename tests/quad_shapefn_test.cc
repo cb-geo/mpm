@@ -177,6 +177,29 @@ TEST_CASE("Quadrilateral shape functions are checked",
       }
     }
 
+    SECTION("Four noded quadrilateral coordinates of unit cell") {
+      const unsigned nfunctions = 4;
+
+      // Coordinates of a unit cell
+      Eigen::Matrix<double, nfunctions, Dim> unit_cell;
+      // clang-format off
+      unit_cell << -1., -1.,
+                    1., -1.,
+                    1.,  1.,
+                   -1.,  1.;
+      // clang-format on
+
+      auto coordinates = quadsf->unit_cell_coordinates();
+      REQUIRE(coordinates.rows() == nfunctions);
+      REQUIRE(coordinates.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
+        for (unsigned j = 0; j < Dim; ++j) {       // Dimension
+          REQUIRE(coordinates(i, j) ==
+                  Approx(unit_cell(i, j)).epsilon(Tolerance));
+        }
+      }
+    }
+
     SECTION("Four noded quadrilateral shape function for corner indices") {
       // Check for corner indices
       Eigen::VectorXi indices = quadsf->corner_indices();
@@ -410,6 +433,33 @@ TEST_CASE("Quadrilateral shape functions are checked",
         REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    SECTION("Eight noded quadrilateral coordinates of unit cell") {
+      const unsigned nfunctions = 8;
+
+      // Coordinates of a unit cell
+      Eigen::Matrix<double, nfunctions, Dim> unit_cell;
+      // clang-format off
+      unit_cell << -1., -1.,
+                    1., -1.,
+                    1.,  1.,
+                   -1.,  1.,
+                    0., -1.,
+                    1.,  0.,
+                    0.,  1.,
+                   -1.,  0.;
+      // clang-format on
+
+      auto coordinates = quadsf->unit_cell_coordinates();
+      REQUIRE(coordinates.rows() == nfunctions);
+      REQUIRE(coordinates.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
+        for (unsigned j = 0; j < Dim; ++j) {       // Dimension
+          REQUIRE(coordinates(i, j) ==
+                  Approx(unit_cell(i, j)).epsilon(Tolerance));
+        }
       }
     }
 
@@ -653,6 +703,34 @@ TEST_CASE("Quadrilateral shape functions are checked",
         REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    SECTION("Nine noded quadrilateral coordinates of unit cell") {
+      const unsigned nfunctions = 9;
+
+      // Coordinates of a unit cell
+      Eigen::Matrix<double, nfunctions, Dim> unit_cell;
+      // clang-format off
+      unit_cell << -1., -1.,
+                    1., -1.,
+                    1.,  1.,
+                   -1.,  1.,
+                    0., -1.,
+                    1.,  0.,
+                    0.,  1.,
+                   -1.,  0.,
+                    0.,  0.;
+      // clang-format on
+
+      auto coordinates = quadsf->unit_cell_coordinates();
+      REQUIRE(coordinates.rows() == nfunctions);
+      REQUIRE(coordinates.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
+        for (unsigned j = 0; j < Dim; ++j) {       // Dimension
+          REQUIRE(coordinates(i, j) ==
+                  Approx(unit_cell(i, j)).epsilon(Tolerance));
+        }
       }
     }
 
