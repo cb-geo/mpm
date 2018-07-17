@@ -526,27 +526,21 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 2, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
 
+    // Affine transform: A^-1 * b
     Eigen::Matrix<double, 2, 1> local_point = A.inverse() * b;
 
     // Check for nan
     bool local_nan = false;
-
-    std::cout << "affine: ";
-    for (unsigned i = 0; i < b.size(); ++i) {
-      std::cout << local_point(i) << "\t";
+    for (unsigned i = 0; i < local_point.size(); ++i)
       if (std::isnan(std::fabs(local_point(i)))) bool local_nan = true;
-    }
     if (!local_nan) local = local_point;
-    std::cout << "\n";
   }
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  unsigned iter = 0;
-  double threshold_norm;
-  for (iter = 0; iter < max_iterations; ++iter) {
+  for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
@@ -560,19 +554,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     Eigen::Matrix<double, Tdim, 1> residual;
     // f(x) = p(x) - p, where p is the real point
     residual = (nodal_coords * sf) - point;
-    // std::cout << iter << " residual: " << residual << "\n";
 
     // x_{n+1} = x_n - f(x)/f'(x)
     local -= (jacobian.inverse() * residual);
 
     // Convergence criteria
     if (residual.norm() < tolerance) break;
-    threshold_norm = residual.norm();
   }
-  std::cout << "Real to unit: \t" << iter << "\t" << threshold_norm << "\n";
-  for (unsigned i = 0; i < local.size(); ++i) std::cout << local(i) << "\t";
-  std::cout << "\n";
-
   return local;
 }
 
@@ -614,27 +602,22 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 3, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
 
+    // Affine transform: A^-1 * b
     Eigen::Matrix<double, 3, 1> local_point = A.inverse() * b;
 
     // Check for nan
     bool local_nan = false;
-
-    std::cout << "affine: ";
-    for (unsigned i = 0; i < b.size(); ++i) {
-      std::cout << local_point(i) << "\t";
+    for (unsigned i = 0; i < local_point.size(); ++i)
       if (std::isnan(std::fabs(local_point(i)))) bool local_nan = true;
-    }
+
     if (!local_nan) local = local_point;
-    std::cout << "\n";
   }
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  unsigned iter = 0;
-  double threshold_norm = 0;
-  for (iter = 0; iter < max_iterations; ++iter) {
+  for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
@@ -648,19 +631,13 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     Eigen::Matrix<double, Tdim, 1> residual;
     // f(x) = p(x) - p
     residual = (nodal_coords * sf) - point;
-    // std::cout << iter << " residual: " << residual << "\n";
-
-    // Convergence criteria
-    threshold_norm = residual.norm();
 
     // x_{n+1} = x_n - f(x)/f'(x)
     local -= (jacobian.inverse() * residual);
 
+    // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
-  std::cout << "Real to unit: \t" << iter << "\t" << threshold_norm << "\n";
-  for (unsigned i = 0; i < local.size(); ++i) std::cout << local(i) << "\t";
-  std::cout << "\n";
   return local;
 }
 

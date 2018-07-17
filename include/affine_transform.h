@@ -30,7 +30,9 @@ namespace mpm {
 // Let K = M^t * (M M^t)^{-1} = [KA Kb] this can be precomputed,
 // and that is exactly what we do. Finally A = Y*KA and b = Y*Kb.
 
-// Affine transform real to unit cell
+//! \brief Affine transform real to unit cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunc Number of functions (vertices)
 template <int Tdim, int Tnfunc>
 struct TransformR2UAffine {
   static const Eigen::Matrix<double, Tnfunc, Tdim> KA;
