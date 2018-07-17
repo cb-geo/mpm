@@ -494,8 +494,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, Tdim, 1> local;
-  local.setZero();
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.setZero();
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 100;
@@ -527,13 +527,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
         point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 2, 1> local_point = A.inverse() * b;
+    Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool local_nan = false;
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      if (std::isnan(std::fabs(local_point(i)))) bool local_nan = true;
-    if (!local_nan) local = local_point;
+    bool guess_nan = false;
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+    if (!guess_nan) xi = affine_guess;
   }
 
   // Newton Raphson iteration to solve for x
@@ -544,11 +544,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
-    const auto grad_sf = shapefn_->grad_shapefn(local);
+    const auto grad_sf = shapefn_->grad_shapefn(xi);
     jacobian = unit_cell.transpose() * grad_sf;
 
     // Shape function
-    const auto sf = shapefn_->shapefn(local);
+    const auto sf = shapefn_->shapefn(xi);
 
     // Residual (f(x))
     Eigen::Matrix<double, Tdim, 1> residual;
@@ -556,12 +556,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
-    local -= (jacobian.inverse() * residual);
+    xi -= (jacobian.inverse() * residual);
 
     // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
-  return local;
+  return xi;
 }
 
 //! Return the local coordinates of a point in a 2D/3D cell
@@ -570,8 +570,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, Tdim, 1> local;
-  local.setZero();
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.setZero();
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 100;
@@ -603,14 +603,13 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
         point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 3, 1> local_point = A.inverse() * b;
+    Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool local_nan = false;
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      if (std::isnan(std::fabs(local_point(i)))) bool local_nan = true;
-
-    if (!local_nan) local = local_point;
+    bool guess_nan = false;
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+    if (!guess_nan) xi = affine_guess;
   }
 
   // Newton Raphson iteration to solve for x
@@ -621,11 +620,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
-    const auto grad_sf = shapefn_->grad_shapefn(local);
+    const auto grad_sf = shapefn_->grad_shapefn(xi);
     jacobian = unit_cell.transpose() * grad_sf;
 
     // Shape function
-    const auto sf = shapefn_->shapefn(local);
+    const auto sf = shapefn_->shapefn(xi);
 
     // Residual f(x)
     Eigen::Matrix<double, Tdim, 1> residual;
@@ -633,12 +632,12 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
-    local -= (jacobian.inverse() * residual);
+    xi -= (jacobian.inverse() * residual);
 
     // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
-  return local;
+  return xi;
 }
 
 //! Map particle mass to nodes
