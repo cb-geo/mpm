@@ -9,6 +9,7 @@
 #include "Eigen/Dense"
 #include "Eigen/LU"
 
+#include "affine_transform.h"
 #include "handler.h"
 #include "node_base.h"
 #include "shapefn.h"
