@@ -21,7 +21,7 @@ namespace mpm {
 // </ul>
 //
 // We look for a matrix X such that X * M = Y where M is
-// a (dim+1) x n_vertices matrix and Y a spacedim x n_vertices.  And:
+// a (dim+1) x n_vertices matrix and Y a dim x n_vertices.  And:
 // The i-th column of M is unit_vertex[i] and the last row all
 // 1's. The i-th column of Y is real_vertex[i].  If we split X=[A|b],
 // the least square approx is A x_hat+b Classically X = Y * (M^t (M
