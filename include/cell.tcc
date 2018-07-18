@@ -242,6 +242,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_mean_length() {
   // Get the indices of sub-triangles
   Eigen::MatrixXi indices = shapefn_->sides_indices();
+  this->mean_length_ = 0.;
   // Calculate the mean length
   for (unsigned i = 0; i < indices.rows(); ++i)
     this->mean_length_ += (nodes_[indices(i, 0)]->coordinates() -
