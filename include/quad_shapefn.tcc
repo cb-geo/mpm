@@ -38,6 +38,21 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 4, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.;
+  // clang-format on
+  return unit_cell;
+}
+
 // 8-node Quadrilateral Element
 //!  3      6       2
 //!   0-----0-----0
@@ -90,6 +105,25 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
   grad_shapefn(6, 1) = 0.5 * (1 - (xi(0) * xi(0)));
   grad_shapefn(7, 1) = -xi(1) * (1. - xi(0));
   return grad_shapefn;
+}
+
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 8, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.,
+                0., -1.,
+                1.,  0.,
+                0.,  1.,
+               -1.,  0.;
+  // clang-format on
+  return unit_cell;
 }
 
 // 9-node Quadrilateral Element
@@ -151,6 +185,26 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 9, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+                1.,  1.,
+               -1.,  1.,
+                0., -1.,
+                1.,  0.,
+                0.,  1.,
+               -1.,  0.,
+                0.,  0.;
+  // clang-format on
+  return unit_cell;
+}
+
 //! Return the B-matrix of a Quadrilateral Element at a given local
 //! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -173,6 +227,23 @@ inline std::vector<Eigen::MatrixXd>
     // clang-format on
   }
   return bmatrix;
+}
+
+//! Return the indices of a cell sides
+//! \retval indices Sides that form the cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXi
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() {
+  Eigen::Matrix<int, 4, 2> indices;
+  // clang-format off
+  indices << 0, 1,
+             1, 2,
+             2, 3,
+             3, 0;
+  // clang-format on
+  return indices;
 }
 
 //! Return the corner indices of a cell to calculate the cell volume
