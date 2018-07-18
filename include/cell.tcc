@@ -549,7 +549,26 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     bool guess_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
       if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+
+    // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // f(x) = p(x) - p, where p is the real point
+    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+
+    // TODO: Remove this and move to a cell properties initalisation
+    this->compute_mean_length();
+
+    // Early exit
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
+      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
+                << " thresold: "
+                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+      return xi;
+    }
   }
 
   // Newton Raphson iteration to solve for x
@@ -567,9 +586,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const auto sf = shapefn_->shapefn(xi);
 
     // Residual (f(x))
-    Eigen::Matrix<double, Tdim, 1> residual;
     // f(x) = p(x) - p, where p is the real point
-    residual = (nodal_coords * sf) - point;
+    Eigen::Matrix<double, Tdim, 1> residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
@@ -625,7 +643,26 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     bool guess_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
       if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+
+    // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // f(x) = p(x) - p, where p is the real point
+    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+
+    // TODO: Remove this and move to a cell properties initalisation
+    this->compute_mean_length();
+
+    // Early exit
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
+      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
+                << " thresold: "
+                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+      return xi;
+    }
   }
 
   // Newton Raphson iteration to solve for x
