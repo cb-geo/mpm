@@ -9,6 +9,7 @@
 #include "Eigen/Dense"
 #include "Eigen/LU"
 
+#include "affine_transform.h"
 #include "handler.h"
 #include "node_base.h"
 #include "shapefn.h"
@@ -106,6 +107,12 @@ class Cell {
   //! Return the centroid of the cell
   Eigen::Matrix<double, Tdim, 1> centroid() const { return centroid_; }
 
+  //! Compute mean length of cell
+  void compute_mean_length();
+
+  //! Return the mean_length
+  double mean_length() const { return mean_length_; }
+
   //! Check if a point is in a 2D cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
@@ -134,6 +141,20 @@ class Cell {
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, 3, 1> local_coordinates_point(
+      const Eigen::Matrix<double, 3, 1>& point);
+
+  //! Return the local coordinates of a point in a unit cell
+  //! Using newton iteration
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 2, 1> transform_real_to_unit_cell(
+      const Eigen::Matrix<double, 2, 1>& point);
+
+  //! Return the local coordinates of a point in a unit cell
+  //! Using newton iteration
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 3, 1> transform_real_to_unit_cell(
       const Eigen::Matrix<double, 3, 1>& point);
 
   //! Map particle mass to nodes
@@ -200,6 +221,9 @@ class Cell {
 
   //! Centroid
   VectorDim centroid_;
+
+  //! mean_length of cell
+  double mean_length_{std::numeric_limits<double>::max()};
 
   //! particles ids in cell
   std::vector<Index> particles_;

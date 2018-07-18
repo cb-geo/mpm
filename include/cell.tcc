@@ -226,11 +226,27 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_centroid() {
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
+
   // Calculate the centroid of the cell
+  centroid_.setZero();
   for (unsigned i = 0; i < indices.size(); ++i)
     centroid_ += nodes_[indices[i]]->coordinates();
 
   centroid_ /= indices.size();
+}
+
+//! Compute mean length of cell
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_mean_length() {
+  // Get the indices of sub-triangles
+  Eigen::MatrixXi indices = shapefn_->sides_indices();
+  this->mean_length_ = 0.;
+  // Calculate the mean length
+  for (unsigned i = 0; i < indices.rows(); ++i)
+    this->mean_length_ += (nodes_[indices(i, 0)]->coordinates() -
+                           nodes_[indices(i, 1)]->coordinates())
+                              .norm();
+  this->mean_length_ /= indices.rows();
 }
 
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
@@ -482,6 +498,195 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
     std::cout << __FILE__ << __LINE__
               << "Compute local coordinate of a point in a cell: "
               << except.what() << '\n';
+  }
+  return xi;
+}
+
+//! Return the local coordinates of a point in a 2D/3D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 2, 1>& point) {
+
+  // Local coordinates of a point in an unit cell
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.setZero();
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 100;
+  // Tolerance for newton raphson
+  const double tolerance = 1.e-11;
+
+  // Matrix of nodal coordinates
+  Eigen::MatrixXd nodal_coords;
+  nodal_coords.resize(Tdim, this->nfunctions());
+
+  for (unsigned j = 0; j < this->nfunctions(); ++j) {
+    Eigen::Matrix<double, Tdim, 1> node = nodes_[j]->coordinates();
+    for (unsigned i = 0; i < Tdim; ++i) {
+      nodal_coords(i, j) = node[i];
+    }
+  }
+
+  // Coordinates of a unit cell
+  const auto unit_cell = shapefn_->unit_cell_coordinates();
+
+  // Affine transformation, using linear interpolation for the initial guess
+  if (this->nfunctions() == 4) {
+    // A = vertex * KA
+    Eigen::Matrix<double, 2, 2> A;
+    A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+
+    // b = vertex * Kb
+    Eigen::Matrix<double, 2, 1> b =
+        point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
+
+    // Affine transform: A^-1 * b
+    Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
+
+    // Check for nan
+    bool guess_nan = false;
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+
+    // Set xi to affine guess
+    if (!guess_nan) xi = affine_guess;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // f(x) = p(x) - p, where p is the real point
+    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+
+    // TODO: Remove this and move to a cell properties initalisation
+    this->compute_mean_length();
+
+    // Early exit
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
+      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
+                << " thresold: "
+                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+      return xi;
+    }
+  }
+
+  // Newton Raphson iteration to solve for x
+  // x_{n+1} = x_n - f(x)/f'(x)
+  // f(x) = p(x) - p, where p is the real point
+  // p(x) is the computed point.
+  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+
+    // Calculate Jacobian
+    Eigen::Matrix<double, Tdim, Tdim> jacobian;
+    const auto grad_sf = shapefn_->grad_shapefn(xi);
+    jacobian = unit_cell.transpose() * grad_sf;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // Residual (f(x))
+    // f(x) = p(x) - p, where p is the real point
+    Eigen::Matrix<double, Tdim, 1> residual = (nodal_coords * sf) - point;
+
+    // x_{n+1} = x_n - f(x)/f'(x)
+    xi -= (jacobian.inverse() * residual);
+
+    // Convergence criteria
+    if (residual.norm() < tolerance) break;
+  }
+  return xi;
+}
+
+//! Return the local coordinates of a point in a 2D/3D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 3, 1>& point) {
+
+  // Local coordinates of a point in an unit cell
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.setZero();
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 100;
+  // Tolerance for newton raphson
+  const double tolerance = 1.e-11;
+
+  // Matrix of nodal coordinates
+  Eigen::MatrixXd nodal_coords;
+  nodal_coords.resize(Tdim, this->nfunctions());
+
+  for (unsigned j = 0; j < this->nfunctions(); ++j) {
+    Eigen::Matrix<double, Tdim, 1> node = nodes_[j]->coordinates();
+    for (unsigned i = 0; i < Tdim; ++i) {
+      nodal_coords(i, j) = node[i];
+    }
+  }
+
+  // Coordinates of a unit cell
+  const auto unit_cell = shapefn_->unit_cell_coordinates();
+
+  // Affine transformation, using linear interpolation for the initial guess
+  if (this->nfunctions() == 8) {
+    // A = vertex * KA
+    Eigen::Matrix<double, 3, 3> A;
+    A = nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
+
+    // b = vertex * Kb
+    Eigen::Matrix<double, 3, 1> b =
+        point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
+
+    // Affine transform: A^-1 * b
+    Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
+
+    // Check for nan
+    bool guess_nan = false;
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+
+    // Set xi to affine guess
+    if (!guess_nan) xi = affine_guess;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // f(x) = p(x) - p, where p is the real point
+    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+
+    // TODO: Remove this and move to a cell properties initalisation
+    this->compute_mean_length();
+
+    // Early exit
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
+      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
+                << " thresold: "
+                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+      return xi;
+    }
+  }
+
+  // Newton Raphson iteration to solve for x
+  // x_{n+1} = x_n - f(x)/f'(x)
+  // f(x) = p(x) - p, where p is the real point
+  // p(x) is the computed point.
+  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+
+    // Calculate Jacobian
+    Eigen::Matrix<double, Tdim, Tdim> jacobian;
+    const auto grad_sf = shapefn_->grad_shapefn(xi);
+    jacobian = unit_cell.transpose() * grad_sf;
+
+    // Shape function
+    const auto sf = shapefn_->shapefn(xi);
+
+    // Residual f(x)
+    Eigen::Matrix<double, Tdim, 1> residual;
+    // f(x) = p(x) - p
+    residual = (nodal_coords * sf) - point;
+
+    // x_{n+1} = x_n - f(x)/f'(x)
+    xi -= (jacobian.inverse() * residual);
+
+    // Convergence criteria
+    if (residual.norm() < tolerance) break;
   }
   return xi;
 }

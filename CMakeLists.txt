@@ -49,11 +49,12 @@ include_directories(
 
 # mpm executable
 SET(mpm_src
-  src/io.cc
-  src/node.cc
-  src/particle.cc
-  src/shapefn.cc
-  src/main.cc
+  ${mpm_SOURCE_DIR}/src/affine_transform.cc
+  ${mpm_SOURCE_DIR}/src/io.cc
+  ${mpm_SOURCE_DIR}/src/node.cc
+  ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/src/main.cc
 )
 add_executable(mpm
   ${mpm_src}
@@ -61,6 +62,7 @@ add_executable(mpm
 
 # Unit test
 SET(test_src
+   ${mpm_SOURCE_DIR}/src/affine_transform.cc
    ${mpm_SOURCE_DIR}/src/io.cc
    ${mpm_SOURCE_DIR}/src/node.cc
    ${mpm_SOURCE_DIR}/src/particle.cc
