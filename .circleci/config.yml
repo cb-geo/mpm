@@ -6,9 +6,9 @@ jobs:
       - image: quay.io/cbgeo/mpm
     steps:
       - checkout
-      # GCC 6.3
+      # GCC-8
       - run:
-          name: GCC-7 build
+          name: GCC-8 build
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
@@ -16,9 +16,9 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j8 
             ctest -VV
-      # Clang 3.9
+      # Clang-6.0
       - run:
-          name: Clang-4.0 build
+          name: Clang-6.0 build
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
