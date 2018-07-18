@@ -330,7 +330,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() co
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
     mpm::HexahedronShapeFn<Tdim, Tnfunctions>::sides_indices() {
-  Eigen::Matrix<int, 12, 2> indices;  
+  Eigen::Matrix<int, 12, 2> indices;
   // clang-format off
   indices << 0, 1,
              1, 2,
