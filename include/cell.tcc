@@ -1,5 +1,3 @@
-#include <cmath>
-
 //! Constructor with cell id, number of nodes and shapefn
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
