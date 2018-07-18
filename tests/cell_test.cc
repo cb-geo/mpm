@@ -79,6 +79,20 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
+    // Check cell length calculation
+    SECTION("Compute mean length of cell") {
+      // Check cell length at initialisation
+      REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
+
+      cell->compute_mean_length();
+
+      // Length of the cell
+      const double length = 2.0;
+
+      // Check cell length calculations
+      REQUIRE(cell->mean_length() == Approx(length).epsilon(Tolerance));
+    }
+
     // Check centroid calculation
     SECTION("Compute centroid of a cell") {
       REQUIRE(cell->nfunctions() == 4);
@@ -554,6 +568,20 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
+
+    // Check cell length calculation
+    SECTION("Compute mean length of cell") {
+      // Check cell length at initialisation
+      REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
+
+      cell->compute_mean_length();
+
+      // Length of the cell
+      const double length = 2.0;
+
+      // Check cell length calculations
+      REQUIRE(cell->mean_length() == Approx(length).epsilon(Tolerance));
+    }
 
     // Check centroid calculation
     SECTION("Compute centroid of a cell") {
