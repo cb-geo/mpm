@@ -200,6 +200,25 @@ TEST_CASE("Quadrilateral shape functions are checked",
       }
     }
 
+    SECTION("Four noded quadrilateral shape function for side indices") {
+      // Check for sides indices
+      Eigen::MatrixXi indices = quadsf->sides_indices();
+      REQUIRE(indices.rows() == 4);
+      REQUIRE(indices.cols() == 2);
+
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 1);
+
+      REQUIRE(indices(1, 0) == 1);
+      REQUIRE(indices(1, 1) == 2);
+
+      REQUIRE(indices(2, 0) == 2);
+      REQUIRE(indices(2, 1) == 3);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 0);
+    }
+
     SECTION("Four noded quadrilateral shape function for corner indices") {
       // Check for corner indices
       Eigen::VectorXi indices = quadsf->corner_indices();
@@ -461,6 +480,25 @@ TEST_CASE("Quadrilateral shape functions are checked",
                   Approx(unit_cell(i, j)).epsilon(Tolerance));
         }
       }
+    }
+
+    SECTION("Eight noded quadrilateral shape function for side indices") {
+      // Check for sides indices
+      Eigen::MatrixXi indices = quadsf->sides_indices();
+      REQUIRE(indices.rows() == 4);
+      REQUIRE(indices.cols() == 2);
+
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 1);
+
+      REQUIRE(indices(1, 0) == 1);
+      REQUIRE(indices(1, 1) == 2);
+
+      REQUIRE(indices(2, 0) == 2);
+      REQUIRE(indices(2, 1) == 3);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 0);
     }
 
     SECTION("Eight noded quadrilateral shape function for corner indices") {
@@ -732,6 +770,25 @@ TEST_CASE("Quadrilateral shape functions are checked",
                   Approx(unit_cell(i, j)).epsilon(Tolerance));
         }
       }
+    }
+
+    SECTION("Nine noded quadrilateral shape function for side indices") {
+      // Check for sides indices
+      Eigen::MatrixXi indices = quadsf->sides_indices();
+      REQUIRE(indices.rows() == 4);
+      REQUIRE(indices.cols() == 2);
+
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 1);
+
+      REQUIRE(indices(1, 0) == 1);
+      REQUIRE(indices(1, 1) == 2);
+
+      REQUIRE(indices(2, 0) == 2);
+      REQUIRE(indices(2, 1) == 3);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 0);
     }
 
     SECTION("Nine noded quadrilateral shape function for corner indices") {
