@@ -223,7 +223,7 @@ class Cell {
   VectorDim centroid_;
 
   //! mean_length of cell
-  double mean_length_;
+  double mean_length_{std::numeric_limits<double>::max()};
 
   //! particles ids in cell
   std::vector<Index> particles_;
