@@ -304,6 +304,48 @@ TEST_CASE("Hexahedron shape functions are checked",
       }
     }
 
+    SECTION("Eight noded hexahedron shape function for sides indices") {
+      // Check for sides indices
+      Eigen::MatrixXi indices = hexsf->sides_indices();
+      REQUIRE(indices.rows() == 12);
+      REQUIRE(indices.cols() == 2);
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 1);
+
+      REQUIRE(indices(1, 0) == 1);
+      REQUIRE(indices(1, 1) == 2);
+
+      REQUIRE(indices(2, 0) == 2);
+      REQUIRE(indices(2, 1) == 3);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 0);
+
+      REQUIRE(indices(4, 0) == 4);
+      REQUIRE(indices(4, 1) == 5);
+
+      REQUIRE(indices(5, 0) == 5);
+      REQUIRE(indices(5, 1) == 6);
+
+      REQUIRE(indices(6, 0) == 6);
+      REQUIRE(indices(6, 1) == 7);
+
+      REQUIRE(indices(7, 0) == 7);
+      REQUIRE(indices(7, 1) == 4);
+
+      REQUIRE(indices(8, 0) == 0);
+      REQUIRE(indices(8, 1) == 4);
+
+      REQUIRE(indices(9, 0) == 1);
+      REQUIRE(indices(9, 1) == 5);
+
+      REQUIRE(indices(10, 0) == 2);
+      REQUIRE(indices(10, 1) == 6);
+
+      REQUIRE(indices(11, 0) == 3);
+      REQUIRE(indices(11, 1) == 7);
+    }
+
     SECTION("Eight noded hexahedron shape function for corner indices") {
       // Check for volume indices
       Eigen::VectorXi indices = hexsf->corner_indices();
@@ -1109,6 +1151,48 @@ TEST_CASE("Hexahedron shape functions are checked",
                   Approx(unit_cell(i, j)).epsilon(Tolerance));
         }
       }
+    }
+
+    SECTION("20-noded hexahedron shape function for sides indices") {
+      // Check for sides indices
+      Eigen::MatrixXi indices = hexsf->sides_indices();
+      REQUIRE(indices.rows() == 12);
+      REQUIRE(indices.cols() == 2);
+      REQUIRE(indices(0, 0) == 0);
+      REQUIRE(indices(0, 1) == 1);
+
+      REQUIRE(indices(1, 0) == 1);
+      REQUIRE(indices(1, 1) == 2);
+
+      REQUIRE(indices(2, 0) == 2);
+      REQUIRE(indices(2, 1) == 3);
+
+      REQUIRE(indices(3, 0) == 3);
+      REQUIRE(indices(3, 1) == 0);
+
+      REQUIRE(indices(4, 0) == 4);
+      REQUIRE(indices(4, 1) == 5);
+
+      REQUIRE(indices(5, 0) == 5);
+      REQUIRE(indices(5, 1) == 6);
+
+      REQUIRE(indices(6, 0) == 6);
+      REQUIRE(indices(6, 1) == 7);
+
+      REQUIRE(indices(7, 0) == 7);
+      REQUIRE(indices(7, 1) == 4);
+
+      REQUIRE(indices(8, 0) == 0);
+      REQUIRE(indices(8, 1) == 4);
+
+      REQUIRE(indices(9, 0) == 1);
+      REQUIRE(indices(9, 1) == 5);
+
+      REQUIRE(indices(10, 0) == 2);
+      REQUIRE(indices(10, 1) == 6);
+
+      REQUIRE(indices(11, 0) == 3);
+      REQUIRE(indices(11, 1) == 7);
     }
 
     SECTION("20-noded hexahedron shape function for corner indices") {
