@@ -235,6 +235,20 @@ void mpm::Cell<Tdim>::compute_centroid() {
   centroid_ /= indices.size();
 }
 
+//! Compute mean length of cell
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_mean_length() {
+  // Get the indices of sub-triangles
+  Eigen::MatrixXi indices = shapefn_->sides_indices();
+  // Calculate the mean length
+  for (unsigned i = 0; i < indices.rows(); ++i)
+    this->mean_length_ += (nodes_[indices(i, 0)]->coordinates() -
+                           nodes_[indices(i, 1)]->coordinates())
+                              .norm();
+  this->mean_length_ /= indices.rows();
+}
+
+
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::point_in_cell(

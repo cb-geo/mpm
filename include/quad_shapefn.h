@@ -90,6 +90,10 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const;
 
+  //! Return the side indices of a cell to calculate the cell length
+  //! \retval indices Outer-indices that form the sides of the cell
+  Eigen::MatrixXi sides_indices();
+
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
   Eigen::VectorXi corner_indices();
