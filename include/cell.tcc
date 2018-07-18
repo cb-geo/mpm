@@ -228,7 +228,9 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_centroid() {
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
+
   // Calculate the centroid of the cell
+  centroid_.setZero();
   for (unsigned i = 0; i < indices.size(); ++i)
     centroid_ += nodes_[indices[i]]->coordinates();
 
@@ -247,7 +249,6 @@ void mpm::Cell<Tdim>::compute_mean_length() {
                               .norm();
   this->mean_length_ /= indices.rows();
 }
-
 
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <unsigned Tdim>
