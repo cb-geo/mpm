@@ -201,7 +201,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     SECTION("Four noded quadrilateral shape function for side indices") {
-      // Check for inhedron indices
+      // Check for sides indices
       Eigen::MatrixXi indices = quadsf->sides_indices();
       REQUIRE(indices.rows() == 4);
       REQUIRE(indices.cols() == 2);
@@ -483,7 +483,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     SECTION("Eight noded quadrilateral shape function for side indices") {
-      // Check for inhedron indices
+      // Check for sides indices
       Eigen::MatrixXi indices = quadsf->sides_indices();
       REQUIRE(indices.rows() == 4);
       REQUIRE(indices.cols() == 2);
@@ -773,7 +773,7 @@ TEST_CASE("Quadrilateral shape functions are checked",
     }
 
     SECTION("Nine noded quadrilateral shape function for side indices") {
-      // Check for inhedron indices
+      // Check for sides indices
       Eigen::MatrixXi indices = quadsf->sides_indices();
       REQUIRE(indices.rows() == 4);
       REQUIRE(indices.cols() == 2);
