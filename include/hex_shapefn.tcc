@@ -323,6 +323,31 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() co
 //!     0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!   4           16            5
 
+//! Return the indices of a cell sides
+//! \retval indices Sides that form the cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXi
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::sides_indices() {
+  Eigen::Matrix<int, 12, 2> indices;  
+  // clang-format off
+  indices << 0, 1,
+             1, 2,
+             2, 3,
+             3, 0,
+             4, 5,
+             5, 6,
+             6, 7,
+             7, 4,
+             0, 4,
+             1, 5,
+             2, 6,
+             3, 7;
+  // clang-format on
+  return indices;
+}
+
 //! Return the corner indices of a cell to calculate the cell volume
 //! \retval indices Outer-indices that form the cell
 //! \tparam Tdim Dimension

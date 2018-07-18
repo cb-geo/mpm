@@ -229,6 +229,23 @@ inline std::vector<Eigen::MatrixXd>
   return bmatrix;
 }
 
+//! Return the indices of a cell sides
+//! \retval indices Sides that form the cell
+//! \tparam Tdim Dimension
+//! \tparam Tnfunctions Number of shape functions
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXi
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() {
+  Eigen::Matrix<int, 4, 2> indices;  
+  // clang-format off
+  indices << 0, 1,
+             1, 2,
+             2, 3,
+             3, 0;
+  // clang-format on
+  return indices;
+}
+
 //! Return the corner indices of a cell to calculate the cell volume
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi

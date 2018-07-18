@@ -107,6 +107,12 @@ class Cell {
   //! Return the centroid of the cell
   Eigen::Matrix<double, Tdim, 1> centroid() const { return centroid_; }
 
+  //! Compute mean length of cell
+  void compute_mean_length();
+
+  //! Return the mean_length
+  double mean_length() const { return mean_length_; }
+
   //! Check if a point is in a 2D cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
@@ -215,6 +221,9 @@ class Cell {
 
   //! Centroid
   VectorDim centroid_;
+
+  //! mean_length of cell
+  double mean_length_;
 
   //! particles ids in cell
   std::vector<Index> particles_;
