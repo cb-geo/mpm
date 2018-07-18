@@ -236,7 +236,7 @@ inline std::vector<Eigen::MatrixXd>
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
     mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() {
-  Eigen::Matrix<int, 4, 2> indices;  
+  Eigen::Matrix<int, 4, 2> indices;
   // clang-format off
   indices << 0, 1,
              1, 2,
