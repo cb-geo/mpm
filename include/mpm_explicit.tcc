@@ -29,7 +29,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
 
 // Initialise
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::initialise() {
+bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
   bool status = false;
   try {
     // Get mesh properties
@@ -50,37 +50,29 @@ bool mpm::MPMExplicit<Tdim>::initialise() {
         node_type,                                              // node type
         mesh_reader->read_mesh_nodes(io_->file_name("mesh")));  // coordinates
 
-    std::cout << "Number of nodes: " << meshes_.at(0)->nnodes() << "\n";
-
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
     std::shared_ptr<mpm::ShapeFn<Tdim>> shapefn =
         Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
-
     // Create cells from file
     meshes_.at(0)->create_cells(
         std::move(gid),  // global id
         shapefn,         // Shape function
         mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
 
-    std::cout << "Number of cells " << meshes_.at(0)->ncells() << "\n";
-
-    // Read particles
-    auto particles = mesh_reader->read_particles(io_->file_name("particles"));
-
-    for (const auto& particle : particles) {
-      for (unsigned i = 0; i < particle.size(); ++i) {
-        std::cout << particle(i) << "\t";
-      }
-      std::cout << "\n";
-    }
-
-    std::cout << "Number of particles " << particles.size() << "\n";
+    // Particle type
+    const auto particle_type =
+        mesh_props["particle_type"].template get<std::string>();
+    // Create particles from file
+    meshes_.at(0)->create_particles(gid,            // global id
+                                    particle_type,  // particle type
+                                    mesh_reader->read_particles(io_->file_name(
+                                        "particles")));  // coordinates
 
     status = true;
-  } catch (std::domain_error& domain_error) {
-    console_->error("Get mesh object: {}", domain_error.what());
+  } catch (std::exception& exception) {
+    console_->error("Reading mesh and particles: {}", exception.what());
   }
   return status;
 }

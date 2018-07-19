@@ -34,8 +34,10 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
   // Create an IO object
   auto io = std::make_unique<mpm::IO>(argc, argv);
 
+  // Run explicit MPM
   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
-  REQUIRE(mpm->initialise() == true);
+  // Initialise mesh
+  REQUIRE(mpm->initialise_mesh_particles() == true);
 }
 
 // Check MPM Explicit
@@ -65,6 +67,8 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
   // Create an IO object
   auto io = std::make_unique<mpm::IO>(argc, argv);
 
+  // Run explicit MPM
   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
-  REQUIRE(mpm->initialise() == true);
+  // Initialise mesh
+  REQUIRE(mpm->initialise_mesh_particles() == true);
 }
