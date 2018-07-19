@@ -75,8 +75,12 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
-      // Check nodal coordinates
-      auto check_coords = read_mesh->read_mesh_nodes("mesh-2d.txt");
+      // Try to read nodes from a non-existant file
+      auto check_coords = read_mesh->read_mesh_nodes("mesh-missing.txt");
+      // Check number of nodal coordinates
+      REQUIRE(check_coords.size() == 0);
+
+      check_coords = read_mesh->read_mesh_nodes("mesh-2d.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == coordinates.size());
 
@@ -94,8 +98,13 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
+      // Try to read cells from a non-existant file
+      auto check_node_ids = read_mesh->read_mesh_cells("mesh-missing.txt");
+      // Check number of cells
+      REQUIRE(check_node_ids.size() == 0);
+
       // Check node ids in cell
-      auto check_node_ids = read_mesh->read_mesh_cells("mesh-2d.txt");
+      check_node_ids = read_mesh->read_mesh_cells("mesh-2d.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == cells.size());
       // Check node ids of cells
@@ -161,8 +170,13 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
+      // Try to read particle from a non-existant file
+      auto particles = read_mesh->read_particles("particles-missing.txt");
+      // Check number of particles
+      REQUIRE(particles.size() == 0);
+
       // Check particle coordinates
-      auto particles = read_mesh->read_particles("particles-2d.txt");
+      particles = read_mesh->read_particles("particles-2d.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
@@ -240,7 +254,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Dump mesh file as an input file to be read
     std::ofstream file;
-    file.open("mesh.txt");
+    file.open("mesh-3d.txt");
     file << "! elementShape hexahedron\n";
     file << "! elementNumPoints 8\n";
     file << coordinates.size() << "\t" << cells.size() << "\n";
@@ -265,7 +279,12 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
       // Check nodal coordinates
-      auto check_coords = read_mesh->read_mesh_nodes("mesh.txt");
+      auto check_coords = read_mesh->read_mesh_nodes("mesh-missing.txt");
+      // Check number of nodal coordinates
+      REQUIRE(check_coords.size() == 0);
+
+      // Check nodal coordinates
+      check_coords = read_mesh->read_mesh_nodes("mesh-3d.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == coordinates.size());
 
@@ -283,8 +302,13 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
+      // Try to read cells from a non-existant file
+      auto check_node_ids = read_mesh->read_mesh_cells("mesh-missing.txt");
+      // Check number of cells
+      REQUIRE(check_node_ids.size() == 0);
+
       // Check node ids in cell
-      auto check_node_ids = read_mesh->read_mesh_cells("mesh.txt");
+      check_node_ids = read_mesh->read_mesh_cells("mesh-3d.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == cells.size());
       // Check node ids of cells
@@ -357,7 +381,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Dump particles coordinates as an input file to be read
     std::ofstream file;
-    file.open("particles.txt");
+    file.open("particles-3d.txt");
     // Write particle coordinates
     for (const auto& coord : coordinates) {
       for (unsigned i = 0; i < coord.size(); ++i) {
@@ -373,8 +397,13 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
+      // Try to read particle from a non-existant file
+      auto particles = read_mesh->read_particles("particles-missing.txt");
+      // Check number of particles
+      REQUIRE(particles.size() == 0);
+
       // Check particle coordinates
-      auto particles = read_mesh->read_particles("particles.txt");
+      particles = read_mesh->read_particles("particles-3d.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
