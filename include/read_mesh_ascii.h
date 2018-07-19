@@ -11,6 +11,9 @@
 //! MPM namespace
 namespace mpm {
 
+//! Global index type for the cell
+using Index = unsigned long long;
+
 //! ReadMeshAscii class
 //! \brief Derived class that returns mesh and particles locataions from ascii
 //! file \tparam Tdim Dimension
@@ -37,12 +40,12 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   //! Read mesh cells file
   //! \param[in] mesh file name with nodes and cells
   //! \retval cells Vector of nodal indices of cells
-  std::vector<std::vector<unsigned>> read_mesh_cells(const std::string& mesh);
+  std::vector<std::vector<mpm::Index>> read_mesh_cells(const std::string& mesh);
 
-  //! Read mesh particles file
+  //! Read particles file
   //! \param[in] particles_files file name with particle coordinates
   //! \retval coordinates Vector of particle coordinates
-  std::vector<VectorDim> read_mesh_particles(const std::string& particles_file);
+  std::vector<VectorDim> read_particles(const std::string& particles_file);
 
  private:
   //! Logger

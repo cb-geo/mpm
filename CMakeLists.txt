@@ -45,14 +45,17 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 include_directories(
   ${mpm_SOURCE_DIR}/include/
   ${mpm_SOURCE_DIR}/external/
+  ${mpm_SOURCE_DIR}/tests/include/
 )
 
 # mpm executable
 SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/io.cc
+  ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/shapefn.cc
   ${mpm_SOURCE_DIR}/src/main.cc
 )
@@ -62,28 +65,30 @@ add_executable(mpm
 
 # Unit test
 SET(test_src
-   ${mpm_SOURCE_DIR}/src/affine_transform.cc
-   ${mpm_SOURCE_DIR}/src/io.cc
-   ${mpm_SOURCE_DIR}/src/node.cc
-   ${mpm_SOURCE_DIR}/src/particle.cc
-   ${mpm_SOURCE_DIR}/src/shapefn.cc
-   ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
-   ${mpm_SOURCE_DIR}/tests/cell_test.cc
-   ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
-   ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
-   ${mpm_SOURCE_DIR}/tests/io_test.cc
-   ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
-   ${mpm_SOURCE_DIR}/tests/mesh_test.cc
-   ${mpm_SOURCE_DIR}/tests/mpm_explicit_test.cc
-   ${mpm_SOURCE_DIR}/tests/node_container_test.cc
-   ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
-   ${mpm_SOURCE_DIR}/tests/node_test.cc
-   ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
-   ${mpm_SOURCE_DIR}/tests/particle_test.cc
-   ${mpm_SOURCE_DIR}/tests/quad_quadrature_test.cc    
-   ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
-   ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
-   ${mpm_SOURCE_DIR}/tests/test.cc
+  ${mpm_SOURCE_DIR}/src/affine_transform.cc
+  ${mpm_SOURCE_DIR}/src/io.cc
+  ${mpm_SOURCE_DIR}/src/logger.cc
+  ${mpm_SOURCE_DIR}/src/node.cc
+  ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/read_mesh.cc
+  ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
+  ${mpm_SOURCE_DIR}/tests/cell_test.cc
+  ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
+  ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
+  ${mpm_SOURCE_DIR}/tests/io_test.cc
+  ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
+  ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+  ${mpm_SOURCE_DIR}/tests/mpm_explicit_test.cc
+  ${mpm_SOURCE_DIR}/tests/node_container_test.cc
+  ${mpm_SOURCE_DIR}/tests/node_handler_test.cc
+  ${mpm_SOURCE_DIR}/tests/node_test.cc
+  ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
+  ${mpm_SOURCE_DIR}/tests/particle_test.cc
+  ${mpm_SOURCE_DIR}/tests/quad_quadrature_test.cc    
+  ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
+  ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+  ${mpm_SOURCE_DIR}/tests/test.cc
 )   
 add_executable(mpmtest
   ${test_src}

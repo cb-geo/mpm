@@ -11,6 +11,8 @@
 
 #include "io.h"
 #include "mesh.h"
+#include "read_mesh.h"
+#include "read_mesh_ascii.h"
 
 namespace mpm {
 //! MPM class
@@ -28,8 +30,8 @@ class MPM {
     meshes_.clear();
   }
 
-  //! Initialise mesh
-  virtual bool initialise() = 0;
+  // Initialise mesh and particles
+  virtual bool initialise_mesh_particles() = 0;
 
  protected:
   //! A unique id for the analysis
