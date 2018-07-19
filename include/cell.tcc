@@ -644,7 +644,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
     // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
-    
+
     // Shape function
     const auto sf = shapefn_->shapefn(xi);
 
