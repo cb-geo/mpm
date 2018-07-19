@@ -47,10 +47,10 @@ class ReadMesh {
   virtual std::vector<std::vector<unsigned>> read_mesh_cells(
       const std::string& mesh) = 0;
 
-  //! Read mesh particles file
+  //! Read particles file
   //! \param[in] particles_files file name with particle coordinates
   //! \retval coordinates Vector of particle coordinates
-  virtual std::vector<VectorDim> read_mesh_particles(
+  virtual std::vector<VectorDim> read_particles(
       const std::string& particles_file) = 0;
 };  // ReadMesh class
 }  // namespace mpm

@@ -162,7 +162,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
       // Check particle coordinates
-      auto particles = read_mesh->read_mesh_particles("particles-2d.txt");
+      auto particles = read_mesh->read_particles("particles-2d.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
@@ -374,7 +374,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
       // Check particle coordinates
-      auto particles = read_mesh->read_mesh_particles("particles.txt");
+      auto particles = read_mesh->read_particles("particles.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
