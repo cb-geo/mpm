@@ -19,7 +19,4 @@ int main(int argc, char** argv) {
   std::shared_ptr<mpm::NodeBase<Dim>> node =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coord);
   std::cout << "Node id: " << node->id() << '\n';
-
-  std::shared_ptr<mpm::MPM<Dim>> explicit_solver =
-      std::make_shared<mpm::MPMExplicit<Dim>>();
 }

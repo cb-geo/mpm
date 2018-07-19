@@ -24,7 +24,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"traction", "traction.dat"}}},
         {"analysis",
          {{"dt", 0.001},
-          {"number_steps", 1000},
+          {"nsteps", 1000},
           {"gravity", true},
           {"soil_particle_spacing", 0.01},
           {"boundary_friction", 0.5},
@@ -65,7 +65,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     // Check analysis dt
     REQUIRE(analysis["dt"] == json_file["analysis"]["dt"]);
     // Check analysis number_steps
-    REQUIRE(analysis["number_steps"] == json_file["analysis"]["number_steps"]);
+    REQUIRE(analysis["nsteps"] == json_file["analysis"]["nsteps"]);
     // Check analysis gravity
     REQUIRE(analysis["gravity"] == json_file["analysis"]["gravity"]);
     // Check analysis soil_particle_spacing
