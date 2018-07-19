@@ -9,6 +9,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "io.h"
 #include "mesh.h"
 
 namespace mpm {
@@ -20,28 +21,33 @@ template <unsigned Tdim>
 class MPM {
  public:
   //! Constructor
-  MPM() {
+  MPM(std::unique_ptr<IO>&& io) : io_(std::move(io)) {
     // Unique id
-    analysis_uuid_ =
+    uuid_ =
         boost::lexical_cast<std::string>(boost::uuids::random_generator()());
     meshes_.clear();
-  };
+  }
 
   //! Initialise mesh
   virtual bool initialise() = 0;
 
  protected:
   //! A unique id for the analysis
-  std::string analysis_uuid_;
-
+  std::string uuid_;
   //! Time step size
   double dt_{std::numeric_limits<double>::max()};
-
   //! Number of steps
-  unsigned long long nsteps_{std::numeric_limits<unsigned long long>::max()};
-
+  mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
+  //! Gravity
+  Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  //! A unique ptr to IO object
+  std::unique_ptr<mpm::IO> io_;
+  //! JSON analysis object
+  Json analysis_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
 };
 }  // namespace mpm
 
