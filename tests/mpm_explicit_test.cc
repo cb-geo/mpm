@@ -12,12 +12,14 @@ bool write_json(unsigned dim, const std::string& file_name) {
   std::string dimension = "2d";
   auto particle_type = "P2D";
   auto cell_type = "SFQ4";
+  auto mesh_reader = "Ascii2D";
 
   // 3D
   if (dim == 3) {
     dimension = "3d";
     particle_type = "P3D";
     cell_type = "SFH8";
+    mesh_reader = "Ascii3D";
   }
 
   Json json_file = {
@@ -30,7 +32,10 @@ bool write_json(unsigned dim, const std::string& file_name) {
         {"initial_stresses", "initial_soil_stress.dat"},
         {"materials", "materials.dat"},
         {"traction", "traction.dat"}}},
-      {"mesh", {{"cell_type", cell_type}, {"particle_type", particle_type}}},
+      {"mesh",
+       {{"mesh_reader", mesh_reader},
+        {"cell_type", cell_type},
+        {"particle_type", particle_type}}},
       {"analysis",
        {{"dt", 0.001},
         {"nsteps", 1000},
