@@ -106,10 +106,8 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
             if (nlines > nnodes) {
               // Read node ids of each cell
               mpm::Index nid;
-              if (!istream.str().empty()) {
-                istream >> nid;
-                nodes.emplace_back(nid);
-              }
+              istream >> nid;
+              nodes.emplace_back(nid);
             } else {
               // Ignore stream not related to node ids of cells
               istream >> ignore;

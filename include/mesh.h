@@ -16,7 +16,6 @@
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
-#include "read_mesh.h"
 
 namespace mpm {
 
