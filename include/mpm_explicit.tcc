@@ -4,6 +4,11 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     : mpm::MPM<Tdim>(std::move(io)) {
   //! Logger
   console_ = spdlog::get("MPMExplicit");
+
+  // Create a mesh with global id 0
+  const mpm::Index id = 0;
+  meshes_.emplace_back(std::make_unique<mpm::Mesh<Tdim>>(id));
+
   try {
     analysis_ = io_->analysis();
     // Time-step size
@@ -24,6 +29,50 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
 
 // Initialise
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::initialise() {
-  return true;
+bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
+  bool status = false;
+  try {
+    // Get mesh properties
+    auto mesh_props = io_->json_object("mesh");
+    // Get Mesh reader from JSON object
+    const std::string reader =
+        mesh_props["mesh_reader"].template get<std::string>();
+    // Create a mesh reader
+    auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+    // Global Index
+    mpm::Index gid = 0;
+    // Node type
+    const auto node_type = mesh_props["node_type"].template get<std::string>();
+    // Create nodes from file
+    meshes_.at(0)->create_nodes(
+        gid,                                                    // global id
+        node_type,                                              // node type
+        mesh_reader->read_mesh_nodes(io_->file_name("mesh")));  // coordinates
+
+    // Shape function name
+    const auto cell_type = mesh_props["cell_type"].template get<std::string>();
+    // Shape function
+    std::shared_ptr<mpm::ShapeFn<Tdim>> shapefn =
+        Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
+    // Create cells from file
+    meshes_.at(0)->create_cells(
+        gid,      // global id
+        shapefn,  // Shape function
+        mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
+
+    // Particle type
+    const auto particle_type =
+        mesh_props["particle_type"].template get<std::string>();
+    // Create particles from file
+    meshes_.at(0)->create_particles(gid,            // global id
+                                    particle_type,  // particle type
+                                    mesh_reader->read_particles(io_->file_name(
+                                        "particles")));  // coordinates
+
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("Reading mesh and particles: {}", exception.what());
+  }
+  return status;
 }

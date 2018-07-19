@@ -36,6 +36,9 @@ class IO {
   //! Return json analysis object
   Json analysis() const { return json_["analysis"]; }
 
+  //! Return json object
+  Json json_object(const std::string& name) const { return json_[name]; }
+
   //! Return post processing object
   Json post_processing() const { return json_["post_processing"]; }
 
