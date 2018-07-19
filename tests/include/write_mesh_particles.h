@@ -10,6 +10,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
   // 2D
   std::string dimension = "2d";
   auto particle_type = "P2D";
+  auto node_type = "N2D";
   auto cell_type = "SFQ4";
   auto mesh_reader = "Ascii2D";
 
@@ -17,6 +18,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
   if (dim == 3) {
     dimension = "3d";
     particle_type = "P3D";
+    node_type = "N3D";
     cell_type = "SFH8";
     mesh_reader = "Ascii3D";
   }
@@ -33,6 +35,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
         {"traction", "traction.txt"}}},
       {"mesh",
        {{"mesh_reader", mesh_reader},
+        {"node_type", node_type},
         {"cell_type", cell_type},
         {"particle_type", particle_type}}},
       {"analysis",
