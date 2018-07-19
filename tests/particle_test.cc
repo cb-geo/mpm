@@ -312,14 +312,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     cell->add_node(3, node3);
     REQUIRE(cell->nnodes() == 4);
 
+    // Initialise cell properties
+    cell->initialise();
+
     // Add cell to particle
     REQUIRE(cell->status() == false);
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
-
-    // Assign shapefunction to cell
-    cell->compute_volume();
 
     // Check if cell is initialised
     REQUIRE(cell->is_initialised() == true);
@@ -596,8 +596,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
 
-    // Assign shapefunction to cell
-    cell->compute_volume();
+    // Initialise cell properties
+    cell->initialise();
+
     // Check if cell is initialised
     REQUIRE(cell->is_initialised() == true);
 

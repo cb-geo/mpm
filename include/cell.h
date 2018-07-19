@@ -50,6 +50,9 @@ class Cell {
   //! Return id of the cell
   Index id() const { return id_; }
 
+  //! Initialise cell properties
+  bool initialise();
+
   //! Return the initialisation status of cells
   //! \retval initialisation_status Cell has nodes, shape functions and volumes
   bool is_initialised() const;

@@ -24,6 +24,28 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
 }
 
 //! Return the initialisation status of cells
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::initialise() {
+  bool status = false;
+  try {
+    // Check if node pointers are present and are equal to the expected number
+    if (this->nnodes_ == this->nodes_.size()) {
+      // Initialise cell properties (volume, centroid, length)
+      this->compute_volume();
+      this->compute_centroid();
+      this->compute_mean_length();
+      status = true;
+    } else {
+      throw std::runtime_error(
+          "Specified number of nodes for a cell is not present");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+  return status;
+}
+
+//! Return the initialisation status of cells
 //! \retval initialisation_status Cell has nodes, shape functions and volumes
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::is_initialised() const {
@@ -33,6 +55,9 @@ bool mpm::Cell<Tdim>::is_initialised() const {
           this->nfunctions() != 0 &&
           // Check if volume of a cell is initialised
           (std::fabs(this->volume_ - std::numeric_limits<double>::max()) >
+           1.0E-10) &&
+          // Check if mean lenght of a cell is initialised
+          (std::fabs(this->mean_length_ - std::numeric_limits<double>::max()) >
            1.0E-10));
 }
 
@@ -557,16 +582,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
 
-    // TODO: Remove this and move to a cell properties initalisation
-    this->compute_mean_length();
-
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
-      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
-                << " thresold: "
-                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
       return xi;
-    }
   }
 
   // Newton Raphson iteration to solve for x
@@ -650,9 +668,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
-
-    // TODO: Remove this and move to a cell properties initalisation
-    this->compute_mean_length();
 
     // Early exit
     if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
