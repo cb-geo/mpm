@@ -11,7 +11,7 @@
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
-//! Speed Logger
+// Speed log
 #include "spdlog/spdlog.h"
 
 namespace mpm {

@@ -3,7 +3,7 @@
 //! Constructor with argc and argv
 mpm::IO::IO(int argc, char** argv) {
   //! Logger
-  console_ = spdlog::stdout_color_st("IO");
+  console_ = spdlog::get("IO");
   try {
 
     // Set title
