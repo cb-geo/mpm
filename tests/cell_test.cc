@@ -171,26 +171,26 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
       }
 
-      SECTION("Transform real to unit cell, locate point in cell") {
+      SECTION("Transform real to unit cell, xi is in negative coordinates") {
         // Number of nodes in cell
         const unsigned Nnodes = 4;
 
         // Coordinates
         Eigen::Vector2d coords;
 
-        coords << 2, 1;
+        coords << 2.0, 1.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-        coords << 4, 2;
+        coords << 4.0, 2.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-        coords << 2, 4;
+        coords << 2.0, 4.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-        coords << 1, 3;
+        coords << 1.0, 3.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
@@ -211,9 +211,80 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         Eigen::Vector2d point;
         point << 2.1875, 3.25;
 
+        // Test if point is in cell
+        REQUIRE(cell->point_in_cell(point) == true);
+
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell;
         point_unit_cell << 0.5, 0.5;
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point = cell->transform_real_to_unit_cell(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+        // Coordinates of a point in real cell
+        Eigen::Vector2d point1;
+        point1 << 2., 1.;
+
+        // Test if point is in cell
+        REQUIRE(cell->point_in_cell(point1) == true);
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 2, 1> point_unit_cell1;
+        point_unit_cell1 << -1., -1.;
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point1 = cell->transform_real_to_unit_cell(point1);
+        for (unsigned i = 0; i < local_point1.size(); ++i)
+          REQUIRE(local_point1[i] ==
+                  Approx(point_unit_cell1[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Transform real to unit cell, xi is (-0.25, -0.5)") {
+        // Number of nodes in cell
+        const unsigned Nnodes = 4;
+
+        // Coordinates
+        Eigen::Vector2d coords;
+
+        coords << 0., 0.5;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 2., 0.5;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 3., 1.5;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 1., 1.5;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        // 4-noded quadrilateral shape functions
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+
+        mpm::Index id = 0;
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+
+        cell->add_node(0, node0);
+        cell->add_node(1, node1);
+        cell->add_node(2, node2);
+        cell->add_node(3, node3);
+        REQUIRE(cell->nnodes() == 4);
+
+        // Coordinates of a point in real cell
+        Eigen::Vector2d point;
+        point << 1.0, 0.75;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 2, 1> point_unit_cell;
+        point_unit_cell << -0.25, -0.5;
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point = cell->transform_real_to_unit_cell(point);
@@ -665,7 +736,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
       }
 
-      SECTION("Transform real to unit cell, locate point in cell") {
+      SECTION("Transform real to unit cell, xi is in positive coordinates") {
         // Number of nodes in cell
         const unsigned Nnodes = 8;
 
@@ -734,6 +805,171 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Transform real to unit cell, locate points in cells") {
+        // Number of nodes in cell
+        const unsigned Nnodes = 8;
+
+        // Coordinates
+        Eigen::Vector3d coords;
+
+        coords << 0, 0., 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 2, 0., 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 2, .5, 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 0, .5, 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        coords << 1., 0., 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+        coords << 3., 0., 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+        coords << 3., .5, 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+        coords << 1., .5, 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+        // Cell 2
+        coords << 2, 1.5, 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node8 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+
+        coords << 0, 1.5, 0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node9 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+
+        coords << 3., 1.5, 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node10 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+
+        coords << 1., 1.5, 2.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node11 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+
+        // 8-noded hexahedron shape functions
+        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
+        // Cell 1
+        mpm::Index id1 = 0;
+        auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+
+        cell1->add_node(0, node0);
+        cell1->add_node(1, node1);
+        cell1->add_node(2, node2);
+        cell1->add_node(3, node3);
+        cell1->add_node(4, node4);
+        cell1->add_node(5, node5);
+        cell1->add_node(6, node6);
+        cell1->add_node(7, node7);
+        REQUIRE(cell1->nnodes() == 8);
+
+        // Cell 2
+        mpm::Index id2 = 0;
+        auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+
+        cell2->add_node(0, node3);
+        cell2->add_node(1, node2);
+        cell2->add_node(2, node8);
+        cell2->add_node(3, node9);
+        cell2->add_node(4, node7);
+        cell2->add_node(5, node6);
+        cell2->add_node(6, node10);
+        cell2->add_node(7, node11);
+        REQUIRE(cell2->nnodes() == 8);
+
+        // Check point 1
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point1;
+        point1 << 2.25, 0.375, 1.5;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell1;
+        point_unit_cell1 << 0.5, 0.5, 0.5;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point1) == true);
+        REQUIRE(cell2->point_in_cell(point1) == false);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point1 = cell1->transform_real_to_unit_cell(point1);
+        for (unsigned i = 0; i < local_point1.size(); ++i)
+          REQUIRE(local_point1[i] ==
+                  Approx(point_unit_cell1[i]).epsilon(Tolerance));
+
+        // Check point 2
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point2;
+        point2 << 0.75, 0.75, 0.5;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell2;
+        point_unit_cell2 << -0.5, -0.5, -0.5;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point2) == false);
+        REQUIRE(cell2->point_in_cell(point2) == true);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point2 = cell2->transform_real_to_unit_cell(point2);
+        for (unsigned i = 0; i < local_point2.size(); ++i)
+          REQUIRE(local_point2[i] ==
+                  Approx(point_unit_cell2[i]).epsilon(Tolerance));
+
+        // Check point 3
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point3;
+        point3 << 0., 0., 0.;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell3;
+        point_unit_cell3 << -1., -1., -1.;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point3) == true);
+        REQUIRE(cell2->point_in_cell(point3) == false);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point3 = cell1->transform_real_to_unit_cell(point3);
+        for (unsigned i = 0; i < local_point3.size(); ++i)
+          REQUIRE(local_point3[i] ==
+                  Approx(point_unit_cell3[i]).epsilon(Tolerance));
+
+        // Check point 4
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point4;
+        point4 << 3., 1.5, 2.;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell4;
+        point_unit_cell4 << 1., 1., 1.;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point4) == false);
+        REQUIRE(cell2->point_in_cell(point4) == true);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point4 = cell2->transform_real_to_unit_cell(point4);
+        for (unsigned i = 0; i < local_point4.size(); ++i)
+          REQUIRE(local_point4[i] ==
+                  Approx(point_unit_cell4[i]).epsilon(Tolerance));
       }
     }
   }

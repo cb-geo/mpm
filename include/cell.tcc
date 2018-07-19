@@ -655,12 +655,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     this->compute_mean_length();
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_)) {
-      std::cout << __FILE__ << __LINE__ << "Norm: " << fx.squaredNorm()
-                << " thresold: "
-                << 1e-24 * this->mean_length_ * this->mean_length_ << "\n";
+    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
       return xi;
-    }
   }
 
   // Newton Raphson iteration to solve for x
@@ -668,7 +664,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
-
     // Calculate Jacobian
     Eigen::Matrix<double, Tdim, Tdim> jacobian;
     const auto grad_sf = shapefn_->grad_shapefn(xi);
