@@ -15,13 +15,14 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     Json json_file = {
         {"title", "Example JSON Input for MPM"},
         {"input_files",
-         {{"input", "mpm.json"},
+         {{"config", "mpm.json"},
           {"mesh", "mesh.dat"},
           {"constraints", "mesh_constraints.dat"},
           {"particles", "particles.dat"},
           {"initial_stresses", "initial_soil_stress.dat"},
           {"materials", "materials.dat"},
           {"traction", "traction.dat"}}},
+        {"mesh", {{"cell_type", "SFH8"}, {"particle_type", "P3D"}}},
         {"analysis",
          {{"dt", 0.001},
           {"nsteps", 1000},
@@ -47,7 +48,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
     // Check cmake JSON object
-    REQUIRE(io->file_name("input") == "./mpm.json");
+    REQUIRE(io->file_name("config") == "./mpm.json");
 
     // Material file should return an empty string, as file is missing
     std::string material_file = io->file_name("material");
@@ -78,6 +79,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(analysis["damping"] == json_file["analysis"]["damping"]);
     // Check analysis gravity
     REQUIRE(analysis["newmark"] == json_file["analysis"]["newmark"]);
+
+    // Check return of a named JSON object
+    const std::string obj_name = "mesh";
+    REQUIRE(io->json_object(obj_name) == json_file["mesh"]);
 
     // Get post processing object
     Json post_processing = io->post_processing();
