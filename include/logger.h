@@ -7,20 +7,22 @@
 //! MPM namespace
 namespace mpm {
 
-// Create a logger for reading mesh
-auto io_logger = spdlog::stdout_color_st("IO");
+struct Logger {
+  // Create a logger for IO
+  static const std::shared_ptr<spdlog::logger> io_logger;
 
-// Create a logger for reading mesh
-auto read_mesh_logger = spdlog::stdout_color_st("ReadMesh");
+  // Create a logger for reading mesh
+  static const std::shared_ptr<spdlog::logger> read_mesh;
 
-// Create a logger for reading ascii mesh
-auto read_mesh_ascii_logger = spdlog::stdout_color_st("ReadMeshAscii");
+  // Create a logger for reading ascii mesh
+  static const std::shared_ptr<spdlog::logger> read_mesh_ascii;
 
-// Create a logger for MPM
-auto mpm_logger = spdlog::stdout_color_st("MPM");
+  // Create a logger for MPM
+  static const std::shared_ptr<spdlog::logger> mpm_logger;
 
-// Create a logger for MPM
-auto mpm_explicit_logger = spdlog::stdout_color_st("MPMExplicit");
+  // Create a logger for MPM Explicit
+  static const std::shared_ptr<spdlog::logger> mpm_explicit_logger;
+};
 
 }  // namespace mpm
 
