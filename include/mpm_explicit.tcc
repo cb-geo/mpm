@@ -74,7 +74,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
 
     if (!unlocatable_particles.empty())
-      throw std::runtime_error("Unlocatables particles found in mesh");
+      throw std::runtime_error("Particle outside the mesh domain");
 
     status = true;
   } catch (std::exception& exception) {
