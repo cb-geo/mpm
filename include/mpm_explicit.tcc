@@ -70,6 +70,12 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
                                     mesh_reader->read_particles(io_->file_name(
                                         "particles")));  // coordinates
 
+    // Locate particles in cell
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+
     status = true;
   } catch (std::exception& exception) {
     console_->error("Reading mesh and particles: {}", exception.what());
