@@ -22,8 +22,8 @@ class MPMExplicit : public MPM<Tdim> {
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
 
-  //! Initialise
-  bool initialise();
+  //! Initialise mesh and particles
+  bool initialise_mesh_particles();
 
  protected:
   // Generate a unique id for the analysis
