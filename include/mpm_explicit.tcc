@@ -70,6 +70,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
                                     mesh_reader->read_particles(io_->file_name(
                                         "particles")));  // coordinates
 
+    // Locate particles in cell
+    meshes_.at(0)->locate_particles_mesh();
+
     status = true;
   } catch (std::exception& exception) {
     console_->error("Reading mesh and particles: {}", exception.what());
