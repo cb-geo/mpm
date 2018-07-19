@@ -26,6 +26,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
       double ignore;
 
       while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
         std::istringstream istream(line);
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
@@ -134,6 +135,7 @@ template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
     mpm::ReadMeshAscii<Tdim>::read_particles(
         const std::string& particles_file) {
+
   // Nodal coordinates
   std::vector<VectorDim> coordinates;
   coordinates.clear();
@@ -147,6 +149,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
       // Line
       std::string line;
       while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
         std::istringstream istream(line);
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
