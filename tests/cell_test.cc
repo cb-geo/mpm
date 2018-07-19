@@ -171,26 +171,26 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
       }
 
-      SECTION("Transform real to unit cell, xi is (0.5, 0.5)") {
+      SECTION("Transform real to unit cell, xi is in negative coordinates") {
         // Number of nodes in cell
         const unsigned Nnodes = 4;
 
         // Coordinates
         Eigen::Vector2d coords;
 
-        coords << 2, 1;
+        coords << 2.0, 1.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-        coords << 4, 2;
+        coords << 4.0, 2.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-        coords << 2, 4;
+        coords << 2.0, 4.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-        coords << 1, 3;
+        coords << 1.0, 3.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
             std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
@@ -211,6 +211,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         Eigen::Vector2d point;
         point << 2.1875, 3.25;
 
+        // Test if point is in cell
+        REQUIRE(cell->point_in_cell(point) == true);
+
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell;
         point_unit_cell << 0.5, 0.5;
@@ -220,6 +223,23 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+        // Coordinates of a point in real cell
+        Eigen::Vector2d point1;
+        point1 << 2., 1.;
+
+        // Test if point is in cell
+        REQUIRE(cell->point_in_cell(point1) == true);
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 2, 1> point_unit_cell1;
+        point_unit_cell1 << -1., -1.;
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point1 = cell->transform_real_to_unit_cell(point1);
+        for (unsigned i = 0; i < local_point1.size(); ++i)
+          REQUIRE(local_point1[i] ==
+                  Approx(point_unit_cell1[i]).epsilon(Tolerance));
       }
 
       SECTION("Transform real to unit cell, xi is (-0.25, -0.5)") {
@@ -716,7 +736,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
       }
 
-      SECTION("Transform real to unit cell, xi is (0.5, 0.5, 0.)") {
+      SECTION("Transform real to unit cell, xi is in positive coordinates") {
         // Number of nodes in cell
         const unsigned Nnodes = 8;
 
@@ -912,6 +932,44 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         for (unsigned i = 0; i < local_point2.size(); ++i)
           REQUIRE(local_point2[i] ==
                   Approx(point_unit_cell2[i]).epsilon(Tolerance));
+
+        // Check point 3
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point3;
+        point3 << 0., 0., 0.;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell3;
+        point_unit_cell3 << -1., -1., -1.;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point3) == true);
+        REQUIRE(cell2->point_in_cell(point3) == false);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point3 = cell1->transform_real_to_unit_cell(point3);
+        for (unsigned i = 0; i < local_point3.size(); ++i)
+          REQUIRE(local_point3[i] ==
+                  Approx(point_unit_cell3[i]).epsilon(Tolerance));
+
+        // Check point 4
+        // Coordinates of a point in real cell
+        Eigen::Vector3d point4;
+        point4 << 3., 1.5, 2.;
+
+        // Coordinates of the point in an unit cell
+        Eigen::Matrix<double, 3, 1> point_unit_cell4;
+        point_unit_cell4 << 1., 1., 1.;
+
+        // Check if point is in cell
+        REQUIRE(cell1->point_in_cell(point4) == false);
+        REQUIRE(cell2->point_in_cell(point4) == true);
+
+        // Use Newton-raphson iteration to find local coordinates
+        auto local_point4 = cell2->transform_real_to_unit_cell(point4);
+        for (unsigned i = 0; i < local_point4.size(); ++i)
+          REQUIRE(local_point4[i] ==
+                  Approx(point_unit_cell4[i]).epsilon(Tolerance));
       }
     }
   }
