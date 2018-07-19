@@ -25,5 +25,12 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
 // Initialise
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise() {
-  return true;
+  bool status = false;
+  try {
+    auto mesh_props = io_->json_object("mesh");
+    status = true;
+  } catch (std::domain_error& domain_error) {
+    console_->error("Get mesh object: {}", domain_error.what());
+  }
+  return status;
 }

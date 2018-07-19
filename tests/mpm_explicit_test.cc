@@ -8,19 +8,29 @@ using Json = nlohmann::json;
 
 bool write_json(unsigned dim, const std::string& file_name) {
   // Make json object with input files
+  // 2D
   std::string dimension = "2d";
-  if (dim == 3) dimension = "3d";
+  auto particle_type = "P2D";
+  auto cell_type = "SFQ4";
+
+  // 3D
+  if (dim == 3) {
+    dimension = "3d";
+    particle_type = "P3D";
+    cell_type = "SFH8";
+  }
 
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
       {"input_files",
-       {{"input", "mpm.json"},
+       {{"config", "mpm.json"},
         {"mesh", "mesh.dat"},
         {"constraints", "mesh_constraints.dat"},
         {"particles", "particles.dat"},
         {"initial_stresses", "initial_soil_stress.dat"},
         {"materials", "materials.dat"},
         {"traction", "traction.dat"}}},
+      {"mesh", {{"cell_type", cell_type}, {"particle_type", particle_type}}},
       {"analysis",
        {{"dt", 0.001},
         {"nsteps", 1000},
