@@ -71,7 +71,10 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
                                         "particles")));  // coordinates
 
     // Locate particles in cell
-    meshes_.at(0)->locate_particles_mesh();
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Unlocatables particles found in mesh");
 
     status = true;
   } catch (std::exception& exception) {
