@@ -79,13 +79,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
+    // Check cell length at initialisation
+    REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
+    // Check volume before initialisation
+    REQUIRE(cell->volume() ==
+            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
+    // Check if cell is initialised, after addition of nodes
+    REQUIRE(cell->is_initialised() == true);
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
-      // Check cell length at initialisation
-      REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
-
-      cell->compute_mean_length();
-
       // Length of the cell
       const double length = 2.0;
 
@@ -117,13 +123,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Compute volume of a cell") {
       REQUIRE(cell->nfunctions() == 4);
 
-      // Check if cell is initialised, after addition of shapefn
-      REQUIRE(cell->is_initialised() == false);
-
-      // Compute volume
-      REQUIRE(cell->volume() ==
-              Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-      cell->compute_volume();
       REQUIRE(cell->volume() == Approx(4.0).epsilon(Tolerance));
 
       // Check if cell is initialised, after volume calculation
@@ -207,6 +206,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         cell->add_node(3, node3);
         REQUIRE(cell->nnodes() == 4);
 
+        // Initialise cell
+        REQUIRE(cell->initialise() == true);
+
         // Coordinates of a point in real cell
         Eigen::Vector2d point;
         point << 2.1875, 3.25;
@@ -277,6 +279,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         cell->add_node(2, node2);
         cell->add_node(3, node3);
         REQUIRE(cell->nnodes() == 4);
+
+        // Initialise cell
+        REQUIRE(cell->initialise() == true);
 
         // Coordinates of a point in real cell
         Eigen::Vector2d point;
@@ -349,6 +354,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->add_node(1, node1);
     cell->add_node(2, node2);
     cell->add_node(3, node3);
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
 
     // Create a vector of node pointers
     std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{node0, node1, node2,
@@ -640,13 +648,19 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
+    // Check cell length at initialisation
+    REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
+    // Check volume before initialisation
+    REQUIRE(cell->volume() ==
+            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
+    // Check if cell is initialised, after addition of nodes
+    REQUIRE(cell->is_initialised() == true);
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
-      // Check cell length at initialisation
-      REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
-
-      cell->compute_mean_length();
-
       // Length of the cell
       const double length = 2.0;
 
@@ -659,7 +673,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(cell->nfunctions() == 8);
 
       // Compute centroid
-      cell->compute_centroid();
       auto check_centroid = cell->centroid();
 
       // Centroid
@@ -678,17 +691,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     SECTION("Compute volume of a cell") {
       REQUIRE(cell->nfunctions() == 8);
 
-      // Check if cell is initialised, after addition of shapefn
-      REQUIRE(cell->is_initialised() == false);
-
-      // Compute volume
-      REQUIRE(cell->volume() ==
-              Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-      cell->compute_volume();
       REQUIRE(cell->volume() == Approx(8.0).epsilon(Tolerance));
-
-      // Check if cell is initialised, after volume computation
-      REQUIRE(cell->is_initialised() == true);
 
       SECTION("Check if a point is in a cell") {
         // Check point in cell
@@ -792,6 +795,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         cell->add_node(7, node7);
         REQUIRE(cell->nnodes() == 8);
 
+        // Initialise cell
+        REQUIRE(cell->initialise() == true);
+
         // Coordinates of a point in real cell
         Eigen::Vector3d point;
         point << 2.1875, 3.25, 0.;
@@ -881,6 +887,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         cell1->add_node(7, node7);
         REQUIRE(cell1->nnodes() == 8);
 
+        // Initialise cell
+        REQUIRE(cell1->initialise() == true);
+
         // Cell 2
         mpm::Index id2 = 0;
         auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
@@ -894,6 +903,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         cell2->add_node(6, node10);
         cell2->add_node(7, node11);
         REQUIRE(cell2->nnodes() == 8);
+
+        // Initialise cell
+        REQUIRE(cell2->initialise() == true);
 
         // Check point 1
         // Coordinates of a point in real cell
@@ -1027,6 +1039,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell->add_node(6, node6);
     cell->add_node(7, node7);
     REQUIRE(cell->nnodes() == 8);
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
 
     // Create a vector of node pointers
     std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes{

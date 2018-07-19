@@ -94,9 +94,12 @@ bool mpm::Mesh<Tdim>::create_cells(
         // Add cell to mesh
         bool insert_cell = false;
         // Check if cell has all nodes before inserting to mesh
-        if (cell->nnodes() == nodes.size())
-          insert_cell = this->add_cell(cell);
-        else
+        if (cell->nnodes() == nodes.size()) {
+          // Initialise cell before insertion
+          cell->initialise();
+          // If cell is initialised insert to mesh
+          if (cell->is_initialised()) insert_cell = this->add_cell(cell);
+        } else
           throw std::runtime_error("Invalid node ids for cell!");
 
         // Increament global cell id
