@@ -57,8 +57,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
         Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
     // Create cells from file
     meshes_.at(0)->create_cells(
-        std::move(gid),  // global id
-        shapefn,         // Shape function
+        gid,      // global id
+        shapefn,  // Shape function
         mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
 
     // Particle type
