@@ -5,55 +5,7 @@
 using Json = nlohmann::json;
 
 #include "mpm_explicit.h"
-
-bool write_json(unsigned dim, const std::string& file_name) {
-  // Make json object with input files
-  // 2D
-  std::string dimension = "2d";
-  auto particle_type = "P2D";
-  auto cell_type = "SFQ4";
-  auto mesh_reader = "Ascii2D";
-
-  // 3D
-  if (dim == 3) {
-    dimension = "3d";
-    particle_type = "P3D";
-    cell_type = "SFH8";
-    mesh_reader = "Ascii3D";
-  }
-
-  Json json_file = {
-      {"title", "Example JSON Input for MPM"},
-      {"input_files",
-       {{"config", "mpm.json"},
-        {"mesh", "mesh.dat"},
-        {"constraints", "mesh_constraints.dat"},
-        {"particles", "particles.dat"},
-        {"initial_stresses", "initial_soil_stress.dat"},
-        {"materials", "materials.dat"},
-        {"traction", "traction.dat"}}},
-      {"mesh",
-       {{"mesh_reader", mesh_reader},
-        {"cell_type", cell_type},
-        {"particle_type", particle_type}}},
-      {"analysis",
-       {{"dt", 0.001},
-        {"nsteps", 1000},
-        {"gravity", true},
-        {"soil_particle_spacing", 0.01},
-        {"boundary_friction", 0.5},
-        {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
-        {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
-      {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
-
-  // Dump JSON as an input file to be read
-  std::ofstream file;
-  file.open((file_name + "-" + dimension + ".json").c_str());
-  file << json_file.dump(2);
-  file.close();
-
-  return true;
-}
+#include "write_mesh_particles.h"
 
 // Check MPM Explicit
 TEST_CASE("MPM 2D Explicit implementation is checked",
@@ -63,8 +15,16 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit";
-  bool status = write_json(2, fname);
+  bool status = mpm_test::write_json(2, fname);
   REQUIRE(status == true);
+
+  // Write Mesh
+  bool mesh_status = mpm_test::write_mesh_2d();
+  REQUIRE(mesh_status == true);
+
+  // Write Particles
+  bool particle_status = mpm_test::write_particles_2d();
+  REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
@@ -86,8 +46,16 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit";
-  bool status = write_json(3, fname);
+  bool status = mpm_test::write_json(3, fname);
   REQUIRE(status == true);
+
+  // Write Mesh
+  bool mesh_status = mpm_test::write_mesh_3d();
+  REQUIRE(mesh_status == true);
+
+  // Write Particles
+  bool particle_status = mpm_test::write_particles_3d();
+  REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;

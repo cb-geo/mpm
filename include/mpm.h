@@ -11,6 +11,8 @@
 
 #include "io.h"
 #include "mesh.h"
+#include "read_mesh.h"
+#include "read_mesh_ascii.h"
 
 namespace mpm {
 //! MPM class

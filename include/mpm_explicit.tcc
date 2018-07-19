@@ -27,7 +27,26 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise() {
   bool status = false;
   try {
+    // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
+    // Get Mesh reader from JSON object
+    const std::string reader =
+        mesh_props["mesh_reader"].template get<std::string>();
+    // Create a mesh reader
+    auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+    // Read particles
+    auto particles = mesh_reader->read_particles(io_->file_name("particles"));
+
+    for (const auto& particle : particles) {
+      for (unsigned i = 0; i < particle.size(); ++i) {
+        std::cout << particle(i) << "\t";
+      }
+      std::cout << "\n";
+    }
+
+    std::cout << "Number of particles " << particles.size() << "\n";
+
     status = true;
   } catch (std::domain_error& domain_error) {
     console_->error("Get mesh object: {}", domain_error.what());

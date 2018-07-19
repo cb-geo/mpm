@@ -45,6 +45,7 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 include_directories(
   ${mpm_SOURCE_DIR}/include/
   ${mpm_SOURCE_DIR}/external/
+  ${mpm_SOURCE_DIR}/tests/include/
 )
 
 # mpm executable
