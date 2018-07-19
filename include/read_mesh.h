@@ -7,13 +7,18 @@
 #include <memory>
 #include <vector>
 
+// Boost string algorithm
 #include "Eigen/Dense"
+#include <boost/algorithm/string.hpp>
 // Speed log
 #include "spdlog/spdlog.h"
 
 #include "logger.h"
 
 namespace mpm {
+
+//! Global index type for the cell
+using Index = unsigned long long;
 
 //! ReadMesh class
 //! \brief Abstract Base class that returns mesh and particles locataions
@@ -44,7 +49,7 @@ class ReadMesh {
   //! Read mesh cells file
   //! \param[in] mesh file name with nodes and cells
   //! \retval cells Vector of nodal indices of cells
-  virtual std::vector<std::vector<unsigned>> read_mesh_cells(
+  virtual std::vector<std::vector<mpm::Index>> read_mesh_cells(
       const std::string& mesh) = 0;
 
   //! Read particles file

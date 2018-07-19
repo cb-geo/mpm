@@ -62,10 +62,10 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
 
 //! Return indices of nodes of cells in a mesh from input file
 template <unsigned Tdim>
-std::vector<std::vector<unsigned>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
+std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
     const std::string& mesh) {
   // Indices of nodes
-  std::vector<std::vector<unsigned>> cells;
+  std::vector<std::vector<mpm::Index>> cells;
   cells.clear();
 
   std::fstream file;
@@ -81,14 +81,15 @@ std::vector<std::vector<unsigned>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
       // Coordinates
       Eigen::Matrix<double, Tdim, 1> coords;
       // # of nodes and cells
-      unsigned nnodes = 0, ncells = 0;
+      mpm::Index nnodes = 0, ncells = 0;
       // ignore stream
       double ignore;
 
       while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
         std::istringstream istream(line);
         // Vector of node ids for a cell
-        std::vector<unsigned> nodes;
+        std::vector<mpm::Index> nodes;
         nodes.clear();
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
@@ -103,9 +104,11 @@ std::vector<std::vector<unsigned>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
             // Ignore nodal coordinates
             if (nlines > nnodes) {
               // Read node ids of each cell
-              unsigned nid;
-              istream >> nid;
-              nodes.emplace_back(nid);
+              mpm::Index nid;
+              if (!istream.str().empty()) {
+                istream >> nid;
+                nodes.emplace_back(nid);
+              }
             } else {
               // Ignore stream not related to node ids of cells
               istream >> ignore;

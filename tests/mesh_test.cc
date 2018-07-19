@@ -357,7 +357,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     SECTION("Check creation of nodes") {
       // Node type 2D
-      const std::string node_type = "Node2D";
+      const std::string node_type = "N2D";
       // Global node index
       mpm::Index gnid = 0;
       mesh->create_nodes(gnid, node_type, coordinates);
@@ -843,7 +843,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     SECTION("Check creation of nodes") {
       // Node type 3D
-      const std::string node_type = "Node3D";
+      const std::string node_type = "N3D";
       // Global node index
       mpm::Index gnid = 0;
       mesh->create_nodes(gnid, node_type, coordinates);
