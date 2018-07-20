@@ -9,7 +9,6 @@
 
 #include "cell.h"
 #include "particle_base.h"
-#include "serialize.h"
 
 namespace mpm {
 
@@ -120,18 +119,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] nphase Index corresponding to the phase
   Eigen::VectorXd acceleration(unsigned nphase) const {
     return acceleration_.col(nphase);
-  }
-
-  friend class boost::serialization::access;
-  //! Serialization / desierailization of particle
-  //! \tparam Archive Boost archive object
-  //! \param[in] ar Boost archive type
-  //! \param[in] version Version numbering for the class object
-  template <class Archive>
-  void serialize(Archive& ar, const unsigned int version) {
-    ar& id_;
-    ar& coordinates_;
-    std::cout << "Derived\n";
   }
 
  private:

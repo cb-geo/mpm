@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "node_base.h"
-#include "serialize.h"
 
 namespace mpm {
 
