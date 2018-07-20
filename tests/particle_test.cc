@@ -1,8 +1,6 @@
 #include <iostream>
 #include <limits>
 
-#include "serialize.h"
-
 #include "catch.hpp"
 
 #include "cell.h"
@@ -170,42 +168,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
-  }
-
-  //! Test serialize function
-  SECTION("Serialisation is checked") {
-    mpm::Index id = 0;
-    const double Tolerance = 1.E-7;
-
-    // Check for negative value of coordinates
-    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
-
-    // Create a string stream
-    std::stringstream ss;
-    // save data to archive
-    {
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
-      boost::archive::text_oarchive oa(ss);
-      oa << *particle;
-    }
-    // load data from archive
-    {
-      mpm::Index id = 1;
-      // Coordinates
-      Eigen::Matrix<double, 1, 1> coordinates;
-      coordinates.setZero();
-
-      auto particle =
-          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
-      REQUIRE(particle->id() == 1);
-
-      // Load from archive
-      boost::archive::text_iarchive(ss) >> *particle;
-      REQUIRE(particle->id() == 0);
-      coordinates = particle->coordinates();
-      for (unsigned i = 0; i < coordinates.size(); ++i)
-        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
-    }
   }
 }
 
@@ -412,42 +374,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 19.745;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
-  }
-
-  //! Test serialize function
-  SECTION("Serialisation is checked") {
-    mpm::Index id = 0;
-    const double Tolerance = 1.E-7;
-
-    // Check for negative value of coordinates
-    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
-
-    // Create a string stream
-    std::stringstream ss;
-    // save data to archive
-    {
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
-      boost::archive::text_oarchive oa(ss);
-      oa << *particle;
-    }
-    // load data from archive
-    {
-      mpm::Index id = 1;
-      // Coordinates
-      Eigen::Vector2d coordinates;
-      coordinates.setZero();
-
-      auto particle =
-          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
-      REQUIRE(particle->id() == 1);
-
-      // Load from archive
-      boost::archive::text_iarchive(ss) >> *particle;
-      REQUIRE(particle->id() == 0);
-      coordinates = particle->coordinates();
-      for (unsigned i = 0; i < coordinates.size(); ++i)
-        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
-    }
   }
 }
 
@@ -694,41 +620,5 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
-  }
-
-  //! Test serialize function
-  SECTION("Serialisation is checked") {
-    mpm::Index id = 0;
-    const double Tolerance = 1.E-7;
-
-    // Check for negative value of coordinates
-    for (unsigned i = 0; i < coords.size(); ++i) coords(i) = i;
-
-    // Create a string stream
-    std::stringstream ss;
-    // save data to archive
-    {
-      auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
-      boost::archive::text_oarchive oa(ss);
-      oa << *particle;
-    }
-    // load data from archive
-    {
-      mpm::Index id = 1;
-      // Coordinates
-      Eigen::Vector3d coordinates;
-      coordinates.setZero();
-
-      auto particle =
-          std::make_shared<mpm::Particle<Dim, Nphases>>(id, coordinates);
-      REQUIRE(particle->id() == 1);
-
-      // Load from archive
-      boost::archive::text_iarchive(ss) >> *particle;
-      REQUIRE(particle->id() == 0);
-      coordinates = particle->coordinates();
-      for (unsigned i = 0; i < coordinates.size(); ++i)
-        REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
-    }
   }
 }
