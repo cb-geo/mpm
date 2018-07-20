@@ -57,9 +57,8 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     std::string material_file = io->file_name("material");
     REQUIRE(material_file.empty() == true);
 
-    // Check if CMake and README files are present
-    REQUIRE(io->check_file("../CMakeLists.txt") == true);
-    REQUIRE(io->check_file("../README.md") == true);
+    // Check if mpm.json exists
+    REQUIRE(io->check_file("./mpm.json") == true);
 
     // Check if a non-existant file is present
     REQUIRE(io->check_file("../fail.txt") == false);
