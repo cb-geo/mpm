@@ -6,7 +6,7 @@
 #include <limits>
 #include <vector>
 
-#include "serialize.h"
+#include <Eigen/Dense>
 
 namespace mpm {
 
