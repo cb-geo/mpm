@@ -556,7 +556,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   const auto unit_cell = shapefn_->unit_cell_coordinates();
 
   // Affine transformation, using linear interpolation for the initial guess
-  if (this->nfunctions() == 4) {
+  if (shapefn_->degree() == mpm::ShapeFnDegree::Linear) {
     // A = vertex * KA
     Eigen::Matrix<double, 2, 2> A;
     A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
@@ -643,7 +643,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   const auto unit_cell = shapefn_->unit_cell_coordinates();
 
   // Affine transformation, using linear interpolation for the initial guess
-  if (this->nfunctions() == 8) {
+  if (shapefn_->degree() == mpm::ShapeFnDegree::Linear) {
     // A = vertex * KA
     Eigen::Matrix<double, 3, 3> A;
     A = nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;

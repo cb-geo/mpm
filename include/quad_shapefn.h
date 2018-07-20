@@ -87,6 +87,9 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \retval bmatrix B matrix
   std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi);
 
+  //! Return the degree of shape function
+  mpm::ShapeFnDegree degree() const;
+
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const;
 
