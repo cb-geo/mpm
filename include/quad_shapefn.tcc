@@ -205,6 +205,27 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::unit_cell_coordinates()
   return unit_cell;
 }
 
+//! Return the degree of shape function
+//! 4-noded quadrilateral
+template <>
+inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 4>::degree() const {
+  return mpm::ShapeFnDegree::Linear;
+}
+
+//! Return the degree of shape function
+//! 8-noded quadrilateral
+template <>
+inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 8>::degree() const {
+  return mpm::ShapeFnDegree::Quadratic;
+}
+
+//! Return the degree of shape function
+//! 9-noded quadrilateral
+template <>
+inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 9>::degree() const {
+  return mpm::ShapeFnDegree::Quadratic;
+}
+
 //! Return the B-matrix of a Quadrilateral Element at a given local
 //! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>
