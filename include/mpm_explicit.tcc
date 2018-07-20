@@ -23,7 +23,8 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
       }
     }
   } catch (std::domain_error& domain_error) {
-    console_->error("Get analysis object: {}", domain_error.what());
+    console_->error(" {} {} Get analysis object: {}", __FILE__, __LINE__,
+                    domain_error.what());
   }
 }
 
@@ -78,7 +79,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     status = true;
   } catch (std::exception& exception) {
-    console_->error("Reading mesh and particles: {}", exception.what());
+    console_->error("{} {} Reading mesh and particles: {}", __FILE__, __LINE__,
+                    exception.what());
   }
   return status;
 }
