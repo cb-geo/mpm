@@ -7,6 +7,9 @@
 
 namespace mpm {
 
+// Degree of shape function
+enum ShapeFnDegree { Linear = 1, Quadratic = 2 };
+
 //! Base class of shape functions
 //! \brief Base class that stores the information about shape functions
 //! \tparam Tdim Dimension
@@ -38,6 +41,9 @@ class ShapeFn {
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
   virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) = 0;
+
+  //! Return the degree of shape function
+  virtual mpm::ShapeFnDegree degree() const = 0;
 
   //! Return nodal coordinates of a unit cell
   virtual Eigen::MatrixXd unit_cell_coordinates() const = 0;
