@@ -17,6 +17,9 @@ TEST_CASE("Quadrilateral shape functions are checked",
     std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
         std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
 
+    // Check degree
+    REQUIRE(quadsf->degree() == mpm::ShapeFnDegree::Linear);
+
     // Coordinates is (0,0)
     SECTION("Four noded quadrilateral shape function for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
@@ -254,6 +257,9 @@ TEST_CASE("Quadrilateral shape functions are checked",
     const unsigned nfunctions = 8;
     std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
         std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
+
+    // Check degree
+    REQUIRE(quadsf->degree() == mpm::ShapeFnDegree::Quadratic);
 
     // Coordinates is (0,0)
     SECTION("Eight noded quadrilateral shape function for coordinates(0,0)") {
@@ -536,6 +542,9 @@ TEST_CASE("Quadrilateral shape functions are checked",
     const unsigned nfunctions = 9;
     std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
         std::make_shared<mpm::QuadrilateralShapeFn<Dim, nfunctions>>();
+
+    // Check degree
+    REQUIRE(quadsf->degree() == mpm::ShapeFnDegree::Quadratic);
 
     // Coordinates is (0,0)
     SECTION("Nine noded quadrilateral shape function for coordinates(0,0)") {

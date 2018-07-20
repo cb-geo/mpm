@@ -267,6 +267,22 @@ inline std::vector<Eigen::MatrixXd>
   return bmatrix;
 }
 
+//! Return the degree of shape function
+//! 8-noded hexahedron
+template <>
+inline  mpm::ShapeFnDegree 
+mpm::HexahedronShapeFn<3, 8>::degree() const {
+  return mpm::ShapeFnDegree::Linear;
+}
+
+//! Return the degree of shape function
+//! 8-noded hexahedron
+template <>
+inline  mpm::ShapeFnDegree 
+mpm::HexahedronShapeFn<3, 20>::degree() const {
+  return mpm::ShapeFnDegree::Quadratic;
+}
+
 //! Return nodal coordinates of a unit cell
 template <>
 inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() const {
