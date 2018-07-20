@@ -17,6 +17,9 @@ TEST_CASE("Hexahedron shape functions are checked",
     std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
         std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
 
+    // Check degree
+    REQUIRE(hexsf->degree() == mpm::ShapeFnDegree::Linear);
+
     // Coordinates is (0, 0, 0)
     SECTION("Eight noded hexahedron shape function for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
@@ -421,6 +424,9 @@ TEST_CASE("Hexahedron shape functions are checked",
     const unsigned nfunctions = 20;
     std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
         std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
+
+    // Check degree
+    REQUIRE(hexsf->degree() == mpm::ShapeFnDegree::Quadratic);
 
     // Coordinates is (0, 0, 0)
     SECTION("Twenty noded hexahedron shape function for coordinates(0, 0, 0)") {
