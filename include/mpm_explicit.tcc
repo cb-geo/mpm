@@ -97,13 +97,14 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
     auto materials = io_->json_object("materials");
 
     for (const auto material_props : materials) {
-      // Create a new material from JSON object
+      // Get material type
       const std::string material_type =
           material_props["type"].template get<std::string>();
 
+      // Get material id
       unsigned material_id = material_props["id"].template get<unsigned>();
 
-      // Create material
+      // Create a new material from JSON object
       auto mat = Factory<mpm::Material, unsigned>::instance()->create(
           material_type, std::move(material_id));
 
@@ -111,12 +112,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
       mat->properties(material_props);
       
       // Add material to list
-      materials_.emplace_back(mat);
+      materials_.insert(std::make_pair(mat->id(), mat));
     }
-
-    for (const auto mat: materials_)
-      std::cout << "Material: " << mat->property("density") << "\n";
-
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} {} Reading materials: {}", __FILE__, __LINE__,
