@@ -11,7 +11,7 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
                                    const std::string& node_type,
                                    const std::vector<VectorDim>& coordinates) {
-  bool status = false;
+  bool status = true;
   try {
     // Check if nodal coordinates is not empty
     if (!coordinates.empty()) {
@@ -30,14 +30,12 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
         else
           throw std::runtime_error("Addition of node to mesh failed!");
       }
-      // When successful
-      status = true;
-    } else {
+    } else
       // If the coordinates vector is empty
       throw std::runtime_error("List of coordinates is empty");
-    }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -74,7 +72,7 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
     mpm::Index gcid, const std::shared_ptr<mpm::ShapeFn<Tdim>>& shapefn,
     const std::vector<std::vector<mpm::Index>>& cells) {
-  bool status = false;
+  bool status = true;
   try {
     // Check if node id list is not empty
     if (!cells.empty()) {
@@ -108,14 +106,13 @@ bool mpm::Mesh<Tdim>::create_cells(
         else
           throw std::runtime_error("Addition of cell to mesh failed!");
       }
-      // When successful
-      status = true;
     } else {
       // If the coordinates vector is empty
       throw std::runtime_error("List of nodes of cells is empty");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -148,14 +145,13 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
     mpm::Index gpid, const std::string& particle_type,
     const std::vector<VectorDim>& coordinates) {
-  bool status = false;
+  bool status = true;
   try {
     // Check if particle coordinates is not empty
     if (!coordinates.empty()) {
       for (const auto& particle_coordinates : coordinates) {
         // Add particle to mesh and check
         bool insert_status = this->add_particle(
-            // Create a particle of particular
             Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                     const Eigen::Matrix<double, Tdim, 1>&>::instance()
                 ->create(particle_type, static_cast<mpm::Index>(gpid),
@@ -167,14 +163,13 @@ bool mpm::Mesh<Tdim>::create_particles(
         else
           throw std::runtime_error("Addition of particle to mesh failed!");
       }
-      // When successful
-      status = true;
     } else {
       // If the coordinates vector is empty
       throw std::runtime_error("List of coordinates is empty");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -207,7 +202,8 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     bool find_cell = false;
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      // Check if co-ordinates is within the cell, if true add particle to cell
+      // Check if co-ordinates is within the cell, if true add particle to
+      // cell
       if ((*citr)->point_in_cell((*pitr)->coordinates())) {
         (*pitr)->assign_cell(*citr);
         find_cell = true;

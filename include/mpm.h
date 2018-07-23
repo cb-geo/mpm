@@ -36,6 +36,9 @@ class MPM {
   // Initialise materials
   virtual bool initialise_materials() = 0;
 
+  // Solve
+  virtual bool solve() = 0;
+
  protected:
   //! A unique id for the analysis
   std::string uuid_;

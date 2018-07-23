@@ -28,6 +28,9 @@ class MPMExplicit : public MPM<Tdim> {
   //! Initialise materials
   bool initialise_materials();
 
+  //! Solve
+  bool solve();
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM<Tdim>::uuid_;
