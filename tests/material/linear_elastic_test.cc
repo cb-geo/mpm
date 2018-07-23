@@ -39,7 +39,13 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
+    // Check material status before assigning material property
+    REQUIRE(material->status() == false);
+    
     material->properties(jmaterial);
+
+    // Check material status after assigning material property
+    REQUIRE(material->status() == true);
 
     // Calculate modulus values
     const double K = 8333333.333333333;

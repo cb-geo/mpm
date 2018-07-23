@@ -39,6 +39,9 @@ class Material {
   //! Return id of the material
   unsigned id() const { return id_; }
 
+  //! Return status as true, when properties are assigned
+  bool status() const { return status_; }
+  
   //! Read material properties
   virtual void properties(const Json&) = 0;
 
@@ -51,6 +54,8 @@ class Material {
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
+  //! status
+  bool status_{false};
 };  // Material class
 }  // namespace mpm
 

@@ -32,9 +32,6 @@ class LinearElastic : public Material {
   //! Delete assignement operator
   LinearElastic& operator=(const LinearElastic&) = delete;
 
-  //! Return id of the linearelastic
-  unsigned id() const { return id_; }
-
   //! Read material properties
   void properties(const Json&);
 
@@ -47,6 +44,8 @@ class LinearElastic : public Material {
  protected:
   //! material id
   using Material::id_;
+  //! material status
+  using Material::status_;
 
  private:
   //! Elastic stiffness matrix
