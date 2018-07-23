@@ -312,6 +312,33 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Assign material
+    unsigned mid = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(mid));
+
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    unsigned phase = 0;
+    // Check compute mass before material and volume
+    REQUIRE(particle->compute_mass(phase) == false);
+
+    // Assign material properties
+    material->properties(jmaterial);
+    REQUIRE(particle->assign_material(material) == true);
+
+    // Compute volume
+    REQUIRE(particle->compute_volume() == true);
+
+    // Compute mass
+    REQUIRE(particle->compute_mass(phase) == true);
+    // Mass
+    REQUIRE(particle->mass(phase) == Approx(1000.).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -611,6 +638,33 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Assign material
+    unsigned mid = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(mid));
+
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    unsigned phase = 0;
+    // Check compute mass before material and volume
+    REQUIRE(particle->compute_mass(phase) == false);
+
+    // Assign material properties
+    material->properties(jmaterial);
+    REQUIRE(particle->assign_material(material) == true);
+
+    // Compute volume
+    REQUIRE(particle->compute_volume() == true);
+
+    // Compute mass
+    REQUIRE(particle->compute_mass(phase) == true);
+    // Mass
+    REQUIRE(particle->mass(phase) == Approx(8000.).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
