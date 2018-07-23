@@ -31,16 +31,33 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
   char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
                   (char*)"mpm-explicit-2d.json"};
 
-  // Create an IO object
-  auto io = std::make_unique<mpm::IO>(argc, argv);
+  SECTION("Check initialisation") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-  // Run explicit MPM
-  auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
-  // Initialise mesh
-  REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh
+    REQUIRE(mpm->initialise_mesh_particles() == true);
 
-  // Initialise materials
-  REQUIRE(mpm->initialise_materials() == true);
+    // Initialise materials
+    REQUIRE(mpm->initialise_materials() == true);
+
+    // Reinitialise mesh
+    REQUIRE(mpm->initialise_mesh_particles() == false);
+
+    // Renitialise materials
+    REQUIRE(mpm->initialise_materials() == false);
+  }
+
+  SECTION("Check solver") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    // Solve
+    REQUIRE(mpm->solve() == true);
+  }
 }
 
 // Check MPM Explicit
@@ -67,14 +84,31 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
   char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
                   (char*)"mpm-explicit-3d.json"};
 
-  // Create an IO object
-  auto io = std::make_unique<mpm::IO>(argc, argv);
+  SECTION("Check initialisation") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-  // Run explicit MPM
-  auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
-  // Initialise mesh
-  REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh
+    REQUIRE(mpm->initialise_mesh_particles() == true);
 
-  // Initialise materials
-  REQUIRE(mpm->initialise_materials() == true);
+    // Initialise materials
+    REQUIRE(mpm->initialise_materials() == true);
+
+    // Reinitialise mesh
+    REQUIRE(mpm->initialise_mesh_particles() == false);
+
+    // Renitialise materials
+    REQUIRE(mpm->initialise_materials() == false);
+  }
+
+  SECTION("Check solver") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    // Solve
+    REQUIRE(mpm->solve() == true);
+  }
 }
