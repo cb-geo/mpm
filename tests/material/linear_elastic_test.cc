@@ -47,6 +47,10 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     REQUIRE(material->property("density") ==
             Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
 
+    // Check for property that does not exist
+    REQUIRE(material->property("noproperty") ==
+            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+
     material->properties(jmaterial);
 
     // Check material status after assigning material property
