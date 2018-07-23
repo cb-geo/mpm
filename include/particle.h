@@ -50,7 +50,7 @@ class Particle : public ParticleBase<Tdim> {
   void initialise();
 
   //! Compute reference coordinates in a cell
-  void compute_reference_location();
+  bool compute_reference_location();
 
   //! Return reference location
   VectorDim reference_location() const { return xi_; }
@@ -63,7 +63,6 @@ class Particle : public ParticleBase<Tdim> {
   Index cell_id() const { return cell_id_; }
 
   //! Compute shape functions of a particle, based on local coordinates
-  //! \retval status Returns if compute shapefns was successful
   bool compute_shapefn();
 
   //! Assign nodal mass to particles
