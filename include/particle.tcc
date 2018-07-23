@@ -99,7 +99,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute shapefns for the particle");
+          "cannot compute shapefns for the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
@@ -120,7 +120,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute volume for the particle");
+          "cannot compute volume for the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
