@@ -316,6 +316,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Initialise material
     Json jmaterial;
+    jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
@@ -589,7 +590,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
-  
+
   SECTION("Check assign material to particle") {
     // Add particle
     mpm::Index id = 0;
@@ -603,6 +604,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Initialise material
     Json jmaterial;
+    jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
