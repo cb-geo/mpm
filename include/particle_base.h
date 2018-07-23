@@ -56,7 +56,7 @@ class ParticleBase {
   VectorDim coordinates() const { return coordinates_; }
 
   //! Compute reference coordinates in a cell
-  virtual void compute_reference_location() = 0;
+  virtual bool compute_reference_location() = 0;
 
   //! Return reference location
   virtual VectorDim reference_location() const = 0;
@@ -66,6 +66,9 @@ class ParticleBase {
 
   //! Return cell id
   virtual Index cell_id() const = 0;
+
+  //! Compute shape functions
+  virtual bool compute_shapefn() = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }

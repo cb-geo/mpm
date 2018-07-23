@@ -279,6 +279,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Add cell to particle
     REQUIRE(cell->status() == false);
+    // Check compute shape functions of a particle
+    REQUIRE(particle->compute_shapefn() == false);
+    // Compute reference location should throw
+    REQUIRE(particle->compute_reference_location() == false);
+
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
@@ -286,9 +291,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check if cell is initialised
     REQUIRE(cell->is_initialised() == true);
 
+    // Check compute shape functions of a particle
+    REQUIRE(particle->compute_shapefn() == true);
+
     // Check reference location
     coords << -0.5, -0.5;
-    particle->compute_reference_location();
+    REQUIRE(particle->compute_reference_location() == true);
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
@@ -530,13 +538,24 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Add cell to particle
     REQUIRE(cell->status() == false);
+    // Check compute shape functions of a particle
+    REQUIRE(particle->compute_shapefn() == false);
+    // Compute reference location should throw
+    REQUIRE(particle->compute_reference_location() == false);
+
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
 
+    // Check if cell is initialised
+    REQUIRE(cell->is_initialised() == true);
+
+    // Check compute shape functions of a particle
+    REQUIRE(particle->compute_shapefn() == true);
+
     // Check reference location
     coords << 0.5, 0.5, 0.5;
-    particle->compute_reference_location();
+    REQUIRE(particle->compute_reference_location() == true);
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
