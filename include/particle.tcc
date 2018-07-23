@@ -40,11 +40,18 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 // Assign a material to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_material(
-    const std::shared_ptr<Material>& materialptr) {
+    const std::shared_ptr<Material>& material) {
   bool status = false;
-  if (materialptr != nullptr) {
-    material_ = materialptr;
-    status = true;
+  try {
+    // Check if material is valid and properties are set
+    if (material != nullptr && material->status()) {
+      material_ = material;
+      status = true;
+    } else {
+      throw std::runtime_error("Material is undefined!");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << exception.what() << '\n';
   }
   return status;
 }

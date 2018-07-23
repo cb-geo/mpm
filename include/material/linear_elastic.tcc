@@ -6,6 +6,7 @@ void mpm::LinearElastic::properties(const Json& materail_properties) {
         materail_properties["youngs_modulus"].template get<double>();
     poisson_ratio_ =
         materail_properties["poisson_ratio"].template get<double>();
+    status_ = true;
   } catch (std::exception& except) {
     std::cerr << "Material parameter not set: " << except.what() << '\n';
   }
