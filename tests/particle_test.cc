@@ -297,8 +297,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == true);
 
+    // Assign volume
+    particle->assign_volume(2.0);
+    // Check volume
+    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
     REQUIRE(particle->compute_volume() == true);
+    // Check volume
+    REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
 
     // Check reference location
     coords << -0.5, -0.5;
@@ -590,8 +596,14 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == true);
 
+    // Assign volume
+    particle->assign_volume(2.0);
+    // Check volume
+    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
     REQUIRE(particle->compute_volume() == true);
+    // Check volume
+    REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
 
     // Check reference location
     coords << 0.5, 0.5, 0.5;
