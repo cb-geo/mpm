@@ -37,12 +37,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 
 // Compute reference location cell to particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
+bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
+  bool status = false;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get reference location of a particle
       this->xi_ = cell_->local_coordinates_point(this->coordinates_);
+      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -51,6 +53,7 @@ void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
+  return status;
 }
 
 // Compute shape functions and gradients
