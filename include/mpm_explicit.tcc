@@ -9,6 +9,9 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   const mpm::Index id = 0;
   meshes_.emplace_back(std::make_unique<mpm::Mesh<Tdim>>(id));
 
+  // Empty all materials
+  materials_.clear();
+
   try {
     analysis_ = io_->analysis();
     // Time-step size
@@ -80,6 +83,36 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} {} Reading mesh and particles: {}", __FILE__, __LINE__,
+                    exception.what());
+  }
+  return status;
+}
+
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::initialise_materials() {
+  bool status = false;
+  materials_.clear();
+  try {
+    // Get materials properties
+    auto materials = io_->json_object("materials");
+
+    for (const auto material : materials) {
+      // Create a new material from JSON object
+      const std::string material_name =
+          material["name"].template get<std::string>();
+
+      unsigned material_id = material["id"].template get<unsigned>();
+
+      // Create material
+      auto mat = Factory<mpm::Material, unsigned>::instance()->create(
+          material_name, std::move(material_id));
+
+      // Add material to list
+      materials_.emplace_back(mat);
+    }
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} {} Reading materials: {}", __FILE__, __LINE__,
                     exception.what());
   }
   return status;

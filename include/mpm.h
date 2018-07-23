@@ -33,6 +33,9 @@ class MPM {
   // Initialise mesh and particles
   virtual bool initialise_mesh_particles() = 0;
 
+  // Initialise materials
+  virtual bool initialise_materials() = 0;
+
  protected:
   //! A unique id for the analysis
   std::string uuid_;
@@ -44,6 +47,8 @@ class MPM {
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  //! Materials
+  std::vector<std::shared_ptr<mpm::Material>> materials_;
   //! A unique ptr to IO object
   std::unique_ptr<mpm::IO> io_;
   //! JSON analysis object

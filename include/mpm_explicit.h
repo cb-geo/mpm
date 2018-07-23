@@ -25,6 +25,9 @@ class MPMExplicit : public MPM<Tdim> {
   //! Initialise mesh and particles
   bool initialise_mesh_particles();
 
+  //! Initialise materials
+  bool initialise_materials();
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM<Tdim>::uuid_;
@@ -36,6 +39,8 @@ class MPMExplicit : public MPM<Tdim> {
   using mpm::MPM<Tdim>::gravity_;
   //! Mesh object
   using mpm::MPM<Tdim>::meshes_;
+  //! Materials
+  using mpm::MPM<Tdim>::materials_;
   //! A unique ptr to IO object
   using mpm::MPM<Tdim>::io_;
   //! JSON analysis object
