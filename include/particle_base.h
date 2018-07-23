@@ -67,6 +67,9 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
+  //! Compute shape functions
+  virtual bool compute_shapefn() = 0;
+
   //! Assign status
   void assign_status(bool status) { status_ = status; }
 

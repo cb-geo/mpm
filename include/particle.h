@@ -53,7 +53,7 @@ class Particle : public ParticleBase<Tdim> {
   void compute_reference_location();
 
   //! Return reference location
-  VectorDim reference_location() const { return reference_location_; }
+  VectorDim reference_location() const { return xi_; }
 
   // Assign a cell to particle
   //! \param[in] cellptr Pointer to a cell
@@ -61,6 +61,10 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return cell id
   Index cell_id() const { return cell_id_; }
+
+  //! Compute shape functions of a particle, based on local coordinates
+  //! \retval status Returns if compue shapefns was successful
+  bool compute_shapefn();
 
   //! Assign nodal mass to particles
   //! \param[in] nphase Index corresponding to the phase
@@ -127,7 +131,7 @@ class Particle : public ParticleBase<Tdim> {
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
   //! Reference coordinates (in a cell)
-  Eigen::Matrix<double, Tdim, 1> reference_location_;
+  Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Cell id
@@ -144,6 +148,12 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Gradient of shape functions
+  Eigen::MatrixXd grad_shapefn_;
+  //! B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix_;
 
 };  // Particle class
 }  // namespace mpm
