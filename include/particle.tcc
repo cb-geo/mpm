@@ -3,6 +3,7 @@ template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
+  cell_ = nullptr;
 }
 
 //! Construct a particle with id, coordinates and status
@@ -11,6 +12,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
                                         bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
+  cell_ = nullptr;
 }
 
 // Initialise particle properties
@@ -38,7 +40,7 @@ template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   try {
     // Get reference location of a particle
-    if (this->cell_->is_initialised()) {
+    if (cell_ != nullptr) {
       this->xi_ = cell_->local_coordinates_point(this->coordinates_);
     } else {
       throw std::runtime_error(
@@ -56,7 +58,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
   bool status = false;
   try {
-    if (this->cell_->is_initialised()) {
+    if (cell_ != nullptr) {
       // Compute local coordinates
       this->compute_reference_location();
 
@@ -71,7 +73,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       bmatrix_ = sfn->bmatrix(this->xi_);
       // Return update status
       status = true;
-
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
