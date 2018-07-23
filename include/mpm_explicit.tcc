@@ -167,6 +167,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
+  // Iterate over each particle to compute shapefn
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+
   // Compute volume
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));

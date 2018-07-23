@@ -83,6 +83,9 @@ class ParticleBase {
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
 
+  //! Map particle mass to nodes
+  virtual bool map_mass_to_nodes(unsigned phase) = 0;
+
   // Assign material
   virtual bool assign_material(const std::shared_ptr<Material>& material) = 0;
 

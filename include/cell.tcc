@@ -703,12 +703,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
 //! Map particle mass to nodes
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const VectorDim& xi,
+void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
                                                  unsigned nphase,
                                                  double pmass) {
-  const auto shapefns = shapefn_->shapefn(xi);
-  for (unsigned i = 0; i < shapefns.size(); ++i) {
-    nodes_[i]->update_mass(true, nphase, shapefns(i) * pmass);
+  for (unsigned i = 0; i < shapefn.size(); ++i) {
+    nodes_[i]->update_mass(true, nphase, shapefn(i) * pmass);
   }
 }
 

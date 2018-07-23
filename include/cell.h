@@ -167,10 +167,10 @@ class Cell {
       const Eigen::Matrix<double, 3, 1>& point);
 
   //! Map particle mass to nodes
-  //! \param[in] xi local coordinates of particle
+  //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] nphase Phase associate to the particle
   //! \param[in] pmass mass of particle
-  void map_particle_mass_to_nodes(const VectorDim& xi, unsigned nphase,
+  void map_particle_mass_to_nodes(const Eigen::VectorXd& xi, unsigned nphase,
                                   double pmass);
 
   //! Map particle volume to nodes

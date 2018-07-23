@@ -34,7 +34,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
 
   // Update/assign mass
   std::lock_guard<std::mutex> guard(node_mutex_);
-  mass_(0, nphase) = mass_(0, nphase) * factor + mass;
+  mass_(nphase) = (mass_(nphase) * factor) + mass;
 }
 
 //! Update volume at the nodes from particle
@@ -48,7 +48,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
 
   // Update/assign volume
   std::lock_guard<std::mutex> guard(node_mutex_);
-  volume_(0, nphase) = volume_(0, nphase) * factor + volume;
+  volume_(nphase) = volume_(nphase) * factor + volume;
 }
 
 //! Update external force (body force / traction force)
