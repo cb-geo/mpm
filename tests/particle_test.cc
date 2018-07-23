@@ -275,6 +275,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     cell->add_node(3, node3);
     REQUIRE(cell->nnodes() == 4);
 
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+
     // Initialise cell properties
     cell->initialise();
 
@@ -339,6 +345,24 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_mass(phase) == true);
     // Mass
     REQUIRE(particle->mass(phase) == Approx(1000.).epsilon(Tolerance));
+
+    // Map particle mass to nodes
+    particle->assign_mass(phase, std::numeric_limits<double>::max());
+    REQUIRE(particle->map_mass_to_nodes(phase) == false);
+
+    // Assign mass to nodes
+    REQUIRE(particle->compute_reference_location() == true);
+    REQUIRE(particle->compute_shapefn() == true);
+
+    REQUIRE(particle->compute_mass(phase) == true);
+    REQUIRE(particle->map_mass_to_nodes(phase) == true);
+
+    // Values of nodal mass
+    std::array<double, 4> nodal_mass{562.5, 187.5, 62.5, 187.5};
+    // Check nodal mass
+    for (unsigned i = 0; i < nodes.size(); ++i)
+      REQUIRE(nodes.at(i)->mass(phase) ==
+              Approx(nodal_mass.at(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -588,6 +612,16 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+    nodes.emplace_back(node4);
+    nodes.emplace_back(node5);
+    nodes.emplace_back(node6);
+    nodes.emplace_back(node7);
+
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -665,6 +699,25 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_mass(phase) == true);
     // Mass
     REQUIRE(particle->mass(phase) == Approx(8000.).epsilon(Tolerance));
+
+    // Map particle mass to nodes
+    particle->assign_mass(phase, std::numeric_limits<double>::max());
+    REQUIRE(particle->map_mass_to_nodes(phase) == false);
+
+    // Assign mass to nodes
+    REQUIRE(particle->compute_reference_location() == true);
+    REQUIRE(particle->compute_shapefn() == true);
+
+    REQUIRE(particle->compute_mass(phase) == true);
+    REQUIRE(particle->map_mass_to_nodes(phase) == true);
+
+    // Values of nodal mass
+    std::array<double, 8> nodal_mass{125., 375.,  1125., 375.,
+                                     375., 1125., 3375., 1125.};
+    // Check nodal mass
+    for (unsigned i = 0; i < nodes.size(); ++i)
+      REQUIRE(nodes.at(i)->mass(phase) ==
+              Approx(nodal_mass.at(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {

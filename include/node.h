@@ -65,7 +65,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return mass at a given node for a given phase
   //! \param[in] nphase Index corresponding to the phase
-  double mass(unsigned nphase) const { return mass_(0, nphase); }
+  double mass(unsigned nphase) const { return mass_(nphase); }
 
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -75,7 +75,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return volume at a given node for a given phase
   //! \param[in] nphase Index corresponding to the phase
-  double volume(unsigned nphase) const { return volume_(0, nphase); }
+  double volume(unsigned nphase) const { return volume_(nphase); }
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)

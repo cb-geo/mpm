@@ -78,9 +78,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool compute_mass(unsigned phase);
 
-  // Assign material
-  //! \param[in] material Pointer to a material
-  bool assign_material(const std::shared_ptr<Material>& material);
+  //! Map particle mass to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_mass_to_nodes(unsigned phase);
 
   //! Assign nodal mass to particles
   //! \param[in] phase Index corresponding to the phase
@@ -91,6 +91,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Return mass of the particlesx
   //! \param[in] phase Index corresponding to the phase
   double mass(unsigned phase) const { return mass_(0, phase); }
+
+  // Assign material
+  //! \param[in] material Pointer to a material
+  bool assign_material(const std::shared_ptr<Material>& material);
 
   //! Assign stress to the particle
   //! \param[in] phase Index corresponding to the phase
