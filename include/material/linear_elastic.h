@@ -1,7 +1,6 @@
 #ifndef MPM_MATERIAL_LINEAR_ELASTIC_H_
 #define MPM_MATERIAL_LINEAR_ELASTIC_H_
 
-#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
@@ -33,12 +32,17 @@ class LinearElastic : public Material {
   LinearElastic& operator=(const LinearElastic&) = delete;
 
   //! Read material properties
-  void properties(const Json&);
+  //! \param[in] materail_properties Material properties
+  void properties(const Json& material_properties );
 
   //! Compute elastic tensor
+  //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \retval updated_stress Updated value of stress
   void compute_stress(Vector6d& stress, const Vector6d& strain);
 
  protected:
@@ -46,10 +50,13 @@ class LinearElastic : public Material {
   using Material::id_;
   //! material status
   using Material::status_;
-
+  //! Material properties
+  using Material::properties_;
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
+  //! Density
+  double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio

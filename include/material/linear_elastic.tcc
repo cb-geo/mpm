@@ -1,11 +1,12 @@
 //! Read material properties
-//! \param[in] materail_properties Material properties
-void mpm::LinearElastic::properties(const Json& materail_properties) {
+void mpm::LinearElastic::properties(const Json& material_properties) {
   try {
+    density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
-        materail_properties["youngs_modulus"].template get<double>();
+        material_properties["youngs_modulus"].template get<double>();
     poisson_ratio_ =
-        materail_properties["poisson_ratio"].template get<double>();
+        material_properties["poisson_ratio"].template get<double>();
+    properties_ = material_properties;
     status_ = true;
   } catch (std::exception& except) {
     std::cerr << "Material parameter not set: " << except.what() << '\n';
@@ -13,7 +14,6 @@ void mpm::LinearElastic::properties(const Json& materail_properties) {
 }
 
 //! Return elastic tensor
-//! \retval de_ Elastic tensor
 mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
   // Bulk and shear modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
@@ -36,9 +36,6 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
 }
 
 //! Compute stress
-//! \param[in] strain Strain
-//! \param[in] stress Stress
-//! \retval updated_stress Updated value of stress
 void mpm::LinearElastic::compute_stress(Vector6d& stress,
                                         const Vector6d& strain) {
   Vector6d dstress = de_ * strain;

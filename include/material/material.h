@@ -1,6 +1,7 @@
 #ifndef MPM_MATERIAL_MATERIAL_H_
 #define MPM_MATERIAL_MATERIAL_H_
 
+#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
@@ -41,14 +42,32 @@ class Material {
 
   //! Return status as true, when properties are assigned
   bool status() const { return status_; }
-  
+
   //! Read material properties
+  //! \param[in] materail_properties Material properties
   virtual void properties(const Json&) = 0;
 
+  //! Get material property
+  //! \param[in] key Material properties key
+  //! \retval result Value of material property
+  double property(const std::string& key) {
+    double result = std::numeric_limits<double>::max();
+    try {
+      result = properties_[key].template get<double>();
+    } catch (std::exception& except) {
+      std::cerr << "Material parameter not found: " << except.what() << '\n';
+    }
+    return result;
+  }
+
   //! Compute elastic tensor
+  //! \retval de_ Elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;
 
   //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \retval updated_stress Updated value of stress
   virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
 
  protected:
@@ -56,6 +75,8 @@ class Material {
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! status
   bool status_{false};
+  //! Material properties
+  Json properties_;
 };  // Material class
 }  // namespace mpm
 

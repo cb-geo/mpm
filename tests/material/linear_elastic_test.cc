@@ -36,17 +36,29 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
     // Initialise material
     Json jmaterial;
+    jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
     // Check material status before assigning material property
     REQUIRE(material->status() == false);
     
+    // Get material properties
+    REQUIRE(material->property("density") ==
+            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+
+    // Check for property that does not exist
+    REQUIRE(material->property("noproperty") ==
+            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+
     material->properties(jmaterial);
 
     // Check material status after assigning material property
     REQUIRE(material->status() == true);
 
+    // Get material properties
+    REQUIRE(material->property("density") == Approx(jmaterial["density"]).epsilon(Tolerance));
+    
     // Calculate modulus values
     const double K = 8333333.333333333;
     const double G = 3846153.846153846;
@@ -105,6 +117,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
     // Initialise material
     Json jmaterial;
+    jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
@@ -124,6 +137,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
     // Initialise strain
     mpm::Material::Vector6d strain;
+    strain.setZero();
     strain(0) = 0.0010000;
     strain(1) = 0.0005000;
     strain(2) = 0.0005000;
