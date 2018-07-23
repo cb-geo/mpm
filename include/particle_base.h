@@ -71,6 +71,12 @@ class ParticleBase {
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
+  //! Assign volume
+  virtual void assign_volume(double volume) = 0;
+
+  //! Return volume
+  virtual double volume() const = 0;
+
   //! Compute volume of particle
   virtual bool compute_volume() = 0;
 

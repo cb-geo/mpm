@@ -65,6 +65,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn();
 
+  //! Assign volume
+  void assign_volume(double volume) { volume_ = volume; }
+
+  //! Return volume
+  double volume() const { return volume_; }
+
   //! Compute volume based on cell volume
   bool compute_volume();
 
