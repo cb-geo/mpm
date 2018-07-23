@@ -31,10 +31,10 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   }
 }
 
-// Initialise
+// Initialise mesh and particles
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
-  bool status = false;
+  bool status = true;
   try {
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
@@ -49,30 +49,41 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Node type
     const auto node_type = mesh_props["node_type"].template get<std::string>();
     // Create nodes from file
-    meshes_.at(0)->create_nodes(
+    bool node_status = meshes_.at(0)->create_nodes(
         gid,                                                    // global id
         node_type,                                              // node type
         mesh_reader->read_mesh_nodes(io_->file_name("mesh")));  // coordinates
+
+    if (!node_status)
+      throw std::runtime_error("Addition of nodes to mesh failed");
 
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
     std::shared_ptr<mpm::ShapeFn<Tdim>> shapefn =
         Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
+    
     // Create cells from file
-    meshes_.at(0)->create_cells(
+    bool cell_status = meshes_.at(0)->create_cells(
         gid,      // global id
         shapefn,  // Shape function
         mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
+
+    if (!cell_status)
+      throw std::runtime_error("Addition of cells to mesh failed");
 
     // Particle type
     const auto particle_type =
         mesh_props["particle_type"].template get<std::string>();
     // Create particles from file
-    meshes_.at(0)->create_particles(gid,            // global id
-                                    particle_type,  // particle type
-                                    mesh_reader->read_particles(io_->file_name(
-                                        "particles")));  // coordinates
+    bool particle_status = meshes_.at(0)->create_particles(
+        gid,            // global id
+        particle_type,  // particle type
+        mesh_reader->read_particles(
+            io_->file_name("particles")));  // coordinates
+
+    if (!particle_status)
+      throw std::runtime_error("Addition of particles to mesh failed");
 
     // Locate particles in cell
     auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
@@ -80,18 +91,18 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    status = true;
   } catch (std::exception& exception) {
-    console_->error("{} {} Reading mesh and particles: {}", __FILE__, __LINE__,
+    console_->error("#{}: Reading mesh and particles: {}", __LINE__,
                     exception.what());
+    status = false;
   }
   return status;
 }
 
+// Initialise materials
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise_materials() {
-  bool status = false;
-  materials_.clear();
+  bool status = true;
   try {
     // Get materials properties
     auto materials = io_->json_object("materials");
@@ -112,12 +123,17 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
       mat->properties(material_props);
 
       // Add material to list
-      materials_.insert(std::make_pair(mat->id(), mat));
+      auto result = materials_.insert(std::make_pair(mat->id(), mat));
+
+      // If insert material failed
+      if (!result.second) {
+        status = false;
+        throw std::runtime_error("New material cannot be added, insertion failed");
+      }
     }
-    status = true;
   } catch (std::exception& exception) {
-    console_->error("{} {} Reading materials: {}", __FILE__, __LINE__,
-                    exception.what());
+    console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
+    status = false;
   }
   return status;
 }
@@ -125,13 +141,27 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
 //! MPM Explicit solver
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
-  bool status = false;
+  bool status = true;
+
+  // Initialise material
+  this->initialise_materials();
 
   // Initialise mesh and materials
   this->initialise_mesh_particles();
-  this->initialise_materials();
 
-  // Set success
-  status = true;
+  // Get mesh properties
+  auto mesh_props = io_->json_object("mesh");
+  // Material id
+  const unsigned material_id =
+      mesh_props["material_id"].template get<unsigned>();
+
+  // Get material from list of materials
+  auto material = materials_.at(material_id);
+
+  // Iterate over each particle to assign material
+  meshes_.at(0)->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                std::placeholders::_1, material));
+
   return status;
 }
