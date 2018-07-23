@@ -1,5 +1,5 @@
-#ifndef MPM_MATERIAL_H_
-#define MPM_MATERIAL_H_
+#ifndef MPM_MATERIAL_MATERIAL_H_
+#define MPM_MATERIAL_MATERIAL_H_
 
 #include <limits>
 
@@ -23,8 +23,9 @@ class Material {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
-  //! Constructor with id
-  Material(unsigned id);
+  // Constructor with id
+  //! \param[in] id Material id
+  Material(unsigned id) : id_{id} {}
 
   //! Destructor
   virtual ~Material(){};
@@ -53,6 +54,4 @@ class Material {
 };  // Material class
 }  // namespace mpm
 
-#include "material.tcc"
-
-#endif  // MPM_MATERIAL_H_
+#endif  // MPM_MATERIAL_MATERIAL_H_
