@@ -3,6 +3,7 @@ template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
+  cell_ = nullptr;
 }
 
 //! Construct a particle with id, coordinates and status
@@ -11,6 +12,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
                                         bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
+  cell_ = nullptr;
 }
 
 // Initialise particle properties
@@ -35,12 +37,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 
 // Compute reference location cell to particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
+bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
+  bool status = false;
   try {
-    // Get reference location of a particle
-    if (cell_->is_initialised()) {
-      this->reference_location_ =
-          cell_->local_coordinates_point(this->coordinates_);
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get reference location of a particle
+      this->xi_ = cell_->local_coordinates_point(this->coordinates_);
+      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -49,6 +53,40 @@ void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
+  return status;
+}
+
+// Compute shape functions and gradients
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
+
+  bool status = false;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Compute local coordinates
+      this->compute_reference_location();
+
+      // Get shape function ptr of a cell
+      const auto sfn = cell_->shapefn_ptr();
+
+      // Compute shape function of the particle
+      shapefn_ = sfn->shapefn(this->xi_);
+      // Compute gradient shape function of the particle
+      grad_shapefn_ = sfn->grad_shapefn(this->xi_);
+      // Compute bmatrix of the particle
+      bmatrix_ = sfn->bmatrix(this->xi_);
+      // Return update status
+      status = true;
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "Cannot compute shapefns for the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+  }
+  return status;
 }
 
 // Assign stress to the particle

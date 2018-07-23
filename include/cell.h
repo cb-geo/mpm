@@ -67,6 +67,9 @@ class Cell {
   //! \param[in] shapefnptr Pointer to a shape function
   bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
 
+  //! Return a pointer to shape function of a cell
+  std::shared_ptr<ShapeFn<Tdim>> shapefn_ptr() { return shapefn_; }
+
   //! Return the number of shape functions, returns zero if the shapefunction is
   //! not set.
   unsigned nfunctions() const {
