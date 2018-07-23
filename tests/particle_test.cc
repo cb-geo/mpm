@@ -5,6 +5,7 @@
 
 #include "cell.h"
 #include "hex_shapefn.h"
+#include "material/material.h"
 #include "node.h"
 #include "particle.h"
 #include "quad_shapefn.h"
@@ -302,6 +303,34 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
+  SECTION("Check assign material to particle") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75;
+    auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    unsigned mid = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(mid));
+    REQUIRE(material->id() == 0);
+
+    // Initialise material
+    Json jmaterial;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    // Check material status before assigning material property
+    REQUIRE(material->status() == false);
+
+    // Check if particle can be assigned a material without properties
+    REQUIRE(particle->assign_material(material) == false);
+    // Assign material properties
+    material->properties(jmaterial);
+
+    // Assign material to particle
+    REQUIRE(particle->assign_material(material) == true);
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -559,6 +588,34 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto ref_coordinates = particle->reference_location();
     for (unsigned i = 0; i < ref_coordinates.size(); ++i)
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+  }
+  
+  SECTION("Check assign material to particle") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75, 0.75;
+    auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    unsigned mid = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(mid));
+    REQUIRE(material->id() == 0);
+
+    // Initialise material
+    Json jmaterial;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    // Check material status before assigning material property
+    REQUIRE(material->status() == false);
+
+    // Check if particle can be assigned a material without properties
+    REQUIRE(particle->assign_material(material) == false);
+    // Assign material properties
+    material->properties(jmaterial);
+
+    // Assign material to particle
+    REQUIRE(particle->assign_material(material) == true);
   }
 
   SECTION("Check particle properties") {

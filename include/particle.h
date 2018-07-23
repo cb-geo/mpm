@@ -65,6 +65,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn();
 
+  // Assign material
+  //! \param[in] material Pointer to a material
+  bool assign_material(const std::shared_ptr<Material>& material);
+
   //! Assign nodal mass to particles
   //! \param[in] nphase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
@@ -137,6 +141,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
+  //! Cell
+  std::shared_ptr<Material> material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses

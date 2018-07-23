@@ -4,6 +4,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   cell_ = nullptr;
+  material_ = nullptr;
 }
 
 //! Construct a particle with id, coordinates and status
@@ -13,6 +14,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
+  material_ = nullptr;
 }
 
 // Initialise particle properties
@@ -33,6 +35,25 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
   cell_id_ = cellptr->id();
   this->compute_reference_location();
   return cell_->add_particle_id(this->id());
+}
+
+// Assign a material to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_material(
+    const std::shared_ptr<Material>& material) {
+  bool status = false;
+  try {
+    // Check if material is valid and properties are set
+    if (material != nullptr && material->status()) {
+      material_ = material;
+      status = true;
+    } else {
+      throw std::runtime_error("Material is undefined!");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << exception.what() << '\n';
+  }
+  return status;
 }
 
 // Compute reference location cell to particle

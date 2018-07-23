@@ -4,8 +4,7 @@
 #include "catch.hpp"
 #include "json.hpp"
 
-#include "factory.h"
-#include "material/linear_elastic.h"
+#include "material/material.h"
 
 //! \brief Check linearelastic class
 TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
@@ -14,22 +13,25 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
-    const unsigned id = 0;
-    auto material = std::make_shared<mpm::LinearElastic>(id);
+    unsigned id = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
   }
 
   SECTION("LinearElastic id is positive") {
     //! Check for id is a positive value
-    const unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = std::make_shared<mpm::LinearElastic>(id);
+    unsigned id = std::numeric_limits<unsigned>::max();
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(id));
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
   //! Read material properties
   SECTION("LinearElastic check stiffness matrix") {
-    const unsigned id = 0;
-    auto material = std::make_shared<mpm::LinearElastic>(id);
+    unsigned id = 0;
+    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+        "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
 
     // Initialise material
@@ -37,7 +39,13 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
+    // Check material status before assigning material property
+    REQUIRE(material->status() == false);
+    
     material->properties(jmaterial);
+
+    // Check material status after assigning material property
+    REQUIRE(material->status() == true);
 
     // Calculate modulus values
     const double K = 8333333.333333333;

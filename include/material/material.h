@@ -1,5 +1,5 @@
-#ifndef MPM_MATERIAL_H_
-#define MPM_MATERIAL_H_
+#ifndef MPM_MATERIAL_MATERIAL_H_
+#define MPM_MATERIAL_MATERIAL_H_
 
 #include <limits>
 
@@ -23,8 +23,9 @@ class Material {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
-  //! Constructor with id
-  Material(unsigned id);
+  // Constructor with id
+  //! \param[in] id Material id
+  Material(unsigned id) : id_{id} {}
 
   //! Destructor
   virtual ~Material(){};
@@ -38,6 +39,9 @@ class Material {
   //! Return id of the material
   unsigned id() const { return id_; }
 
+  //! Return status as true, when properties are assigned
+  bool status() const { return status_; }
+  
   //! Read material properties
   virtual void properties(const Json&) = 0;
 
@@ -50,9 +54,9 @@ class Material {
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
+  //! status
+  bool status_{false};
 };  // Material class
 }  // namespace mpm
 
-#include "material.tcc"
-
-#endif  // MPM_MATERIAL_H_
+#endif  // MPM_MATERIAL_MATERIAL_H_
