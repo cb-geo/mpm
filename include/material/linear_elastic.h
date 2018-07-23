@@ -1,7 +1,6 @@
 #ifndef MPM_MATERIAL_LINEAR_ELASTIC_H_
 #define MPM_MATERIAL_LINEAR_ELASTIC_H_
 
-#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
@@ -36,11 +35,6 @@ class LinearElastic : public Material {
   //! \param[in] materail_properties Material properties
   void properties(const Json& material_properties );
 
-  //! Get material property
-  //! \param[in] key Material properties key
-  //! \retval result Value of material property
-  double property(const std::string& key);
-
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor();
@@ -56,12 +50,11 @@ class LinearElastic : public Material {
   using Material::id_;
   //! material status
   using Material::status_;
-
+  //! Material properties
+  using Material::properties_;
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
-  //! Material properties
-  Json properties_;
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
