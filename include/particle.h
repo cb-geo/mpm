@@ -63,7 +63,7 @@ class Particle : public ParticleBase<Tdim> {
   Index cell_id() const { return cell_id_; }
 
   //! Compute shape functions of a particle, based on local coordinates
-  //! \retval status Returns if compue shapefns was successful
+  //! \retval status Returns if compute shapefns was successful
   bool compute_shapefn();
 
   //! Assign nodal mass to particles
