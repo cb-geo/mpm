@@ -39,8 +39,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   try {
-    // Get reference location of a particle
+    // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
+      // Get reference location of a particle
       this->xi_ = cell_->local_coordinates_point(this->coordinates_);
     } else {
       throw std::runtime_error(
@@ -58,6 +59,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
   bool status = false;
   try {
+    // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Compute local coordinates
       this->compute_reference_location();

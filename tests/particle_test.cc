@@ -281,7 +281,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == false);
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == false);
-    
+
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
@@ -538,7 +538,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == false);
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == false);
-    
+
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
