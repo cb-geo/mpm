@@ -59,13 +59,12 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
 // Compute reference location cell to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
-  bool status = false;
+  bool status = true;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get reference location of a particle
       this->xi_ = cell_->local_coordinates_point(this->coordinates_);
-      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -73,6 +72,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -80,8 +80,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
 // Compute shape functions and gradients
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
-
-  bool status = false;
+  bool status = true;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -97,8 +96,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       grad_shapefn_ = sfn->grad_shapefn(this->xi_);
       // Compute bmatrix of the particle
       bmatrix_ = sfn->bmatrix(this->xi_);
-      // Return update status
-      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -106,6 +103,28 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
     }
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+// Compute shape functions and gradients
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Volume of the cell / # of particles
+      this->volume_ = cell_->volume() / cell_->nparticles();
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "Cannot compute volume for the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
   }
   return status;
 }

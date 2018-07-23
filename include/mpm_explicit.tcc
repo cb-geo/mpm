@@ -62,7 +62,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Shape function
     std::shared_ptr<mpm::ShapeFn<Tdim>> shapefn =
         Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
-    
+
     // Create cells from file
     bool cell_status = meshes_.at(0)->create_cells(
         gid,      // global id
@@ -128,7 +128,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
       // If insert material failed
       if (!result.second) {
         status = false;
-        throw std::runtime_error("New material cannot be added, insertion failed");
+        throw std::runtime_error(
+            "New material cannot be added, insertion failed");
       }
     }
   } catch (std::exception& exception) {
@@ -165,6 +166,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
+
+  // Compute volume
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
   return status;
 }

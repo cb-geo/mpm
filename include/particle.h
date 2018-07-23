@@ -65,6 +65,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn();
 
+  //! Compute volume based on cell volume
+  bool compute_volume();
+
   // Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(const std::shared_ptr<Material>& material);
@@ -134,15 +137,17 @@ class Particle : public ParticleBase<Tdim> {
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
   //! Reference coordinates (in a cell)
-  Eigen::Matrix<double, Tdim, 1> xi_;
+  using ParticleBase<Tdim>::xi_;
   //! Cell
-  std::shared_ptr<Cell<Tdim>> cell_;
+  using ParticleBase<Tdim>::cell_;
   //! Cell id
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Cell
-  std::shared_ptr<Material> material_;
+  //! Volume
+  using ParticleBase<Tdim>::volume_;
+  //! Material
+  using ParticleBase<Tdim>::material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
