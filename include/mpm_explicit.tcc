@@ -110,7 +110,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
 
       // Initialise material properties
       mat->properties(material_props);
-      
+
       // Add material to list
       materials_.insert(std::make_pair(mat->id(), mat));
     }
@@ -119,5 +119,19 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
     console_->error("{} {} Reading materials: {}", __FILE__, __LINE__,
                     exception.what());
   }
+  return status;
+}
+
+//! MPM Explicit solver
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::solve() {
+  bool status = false;
+
+  // Initialise mesh and materials
+  this->initialise_mesh_particles();
+  this->initialise_materials();
+
+  // Set success
+  status = true;
   return status;
 }
