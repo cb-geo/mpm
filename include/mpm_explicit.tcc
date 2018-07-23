@@ -177,9 +177,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Phase
   unsigned phase = 0;
-  // Compute volume
+  // Compute mass
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+  // Assign mass to nodes
+  meshes_.at(0)->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_mass_to_nodes,
+                std::placeholders::_1, phase));
+
+  // Check mass at nodes
+  meshes_.at(0)->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
 
   return status;
 }
