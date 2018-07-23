@@ -1,5 +1,5 @@
-#ifndef MPM_LINEAR_ELASTIC_H_
-#define MPM_LINEAR_ELASTIC_H_
+#ifndef MPM_MATERIAL_LINEAR_ELASTIC_H_
+#define MPM_MATERIAL_LINEAR_ELASTIC_H_
 
 #include <iostream>
 #include <limits>
@@ -32,9 +32,6 @@ class LinearElastic : public Material {
   //! Delete assignement operator
   LinearElastic& operator=(const LinearElastic&) = delete;
 
-  //! Return id of the linearelastic
-  unsigned id() const { return id_; }
-
   //! Read material properties
   void properties(const Json&);
 
@@ -47,6 +44,8 @@ class LinearElastic : public Material {
  protected:
   //! material id
   using Material::id_;
+  //! material status
+  using Material::status_;
 
  private:
   //! Elastic stiffness matrix
@@ -60,7 +59,4 @@ class LinearElastic : public Material {
 
 #include "linear_elastic.tcc"
 
-static Register<mpm::Material, mpm::LinearElastic, unsigned> linearelastic(
-    "LinearElastic");
-
-#endif  // MPM_LINEAR_ELASTIC_H_
+#endif  // MPM_MATERIAL_LINEAR_ELASTIC_H_

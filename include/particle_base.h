@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "material/material.h"
 
 namespace mpm {
 
@@ -69,6 +70,9 @@ class ParticleBase {
 
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
+
+  // Assign material
+  virtual bool assign_material(const std::shared_ptr<Material>& material) = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
