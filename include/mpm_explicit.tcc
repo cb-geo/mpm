@@ -171,5 +171,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
+  // Phase
+  unsigned phase = 0;
+  // Compute volume
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
   return status;
 }

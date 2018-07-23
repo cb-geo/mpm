@@ -71,70 +71,72 @@ class Particle : public ParticleBase<Tdim> {
   //! Return volume
   double volume() const { return volume_; }
 
-  //! Compute volume based on cell volume
+  //! Compute volume as cell volume / nparticles
   bool compute_volume();
+
+  //! Compute mass as volume * density
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_mass(unsigned phase);
 
   // Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(const std::shared_ptr<Material>& material);
 
   //! Assign nodal mass to particles
-  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
-  void assign_mass(unsigned nphase, double mass) { mass_(0, nphase) = mass; }
+  void assign_mass(unsigned phase, double mass) { mass_(0, phase) = mass; }
 
   //! Return mass of the particlesx
-  //! \param[in] nphase Index corresponding to the phase
-  double mass(unsigned nphase) const { return mass_(0, nphase); }
+  //! \param[in] phase Index corresponding to the phase
+  double mass(unsigned phase) const { return mass_(0, phase); }
 
   //! Assign stress to the particle
-  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress A vector of particle stress
-  void assign_stress(unsigned nphase,
-                     const Eigen::Matrix<double, 6, 1>& stress);
+  void assign_stress(unsigned phase, const Eigen::Matrix<double, 6, 1>& stress);
 
   //! Return stress of the particle
-  //! \param[in] nphase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> stress(unsigned nphase) const {
-    return stress_.col(nphase);
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, 6, 1> stress(unsigned phase) const {
+    return stress_.col(phase);
   }
 
   //! Assign velocity to the particle
-  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(unsigned nphase, const Eigen::VectorXd& velocity);
+  bool assign_velocity(unsigned phase, const Eigen::VectorXd& velocity);
 
   //! Return velocity of the particle
-  //! \param[in] nphase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned nphase) const {
-    return velocity_.col(nphase);
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd velocity(unsigned phase) const {
+    return velocity_.col(phase);
   }
 
   //! Assign momentum to the particle
-  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum A vector of particle momentum
   //! \retval status Assignment status
-  bool assign_momentum(unsigned nphase, const Eigen::VectorXd& momentum);
+  bool assign_momentum(unsigned phase, const Eigen::VectorXd& momentum);
 
   //! Return momentum of the particle
-  //! \param[in] nphase Index corresponding to the phase
-  Eigen::VectorXd momentum(unsigned nphase) const {
-    return momentum_.col(nphase);
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd momentum(unsigned phase) const {
+    return momentum_.col(phase);
   }
 
   //! Assign acceleration to the particle
-  //! \param[in] nphase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration A vector of particle acceleration
   //! \retval status Assignment status
-  bool assign_acceleration(unsigned nphase,
-                           const Eigen::VectorXd& acceleration);
+  bool assign_acceleration(unsigned phase, const Eigen::VectorXd& acceleration);
 
   //! Return acceleration of the particle
-  //! \param[in] nphase Index corresponding to the phase
-  Eigen::VectorXd acceleration(unsigned nphase) const {
-    return acceleration_.col(nphase);
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd acceleration(unsigned phase) const {
+    return acceleration_.col(phase);
   }
 
  private:
