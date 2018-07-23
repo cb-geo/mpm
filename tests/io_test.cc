@@ -26,6 +26,17 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
          {{"mesh_reader", "Ascii3D"},
           {"cell_type", "SFH8"},
           {"particle_type", "P3D"}}},
+        {"materials",
+         {{{"id", 0},
+           {"type", "LinearElastic"},
+           {"density", 1000.},
+           {"youngs_modulus", 1.0E+8},
+           {"poisson_ratio", 0.495}},
+          {{"id", 1},
+           {"type", "LinearElastic"},
+           {"density", 2300.},
+           {"youngs_modulus", 1.5E+6},
+           {"poisson_ratio", 0.25}}}},
         {"analysis",
          {{"dt", 0.001},
           {"nsteps", 1000},
@@ -85,6 +96,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     // Check return of a named JSON object
     const std::string obj_name = "mesh";
     REQUIRE(io->json_object(obj_name) == json_file["mesh"]);
+
+    // Check return of materials JSON object
+    const std::string materials = "materials";
+    REQUIRE(io->json_object(materials) == json_file["materials"]);
 
     // Get post processing object
     Json post_processing = io->post_processing();
