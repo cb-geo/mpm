@@ -71,6 +71,9 @@ class ParticleBase {
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
+  //! Compute volume of particle
+  virtual bool compute_volume() = 0;
+
   // Assign material
   virtual bool assign_material(const std::shared_ptr<Material>& material) = 0;
 
@@ -126,7 +129,14 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
-
+  //! Volume
+  double volume_{std::numeric_limits<double>::max()};
+  //! Reference coordinates (in a cell)
+  Eigen::Matrix<double, Tdim, 1> xi_;
+  //! Cell
+  std::shared_ptr<Cell<Tdim>> cell_;
+  //! Material
+  std::shared_ptr<Material> material_;
 };  // ParticleBase class
 }  // namespace mpm
 
