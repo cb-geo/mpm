@@ -284,6 +284,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute volume
+    REQUIRE(particle->compute_volume() == false);
 
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
@@ -294,6 +296,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == true);
+
+    // Compute volume
+    REQUIRE(particle->compute_volume() == true);
 
     // Check reference location
     coords << -0.5, -0.5;
@@ -572,6 +577,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute volume
+    REQUIRE(particle->compute_volume() == false);
 
     particle->assign_cell(cell);
     REQUIRE(cell->status() == true);
@@ -582,6 +589,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check compute shape functions of a particle
     REQUIRE(particle->compute_shapefn() == true);
+
+    // Compute volume
+    REQUIRE(particle->compute_volume() == true);
 
     // Check reference location
     coords << 0.5, 0.5, 0.5;
