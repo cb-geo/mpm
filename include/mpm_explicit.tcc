@@ -144,11 +144,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
   // Initialise material
-  this->initialise_materials();
+  bool mat_status = this->initialise_materials();
+  if (!mat_status) status = false;
 
   // Initialise mesh and materials
-  this->initialise_mesh_particles();
+  bool mesh_status = this->initialise_mesh_particles();
+  if (!mesh_status) status = false;
 
+  // Assign material to particles
   // Get mesh properties
   auto mesh_props = io_->json_object("mesh");
   // Material id
