@@ -99,6 +99,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       REQUIRE(cell->mean_length() == Approx(length).epsilon(Tolerance));
     }
 
+    // Check shape functions
+    SECTION("Check shape functions") {
+     const auto sf_ptr = cell->shapefn_ptr();
+     REQUIRE(sf_ptr->nfunctions() == shapefn->nfunctions());
+    }
+    
     // Check centroid calculation
     SECTION("Compute centroid of a cell") {
       REQUIRE(cell->nfunctions() == 4);
@@ -685,6 +691,12 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       // Check centroid calculations
       for (unsigned i = 0; i < check_centroid.size(); ++i)
         REQUIRE(check_centroid[i] == Approx(centroid[i]).epsilon(Tolerance));
+    }
+
+    // Check shape functions
+    SECTION("Check shape functions") {
+     const auto sf_ptr = cell->shapefn_ptr();
+     REQUIRE(sf_ptr->nfunctions() == shapefn->nfunctions());
     }
 
     // Check cell volume calculation
