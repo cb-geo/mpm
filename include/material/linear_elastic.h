@@ -33,12 +33,22 @@ class LinearElastic : public Material {
   LinearElastic& operator=(const LinearElastic&) = delete;
 
   //! Read material properties
-  void properties(const Json&);
+  //! \param[in] materail_properties Material properties
+  void properties(const Json& material_properties );
+
+  //! Get material property
+  //! \param[in] key Material properties key
+  //! \retval result Value of material property
+  double property(const std::string& key);
 
   //! Compute elastic tensor
+  //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \retval updated_stress Updated value of stress
   void compute_stress(Vector6d& stress, const Vector6d& strain);
 
  protected:
@@ -50,6 +60,10 @@ class LinearElastic : public Material {
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
+  //! Material properties
+  Json properties_;
+  //! Density
+  double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio

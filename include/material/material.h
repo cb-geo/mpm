@@ -43,12 +43,22 @@ class Material {
   bool status() const { return status_; }
   
   //! Read material properties
+  //! \param[in] materail_properties Material properties
   virtual void properties(const Json&) = 0;
 
+  //! Get material property
+  //! \param[in] key Material properties key
+  //! \retval result Value of material property
+  virtual double property(const std::string& key) = 0;
+
   //! Compute elastic tensor
+  //! \retval de_ Elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;
 
   //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \retval updated_stress Updated value of stress
   virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
 
  protected:
