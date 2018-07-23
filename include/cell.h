@@ -57,6 +57,9 @@ class Cell {
   //! \retval initialisation_status Cell has nodes, shape functions and volumes
   bool is_initialised() const;
 
+  //! Return the number of particles
+  unsigned nparticles() const { return particles_.size(); }
+
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 

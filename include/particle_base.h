@@ -71,6 +71,18 @@ class ParticleBase {
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
+  //! Assign volume
+  virtual void assign_volume(double volume) = 0;
+
+  //! Return volume
+  virtual double volume() const = 0;
+
+  //! Compute volume of particle
+  virtual bool compute_volume() = 0;
+
+  //! Compute mass of particle
+  virtual bool compute_mass(unsigned phase) = 0;
+
   // Assign material
   virtual bool assign_material(const std::shared_ptr<Material>& material) = 0;
 
@@ -84,38 +96,38 @@ class ParticleBase {
   virtual void initialise() = 0;
 
   //! Assign mass
-  virtual void assign_mass(unsigned nphase, double mass) = 0;
+  virtual void assign_mass(unsigned phase, double mass) = 0;
 
   //! Return mass
-  virtual double mass(unsigned nphase) const = 0;
+  virtual double mass(unsigned phase) const = 0;
 
   //! Assign stress
-  virtual void assign_stress(unsigned nphase,
+  virtual void assign_stress(unsigned phase,
                              const Eigen::Matrix<double, 6, 1>& stress) = 0;
 
   //! Return stress
-  virtual Eigen::Matrix<double, 6, 1> stress(unsigned nphase) const = 0;
+  virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
 
   //! Assign velocity
-  virtual bool assign_velocity(unsigned nphase,
+  virtual bool assign_velocity(unsigned phase,
                                const Eigen::VectorXd& velocity) = 0;
 
   //! Return velocity
-  virtual Eigen::VectorXd velocity(unsigned nphase) const = 0;
+  virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
 
   //! Assign momentum
-  virtual bool assign_momentum(unsigned nphase,
+  virtual bool assign_momentum(unsigned phase,
                                const Eigen::VectorXd& momentum) = 0;
 
   //! Return momentum
-  virtual Eigen::VectorXd momentum(unsigned nphase) const = 0;
+  virtual Eigen::VectorXd momentum(unsigned phase) const = 0;
 
   //! Assign acceleration
-  virtual bool assign_acceleration(unsigned nphase,
+  virtual bool assign_acceleration(unsigned phase,
                                    const Eigen::VectorXd& acceleration) = 0;
 
   //! Return acceleration
-  virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
+  virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
 
  protected:
   //! particleBase id
@@ -126,7 +138,14 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
-
+  //! Volume
+  double volume_{std::numeric_limits<double>::max()};
+  //! Reference coordinates (in a cell)
+  Eigen::Matrix<double, Tdim, 1> xi_;
+  //! Cell
+  std::shared_ptr<Cell<Tdim>> cell_;
+  //! Material
+  std::shared_ptr<Material> material_;
 };  // ParticleBase class
 }  // namespace mpm
 

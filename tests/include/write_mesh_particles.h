@@ -36,6 +36,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
       {"mesh",
        {{"mesh_reader", mesh_reader},
         {"node_type", node_type},
+        {"material_id", 1},
         {"cell_type", cell_type},
         {"particle_type", particle_type}}},
       {"materials",

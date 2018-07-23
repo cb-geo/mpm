@@ -59,13 +59,12 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
 // Compute reference location cell to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
-  bool status = false;
+  bool status = true;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get reference location of a particle
       this->xi_ = cell_->local_coordinates_point(this->coordinates_);
-      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -73,6 +72,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -80,8 +80,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
 // Compute shape functions and gradients
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
-
-  bool status = false;
+  bool status = true;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -97,15 +96,56 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       grad_shapefn_ = sfn->grad_shapefn(this->xi_);
       // Compute bmatrix of the particle
       bmatrix_ = sfn->bmatrix(this->xi_);
-      // Return update status
-      status = true;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute shapefns for the particle");
+          "cannot compute shapefns for the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+// Compute volume of particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Volume of the cell / # of particles
+      this->volume_ = cell_->volume() / cell_->nparticles();
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute volume for the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+// Compute mass of particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle volume is set and material ptr is valid
+    if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
+      // Mass = volume of particle * density
+      this->mass_(0, phase) = volume_ * material_->property("density");
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! or material is invalid"
+          "cannot compute mass for the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
   }
   return status;
 }
@@ -113,15 +153,15 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 // Assign stress to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_stress(
-    unsigned nphase, const Eigen::Matrix<double, 6, 1>& stress) {
+    unsigned phase, const Eigen::Matrix<double, 6, 1>& stress) {
   // Assign stress
-  stress_.col(nphase) = stress;
+  stress_.col(phase) = stress;
 }
 
 // Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
-    unsigned nphase, const Eigen::VectorXd& velocity) {
+    unsigned phase, const Eigen::VectorXd& velocity) {
   bool status = false;
   try {
     if (velocity.size() != velocity_.size()) {
@@ -129,7 +169,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
           "Particle velocity degrees of freedom don't match");
     }
     // Assign velocity
-    velocity_.col(nphase) = velocity;
+    velocity_.col(phase) = velocity;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -141,7 +181,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
 // Assign momentum to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
-    unsigned nphase, const Eigen::VectorXd& momentum) {
+    unsigned phase, const Eigen::VectorXd& momentum) {
   bool status = false;
   try {
     if (momentum.size() != momentum_.size()) {
@@ -149,7 +189,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
           "Particle momentum degrees of freedom don't match");
     }
     // Assign momentum
-    momentum_.col(nphase) = momentum;
+    momentum_.col(phase) = momentum;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -161,7 +201,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
 //! Assign acceleration to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
-    unsigned nphase, const Eigen::VectorXd& acceleration) {
+    unsigned phase, const Eigen::VectorXd& acceleration) {
   bool status = false;
   try {
     if (acceleration.size() != acceleration_.size()) {
@@ -169,7 +209,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
           "Particle acceleration degrees of freedom don't match");
     }
     // Assign acceleration
-    acceleration_.col(nphase) = acceleration;
+    acceleration_.col(phase) = acceleration;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';

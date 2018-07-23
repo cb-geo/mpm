@@ -13,6 +13,7 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "material/material.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
