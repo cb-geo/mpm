@@ -389,9 +389,10 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     pgravity << 0., 9.814;
     // Phase
     unsigned phase = 0;
+    const auto shapefns_xi = shapefn->shapefn(xi);
 
     SECTION("Check particle mass mapping") {
-      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
     }
@@ -1081,8 +1082,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Phase
     unsigned phase = 0;
 
+    const auto shapefns_xi = shapefn->shapefn(xi);
+
     SECTION("Check particle mass mapping") {
-      cell->map_particle_mass_to_nodes(xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
       for (const auto& node : nodes)
         REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
     }
