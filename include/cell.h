@@ -168,55 +168,56 @@ class Cell {
 
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass mass of particle
-  void map_particle_mass_to_nodes(const Eigen::VectorXd& xi, unsigned nphase,
+  void map_particle_mass_to_nodes(const Eigen::VectorXd& xi, unsigned phase,
                                   double pmass);
 
   //! Map particle volume to nodes
   //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume volume of particle
-  void map_particle_volume_to_nodes(const VectorDim& xi, unsigned nphase,
+  void map_particle_volume_to_nodes(const VectorDim& xi, unsigned phase,
                                     double pvolume);
 
-  //! Compute the nodal momentum from particle mass and velocity for a given
-  //! phase \param[in] xi local coordinates of particle \param[in] nphase Phase
-  //! associate to the particle \param[in] pmass mass of a particle \param[in]
-  //! pvelocity velocity of a particle
-  void compute_nodal_momentum(const VectorDim& xi, unsigned nphase,
-                              double pmass, const Eigen::VectorXd& pvelocity);
+  //! Compute the nodal momentum with particle mass & velocity for a phase
+  //! \param[in] xi local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass mass of a particle
+  //! \param[in] velocity velocity of a particle
+  void compute_nodal_momentum(const VectorDim& xi, unsigned phase, double pmass,
+                              const Eigen::VectorXd& pvelocity);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pgravity Gravity of a particle
-  void compute_nodal_body_force(const VectorDim& xi, unsigned nphase,
+  void compute_nodal_body_force(const VectorDim& xi, unsigned phase,
                                 double pmass, const VectorDim& pgravity);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
   //! \param[in] pstress Stress of particle
-  void compute_nodal_internal_force(unsigned nphase, double pvolume,
+  void compute_nodal_internal_force(unsigned phase, double pvolume,
                                     const VectorDim& xi,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
   //! Return velocity at given location by interpolating from nodes
   //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \retval velocity Interpolated velocity at xi
   Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
-                                             unsigned nphase);
+                                             unsigned phase);
 
   //! Return acceleration at given location by interpolating from nodes
   //! \param[in] xi local coordinates of particle
-  //! \param[in] nphase Phase associate to the particle
+  //! \param[in] phase Phase associate to the particle
   //! \retval acceleration Interpolated acceleration at xi
   Eigen::VectorXd interpolate_nodal_acceleration(const VectorDim& xi,
-                                                 unsigned nphase);
+                                                 unsigned phase);
 
  protected:
   //! cell id
