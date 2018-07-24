@@ -53,6 +53,12 @@ class NodeBase {
   //! Return degrees of freedom
   virtual unsigned dof() const = 0;
 
+  //! Assign status
+  virtual void assign_status(bool status) = 0;
+
+  //! Return status
+  virtual bool status() const = 0;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

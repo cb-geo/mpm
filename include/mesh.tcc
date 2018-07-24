@@ -67,6 +67,15 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
   tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
 }
 
+//! Iterate over nodes
+template <unsigned Tdim>
+template <typename Toper, typename Tpred>
+void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    if (pred(*itr)) oper(*itr);
+  }
+}
+
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
