@@ -64,10 +64,11 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get reference location of a particle
-      if (Tdim == 3)
-        this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
-      else
-        this->xi_ = cell_->local_coordinates_point(this->coordinates_);
+#ifdef _MPM_ISOPARAMETRIC_
+      this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
+#else
+      this->xi_ = cell_->local_coordinates_point(this->coordinates_);
+#endif
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
