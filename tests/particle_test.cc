@@ -348,14 +348,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Map particle mass to nodes
     particle->assign_mass(phase, std::numeric_limits<double>::max());
-    REQUIRE(particle->map_mass_to_nodes(phase) == false);
+    REQUIRE(particle->map_mass_momentum_to_nodes(phase) == false);
 
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
 
     REQUIRE(particle->compute_mass(phase) == true);
-    REQUIRE(particle->map_mass_to_nodes(phase) == true);
+    REQUIRE(particle->map_mass_momentum_to_nodes(phase) == true);
 
     // Values of nodal mass
     std::array<double, 4> nodal_mass{562.5, 187.5, 62.5, 187.5};
@@ -702,14 +702,14 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Map particle mass to nodes
     particle->assign_mass(phase, std::numeric_limits<double>::max());
-    REQUIRE(particle->map_mass_to_nodes(phase) == false);
+    REQUIRE(particle->map_mass_momentum_to_nodes(phase) == false);
 
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
 
     REQUIRE(particle->compute_mass(phase) == true);
-    REQUIRE(particle->map_mass_to_nodes(phase) == true);
+    REQUIRE(particle->map_mass_momentum_to_nodes(phase) == true);
 
     // Values of nodal mass
     std::array<double, 8> nodal_mass{125., 375.,  1125., 375.,
