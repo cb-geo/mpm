@@ -156,6 +156,13 @@ class Cell {
   //! Using newton iteration
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, 1, 1> transform_real_to_unit_cell(
+      const Eigen::Matrix<double, 1, 1>& point);
+
+  //! Return the local coordinates of a point in a unit cell
+  //! Using newton iteration
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, 2, 1> transform_real_to_unit_cell(
       const Eigen::Matrix<double, 2, 1>& point);
 
