@@ -57,6 +57,12 @@ class Node : public NodeBase<Tdim> {
   //! Return degrees of freedom
   unsigned dof() const { return dof_; }
 
+  //! Assign status
+  void assign_status(bool status) { status_ = status; }
+
+  //! Return status
+  bool status() const { return status_; }
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -158,6 +164,8 @@ class Node : public NodeBase<Tdim> {
   VectorDim coordinates_;
   //! Degrees of freedom
   unsigned dof_{std::numeric_limits<unsigned>::max()};
+  //! Status
+  bool status_{false};
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
