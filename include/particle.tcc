@@ -137,11 +137,31 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     // Check if particle volume is set and material ptr is valid
     if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
       // Mass = volume of particle * density
-      this->mass_(0, phase) = volume_ * material_->property("density");
+      this->mass_(phase) = volume_ * material_->property("density");
     } else {
       throw std::runtime_error(
           "Cell is not initialised! or material is invalid"
           "cannot compute mass for the particle");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+//! Map particle mass to nodes
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_mass_to_nodes(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle mass is set
+    if (mass_(phase) != std::numeric_limits<double>::max()) {
+      // Map particle mass to nodes
+      this->cell_->map_particle_mass_to_nodes(this->shapefn_, phase,
+                                              mass_(phase));
+    } else {
+      throw std::runtime_error("Particle mass has not be computed");
     }
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
