@@ -181,9 +181,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Compute mass
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
-  // Assign mass to nodes
+  // Assign mass and momentum to nodes
   meshes_.at(0)->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::map_mass_to_nodes,
+      std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                 std::placeholders::_1, phase));
 
   // Assign mass to nodes
