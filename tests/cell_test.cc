@@ -1142,6 +1142,71 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     for (const auto& node : nodes) REQUIRE(node->status() == false);
   }
 
+  // Check if a point is in an oblique cell
+  SECTION("Point in a distorted cell") {
+    // Coordinates
+    Eigen::Vector3d coords;
+    coords << 812481.0000000000, 815877.0000000001, 158.0900000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 812482.9999999999, 815877.0000000001, 159.1500000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 812482.9999999999, 815879.0000000000, 160.3900000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 812481.0000000000, 815879.0000000000, 159.4800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 812481.0000000000, 815877.0000000001, 160.0900000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 812482.9999999999, 815877.0000000001, 161.1500000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    coords << 812482.9999999999, 815879.0000000000, 162.3900000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+    coords << 812481.0000000000, 815879.0000000000, 161.4800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+    // 8-noded hexahedron shape functions
+    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
+        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
+    //! Check Cell IDs
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell->is_initialised() == false);
+
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+    cell->add_node(4, node4);
+    cell->add_node(5, node5);
+    cell->add_node(6, node6);
+    cell->add_node(7, node7);
+    REQUIRE(cell->nnodes() == 8);
+
+    REQUIRE(cell->nfunctions() == 8);
+
+    // Check point in cell
+    Eigen::Vector3d point;
+    point << 812482.5000000000, 815878.5000000000, 160.0825000000;
+    REQUIRE(cell->point_in_cell(point) == true);
+  }
+
   SECTION("Test particle information mapping") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
