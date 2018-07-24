@@ -126,9 +126,6 @@ class NodeBase {
   //! \param[in] nphase Index corresponding to the phase
   virtual Eigen::VectorXd acceleration(unsigned nphase) const = 0;
 
-  // TODO: REMOVE
-  virtual void stats() = 0;
-
 };  // NodeBase class
 }  // namespace mpm
 

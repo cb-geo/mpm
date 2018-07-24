@@ -144,6 +144,9 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
+  // Phase
+  const unsigned phase = 0;
+
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
@@ -175,8 +178,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
-  // Phase
-  unsigned phase = 0;
   // Compute mass
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
@@ -184,10 +185,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_mass_to_nodes,
                 std::placeholders::_1, phase));
-
-  // Check mass at nodes
-  meshes_.at(0)->iterate_over_nodes(
-      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
 
   return status;
 }
