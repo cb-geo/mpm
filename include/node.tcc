@@ -26,7 +26,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
 
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
+void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
                                                   double mass) {
   // Decide to update or assign
   double factor = 1.0;
@@ -34,13 +34,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned nphase,
 
   // Update/assign mass
   std::lock_guard<std::mutex> guard(node_mutex_);
-  mass_(nphase) = (mass_(nphase) * factor) + mass;
+  mass_(phase) = (mass_(phase) * factor) + mass;
 }
 
 //! Update volume at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
-                                                    unsigned nphase,
+void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
                                                     double volume) {
   // Decide to update or assign
   double factor = 1.0;
@@ -48,13 +47,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update,
 
   // Update/assign volume
   std::lock_guard<std::mutex> guard(node_mutex_);
-  volume_(nphase) = volume_(nphase) * factor + volume;
+  volume_(phase) = volume_(phase) * factor + volume;
 }
 
 //! Update external force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
-    bool update, unsigned nphase, const Eigen::VectorXd& force) {
+    bool update, unsigned phase, const Eigen::VectorXd& force) {
   bool status = false;
   try {
     if (force.size() != external_force_.size()) {
@@ -68,7 +67,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
 
     // Update/assign external force
     std::lock_guard<std::mutex> guard(node_mutex_);
-    external_force_.col(nphase) = external_force_.col(nphase) * factor + force;
+    external_force_.col(phase) = external_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -80,7 +79,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
 //! Update internal force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
-    bool update, unsigned nphase, const Eigen::VectorXd& force) {
+    bool update, unsigned phase, const Eigen::VectorXd& force) {
   bool status = false;
   try {
     if (force.size() != internal_force_.size()) {
@@ -94,7 +93,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
 
     // Update/assign internal force
     std::lock_guard<std::mutex> guard(node_mutex_);
-    internal_force_.col(nphase) = internal_force_.col(nphase) * factor + force;
+    internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -106,7 +105,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
 //! Assign nodal momentum
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
-    bool update, unsigned nphase, const Eigen::VectorXd& momentum) {
+    bool update, unsigned phase, const Eigen::VectorXd& momentum) {
   bool status = false;
   try {
     if (momentum.size() != momentum_.size()) {
@@ -119,7 +118,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 
     // Update/assign momentum
     std::lock_guard<std::mutex> guard(node_mutex_);
-    momentum_.col(nphase) = momentum_.col(nphase) * factor + momentum;
+    momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -133,16 +132,16 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   const double tolerance = std::numeric_limits<double>::lowest();
-  for (unsigned nphase = 0; nphase < Tnphases; ++nphase) {
-    if (mass_(nphase) > tolerance)
-      velocity_.col(nphase) = momentum_.col(nphase) / mass_(nphase);
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    if (mass_(phase) > tolerance)
+      velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
   }
 }
 
 //! Update nodal acceleration
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
-    bool update, unsigned nphase, const Eigen::VectorXd& acceleration) {
+    bool update, unsigned phase, const Eigen::VectorXd& acceleration) {
   bool status = false;
   try {
     if (acceleration.size() != acceleration_.size()) {
@@ -156,8 +155,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
 
     //! Update/assign acceleration
     std::lock_guard<std::mutex> guard(node_mutex_);
-    acceleration_.col(nphase) =
-        acceleration_.col(nphase) * factor + acceleration;
+    acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
