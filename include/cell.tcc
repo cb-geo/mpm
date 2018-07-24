@@ -730,14 +730,13 @@ void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
 
 //! Compute nodal momentum from particle mass and velocity for a given phase
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_momentum(const VectorDim& xi,
+void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
                                              unsigned phase, double pmass,
                                              const Eigen::VectorXd& pvelocity) {
-  // Get shape functions
-  const auto shapefns = shapefn_->shapefn(xi);
+
   // if (pmass.size() == pvelocity.cols()) mass = pmass.asDiagonal();
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
-    nodes_[i]->update_momentum(true, phase, shapefns(i) * pmass * pvelocity);
+    nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);
   }
 }
 

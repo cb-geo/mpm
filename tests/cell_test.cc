@@ -405,7 +405,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle momentum mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
-      cell->compute_nodal_momentum(xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
@@ -1099,7 +1099,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     SECTION("Check particle momentum mapping") {
       cell->map_particle_mass_to_nodes(xi, phase, pmass);
-      cell->compute_nodal_momentum(xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(0.5).epsilon(Tolerance));

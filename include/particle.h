@@ -78,9 +78,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool compute_mass(unsigned phase);
 
-  //! Map particle mass to nodes
+  //! Map particle mass and momentum to nodes
   //! \param[in] phase Index corresponding to the phase
-  bool map_mass_to_nodes(unsigned phase);
+  bool map_mass_momentum_to_nodes(unsigned phase);
 
   //! Assign nodal mass to particles
   //! \param[in] phase Index corresponding to the phase
