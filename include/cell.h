@@ -187,6 +187,15 @@ class Cell {
   void map_particle_volume_to_nodes(const VectorDim& xi, unsigned phase,
                                     double pvolume);
 
+  //! Map particle mass and momentum to nodes for a phase
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass mass of a particle
+  //! \param[in] velocity velocity of a particle
+  void map_mass_momentum_to_nodes(const Eigen::VectorXd& shapefn,
+                                  unsigned phase, double pmass,
+                                  const Eigen::VectorXd& pvelocity);
+
   //! Compute the nodal momentum with particle mass & velocity for a phase
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle

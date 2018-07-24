@@ -162,12 +162,9 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
   try {
     // Check if particle mass is set
     if (mass_(phase) != std::numeric_limits<double>::max()) {
-      // Map particle mass to nodes
-      this->cell_->map_particle_mass_to_nodes(this->shapefn_, phase,
-                                              mass_(phase));
-      // Map particle momentum to nodes
-      this->cell_->compute_nodal_momentum(this->shapefn_, phase, mass_(phase),
-                                          velocity_.col(phase));
+      // Map particle mass and momentum to nodes
+      this->cell_->map_mass_momentum_to_nodes(
+          this->shapefn_, phase, mass_(phase), velocity_.col(phase));
     } else {
       throw std::runtime_error("Particle mass has not be computed");
     }
