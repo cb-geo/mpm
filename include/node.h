@@ -145,7 +145,7 @@ class Node : public NodeBase<Tdim> {
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) +
-                      " mass: " + std::to_string(mass_(0)) + "\n";
+                      " momentum: " + std::to_string(momentum_(0, 0)) + "\n";
     std::cout << out;
   }
 
