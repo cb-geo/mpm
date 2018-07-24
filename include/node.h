@@ -142,13 +142,6 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(nphase);
   }
 
-  // TODO: REMOVE
-  void stats() {
-    std::string out = "Node: " + std::to_string(id_) +
-                      "mass: " + std::to_string(mass_(0)) + "\n";
-    std::cout << out;
-  }
-
  private:
   //! Mutex
   std::mutex node_mutex_;
