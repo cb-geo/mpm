@@ -527,6 +527,44 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
   return xi;
 }
 
+//! Return the local coordinates of a point in a 1D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 1, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 1, 1> xi;
+
+  try {
+    // Indices of corner nodes
+    Eigen::VectorXi indices = shapefn_->corner_indices();
+
+    // Linear
+    if (indices.size() == 2) {
+      //
+      // 0 0---------0 1
+      //        l
+      const double length = (nodes_[indices[0]]->coordinates() -
+                             nodes_[indices[1]]->coordinates())
+                                .norm();
+
+      const Eigen::Matrix<double, 1, 1> centre =
+          (nodes_[indices[0]]->coordinates() +
+           nodes_[indices[1]]->coordinates()) /
+          2.0;
+
+      xi(0) = 2. * (point(0) - centre(0)) / length;
+    } else {
+      throw std::runtime_error("Unable to compute local coordinates");
+    }
+  } catch (std::exception& except) {
+    std::cout << __FILE__ << __LINE__
+              << "Compute local coordinate of a point in a cell: "
+              << except.what() << '\n';
+  }
+  return xi;
+}
+
+
 //! Return the local coordinates of a point in a 2D/3D cell
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
