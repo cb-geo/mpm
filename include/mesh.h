@@ -72,6 +72,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_nodes(Toper oper);
 
+  //! Iterate over nodes with predicate
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \tparam Tpred Predicate
+  template <typename Toper, typename Tpred>
+  void iterate_over_nodes_predicate(Toper oper, Tpred pred);
+
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
   //! \param[in] shapefn Shape function of the cell

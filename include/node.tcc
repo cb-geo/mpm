@@ -22,6 +22,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
+  status_ = false;
 }
 
 //! Update mass at the nodes from particle

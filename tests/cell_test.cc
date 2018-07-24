@@ -356,6 +356,43 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     REQUIRE(cell->nparticles() == 0);
   }
 
+  SECTION("Test node status") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+
+    // When number of particles are zero
+    REQUIRE(cell->nparticles() == 0);
+    REQUIRE(cell->status() == false);
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == false);
+
+    // Add a particle
+    REQUIRE(cell->add_particle_id(pid) == true);
+    REQUIRE(cell->status() == true);
+    REQUIRE(cell->nparticles() == 1);
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == true);
+
+    // Remove a particle
+    cell->remove_particle_id(pid);
+    REQUIRE(cell->status() == false);
+    REQUIRE(cell->nparticles() == 0);
+    // initialise nodes
+    for (const auto& node : nodes) node->initialise();
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == false);
+  }
+
   SECTION("Test particle information mapping") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
@@ -1058,6 +1095,51 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
     REQUIRE(cell->nparticles() == 0);
+  }
+
+  SECTION("Test node status") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, shapefn);
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+    cell->add_node(4, node4);
+    cell->add_node(5, node5);
+    cell->add_node(6, node6);
+    cell->add_node(7, node7);
+
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+    nodes.emplace_back(node4);
+    nodes.emplace_back(node5);
+    nodes.emplace_back(node6);
+    nodes.emplace_back(node7);
+
+    // When number of particles are zero
+    REQUIRE(cell->nparticles() == 0);
+    REQUIRE(cell->status() == false);
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == false);
+
+    // Add a particle
+    REQUIRE(cell->add_particle_id(pid) == true);
+    REQUIRE(cell->status() == true);
+    REQUIRE(cell->nparticles() == 1);
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == true);
+
+    // Remove a particle
+    cell->remove_particle_id(pid);
+    REQUIRE(cell->status() == false);
+    REQUIRE(cell->nparticles() == 0);
+    // initialise nodes
+    for (const auto& node : nodes) node->initialise();
+    cell->activate_nodes();
+    for (const auto& node : nodes) REQUIRE(node->status() == false);
   }
 
   SECTION("Test particle information mapping") {
