@@ -170,6 +170,16 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
+  // Initialise nodes
+  meshes_.at(0)->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+
+  meshes_.at(0)->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+
+  meshes_.at(0)->iterate_over_cells(
+      std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+
   // Iterate over each particle to compute shapefn
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
@@ -186,9 +196,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                 std::placeholders::_1, phase));
 
+  std::cout << "After: \n";
   // Assign mass to nodes
-  meshes_.at(0)->iterate_over_nodes(
-      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+  meshes_.at(0)->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
   return status;
 }
