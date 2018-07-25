@@ -39,7 +39,7 @@ class Bingham : public Material {
   //! \param[in] strain Strain
   //! \param[in] stress Stress
   //! \retval updated_stress Updated value of stress
-  void compute_stress(Vector6d& stress, const Vector6d& strain);
+  void compute_stress(Vector6d& stress, const Vector6d& dstrain, const Eigen::Matrix3d& strain_rate);
 
  protected:
   //! material id
