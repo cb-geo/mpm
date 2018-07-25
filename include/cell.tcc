@@ -794,6 +794,7 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::compute_strain_rate(
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
   }
+  return strain_rate;
 }
 
 //! Compute the nodal body force of a cell from particle mass and gravity
