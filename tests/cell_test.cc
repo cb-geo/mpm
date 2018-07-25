@@ -1545,7 +1545,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 }
 
 //! \brief Check cell class for 3D case
-TEST_CASE("Cell is checked for 3D cezraase", "[cell][3D][Ezra]") {
+TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -1559,9 +1559,14 @@ TEST_CASE("Cell is checked for 3D cezraase", "[cell][3D][Ezra]") {
 
   // Check if a point is in an oblique cell
   SECTION("Point in a distorted cell") {
+
+    // Check point in cell
+    Eigen::Vector3d point;
+    point << 812498.5000000001, 815872.5000000000, 167.459;
+
     // Coordinates
     Eigen::Vector3d coords;
-    /*
+    
     coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
@@ -1594,76 +1599,105 @@ TEST_CASE("Cell is checked for 3D cezraase", "[cell][3D][Ezra]") {
     coords << 812496.9999999999, 815873.0000000000, 168.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
-    */
-    
-    // Element 1
-    coords << 812496.9999999999, 815870.9999999999, 163.4800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    coords << 812499.0000000000, 815870.9999999999, 164.7800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
-
-    coords << 812499.0000000000, 815873.0000000000, 166.0800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
-
-    coords << 812496.9999999999, 815873.0000000000, 164.8400000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
-
-
-    coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
-
-    coords << 812499.0000000000, 815870.9999999999, 166.7800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
-
-    coords << 812499.0000000000, 815873.0000000000, 168.0800000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
-
-    coords << 812496.9999999999, 815873.0000000000, 166.8400000000;
-    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
-    
     // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
         Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
 
     //! Check Cell IDs
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
 
     // Check if cell is initialised, before addition of nodes
-    REQUIRE(cell->is_initialised() == false);
+    REQUIRE(cell1->is_initialised() == false);
 
-    cell->add_node(0, node0);
-    cell->add_node(1, node1);
-    cell->add_node(2, node2);
-    cell->add_node(3, node3);
-    cell->add_node(4, node4);
-    cell->add_node(5, node5);
-    cell->add_node(6, node6);
-    cell->add_node(7, node7);
-    REQUIRE(cell->nnodes() == 8);
+    cell1->add_node(0, node0);
+    cell1->add_node(1, node1);
+    cell1->add_node(2, node2);
+    cell1->add_node(3, node3);
+    cell1->add_node(4, node4);
+    cell1->add_node(5, node5);
+    cell1->add_node(6, node6);
+    cell1->add_node(7, node7);
+    REQUIRE(cell1->nnodes() == 8);
 
-    REQUIRE(cell->nfunctions() == 8);
+    REQUIRE(cell1->nfunctions() == 8);
 
-    // Check point in cell
-    Eigen::Vector3d point;
-    point << 812498.5000000001, 815872.5000000000, 167.459;
-    REQUIRE(cell->point_in_cell(point) == false);
+    // Point in cell1 fails to capture
+    REQUIRE(cell1->point_in_cell(point) == false);
+
 
     Eigen::Vector3d xi;
-    xi = cell->transform_real_to_unit_cell(point);
+    xi = cell1->transform_real_to_unit_cell(point);
 
     std::cout << "Xi: \n";
-    for (unsigned i = 0; i < xi.size(); ++i)
-      std::cout << xi(i) << "\t";
+    for (unsigned i = 0; i < xi.size(); ++i) std::cout << xi(i) << "\t";
     std::cout << "\n";
+
+    
+    //Cell 2
+    mpm::Index id2 = 0;
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell2->is_initialised() == false);
+
+    
+    // Element 1
+    coords << 812496.9999999999, 815870.9999999999, 163.4800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node10 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 812499.0000000000, 815870.9999999999, 164.7800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node11 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 812499.0000000000, 815873.0000000000, 166.0800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node12 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 812496.9999999999, 815873.0000000000, 164.8400000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node13 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node14 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 812499.0000000000, 815870.9999999999, 166.7800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node15 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    coords << 812499.0000000000, 815873.0000000000, 168.0800000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node16 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+    coords << 812496.9999999999, 815873.0000000000, 166.8400000000;
+    std::shared_ptr<mpm::NodeBase<Dim>> node17 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+
+    cell2->add_node(0, node10);
+    cell2->add_node(1, node11);
+    cell2->add_node(2, node12);
+    cell2->add_node(3, node13);
+    cell2->add_node(4, node14);
+    cell2->add_node(5, node15);
+    cell2->add_node(6, node16);
+    cell2->add_node(7, node17);
+    REQUIRE(cell2->nnodes() == 8);
+    REQUIRE(cell2->nfunctions() == 8);
+
+    // Point in cell fails to capture
+    REQUIRE(cell2->point_in_cell(point) == false);
+
+    // Use affine transformation
+    xi = cell2->transform_real_to_unit_cell(point);
+
+    std::cout << "Xi: \n";
+    for (unsigned i = 0; i < xi.size(); ++i) std::cout << xi(i) << "\t";
+    std::cout << "\n";
+
+
   }
 }
