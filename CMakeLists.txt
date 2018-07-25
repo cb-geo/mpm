@@ -110,6 +110,7 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/hexahedron_element_test.cc
   ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
   ${mpm_SOURCE_DIR}/tests/io_test.cc
+  ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
   ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
   ${mpm_SOURCE_DIR}/tests/mesh_test.cc
   ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
