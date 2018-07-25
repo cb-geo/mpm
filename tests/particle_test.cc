@@ -782,6 +782,14 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
 
+    // Check velocity
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
+    REQUIRE(particle->assign_velocity(Phase, velocity) == true);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) == Approx(i).epsilon(Tolerance));
+
     REQUIRE(particle->compute_mass(phase) == true);
     REQUIRE(particle->map_mass_momentum_to_nodes(phase) == true);
 
@@ -792,6 +800,83 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < nodes.size(); ++i)
       REQUIRE(nodes.at(i)->mass(phase) ==
               Approx(nodal_mass.at(i)).epsilon(Tolerance));
+
+        // Compute nodal velocity
+    for (const auto node : nodes) node->compute_velocity();
+
+    // Values of nodal momentum
+    Eigen::Matrix<double, 8, 3> nodal_momentum;
+    
+    // clang-format off
+    nodal_momentum << 0.,  125.,  250.,
+                      0.,  375.,  750.,
+                      0., 1125., 2250.,
+                      0.,  375.,  750.,
+                      0.,  375.,  750.,
+                      0., 1125., 2250.,
+                      0., 3375., 6750.,
+                      0., 1125., 2250.;
+    // clang-format on
+    
+    // Check nodal momentum
+    for (unsigned i = 0; i < nodal_momentum.rows(); ++i)
+      for (unsigned j = 0; j < nodal_momentum.cols(); ++j)
+        REQUIRE(nodes.at(i)->momentum(phase)[j] ==
+                Approx(nodal_momentum(i, j)).epsilon(Tolerance));
+    /*
+        REQUIRE(nodes.at(i)->momentum(phase)(j) ==
+                Approx(nodal_momentum(i, j)).epsilon(Tolerance));
+
+    /*
+    // Values of nodal velocity
+    Eigen::Matrix<double, 4, 2> nodal_velocity;
+    // clang-format off
+    nodal_velocity << 0., 1.,
+                      0., 1.,
+                      0., 1.,
+                      0., 1.;
+    // clang-format on
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes.at(i)->velocity(phase)(j) ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Set momentum to get non-zero strain
+    // clang-format off
+    nodal_momentum << 0., 562.5 * 1.,
+                      0., 187.5 * 2.,
+                      0.,  62.5 * 3.,
+                      0., 187.5 * 4.;
+    // clang-format on
+    for (unsigned i = 0; i < nodes.size(); ++i)
+      nodes.at(i)->update_momentum(false, phase, nodal_momentum.row(i));
+
+    // nodal velocity
+    // clang-format off
+    nodal_velocity << 0., 1.,
+                      0., 2.,
+                      0., 3.,
+                      0., 4.;
+    // clang-format on
+    // Compute nodal velocity
+    for (const auto node : nodes) node->compute_velocity();
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes.at(i)->velocity(phase)(j) ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Compute strain
+    particle->compute_strain(phase, 0.1);
+    // Strain
+    Eigen::Matrix<double, 6, 1> strain;
+    strain << 0., 0.125, 0., 0.025, 0., 0.;
+    // Check strains
+    for (unsigned i = 0; i < strain.rows(); ++i)
+      REQUIRE(particle->strain(phase)(i) ==
+              Approx(strain(i)).epsilon(Tolerance));
+    */
   }
 
   SECTION("Check assign material to particle") {
