@@ -228,11 +228,11 @@ class Cell {
       const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
-  //! \param[in] xi local coordinates of particle
+  //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pgravity Gravity of a particle
-  void compute_nodal_body_force(const VectorDim& xi, unsigned phase,
+  void compute_nodal_body_force(const Eigen::VectorXd& xi, unsigned phase,
                                 double pmass, const VectorDim& pgravity);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
