@@ -179,46 +179,32 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 // Compute strain of the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
-  // TODO: Remove
-  unsigned k = 0;
-  for (const auto& bm : bmatrix_) {
-    std::cout << "Bmatrix: " << k << "\n";
-    for (unsigned i = 0; i < bm.rows(); ++i) {
-      for (unsigned j = 0; j < bm.cols(); ++j) {
-        std::cout << bm(i, j) << "\t";
-      }
-      std::cout << "\n";
-    }
-    ++k;
-  }
-
   // Strain rate
   Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   // dstrain
   Eigen::Matrix<double, 6, 1> dstrain;
   dstrain.setZero();
-
+  // Set dimension of strain rate
   switch (Tdim) {
     case (1): {
-      dstrain(0) = strain_rate(0) * dt;
+      dstrain(0) = strain_rate(0);
       break;
     }
     case (2): {
-      dstrain(0) = strain_rate(0) * dt;
-      dstrain(1) = strain_rate(1) * dt;
-      dstrain(3) = strain_rate(2) * dt;
+      dstrain(0) = strain_rate(0);
+      dstrain(1) = strain_rate(1);
+      dstrain(3) = strain_rate(2);
       break;
     }
     default: {
-      dstrain = strain_rate * dt;
+      dstrain = strain_rate;
       break;
     }
   }
 
-  // TODO: Remove
-  for (unsigned i = 0; i < dstrain.size(); ++i)
-    std::cout << "Strain ratae: " << dstrain(i) << "\n";
-
+  // dstrain = strain_rate * dt
+  dstrain *= dt;
+  
   // Update strain
   strain_ += dstrain;
 }
