@@ -876,17 +876,17 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
-    /*
+    
     // Compute strain
     particle->compute_strain(phase, 0.1);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
-    strain << 0., 0.125, 0., 0.025, 0., 0.;
+    strain << 0.00000, 0.07500, 0.40000, -0.02500, 0.35000, -0.05000;
+
     // Check strains
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
-    */
   }
 
   SECTION("Check assign material to particle") {

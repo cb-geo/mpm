@@ -805,7 +805,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
           "Number of nodes / shapefn doesn't match BMatrix");
 
     for (unsigned i = 0; i < this->nnodes(); ++i) {
-      Eigen::Matrix<double, 2, 1> node_velocity = nodes_[i]->velocity(phase);
+      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
       strain_rate += bmatrix.at(i) * node_velocity;
     }
   } catch (std::exception& exception) {
