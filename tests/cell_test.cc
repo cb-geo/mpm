@@ -427,6 +427,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Phase
     unsigned phase = 0;
     const auto shapefns_xi = shapefn->shapefn(xi);
+    const auto bmatrix = shapefn->bmatrix(xi);
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -461,6 +462,51 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(2.0).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check particle strain") {
+      // Particle mass
+      pmass = 40.;
+
+      // Map particle mass to nodes
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(10.0).epsilon(Tolerance));
+
+      // Map momentum to nodes
+      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(10.0).epsilon(Tolerance));
+      }
+
+      // Update mass and momentum
+      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(20.0).epsilon(Tolerance));
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(20.0).epsilon(Tolerance));
+      }
+
+      // Update particle mass
+      pmass = 80;
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+
+      // Compute nodal velocity
+      for (const auto& node : nodes) {
+        node->compute_velocity();
+        for (unsigned i = 0; i < pvelocity.size(); ++i) {
+          REQUIRE(node->momentum(phase)(i) == Approx(20.0).epsilon(Tolerance));
+          REQUIRE(node->mass(phase) == Approx(40.0).epsilon(Tolerance));
+          REQUIRE(node->velocity(phase)(i) == Approx(0.5).epsilon(Tolerance));
+        }
+      }
+
+      Eigen::Matrix<double, Dim, 1> strain_rate =
+          cell->compute_strain_rate(bmatrix, phase);
+      for (unsigned i = 0; i < Dim; ++i)
+        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
@@ -1244,6 +1290,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     unsigned phase = 0;
 
     const auto shapefns_xi = shapefn->shapefn(xi);
+    const auto bmatrix = shapefn->bmatrix(xi);
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -1279,6 +1326,51 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check particle strain") {
+      // Particle mass
+      pmass = 40.;
+
+      // Map particle mass to nodes
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(5.).epsilon(Tolerance));
+
+      // Map momentum to nodes
+      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(5.).epsilon(Tolerance));
+      }
+
+      // Update mass and momentum
+      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      for (const auto& node : nodes)
+        REQUIRE(node->mass(phase) == Approx(10.).epsilon(Tolerance));
+      for (const auto& node : nodes) {
+        for (unsigned i = 0; i < pvelocity.size(); ++i)
+          REQUIRE(node->momentum(phase)(i) == Approx(10.).epsilon(Tolerance));
+      }
+
+      // Update particle mass
+      pmass = 80.;
+      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+
+      // Compute nodal velocity
+      for (const auto& node : nodes) {
+        node->compute_velocity();
+        for (unsigned i = 0; i < pvelocity.size(); ++i) {
+          REQUIRE(node->momentum(phase)(i) == Approx(10.0).epsilon(Tolerance));
+          REQUIRE(node->mass(phase) == Approx(20.0).epsilon(Tolerance));
+          REQUIRE(node->velocity(phase)(i) == Approx(0.5).epsilon(Tolerance));
+        }
+      }
+
+      Eigen::Matrix<double, Dim, 1> strain_rate =
+          cell->compute_strain_rate(bmatrix, phase);
+      for (unsigned i = 0; i < Dim; ++i)
+        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
