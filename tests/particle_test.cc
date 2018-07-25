@@ -457,6 +457,27 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < stress.rows(); ++i)
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
+
+    // Check body force
+    Eigen::Matrix<double, 2, 1> gravity;
+    gravity << 0., -9.81;
+
+    particle->map_body_force(phase, gravity);
+
+    // Body force
+    Eigen::Matrix<double, 4, 2> body_force;
+    // clang-format off
+    body_force << 0., -5518.125,
+                  0., -1839.375,
+                  0.,  -613.125,
+                  0., -1839.375;
+    // clang-format on
+
+    // Check nodal body force
+    for (unsigned i = 0; i < body_force.rows(); ++i)
+      for (unsigned j = 0; j < body_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(body_force(i, j)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -925,6 +946,31 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < stress.rows(); ++i)
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
+
+    // Check body force
+    Eigen::Matrix<double, 3, 1> gravity;
+    gravity << 0., 0., -9.81;
+
+    particle->map_body_force(phase, gravity);
+
+    // Body force
+    Eigen::Matrix<double, 8, 3> body_force;
+    // clang-format off
+    body_force << 0., 0.,  -1226.25,
+                  0., 0.,  -3678.75,
+                  0., 0., -11036.25,
+                  0., 0.,  -3678.75,
+                  0., 0.,  -3678.75,
+                  0., 0., -11036.25,
+                  0., 0., -33108.75,
+                  0., 0., -11036.25;
+    // clang-format on
+
+    // Check nodal body force
+    for (unsigned i = 0; i < body_force.rows(); ++i)
+      for (unsigned j = 0; j < body_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(body_force(i, j)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
