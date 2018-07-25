@@ -99,6 +99,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute strain
   void compute_strain(unsigned phase, double dt);
 
+  //! Return strain of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, 6, 1> strain(unsigned phase) const {
+    return strain_.col(phase);
+  }
+
   //! Assign stress to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress A vector of particle stress

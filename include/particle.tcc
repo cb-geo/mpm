@@ -162,8 +162,6 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
   try {
     // Check if particle mass is set
     if (mass_(phase) != std::numeric_limits<double>::max()) {
-      // TODO: Remove after testing
-      // for (unsigned i = 0; i < Tdim; ++i) velocity_(i, phase) = 1.;
       // Map particle mass and momentum to nodes
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
@@ -186,6 +184,19 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   Eigen::Matrix<double, 6, 1> dstrain;
   dstrain.setZero();
 
+  // TODO: Remove
+  /*
+  for (const auto& bm : bmatrix_) {
+    std::cout << "Bmatrix: \n";
+    for (unsigned i = 0; i < bm.rows(); ++i) {
+      for (unsigned j = 0; j < bm.cols(); ++j) {
+        std::cout << bm(i, j) << "\t";
+      }
+      std::cout << "\n";
+    }
+  }
+  */
+
   switch (Tdim) {
     case (1): {
       dstrain(0) = strain_rate(0) * dt;
@@ -202,6 +213,13 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
       break;
     }
   }
+
+  // TODO: Remove
+  /*
+  for (unsigned i = 0; i < dstrain.size(); ++i)
+    std::cout << "Strain ratae: " << dstrain(i) << "\n";
+  */
+
   // Update strain
   strain_ += dstrain;
 }
