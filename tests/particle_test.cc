@@ -443,7 +443,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
 
-    std::cout << "COMPUTE STRESS\n";
+    // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
     Eigen::Matrix<double, 6, 1> stress;
@@ -913,7 +913,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
 
-    std::cout << "3D COMPUTE STRESS\n";
+    // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
     Eigen::Matrix<double, 6, 1> stress;
