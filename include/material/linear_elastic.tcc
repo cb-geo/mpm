@@ -32,14 +32,6 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
   de_(5,0)= 0;    de_(5,1)= 0;    de_(5,2)= 0;    de_(5,3)=0;    de_(5,4)=0;    de_(5,5)=G;
   // clang-format on
 
-  std::cout << "De: \n";
-  for (unsigned i = 0; i < de_.rows(); ++i) {
-    for (unsigned j = 0; j < de_.cols(); ++j) {
-      std::cout << de_(i, j) << ", ";
-    }
-    std::cout << ";";
-  }
-
   return de_;
 }
 
