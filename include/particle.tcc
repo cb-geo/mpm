@@ -22,6 +22,7 @@ template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
+  strain_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -196,7 +197,6 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // dstrain
   Eigen::Matrix<double, 6, 1> dstrain;
   dstrain.setZero();
-
 
   switch (Tdim) {
     case (1): {
