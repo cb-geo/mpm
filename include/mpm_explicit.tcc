@@ -206,6 +206,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1,
                 phase, dt_));
 
+  // Iterate over each particle to compute stress
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1, phase));
+
   std::cout << "After: \n";
   // TODO: Remove stats
   /*

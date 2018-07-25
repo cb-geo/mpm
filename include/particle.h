@@ -105,6 +105,9 @@ class Particle : public ParticleBase<Tdim> {
     return strain_.col(phase);
   }
 
+  //! Compute stress
+  bool compute_stress(unsigned phase);
+
   //! Assign stress to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress A vector of particle stress
