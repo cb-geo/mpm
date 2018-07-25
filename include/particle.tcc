@@ -240,6 +240,17 @@ void mpm::Particle<Tdim, Tnphases>::assign_stress(
   stress_.col(phase) = stress;
 }
 
+//! Map body force
+//! \param[in] phase Index corresponding to the phase
+//! \param[in] pgravity Gravity of a particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
+                                                   const VectorDim& pgravity) {
+  // Compute nodal body forces
+  cell_->compute_nodal_body_force(this->shapefn_, phase, this->mass_(phase),
+                                  pgravity);
+}
+
 // Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_velocity(

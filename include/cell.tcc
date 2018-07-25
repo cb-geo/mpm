@@ -832,7 +832,7 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
   // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, phase,
-                                     shapefn(i) * pgravity * pmass);
+                                     (shapefn(i) * pgravity * pmass));
 }
 
 //! Compute the nodal internal force  of a cell from particle stress and
