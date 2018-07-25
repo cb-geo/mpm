@@ -210,13 +210,18 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1, phase));
 
-  std::cout << "After: \n";
+  // Iterate over each particle to compute nodal body force
+  meshes_.at(0)->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_body_force, std::placeholders::_1,
+                phase, this->gravity_));
+
   // TODO: Remove stats
+  std::cout << "After: \n";
   /*
   meshes_.at(0)->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
-  */
 
+  */
   meshes_.at(0)->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));

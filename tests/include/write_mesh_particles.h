@@ -13,6 +13,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
   auto node_type = "N2D";
   auto cell_type = "SFQ4";
   auto mesh_reader = "Ascii2D";
+  std::vector<double> gravity{{0., -9.81}};
 
   // 3D
   if (dim == 3) {
@@ -21,6 +22,8 @@ bool write_json(unsigned dim, const std::string& file_name) {
     node_type = "N3D";
     cell_type = "SFH8";
     mesh_reader = "Ascii3D";
+    gravity.clear();
+    gravity = {0., 0., -9.81};
   }
 
   Json json_file = {
@@ -53,7 +56,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
       {"analysis",
        {{"dt", 0.001},
         {"nsteps", 1000},
-        {"gravity", true},
+        {"gravity", gravity},
         {"soil_particle_spacing", 0.01},
         {"boundary_friction", 0.5},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
