@@ -119,6 +119,11 @@ class Particle : public ParticleBase<Tdim> {
     return stress_.col(phase);
   }
 
+  //! Map body force
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pgravity Gravity of a particle
+  void map_body_force(unsigned phase, const VectorDim& pgravity);
+
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
