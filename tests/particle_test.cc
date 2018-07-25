@@ -806,7 +806,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Values of nodal momentum
     Eigen::Matrix<double, 8, 3> nodal_momentum;
-    
     // clang-format off
     nodal_momentum << 0.,  125.,  250.,
                       0.,  375.,  750.,
@@ -842,23 +841,32 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
-    /*
+
     // Set momentum to get non-zero strain
     // clang-format off
-    nodal_momentum << 0., 562.5 * 1.,
-                      0., 187.5 * 2.,
-                      0.,  62.5 * 3.,
-                      0., 187.5 * 4.;
+    nodal_momentum << 0.,  125. * 1.,  250. * 1.,
+                      0.,  375. * 2.,  750. * 2.,
+                      0., 1125. * 3., 2250. * 3.,
+                      0.,  375. * 4.,  750. * 4.,
+                      0.,  375. * 5.,  750. * 5.,
+                      0., 1125. * 6., 2250. * 6.,
+                      0., 3375. * 7., 6750. * 7.,
+                      0., 1125. * 8., 2250. * 8.;
     // clang-format on
     for (unsigned i = 0; i < nodes.size(); ++i)
-      nodes.at(i)->update_momentum(false, phase, nodal_momentum.row(i));
+      REQUIRE(nodes.at(i)->update_momentum(false, phase,
+                                           nodal_momentum.row(i)) == true);
 
     // nodal velocity
     // clang-format off
-    nodal_velocity << 0., 1.,
-                      0., 2.,
-                      0., 3.,
-                      0., 4.;
+    nodal_velocity << 0., 1.,  2.,
+                      0., 2.,  4.,
+                      0., 3.,  6.,
+                      0., 4.,  8.,
+                      0., 5., 10.,
+                      0., 6., 12.,
+                      0., 7., 14.,
+                      0., 8., 16.;
     // clang-format on
     // Compute nodal velocity
     for (const auto node : nodes) node->compute_velocity();
@@ -868,6 +876,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    /*
     // Compute strain
     particle->compute_strain(phase, 0.1);
     // Strain
