@@ -162,6 +162,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
   try {
     // Check if particle mass is set
     if (mass_(phase) != std::numeric_limits<double>::max()) {
+      // TODO: Remove after testing
+      // for (unsigned i = 0; i < Tdim; ++i) velocity_(i, phase) = 1.;
       // Map particle mass and momentum to nodes
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
