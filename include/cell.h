@@ -193,8 +193,8 @@ class Cell {
   //! Compute the nodal momentum with particle mass & velocity for a phase
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  //! \param[in] pmass mass of a particle
-  //! \param[in] velocity velocity of a particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] pvelocity velocity of a particle
   void compute_nodal_momentum(const Eigen::VectorXd& shapefn, unsigned phase,
                               double pmass, const Eigen::VectorXd& pvelocity);
 
