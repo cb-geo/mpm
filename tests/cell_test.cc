@@ -503,9 +503,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         }
       }
 
-      Eigen::Matrix<double, Dim, 1> strain_rate =
-          cell->compute_strain_rate(bmatrix, phase);
-      for (unsigned i = 0; i < Dim; ++i)
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
+      REQUIRE(strain_rate.size() == 3);
+      for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
     }
 
@@ -1367,9 +1367,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         }
       }
 
-      Eigen::Matrix<double, Dim, 1> strain_rate =
-          cell->compute_strain_rate(bmatrix, phase);
-      for (unsigned i = 0; i < Dim; ++i)
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
+      REQUIRE(strain_rate.size() == 6);
+      for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
     }
 
