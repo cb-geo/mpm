@@ -511,7 +511,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle body force mapping") {
       // Calculate body force at nodes
-      cell->compute_nodal_body_force(xi, phase, pmass, pgravity);
+      cell->compute_nodal_body_force(shapefns_xi, phase, pmass, pgravity);
       Eigen::Vector2d bodyforce;
       bodyforce << 0., 9.814;
       for (const auto& node : nodes) {
@@ -1375,7 +1375,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     SECTION("Check particle body force mapping") {
       // Compute body force at nodes
-      cell->compute_nodal_body_force(xi, phase, pmass, pgravity);
+      cell->compute_nodal_body_force(shapefns_xi, phase, pmass, pgravity);
       Eigen::Vector3d bodyforce;
       bodyforce << 0., 0., 0.5 * 9.814;
       for (const auto& node : nodes) {
