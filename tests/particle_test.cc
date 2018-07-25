@@ -334,6 +334,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
+    // Test compute stress before material assignment
+    REQUIRE(particle->compute_stress(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -437,11 +440,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
-
-    // Compute stress
-    // Assign material properties
-    material->properties(jmaterial);
-    REQUIRE(particle->assign_material(material) == true);
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -784,6 +782,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
+    // Test compute stress before material assignment
+    REQUIRE(particle->compute_stress(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -907,11 +908,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
-
-    // Compute stress
-    // Assign material properties
-    material->properties(jmaterial);
-    REQUIRE(particle->assign_material(material) == true);
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
