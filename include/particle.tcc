@@ -204,9 +204,33 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 
   // dstrain = strain_rate * dt
   dstrain *= dt;
-  
+
   // Update strain
   strain_ += dstrain;
+}
+
+// Compute stress
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
+  bool status = true;
+  Eigen::Matrix<double, 6, 1> stress;
+  stress.setZero();
+  try {
+    // Check if  material ptr is valid
+    if (material_ != nullptr) {
+      // Calculate stress
+      material_->compute_stress(stress, this->strain_);
+      // Assign stress
+      this->assign_stress(phase, stress);
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << "\n"
+              << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
 }
 
 // Assign stress to the particle
