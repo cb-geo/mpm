@@ -146,7 +146,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Phase
   const unsigned phase = 0;
-
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
@@ -201,6 +200,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Tdim>::compute_velocity, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+  // Iterate over each particle to calculate strain
+  meshes_.at(0)->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1,
+                phase, dt_));
 
   std::cout << "After: \n";
   // TODO: Remove stats

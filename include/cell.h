@@ -190,6 +190,14 @@ class Cell {
   void map_particle_volume_to_nodes(const VectorDim& xi, unsigned phase,
                                     double pvolume);
 
+  //! Compute the nodal momentum with particle mass & velocity for a phase
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] pvelocity velocity of a particle
+  void compute_nodal_momentum(const Eigen::VectorXd& shapefn, unsigned phase,
+                              double pmass, const Eigen::VectorXd& pvelocity);
+
   //! Map particle mass and momentum to nodes for a phase
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
@@ -199,13 +207,25 @@ class Cell {
                                   unsigned phase, double pmass,
                                   const Eigen::VectorXd& pvelocity);
 
-  //! Compute the nodal momentum with particle mass & velocity for a phase
-  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! Return velocity at given location by interpolating from nodes
+  //! \param[in] xi local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  //! \param[in] pmass mass of a particle
-  //! \param[in] velocity velocity of a particle
-  void compute_nodal_momentum(const Eigen::VectorXd& shapefn, unsigned phase,
-                              double pmass, const Eigen::VectorXd& pvelocity);
+  //! \retval velocity Interpolated velocity at xi
+  Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
+                                             unsigned phase);
+
+  //! Return acceleration at given location by interpolating from nodes
+  //! \param[in] xi local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \retval acceleration Interpolated acceleration at xi
+  Eigen::VectorXd interpolate_nodal_acceleration(const VectorDim& xi,
+                                                 unsigned phase);
+
+  //! Compute strain rate
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  Eigen::VectorXd compute_strain_rate(
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] xi local coordinates of particle
@@ -223,20 +243,6 @@ class Cell {
   void compute_nodal_internal_force(unsigned phase, double pvolume,
                                     const VectorDim& xi,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
-
-  //! Return velocity at given location by interpolating from nodes
-  //! \param[in] xi local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
-  //! \retval velocity Interpolated velocity at xi
-  Eigen::VectorXd interpolate_nodal_velocity(const VectorDim& xi,
-                                             unsigned phase);
-
-  //! Return acceleration at given location by interpolating from nodes
-  //! \param[in] xi local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
-  //! \retval acceleration Interpolated acceleration at xi
-  Eigen::VectorXd interpolate_nodal_acceleration(const VectorDim& xi,
-                                                 unsigned phase);
 
  protected:
   //! cell id
