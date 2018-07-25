@@ -38,6 +38,7 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
 //! Compute stress
 void mpm::LinearElastic::compute_stress(Vector6d& stress,
                                         const Vector6d& strain) {
-  Vector6d dstress = de_ * strain;
+
+  Vector6d dstress = this->elastic_tensor() * strain;
   stress += dstress;
 }

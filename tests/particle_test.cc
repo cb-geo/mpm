@@ -334,6 +334,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
+    // Test compute stress before material assignment
+    REQUIRE(particle->compute_stress(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -437,6 +440,23 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
+
+    // Compute stress
+    REQUIRE(particle->compute_stress(phase) == true);
+
+    Eigen::Matrix<double, 6, 1> stress;
+    // clang-format off
+    stress <<  721153.8461538460,
+              1682692.3076923075,
+               721153.8461538460,
+                96153.8461538462,
+                    0.0000000000,
+                    0.0000000000;
+    // clang-format on
+    // Check stress
+    for (unsigned i = 0; i < stress.rows(); ++i)
+      REQUIRE(particle->stress(phase)(i) ==
+              Approx(stress(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -762,6 +782,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
+    // Test compute stress before material assignment
+    REQUIRE(particle->compute_stress(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -885,6 +908,23 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
+
+    // Compute stress
+    REQUIRE(particle->compute_stress(phase) == true);
+
+    Eigen::Matrix<double, 6, 1> stress;
+    // clang-format off
+    stress << 2740384.6153846150,
+              3317307.6923076920,
+              5817307.6923076920,
+               -96153.8461538463,
+              1346153.8461538465,
+              -192307.6923076927;
+    // clang-format on
+    // Check stress
+    for (unsigned i = 0; i < stress.rows(); ++i)
+      REQUIRE(particle->stress(phase)(i) ==
+              Approx(stress(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
