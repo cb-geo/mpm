@@ -132,10 +132,19 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 //! velocity = momentum / mass
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
-  const double tolerance = std::numeric_limits<double>::lowest();
-  for (unsigned phase = 0; phase < Tnphases; ++phase) {
-    if (mass_(phase) > tolerance)
-      velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
+  try {
+    const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
+
+    for (unsigned phase = 0; phase < Tnphases; ++phase) {
+      if (mass_(phase) > tolerance) {
+        std::cout << "Mass: " << mass_(phase) << "\n";
+        velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
+      } else
+        throw std::runtime_error("Nodal mass is zero or below threshold");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
   }
 }
 
