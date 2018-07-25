@@ -174,6 +174,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
+  // TODO: Remove stats
   meshes_.at(0)->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
 
@@ -196,8 +197,18 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                 std::placeholders::_1, phase));
 
+  // Compute nodal velocity
+  meshes_.at(0)->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::compute_velocity, std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
   std::cout << "After: \n";
-  // Assign mass to nodes
+  // TODO: Remove stats
+  /*
+  meshes_.at(0)->iterate_over_nodes(
+      std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+  */
+
   meshes_.at(0)->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
