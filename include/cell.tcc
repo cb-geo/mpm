@@ -816,15 +816,13 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
 
 //! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,
+void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
                                                unsigned phase, double pmass,
                                                const VectorDim& pgravity) {
-  // Get shape functions
-  const auto shapefns = shapefn_->shapefn(xi);
   // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, phase,
-                                     shapefns(i) * pgravity * pmass);
+                                     (shapefn(i) * pgravity * pmass));
 }
 
 //! Compute the nodal internal force  of a cell from particle stress and

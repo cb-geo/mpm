@@ -120,6 +120,9 @@ class ParticleBase {
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
 
+  //! Map body force
+  virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
+
   //! Assign velocity
   virtual bool assign_velocity(unsigned phase,
                                const Eigen::VectorXd& velocity) = 0;
