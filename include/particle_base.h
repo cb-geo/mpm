@@ -110,6 +110,9 @@ class ParticleBase {
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain(unsigned phase) const = 0;
 
+  //! Compute stress
+  virtual bool compute_stress(unsigned phase) = 0;
+
   //! Assign stress
   virtual void assign_stress(unsigned phase,
                              const Eigen::Matrix<double, 6, 1>& stress) = 0;
