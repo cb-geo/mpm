@@ -224,6 +224,19 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
+      // Check mass
+      double mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Compute and check velocity this should throw zero mass
+      std::cout << "Check nodal velocity\n";
+      node->compute_velocity();
+
+      mass = 100.;
+      // Update mass to 100.5
+      node->update_mass(true, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
+
       // Compute and check velocity
       node->compute_velocity();
       for (unsigned i = 0; i < Dim; ++i)
@@ -504,6 +517,19 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
+      // Check mass
+      double mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Compute and check velocity this should throw zero mass
+      std::cout << "Check nodal velocity\n";
+      node->compute_velocity();
+
+      mass = 100.;
+      // Update mass to 100.5
+      node->update_mass(true, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
+
       // Compute and check velocity
       node->compute_velocity();
       for (unsigned i = 0; i < Dim; ++i)
@@ -729,6 +755,19 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       node->update_momentum(false, Nphase, momentum);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
+
+      // Check mass
+      double mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Compute and check velocity this should throw zero mass
+      std::cout << "Check nodal velocity\n";
+      node->compute_velocity();
+
+      mass = 100.;
+      // Update mass to 100.5
+      node->update_mass(true, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
 
       // Check zero velocity
       for (unsigned i = 0; i < Dim; ++i)
