@@ -224,7 +224,7 @@ class Cell {
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  Eigen::Matrix<double, Tdim, 1> compute_strain_rate(
+  Eigen::VectorXd compute_strain_rate(
       const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
   //! Compute the nodal body force of a cell from particle mass and gravity

@@ -177,6 +177,35 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
   return status;
 }
 
+// Compute strain of the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
+  // Strain rate
+  Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+  // dstrain
+  Eigen::Matrix<double, 6, 1> dstrain;
+  dstrain.setZero();
+
+  switch (Tdim) {
+    case (1): {
+      dstrain(0) = strain_rate(0) * dt;
+      break;
+    }
+    case (2): {
+      dstrain(0) = strain_rate(0) * dt;
+      dstrain(1) = strain_rate(1) * dt;
+      dstrain(3) = strain_rate(2) * dt;
+      break;
+    }
+    default: {
+      dstrain = strain_rate * dt;
+      break;
+    }
+  }
+  // Update strain
+  strain_ += dstrain;
+}
+
 // Assign stress to the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::assign_stress(

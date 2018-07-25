@@ -92,9 +92,12 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double mass(unsigned phase) const { return mass_(0, phase); }
 
-  // Assign material
+  //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(const std::shared_ptr<Material>& material);
+
+  //! Compute strain
+  void compute_strain(unsigned phase, double dt);
 
   //! Assign stress to the particle
   //! \param[in] phase Index corresponding to the phase
@@ -164,6 +167,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
+  //! Strains
+  Eigen::Matrix<double, 6, Tnphases> strain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
