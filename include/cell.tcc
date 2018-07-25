@@ -773,6 +773,47 @@ void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
   }
 }
 
+//! Compute strain rate
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
+    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
+  // Define strain rate
+  Eigen::VectorXd strain_rate;
+
+  switch (Tdim) {
+    case (1): {
+      strain_rate.resize(1);
+      break;
+    }
+    case (2): {
+      strain_rate.resize(3);
+      break;
+    }
+    default: {
+      strain_rate.resize(6);
+      break;
+    }
+  }
+
+  strain_rate.setZero();
+
+  try {
+    // Check if B-Matrix size and number of nodes match
+    if (this->nfunctions() != bmatrix.size() ||
+        this->nnodes() != bmatrix.size())
+      throw std::runtime_error(
+          "Number of nodes / shapefn doesn't match BMatrix");
+
+    for (unsigned i = 0; i < this->nnodes(); ++i) {
+      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
+      strain_rate += bmatrix.at(i) * node_velocity;
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+  }
+  return strain_rate;
+}
+
 //! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_body_force(const VectorDim& xi,

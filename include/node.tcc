@@ -137,7 +137,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
 
     for (unsigned phase = 0; phase < Tnphases; ++phase) {
       if (mass_(phase) > tolerance) {
-        std::cout << "Mass: " << mass_(phase) << "\n";
         velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
       } else
         throw std::runtime_error("Nodal mass is zero or below threshold");

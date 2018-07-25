@@ -22,6 +22,7 @@ template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
+  strain_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -162,8 +163,6 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
   try {
     // Check if particle mass is set
     if (mass_(phase) != std::numeric_limits<double>::max()) {
-      // TODO: Remove after testing
-      // for (unsigned i = 0; i < Tdim; ++i) velocity_(i, phase) = 1.;
       // Map particle mass and momentum to nodes
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
@@ -175,6 +174,39 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
     status = false;
   }
   return status;
+}
+
+// Compute strain of the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
+  // Strain rate
+  Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+  // dstrain
+  Eigen::Matrix<double, 6, 1> dstrain;
+  dstrain.setZero();
+  // Set dimension of strain rate
+  switch (Tdim) {
+    case (1): {
+      dstrain(0) = strain_rate(0);
+      break;
+    }
+    case (2): {
+      dstrain(0) = strain_rate(0);
+      dstrain(1) = strain_rate(1);
+      dstrain(3) = strain_rate(2);
+      break;
+    }
+    default: {
+      dstrain = strain_rate;
+      break;
+    }
+  }
+
+  // dstrain = strain_rate * dt
+  dstrain *= dt;
+  
+  // Update strain
+  strain_ += dstrain;
 }
 
 // Assign stress to the particle
