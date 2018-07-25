@@ -70,6 +70,9 @@ class Material {
   //! \retval updated_stress Updated value of stress
   virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
 
+  virtual void compute_stress(Vector6d& stress, const Vector6d& dstrain, const Eigen::Matrix3d& strain_rate) = 0;
+
+
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
