@@ -74,7 +74,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute local reference coordinates of the particle");
+          "cannot compute local reference coordinates of the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -355,7 +355,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute local reference coordinates of the particle");
+          "cannot compute updated coordinates of the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';

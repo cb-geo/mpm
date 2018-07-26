@@ -243,6 +243,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     coords << 0.75, 0.75;
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
+    // Phase
+    const unsigned phase = 0;
+    // Time-step
+    const double dt = 0.1;
+
     // Check particle coordinates
     auto coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -291,6 +296,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute updated particle location should fail
+    REQUIRE(particle->compute_updated_position(phase, dt) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
@@ -331,7 +338,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    unsigned phase = 0;
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
@@ -436,7 +442,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    const double dt = 0.1;
     particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
@@ -751,6 +756,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
+    // Phase
+    const unsigned phase = 0;
+    // Time-step
+    const double dt = 0.1;
+
     // Check particle coordinates
     auto coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -827,6 +837,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute updated particle location should fail
+    REQUIRE(particle->compute_updated_position(phase, dt) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
@@ -867,7 +879,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    unsigned phase = 0;
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
@@ -991,7 +1002,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    const double dt = 0.1;
     particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
