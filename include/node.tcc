@@ -9,6 +9,8 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   coordinates_ = coord;
   dof_ = Tdof;
 
+  // Clear any velocity constraints
+  velocity_constraints_.clear();
   this->initialise();
 }
 
@@ -171,4 +173,72 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     status = false;
   }
   return status;
+}
+
+//! Assign velocity constraints
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
+    const std::map<unsigned, double>& vel_constraints) {
+  bool status = true;
+  try {
+    for (const auto& constraint : vel_constraints) {
+      //! Constrain directions can take values between 0 and Dim * Nphases
+      if (constraint.first < 0 || constraint.first >= (Tdim * Tnphases)) {
+        throw std::runtime_error("Constraint direction is out of bounds");
+        status = false;
+      }
+    }
+    if (status) velocity_constraints_ = vel_constraints;
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+//! Compute acceleration and velocity
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
+    unsigned phase, double dt) {
+  bool status = true;
+  const double tolerance = 1.E-8;
+  try {
+    if (mass_(phase) > tolerance) {
+      // acceleration (unbalaced force / mass)
+      this->acceleration_.col(phase) = (this->external_force_.col(phase) +
+                                        this->internal_force_.col(phase)) /
+                                       this->mass_(phase);
+
+      // Velocity = acceleration * dt
+      this->velocity_.col(phase) = this->acceleration_.col(phase) * dt;
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_velocity_constraints();
+    } else
+      throw std::runtime_error("Nodal mass is zero or below threshold");
+
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+//! Apply velocity constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
+  // Set velocity constraint
+  for (const auto& constraint : this->velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const unsigned direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const unsigned phase = static_cast<unsigned>(dir / Tdim);
+    this->velocity_(direction, phase) = constraint.second;
+    this->acceleration_(direction, phase) = 0.;
+  }
 }
