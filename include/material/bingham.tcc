@@ -30,7 +30,6 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   unsigned phase = 0;
   auto strain_rate = ptr->strain_rate(phase);
-  std::cout << "TEST IS HERE\n";
 
   // Bulk and shear modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
