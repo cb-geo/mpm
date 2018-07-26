@@ -1,5 +1,5 @@
-#include <limits>
 #include <iostream>
+#include <limits>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
@@ -53,7 +53,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check material status before assigning material property
     REQUIRE(material->status() == false);
-    
+
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
@@ -68,8 +68,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(material->status() == true);
 
     // Get material properties
-    REQUIRE(material->property("density") == Approx(jmaterial["density"]).epsilon(Tolerance));
-    
+    REQUIRE(material->property("density") ==
+            Approx(jmaterial["density"]).epsilon(Tolerance));
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -117,13 +117,13 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
     auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
-  
+
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     const unsigned Dim = 3;
     const unsigned Dof = 6;
     const unsigned Nphases = 1;
-    const unsigned Nnodes = 8;    
+    const unsigned Nnodes = 8;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -151,10 +151,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
-    
+        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, shapefn);
-       
+
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -169,7 +169,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Reset stress
     stress.setZero();
-   
+
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
 
@@ -180,7 +180,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
-
   }
 
   SECTION("Bingham check stresses with some strain rate") {
@@ -228,13 +227,13 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
     auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
-  
+
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     const unsigned Dim = 3;
     const unsigned Dof = 6;
     const unsigned Nphases = 1;
-    const unsigned Nnodes = 8;    
+    const unsigned Nnodes = 8;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -262,10 +261,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
-    
+        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, shapefn);
-       
+
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -282,7 +281,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Reset stress
     stress.setZero();
-   
+
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
 
@@ -293,6 +292,5 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
-
   }
 }

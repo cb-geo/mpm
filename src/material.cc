@@ -1,5 +1,5 @@
-#include "material/bingham.h"
 #include "material/material.h"
+#include "material/bingham.h"
 #include "material/linear_elastic.h"
 
 // Bingham 2D
