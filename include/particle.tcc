@@ -251,6 +251,29 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
                                   pgravity);
 }
 
+//! Map internal force
+//! \param[in] phase Index corresponding to the phase
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if  material ptr is valid
+    if (material_ != nullptr) {
+      // Compute nodal internal forces
+      // volume * pstress
+      cell_->compute_nodal_internal_force(
+          this->bmatrix_, phase,
+          (this->mass_(phase) / material_->property("density")), this->stress_);
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
 // Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
