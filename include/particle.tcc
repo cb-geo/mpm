@@ -34,17 +34,19 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     std::shared_ptr<Cell<Tdim>> cellptr) {
   bool status = true;
   try {
-    // if a cell already exists remove particle from that cell
-    if (cell_ != nullptr) cell_->remove_particle_id(this->id());
-
     // Assign cell to the new cell ptr, if point can be found in new cell
     if (cellptr->is_point_in_cell(this->coordinates_)) {
+      // if a cell already exists remove particle from that cell
+      if (cell_ != nullptr) cell_->remove_particle_id(this->id());
+
       cell_ = cellptr;
       cell_id_ = cellptr->id();
       // Calculate the reference location of particle
       this->compute_reference_location();
       status = cell_->add_particle_id(this->id());
     } else {
+      // If the point is in not current cell, set as null ptr
+      if (!cell_->is_point_in_cell(this->coordinates_)) cell_ = nullptr;
       throw std::runtime_error("Point cannot be found in cell!");
     }
   } catch (std::exception& exception) {
