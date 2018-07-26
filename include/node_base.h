@@ -4,6 +4,7 @@
 #include <array>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -131,6 +132,11 @@ class NodeBase {
   //! Return acceleration
   //! \param[in] phase Index corresponding to the phase
   virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
+
+  //! Assign velocity constraints
+  //! Directions can take values between 0 and Dim * Nphases
+  virtual bool assign_velocity_constraints(
+      const std::map<unsigned, double>& vel_constraints) = 0;
 
   //! TODO: Remove debug printing
   virtual void stats() = 0;

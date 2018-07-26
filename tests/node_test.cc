@@ -252,6 +252,15 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Exception handling invalid momentum dimension
       status = node->update_momentum(false, Nphase, momentum);
       REQUIRE(status == false);
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 0.;
+
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      // Check out of bounds condition
+      vel_constraints[1] = 0.;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
     }
 
     SECTION("Check acceleration") {
@@ -545,6 +554,15 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Exception handling invalid momentum dimension
       status = node->update_momentum(false, Nphase, momentum);
       REQUIRE(status == false);
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 0.;
+
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      // Check out of bounds condition
+      vel_constraints[3] = 0.;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
     }
 
     SECTION("Check acceleration") {
@@ -777,6 +795,15 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       node->compute_velocity();
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 0.;
+
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      // Check out of bounds condition
+      vel_constraints[4] = 0.;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
     }
 
     SECTION("Check acceleration") {
