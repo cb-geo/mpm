@@ -338,6 +338,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
 
+    // Test compute internal force before material assignment
+    REQUIRE(particle->map_internal_force(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -824,6 +827,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
+
+    // Test compute internal force before material assignment
+    REQUIRE(particle->map_internal_force(phase) == false);
 
     // Assign material properties
     material->properties(jmaterial);
