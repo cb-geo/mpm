@@ -876,13 +876,12 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
 
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
-                                                            unsigned phase) {
+Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(
+    const Eigen::VectorXd& shapefn, unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
-  const auto shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    velocity += shapefns(i) * nodes_[i]->velocity(phase);
+    velocity += shapefn(i) * nodes_[i]->velocity(phase);
 
   return velocity;
 }
@@ -890,12 +889,11 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(const VectorDim& xi,
 //! Return acceleration at a point by interpolating from nodes
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
-    const VectorDim& xi, unsigned phase) {
+    const Eigen::VectorXd& shapefn, unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> acceleration =
       Eigen::Matrix<double, Tdim, 1>::Zero();
-  const auto shapefns = shapefn_->shapefn(xi);
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    acceleration += shapefns(i) * nodes_[i]->acceleration(phase);
+    acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 
   return acceleration;
 }
