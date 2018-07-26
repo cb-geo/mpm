@@ -150,7 +150,8 @@ class Node : public NodeBase<Tdim> {
 
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
-  bool compute_acceleration_velocity(unsigned phase);
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity(unsigned phase, double dt);
 
   //! Assign velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
@@ -159,9 +160,6 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply velocity constraints
   void apply_velocity_constraints();
-
-  //! Apply acceleration constraints
-  void apply_acceleration_constraints();
 
   // TODO: Remove debug printing
   void stats() {

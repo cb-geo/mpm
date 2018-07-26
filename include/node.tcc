@@ -201,7 +201,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
 //! Compute acceleration and velocity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
-    unsigned phase) {
+    unsigned phase, double dt) {
   bool status = true;
   const double tolerance = 1.E-8;
   try {
@@ -210,6 +210,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       this->acceleration_(phase) =
           (this->external_force_(phase) + this->internal_force_(phase)) /
           this->mass_(phase);
+      // Velocity = acceleration * dt
+      this->velocity_(phase) = this->acceleration_(phase) * dt;
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_velocity_constraints();
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
 
@@ -233,20 +238,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const unsigned phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
-  }
-}
-
-//! Apply acceleration constraints
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::apply_acceleration_constraints() {
-  // Set acceleration constraint
-  for (const auto& constraint : this->velocity_constraints_) {
-    // Direction value in the constraint (0, Dim * Nphases)
-    const unsigned dir = constraint.first;
-    // Direction: dir % Tdim (modulus)
-    const unsigned direction = static_cast<unsigned>(dir % Tdim);
-    // Phase: Integer value of division (dir / Tdim)
-    const unsigned phase = static_cast<unsigned>(dir / Tdim);
     this->acceleration_(direction, phase) = 0.;
   }
 }

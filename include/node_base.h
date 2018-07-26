@@ -134,7 +134,7 @@ class NodeBase {
   virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
 
   //! Compute acceleration
-  virtual bool compute_acceleration_velocity(unsigned phase) = 0;
+  virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
   //! Assign velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
@@ -143,9 +143,6 @@ class NodeBase {
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
-
-  //! Apply acceleration constraints
-  virtual void apply_acceleration_constraints() = 0;
 
   //! TODO: Remove debug printing
   virtual void stats() = 0;

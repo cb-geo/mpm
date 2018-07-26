@@ -321,7 +321,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(acceleration(i)).epsilon(Tolerance));
 
       // Apply constraints
-      node->apply_acceleration_constraints();
+      node->apply_velocity_constraints();
 
       // Check apply constraints
       acceleration << 0.0;
@@ -659,7 +659,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(acceleration(i)).epsilon(Tolerance));
 
       // Apply constraints
-      node->apply_acceleration_constraints();
+      node->apply_velocity_constraints();
 
       // Check apply constraints
       acceleration << 0., 5.;
@@ -946,7 +946,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
                 Approx(acceleration(i)).epsilon(Tolerance));
 
       // Apply constraints
-      node->apply_acceleration_constraints();
+      node->apply_velocity_constraints();
 
       // Check apply constraints
       acceleration << 0.0, 0.0, 5.;
