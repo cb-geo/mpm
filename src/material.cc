@@ -1,3 +1,4 @@
+#include "material/bingham.h"
 #include "material/material.h"
 #include "material/linear_elastic.h"
 
