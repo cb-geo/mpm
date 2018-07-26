@@ -124,6 +124,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(unsigned phase, const VectorDim& pgravity);
 
+  //! Map internal force
+  //! \param[in] phase Index corresponding to the phase
+  bool map_internal_force(unsigned phase);
+
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
