@@ -407,7 +407,7 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
 //! Check if a point is in a 3D cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, 3, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point) {
 
   bool status = true;
 
