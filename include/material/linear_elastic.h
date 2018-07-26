@@ -63,8 +63,6 @@ class LinearElastic : public Material<Tdim> {
   //! Check if this material needs a particle handle
   bool property_handle() const override { return false; }
 
-  void compute_stress3(Vector6d& stress, const Vector6d& strain, const Vector6d& strain_rate){};
-
 
  protected:
   //! material id
