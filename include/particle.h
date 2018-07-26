@@ -65,6 +65,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Return cell id
   Index cell_id() const { return cell_id_; }
 
+  //! Remove cell associated with the particle
+  void remove_cell();
+
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn();
 
@@ -213,6 +216,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
+  //! dstrains
+  Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

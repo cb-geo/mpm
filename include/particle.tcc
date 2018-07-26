@@ -23,6 +23,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
   strain_.setZero();
+  dstrain_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -37,7 +38,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     // Assign cell to the new cell ptr, if point can be found in new cell
     if (cellptr->is_point_in_cell(this->coordinates_)) {
       // if a cell already exists remove particle from that cell
-      if (cell_ != nullptr) cell_->remove_particle_id(this->id());
+      if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
@@ -45,8 +46,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
       this->compute_reference_location();
       status = cell_->add_particle_id(this->id());
     } else {
-      // If the point is in not current cell, set as null ptr
-      if (!cell_->is_point_in_cell(this->coordinates_)) cell_ = nullptr;
       throw std::runtime_error("Point cannot be found in cell!");
     }
   } catch (std::exception& exception) {
@@ -54,6 +53,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     status = false;
   }
   return status;
+}
+
+// Remove cell for the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::remove_cell() {
+  // if a cell is not nullptr
+  if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+  cell_id_ = std::numeric_limits<Index>::max();
 }
 
 // Assign a material to particle
@@ -223,6 +230,8 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // dstrain = strain_rate * dt
   dstrain *= dt;
 
+  // Update dstrain
+  dstrain_.col(phase) = dstrain;
   // Update strain
   strain_.col(phase) += dstrain;
 }
@@ -244,7 +253,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Calculate stress
-      material_->compute_stress(stress, this->strain_.col(phase));
+      material_->compute_stress(stress, this->dstrain_.col(phase));
       // Assign stress
       this->assign_stress(phase, stress);
     } else {

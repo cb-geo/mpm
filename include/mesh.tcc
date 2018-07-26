@@ -187,8 +187,18 @@ bool mpm::Mesh<Tdim>::create_particles(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-  bool insertion_status = particles_.add(particle);
-  return insertion_status;
+  bool status = false;
+  try {
+    // Add only if particle can be located in any cell of the mesh
+    if (this->locate_particle_cells(particle))
+      status = particles_.add(particle);
+    else
+      throw std::runtime_error("Particle not found in mesh");
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+    status = false;
+  }
+  return status;
 }
 
 //! Remove a particle pointer from the mesh
@@ -207,21 +217,40 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  // Iterate through each particle and
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    bool find_cell = false;
-    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      // Check if co-ordinates is within the cell, if true add particle to
-      // cell
-      if ((*citr)->point_in_cell((*pitr)->coordinates())) {
-        (*pitr)->assign_cell(*citr);
-        find_cell = true;
-      }
-    }
-    // If particle is not found in mesh add to a list of particles
-    if (!find_cell) particles.emplace_back(*pitr);
-  }
+  tbb::parallel_for_each(
+      particles_.cbegin(), particles_.cend(),
+      [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+        // If particle is not found in mesh add to a list of particles
+        if (!this->locate_particle_cells(particle))
+          // Needs a lock guard here
+          particles.emplace_back(particle);
+      });
+
   return particles;
+}
+
+//! Locate particles in a cell
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::locate_particle_cells(
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+  // Check the current cell if it is not invalid
+  if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
+    if (particle->compute_reference_location()) return true;
+
+  bool status = false;
+  tbb::parallel_for_each(
+      cells_.cbegin(), cells_.cend(),
+      [=, &status](std::shared_ptr<mpm::Cell<Tdim>> cell) {
+        // Check if particle is already found, if so don't run for other cells
+        // Check if co-ordinates is within the cell, if true
+        // add particle to cell
+        if (!status && cell->is_point_in_cell(particle->coordinates())) {
+          particle->assign_cell(cell);
+          status = true;
+        }
+      });
+
+  return status;
 }
 
 //! Iterate over particles
