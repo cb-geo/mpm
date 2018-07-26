@@ -227,7 +227,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                 std::placeholders::_1, phase, this->dt_));
 
-  /*
+
   // TODO: Remove
   // Iterate over each particle stats
   meshes_.at(0)->iterate_over_particles(
@@ -238,11 +238,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   /*
   meshes_.at(0)->iterate_over_nodes(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
-
+  */
 
   meshes_.at(0)->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-  */
+
   return status;
 }
