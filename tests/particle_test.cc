@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <limits>
 
@@ -337,6 +338,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
 
+    // Test compute internal force before material assignment
+    REQUIRE(particle->map_internal_force(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -478,6 +482,24 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       for (unsigned j = 0; j < body_force.cols(); ++j)
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
+
+    // Internal force
+    Eigen::Matrix<double, 4, 2> internal_force;
+    // clang-format off
+    internal_force << -306490.3846153846, -667067.3076923075,
+                       258413.4615384615, -174278.8461538461,
+                       102163.4615384615,  222355.7692307692,
+                      -54086.53846153844,  618990.3846153845;
+    // clang-format on
+
+    // Map particle internal force
+    REQUIRE(particle->map_internal_force(phase) == true);
+
+    // Check nodal internal force
+    for (unsigned i = 0; i < internal_force.rows(); ++i)
+      for (unsigned j = 0; j < internal_force.cols(); ++j)
+        REQUIRE(nodes[i]->internal_force(phase)[j] ==
+                Approx(internal_force(i, j)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -806,6 +828,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
 
+    // Test compute internal force before material assignment
+    REQUIRE(particle->map_internal_force(phase) == false);
+
     // Assign material properties
     material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
@@ -971,6 +996,28 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned j = 0; j < body_force.cols(); ++j)
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
+
+    // Internal force
+    Eigen::Matrix<double, 8, 3> internal_force;
+    // clang-format off
+    internal_force << -612980.7692307689,-1141826.923076923,-1742788.461538461,
+                       901442.3076923079,-3521634.615384615,-5420673.076923076,
+                       2415865.384615385,-612980.7692307703,-12223557.69230769,
+                      -1935096.153846153,-108173.0769230771,-3882211.538461538,
+                                -2031250,-2079326.923076922, 588942.3076923075,
+                       2127403.846153846,-6526442.307692306, 1189903.846153845,
+                        5516826.92307692, 10276442.30769231, 15685096.15384615,
+                      -6382211.538461537, 3713942.307692308, 5805288.461538462;
+    // clang-format on
+
+    // Map particle internal force
+    REQUIRE(particle->map_internal_force(phase) == true);
+
+    // Check nodal internal force
+    for (unsigned i = 0; i < internal_force.rows(); ++i)
+      for (unsigned j = 0; j < internal_force.cols(); ++j)
+        REQUIRE(nodes[i]->internal_force(phase)[j] ==
+                Approx(internal_force(i, j)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
