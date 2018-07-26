@@ -505,6 +505,26 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Calculate nodal acceleration and velocity
     for (const auto& node : nodes)
       node->compute_acceleration_velocity(phase, dt);
+
+    // Check nodal velocity
+    // clang-format off
+    nodal_velocity << -54.48717948717948, -119.57074358974360,
+                      137.82051282051280,  -93.92971794871795,
+                      163.46153846153850,  354.78823076923080,
+                      -28.84615384615384,  329.14720512820510;
+    // clang-format on
+
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->velocity(phase)[j] ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Check nodal acceleration
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->acceleration(phase)[j] ==
+                Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -1028,6 +1048,29 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Calculate nodal acceleration and velocity
     for (const auto& node : nodes)
       node->compute_acceleration_velocity(phase, dt);
+
+    // Check nodal velocity
+    // clang-format off
+    nodal_velocity << -490.3846153846152, -913.4615384615383, -1395.211769230769,
+                       240.3846153846155, -939.1025641025641, -1446.493820512821,
+                       214.7435897435898, -54.48717948717960, -1087.519461538462,
+                       -516.025641025641, -28.84615384615390, -1036.237410256410,
+                      -541.6666666666666, -554.4871794871794,  156.0702820512820,
+                       189.1025641025641, -580.1282051282051,  104.7882307692307,
+                       163.4615384615384, 304.48717948717950,  463.7625897435898,
+                      -567.3076923076923, 330.12820512820530,  515.0446410256412;
+    // clang-format on
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->velocity(phase)[j] ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Check nodal acceleration
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->acceleration(phase)[j] ==
+                Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
