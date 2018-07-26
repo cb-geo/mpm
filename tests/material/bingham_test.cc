@@ -62,10 +62,6 @@ TEST_CASE("Bingham is checked", "[material][bingham]") {
     // Get material properties
     REQUIRE(material->property("density") == Approx(jmaterial["density"]).epsilon(Tolerance));
     
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    const double G = 3846153.846153846;
-
   }
 
   SECTION("Bingham check stresses") {
@@ -95,15 +91,15 @@ TEST_CASE("Bingham is checked", "[material][bingham]") {
     REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
 
-    // Initialise dstrain
-    mpm::Material::Vector6d dstrain;
-    dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
+    // Initialise strain
+    mpm::Material::Vector6d strain;
+    strain.setZero();
+    strain(0) = 0.0010000;
+    strain(1) = 0.0005000;
+    strain(2) = 0.0005000;
+    strain(3) = 0.0000000;
+    strain(4) = 0.0000000;
+    strain(5) = 0.0000000;
 
     // Initialise strain rate
     mpm::Material::Vector6d strain_rate;
@@ -116,23 +112,24 @@ TEST_CASE("Bingham is checked", "[material][bingham]") {
     strain_rate(5) = 0.0000000;
 
     // Compute updated stress
-    material->compute_stress(stress, dstrain, strain_rate);
+    material->compute_stress3(stress, strain, strain_rate);
 
     // Check stressees
-    REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(16666.66666667).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(16666.66666667).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(16666.66666667).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
 
-    // Initialise dstrain
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000100;
-    dstrain(4) = 0.0000200;
-    dstrain(5) = 0.0000300;
+    // Check stress with some shear strain_rate but does not reach threshold
+    // Initialise strain
+    strain(0) = 0.0010000;
+    strain(1) = 0.0005000;
+    strain(2) = 0.0005000;
+    strain(3) = 0.0000100;
+    strain(4) = 0.0000200;
+    strain(5) = 0.0000300;
     
     // Initialise strain rate
     strain_rate(0) = 0.0000100;
@@ -146,14 +143,46 @@ TEST_CASE("Bingham is checked", "[material][bingham]") {
     stress.setZero();
 
     // Compute updated stress
-    material->compute_stress(stress, dstrain, strain_rate);
+    material->compute_stress3(stress, strain, strain_rate);
 
     // Check stressees
-    REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(1.53846153845333e+04).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
+
+    // Check stress with some shear strain_rate that does reach threshold
+    // Initialise strain
+    strain(0) = 0.0010000;
+    strain(1) = 0.0005000;
+    strain(2) = 0.0005000;
+    strain(3) = 0.0000100;
+    strain(4) = 0.0000200;
+    strain(5) = 0.0000300;
+    
+    // Initialise strain rate
+    strain_rate(0) = 1.000000;
+    strain_rate(1) = 0.500000;
+    strain_rate(2) = 0.500000;
+    strain_rate(3) = 0.010000;
+    strain_rate(4) = 0.020000;
+    strain_rate(5) = 0.030000;
+
+    // Reset stress
+    stress.setZero();
+
+    // Compute updated stress
+    material->compute_stress3(stress, strain, strain_rate);
+
+    // Check stressees
+    REQUIRE(stress(0) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(16666.66666666667).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(8.908724740775902).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(17.81744948155181).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(26.72617422232771).epsilon(Tolerance));
+
   }
 }

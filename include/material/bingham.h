@@ -35,11 +35,18 @@ class Bingham : public Material {
   //! \param[in] materail_properties Material properties
   void properties(const Json& material_properties );
 
+  //! Compute elastic tensor
+  //! \retval de_ Elastic tensor
+  Matrix6x6 elastic_tensor(){};
+
   //! Compute stress
   //! \param[in] strain Strain
   //! \param[in] stress Stress
   //! \retval updated_stress Updated value of stress
-  void compute_stress(Vector6d& stress, const Vector6d& dstrain, const Eigen::Matrix3d& strain_rate);
+  void compute_stress(Vector6d& stress, const Vector6d& strain){};
+
+  void compute_stress3(Vector6d& stress, const Vector6d& strain, const Vector6d& strain_rate);
+
 
  protected:
   //! material id
@@ -57,7 +64,7 @@ class Bingham : public Material {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Tau0 - shear threshold 
+  //! Tau0 - shear 
   double tau0_{std::numeric_limits<double>::max()};
   //! mu parameter 
   double mu_{std::numeric_limits<double>::max()};
