@@ -215,6 +215,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::map_body_force, std::placeholders::_1,
                 phase, this->gravity_));
 
+  // Iterate over each particle to compute nodal internal force
+  meshes_.at(0)->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                std::placeholders::_1, phase));
+
   // TODO: Remove stats
   std::cout << "After: \n";
   /*
