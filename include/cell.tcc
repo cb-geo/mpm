@@ -395,8 +395,6 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
     }
   }
 
-  std::cout << "Volume: " << volume_ << " tetvolumes: " << tetvolumes << "\n";
-
   // Check if the point is inside the hedron
   if (std::fabs(tetvolumes - volume_) < tolerance) {
     status = true;
@@ -715,10 +713,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
 
-    std::cout << "Affine guess: \n";
-    for (unsigned i = 0; i < xi.size(); ++i) std::cout << xi(i) << "\t";
-    std::cout << "\n";
-
     // Early exit
     if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
       return xi;
@@ -745,8 +739,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
 
-    std::cout << "Iteration: " << iter << "  tolerance: " << residual.norm()
-              << "\n";
     // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
