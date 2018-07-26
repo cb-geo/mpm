@@ -65,6 +65,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Return cell id
   Index cell_id() const { return cell_id_; }
 
+  //! Remove cell associated with the particle
+  void remove_cell();
+
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn();
 
