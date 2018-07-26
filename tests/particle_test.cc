@@ -436,7 +436,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, 0.1);
+    const double dt = 0.1;
+    particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0., 0.125, 0., 0.025, 0., 0.;
@@ -500,6 +501,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       for (unsigned j = 0; j < internal_force.cols(); ++j)
         REQUIRE(nodes[i]->internal_force(phase)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
+
+    // Calculate nodal acceleration and velocity
+    for (const auto& node : nodes)
+      node->compute_acceleration_velocity(phase, dt);
   }
 
   SECTION("Check assign material to particle") {
@@ -945,7 +950,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, 0.1);
+    const double dt = 0.1;
+    particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0.00000, 0.07500, 0.40000, -0.02500, 0.35000, -0.05000;
@@ -1018,6 +1024,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned j = 0; j < internal_force.cols(); ++j)
         REQUIRE(nodes[i]->internal_force(phase)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
+
+    // Calculate nodal acceleration and velocity
+    for (const auto& node : nodes)
+      node->compute_acceleration_velocity(phase, dt);
   }
 
   SECTION("Check assign material to particle") {
