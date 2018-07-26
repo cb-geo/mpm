@@ -37,7 +37,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     // Assign cell to the new cell ptr, if point can be found in new cell
     if (cellptr->is_point_in_cell(this->coordinates_)) {
       // if a cell already exists remove particle from that cell
-      if (cell_ != nullptr) cell_->remove_particle_id(this->id());
+      if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
@@ -45,8 +45,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
       this->compute_reference_location();
       status = cell_->add_particle_id(this->id());
     } else {
-      // If the point is in not current cell, set as null ptr
-      if (!cell_->is_point_in_cell(this->coordinates_)) cell_ = nullptr;
       throw std::runtime_error("Point cannot be found in cell!");
     }
   } catch (std::exception& exception) {
@@ -54,6 +52,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     status = false;
   }
   return status;
+}
+
+// Remove cell for the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::remove_cell() {
+  // if a cell is not nullptr
+  if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+  cell_id_ = std::numeric_limits<Index>::max();
 }
 
 // Assign a material to particle
