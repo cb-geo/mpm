@@ -287,7 +287,8 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 
 // Return strain rate
 template <unsigned Tdim, unsigned Tnphases>
-Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::strain_rate(unsigned phase) const {
+Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::strain_rate(
+    unsigned phase) const {
   Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   return strain_rate;
 }

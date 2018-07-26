@@ -63,7 +63,6 @@ class LinearElastic : public Material<Tdim> {
   //! Check if this material needs a particle handle
   bool property_handle() const override { return false; }
 
-
  protected:
   //! material id
   using Material<Tdim>::id_;

@@ -34,18 +34,18 @@ class Bingham : public Material<Tdim> {
   Bingham& operator=(const Bingham&) = delete;
 
   //! Read material properties
-  //! \param[in] materail_properties Material properties
-  void properties(const Json& material_properties );
+  //! \param[in] material_properties Material properties
+  void properties(const Json& material_properties);
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
-  Matrix6x6 elastic_tensor(){};
+  Matrix6x6 elastic_tensor();
 
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain){};
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain);
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -65,20 +65,19 @@ class Bingham : public Material<Tdim> {
   using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
+
  private:
-  //! Elastic stiffness matrix
-  Matrix6x6 de_;
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Tau0 - shear 
+  //! Tau0 - shear
   double tau0_{std::numeric_limits<double>::max()};
-  //! mu parameter 
+  //! mu parameter
   double mu_{std::numeric_limits<double>::max()};
-  //! Strain cutoff 
+  //! Strain cutoff
   double strain_cutoff_{std::numeric_limits<double>::max()};
 
 };  // Bingham class
