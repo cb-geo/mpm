@@ -97,6 +97,8 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_material(const std::shared_ptr<Material>& material);
 
   //! Compute strain
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
   void compute_strain(unsigned phase, double dt);
 
   //! Return strain of the particle
@@ -162,6 +164,23 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   Eigen::VectorXd acceleration(unsigned phase) const {
     return acceleration_.col(phase);
+  }
+
+  //! Compute updated position of the particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool compute_updated_position(unsigned phase, double dt);
+
+  //! TODO: Remove
+  void stats() {
+    std::string out = "Particle: " + std::to_string(id_) + "\t" +
+                      std::to_string(status_) + " position: ";
+    std::string val = "";
+    for (unsigned i = 0; i < coordinates_.size(); ++i)
+      val += std::to_string(coordinates_(i, 0)) + "\t";
+    out += val + "\n";
+
+    std::cout << out;
   }
 
  private:

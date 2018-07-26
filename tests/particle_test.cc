@@ -243,6 +243,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     coords << 0.75, 0.75;
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
+    // Phase
+    const unsigned phase = 0;
+    // Time-step
+    const double dt = 0.1;
+
     // Check particle coordinates
     auto coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -291,6 +296,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute updated particle location should fail
+    REQUIRE(particle->compute_updated_position(phase, dt) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
@@ -331,7 +338,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    unsigned phase = 0;
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
@@ -436,7 +442,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, 0.1);
+    particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0., 0.125, 0., 0.025, 0., 0.;
@@ -500,6 +506,51 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       for (unsigned j = 0; j < internal_force.cols(); ++j)
         REQUIRE(nodes[i]->internal_force(phase)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
+
+    // Calculate nodal acceleration and velocity
+    for (const auto& node : nodes)
+      node->compute_acceleration_velocity(phase, dt);
+
+    // Check nodal velocity
+    // clang-format off
+    nodal_velocity << -54.48717948717948, -119.57074358974360,
+                      137.82051282051280,  -93.92971794871795,
+                      163.46153846153850,  354.78823076923080,
+                      -28.84615384615384,  329.14720512820510;
+    // clang-format on
+
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->velocity(phase)[j] ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Check nodal acceleration
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->acceleration(phase)[j] ==
+                Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
+
+    // Check original particle coordinates
+    coords << 0.75, 0.75;
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location
+    REQUIRE(particle->compute_updated_position(phase, dt) == true);
+    // Check particle velocity
+    velocity << 0., -0.981;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // Updated particle coordinate
+    coords << 0.75, .6519;  // (0.75 - 0.0981)
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -705,6 +756,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
+    // Phase
+    const unsigned phase = 0;
+    // Time-step
+    const double dt = 0.1;
+
     // Check particle coordinates
     auto coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -781,6 +837,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
+    // Compute updated particle location should fail
+    REQUIRE(particle->compute_updated_position(phase, dt) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
@@ -821,7 +879,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    unsigned phase = 0;
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
 
@@ -945,7 +1002,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, 0.1);
+    particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0.00000, 0.07500, 0.40000, -0.02500, 0.35000, -0.05000;
@@ -1018,6 +1075,54 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned j = 0; j < internal_force.cols(); ++j)
         REQUIRE(nodes[i]->internal_force(phase)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
+
+    // Calculate nodal acceleration and velocity
+    for (const auto& node : nodes)
+      node->compute_acceleration_velocity(phase, dt);
+
+    // Check nodal velocity
+    // clang-format off
+    nodal_velocity << -490.3846153846152, -913.4615384615383, -1395.211769230769,
+                       240.3846153846155, -939.1025641025641, -1446.493820512821,
+                       214.7435897435898, -54.48717948717960, -1087.519461538462,
+                       -516.025641025641, -28.84615384615390, -1036.237410256410,
+                      -541.6666666666666, -554.4871794871794,  156.0702820512820,
+                       189.1025641025641, -580.1282051282051,  104.7882307692307,
+                       163.4615384615384, 304.48717948717950,  463.7625897435898,
+                      -567.3076923076923, 330.12820512820530,  515.0446410256412;
+    // clang-format on
+    // Check nodal velocity
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->velocity(phase)[j] ==
+                Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    // Check nodal acceleration
+    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
+      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+        REQUIRE(nodes[i]->acceleration(phase)[j] ==
+                Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
+
+    // Check original particle coordinates
+    coords << 1.5, 1.5, 1.5;
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location
+    REQUIRE(particle->compute_updated_position(phase, dt) == true);
+    // Check particle velocity
+    velocity << 0., 0., -0.981;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // Updated particle coordinate
+    coords << 1.5, 1.5, 1.4019;  // (1.5 - 0.0981)
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {

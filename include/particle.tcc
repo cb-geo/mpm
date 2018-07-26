@@ -74,7 +74,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
-          "Cannot compute local reference coordinates of the particle");
+          "cannot compute local reference coordinates of the particle");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
@@ -328,6 +328,35 @@ bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     // Assign acceleration
     acceleration_.col(phase) = acceleration;
     status = true;
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated position of the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
+                                                             double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal velocity
+      Eigen::Matrix<double, Tdim, 1> velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+
+      // Update particle velocity to interpolated nodal velocity
+      this->velocity_.col(phase) = velocity;
+
+      // New position  current position + velocity * dt
+      this->coordinates_ += velocity * dt;
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated coordinates of the particle");
+    }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
     status = false;
