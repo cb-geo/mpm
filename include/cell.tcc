@@ -845,6 +845,7 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
     const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, double pvolume,
     const Eigen::Matrix<double, 6, 1>& pstress) {
 
+  std::cout << "Nodal internal force: \n";
   // Define strain rate
   Eigen::VectorXd stress;
 
@@ -870,6 +871,21 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
     }
   }
 
+  for (const auto& bm : bmatrix) {
+    std::cout << "Bmatrix: \n";
+    for (unsigned i = 0; i < bm.rows(); ++i) {
+      for (unsigned j = 0; j < bm.cols(); ++j) {
+        std::cout << bm(i, j) << "\t";
+      }
+      std::cout << "\n";
+    }
+  }
+
+  std::cout << "Particle volume: " << pvolume << "\n";
+
+  std::cout << "Stress: ";
+  for (unsigned i = 0; i < stress.size(); ++i) std::cout << stress(i) << "\t";
+  std::cout << "\n";
   // Map internal forces from particle to nodes
   for (unsigned j = 0; j < this->nfunctions(); ++j)
     nodes_[j]->update_internal_force(
