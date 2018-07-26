@@ -55,7 +55,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Return reference location
   VectorDim reference_location() const { return xi_; }
 
-  // Assign a cell to particle
+  //! Assign a cell to particle
+  //! If point is in new cell, assign new cell and remove particle id from old
+  //! cell. If point can't be found in the new cell, check if particle is still
+  //! valid in the old cell, if it is leave it as is. If not, set cell as null
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr);
 
