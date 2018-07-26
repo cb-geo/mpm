@@ -401,6 +401,19 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
   return status;
 }
 
+//! Check if a point is in a 3D cell by affine transformation and newton-raphson
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::is_point_in_cell(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+  bool status = true;
+  // Get local coordinates
+  Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
+  // Check if the transformed coordinate is within the unit cell (-1, 1)
+  for (unsigned i = 0; i < xi.size(); ++i)
+    if (xi(i) < -1. || xi(i) > 1.) status = false;
+
+  return status;
+}
 //! Return the local coordinates of a point in a 1D cell
 template <unsigned Tdim>
 inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::local_coordinates_point(
@@ -564,9 +577,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   xi.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 100;
+  const unsigned max_iterations = 500;
   // Tolerance for newton raphson
-  const double tolerance = 1.e-11;
+  const double tolerance = 1.e-10;
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
