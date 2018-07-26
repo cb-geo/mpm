@@ -167,7 +167,7 @@ class Node : public NodeBase<Tdim> {
                       std::to_string(status_) + " external_force: ";
     std::string val = "";
     for (unsigned i = 0; i < velocity_.size(); ++i)
-      val += std::to_string(external_force_(i, 0)) + "\t";
+      val += std::to_string(velocity_(i, 0)) + "\t";
     out += val + "\n";
 
     std::cout << out;
