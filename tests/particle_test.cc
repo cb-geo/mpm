@@ -301,7 +301,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
-    particle->assign_cell(cell);
+    REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
 
@@ -842,7 +842,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
 
-    particle->assign_cell(cell);
+    REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
 
