@@ -220,6 +220,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
                 std::placeholders::_1, phase));
 
+  // Iterate over active nodes to compute acceleratation and velocity
+  meshes_.at(0)->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
+                std::placeholders::_1, phase, this->dt_),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
   // TODO: Remove stats
   std::cout << "After: \n";
   /*
