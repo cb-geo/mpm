@@ -261,6 +261,22 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check out of bounds condition
       vel_constraints[1] = 0.;
       REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+
+      // Check velocity before constraints
+      Eigen::Matrix<double, Dim, 1> velocity;
+      velocity << 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      velocity << 0.0;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
     }
 
     SECTION("Check acceleration") {
@@ -563,6 +579,22 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Check out of bounds condition
       vel_constraints[3] = 0.;
       REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+
+      // Check velocity before constraints
+      Eigen::Matrix<double, Dim, 1> velocity;
+      velocity << 0.1, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      velocity << 0.0, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
     }
 
     SECTION("Check acceleration") {
@@ -804,6 +836,22 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Check out of bounds condition
       vel_constraints[4] = 0.;
       REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+
+      // Check velocity before constraints
+      Eigen::Matrix<double, Dim, 1> velocity;
+      velocity << 0.1, 0.1, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      velocity << 0.0, 0.1, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
     }
 
     SECTION("Check acceleration") {

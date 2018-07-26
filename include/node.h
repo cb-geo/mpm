@@ -153,6 +153,9 @@ class Node : public NodeBase<Tdim> {
   bool assign_velocity_constraints(
       const std::map<unsigned, double>& vel_constraints);
 
+  //! Apply velocity constraints
+  void apply_velocity_constraints();
+
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
