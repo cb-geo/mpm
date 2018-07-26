@@ -171,6 +171,18 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position(unsigned phase, double dt);
 
+  //! TODO: Remove
+  void stats() {
+    std::string out = "Particle: " + std::to_string(id_) + "\t" +
+                      std::to_string(status_) + " position: ";
+    std::string val = "";
+    for (unsigned i = 0; i < coordinates_.size(); ++i)
+      val += std::to_string(coordinates_(i, 0)) + "\t";
+    out += val + "\n";
+
+    std::cout << out;
+  }
+
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;
