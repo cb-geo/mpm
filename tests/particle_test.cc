@@ -525,6 +525,27 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
         REQUIRE(nodes[i]->acceleration(phase)[j] ==
                 Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
+
+    // Check original particle coordinates
+    coords << 0.75, 0.75;
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location
+    REQUIRE(particle->compute_updated_position(phase, dt) == true);
+    // Check particle velocity
+    velocity << 0., -0.981;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // Updated particle coordinate
+    coords << 0.75, .6519;  // (0.75 - 0.0981)
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
@@ -1071,6 +1092,27 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
         REQUIRE(nodes[i]->acceleration(phase)[j] ==
                 Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
+
+    // Check original particle coordinates
+    coords << 1.5, 1.5, 1.5;
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location
+    REQUIRE(particle->compute_updated_position(phase, dt) == true);
+    // Check particle velocity
+    velocity << 0., 0., -0.981;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // Updated particle coordinate
+    coords << 1.5, 1.5, 1.4019;  // (1.5 - 0.0981)
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
