@@ -123,6 +123,9 @@ class ParticleBase {
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain(unsigned phase) const = 0;
 
+  //! Strain rate
+  virtual Eigen::VectorXd strain_rate(unsigned phase) const = 0;
+
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
 

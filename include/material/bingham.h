@@ -12,7 +12,9 @@ namespace mpm {
 //! Bingham class
 //! \brief Bingham fluid material model
 //! \details Bingham class stresses and strains
-class Bingham : public Material {
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+class Bingham : public Material<Tdim> {
  public:
   //! Define a vector of 6 dof
   using Vector6d = Eigen::Matrix<double, 6, 1>;
@@ -20,7 +22,7 @@ class Bingham : public Material {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Constructor with id
-  Bingham(unsigned id) : Material(id){};
+  Bingham(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
   virtual ~Bingham(){};
@@ -40,21 +42,29 @@ class Bingham : public Material {
   Matrix6x6 elastic_tensor(){};
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  void compute_stress(Vector6d& stress, const Vector6d& strain){};
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain){};
 
-  void compute_stress3(Vector6d& stress, const Vector6d& strain, const Vector6d& strain_rate);
+  //! Compute stress
+  //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
+  //! \param[in] particle Constant point to particle base
+  //! \retval updated_stress Updated value of stress
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
+                          const ParticleBase<Tdim>* ptr);
 
+  //! Check if this material needs a particle handle
+  bool property_handle() const { return true; }
 
  protected:
   //! material id
-  using Material::id_;
+  using Material<Tdim>::id_;
   //! material status
-  using Material::status_;
+  using Material<Tdim>::status_;
   //! Material properties
-  using Material::properties_;
+  using Material<Tdim>::properties_;
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
