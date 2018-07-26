@@ -192,6 +192,77 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(status == false);
     }
 
+    SECTION("Check compute acceleration and velocity") {
+      // Time step
+      const double dt = 0.1;
+
+      // Nodal mass
+      double mass = 100.;
+      // Update mass to 100.5
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
+
+      // Check internal force
+      // Create a force vector
+      Eigen::Matrix<double, Dim, 1> force;
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * i;
+      // Update force to 10.0
+      node->update_internal_force(false, Nphase, force);
+      // Internal force
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(force(i)).epsilon(Tolerance));
+
+      // External force
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 5. * i;
+      // Update force to 10.0
+      node->update_external_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(force(i)).epsilon(Tolerance));
+
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 15. * i;
+
+      // Check acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration = force / mass;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Check velocity
+      Eigen::Matrix<double, Dim, 1> velocity = force / mass * dt;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 10.5;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+      // Test velocity with constraints
+      velocity[0] = 10.5;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Test acceleration with constraints
+      acceleration[0] = 0.;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Exception check when mass is zero
+      mass = 0.;
+      // Update mass to 0.
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
+    }
+
     SECTION("Check momentum and velocity") {
       // Check momentum
       Eigen::VectorXd momentum;
@@ -534,6 +605,77 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(status == false);
     }
 
+    SECTION("Check compute acceleration and velocity") {
+      // Time step
+      const double dt = 0.1;
+
+      // Nodal mass
+      double mass = 100.;
+      // Update mass to 100.5
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
+
+      // Check internal force
+      // Create a force vector
+      Eigen::Matrix<double, Dim, 1> force;
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * i;
+      // Update force to 10.0
+      node->update_internal_force(false, Nphase, force);
+      // Internal force
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(force(i)).epsilon(Tolerance));
+
+      // External force
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 5. * i;
+      // Update force to 10.0
+      node->update_external_force(false, Nphase, force);
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->external_force(Nphase)(i) ==
+                Approx(force(i)).epsilon(Tolerance));
+
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+      for (unsigned i = 0; i < force.size(); ++i) force(i) = 15. * i;
+
+      // Check acceleration
+      Eigen::Matrix<double, Dim, 1> acceleration = force / mass;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Check velocity
+      Eigen::Matrix<double, Dim, 1> velocity = force / mass * dt;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 10.5;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+      // Test velocity with constraints
+      velocity[0] = 10.5;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Test acceleration with constraints
+      acceleration[0] = 0.;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Exception check when mass is zero
+      mass = 0.;
+      // Update mass to 0.
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
+    }
+
     SECTION("Check momentum and velocity") {
       // Check momentum
       Eigen::VectorXd momentum;
@@ -870,11 +1012,27 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
       // Check velocity
       Eigen::Matrix<double, Dim, 1> velocity = force / mass * dt;
-      for (unsigned i = 0; i < velocity.size(); ++i) {
-        std::cout << "\nvelocity : " << node->velocity(Nphase)(i) << "\t";
-        // REQUIRE(node->velocity(Nphase)(i) ==
-        //      Approx(velocity(i)).epsilon(Tolerance));
-      }
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply velocity constraints
+      std::map<unsigned, double> vel_constraints;
+      vel_constraints[0] = 10.5;
+      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
+
+      // Test velocity with constraints
+      velocity[0] = 10.5;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Test acceleration with constraints
+      acceleration[0] = 0.;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
 
       // Exception check when mass is zero
       mass = 0.;

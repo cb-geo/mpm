@@ -211,19 +211,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
                                         this->internal_force_.col(phase)) /
                                        this->mass_(phase);
 
-      std::cout << "\nMass: " << mass_(phase) << "\n";
-      std::cout << "\nAcceleration: \n";
-      for (unsigned i = 0; i < acceleration_.rows(); ++i)
-        std::cout << acceleration_(i, phase) << "\t";
-
-      std::cout << "\nInternal: \n";
-      for (unsigned i = 0; i < acceleration_.rows(); ++i)
-        std::cout << internal_force_(i, phase) << "\t";
-
-      std::cout << "\nForce: \n";
-      for (unsigned i = 0; i < acceleration_.rows(); ++i)
-        std::cout << external_force_(i, phase) << "\t";
-
       // Velocity = acceleration * dt
       this->velocity_.col(phase) = this->acceleration_.col(phase) * dt;
       // Apply velocity constraints, which also sets acceleration to 0,
