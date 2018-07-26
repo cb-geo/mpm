@@ -148,6 +148,10 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
+  //! Compute acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_acceleration_velocity(unsigned phase);
+
   //! Assign velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
   bool assign_velocity_constraints(
