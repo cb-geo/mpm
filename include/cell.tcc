@@ -394,7 +394,6 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
       return false;
     }
   }
-
   // Check if the point is inside the hedron
   if (std::fabs(tetvolumes - volume_) < tolerance) {
     status = true;
@@ -406,13 +405,10 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
     const Eigen::Matrix<double, Tdim, 1>& point) {
-
   bool status = true;
-
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
-
-  // Check if the transformed coordinate is within the unit cell
+  // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
     if (xi(i) < -1. || xi(i) > 1.) status = false;
 
@@ -581,9 +577,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   xi.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 1000;
+  const unsigned max_iterations = 500;
   // Tolerance for newton raphson
-  const double tolerance = 1.e-8;
+  const double tolerance = 1.e-10;
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
