@@ -9,6 +9,8 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   coordinates_ = coord;
   dof_ = Tdof;
 
+  // Clear any velocity constraints
+  velocity_constraints_.clear();
   this->initialise();
 }
 
@@ -168,6 +170,26 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     status = true;
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
+    const std::map<unsigned, double>& vel_constraints) {
+  bool status = true;
+  try {
+    for (const auto& constrain : vel_constraints) {
+      if (constrain.first < 0 || constrain.first >= (Tdim * Tnphases)) {
+        throw std::runtime_error("Constraint direction is out of bounds");
+        status = false;
+      }
+    }
+    if (status) velocity_constraints_ = vel_constraints;
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
     status = false;
   }
   return status;

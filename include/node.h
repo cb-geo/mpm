@@ -148,6 +148,11 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
+  //! Assign velocity constraints
+  //! Directions can take values between 0 and Dim * Nphases
+  bool assign_velocity_constraints(
+      const std::map<unsigned, double>& vel_constraints);
+
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
@@ -185,6 +190,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+  //! Velocity constraints
+  std::map<unsigned, double> velocity_constraints_;
 };  // Node class
 }  // namespace mpm
 
