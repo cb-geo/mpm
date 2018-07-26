@@ -229,10 +229,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Locate particles
   auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-  
+
   if (!unlocatable_particles.empty())
     throw std::runtime_error("Particle outside the mesh domain");
-
 
   // TODO: Remove
   // Iterate over each particle stats
@@ -248,7 +247,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   meshes_.at(0)->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
       std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-  
 
   return status;
 }
