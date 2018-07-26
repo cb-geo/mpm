@@ -64,12 +64,59 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Particle 2
     mpm::Index id2 = 1;
+    coords << 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
+
+    // Define nodes
+    coords << 0., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    // Add node 0 and check status
+    bool node_status0 = mesh->add_node(node0);
+    REQUIRE(node_status0 == true);
+
+    coords << 2., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    // Add node 1 and check status
+    bool node_status1 = mesh->add_node(node1);
+    REQUIRE(node_status1 == true);
+
+    coords << 2., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    // Add node 2 and check status
+    bool node_status2 = mesh->add_node(node2);
+    REQUIRE(node_status2 == true);
+
+    coords << 0., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    // Add node 3 and check status
+    bool node_status3 = mesh->add_node(node3);
+    REQUIRE(node_status3 == true);
+
+    // Create cell1
+    coords.setZero();
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+
+    // Add nodes to cell
+    cell1->add_node(0, node0);
+    cell1->add_node(1, node1);
+    cell1->add_node(2, node2);
+    cell1->add_node(3, node3);
+
+    // Add cell 1 and check status
+    REQUIRE(mesh->add_cell(cell1) == true);
 
     // Add particle 1 and check status
     bool status1 = mesh->add_particle(particle1);
@@ -512,12 +559,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               // Add particle100 and check status
               bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == true);
+              REQUIRE(particle100_status == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
               // Should miss particle100
-              REQUIRE(particles.size() == 1);
+              REQUIRE(particles.size() == 0);
             }
           }
         }
@@ -580,6 +627,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Particle 2
     mpm::Index id2 = 1;
+    coords << 2., 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
 
@@ -587,15 +635,62 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add particle 1 and check status
-    bool status1 = mesh->add_particle(particle1);
-    REQUIRE(status1 == true);
-    // Add particle 2 and check status
-    bool status2 = mesh->add_particle(particle2);
-    REQUIRE(status2 == true);
+    // Define nodes
+    coords << 0, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 0, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 2, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    coords << 2, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+    coords << 0, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+    // Create cell1
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+
+    // Add nodes to cell
+    cell1->add_node(0, node0);
+    cell1->add_node(1, node1);
+    cell1->add_node(2, node2);
+    cell1->add_node(3, node3);
+    cell1->add_node(4, node4);
+    cell1->add_node(5, node5);
+    cell1->add_node(6, node6);
+    cell1->add_node(7, node7);
+
+    REQUIRE(cell1->nnodes() == 8);
+
+    REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
     // Add particle 2 again and check status
-    bool status3 = mesh->add_particle(particle2);
-    REQUIRE(status3 == false);
+    REQUIRE(mesh->add_particle(particle2) == false);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -1047,12 +1142,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               // Add particle100 and check status
               bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == true);
+              REQUIRE(particle100_status == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
               // Should miss particle100
-              REQUIRE(particles.size() == 1);
+              REQUIRE(particles.size() == 0);
             }
           }
         }
