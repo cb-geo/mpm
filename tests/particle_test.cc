@@ -493,16 +493,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
-    std::cout << "\nInternal force: \n";
-    for (unsigned i = 0; i < internal_force.rows(); ++i) {
-      for (unsigned j = 0; j < internal_force.cols(); ++j) {
-        std::cout << std::setprecision(16) << nodes[i]->internal_force(phase)[j]
-                  << "\t";
+    for (unsigned i = 0; i < internal_force.rows(); ++i)
+      for (unsigned j = 0; j < internal_force.cols(); ++j)
         REQUIRE(nodes[i]->internal_force(phase)[j] ==
                 Approx(internal_force(i, j)).epsilon(Tolerance));
-      }
-      std::cout << "\n";
-    }
   }
 
   SECTION("Check assign material to particle") {
@@ -1000,30 +994,24 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Internal force
     Eigen::Matrix<double, 8, 3> internal_force;
     // clang-format off
-    internal_force << 0., 0.,  -1226.25,
-                  0., 0.,  -3678.75,
-                  0., 0., -11036.25,
-                  0., 0.,  -3678.75,
-                  0., 0.,  -3678.75,
-                  0., 0., -11036.25,
-                  0., 0., -33108.75,
-                  0., 0., -11036.25;
+    internal_force << -612980.7692307689,-1141826.923076923,-1742788.461538461,
+                       901442.3076923079,-3521634.615384615,-5420673.076923076,
+                       2415865.384615385,-612980.7692307703,-12223557.69230769,
+                      -1935096.153846153,-108173.0769230771,-3882211.538461538,
+                                -2031250,-2079326.923076922, 588942.3076923075,
+                       2127403.846153846,-6526442.307692306, 1189903.846153845,
+                        5516826.92307692, 10276442.30769231, 15685096.15384615,
+                      -6382211.538461537, 3713942.307692308, 5805288.461538462;
     // clang-format on
 
     // Map particle internal force
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
-    std::cout << "\nInternal force: \n";
-    for (unsigned i = 0; i < internal_force.rows(); ++i) {
-      for (unsigned j = 0; j < internal_force.cols(); ++j) {
-        std::cout << std::setprecision(16) << nodes[i]->internal_force(phase)[j]
-                  << "\t";
-        // REQUIRE(nodes[i]->internal_force(phase)[j] ==
-        //       Approx(internal_force(i, j)).epsilon(Tolerance));
-      }
-      std::cout << "\n";
-    }
+    for (unsigned i = 0; i < internal_force.rows(); ++i)
+      for (unsigned j = 0; j < internal_force.cols(); ++j)
+        REQUIRE(nodes[i]->internal_force(phase)[j] ==
+                Approx(internal_force(i, j)).epsilon(Tolerance));
   }
 
   SECTION("Check assign material to particle") {
