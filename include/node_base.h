@@ -141,6 +141,9 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Apply acceleration constraints
+  virtual void apply_acceleration_constraints() = 0;
+
   //! TODO: Remove debug printing
   virtual void stats() = 0;
 };  // NodeBase class

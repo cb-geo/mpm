@@ -156,6 +156,9 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints();
 
+  //! Apply acceleration constraints
+  void apply_acceleration_constraints();
+
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
