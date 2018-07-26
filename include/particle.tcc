@@ -264,11 +264,15 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")), this->stress_);
+      std::cout << "mass: " << mass_(phase)
+                << " density: " << material_->property("density") << "\n";
+
     } else {
       throw std::runtime_error("Material is invalid");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    std::cerr << "Particle internal force" << __FILE__ << __LINE__ << "\t"
+              << exception.what() << '\n';
     status = false;
   }
   return status;
