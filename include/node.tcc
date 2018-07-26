@@ -198,6 +198,29 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
   return status;
 }
 
+//! Compute acceleration and velocity
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
+    unsigned phase) {
+  bool status = true;
+  const double tolerance = 1.E-8;
+  try {
+    if (mass_(phase) > tolerance) {
+      // acceleration (unbalaced force / mass)
+      this->acceleration_(phase) =
+          (this->external_force_(phase) + this->internal_force_(phase)) /
+          this->mass_(phase);
+    } else
+      throw std::runtime_error("Nodal mass is zero or below threshold");
+
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
 //! Apply velocity constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
