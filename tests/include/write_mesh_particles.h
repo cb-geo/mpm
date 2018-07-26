@@ -55,7 +55,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
          {"poisson_ratio", 0.25}}}},
       {"analysis",
        {{"dt", 0.001},
-        {"nsteps", 1000},
+        {"nsteps", 10},
         {"gravity", gravity},
         {"soil_particle_spacing", 0.01},
         {"boundary_friction", 0.5},
