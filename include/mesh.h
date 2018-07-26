@@ -153,6 +153,11 @@ class Mesh {
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
+ private:
+  // Locate a particle in mesh
+  bool locate_particle_mesh(
+      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+
  protected:
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
