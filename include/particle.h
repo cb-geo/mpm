@@ -110,6 +110,10 @@ class Particle : public ParticleBase<Tdim> {
     return strain_.col(phase);
   }
 
+  //! Return strain rate of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd strain_rate(unsigned phase) const;
+
   //! Compute stress
   bool compute_stress(unsigned phase);
 
