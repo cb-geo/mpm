@@ -137,6 +137,12 @@ class Cell {
   //! for a point to be in the cell
   bool point_in_cell(const Eigen::Matrix<double, 3, 1>& point);
 
+  //! Check if a point is in a 3D cell
+  //! Use an affine transformation and NR to check if a transformed point is in
+  //! a unit cell. This is useful for points on the surface, where
+  //! volume calculations are tricky.
+  bool is_point_in_cell(const Eigen::Matrix<double, 3, 1>& point);
+
   //! Return the local coordinates of a point in a 1D cell
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point

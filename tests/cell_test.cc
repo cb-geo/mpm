@@ -1566,7 +1566,7 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
 
     // Coordinates
     Eigen::Vector3d coords;
-    
+
     coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
@@ -1582,7 +1582,6 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
     coords << 812496.9999999999, 815873.0000000000, 166.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
-
 
     coords << 812496.9999999999, 815870.9999999999, 167.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
@@ -1626,7 +1625,6 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
     // Point in cell1 fails to capture
     REQUIRE(cell1->point_in_cell(point) == false);
 
-
     Eigen::Vector3d xi;
     xi = cell1->transform_real_to_unit_cell(point);
 
@@ -1634,15 +1632,16 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
     for (unsigned i = 0; i < xi.size(); ++i) std::cout << xi(i) << "\t";
     std::cout << "\n";
 
-    
-    //Cell 2
+    // Check using unit cell with affine transformation / Newton-Raphson
+    REQUIRE(cell1->is_point_in_cell(point) == true);
+
+    // Cell 2
     mpm::Index id2 = 0;
     auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
 
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell2->is_initialised() == false);
 
-    
     // Element 1
     coords << 812496.9999999999, 815870.9999999999, 163.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node10 =
@@ -1676,7 +1675,6 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node17 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
-
     cell2->add_node(0, node10);
     cell2->add_node(1, node11);
     cell2->add_node(2, node12);
@@ -1698,6 +1696,7 @@ TEST_CASE("Point in distorted cell affine", "[cell][3D][PIC]") {
     for (unsigned i = 0; i < xi.size(); ++i) std::cout << xi(i) << "\t";
     std::cout << "\n";
 
-
+    // Check using unit cell with affine transformation / Newton-Raphson
+    REQUIRE(cell2->is_point_in_cell(point) == false);
   }
 }
