@@ -590,7 +590,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         ++j;
       }
       // Check interpolate velocity (0, 0)
-      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(xi, phase);
+      Eigen::Vector2d velocity =
+          cell->interpolate_nodal_velocity(shapefns_xi, phase);
 
       Eigen::Vector2d interpolated_velocity;
       interpolated_velocity << 0.25, 0.25;
@@ -600,7 +601,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5;
-      velocity = cell->interpolate_nodal_velocity(xi, phase);
+      auto shapefn_xi = shapefn->shapefn(xi);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -609,7 +611,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5;
-      velocity = cell->interpolate_nodal_velocity(xi, phase);
+      shapefn_xi = shapefn->shapefn(xi);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.1875, 0.1875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -637,7 +640,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       }
       // Check interpolate acceleration (0, 0)
       Eigen::Vector2d check_acceleration =
-          cell->interpolate_nodal_acceleration(xi, phase);
+          cell->interpolate_nodal_acceleration(shapefns_xi, phase);
 
       Eigen::Vector2d interpolated_acceleration;
       interpolated_acceleration << 25., 25.;
@@ -647,7 +650,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (0.5, 0.5)
       xi << 0.5, 0.5;
-      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+      auto shapefn_xi = shapefn->shapefn(xi);
+      check_acceleration =
+          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
       interpolated_acceleration << 28.75, 28.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -656,7 +661,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (-0.5, -0.5)
       xi << -0.5, -0.5;
-      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+      shapefn_xi = shapefn->shapefn(xi);
+      check_acceleration =
+          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
       interpolated_acceleration << 18.75, 18.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -1603,7 +1610,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       }
       // Check interpolate velocity (0, 0)
       xi.setZero();
-      Eigen::Vector3d velocity = cell->interpolate_nodal_velocity(xi, phase);
+      Eigen::Vector3d velocity =
+          cell->interpolate_nodal_velocity(shapefns_xi, phase);
 
       Eigen::Vector3d interpolated_velocity;
       interpolated_velocity << 0.45, 0.45, 0.45;
@@ -1613,7 +1621,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      velocity = cell->interpolate_nodal_velocity(xi, phase);
+      auto shapefn_xi = shapefn->shapefn(xi);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.5875, 0.5875, 0.5875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -1622,7 +1631,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      velocity = cell->interpolate_nodal_velocity(xi, phase);
+      shapefn_xi = shapefn->shapefn(xi);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875, 0.2875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -1652,7 +1662,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       xi.setZero();
       // Check interpolate acceleration (0, 0, 0)
       Eigen::Vector3d check_acceleration =
-          cell->interpolate_nodal_acceleration(xi, phase);
+          cell->interpolate_nodal_acceleration(shapefns_xi, phase);
 
       Eigen::Vector3d interpolated_acceleration;
       interpolated_acceleration << 45.0, 45.0, 45.0;
@@ -1662,7 +1672,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (0.5, 0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+      auto shapefn_xi = shapefn->shapefn(xi);
+      check_acceleration =
+          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
       interpolated_acceleration << 58.75, 58.75, 58.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -1671,7 +1683,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (-0.5, -0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      check_acceleration = cell->interpolate_nodal_acceleration(xi, phase);
+      shapefn_xi = shapefn->shapefn(xi);
+      check_acceleration =
+          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
       interpolated_acceleration << 28.75, 28.75, 28.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
