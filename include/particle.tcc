@@ -206,7 +206,7 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   dstrain *= dt;
 
   // Update strain
-  strain_ += dstrain;
+  strain_.col(phase) += dstrain;
 }
 
 // Compute stress
@@ -219,7 +219,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Calculate stress
-      material_->compute_stress(stress, this->strain_);
+      material_->compute_stress(stress, this->strain_.col(phase));
       // Assign stress
       this->assign_stress(phase, stress);
     } else {
@@ -263,7 +263,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
       // volume * pstress
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
-          (this->mass_(phase) / material_->property("density")), this->stress_);
+          (this->mass_(phase) / material_->property("density")),
+          this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }

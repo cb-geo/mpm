@@ -148,13 +148,26 @@ class Node : public NodeBase<Tdim> {
     return acceleration_.col(phase);
   }
 
+  //! Compute acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity(unsigned phase, double dt);
+
+  //! Assign velocity constraints
+  //! Directions can take values between 0 and Dim * Nphases
+  bool assign_velocity_constraints(
+      const std::map<unsigned, double>& vel_constraints);
+
+  //! Apply velocity constraints
+  void apply_velocity_constraints();
+
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
                       std::to_string(status_) + " external_force: ";
     std::string val = "";
     for (unsigned i = 0; i < velocity_.size(); ++i)
-      val += std::to_string(external_force_(i, 0)) + "\t";
+      val += std::to_string(velocity_(i, 0)) + "\t";
     out += val + "\n";
 
     std::cout << out;
@@ -185,6 +198,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Acceleration
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
+  //! Velocity constraints
+  std::map<unsigned, double> velocity_constraints_;
 };  // Node class
 }  // namespace mpm
 
