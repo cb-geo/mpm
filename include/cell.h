@@ -243,12 +243,12 @@ class Cell {
                                 double pmass, const VectorDim& pgravity);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
-  //! \param[in] xi local coordinates of particle
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
   //! \param[in] pstress Stress of particle
-  void compute_nodal_internal_force(unsigned phase, double pvolume,
-                                    const VectorDim& xi,
+  void compute_nodal_internal_force(const std::vector<Eigen::MatrixXd>& bmatrix,
+                                    unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
  protected:

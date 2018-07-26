@@ -527,7 +527,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(phase, pvolume, xi, pinternal_stress);
+      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
+                                         pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector2d> internal_forces;
@@ -1526,7 +1527,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(phase, pvolume, xi, pinternal_stress);
+      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
+                                         pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector3d> internal_forces;
