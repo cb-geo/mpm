@@ -175,13 +175,16 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
   return status;
 }
 
+//! Assign velocity constraints
+//! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
     const std::map<unsigned, double>& vel_constraints) {
   bool status = true;
   try {
-    for (const auto& constrain : vel_constraints) {
-      if (constrain.first < 0 || constrain.first >= (Tdim * Tnphases)) {
+    for (const auto& constraint : vel_constraints) {
+      //! Constrain directions can take values between 0 and Dim * Nphases
+      if (constraint.first < 0 || constraint.first >= (Tdim * Tnphases)) {
         throw std::runtime_error("Constraint direction is out of bounds");
         status = false;
       }
@@ -193,4 +196,19 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
     status = false;
   }
   return status;
+}
+
+//! Apply velocity constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
+  // Set velocity constraint
+  for (const auto& constraint : this->velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    unsigned direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    unsigned phase = static_cast<unsigned>(dir / Tdim);
+    this->velocity_(direction, phase) = constraint.second;
+  }
 }

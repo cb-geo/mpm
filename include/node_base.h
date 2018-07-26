@@ -138,6 +138,9 @@ class NodeBase {
   virtual bool assign_velocity_constraints(
       const std::map<unsigned, double>& vel_constraints) = 0;
 
+  //! Apply velocity constraints
+  virtual void apply_velocity_constraints() = 0;
+
   //! TODO: Remove debug printing
   virtual void stats() = 0;
 };  // NodeBase class
