@@ -322,6 +322,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell2->status() == false);
     // Check cell status because this should not have removed the particle
     REQUIRE(cell->status() == true);
+
+    // Remove assigned cell
+    particle->remove_cell();
+    REQUIRE(particle->assign_cell(cell) == true);
   }
 
   //! Test particle, cell and node functions
@@ -954,6 +958,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell2->status() == false);
     // Check cell status because this should not have removed the particle
     REQUIRE(cell->status() == true);
+
+    // Remove assigned cell
+    particle->remove_cell();
+    REQUIRE(particle->assign_cell(cell) == true);
   }
 
   //! Test particle, cell and node functions

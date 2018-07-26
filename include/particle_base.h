@@ -68,6 +68,9 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
+  //! Remove cell
+  virtual void remove_cell() = 0;
+
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
