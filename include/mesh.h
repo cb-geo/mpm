@@ -154,9 +154,8 @@ class Mesh {
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
  private:
-  // Locate a particle in mesh
-  bool locate_particle_mesh(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+  // Locate a particle in mesh cells
+  bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
 
  protected:
   //! mesh id
