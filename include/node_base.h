@@ -136,11 +136,11 @@ class NodeBase {
   //! Compute acceleration
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
-  //! Assign velocity constraints
+  //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  virtual bool assign_velocity_constraints(unsigned dir, double velocity) = 0;
+  virtual bool assign_velocity_constraint(unsigned dir, double velocity) = 0;
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;

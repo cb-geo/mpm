@@ -204,10 +204,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
   return status;
 }
 
-//! Assign velocity constraints
+//! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim * Nphases
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraint(
     unsigned dir, double velocity) {
   bool status = true;
   try {

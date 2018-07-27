@@ -138,6 +138,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Assign velocity constraints
+  //! \param[in[ velocity_constraints Constraint at node, dir, and velocity
+  bool assign_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>
+          velocity_constraints);
+
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }
