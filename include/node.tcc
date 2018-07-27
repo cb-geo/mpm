@@ -175,29 +175,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
   return status;
 }
 
-//! Assign velocity constraints
-//! Constrain directions can take values between 0 and Dim * Nphases
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
-    const std::map<unsigned, double>& vel_constraints) {
-  bool status = true;
-  try {
-    for (const auto& constraint : vel_constraints) {
-      //! Constrain directions can take values between 0 and Dim * Nphases
-      if (constraint.first < 0 || constraint.first >= (Tdim * Tnphases)) {
-        throw std::runtime_error("Constraint direction is out of bounds");
-        status = false;
-      }
-    }
-    if (status) velocity_constraints_ = vel_constraints;
-  } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
-              << exception.what() << '\n';
-    status = false;
-  }
-  return status;
-}
-
 //! Compute acceleration and velocity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
@@ -218,6 +195,28 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       this->apply_velocity_constraints();
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
+
+  } catch (std::exception& exception) {
+    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
+              << exception.what() << '\n';
+    status = false;
+  }
+  return status;
+}
+
+//! Assign velocity constraints
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraints(
+    unsigned dir, double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir >= 0 && dir < (Tdim * Tnphases))
+      this->velocity_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(dir), static_cast<double>(velocity)));
+    else
+      throw std::runtime_error("Constraint direction is out of bounds");
 
   } catch (std::exception& exception) {
     std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
