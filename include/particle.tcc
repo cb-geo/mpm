@@ -246,7 +246,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Calculate stress
-      material_->compute_stress(stress, this->dstrain_.col(phase));
+      stress = material_->compute_stress(stress, this->dstrain_.col(phase));
 
       material_->testfn(this);
 

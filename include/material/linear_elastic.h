@@ -45,7 +45,15 @@ class LinearElastic : public Material<Tdim> {
   //! \param[in] strain Strain
   //! \param[in] stress Stress
   //! \retval updated_stress Updated value of stress
-  void compute_stress(Vector6d& stress, const Vector6d& strain);
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& strain);
+
+  //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \param[in] particle Constant point to particle base
+  //! \retval updated_stress Updated value of stress
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& strain,
+                          const ParticleBase<Tdim>* ptr);
 
   void testfn(const ParticleBase<Tdim>* ptr) {
     std::string out = "Pointer : " + std::to_string(ptr->id()) +

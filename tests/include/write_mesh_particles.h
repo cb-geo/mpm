@@ -23,7 +23,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
     node_type = "N3D";
     cell_type = "SFH8";
     mesh_reader = "Ascii3D";
-    material = "LinearElastic";
+    material = "LinearElastic3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
   }

@@ -8,8 +8,8 @@
 #include "json.hpp"
 
 #include "factory.h"
-#include "particle_base.h"
 #include "particle.h"
+#include "particle_base.h"
 
 // JSON
 using Json = nlohmann::json;
@@ -58,15 +58,7 @@ class Material {
   //! Get material property
   //! \param[in] key Material properties key
   //! \retval result Value of material property
-  double property(const std::string& key) {
-    double result = std::numeric_limits<double>::max();
-    try {
-      result = properties_[key].template get<double>();
-    } catch (std::exception& except) {
-      std::cerr << "Material parameter not found: " << except.what() << '\n';
-    }
-    return result;
-  }
+  double property(const std::string& key);
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
@@ -76,10 +68,20 @@ class Material {
   //! \param[in] strain Strain
   //! \param[in] stress Stress
   //! \retval updated_stress Updated value of stress
-  virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
+  virtual Vector6d compute_stress(const Vector6d& stress,
+                                  const Vector6d& strain) = 0;
+
+  //! Compute stress
+  //! \param[in] strain Strain
+  //! \param[in] stress Stress
+  //! \param[in] particle Constant point to particle base
+  //! \retval updated_stress Updated value of stress
+  virtual Vector6d compute_stress(const Vector6d& stress,
+                                  const Vector6d& strain,
+                                  const ParticleBase<Tdim>* ptr) = 0;
 
   // Test function
-  virtual void testfn(const ParticleBase<Tdim>* ptr) = 0; 
+  virtual void testfn(const ParticleBase<Tdim>* ptr) = 0;
 
  protected:
   //! material id
@@ -90,5 +92,7 @@ class Material {
   Json properties_;
 };  // Material class
 }  // namespace mpm
+
+#include "material.tcc"
 
 #endif  // MPM_MATERIAL_MATERIAL_H_

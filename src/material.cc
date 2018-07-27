@@ -7,4 +7,4 @@ static Register<mpm::Material<2>, mpm::LinearElastic<2>, unsigned>
 
 // LinearElastic 3D
 static Register<mpm::Material<3>, mpm::LinearElastic<3>, unsigned>
-    linear_elastic("LinearElastic");
+    linear_elastic_3d("LinearElastic3D");
