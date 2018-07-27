@@ -155,8 +155,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Assign velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
-  bool assign_velocity_constraints(
-      const std::map<unsigned, double>& vel_constraints);
+  //! \param[in] dir Direction of velocity constraint
+  //! \param[in] velocity Applied velocity constraint
+  bool assign_velocity_constraints(unsigned dir, double velocity);
 
   //! Apply velocity constraints
   void apply_velocity_constraints();

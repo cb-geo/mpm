@@ -238,9 +238,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(velocity(i)).epsilon(Tolerance));
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Test velocity with constraints
@@ -324,13 +322,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(status == false);
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
       // Check out of bounds condition
-      vel_constraints[1] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(1, 0) == false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
@@ -376,13 +370,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(status == false);
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
       // Check out of bounds condition
-      vel_constraints[1] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(1, 12.5) == false);
 
       // Check acceleration before constraints
       acceleration.resize(Dim);
@@ -651,9 +641,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(velocity(i)).epsilon(Tolerance));
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Test velocity with constraints
@@ -737,13 +725,9 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(status == false);
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = -12.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, -12.5) == true);
       // Check out of bounds condition
-      vel_constraints[2] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(2, 0.) == false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
@@ -785,13 +769,9 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(status == false);
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = -12.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, -12.5) == true);
       // Check out of bounds condition
-      vel_constraints[2] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(2, 0.) == false);
 
       // Check acceleration before constraints
       acceleration.resize(Dim);
@@ -1017,9 +997,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
                 Approx(velocity(i)).epsilon(Tolerance));
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Test velocity with constraints
@@ -1089,14 +1067,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-      vel_constraints[1] = -12.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
+      REQUIRE(node->assign_velocity_constraints(1, -12.5) == true);
       // Check out of bounds condition
-      vel_constraints[4] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(4, 0.) == false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
@@ -1142,14 +1116,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(status == false);
 
       // Apply velocity constraints
-      std::map<unsigned, double> vel_constraints;
-      vel_constraints[0] = 10.5;
-      vel_constraints[1] = -12.5;
-
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == true);
+      REQUIRE(node->assign_velocity_constraints(0, 10.5) == true);
+      REQUIRE(node->assign_velocity_constraints(1, -12.5) == true);
       // Check out of bounds condition
-      vel_constraints[4] = 0.;
-      REQUIRE(node->assign_velocity_constraints(vel_constraints) == false);
+      REQUIRE(node->assign_velocity_constraints(4, 0.) == false);
 
       // Check acceleration before constraints
       acceleration.resize(Dim);
