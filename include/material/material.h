@@ -80,6 +80,11 @@ class Material {
                                   const Vector6d& dstrain,
                                   const ParticleBase<Tdim>* ptr) = 0;
 
+  //! Check if this material needs a particle handle
+  //! Set true, if material needs other parameters from the particle
+  //! For eg, dstrain_rate. These function calls can only to const functions
+  virtual bool property_handle() const = 0;
+  
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};

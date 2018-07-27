@@ -55,6 +55,9 @@ class LinearElastic : public Material<Tdim> {
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
                           const ParticleBase<Tdim>* ptr);
 
+  //! Check if this material needs a particle handle
+  bool property_handle() const { return false; }
+
  protected:
   //! material id
   using Material<Tdim>::id_;

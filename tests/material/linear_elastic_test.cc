@@ -197,6 +197,9 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     // Compute updated stress
     stress = material->compute_stress(stress, strain, particle.get());
 
+    // Check if property handle is needed
+    REQUIRE(material->property_handle() == false);
+
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
     REQUIRE(stress(1) == Approx(1.25000000000000e+04).epsilon(Tolerance));
@@ -393,6 +396,9 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     // Compute updated stress
     stress = material->compute_stress(stress, strain, particle.get());
 
+    // Check if property handle is needed
+    REQUIRE(material->property_handle() == false);
+    
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
     REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
