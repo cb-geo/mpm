@@ -421,8 +421,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Assign material
     unsigned mid = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
-        "LinearElastic", std::move(mid));
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
+        "LinearElastic2D", std::move(mid));
 
     // Initialise material
     Json jmaterial;
@@ -652,8 +652,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     unsigned mid = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
-        "LinearElastic", std::move(mid));
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
+        "LinearElastic2D", std::move(mid));
     REQUIRE(material->id() == 0);
 
     // Initialise material
@@ -1086,8 +1086,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Assign material
     unsigned mid = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
-        "LinearElastic", std::move(mid));
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
+        "LinearElastic3D", std::move(mid));
 
     // Initialise material
     Json jmaterial;
@@ -1348,8 +1348,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     unsigned mid = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
-        "LinearElastic", std::move(mid));
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
+        "LinearElastic3D", std::move(mid));
     REQUIRE(material->id() == 0);
 
     // Initialise material
