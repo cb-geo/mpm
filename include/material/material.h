@@ -65,23 +65,20 @@ class Material {
   virtual Matrix6x6 elastic_tensor() = 0;
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& strain) = 0;
+                                  const Vector6d& dstrain) = 0;
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& strain,
+                                  const Vector6d& dstrain,
                                   const ParticleBase<Tdim>* ptr) = 0;
-
-  // Test function
-  virtual void testfn(const ParticleBase<Tdim>* ptr) = 0;
 
  protected:
   //! material id
