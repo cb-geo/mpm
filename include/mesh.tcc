@@ -277,3 +277,37 @@ bool mpm::Mesh<Tdim>::add_neighbour(
   }
   return insertion_status;
 }
+
+//! Assign velocity constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        velocity_constraints) {
+  bool status = false;
+  try {
+    if (nodes_.size()) {
+      for (const auto& velocity_constraint : velocity_constraints) {
+        // Node id
+        mpm::Index nid = std::get<0>(velocity_constraint);
+        // Direction
+        unsigned dir = std::get<1>(velocity_constraint);
+        // Velocity
+        double velocity = std::get<2>(velocity_constraint);
+
+        // Apply constraint
+        status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
+
+        if (!status)
+          throw std::runtime_error("Node or velocity constraint is invalid");
+      }
+    } else {
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign velocity "
+          "constraints");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << "\n";
+    status = false;
+  }
+  return status;
+}

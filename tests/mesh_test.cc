@@ -568,6 +568,24 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             }
           }
         }
+        // Test assign velocity constraints
+        SECTION("Check assign velocity constraints") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+          velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
+          velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
+                  true);
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
+          REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
+                  false);
+        }
       }
     }
   }
@@ -1150,6 +1168,25 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               REQUIRE(particles.size() == 0);
             }
           }
+        }
+        // Test assign velocity constraints
+        SECTION("Check assign velocity constraints") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+          velocity_constraints.emplace_back(std::make_tuple(2, 2, -12.5));
+          velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
+                  true);
+
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(3, 3, 0.0));
+          REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
+                  false);
         }
       }
     }
