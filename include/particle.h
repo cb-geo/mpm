@@ -212,6 +212,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
+  //! dstrains
+  Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

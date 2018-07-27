@@ -23,6 +23,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
   strain_.setZero();
+  dstrain_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -229,6 +230,8 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // dstrain = strain_rate * dt
   dstrain *= dt;
 
+  // Update dstrain
+  dstrain_.col(phase) = dstrain;
   // Update strain
   strain_.col(phase) += dstrain;
 }
@@ -243,7 +246,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Calculate stress
-      material_->compute_stress(stress, this->strain_.col(phase));
+      material_->compute_stress(stress, this->dstrain_.col(phase));
       // Assign stress
       this->assign_stress(phase, stress);
     } else {
