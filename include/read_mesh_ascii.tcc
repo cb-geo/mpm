@@ -164,8 +164,52 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
       }
     }
   } catch (std::exception& exception) {
-    console_->error("Read mesh nodes: {}", exception.what());
+    console_->error("Read particle coordinates: {}", exception.what());
   }
 
   return coordinates;
+}
+
+//! Return coordinates of particles
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::ReadMeshAscii<Tdim>::read_velocity_constraints(
+        const std::string& velocity_constraints_file) {
+
+  // Nodal coordinates
+  std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(velocity_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Direction
+            unsigned dir;
+            // Velocity
+            double velocity;
+            // Read stream
+            istream >> id >> dir >> velocity;
+            constraints.emplace_back(std::make_tuple(id, dir, velocity));
+          }
+        }
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("Read velocity constraints: {}", exception.what());
+  }
+  return constraints;
 }
