@@ -38,7 +38,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
            {"youngs_modulus", 1.5E+6},
            {"poisson_ratio", 0.25}}}},
         {"analysis",
-         {{"dt", 0.001},https://https://news.ycombinator.com/news.ycombinator.com/
+         {{"dt", 0.001},
           {"nsteps", 1000},
           {"gravity", true},
           {"boundary_friction", 0.5},
@@ -52,7 +52,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     file << json_file.dump(2);
     file.close();
 
-    // Assign argc and argv to ihttps://news.ycombinator.com/https://news.ycombinator.com/nput arguments of MPM
+    // Assign argc and argv to nput arguments of MPM
     int argc = 5;
     char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
                     (char*)"mpm.json"};
