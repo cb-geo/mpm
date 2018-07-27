@@ -281,7 +281,7 @@ bool mpm::Mesh<Tdim>::add_neighbour(
 //! Assign velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_velocity_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         velocity_constraints) {
   bool status = false;
   try {
