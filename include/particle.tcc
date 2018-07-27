@@ -66,7 +66,7 @@ void mpm::Particle<Tdim, Tnphases>::remove_cell() {
 // Assign a material to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_material(
-    const std::shared_ptr<Material>& material) {
+    const std::shared_ptr<Material<Tdim>>& material) {
   bool status = false;
   try {
     // Check if material is valid and properties are set
@@ -247,6 +247,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     if (material_ != nullptr) {
       // Calculate stress
       material_->compute_stress(stress, this->dstrain_.col(phase));
+
+      material_->testfn(this);
+
       // Assign stress
       this->assign_stress(phase, stress);
     } else {

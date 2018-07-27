@@ -51,7 +51,7 @@ class MPM {
   //! Mesh object
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
   //! Materials
-  std::map<unsigned, std::shared_ptr<mpm::Material>> materials_;
+  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! A unique ptr to IO object
   std::unique_ptr<mpm::IO> io_;
   //! JSON analysis object
