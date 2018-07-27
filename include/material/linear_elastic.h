@@ -35,31 +35,25 @@ class LinearElastic : public Material<Tdim> {
 
   //! Read material properties
   //! \param[in] materail_properties Material properties
-  void properties(const Json& material_properties );
+  void properties(const Json& material_properties);
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& strain);
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain);
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& strain,
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
                           const ParticleBase<Tdim>* ptr);
-
-  void testfn(const ParticleBase<Tdim>* ptr) {
-    std::string out = "Pointer : " + std::to_string(ptr->id()) +
-                      " cell: " + std::to_string(ptr->cell_id()) + "\n";
-    std::cout << out;
-  }
 
  protected:
   //! material id
@@ -68,6 +62,7 @@ class LinearElastic : public Material<Tdim> {
   using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
+
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
