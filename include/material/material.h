@@ -8,15 +8,23 @@
 #include "json.hpp"
 
 #include "factory.h"
+#include "particle_base.h"
+#include "particle.h"
 
 // JSON
 using Json = nlohmann::json;
 
 namespace mpm {
 
+// Forward declaration of ParticleBase
+template <unsigned Tdim>
+class ParticleBase;
+
 //! Material base class
 //! \brief Base class that stores the information about materials
 //! \details Material class stresses and strains
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
 class Material {
  public:
   //! Define a vector of 6 dof
@@ -69,6 +77,9 @@ class Material {
   //! \param[in] stress Stress
   //! \retval updated_stress Updated value of stress
   virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
+
+  // Test function
+  virtual void testfn(const ParticleBase<Tdim>* ptr) = 0; 
 
  protected:
   //! material id

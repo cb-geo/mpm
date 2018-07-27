@@ -11,10 +11,12 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
+  const unsigned Dim = 3;
+  
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
         "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
   }
@@ -22,7 +24,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   SECTION("LinearElastic id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
         "LinearElastic", std::move(id));
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
@@ -30,7 +32,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
   //! Read material properties
   SECTION("LinearElastic check stiffness matrix") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
         "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
 
@@ -65,7 +67,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     const double a1 = 13461538.461566667;
     const double a2 = 5769230.769166667;
 
-    mpm::Material::Matrix6x6 de = material->elastic_tensor();
+    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
     REQUIRE(de(0, 0) == Approx(a1).epsilon(Tolerance));
     REQUIRE(de(0, 1) == Approx(a2).epsilon(Tolerance));
     REQUIRE(de(0, 2) == Approx(a2).epsilon(Tolerance));
@@ -111,7 +113,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
   SECTION("LinearElastic check stresses") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material, unsigned>::instance()->create(
+    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
         "LinearElastic", std::move(id));
     REQUIRE(material->id() == 0);
 
@@ -123,10 +125,10 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
 
     material->properties(jmaterial);
 
-    mpm::Material::Matrix6x6 de = material->elastic_tensor();
+    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
 
     // Initialise stress
-    mpm::Material::Vector6d stress;
+    mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
@@ -136,7 +138,7 @@ TEST_CASE("LinearElastic is checked", "[material][linear_elastic]") {
     REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
 
     // Initialise strain
-    mpm::Material::Vector6d strain;
+    mpm::Material<Dim>::Vector6d strain;
     strain.setZero();
     strain(0) = 0.0010000;
     strain(1) = 0.0005000;

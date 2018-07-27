@@ -12,6 +12,10 @@
 
 namespace mpm {
 
+// Forward declaration of Material
+template <unsigned Tdim>
+class Material;
+
 //! Global index type for the particleBase
 using Index = unsigned long long;
 
@@ -90,7 +94,8 @@ class ParticleBase {
   virtual bool map_mass_momentum_to_nodes(unsigned phase) = 0;
 
   // Assign material
-  virtual bool assign_material(const std::shared_ptr<Material>& material) = 0;
+  virtual bool assign_material(
+      const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -172,7 +177,7 @@ class ParticleBase {
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
-  std::shared_ptr<Material> material_;
+  std::shared_ptr<Material<Tdim>> material_;
 };  // ParticleBase class
 }  // namespace mpm
 

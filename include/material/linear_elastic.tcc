@@ -1,5 +1,6 @@
 //! Read material properties
-void mpm::LinearElastic::properties(const Json& material_properties) {
+template <unsigned Tdim>
+void mpm::LinearElastic<Tdim>::properties(const Json& material_properties) {
   try {
     density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
@@ -14,7 +15,8 @@ void mpm::LinearElastic::properties(const Json& material_properties) {
 }
 
 //! Return elastic tensor
-mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
+template <unsigned Tdim>
+Eigen::Matrix<double, 6, 6> mpm::LinearElastic<Tdim>::elastic_tensor() {
   // Bulk and shear modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
   const double G = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
@@ -36,9 +38,10 @@ mpm::Material::Matrix6x6 mpm::LinearElastic::elastic_tensor() {
 }
 
 //! Compute stress
-void mpm::LinearElastic::compute_stress(Vector6d& stress,
-                                        const Vector6d& strain) {
+template <unsigned Tdim>
+void mpm::LinearElastic<Tdim>::compute_stress(Vector6d& stress,
+                                              const Vector6d& dstrain) {
 
-  Vector6d dstress = this->elastic_tensor() * strain;
+  Vector6d dstress = this->elastic_tensor() * dstrain;
   stress += dstress;
 }
