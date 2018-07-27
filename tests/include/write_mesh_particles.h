@@ -29,8 +29,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
       {"input_files",
-       {{"config", "mpm.json"},
-        {"mesh", "mesh-" + dimension + ".txt"},
+       {{"mesh", "mesh-" + dimension + ".txt"},
         {"constraints", "mesh_constraints.txt"},
         {"particles", "particles-" + dimension + ".txt"},
         {"initial_stresses", "initial_soil_stress.txt"},
@@ -57,7 +56,6 @@ bool write_json(unsigned dim, const std::string& file_name) {
        {{"dt", 0.001},
         {"nsteps", 10},
         {"gravity", gravity},
-        {"soil_particle_spacing", 0.01},
         {"boundary_friction", 0.5},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
