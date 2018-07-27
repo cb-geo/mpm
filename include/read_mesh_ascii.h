@@ -47,6 +47,11 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   //! \retval coordinates Vector of particle coordinates
   std::vector<VectorDim> read_particles(const std::string& particles_file);
 
+  //! Read constraints file
+  //! \param[in] velocity_constraints_files file name with constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_velocity_constraints(const std::string& velocity_constraints_file);
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;

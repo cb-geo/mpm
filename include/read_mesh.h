@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 // Boost string algorithm
@@ -57,6 +58,13 @@ class ReadMesh {
   //! \retval coordinates Vector of particle coordinates
   virtual std::vector<VectorDim> read_particles(
       const std::string& particles_file) = 0;
+
+  //! Read velocity constraints file
+  //! \param[in] velocity_constraints_files file name with constraints
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_velocity_constraints(
+          const std::string& velocity_constraints_file) = 0;
+
 };  // ReadMesh class
 }  // namespace mpm
 
