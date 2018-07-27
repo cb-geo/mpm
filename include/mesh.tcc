@@ -217,20 +217,29 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
+  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(),
+                         [=](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+                           locate_particle_mesh(particle);
+                         });
+
+  /*
   // Iterate through each particle and
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     bool find_cell = this->locate_particle_mesh(*pitr);
     // If particle is not found in mesh add to a list of particles
     if (!find_cell) particles.emplace_back(*pitr);
   }
+  */
   return particles;
 }
 
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_mesh(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
 
+  std::string put =  "Particleid: " + std::to_string(particle ->id() ) + "\n";
+  std::cout << put;
   // Check the current cell if it is not invalid
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
     if (particle->compute_reference_location()) return true;
