@@ -41,7 +41,6 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
          {{"dt", 0.001},
           {"nsteps", 1000},
           {"gravity", true},
-          {"soil_particle_spacing", 0.01},
           {"boundary_friction", 0.5},
           {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
           {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
@@ -53,7 +52,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     file << json_file.dump(2);
     file.close();
 
-    // Assign argc and argv to input arguments of MPM
+    // Assign argc and argv to nput arguments of MPM
     int argc = 5;
     char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
                     (char*)"mpm.json"};
