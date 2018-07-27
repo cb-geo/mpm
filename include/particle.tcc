@@ -240,13 +240,12 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
-  Eigen::Matrix<double, 6, 1> stress;
-  stress.setZero();
   try {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Calculate stress
-      stress = material_->compute_stress(stress, this->dstrain_.col(phase), this);
+      auto stress = material_->compute_stress(this->stress_.col(phase),
+                                              this->dstrain_.col(phase), this);
       // Assign stress
       this->assign_stress(phase, stress);
     } else {
