@@ -12,7 +12,9 @@ namespace mpm {
 //! LinearElastic class
 //! \brief Linear Elastic material model
 //! \details LinearElastic class stresses and strains
-class LinearElastic : public Material {
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+class LinearElastic : public Material<Tdim> {
  public:
   //! Define a vector of 6 dof
   using Vector6d = Eigen::Matrix<double, 6, 1>;
@@ -20,7 +22,7 @@ class LinearElastic : public Material {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Constructor with id
-  LinearElastic(unsigned id) : Material(id){};
+  LinearElastic(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
   virtual ~LinearElastic(){};
@@ -33,25 +35,37 @@ class LinearElastic : public Material {
 
   //! Read material properties
   //! \param[in] materail_properties Material properties
-  void properties(const Json& material_properties );
+  void properties(const Json& material_properties);
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor();
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  void compute_stress(Vector6d& stress, const Vector6d& strain);
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain);
+
+  //! Compute stress
+  //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
+  //! \param[in] particle Constant point to particle base
+  //! \retval updated_stress Updated value of stress
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
+                          const ParticleBase<Tdim>* ptr);
+
+  //! Check if this material needs a particle handle
+  bool property_handle() const { return false; }
 
  protected:
   //! material id
-  using Material::id_;
+  using Material<Tdim>::id_;
   //! material status
-  using Material::status_;
+  using Material<Tdim>::status_;
   //! Material properties
-  using Material::properties_;
+  using Material<Tdim>::properties_;
+
  private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;

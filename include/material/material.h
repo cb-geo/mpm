@@ -8,15 +8,23 @@
 #include "json.hpp"
 
 #include "factory.h"
+#include "particle.h"
+#include "particle_base.h"
 
 // JSON
 using Json = nlohmann::json;
 
 namespace mpm {
 
+// Forward declaration of ParticleBase
+template <unsigned Tdim>
+class ParticleBase;
+
 //! Material base class
 //! \brief Base class that stores the information about materials
 //! \details Material class stresses and strains
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
 class Material {
  public:
   //! Define a vector of 6 dof
@@ -50,26 +58,33 @@ class Material {
   //! Get material property
   //! \param[in] key Material properties key
   //! \retval result Value of material property
-  double property(const std::string& key) {
-    double result = std::numeric_limits<double>::max();
-    try {
-      result = properties_[key].template get<double>();
-    } catch (std::exception& except) {
-      std::cerr << "Material parameter not found: " << except.what() << '\n';
-    }
-    return result;
-  }
+  double property(const std::string& key);
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;
 
   //! Compute stress
-  //! \param[in] strain Strain
   //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  virtual void compute_stress(Vector6d& stress, const Vector6d& strain) = 0;
+  virtual Vector6d compute_stress(const Vector6d& stress,
+                                  const Vector6d& dstrain) = 0;
 
+  //! Compute stress
+  //! \param[in] stress Stress
+  //! \param[in] dstrain Strain
+  //! \param[in] particle Constant point to particle base
+  //! \retval updated_stress Updated value of stress
+  virtual Vector6d compute_stress(const Vector6d& stress,
+                                  const Vector6d& dstrain,
+                                  const ParticleBase<Tdim>* ptr) = 0;
+
+  //! Check if this material needs a particle handle
+  //! Set true, if material needs other parameters from the particle
+  //! For eg, dstrain_rate. These function calls can only to const functions
+  virtual bool property_handle() const = 0;
+  
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
@@ -79,5 +94,7 @@ class Material {
   Json properties_;
 };  // Material class
 }  // namespace mpm
+
+#include "material.tcc"
 
 #endif  // MPM_MATERIAL_MATERIAL_H_
