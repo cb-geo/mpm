@@ -241,9 +241,10 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   tbb::parallel_for_each(
       cells_.cbegin(), cells_.cend(),
       [=, &status](std::shared_ptr<mpm::Cell<Tdim>> cell) {
+        // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (cell->is_point_in_cell(particle->coordinates())) {
+        if (!status && cell->is_point_in_cell(particle->coordinates())) {
           particle->assign_cell(cell);
           status = true;
         }
