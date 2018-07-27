@@ -218,18 +218,13 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
   tbb::parallel_for_each(particles_.cbegin(), particles_.cend(),
-                         [=](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
-                           locate_particle_mesh(particle);
+                         [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+                           // If particle is not found in mesh add to a list of particles
+                           if(!this->locate_particle_mesh(particle))
+                             // Needs a lock guard here
+                             particles.emplace_back(particle);
                          });
 
-  /*
-  // Iterate through each particle and
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    bool find_cell = this->locate_particle_mesh(*pitr);
-    // If particle is not found in mesh add to a list of particles
-    if (!find_cell) particles.emplace_back(*pitr);
-  }
-  */
   return particles;
 }
 
