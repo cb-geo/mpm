@@ -155,8 +155,7 @@ class Mesh {
 
  private:
   // Locate a particle in mesh
-  bool locate_particle_mesh(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+  bool locate_particle_mesh(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
 
  protected:
   //! mesh id
