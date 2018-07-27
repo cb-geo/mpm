@@ -4,7 +4,13 @@
 #include "catch.hpp"
 #include "json.hpp"
 
+#include "cell.h"
+#include "hex_shapefn.h"
 #include "material/material.h"
+#include "node.h"
+#include "particle.h"
+#include "quad_shapefn.h"
+#include "shapefn.h"
 
 //! Check linearelastic class in 2D
 TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
@@ -171,6 +177,25 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
     // Compute updated stress
     stress = material->compute_stress(stress, strain);
+
+    // Check stressees
+    REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(1.25000000000000e+04).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.86538461538462e+04).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.00000000000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.00000000000000e+00).epsilon(Tolerance));
+
+    // Add particle
+    mpm::Index pid = 0;
+    Eigen::Matrix<double, Dim, 1> coords;
+    coords << 0.75, 0.75;
+    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+
+    // Reset stress
+    stress.setZero();
+    // Compute updated stress
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -348,6 +373,25 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
 
     // Compute updated stress
     stress = material->compute_stress(stress, strain);
+
+    // Check stressees
+    REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(1.53846153845333e+04).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
+
+    // Add particle
+    mpm::Index pid = 0;
+    Eigen::Matrix<double, Dim, 1> coords;
+    coords << 0.75, 0.75, 0.75;
+    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+
+    // Reset stress
+    stress.setZero();
+    // Compute updated stress
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
