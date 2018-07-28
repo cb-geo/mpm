@@ -7,19 +7,14 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
   try {
-    if (shapefnptr->nfunctions() >= this->nnodes_) {
+    if (shapefnptr->nfunctions() == this->nnodes_) {
       shapefn_ = shapefnptr;
     } else {
       throw std::runtime_error(
-          "Specified number of shape functions is not defined");
-    }
-    if (!(nnodes > Tdim)) {
-      throw std::runtime_error(
-          "Specified number of nodes for a cell is too low");
+          "Specified number of shape functions and nodes don't match");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
-    std::abort();
   }
 }
 
@@ -162,6 +157,13 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
                    particles_.end());
 }
 
+//! Compute volume of a 1D cell
+//! Computes the length of cell
+template <>
+inline void mpm::Cell<1>::compute_volume() {
+  this->volume_ = (nodes_[0]->coordinates()[0] - nodes_[1]->coordinates()[1]);
+}
+
 //! Compute volume of a 2D cell
 //! Computes the volume of a quadrilateral
 template <>
@@ -294,9 +296,34 @@ void mpm::Cell<Tdim>::compute_mean_length() {
   this->mean_length_ /= indices.rows();
 }
 
+
+//! Check if a point is in a 1D cell by breaking the cell into sub-volumes
+template <>
+inline bool mpm::Cell<1>::point_in_cell(
+    const Eigen::Matrix<double, 1, 1>& point) {
+
+  bool status = false;
+  
+  // Tolerance for volume / area comparison
+  const double tolerance = 1.0E-10;
+
+  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
+    this->compute_volume();
+
+  // Distance of point from 2 vertices
+  const double length = (nodes_[0]->coordinates() - point).norm() +
+                        (nodes_[1]->coordinates() - point).norm();
+
+  // Check if the point is inside the hedron
+  if (std::fabs(length - this->volume_) < tolerance) {
+    status = true;
+  }
+  return status;
+}
+
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
-template <unsigned Tdim>
-inline bool mpm::Cell<Tdim>::point_in_cell(
+template <>
+inline bool mpm::Cell<2>::point_in_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -331,28 +358,28 @@ inline bool mpm::Cell<Tdim>::point_in_cell(
     area << 1.  , 1.  , 1.,
             a(0), b(0), point(0),
             a(1), b(1), point(1);
-    // clang-format on
-    const double triarea = 0.5 * std::fabs(area.determinant());
+      // clang-format on
+      const double triarea = 0.5 * std::fabs(area.determinant());
 
-    triareas += triarea;
+      triareas += triarea;
 
-    // Optimisation check, if the sub-tetrahedra area exceeds the area of
-    // hexahedron, abort and return false (point is outside).
-    if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
-      return false;
+      // Optimisation check, if the sub-tetrahedra area exceeds the area of
+      // hexahedron, abort and return false (point is outside).
+      if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
+        return false;
+      }
     }
-  }
 
-  // Check if the point is inside the hedron
-  if (std::fabs(triareas - volume_) < tolerance) {
-    status = true;
-  }
-  return status;
+    // Check if the point is inside the hedron
+    if (std::fabs(triareas - volume_) < tolerance) {
+      status = true;
+    }
+    return status;
 }
 
 //! Check if a point is in a 3D cell by breaking the cell into sub-volumes
-template <unsigned Tdim>
-inline bool mpm::Cell<Tdim>::point_in_cell(
+template <>
+inline bool mpm::Cell<3>::point_in_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -414,9 +441,10 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
 
   return status;
 }
+
 //! Return the local coordinates of a point in a 1D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::local_coordinates_point(
+template <>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point(
     const Eigen::Matrix<double, 1, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 1, 1> xi;
@@ -452,8 +480,8 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::local_coordinates_point(
 }
 
 //! Return the local coordinates of a point in a 2D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     const Eigen::Matrix<double, 2, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 2, 1> xi;
@@ -500,8 +528,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::local_coordinates_point(
 }
 
 //! Return the local coordinates of a point in a 3D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Local point coordinates
@@ -561,19 +589,19 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::local_coordinates_point(
 }
 
 //! Return the local coordinates of a point in a 1D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+template <>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
   return this->local_coordinates_point(point);
 }
 
-//! Return the local coordinates of a point in a 2D/3D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+//! Return the local coordinates of a point in a 2D cell
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, Tdim, 1> xi;
+  Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
   // Maximum iterations of newton raphson
@@ -583,11 +611,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(Tdim, this->nfunctions());
+  nodal_coords.resize(2, this->nfunctions());
 
   for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    Eigen::Matrix<double, Tdim, 1> node = nodes_[j]->coordinates();
-    for (unsigned i = 0; i < Tdim; ++i) {
+    Eigen::Matrix<double, 2, 1> node = nodes_[j]->coordinates();
+    for (unsigned i = 0; i < 2; ++i) {
       nodal_coords(i, j) = node[i];
     }
   }
@@ -620,7 +648,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const auto sf = shapefn_->shapefn(xi);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+    Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
 
     // Early exit
     if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
@@ -634,7 +662,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
-    Eigen::Matrix<double, Tdim, Tdim> jacobian;
+    Eigen::Matrix<double, 2, 2> jacobian;
     const auto grad_sf = shapefn_->grad_shapefn(xi);
     jacobian = unit_cell.transpose() * grad_sf;
 
@@ -643,7 +671,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, Tdim, 1> residual = (nodal_coords * sf) - point;
+    Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
@@ -655,12 +683,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 }
 
 //! Return the local coordinates of a point in a 2D/3D cell
-template <unsigned Tdim>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, Tdim, 1> xi;
+  Eigen::Matrix<double, 3, 1> xi;
   xi.setZero();
 
   // Maximum iterations of newton raphson
@@ -670,11 +698,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(Tdim, this->nfunctions());
+  nodal_coords.resize(3, this->nfunctions());
 
   for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    Eigen::Matrix<double, Tdim, 1> node = nodes_[j]->coordinates();
-    for (unsigned i = 0; i < Tdim; ++i) {
+    Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
+    for (unsigned i = 0; i < 3; ++i) {
       nodal_coords(i, j) = node[i];
     }
   }
@@ -707,7 +735,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const auto sf = shapefn_->shapefn(xi);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, Tdim, 1> fx = (nodal_coords * sf) - point;
+    Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
 
     // Early exit
     if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
@@ -720,7 +748,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
     // Calculate Jacobian
-    Eigen::Matrix<double, Tdim, Tdim> jacobian;
+    Eigen::Matrix<double, 3, 3> jacobian;
     const auto grad_sf = shapefn_->grad_shapefn(xi);
     jacobian = unit_cell.transpose() * grad_sf;
 
@@ -728,7 +756,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<Tdim>::transform_real_to_unit_cell(
     const auto sf = shapefn_->shapefn(xi);
 
     // Residual f(x)
-    Eigen::Matrix<double, Tdim, 1> residual;
+    Eigen::Matrix<double, 3, 1> residual;
     // f(x) = p(x) - p
     residual = (nodal_coords * sf) - point;
 

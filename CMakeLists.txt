@@ -51,6 +51,7 @@ include_directories(
 # mpm executable
 SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
+  ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
@@ -67,6 +68,7 @@ add_executable(mpm
 # Unit test
 SET(test_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
+  ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
