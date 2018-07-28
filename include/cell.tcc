@@ -7,19 +7,14 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
   try {
-    if (shapefnptr->nfunctions() >= this->nnodes_) {
+    if (shapefnptr->nfunctions() == this->nnodes_) {
       shapefn_ = shapefnptr;
     } else {
       throw std::runtime_error(
-          "Specified number of shape functions is not defined");
-    }
-    if (!(nnodes > Tdim)) {
-      throw std::runtime_error(
-          "Specified number of nodes for a cell is too low");
+          "Specified number of shape functions and nodes don't match");
     }
   } catch (std::exception& exception) {
     std::cerr << exception.what() << '\n';
-    std::abort();
   }
 }
 
