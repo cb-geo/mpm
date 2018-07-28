@@ -67,6 +67,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   SECTION("Add nodes") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+    // Test initialisation for failure
+    REQUIRE(cell->initialise() == false);
+
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
@@ -323,6 +326,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->nfunctions() == 4);
+
+      const unsigned nnodes = 8;
+      auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, nnodes, shapefn);
     }
     // Check 8-noded function
     SECTION("Check 8-noded Quadrilateral") {
@@ -749,6 +755,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
 
+    // Test initialisation for failure
+    REQUIRE(cell->initialise() == false);
+
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
@@ -1127,6 +1136,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
       REQUIRE(cell->nfunctions() == 8);
+
+      // Fail trying to create when number of nodes don't match
+      const unsigned nnodes = 9;
+      auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, nnodes, shapefn);
     }
     // Check 20-noded function
     SECTION("Check 20-noded Hexahedron") {
