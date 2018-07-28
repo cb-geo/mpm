@@ -125,17 +125,11 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
-  //! Check if a point is in a 2D cell
+  //! Check if a point is in a cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
   //! for a point to be in the cell
-  bool point_in_cell(const Eigen::Matrix<double, 2, 1>& point);
-
-  //! Check if a point is in a 3D cell
-  //! Cell is broken into sub-tetrahedrons with point as one of the
-  //! vertex The sum of the sub-volume should be equal to the volume of the cell
-  //! for a point to be in the cell
-  bool point_in_cell(const Eigen::Matrix<double, 3, 1>& point);
+  bool point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Check if a point is in a cell
   //! Use an affine transformation and NR to check if a transformed point is in
@@ -144,44 +138,18 @@ class Cell {
   //! and 1 in a unit cell
   bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
-  //! Return the local coordinates of a point in a 1D cell
+  //! Return the local coordinates of a point in a cell
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 1, 1> local_coordinates_point(
-      const Eigen::Matrix<double, 1, 1>& point);
-
-  //! Return the local coordinates of a point in a 2D cell
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 2, 1> local_coordinates_point(
-      const Eigen::Matrix<double, 2, 1>& point);
-
-  //! Return the local coordinates of a point in a 3D cell
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 3, 1> local_coordinates_point(
-      const Eigen::Matrix<double, 3, 1>& point);
+  Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
+      const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a unit cell
-  //! Using newton iteration
+  //! Using newton iteration / affine transformation
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 1, 1> transform_real_to_unit_cell(
-      const Eigen::Matrix<double, 1, 1>& point);
-
-  //! Return the local coordinates of a point in a unit cell
-  //! Using newton iteration
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 2, 1> transform_real_to_unit_cell(
-      const Eigen::Matrix<double, 2, 1>& point);
-
-  //! Return the local coordinates of a point in a unit cell
-  //! Using newton iteration
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, 3, 1> transform_real_to_unit_cell(
-      const Eigen::Matrix<double, 3, 1>& point);
+  Eigen::Matrix<double, Tdim, 1> transform_real_to_unit_cell(
+      const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
