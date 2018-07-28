@@ -327,17 +327,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check 8-noded function
     SECTION("Check 8-noded Quadrilateral") {
       // 8-noded quadrilateral shape functions
+      const unsigned nnodes = 8;
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ8");
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, shapefn);
       REQUIRE(cell->nfunctions() == 8);
     }
     // Check 9-noded function
     SECTION("Check 9-noded Quadrilateral") {
       // 9-noded quadrilateral shape functions
+      const unsigned nnodes = 9;
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ9");
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, shapefn);
       REQUIRE(cell->nfunctions() == 9);
     }
   }
@@ -1129,10 +1131,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check 20-noded function
     SECTION("Check 20-noded Hexahedron") {
       // 20-noded hexahedron shape functions
+      const unsigned nnodes = 20;
       std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
           Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH20");
 
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, shapefn);
       REQUIRE(cell->nfunctions() == 20);
     }
   }
