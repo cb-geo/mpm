@@ -73,11 +73,18 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
-    cell->add_node(0, node0);
-    cell->add_node(1, node1);
-    cell->add_node(2, node2);
-    cell->add_node(3, node3);
+    REQUIRE(cell->add_node(0, node0) == true);
+    REQUIRE(cell->add_node(1, node1) == true);
+    REQUIRE(cell->add_node(2, node2) == true);
+    REQUIRE(cell->add_node(3, node3) == true);
     REQUIRE(cell->nnodes() == 4);
+
+    // Test failing add node
+    coords << 1., 1.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+    // Fail add node
+    REQUIRE(cell->add_node(4, node4) == false);
 
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
@@ -209,10 +216,10 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         mpm::Index id = 0;
         auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
 
-        cell->add_node(0, node0);
-        cell->add_node(1, node1);
-        cell->add_node(2, node2);
-        cell->add_node(3, node3);
+        REQUIRE(cell->add_node(0, node0) == true);
+        REQUIRE(cell->add_node(1, node1) == true);
+        REQUIRE(cell->add_node(2, node2) == true);
+        REQUIRE(cell->add_node(3, node3) == true);
         REQUIRE(cell->nnodes() == 4);
 
         // Initialise cell
@@ -761,15 +768,22 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check if cell is initialised, before addition of nodes
     REQUIRE(cell->is_initialised() == false);
 
-    cell->add_node(0, node0);
-    cell->add_node(1, node1);
-    cell->add_node(2, node2);
-    cell->add_node(3, node3);
-    cell->add_node(4, node4);
-    cell->add_node(5, node5);
-    cell->add_node(6, node6);
-    cell->add_node(7, node7);
+    REQUIRE(cell->add_node(0, node0) == true);
+    REQUIRE(cell->add_node(1, node1) == true);
+    REQUIRE(cell->add_node(2, node2) == true);
+    REQUIRE(cell->add_node(3, node3) == true);
+    REQUIRE(cell->add_node(4, node4) == true);
+    REQUIRE(cell->add_node(5, node5) == true);
+    REQUIRE(cell->add_node(6, node6) == true);
+    REQUIRE(cell->add_node(7, node7) == true);
     REQUIRE(cell->nnodes() == 8);
+
+    // Test failing add node
+    coords << 1., 1., 1.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node100 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(100, coords);
+    // Fail add node
+    REQUIRE(cell->add_node(8, node100) == false);
 
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == false);
