@@ -15,9 +15,8 @@ mpm::IO::IO(int argc, char** argv) {
     cmd.add(dim_arg);
 
     // Define working directory
-    TCLAP::ValueArg<std::string> cwd_arg("f", "working_dir",
-                                         "Current working folder", true, "",
-                                         "Working_folder");
+    TCLAP::ValueArg<std::string> cwd_arg(
+        "f", "working_dir", "Current working folder", true, "", "working_dir");
     cmd.add(cwd_arg);
 
     // Define input file
@@ -26,11 +25,11 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
-    // Solver
-    TCLAP::ValueArg<std::string> solver_arg("a", "analysis", "analysis", true,
-                                            "MPMExplicit3D", "analysis");
+    // Analysis
+    TCLAP::ValueArg<std::string> analysis_arg(
+        "a", "analysis", "MPM analysis", true, "MPMExplicit3D", "analysis");
 
-    cmd.add(solver_arg);
+    cmd.add(analysis_arg);
 
     // Parse arguments
     cmd.parse(argc, argv);
@@ -44,8 +43,8 @@ mpm::IO::IO(int argc, char** argv) {
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
 
-    // Set Solver Type
-    solver_ = solver_arg.getValue();
+    // Set Analysis Type
+    analysis_ = analysis_arg.getValue();
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
   }
