@@ -14,9 +14,14 @@ IF (NOT CMAKE_BUILD_TYPE)
  #SET(CMAKE_BUILD_TYPE "Release")
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
-# GNU Specific settings
+# GNU specific settings
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+endif()
+
+# Intel specific settings
+if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 # CMake Modules
@@ -41,8 +46,13 @@ link_libraries(${TBB_LIBRARIES})
 find_package (Threads)
 link_libraries (${CMAKE_THREAD_LIBS_INIT})
 
+# VTK
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+link_libraries(${VTK_LIBRARIES})
+
 # Include directories
-include_directories(
+include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
