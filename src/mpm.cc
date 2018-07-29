@@ -1,8 +1,8 @@
 #include <memory>
 
-#include "mpm.h"
 #include "factory.h"
 #include "io.h"
+#include "mpm.h"
 #include "mpm_explicit.h"
 
 // 2D MPM

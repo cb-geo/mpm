@@ -9,6 +9,11 @@ mpm::IO::IO(int argc, char** argv) {
     // Set title
     TCLAP::CmdLine cmd("Material Point Method (CB-Geo)", ' ', "Alpha");
 
+    // Define dimension
+    TCLAP::ValueArg<unsigned int> dim_arg("d", "dimension", "Problem dimension",
+                                          true, 3, "Dimension");
+    cmd.add(dim_arg);
+
     // Define working directory
     TCLAP::ValueArg<std::string> cwd_arg("f", "working_dir",
                                          "Current working folder", true, "",
@@ -21,8 +26,17 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
+    // Solver
+    TCLAP::ValueArg<std::string> solver_arg("a", "analysis", "analysis", true,
+                                            "MPMExplicit3D", "analysis");
+
+    cmd.add(solver_arg);
+
     // Parse arguments
     cmd.parse(argc, argv);
+
+    // Dimension
+    dimension_ = dim_arg.getValue();
 
     // Set working directory
     working_dir_ = cwd_arg.getValue();
@@ -30,6 +44,8 @@ mpm::IO::IO(int argc, char** argv) {
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
 
+    // Set Solver Type
+    solver_ = solver_arg.getValue();
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
   }
