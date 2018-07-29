@@ -5,14 +5,8 @@ mpm::IO::IO(int argc, char** argv) {
   //! Logger
   console_ = spdlog::get("IO");
   try {
-
     // Set title
-    TCLAP::CmdLine cmd("Material Point Method (CB-Geo)", ' ', "Alpha");
-
-    // Define dimension
-    TCLAP::ValueArg<unsigned int> dim_arg("d", "dimension", "Problem dimension",
-                                          true, 3, "Dimension");
-    cmd.add(dim_arg);
+    TCLAP::CmdLine cmd("Material Point Method (CB-Geo)", ' ', "Alpha V1.0");
 
     // Define working directory
     TCLAP::ValueArg<std::string> cwd_arg(
@@ -33,9 +27,6 @@ mpm::IO::IO(int argc, char** argv) {
 
     // Parse arguments
     cmd.parse(argc, argv);
-
-    // Dimension
-    dimension_ = dim_arg.getValue();
 
     // Set working directory
     working_dir_ = cwd_arg.getValue();

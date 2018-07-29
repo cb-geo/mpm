@@ -53,10 +53,9 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     file.close();
 
     // Assign argc and argv to nput arguments of MPM
-    int argc = 9;
+    int argc = 7;
     // clang-format off
     char* argv[] = {(char*)"./mpm",
-                    (char*)"-d",  (char*)"3",
                     (char*)"-a",  (char*)"MPMExplicit3D",
                     (char*)"-f",  (char*)"./",
                     (char*)"-i",  (char*)"mpm.json"};
