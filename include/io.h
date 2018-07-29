@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-//#include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
 
 #include "tclap/CmdLine.h"
 //! Alias for JSON
@@ -23,6 +23,9 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
+  //! Return dimension
+  unsigned int dimension() const { return dimension_; }
+
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
   //! \param[in] key Input key in JSON for the filename of
@@ -32,6 +35,9 @@ class IO {
   //! Check if a file is present and valid
   //! \param[in] file_name Name of the file to check if it is present
   bool check_file(const std::string& file_name);
+
+  //! Return solver
+  std::string solver() const { return solver_; }
 
   //! Return json analysis object
   Json analysis() const { return json_["analysis"]; }
@@ -43,12 +49,16 @@ class IO {
   Json post_processing() const { return json_["post_processing"]; }
 
  private:
+  //! Dimension
+  unsigned int dimension_;
   //! Working directory
   std::string working_dir_;
   //! Input file name
   std::string input_file_{"mpm.json"};
   //! Input JSON object
   Json json_;
+  //! Solver
+  std::string solver_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
 };
