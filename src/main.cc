@@ -18,10 +18,10 @@ int main(int argc, char** argv) {
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
     // Get problem dimension
-    const unsigned Dim = 3;  // io->dimension();
+    const unsigned Dim = io->dimension();
 
     // Get analysis
-    const std::string analysis = "MPMExplicit3D";  // io->analysis_type();
+    const std::string analysis = io->analysis_type();
 
     switch (Dim) {
       case 2: {
