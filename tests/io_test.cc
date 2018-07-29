@@ -53,12 +53,19 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     file.close();
 
     // Assign argc and argv to nput arguments of MPM
-    int argc = 5;
-    char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
-                    (char*)"mpm.json"};
+    int argc = 7;
+    // clang-format off
+    char* argv[] = {(char*)"./mpm",
+                    (char*)"-a",  (char*)"MPMExplicit3D",
+                    (char*)"-f",  (char*)"./",
+                    (char*)"-i",  (char*)"mpm.json"};
+    // clang-format on
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
+
+    // Check analysis type
+    REQUIRE(io->analysis_type() == "MPMExplicit3D");
 
     // Check cmake JSON object
     REQUIRE(io->file_name("config") == "./mpm.json");

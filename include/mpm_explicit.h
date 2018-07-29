@@ -17,7 +17,7 @@ namespace mpm {
 //! \details A single-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMExplicit : public MPM<Tdim> {
+class MPMExplicit : public MPM {
  public:
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
@@ -33,23 +33,25 @@ class MPMExplicit : public MPM<Tdim> {
 
  protected:
   // Generate a unique id for the analysis
-  using mpm::MPM<Tdim>::uuid_;
+  using mpm::MPM::uuid_;
   //! Time step size
-  using mpm::MPM<Tdim>::dt_;
+  using mpm::MPM::dt_;
   //! Number of steps
-  using mpm::MPM<Tdim>::nsteps_;
-  //! Gravity
-  using mpm::MPM<Tdim>::gravity_;
-  //! Mesh object
-  using mpm::MPM<Tdim>::meshes_;
-  //! Materials
-  using mpm::MPM<Tdim>::materials_;
+  using mpm::MPM::nsteps_;
   //! A unique ptr to IO object
-  using mpm::MPM<Tdim>::io_;
+  using mpm::MPM::io_;
   //! JSON analysis object
-  using mpm::MPM<Tdim>::analysis_;
+  using mpm::MPM::analysis_;
   //! Logger
-  using mpm::MPM<Tdim>::console_;
+  using mpm::MPM::console_;
+
+ private:
+  //! Gravity
+  Eigen::Matrix<double, Tdim, 1> gravity_;
+  //! Mesh object
+  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  //! Materials
+  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
 
 };  // MPMExplicit class
 }  // namespace mpm

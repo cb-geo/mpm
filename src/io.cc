@@ -5,14 +5,12 @@ mpm::IO::IO(int argc, char** argv) {
   //! Logger
   console_ = spdlog::get("IO");
   try {
-
     // Set title
-    TCLAP::CmdLine cmd("Material Point Method (CB-Geo)", ' ', "Alpha");
+    TCLAP::CmdLine cmd("Material Point Method (CB-Geo)", ' ', "Alpha V1.0");
 
     // Define working directory
-    TCLAP::ValueArg<std::string> cwd_arg("f", "working_dir",
-                                         "Current working folder", true, "",
-                                         "Working_folder");
+    TCLAP::ValueArg<std::string> cwd_arg(
+        "f", "working_dir", "Current working folder", true, "", "working_dir");
     cmd.add(cwd_arg);
 
     // Define input file
@@ -20,6 +18,12 @@ mpm::IO::IO(int argc, char** argv) {
                                            "Input JSON file [mpm.json]", false,
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
+
+    // Analysis
+    TCLAP::ValueArg<std::string> analysis_arg(
+        "a", "analysis", "MPM analysis", true, "MPMExplicit3D", "analysis");
+
+    cmd.add(analysis_arg);
 
     // Parse arguments
     cmd.parse(argc, argv);
@@ -30,6 +34,8 @@ mpm::IO::IO(int argc, char** argv) {
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
 
+    // Set Analysis Type
+    analysis_ = analysis_arg.getValue();
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
   }

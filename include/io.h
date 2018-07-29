@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-//#include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
 
 #include "tclap/CmdLine.h"
 //! Alias for JSON
@@ -33,6 +33,9 @@ class IO {
   //! \param[in] file_name Name of the file to check if it is present
   bool check_file(const std::string& file_name);
 
+  //! Return analysis
+  std::string analysis_type() const { return analysis_; }
+
   //! Return json analysis object
   Json analysis() const { return json_["analysis"]; }
 
@@ -49,6 +52,8 @@ class IO {
   std::string input_file_{"mpm.json"};
   //! Input JSON object
   Json json_;
+  //! Analysis
+  std::string analysis_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
 };

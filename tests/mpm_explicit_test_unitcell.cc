@@ -27,9 +27,13 @@ TEST_CASE("MPM 2D Explicit implementation is checked in unitcells",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 5;
-  char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
-                  (char*)"mpm-explicit-2d-unitcell.json"};
+  int argc = 7;
+  // clang-format off
+  char* argv[] = {(char*)"./mpm",
+                  (char*)"-a",  (char*)"MPMExplicit2D",
+                  (char*)"-f",  (char*)"./",
+                  (char*)"-i",  (char*)"mpm-explicit-2d-unitcell.json"};
+  // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
@@ -80,9 +84,13 @@ TEST_CASE("MPM 3D Explicit implementation is checked in unitcells",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 5;
-  char* argv[] = {(char*)"./mpm", (char*)"-f", (char*)"./", (char*)"-i",
-                  (char*)"mpm-explicit-3d-unitcell.json"};
+  int argc = 7;
+  // clang-format off
+  char* argv[] = {(char*)"./mpm",
+                  (char*)"-a",  (char*)"MPMExplicit3D",
+                  (char*)"-f",  (char*)"./",
+                  (char*)"-i",  (char*)"mpm-explicit-3d-unitcell.json"};
+  // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
