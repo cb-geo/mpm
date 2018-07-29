@@ -23,9 +23,6 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
-  //! Return dimension
-  unsigned int dimension() const { return dimension_; }
-
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
   //! \param[in] key Input key in JSON for the filename of
@@ -49,8 +46,6 @@ class IO {
   Json post_processing() const { return json_["post_processing"]; }
 
  private:
-  //! Dimension
-  unsigned int dimension_;
   //! Working directory
   std::string working_dir_;
   //! Input file name
