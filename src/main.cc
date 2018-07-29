@@ -2,11 +2,10 @@
 
 #include "spdlog/spdlog.h"
 
-//#include "io.h"
+#include "io.h"
 #include "mpm.h"
 
 int main(int argc, char** argv) {
-  /*
   // Logger level (trace, debug, info, warn, error, critical, off)
   spdlog::set_level(spdlog::level::trace);
 
@@ -16,22 +15,20 @@ int main(int argc, char** argv) {
   try {
 
     // Create an IO object
-    // auto io = std::make_unique<mpm::IO>(io_argc, io_argv);
+    auto io = std::make_unique<mpm::IO>(argc, argv);
 
-    /*
     // Get problem dimension
-    const unsigned Dim = io->dimension();
+    const unsigned Dim = 3;  // io->dimension();
 
-    // Get solver
-    const std::string solver = io->solver();
+    // Get analysis
+    const std::string analysis = "MPMExplicit3D";  // io->analysis_type();
 
     switch (Dim) {
       case 2: {
 
-        // Create an MPM solver
-        auto mpm =
-            Factory<mpm::MPM<2>, std::unique_ptr<mpm::IO>&&>::instance()
-                ->create(solver, std::move(io));
+        // Create an MPM analysis
+        auto mpm = Factory<mpm::MPM<2>, std::unique_ptr<mpm::IO>&&>::instance()
+                       ->create(analysis, std::move(io));
 
         // Initialise mesh
         mpm->initialise_mesh_particles();
@@ -45,9 +42,9 @@ int main(int argc, char** argv) {
         break;
       }
       default: {
-        // Create an MPM solver
+        // Create an MPM analysis
         auto mpm = Factory<mpm::MPM<3>, std::unique_ptr<mpm::IO>&&>::instance()
-                       ->create(solver, std::move(io));
+                       ->create(analysis, std::move(io));
 
         // Initialise mesh
         mpm->initialise_mesh_particles();
@@ -64,5 +61,4 @@ int main(int argc, char** argv) {
   } catch (std::exception& exception) {
     console->error("MPM main: {}", exception.what());
   }
-    */
 }
