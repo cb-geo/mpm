@@ -18,8 +18,6 @@ namespace mpm {
 //! MPM class
 //! \brief MPM class calls solver and algorithm
 //! \details MPM class: implicit and explicit MPM
-//! \tparam Tdim Dimension
-template <unsigned Tdim>
 class MPM {
  public:
   //! Constructor
@@ -27,7 +25,6 @@ class MPM {
     // Unique id
     uuid_ =
         boost::lexical_cast<std::string>(boost::uuids::random_generator()());
-    meshes_.clear();
   }
 
   // Initialise mesh and particles
@@ -46,12 +43,6 @@ class MPM {
   double dt_{std::numeric_limits<double>::max()};
   //! Number of steps
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
-  //! Gravity
-  Eigen::Matrix<double, Tdim, 1> gravity_;
-  //! Mesh object
-  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
-  //! Materials
-  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! A unique ptr to IO object
   std::unique_ptr<mpm::IO> io_;
   //! JSON analysis object

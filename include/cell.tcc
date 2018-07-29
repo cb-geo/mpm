@@ -296,14 +296,13 @@ void mpm::Cell<Tdim>::compute_mean_length() {
   this->mean_length_ /= indices.rows();
 }
 
-
 //! Check if a point is in a 1D cell by breaking the cell into sub-volumes
 template <>
 inline bool mpm::Cell<1>::point_in_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
 
   bool status = false;
-  
+
   // Tolerance for volume / area comparison
   const double tolerance = 1.0E-10;
 
@@ -358,23 +357,23 @@ inline bool mpm::Cell<2>::point_in_cell(
     area << 1.  , 1.  , 1.,
             a(0), b(0), point(0),
             a(1), b(1), point(1);
-      // clang-format on
-      const double triarea = 0.5 * std::fabs(area.determinant());
+    // clang-format on
+    const double triarea = 0.5 * std::fabs(area.determinant());
 
-      triareas += triarea;
+    triareas += triarea;
 
-      // Optimisation check, if the sub-tetrahedra area exceeds the area of
-      // hexahedron, abort and return false (point is outside).
-      if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
-        return false;
-      }
+    // Optimisation check, if the sub-tetrahedra area exceeds the area of
+    // hexahedron, abort and return false (point is outside).
+    if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
+      return false;
     }
+  }
 
-    // Check if the point is inside the hedron
-    if (std::fabs(triareas - volume_) < tolerance) {
-      status = true;
-    }
-    return status;
+  // Check if the point is inside the hedron
+  if (std::fabs(triareas - volume_) < tolerance) {
+    status = true;
+  }
+  return status;
 }
 
 //! Check if a point is in a 3D cell by breaking the cell into sub-volumes

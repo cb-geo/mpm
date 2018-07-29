@@ -1,12 +1,13 @@
 //! Constructor
 template <unsigned Tdim>
 mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
-    : mpm::MPM<Tdim>(std::move(io)) {
+    : mpm::MPM(std::move(io)) {
   //! Logger
   console_ = spdlog::get("MPMExplicit");
 
   // Create a mesh with global id 0
   const mpm::Index id = 0;
+  meshes_.clear();
   meshes_.emplace_back(std::make_unique<mpm::Mesh<Tdim>>(id));
 
   // Empty all materials
