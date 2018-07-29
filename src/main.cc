@@ -13,51 +13,26 @@ int main(int argc, char** argv) {
   auto console = spdlog::stdout_color_mt("main");
 
   try {
-
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
-
-    // Get problem dimension
-    const unsigned Dim = io->dimension();
 
     // Get analysis
     const std::string analysis = io->analysis_type();
 
-    switch (Dim) {
-      case 2: {
+    // Create an MPM analysis
+    auto mpm =
+        Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
+            analysis, std::move(io));
 
-        // Create an MPM analysis
-        auto mpm = Factory<mpm::MPM<2>, std::unique_ptr<mpm::IO>&&>::instance()
-                       ->create(analysis, std::move(io));
+    // Initialise mesh
+    mpm->initialise_mesh_particles();
 
-        // Initialise mesh
-        mpm->initialise_mesh_particles();
+    // Initialise materials
+    mpm->initialise_materials();
 
-        // Initialise materials
-        mpm->initialise_materials();
+    // Solve
+    mpm->solve();
 
-        // Solve
-        mpm->solve();
-
-        break;
-      }
-      default: {
-        // Create an MPM analysis
-        auto mpm = Factory<mpm::MPM<3>, std::unique_ptr<mpm::IO>&&>::instance()
-                       ->create(analysis, std::move(io));
-
-        // Initialise mesh
-        mpm->initialise_mesh_particles();
-
-        // Initialise materials
-        mpm->initialise_materials();
-
-        // Solve
-        mpm->solve();
-
-        break;
-      }
-    }
   } catch (std::exception& exception) {
     console->error("MPM main: {}", exception.what());
   }
