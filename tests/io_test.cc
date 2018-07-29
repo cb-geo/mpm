@@ -65,9 +65,6 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
-    // Check dimension
-    REQUIRE(io->dimension() == 3);
-
     // Check analysis type
     REQUIRE(io->analysis_type() == "MPMExplicit3D");
 
