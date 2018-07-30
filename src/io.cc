@@ -92,3 +92,53 @@ bool mpm::IO::check_file(const std::string& filename) {
   }
   return status;
 }
+
+//! Create output VTK file names (eg. Velocity0000*.vtk)
+boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
+                                             const std::string& file_extension,
+                                             const std::string& analysis_id,
+                                             unsigned step,
+                                             unsigned max_steps) {
+  std::stringstream file_name;
+  std::string path = this->output_folder();
+
+  file_name.str(std::string());
+  file_name << attribute;
+  file_name.fill('0');
+  int digits = log10(max_steps) + 1;
+  file_name.width(digits);
+  file_name << step;
+  file_name << file_extension;
+
+  // Include path
+  if (!path.empty()) path = working_dir_ + path;
+
+  // Create results folder if not present
+  boost::filesystem::path dir(path);
+  if (!boost::filesystem::exists(dir)) boost::filesystem::create_directory(dir);
+
+  // Create analysis folder
+  path += analysis_id + "/";
+  dir = path;
+  if (!boost::filesystem::exists(dir)) boost::filesystem::create_directory(dir);
+
+  boost::filesystem::path file_path(path + file_name.str().c_str());
+  return file_path;
+}
+
+//! Return output folder
+std::string mpm::IO::output_folder() const {
+  std::string path{"results/"};
+
+  Json json_postprocess = this->post_processing();
+
+  try {
+    auto results = json_postprocess.at("path");
+    if (!results.empty()) path = results;
+
+  } catch (std::exception& except) {
+    console_->error("Output file creation: {}", except.what());
+    console_->warn("Using default path: {}", path);
+  }
+  return path;
+}
