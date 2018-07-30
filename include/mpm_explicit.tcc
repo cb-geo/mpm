@@ -238,7 +238,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-
     // Stats
     // TODO: Remove
     // Iterate over each particle stats
@@ -256,11 +255,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     */
-    this->write_vtk(step, this->nsteps_); 
+    this->write_vtk(step, this->nsteps_);
   }
   return status;
 }
-
 
 //! Write VTK  files
 template <unsigned Tdim>
@@ -277,32 +275,11 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
 
-  /*
-  // Write displacement vector to file
-  attribute = "displacement";
-  std::string disp_file =
+  unsigned phase = 0;
+  // Write stress vector
+  attribute = "stresses";
+  auto stress_file =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(disp_file, mesh_->nodal_displacements(),
-                                      attribute);
-  // Write rotation vector to file
-  attribute = "rotation";
-  std::string rot_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(rot_file, mesh_->nodal_rotations(),
-                                      attribute);
-
-  // Write force vector
-  attribute = "force";
-  auto force_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(force_file, mesh_->nodal_forces(),
-                                      attribute);
-
-  // Write moment vector
-  attribute = "moment";
-  auto moment_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(moment_file, mesh_->nodal_moments(),
-                                      attribute);
-  */                                      
+  vtk_writer->write_vector_point_data(
+      stress_file, meshes_.at(0)->particle_stresses(phase), attribute);
 }

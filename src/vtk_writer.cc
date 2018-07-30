@@ -7,7 +7,7 @@ VtkWriter::VtkWriter(
     const std::vector<Eigen::Matrix<double, 3, 1>>& coordinates) {
   // Assign points
   points_ = vtkSmartPointer<vtkPoints>::New();
-  unsigned id = 0;
+  unsigned long long id = 0;
   for (const auto& coordinate : coordinates) {
     const double* point = coordinate.data();
     points_->InsertPoint(id, point);
@@ -30,11 +30,14 @@ void VtkWriter::write_geometry(const std::string& filename) {
 
   writer->SetFileName(filename.c_str());
 
+  writer->SetDataModeToBinary();
+  
 #if VTK_MAJOR_VERSION <= 5
   writer->SetInput(pdata);
 #else
   writer->SetInputData(pdata);
 #endif
+
   writer->Write();
 }
 
@@ -72,6 +75,8 @@ void VtkWriter::write_vector_point_data(
 
   writer->SetFileName(filename.c_str());
 
+  writer->SetDataModeToBinary();
+  
 #if VTK_MAJOR_VERSION <= 5
   writer->SetInput(pdata);
 #else
