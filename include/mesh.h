@@ -141,6 +141,10 @@ class Mesh {
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
+  //! Return particle stresses
+  //! \param[in] phase Index corresponding to the phase
+  std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses(unsigned phase);
+
   //! Assign velocity constraints
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
   bool assign_velocity_constraints(
