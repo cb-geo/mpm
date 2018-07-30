@@ -263,7 +263,7 @@ template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   const auto coordinates = meshes_.at(0)->particle_coordinates();
   // VTK PolyData writer
-  std::unique_ptr<VtkWriter> vtk_writer(new VtkWriter(coordinates));
+  auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
 
   // Write input geometry to vtk file
   std::string attribute = "geometry";

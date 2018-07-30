@@ -286,6 +286,7 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_coordinates()
     Eigen::Vector3d coordinates;
     coordinates.setZero();
     auto pcoords = (*pitr)->coordinates();
+    // Fill coordinates to the size of dimensions
     for (unsigned i = 0; i < Tdim; ++i) coordinates(i) = pcoords(i);
     particle_coordinates.emplace_back(coordinates);
   }

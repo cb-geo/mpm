@@ -70,6 +70,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/src/vtk_writer.cc
   ${mpm_SOURCE_DIR}/src/main.cc
 )
 add_executable(mpm
@@ -88,6 +89,7 @@ SET(test_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/src/vtk_writer.cc
   ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
   ${mpm_SOURCE_DIR}/tests/cell_test.cc
   ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
