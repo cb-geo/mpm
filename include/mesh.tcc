@@ -280,7 +280,8 @@ bool mpm::Mesh<Tdim>::add_neighbour(
 
 //! Return particle coordinates
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_coordinates() {
+std::vector<Eigen::Matrix<double, 3, 1>>
+    mpm::Mesh<Tdim>::particle_coordinates() {
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     Eigen::Vector3d coordinates;
@@ -295,7 +296,8 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_coordinates()
 
 //! Return particle stresses
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(unsigned phase) {
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(
+    unsigned phase) {
   std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     Eigen::Vector3d stresses;

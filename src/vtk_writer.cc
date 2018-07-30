@@ -31,7 +31,7 @@ void VtkWriter::write_geometry(const std::string& filename) {
   writer->SetFileName(filename.c_str());
 
   writer->SetDataModeToBinary();
-  
+
 #if VTK_MAJOR_VERSION <= 5
   writer->SetInput(pdata);
 #else
@@ -76,7 +76,7 @@ void VtkWriter::write_vector_point_data(
   writer->SetFileName(filename.c_str());
 
   writer->SetDataModeToBinary();
-  
+
 #if VTK_MAJOR_VERSION <= 5
   writer->SetInput(pdata);
 #else

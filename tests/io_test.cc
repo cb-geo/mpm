@@ -111,5 +111,17 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     Json post_processing = io->post_processing();
     // Check post processing data
     REQUIRE(post_processing == json_file["post_processing"]);
+
+    // Check input file name
+    const std::string attribute = "geometry";
+    const std::string extension = ".vtp";
+    const std::string uuid_ = "MPM";
+    unsigned step = 57;
+    unsigned max_steps = 100;
+    auto meshfile =
+        io->output_file(attribute, extension, uuid_, step, max_steps).string();
+    REQUIRE(meshfile == "./results/MPM/geometry057.vtp");
+    // Check output folder
+    REQUIRE(io->output_folder() == "results/");
   }
 }

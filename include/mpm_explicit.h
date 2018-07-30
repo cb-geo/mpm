@@ -34,29 +34,29 @@ class MPMExplicit : public MPM {
   //! Write VTK  files
   void write_vtk(mpm::Index step, mpm::Index max_steps);
 
-   protected:
-    // Generate a unique id for the analysis
-    using mpm::MPM::uuid_;
-    //! Time step size
-    using mpm::MPM::dt_;
-    //! Number of steps
-    using mpm::MPM::nsteps_;
-    //! A unique ptr to IO object
-    using mpm::MPM::io_;
-    //! JSON analysis object
-    using mpm::MPM::analysis_;
-    //! Logger
-    using mpm::MPM::console_;
+ protected:
+  // Generate a unique id for the analysis
+  using mpm::MPM::uuid_;
+  //! Time step size
+  using mpm::MPM::dt_;
+  //! Number of steps
+  using mpm::MPM::nsteps_;
+  //! A unique ptr to IO object
+  using mpm::MPM::io_;
+  //! JSON analysis object
+  using mpm::MPM::analysis_;
+  //! Logger
+  using mpm::MPM::console_;
 
-   private:
-    //! Gravity
-    Eigen::Matrix<double, Tdim, 1> gravity_;
-    //! Mesh object
-    std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
-    //! Materials
-    std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+ private:
+  //! Gravity
+  Eigen::Matrix<double, Tdim, 1> gravity_;
+  //! Mesh object
+  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  //! Materials
+  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
 
-  };  // MPMExplicit class
+};  // MPMExplicit class
 }  // namespace mpm
 
 #include "mpm_explicit.tcc"
