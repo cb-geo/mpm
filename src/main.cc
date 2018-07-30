@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     auto mpm =
         Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
             analysis, std::move(io));
-    
+
     // Solve
     mpm->solve();
 

@@ -545,8 +545,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() == mesh->nparticles());
-              
+            REQUIRE(mesh->particle_stresses(phase).size() ==
+                    mesh->nparticles());
+
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
@@ -1154,7 +1155,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() == mesh->nparticles());
+            REQUIRE(mesh->particle_stresses(phase).size() ==
+                    mesh->nparticles());
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
