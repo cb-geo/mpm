@@ -278,6 +278,21 @@ bool mpm::Mesh<Tdim>::add_neighbour(
   return insertion_status;
 }
 
+//! Return particle coordinates
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_coordinates() {
+  std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates;
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    Eigen::Vector3d coordinates;
+    coordinates.setZero();
+    auto pcoords = (*pitr)->coordinates();
+    for (unsigned i = 0; i < Tdim; ++i) coordinates(i) = pcoords(i);
+    particle_coordinates.emplace_back(coordinates);
+  }
+  return particle_coordinates;
+}
+
+
 //! Assign velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_velocity_constraints(

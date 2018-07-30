@@ -3,8 +3,9 @@
 //! VTK Writer class Constructor with coordniates
 //! \param[in] coordinate Point coordinates
 //! \param[in] node_pairs Node ID pairs to form elements
-VtkWriter::VtkWriter(const std::vector<Eigen::Vector3d>& coordinates) {
-  // Assing points
+VtkWriter::VtkWriter(
+    const std::vector<Eigen::Matrix<double, 3, 1>>& coordinates) {
+  // Assign points
   points_ = vtkSmartPointer<vtkPoints>::New();
   unsigned id = 0;
   for (const auto& coordinate : coordinates) {

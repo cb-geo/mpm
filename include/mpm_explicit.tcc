@@ -256,3 +256,49 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   }
   return status;
 }
+
+
+//! Write VTK  files
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
+  const auto coordinates = meshes_.at(0)->particle_coordinates();
+  // VTK PolyData writer
+  std::unique_ptr<VtkWriter> vtk_writer(new VtkWriter(coordinates));
+
+  // Write input geometry to vtk file
+  std::string attribute = "geometry";
+  std::string extension = ".vtp";
+
+  /*
+  auto meshfile =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_geometry(meshfile);
+
+  // Write displacement vector to file
+  attribute = "displacement";
+  std::string disp_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(disp_file, mesh_->nodal_displacements(),
+                                      attribute);
+  // Write rotation vector to file
+  attribute = "rotation";
+  std::string rot_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(rot_file, mesh_->nodal_rotations(),
+                                      attribute);
+
+  // Write force vector
+  attribute = "force";
+  auto force_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(force_file, mesh_->nodal_forces(),
+                                      attribute);
+
+  // Write moment vector
+  attribute = "moment";
+  auto moment_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(moment_file, mesh_->nodal_moments(),
+                                      attribute);
+  */                                      
+}

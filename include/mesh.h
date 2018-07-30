@@ -138,6 +138,9 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Return coordinates of particles
+  std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
+
   //! Assign velocity constraints
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
   bool assign_velocity_constraints(
