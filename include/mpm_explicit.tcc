@@ -170,7 +170,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  for (mpm::Index steps = 0; steps < this->nsteps_; ++steps) {
+  for (mpm::Index step = 0; step < this->nsteps_; ++step) {
 
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
@@ -245,14 +245,39 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
 
     // TODO: Remove stats
-    /*
-    std::cout << "After: \n";
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+    /*
+        meshes_.at(0)->iterate_over_nodes_predicate(
+            std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
+            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
     */
-    meshes_.at(0)->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    this->write_vtk(step, this->nsteps_);
   }
   return status;
+}
+
+//! Write VTK  files
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
+  const auto coordinates = meshes_.at(0)->particle_coordinates();
+  // VTK PolyData writer
+  auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
+
+  // Write input geometry to vtk file
+  std::string attribute = "geometry";
+  std::string extension = ".vtp";
+
+  auto meshfile =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_geometry(meshfile);
+
+  unsigned phase = 0;
+  // Write stress vector
+  attribute = "stresses";
+  auto stress_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(
+      stress_file, meshes_.at(0)->particle_stresses(phase), attribute);
 }

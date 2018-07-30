@@ -541,6 +541,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
 
+            const unsigned phase = 0;
+            // Particles coordinates
+            REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
+            // Particle stresses
+            REQUIRE(mesh->particle_stresses(phase).size() ==
+                    mesh->nparticles());
+
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
@@ -1143,6 +1150,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // This fails with empty list error in particle creation
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
+
+            const unsigned phase = 0;
+            // Particles coordinates
+            REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
+            // Particle stresses
+            REQUIRE(mesh->particle_stresses(phase).size() ==
+                    mesh->nparticles());
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh

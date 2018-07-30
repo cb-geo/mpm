@@ -4,6 +4,7 @@
 
 #include "io.h"
 #include "mpm.h"
+#include "vtk_writer.h"
 
 int main(int argc, char** argv) {
   // Logger level (trace, debug, info, warn, error, critical, off)
@@ -23,12 +24,6 @@ int main(int argc, char** argv) {
     auto mpm =
         Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
             analysis, std::move(io));
-
-    // Initialise mesh
-    mpm->initialise_mesh_particles();
-
-    // Initialise materials
-    mpm->initialise_materials();
 
     // Solve
     mpm->solve();

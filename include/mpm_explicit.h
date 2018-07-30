@@ -31,6 +31,9 @@ class MPMExplicit : public MPM {
   //! Solve
   bool solve();
 
+  //! Write VTK  files
+  void write_vtk(mpm::Index step, mpm::Index max_steps);
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
