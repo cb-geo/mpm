@@ -45,6 +45,21 @@ class IO {
   //! Return post processing object
   Json post_processing() const { return json_["post_processing"]; }
 
+  //! Return the output folder for the analysis
+  std::string output_folder() const;
+
+  //! Create output VTK file names (eg. velocity0000*.vtk)
+  //! Generates a file based on attribute, current step and maxsteps
+  //! \param[in] attribute Attribute being written (eg., velocity / stress)
+  //! \param[in] file_extension File Extension (*.vtk or *.vtp)
+  //! \param[in] step Current step
+  //! \param[in] max_steps Total number of steps to be solved
+  //! \return file_name File name with the correct attribute and a VTK extension
+  boost::filesystem::path output_file(const std::string& attribute,
+                                      const std::string& file_extension,
+                                      const std::string& analysis_id,
+                                      unsigned step, unsigned max_steps);
+
  private:
   //! Working directory
   std::string working_dir_;
