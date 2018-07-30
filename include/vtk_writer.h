@@ -18,7 +18,7 @@
 class VtkWriter {
  public:
   // Constructor with coordinates
-  VtkWriter(const std::vector<Eigen::Vector3d>& coordinates);
+  VtkWriter(const std::vector<Eigen::Matrix<double, 3, 1>>& coordinates);
 
   //! Write coordinates
   void write_geometry(const std::string& filename);

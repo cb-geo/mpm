@@ -13,6 +13,7 @@
 #include "mesh.h"
 #include "read_mesh.h"
 #include "read_mesh_ascii.h"
+#include "vtk_writer.h"
 
 namespace mpm {
 //! MPM class
@@ -35,6 +36,9 @@ class MPM {
 
   // Solve
   virtual bool solve() = 0;
+
+  //! Write VTK  files
+  virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
 
  protected:
   //! A unique id for the analysis
