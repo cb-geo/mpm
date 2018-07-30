@@ -8,10 +8,14 @@
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
+#include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 #include <vtkVersion.h>
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkZLibDataCompressor.h>
+
+#include <string>
+#include <vector>
 
 //! VTK Writer class
 //! \brief VTK writer class

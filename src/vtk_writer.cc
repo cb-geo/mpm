@@ -25,9 +25,6 @@ void VtkWriter::write_geometry(const std::string& filename) {
   // Add the points to the dataset
   pdata->SetPoints(points_);
 
-  // Add the lines to the dataset
-  pdata->SetLines(lines_);
-
   // Write file
   auto writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
 
@@ -54,9 +51,6 @@ void VtkWriter::write_vector_point_data(
 
   // Add the points to the dataset
   pdata->SetPoints(points_);
-
-  // Add the lines to the dataset
-  pdata->SetLines(lines_);
 
   // Create an array to hold distance information
   auto vectordata = vtkSmartPointer<vtkDoubleArray>::New();
