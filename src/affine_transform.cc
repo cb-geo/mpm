@@ -1,15 +1,15 @@
 #include "affine_transform.h"
 
 // 1D
-// M=[0 1; 1 1];
+// M=[-1 1; 1 1];
 // K1 = transpose(M) * inverse (M*transpose(M));
 template <>
 const Eigen::Matrix<double, 2, 1> mpm::TransformR2UAffine<1, 2>::KA =
-    (Eigen::Matrix<double, 2, 1>() << -1.000000f, 1.000000f).finished();
+    (Eigen::Matrix<double, 2, 1>() << -0.500000f, 0.500000f).finished();
 
 template <>
 const Eigen::Matrix<double, 2, 1> mpm::TransformR2UAffine<1, 2>::Kb =
-    (Eigen::Matrix<double, 2, 1>() << 1.000000f, 0.000000f).finished();
+    (Eigen::Matrix<double, 2, 1>() << 0.500000f, 0.500000f).finished();
 
 // 2D
 // M=[-1 1 1 -1;-1 -1 1 1;1 1 1 1];
@@ -31,9 +31,12 @@ const Eigen::Matrix<double, 4, 1> mpm::TransformR2UAffine<2, 4>::Kb =
         .finished();
 
 // 3D
-// M=[-1 1 1 -1 -1 1 1 -1;-1 -1 1 1 -1 -1 1 1; -1 -1 -1 -1 1 1 1 1; 1 1 1 1 1 1
-// 11]; K3 = transpose(M) * inverse(M*transpose(M))
 // clang-format off
+// M=[-1  1  1 -1 -1  1 1 -1; ...
+//    -1 -1  1  1 -1 -1 1  1; ...
+//    -1 -1 -1 -1  1  1 1  1; ...
+//     1  1  1  1  1  1 1  1];
+// K3 = transpose(M) * inverse(M*transpose(M))
 template <>
 const Eigen::Matrix<double, 8, 3> mpm::TransformR2UAffine<3, 8>::KA =
     (Eigen::Matrix<double, 8, 3>() <<
