@@ -133,7 +133,7 @@ std::string mpm::IO::output_folder() const {
   Json json_postprocess = this->post_processing();
 
   try {
-    auto results = json_postprocess.at("results");
+    auto results = json_postprocess.at("path");
     if (!results.empty()) path = results;
 
   } catch (std::exception& except) {

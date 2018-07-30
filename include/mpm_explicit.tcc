@@ -170,7 +170,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  for (mpm::Index steps = 0; steps < this->nsteps_; ++steps) {
+  for (mpm::Index step = 0; step < this->nsteps_; ++step) {
 
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
@@ -238,6 +238,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
+
     // Stats
     // TODO: Remove
     // Iterate over each particle stats
@@ -249,10 +250,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     std::cout << "After: \n";
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
-    */
+
     meshes_.at(0)->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    */
+    this->write_vtk(step, this->nsteps_); 
   }
   return status;
 }
@@ -269,11 +273,11 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   std::string attribute = "geometry";
   std::string extension = ".vtp";
 
-  /*
   auto meshfile =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
 
+  /*
   // Write displacement vector to file
   attribute = "displacement";
   std::string disp_file =
