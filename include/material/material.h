@@ -52,7 +52,7 @@ class Material {
   bool status() const { return status_; }
 
   //! Read material properties
-  //! \param[in] materail_properties Material properties
+  //! \param[in] material_properties Material properties
   virtual void properties(const Json&) = 0;
 
   //! Get material property
