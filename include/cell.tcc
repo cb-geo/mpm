@@ -213,9 +213,6 @@ inline void mpm::Cell<2>::compute_volume() {
     if (this->volume_ <= 0)
       throw std::runtime_error(
           "Negative or zero volume cell, misconfigured cell!");
-
-    std::cout << "Volume: " << this->volume_ << "\n";
-
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
               << "Compute volume of a cell: " << except.what() << '\n';
@@ -274,9 +271,6 @@ inline void mpm::Cell<3>::compute_volume() {
     if (this->volume_ <= 0)
       throw std::runtime_error(
           "Negative or zero volume cell, misconfigured cell!");
-
-    std::cout << "Volume: " << this->volume_ << "\n";
-
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
               << "Compute volume of a cell: " << except.what() << '\n';
