@@ -623,12 +623,15 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Tolerance for newton raphson
   const double tolerance = 1.e-10;
 
+  // Get indices of corner nodes
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(2, this->nfunctions());
+  nodal_coords.resize(2, indices.size());
 
-  for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    Eigen::Matrix<double, 2, 1> node = nodes_[j]->coordinates();
+  for (unsigned j = 0; j < indices.size(); ++j) {
+    Eigen::Matrix<double, 2, 1> node = nodes_[indices[j]]->coordinates();
     for (unsigned i = 0; i < 2; ++i) {
       nodal_coords(i, j) = node[i];
     }
@@ -710,12 +713,15 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // Tolerance for newton raphson
   const double tolerance = 1.e-11;
 
+  // Get indices of corner nodes
+  Eigen::VectorXi indices = shapefn_->corner_indices();
+  
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(3, this->nfunctions());
+  nodal_coords.resize(3, indices.size());
 
-  for (unsigned j = 0; j < this->nfunctions(); ++j) {
-    Eigen::Matrix<double, 3, 1> node = nodes_[j]->coordinates();
+  for (unsigned j = 0; j < indices.size(); ++j) {
+    Eigen::Matrix<double, 3, 1> node = nodes_[indices[j]]->coordinates();
     for (unsigned i = 0; i < 3; ++i) {
       nodal_coords(i, j) = node[i];
     }
