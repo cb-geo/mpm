@@ -124,6 +124,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const unsigned Dof = 6;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
+    const unsigned phase = 0;
+    const double dt = 1;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -166,6 +168,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     particle->assign_cell(cell);
     auto check = particle->compute_shapefn();
+    particle->compute_strain(phase, dt);
 
     // Reset stress
     stress.setZero();
@@ -182,7 +185,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
   }
 
-  SECTION("Bingham check stresses with some strain rate") {
+  SECTION("Bingham check stresses with strain rate") {
     unsigned id = 0;
     auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
         "Bingham3D", std::move(id));
@@ -234,6 +237,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const unsigned Dof = 6;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
+    const unsigned phase = 0;
+    const double dt = 1;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -276,6 +281,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     particle->assign_cell(cell);
     auto check = particle->compute_shapefn();
+    particle->compute_strain(phase, dt);
 
     // Yet to implement: add velocity constraint to have certain strain_rate
 

@@ -73,7 +73,7 @@ class Bingham : public Material<Tdim> {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Tau0 - shear
+  //! Tau0 - shear yield stress
   double tau0_{std::numeric_limits<double>::max()};
   //! mu parameter
   double mu_{std::numeric_limits<double>::max()};

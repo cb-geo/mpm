@@ -130,8 +130,9 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
 
 //! Return coordinates of particles
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::ReadMeshAscii<
-    Tdim>::read_particles(const std::string& particles_file) {
+std::vector<Eigen::Matrix<double, Tdim, 1>>
+    mpm::ReadMeshAscii<Tdim>::read_particles(
+        const std::string& particles_file) {
 
   // Nodal coordinates
   std::vector<VectorDim> coordinates;
