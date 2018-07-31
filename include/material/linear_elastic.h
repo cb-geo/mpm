@@ -34,7 +34,7 @@ class LinearElastic : public Material<Tdim> {
   LinearElastic& operator=(const LinearElastic&) = delete;
 
   //! Read material properties
-  //! \param[in] materail_properties Material properties
+  //! \param[in] material_properties Material properties
   void properties(const Json& material_properties);
 
   //! Compute elastic tensor
