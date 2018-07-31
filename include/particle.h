@@ -124,7 +124,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return strain rate of the particle
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd strain_rate(unsigned phase) const;
+  Eigen::VectorXd strain_rate(unsigned phase) const {
+    return strain_rate_;
+  };
 
   //! Compute stress
   bool compute_stress(unsigned phase) override;
@@ -189,6 +191,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
+  //! strain rate
+  Eigen::VectorXd strain_rate_;  
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Shape functions

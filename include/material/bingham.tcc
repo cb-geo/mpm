@@ -25,11 +25,7 @@ Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {
   Eigen::Matrix<double, 6, 6> de;
   de.setZero();
 
-  try {
-    throw std::runtime_error("Elastic tensor is not used for this material");
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-  }
+  throw std::runtime_error("Elastic tensor is not used for this material");
 
   return de;
 }
@@ -42,12 +38,8 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   Vector6d stress_results;
   stress_results.setZero();
 
-  try {
-    throw std::runtime_error(
+  throw std::runtime_error(
         "Stress computation for this material is not valid");
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-  }
 
   return stress_results;
 }
@@ -58,8 +50,8 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr) {
 
-  unsigned phase = 0;
-  auto strain_rate = ptr->strain_rate(phase);
+  const unsigned phase = 0;
+  const auto strain_rate = ptr->strain_rate(phase);
 
   // Bulk modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
@@ -85,9 +77,18 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // Compute deviatoric strain
   Eigen::Vector3d tau;
   tau.setZero();
-  tau(0) = factor * strain_rate(0);
-  tau(1) = factor * strain_rate(1);
-  tau(2) = factor * strain_rate(2);
+  try {
+    if (Tdim == 2) {
+      tau(0) = factor * strain_rate(0);
+      tau(1) = factor * strain_rate(1);
+    } else if (Tdim == 3) {
+      tau = factor * strain_rate.head(3);
+    } else {
+      throw std::runtime_error("Material model is not for 1D problem");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';  
+  }
 
   // double sum_squared_tau = 0.5 * (tau(0) * tau(0) + tau(1) * tau(1) + tau(2)
   // * tau(2));
@@ -97,12 +98,24 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // Update stress
   Eigen::Matrix<double, 6, 1> stress_results;
   stress_results.setZero();
-  stress_results(0) = tau(0) + pressure_new;
-  stress_results(1) = tau(1) + pressure_new;
-  stress_results(2) = tau(2) + pressure_new;
-  stress_results(3) = factor * strain_rate(3);
-  stress_results(4) = factor * strain_rate(4);
-  stress_results(5) = factor * strain_rate(5);
+  try {
+    if (Tdim == 2) {
+      stress_results(0) = tau(0) + pressure_new;
+      stress_results(1) = tau(1) + pressure_new;
+      stress_results(3) = tau(2) + pressure_new;
+    } else if (Tdim == 3) {
+      stress_results(0) = tau(0) + pressure_new;
+      stress_results(1) = tau(1) + pressure_new;
+      stress_results(2) = tau(2) + pressure_new;
+      stress_results(3) = factor * strain_rate(3);
+      stress_results(4) = factor * strain_rate(4);
+      stress_results(5) = factor * strain_rate(5);    
+    } else {
+      throw std::runtime_error("Material model is not for 1D problem");
+    }
+  } catch (std::exception& exception) {
+    std::cerr << exception.what() << '\n';  
+  }
 
   return stress_results;
 }
