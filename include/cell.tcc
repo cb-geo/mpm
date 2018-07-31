@@ -625,7 +625,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
-  
+
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
   nodal_coords.resize(2, indices.size());
@@ -715,7 +715,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
-  
+
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
   nodal_coords.resize(3, indices.size());
