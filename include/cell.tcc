@@ -161,7 +161,8 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
 //! Computes the length of cell
 template <>
 inline void mpm::Cell<1>::compute_volume() {
-  this->volume_ = (nodes_[0]->coordinates()[0] - nodes_[1]->coordinates()[1]);
+  this->volume_ =
+      std::fabs(nodes_[0]->coordinates()[0] - nodes_[1]->coordinates()[1]);
 }
 
 //! Compute volume of a 2D cell
@@ -208,6 +209,13 @@ inline void mpm::Cell<2>::compute_volume() {
       throw std::runtime_error(
           "Unable to compute volume, number of vertices is incorrect");
     }
+    // Check negative volume
+    if (this->volume_ <= 0)
+      throw std::runtime_error(
+          "Negative or zero volume cell, misconfigured cell!");
+
+    std::cout << "Volume: " << this->volume_ << "\n";
+
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
               << "Compute volume of a cell: " << except.what() << '\n';
@@ -262,6 +270,13 @@ inline void mpm::Cell<3>::compute_volume() {
       throw std::runtime_error(
           "Unable to compute volume, number of vertices is incorrect");
     }
+    // Check negative volume
+    if (this->volume_ <= 0)
+      throw std::runtime_error(
+          "Negative or zero volume cell, misconfigured cell!");
+
+    std::cout << "Volume: " << this->volume_ << "\n";
+
   } catch (std::exception& except) {
     std::cout << __FILE__ << __LINE__
               << "Compute volume of a cell: " << except.what() << '\n';
