@@ -9,6 +9,10 @@
 [![](https://img.shields.io/github/issues-raw/cb-geo/mpm.svg)](https://github.com/cb-geo/mpm/issues)
 [![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/cb-geo/mpm/projects/)
 
+## Documentation
+
+Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for information on compiling, and running the code. The documentation also include the MPM theory.
+
 ## Install dependencies
 
 * Docker image for CB-Geo mpm code [https://hub.docker.com/r/cbgeo/mpm](https://hub.docker.com/r/cbgeo/mpm)
@@ -21,6 +25,19 @@
 * [Boost](http://www.boost.org/)
 * [Eigen](http://eigen.tuxfamily.org/)
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
+* [HDF5](https://support.hdfgroup.org/HDF5/)
+* [VTK](https://www.vtk.org/)
+
+### Fedora installation
+
+Please run the following command:
+
+```shell
+dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
+                   git hdf5 hdf5-devel kernel-devel lcov\
+                   make openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
+                   voro++ voro++-devel vtk vtk-devel wget
+```
 
 ## Compile and Run
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
