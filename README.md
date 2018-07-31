@@ -39,7 +39,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
                    voro++ voro++-devel vtk vtk-devel wget
 ```
 
-## Compile and Run
+## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
 0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
@@ -49,6 +49,37 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 ### Run tests
 
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
+
+### Run MPM
+
+The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
+
+```
+./mpm  -a <analysis> [-i <input_file>] -f <working_dir> [--] [--version]
+       [-h]
+```
+
+Where:
+
+```
+   -a <analysis>,  --analysis <analysis>
+     (required)  MPM analysis
+
+   -i <input_file>,  --input_file <input_file>
+     Input JSON file [mpm.json]
+
+   -f <working_dir>,  --working_dir <working_dir>
+     (required)  Current working folder
+
+   --,  --ignore_rest
+     Ignores the rest of the labeled arguments following this flag.
+
+   --version
+     Displays version information and exits.
+
+   -h,  --help
+     Displays usage information and exits.
+```
 
 ## References
 * [Aspect](https://github.com/geodynamics/aspect)
