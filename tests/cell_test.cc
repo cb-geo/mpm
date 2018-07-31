@@ -144,6 +144,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       // Check if cell is initialised, after volume calculation
       REQUIRE(cell->is_initialised() == true);
 
+      SECTION("Check negative or zero volume cell") {
+        mpm::Index id = 0;
+        auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+        REQUIRE(cell1->add_node(0, node1) == true);
+        REQUIRE(cell1->add_node(1, node1) == true);
+        REQUIRE(cell1->add_node(2, node1) == true);
+        REQUIRE(cell1->add_node(3, node1) == true);
+        REQUIRE(cell1->nnodes() == 4);
+        cell1->compute_volume();
+      }
+
       SECTION("Check if a point is in a cell") {
         // Check point in cell
         Eigen::Vector2d point;
@@ -838,6 +849,21 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(cell->nfunctions() == 8);
 
       REQUIRE(cell->volume() == Approx(8.0).epsilon(Tolerance));
+
+      SECTION("Check negative or zero volume cell") {
+        mpm::Index id = 0;
+        auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+        REQUIRE(cell1->add_node(0, node1) == true);
+        REQUIRE(cell1->add_node(1, node1) == true);
+        REQUIRE(cell1->add_node(2, node1) == true);
+        REQUIRE(cell1->add_node(3, node1) == true);
+        REQUIRE(cell1->add_node(4, node1) == true);
+        REQUIRE(cell1->add_node(5, node1) == true);
+        REQUIRE(cell1->add_node(6, node1) == true);
+        REQUIRE(cell1->add_node(7, node1) == true);
+        REQUIRE(cell1->nnodes() == 8);
+        cell1->compute_volume();
+      }
 
       SECTION("Check if a point is in a cell") {
         // Check point in cell
