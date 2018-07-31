@@ -305,33 +305,33 @@ bool write_particles_3d_unitcell() {
   // Particle 7
   particle << 0.75, 0.75, 0.75;
   coordinates.emplace_back(particle);
-/*
-  // Cell 1
-  // Particle 8
-  particle << 1.25, 0.25, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 9
-  particle << 1.75, 0.25, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 10
-  particle << 1.25, 0.75, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 11
-  particle << 1.75, 0.75, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 12
-  particle << 1.25, 0.25, 0.75;
-  coordinates.emplace_back(particle);
-  // Particle 13
-  particle << 1.25, 0.25, 0.75;
-  coordinates.emplace_back(particle);
-  // Particle 14
-  particle << 1.75, 0.75, 0.75;
-  coordinates.emplace_back(particle);
-  // Particle 15
-  particle << 1.75, 0.75, 0.75;
-  coordinates.emplace_back(particle);
-  */
+  /*
+    // Cell 1
+    // Particle 8
+    particle << 1.25, 0.25, 0.25;
+    coordinates.emplace_back(particle);
+    // Particle 9
+    particle << 1.75, 0.25, 0.25;
+    coordinates.emplace_back(particle);
+    // Particle 10
+    particle << 1.25, 0.75, 0.25;
+    coordinates.emplace_back(particle);
+    // Particle 11
+    particle << 1.75, 0.75, 0.25;
+    coordinates.emplace_back(particle);
+    // Particle 12
+    particle << 1.25, 0.25, 0.75;
+    coordinates.emplace_back(particle);
+    // Particle 13
+    particle << 1.25, 0.25, 0.75;
+    coordinates.emplace_back(particle);
+    // Particle 14
+    particle << 1.75, 0.75, 0.75;
+    coordinates.emplace_back(particle);
+    // Particle 15
+    particle << 1.75, 0.75, 0.75;
+    coordinates.emplace_back(particle);
+    */
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-3d-unitcell.txt");

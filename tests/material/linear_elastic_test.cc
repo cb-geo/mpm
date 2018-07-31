@@ -18,7 +18,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   const double Tolerance = 1.E-7;
 
   const unsigned Dim = 2;
-  
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
@@ -50,7 +50,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
     // Check material status before assigning material property
     REQUIRE(material->status() == false);
-    
+
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
@@ -65,8 +65,9 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(material->status() == true);
 
     // Get material properties
-    REQUIRE(material->property("density") == Approx(jmaterial["density"]).epsilon(Tolerance));
-    
+    REQUIRE(material->property("density") ==
+            Approx(jmaterial["density"]).epsilon(Tolerance));
+
     // Calculate modulus values
     const double K = 8333333.333333333;
     const double G = 3846153.846153846;
@@ -210,14 +211,13 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   }
 }
 
-
 //! Check linearelastic class in 3D
 TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
   const unsigned Dim = 3;
-  
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
@@ -249,7 +249,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
 
     // Check material status before assigning material property
     REQUIRE(material->status() == false);
-    
+
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
@@ -264,8 +264,9 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(material->status() == true);
 
     // Get material properties
-    REQUIRE(material->property("density") == Approx(jmaterial["density"]).epsilon(Tolerance));
-    
+    REQUIRE(material->property("density") ==
+            Approx(jmaterial["density"]).epsilon(Tolerance));
+
     // Calculate modulus values
     const double K = 8333333.333333333;
     const double G = 3846153.846153846;
@@ -398,7 +399,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
 
     // Check if property handle is needed
     REQUIRE(material->property_handle() == false);
-    
+
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
     REQUIRE(stress(1) == Approx(1.53846153845333e+04).epsilon(Tolerance));
