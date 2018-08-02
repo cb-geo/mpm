@@ -94,20 +94,29 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   Eigen::Matrix<double, 6, 1> stress_results;
   stress_results.setZero();
   // Get dirac delta function in Voigt notation
-  Eigen::Matrix<double, 6, 1> dirac_delta;
-  try {
-    if (Tdim == 2) {
-      dirac_delta << 1, 1, 0, 0, 0, 0;
-    } else if (Tdim == 3) {
-      dirac_delta << 1, 1, 1, 0, 0, 0;
-    } else {
-      throw std::runtime_error("Material model is not for 1D problem");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
-  }
+  const auto dirac_delta = this->dirac_delta();
 
   stress_results = pressure_new * dirac_delta + tau;
 
   return stress_results;
+}
+
+//! Dirac delta 2D
+template <>
+Eigen::Matrix<double, 6, 1> mpm::Bingham<2>::dirac_delta() { 
+
+  Eigen::Matrix<double, 6, 1> dirac_delta;  
+  dirac_delta << 1, 1, 0, 0, 0, 0;
+
+  return dirac_delta;
+}
+
+//! Dirac delta 3D
+template <>
+Eigen::Matrix<double, 6, 1> mpm::Bingham<3>::dirac_delta() { 
+
+  Eigen::Matrix<double, 6, 1> dirac_delta;  
+  dirac_delta << 1, 1, 1, 0, 0, 0;
+
+  return dirac_delta;
 }
