@@ -32,7 +32,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
 // Assign a cell to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_cell(
-    std::shared_ptr<Cell<Tdim>> cellptr) {
+    const std::shared_ptr<Cell<Tdim>>& cellptr) {
   bool status = true;
   try {
     // Assign cell to the new cell ptr, if point can be found in new cell
