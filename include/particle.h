@@ -61,7 +61,7 @@ class Particle : public ParticleBase<Tdim> {
   //! cell. If point can't be found in the new cell, check if particle is still
   //! valid in the old cell, if it is leave it as is. If not, set cell as null
   //! \param[in] cellptr Pointer to a cell
-  bool assign_cell(std::shared_ptr<Cell<Tdim>> cellptr);
+  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
 
   //! Return cell id
   Index cell_id() const { return cell_id_; }
