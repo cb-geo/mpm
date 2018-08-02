@@ -6,9 +6,9 @@
 #include "catch.hpp"
 #include "json.hpp"
 
-#include "material/material.h"
 #include "factory.h"
 #include "hex_shapefn.h"
+#include "material/material.h"
 #include "mesh.h"
 #include "node.h"
 #include "shapefn.h"
@@ -272,7 +272,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
   }
 }
-
 
 TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
   // Tolerance
@@ -548,8 +547,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_cell(cell);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-
-    // Yet to implement: add velocity constraint to have certain strain_rate
 
     // Reset stress
     stress.setZero();

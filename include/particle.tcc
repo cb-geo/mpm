@@ -72,6 +72,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   stress_.setZero();
   strain_.setZero();
   dstrain_.setZero();
+  strain_rate_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -342,11 +343,11 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Compute nodal internal forces
-      // -pstress * volume
+      // volume * pstress
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")),
-          -1. * this->stress_.col(phase));
+          this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }

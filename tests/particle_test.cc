@@ -110,6 +110,22 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(17.51).epsilon(Tolerance));
+
+    // Check strain rate
+    Eigen::Matrix<double, 6, 1> strain_rate;
+    for (unsigned i = 0; i < strain_rate.size(); ++i) strain_rate(i) = 17.51;
+
+    for (unsigned i = 0; i < strain_rate.size(); ++i)
+      REQUIRE(particle->strain_rate(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_strain_rate(Phase, strain_rate);
+    for (unsigned i = 0; i < strain_rate.size(); ++i)
+      REQUIRE(particle->strain_rate(Phase)(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
@@ -578,6 +594,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
 
+    // Strain rate
+    Eigen::Matrix<double, 6, 1> strain_rate;
+    strain_rate << 0., 1.25, 0., 0.25, 0., 0.;
+    // Check strain rate
+    for (unsigned i = 0; i < strain_rate.rows(); ++i)
+      REQUIRE(particle->strain_rate(phase)(i) ==
+              Approx(strain_rate(i)).epsilon(Tolerance));
+
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
@@ -740,6 +764,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(17.52).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -1312,6 +1340,15 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
 
+    // Strain rate
+    Eigen::Matrix<double, 6, 1> strain_rate;
+    strain_rate << 0.00000, 0.7500, 4.0000, -0.2500, 3.5000, -0.5000;
+
+    // Check strain rate
+    for (unsigned i = 0; i < strain_rate.rows(); ++i)
+      REQUIRE(particle->strain_rate(phase)(i) ==
+              Approx(strain_rate(i)).epsilon(Tolerance));
+
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
@@ -1488,6 +1525,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    particle->assign_stress(Phase, stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
