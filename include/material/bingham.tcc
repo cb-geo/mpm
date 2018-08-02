@@ -103,9 +103,9 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
 //! Dirac delta 2D
 template <>
-Eigen::Matrix<double, 6, 1> mpm::Bingham<2>::dirac_delta() { 
+Eigen::Matrix<double, 6, 1> mpm::Bingham<2>::dirac_delta() {
 
-  Eigen::Matrix<double, 6, 1> dirac_delta;  
+  Eigen::Matrix<double, 6, 1> dirac_delta;
   dirac_delta << 1, 1, 0, 0, 0, 0;
 
   return dirac_delta;
@@ -113,9 +113,9 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<2>::dirac_delta() {
 
 //! Dirac delta 3D
 template <>
-Eigen::Matrix<double, 6, 1> mpm::Bingham<3>::dirac_delta() { 
+Eigen::Matrix<double, 6, 1> mpm::Bingham<3>::dirac_delta() {
 
-  Eigen::Matrix<double, 6, 1> dirac_delta;  
+  Eigen::Matrix<double, 6, 1> dirac_delta;
   dirac_delta << 1, 1, 1, 0, 0, 0;
 
   return dirac_delta;
