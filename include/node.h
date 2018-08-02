@@ -165,7 +165,7 @@ class Node : public NodeBase<Tdim> {
   // TODO: Remove debug printing
   void stats() {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
-                      std::to_string(status_) + " external_force: ";
+                      std::to_string(status_) + " velocity: ";
     std::string val = "";
     for (unsigned i = 0; i < velocity_.size(); ++i)
       val += std::to_string(velocity_(i, 0)) + "\t";
