@@ -49,7 +49,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["poisson_ratio"] = 0.3;
     jmaterial["tau0"] = 771.8;
     jmaterial["mu"] = 0.0451;
-    jmaterial["strain_cutoff"] = 0.2;
+    jmaterial["critical_shear_rate"] = 0.2;
 
     // Check material status before assigning material property
     REQUIRE(material->status() == false);
@@ -85,7 +85,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["poisson_ratio"] = 0.3;
     jmaterial["tau0"] = 771.8;
     jmaterial["mu"] = 0.0451;
-    jmaterial["strain_cutoff"] = 0.2;
+    jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
 
@@ -198,7 +198,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["poisson_ratio"] = 0.3;
     jmaterial["tau0"] = 771.8;
     jmaterial["mu"] = 0.0451;
-    jmaterial["strain_cutoff"] = 0.2;
+    jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
 

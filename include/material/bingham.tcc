@@ -9,8 +9,8 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
         material_properties["poisson_ratio"].template get<double>();
     tau0_ = material_properties["tau0"].template get<double>();
     mu_ = material_properties["mu"].template get<double>();
-    strain_cutoff_ =
-        material_properties["strain_cutoff"].template get<double>();
+    critical_shear_rate_ =
+        material_properties["critical_shear_rate"].template get<double>();
     properties_ = material_properties;
     status_ = true;
   } catch (std::exception& except) {
@@ -38,8 +38,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   Vector6d stress_results;
   stress_results.setZero();
 
-  throw std::runtime_error(
-        "Stress computation for this material is not valid");
+  throw std::runtime_error("Stress computation for this material is not valid");
 
   return stress_results;
 }
@@ -58,63 +57,57 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // Make minimum of strain_cutoff accuracy
   const double strain_threshold = 1.0E-15;
-  if (strain_cutoff_ < strain_threshold) strain_cutoff_ = strain_threshold;
+  if (critical_shear_rate_ < strain_threshold)
+    critical_shear_rate_ = strain_threshold;
 
   // Get volumetric change and update pressure
+  // p_1 = p_0 + dp
+  // dp = K * strain_volumetric
   const double pressure_old = (stress(0) + stress(1) + stress(2)) / 3.0;
   const double dpressure = K * (dstrain(0) + dstrain(1) + dstrain(2));
   const double pressure_new = pressure_old + dpressure;
 
-  const double invariant2 = 0.5 * strain_rate.dot(strain_rate);
-
-  // Compute deviatoric change
-  double factor;
-  if (std::sqrt(invariant2) > strain_cutoff_)
-    factor = ((tau0_ / (std::sqrt(invariant2))) + 2 * mu_);
+  // Checking yielding from strain rate vs critical yielding shear rate
+  // rate of shear = sqrt(2 * strain_rate * strain_rate)
+  // yielding is defined: rate of shear > critical_shear_rate_^2
+  // modulus maps shear rate to shear stress
+  const double shear_rate = 2 * strain_rate.dot(strain_rate);
+  double modulus;
+  if (shear_rate > critical_shear_rate_ * critical_shear_rate_)
+    modulus = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
   else
-    factor = 0.;
+    modulus = 0.;
 
-  // Compute deviatoric strain
-  Eigen::Vector3d tau;
+  // Compute shear change to volumetric
+  // tau deviatoric part of cauchy stress tensor
+  // size depends on dimension
+  Eigen::VectorXd tau;
   tau.setZero();
-  try {
-    if (Tdim == 2) {
-      tau(0) = factor * strain_rate(0);
-      tau(1) = factor * strain_rate(1);
-    } else if (Tdim == 3) {
-      tau = factor * strain_rate.head(3);
-    } else {
-      throw std::runtime_error("Material model is not for 1D problem");
-    }
-  } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';  
-  }
+  tau = modulus * strain_rate;
 
-  // double sum_squared_tau = 0.5 * (tau(0) * tau(0) + tau(1) * tau(1) + tau(2)
-  // * tau(2));
-  double sum_squared_tau = 0.5 * tau.dot(tau);
-  if (sum_squared_tau < (tau0_ * tau0_)) tau.setZero();
+  // Use von Mises criterion
+  // second invariant of tau > 2 tau0^2
+  double invariant2 = tau.dot(tau);
+  if (invariant2 < 2 * (tau0_ * tau0_)) tau.setZero();
 
-  // Update stress
+  // Update volumetric and deviatoric stress
   Eigen::Matrix<double, 6, 1> stress_results;
   stress_results.setZero();
+  // Get dirac function in Voigt notation
+  Eigen::Matrix<double, 6, 1> dirac;
+  dirac << 1, 1, 1, 0, 0, 0;
   try {
     if (Tdim == 2) {
       stress_results(0) = tau(0) + pressure_new;
       stress_results(1) = tau(1) + pressure_new;
-      stress_results(3) = tau(2) + pressure_new;
+      stress_results(3) = tau(2);
     } else if (Tdim == 3) {
-      stress_results(0) = tau(0) + pressure_new;
-      stress_results(1) = tau(1) + pressure_new;
-      stress_results(2) = tau(2) + pressure_new;
-      stress_results(3) = factor * strain_rate(3);
-      stress_results(4) = factor * strain_rate(4);
-      stress_results(5) = factor * strain_rate(5);    
+      stress_results = pressure_new * dirac + tau;
     } else {
       throw std::runtime_error("Material model is not for 1D problem");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';  
+    std::cerr << exception.what() << '\n';
   }
 
   return stress_results;
