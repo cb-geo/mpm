@@ -77,7 +77,7 @@ class Bingham : public Material<Tdim> {
   double tau0_{std::numeric_limits<double>::max()};
   //! mu - constant plastic viscosity [N s / m^2 or kg / m / s]
   double mu_{std::numeric_limits<double>::max()};
-  //! Critical yielding shear rate 
+  //! Critical yielding shear rate
   double critical_shear_rate_{std::numeric_limits<double>::max()};
 
 };  // Bingham class

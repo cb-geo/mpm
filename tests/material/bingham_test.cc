@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <vector>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
@@ -8,6 +9,7 @@
 #include "material/material.h"
 #include "factory.h"
 #include "hex_shapefn.h"
+#include "mesh.h"
 #include "node.h"
 #include "shapefn.h"
 
@@ -106,7 +108,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain.setZero();
     dstrain(0) = 0.0010000;
     dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
+    dstrain(2) = 0.0000000;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -150,7 +152,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     cell->add_node(3, node3);
 
     particle->assign_cell(cell);
-    auto check = particle->compute_shapefn();
+    particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
     // Reset stress
@@ -160,8 +162,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     stress = material->compute_stress(stress, dstrain, particle.get());
 
     // Check stressees
-    REQUIRE(stress(0) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(16666.66666667).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(12500.00000000).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(12500.00000000).epsilon(Tolerance));
     REQUIRE(stress(2) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
@@ -203,7 +205,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain.setZero();
     dstrain(0) = 0.0010000;
     dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
+    dstrain(2) = 0.0000000;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -216,6 +218,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
+    mpm::Index mesh_id = 0;
     const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
@@ -239,6 +242,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
         Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
 
+    node0->assign_velocity_constraint(0, 2);
+    node0->assign_velocity_constraint(1, 3);
+    node0->apply_velocity_constraints();
+
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, shapefn);
 
     cell->add_node(0, node0);
@@ -247,10 +254,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     cell->add_node(3, node3);
 
     particle->assign_cell(cell);
-    auto check = particle->compute_shapefn();
+    particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-
-    // Yet to implement: add velocity constraint to have certain strain_rate
 
     // Reset stress
     stress.setZero();
@@ -259,10 +264,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     stress = material->compute_stress(stress, dstrain, particle.get());
 
     // Check stressees
-    REQUIRE(stress(0) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(16666.66666667).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(12145.8400481974).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(11968.7600722961).epsilon(Tolerance));
     REQUIRE(stress(2) == Approx(0.000000e+00).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(-885.3998795065).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
   }
@@ -423,7 +428,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     cell->add_node(7, node7);
 
     particle->assign_cell(cell);
-    auto check = particle->compute_shapefn();
+    particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
     // Reset stress
@@ -524,6 +529,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
         Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
 
+    node0->assign_velocity_constraint(0, 2);
+    node0->assign_velocity_constraint(1, 3);
+    node0->assign_velocity_constraint(2, 4);
+    node0->apply_velocity_constraints();
+
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, shapefn);
 
     cell->add_node(0, node0);
@@ -536,7 +546,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     cell->add_node(7, node7);
 
     particle->assign_cell(cell);
-    auto check = particle->compute_shapefn();
+    particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
     // Yet to implement: add velocity constraint to have certain strain_rate
@@ -548,11 +558,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     stress = material->compute_stress(stress, dstrain, particle.get());
 
     // Check stressees
-    REQUIRE(stress(0) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.000000e+00).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(0.000000e+00).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(0.000000e+00).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(16453.03817331399).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(16346.22438237844).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(16410.31247464346).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(-534.0714035477).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(-619.5228281154).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(-555.4342596897).epsilon(Tolerance));
   }
 }
