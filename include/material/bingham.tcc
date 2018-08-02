@@ -30,7 +30,8 @@ Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {
   return de;
 }
 
-//! Compute stress without a particle handle is undefined in the Bingham model, throws an error
+//! Compute stress without a particle handle is undefined in the Bingham model,
+//! throws an error
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain) {
