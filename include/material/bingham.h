@@ -25,7 +25,7 @@ class Bingham : public Material<Tdim> {
   Bingham(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
-  virtual ~Bingham(){};
+  virtual ~Bingham() override{};
 
   //! Delete copy constructor
   Bingham(const Bingham&) = delete;
@@ -35,28 +35,28 @@ class Bingham : public Material<Tdim> {
 
   //! Read material properties
   //! \param[in] material_properties Material properties
-  void properties(const Json& material_properties);
+  void properties(const Json& material_properties) override;
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
-  Matrix6x6 elastic_tensor();
+  Matrix6x6 elastic_tensor() override;
 
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain);
-
+  Vector6d compute_stress(const Vector6d& stress,
+                          const Vector6d& dstrain) override;
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr);
+                          const ParticleBase<Tdim>* ptr) override;
 
   //! Check if this material needs a particle handle
-  bool property_handle() const { return true; }
+  bool property_handle() const override { return false; }
 
  protected:
   //! material id
@@ -79,6 +79,9 @@ class Bingham : public Material<Tdim> {
   double mu_{std::numeric_limits<double>::max()};
   //! Critical yielding shear rate
   double critical_shear_rate_{std::numeric_limits<double>::max()};
+  
+  //! Dirac delta function in Voigt notation
+  Eigen::Matrix<double, 6, 1> dirac_delta();
 
 };  // Bingham class
 }  // namespace mpm
