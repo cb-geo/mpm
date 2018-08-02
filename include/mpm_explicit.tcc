@@ -58,6 +58,14 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
 
+    // Read and assign velocity constraints
+    bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
+        mesh_reader->read_velocity_constraints(
+            io_->file_name("velocity_constraints")));
+    if (!velocity_constraints)
+      throw std::runtime_error(
+          "Velocity constraints are not properly assigned");
+
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
