@@ -55,17 +55,17 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // Bulk modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
-  // Make minimum of strain_cutoff accuracy
-  const double strain_threshold = 1.0E-15;
-  if (critical_shear_rate_ < strain_threshold)
-    critical_shear_rate_ = strain_threshold;
-
   // Get volumetric change and update pressure
   // p_1 = p_0 + dp
   // dp = K * strain_volumetric
   const double pressure_old = (stress(0) + stress(1) + stress(2)) / 3.0;
   const double dpressure = K * (dstrain(0) + dstrain(1) + dstrain(2));
   const double pressure_new = pressure_old + dpressure;
+
+  // Determine accuracy of minimum critical shear rate
+  const double shear_rate_threshold = 1.0E-15;
+  if (critical_shear_rate_ < shear_rate_threshold)
+    critical_shear_rate_ = shear_rate_threshold;
 
   // Checking yielding from strain rate vs critical yielding shear rate
   // rate of shear = sqrt(2 * strain_rate * strain_rate)
@@ -93,16 +93,16 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // Update volumetric and deviatoric stress
   Eigen::Matrix<double, 6, 1> stress_results;
   stress_results.setZero();
-  // Get dirac function in Voigt notation
-  Eigen::Matrix<double, 6, 1> dirac;
-  dirac << 1, 1, 1, 0, 0, 0;
+  // Get dirac delta function in Voigt notation
+  Eigen::Matrix<double, 6, 1> dirac_delta;
+  dirac_delta << 1, 1, 1, 0, 0, 0;
   try {
     if (Tdim == 2) {
       stress_results(0) = tau(0) + pressure_new;
       stress_results(1) = tau(1) + pressure_new;
       stress_results(3) = tau(2);
     } else if (Tdim == 3) {
-      stress_results = pressure_new * dirac + tau;
+      stress_results = pressure_new * dirac_delta + tau;
     } else {
       throw std::runtime_error("Material model is not for 1D problem");
     }

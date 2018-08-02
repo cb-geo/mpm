@@ -73,11 +73,11 @@ class Bingham : public Material<Tdim> {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Tau0 - shear yield stress
+  //! Tau0 - shear yield stress in unit of [Pa]
   double tau0_{std::numeric_limits<double>::max()};
-  //! mu - constant plastic viscosity
+  //! mu - constant plastic viscosity [N s / m^2 or kg / m / s]
   double mu_{std::numeric_limits<double>::max()};
-  //! Critical yielding shear rate
+  //! Critical yielding shear rate 
   double critical_shear_rate_{std::numeric_limits<double>::max()};
 
 };  // Bingham class
