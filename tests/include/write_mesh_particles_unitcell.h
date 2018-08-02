@@ -32,7 +32,7 @@ bool write_json_unitcell(unsigned dim, const std::string& file_name) {
       {"title", "Example JSON Input for MPM"},
       {"input_files",
        {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
-        {"constraints", "mesh_constraints.txt"},
+        {"velocity_constraints", "velocity-constraints-unitcell.txt"},
         {"particles", "particles-" + dimension + "-unitcell.txt"},
         {"initial_stresses", "initial_soil_stress.txt"},
         {"materials", "materials.txt"},
@@ -131,6 +131,13 @@ bool write_mesh_2d_unitcell() {
   }
 
   file.close();
+
+  // Dump mesh velocity constraints
+  std::ofstream file_constraints;
+  file_constraints.open("velocity-constraints-unitcell.txt");
+  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints.close();
+
   return true;
 }
 
@@ -268,6 +275,13 @@ bool write_mesh_3d_unitcell() {
   }
 
   file.close();
+
+  // Dump mesh velocity constraints
+  std::ofstream file_constraints;
+  file_constraints.open("velocity-constraints-unitcell.txt");
+  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints.close();
+
   return true;
 }
 
