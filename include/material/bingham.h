@@ -56,7 +56,7 @@ class Bingham : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr) override;
 
   //! Check if this material needs a particle handle
-  bool property_handle() const override { return false; }
+  bool property_handle() const override { return true; }
 
  protected:
   //! material id
