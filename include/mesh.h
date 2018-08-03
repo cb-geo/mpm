@@ -35,7 +35,6 @@ typedef struct HDF5Particle {
   double tau_xy, tau_yz, tau_xz;
 } HDF5Particle;
 
-
 //! Mesh class
 //! \brief Base class that stores the information about meshes
 //! \details Mesh class which stores the particles, nodes, cells and neighbours
@@ -187,7 +186,7 @@ class Mesh {
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of writing HDF5 output
   bool write_particles_hdf5(unsigned phase, const std::string& filename);
-  
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
