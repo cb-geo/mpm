@@ -32,6 +32,11 @@ jobs:
           command: |
             cppcheck --version
             cppcheck --enable=warning --inconclusive --force --language=c++ --std=c++11 src/*.cc include/*.h include/*.tcc --error-exitcode=1
+      # clang-format
+      - run:
+          name: clang-format
+          command: |
+            python ./run-clang-format.py -r include/* src/* tests/*
       # codecoverage
       - run:
           name: codecov.io
