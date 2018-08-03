@@ -70,41 +70,41 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   }
 
   //! Return number of shape functions
-  unsigned nfunctions() const { return Tnfunctions; }
+  unsigned nfunctions() const override { return Tnfunctions; }
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
   //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi);
+  Eigen::VectorXd shapefn(const VectorDim& xi) override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi);
+  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) override;
 
   //! Evaluate the B matrix at given local coordinates
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi);
+  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) override;
 
   //! Return the degree of shape function
-  mpm::ShapeFnDegree degree() const;
+  mpm::ShapeFnDegree degree() const override;
 
   //! Return nodal coordinates of a unit cell
-  Eigen::MatrixXd unit_cell_coordinates() const;
+  Eigen::MatrixXd unit_cell_coordinates() const override;
 
   //! Return the side indices of a cell to calculate the cell length
   //! \retval indices Outer-indices that form the sides of the cell
-  Eigen::MatrixXi sides_indices();
+  Eigen::MatrixXi sides_indices() override;
 
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
-  Eigen::VectorXi corner_indices();
+  Eigen::VectorXi corner_indices() override;
 
   //! Return indices of a sub-tetrahedrons in a volume
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
-  Eigen::MatrixXi inhedron_indices();
+  Eigen::MatrixXi inhedron_indices() override;
 };
 
 }  // namespace mpm

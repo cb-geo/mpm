@@ -23,16 +23,16 @@ class MPMExplicit : public MPM {
   MPMExplicit(std::unique_ptr<IO>&& io);
 
   //! Initialise mesh and particles
-  bool initialise_mesh_particles();
+  bool initialise_mesh_particles() override;
 
   //! Initialise materials
-  bool initialise_materials();
+  bool initialise_materials() override;
 
   //! Solve
-  bool solve();
+  bool solve() override;
 
   //! Write VTK  files
-  void write_vtk(mpm::Index step, mpm::Index max_steps);
+  void write_vtk(mpm::Index step, mpm::Index max_steps) override;
 
  protected:
   // Generate a unique id for the analysis
