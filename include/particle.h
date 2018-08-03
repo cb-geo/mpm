@@ -93,7 +93,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
-  void assign_mass(unsigned phase, double mass) override { mass_(0, phase) = mass; }
+  void assign_mass(unsigned phase, double mass) override {
+    mass_(0, phase) = mass;
+  }
 
   //! Return mass of the particlesx
   //! \param[in] phase Index corresponding to the phase
@@ -101,7 +103,8 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign material
   //! \param[in] material Pointer to a material
-  bool assign_material(const std::shared_ptr<Material<Tdim>>& material) override;
+  bool assign_material(
+      const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -120,7 +123,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign stress to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress A vector of particle stress
-  void assign_stress(unsigned phase, const Eigen::Matrix<double, 6, 1>& stress) override;
+  void assign_stress(unsigned phase,
+                     const Eigen::Matrix<double, 6, 1>& stress) override;
 
   //! Return stress of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -141,7 +145,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(unsigned phase, const Eigen::VectorXd& velocity) override;
+  bool assign_velocity(unsigned phase,
+                       const Eigen::VectorXd& velocity) override;
 
   //! Return velocity of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -153,7 +158,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum A vector of particle momentum
   //! \retval status Assignment status
-  bool assign_momentum(unsigned phase, const Eigen::VectorXd& momentum) override;
+  bool assign_momentum(unsigned phase,
+                       const Eigen::VectorXd& momentum) override;
 
   //! Return momentum of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -165,7 +171,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration A vector of particle acceleration
   //! \retval status Assignment status
-  bool assign_acceleration(unsigned phase, const Eigen::VectorXd& acceleration) override;
+  bool assign_acceleration(unsigned phase,
+                           const Eigen::VectorXd& acceleration) override;
 
   //! Return acceleration of the particle
   //! \param[in] phase Index corresponding to the phase
