@@ -58,6 +58,14 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
 
+    // Read and assign velocity constraints
+    bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
+        mesh_reader->read_velocity_constraints(
+            io_->file_name("velocity_constraints")));
+    if (!velocity_constraints)
+      throw std::runtime_error(
+          "Velocity constraints are not properly assigned");
+
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
@@ -114,7 +122,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
           material_props["type"].template get<std::string>();
 
       // Get material id
-      unsigned material_id = material_props["id"].template get<unsigned>();
+      auto material_id = material_props["id"].template get<unsigned>();
 
       // Create a new material from JSON object
       auto mat = Factory<mpm::Material<Tdim>, unsigned>::instance()->create(
@@ -159,8 +167,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Get mesh properties
   auto mesh_props = io_->json_object("mesh");
   // Material id
-  const unsigned material_id =
-      mesh_props["material_id"].template get<unsigned>();
+  const auto material_id = mesh_props["material_id"].template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);

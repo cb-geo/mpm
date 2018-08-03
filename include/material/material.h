@@ -84,7 +84,7 @@ class Material {
   //! Set true, if material needs other parameters from the particle
   //! For eg, dstrain_rate. These function calls can only to const functions
   virtual bool property_handle() const = 0;
-  
+
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
