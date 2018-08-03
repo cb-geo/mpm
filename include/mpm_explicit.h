@@ -31,8 +31,11 @@ class MPMExplicit : public MPM {
   //! Solve
   bool solve() override;
 
-  //! Write VTK  files
+  //! Write VTK files
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
+
+  //! Write HDF5 files
+  void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
  protected:
   // Generate a unique id for the analysis

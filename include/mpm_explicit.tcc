@@ -260,12 +260,15 @@ bool mpm::MPMExplicit<Tdim>::solve() {
             std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     */
+    // VTK outputs
     this->write_vtk(step, this->nsteps_);
+    // HDF5 outputs
+    this->write_hdf5(step, this->nsteps_);
   }
   return status;
 }
 
-//! Write VTK  files
+//! Write VTK files
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   const auto coordinates = meshes_.at(0)->particle_coordinates();
@@ -287,4 +290,18 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_vector_point_data(
       stress_file, meshes_.at(0)->particle_stresses(phase), attribute);
+}
+
+//! Write HDF5 files
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
+  // Write input geometry to vtk file
+  std::string attribute = "particles";
+  std::string extension = ".h5";
+
+  auto particles_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+
+  const unsigned phase = 0;
+  meshes_.at(0)->write_particles_hdf5(phase, particles_file);
 }
