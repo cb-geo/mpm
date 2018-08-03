@@ -2,13 +2,13 @@
 #define MPM_PARTICLE_H_
 
 #include <array>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "cell.h"
+#include "logger.h"
 #include "particle_base.h"
 
 namespace mpm {
@@ -234,7 +234,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::MatrixXd grad_shapefn_;
   //! B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix_;
-
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };  // Particle class
 }  // namespace mpm
 

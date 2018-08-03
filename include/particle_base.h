@@ -2,7 +2,6 @@
 #define MPM_PARTICLEBASE_H_
 
 #include <array>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>
