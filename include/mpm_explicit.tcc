@@ -167,8 +167,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Get mesh properties
   auto mesh_props = io_->json_object("mesh");
   // Material id
-  const auto material_id =
-      mesh_props["material_id"].template get<unsigned>();
+  const auto material_id = mesh_props["material_id"].template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);
