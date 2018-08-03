@@ -359,9 +359,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     Eigen::Vector3d coordinates;
     coordinates.setZero();
     Eigen::VectorXd coords = (*pitr)->coordinates();
-    for (unsigned j = 0; j < Tdim; ++j)
-      coordinates[j] = coords[j];
-    
+    for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = coords[j];
+
     Eigen::Vector3d velocity;
     velocity.setZero();
     for (unsigned j = 0; j < Tdim; ++j)
@@ -398,37 +397,23 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
-      HOFFSET(HDF5Particle, id),
-      HOFFSET(HDF5Particle, coord_x),
-      HOFFSET(HDF5Particle, coord_y),
-      HOFFSET(HDF5Particle, coord_z),
-      HOFFSET(HDF5Particle, velocity_x),
-      HOFFSET(HDF5Particle, velocity_y),
-      HOFFSET(HDF5Particle, velocity_z),
-      HOFFSET(HDF5Particle, stress_xx),
-      HOFFSET(HDF5Particle, stress_yy),
-      HOFFSET(HDF5Particle, stress_zz),
-      HOFFSET(HDF5Particle, tau_xy),
-      HOFFSET(HDF5Particle, tau_yz),
-      HOFFSET(HDF5Particle, tau_xz),
-      HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, coord_x),
+      HOFFSET(HDF5Particle, coord_y),    HOFFSET(HDF5Particle, coord_z),
+      HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
+      HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
+      HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
+      HOFFSET(HDF5Particle, tau_xy),     HOFFSET(HDF5Particle, tau_yz),
+      HOFFSET(HDF5Particle, tau_xz),     HOFFSET(HDF5Particle, status),
   };
 
   size_t dst_sizes[NFIELDS] = {
-      sizeof(particle_data[0].id),
-      sizeof(particle_data[0].coord_x),
-      sizeof(particle_data[0].coord_y),
-      sizeof(particle_data[0].coord_z),
-      sizeof(particle_data[0].velocity_x),
-      sizeof(particle_data[0].velocity_y),
-      sizeof(particle_data[0].velocity_z),
-      sizeof(particle_data[0].stress_xx),
-      sizeof(particle_data[0].stress_yy),
-      sizeof(particle_data[0].stress_zz),
-      sizeof(particle_data[0].tau_xy),
-      sizeof(particle_data[0].tau_yz),
-      sizeof(particle_data[0].tau_xz),
-      sizeof(particle_data[0].status),
+      sizeof(particle_data[0].id),         sizeof(particle_data[0].coord_x),
+      sizeof(particle_data[0].coord_y),    sizeof(particle_data[0].coord_z),
+      sizeof(particle_data[0].velocity_x), sizeof(particle_data[0].velocity_y),
+      sizeof(particle_data[0].velocity_z), sizeof(particle_data[0].stress_xx),
+      sizeof(particle_data[0].stress_yy),  sizeof(particle_data[0].stress_zz),
+      sizeof(particle_data[0].tau_xy),     sizeof(particle_data[0].tau_yz),
+      sizeof(particle_data[0].tau_xz),     sizeof(particle_data[0].status),
   };
 
   // Define particle field information
