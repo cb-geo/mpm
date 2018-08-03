@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "logger.h"
 #include "particle_base.h"
 
 namespace mpm {

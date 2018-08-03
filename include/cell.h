@@ -1,7 +1,6 @@
 #ifndef MPM_CELL_H_
 #define MPM_CELL_H_
 
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -11,6 +10,7 @@
 
 #include "affine_transform.h"
 #include "handler.h"
+#include "logger.h"
 #include "node_base.h"
 #include "shapefn.h"
 
@@ -246,6 +246,8 @@ class Cell {
 
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
 };  // Cell class
 }  // namespace mpm
 
