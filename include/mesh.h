@@ -6,7 +6,12 @@
 #include <memory>
 #include <vector>
 
+// Eigen
 #include "Eigen/Dense"
+// HDF5
+#include "hdf5.h"
+#include "hdf5_hl.h"
+// TBB
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 
@@ -19,6 +24,17 @@
 #include "particle_base.h"
 
 namespace mpm {
+
+// Define a struct of particle
+typedef struct HDF5Particle {
+  mpm::Index id;
+  bool status;
+  double coord_x, coord_y, coord_z;
+  double velocity_x, velocity_y, velocity_z;
+  double stress_xx, stress_yy, stress_zz;
+  double tau_xy, tau_yz, tau_xz;
+} HDF5Particle;
+
 
 //! Mesh class
 //! \brief Base class that stores the information about meshes
@@ -166,6 +182,12 @@ class Mesh {
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
+  //! Write HDF5 particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \retval status Status of writing HDF5 output
+  bool write_particles_hdf5(unsigned phase, const std::string& filename);
+  
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);

@@ -343,3 +343,154 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
   }
   return status;
 }
+
+//! Write particles to HDF5
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
+                                           const std::string& filename) {
+  const unsigned nparticles = this->nparticles();
+
+  std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
+  particle_data.reserve(nparticles);
+
+  mpm::Index i = 0;
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+
+    Eigen::Vector3d coordinates;
+    coordinates.setZero();
+    Eigen::VectorXd coords = (*pitr)->coordinates();
+    for (unsigned j = 0; j < Tdim; ++j)
+      coordinates[j] = coords[j];
+    
+    Eigen::Vector3d velocity;
+    velocity.setZero();
+    for (unsigned j = 0; j < Tdim; ++j)
+      velocity[j] = (*pitr)->velocity(phase)[j];
+
+    Eigen::Matrix<double, 6, 1> stress = (*pitr)->stress(phase);
+
+    particle_data[i].id = (*pitr)->id();
+
+    particle_data[i].coord_x = coordinates[0];
+    particle_data[i].coord_y = coordinates[1];
+    particle_data[i].coord_z = coordinates[2];
+
+    particle_data[i].velocity_x = velocity[0];
+    particle_data[i].velocity_y = velocity[1];
+    particle_data[i].velocity_z = velocity[2];
+
+    particle_data[i].stress_xx = stress[0];
+    particle_data[i].stress_yy = stress[1];
+    particle_data[i].stress_zz = stress[2];
+    particle_data[i].tau_xy = stress[3];
+    particle_data[i].tau_yz = stress[4];
+    particle_data[i].tau_xz = stress[5];
+
+    particle_data[i].status = (*pitr)->status();
+
+    // Counter
+    ++i;
+  }
+  // Calculate the size and the offsets of our struct members in memory
+  const hsize_t NRECORDS = nparticles;
+
+  const hsize_t NFIELDS = 14;
+
+  size_t dst_size = sizeof(HDF5Particle);
+  size_t dst_offset[NFIELDS] = {
+      HOFFSET(HDF5Particle, id),
+      HOFFSET(HDF5Particle, coord_x),
+      HOFFSET(HDF5Particle, coord_y),
+      HOFFSET(HDF5Particle, coord_z),
+      HOFFSET(HDF5Particle, velocity_x),
+      HOFFSET(HDF5Particle, velocity_y),
+      HOFFSET(HDF5Particle, velocity_z),
+      HOFFSET(HDF5Particle, stress_xx),
+      HOFFSET(HDF5Particle, stress_yy),
+      HOFFSET(HDF5Particle, stress_zz),
+      HOFFSET(HDF5Particle, tau_xy),
+      HOFFSET(HDF5Particle, tau_yz),
+      HOFFSET(HDF5Particle, tau_xz),
+      HOFFSET(HDF5Particle, status),
+  };
+
+  size_t dst_sizes[NFIELDS] = {
+      sizeof(particle_data[0].id),
+      sizeof(particle_data[0].coord_x),
+      sizeof(particle_data[0].coord_y),
+      sizeof(particle_data[0].coord_z),
+      sizeof(particle_data[0].velocity_x),
+      sizeof(particle_data[0].velocity_y),
+      sizeof(particle_data[0].velocity_z),
+      sizeof(particle_data[0].stress_xx),
+      sizeof(particle_data[0].stress_yy),
+      sizeof(particle_data[0].stress_zz),
+      sizeof(particle_data[0].tau_xy),
+      sizeof(particle_data[0].tau_yz),
+      sizeof(particle_data[0].tau_xz),
+      sizeof(particle_data[0].status),
+  };
+
+  // Define particle field information
+  const char* field_names[NFIELDS] = {
+      "id",         "coord_x",    "coord_y",   "coord_z",   "velocity_x",
+      "velocity_y", "velocity_z", "stress_xx", "stress_yy", "stress_zz",
+      "tau_xy",     "tau_yz",     "tau_xz",    "status"};
+
+  hid_t field_type[NFIELDS];
+  hid_t string_type;
+  hid_t file_id;
+  hsize_t chunk_size = 10000;
+  int* fill_data = NULL;
+  int compress = 0;
+
+  // Initialize the field_type
+  field_type[0] = H5T_NATIVE_LLONG;
+  field_type[1] = H5T_NATIVE_DOUBLE;
+  field_type[2] = H5T_NATIVE_DOUBLE;
+  field_type[3] = H5T_NATIVE_DOUBLE;
+  field_type[4] = H5T_NATIVE_DOUBLE;
+  field_type[5] = H5T_NATIVE_DOUBLE;
+  field_type[6] = H5T_NATIVE_DOUBLE;
+  field_type[7] = H5T_NATIVE_DOUBLE;
+  field_type[8] = H5T_NATIVE_DOUBLE;
+  field_type[9] = H5T_NATIVE_DOUBLE;
+  field_type[10] = H5T_NATIVE_DOUBLE;
+  field_type[11] = H5T_NATIVE_DOUBLE;
+  field_type[12] = H5T_NATIVE_DOUBLE;
+  field_type[13] = H5T_NATIVE_HBOOL;
+
+  // Create a new file using default properties.
+  file_id =
+      H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  // make a table
+  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS, dst_size,
+                 field_names, dst_offset, field_type, chunk_size, fill_data,
+                 compress, particle_data.data());
+
+#ifdef DEBUG
+  std::vector<HDF5Particle> dst_buf;
+  dst_buf.reserve(nparticles);
+  // Read the table
+  H5TBread_table(file_id, "table", dst_size, dst_offset, dst_sizes,
+                 dst_buf.data());
+
+  // print it by rows
+  std::cout << "Printing HDF5 data: \n";
+  for (unsigned i = 0; i < this->nparticles(); ++i) {
+    std::cout << dst_buf[i].id << '\t' << dst_buf[i].coord_x << '\t'
+              << dst_buf[i].coord_y << '\t' << dst_buf[i].coord_z << '\t'
+              << dst_buf[i].velocity_x << '\t' << dst_buf[i].velocity_y << '\t'
+              << dst_buf[i].velocity_z << '\t' << dst_buf[i].stress_xx << '\t'
+              << dst_buf[i].stress_yy << '\t' << dst_buf[i].stress_zz << '\t'
+              << dst_buf[i].tau_xy << '\t' << dst_buf[i].tau_yz << '\t'
+              << dst_buf[i].tau_xz << '\t' << dst_buf[i].status << '\n';
+  }
+  std::cout << "End of HDF5 data\n";
+#endif
+
+  // close the file
+  H5Fclose(file_id);
+  return true;
+}

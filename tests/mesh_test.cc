@@ -573,6 +573,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Should miss particle100
               REQUIRE(particles.size() == 0);
             }
+
+            // Test HDF5
+            SECTION("Write particles HDF5") {
+              REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
+            }
           }
         }
         // Test assign velocity constraints
@@ -1180,6 +1185,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles = mesh->locate_particles_mesh();
               // Should miss particle100
               REQUIRE(particles.size() == 0);
+            }
+            // Test HDF5
+            SECTION("Write particles HDF5") {
+              REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
             }
           }
         }
