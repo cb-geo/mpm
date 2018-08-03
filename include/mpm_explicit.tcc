@@ -122,7 +122,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
           material_props["type"].template get<std::string>();
 
       // Get material id
-      unsigned material_id = material_props["id"].template get<unsigned>();
+      auto material_id = material_props["id"].template get<unsigned>();
 
       // Create a new material from JSON object
       auto mat = Factory<mpm::Material<Tdim>, unsigned>::instance()->create(
@@ -167,7 +167,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Get mesh properties
   auto mesh_props = io_->json_object("mesh");
   // Material id
-  const unsigned material_id =
+  const auto material_id =
       mesh_props["material_id"].template get<unsigned>();
 
   // Get material from list of materials
