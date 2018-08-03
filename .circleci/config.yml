@@ -14,7 +14,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j
+            make -j4
             ctest -VV
       # Clang-6.0
       - run:
@@ -24,7 +24,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j 
+            make -j4 
             ctest -VV
       # cppcheck
       - run:
@@ -45,7 +45,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
-            make -j
+            make -j4
             ctest -VV
             make gcov
             make lcov
