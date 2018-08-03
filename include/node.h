@@ -7,8 +7,8 @@
 #include <mutex>
 #include <vector>
 
-#include "node_base.h"
 #include "logger.h"
+#include "node_base.h"
 
 namespace mpm {
 
