@@ -32,7 +32,7 @@ class Node : public NodeBase<Tdim> {
   Node(Index id, const VectorDim& coord);
 
   //! Virtual destructor
-  virtual ~Node(){};
+  ~Node() override{};
 
   //! Delete copy constructor
   Node(const Node<Tdim, Tdof, Tnphases>&) = delete;
@@ -41,47 +41,47 @@ class Node : public NodeBase<Tdim> {
   Node& operator=(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
   //! Initialise nodal properties
-  void initialise();
+  void initialise() override;
 
   //! Return id of the nodebase
-  Index id() const { return id_; }
+  Index id() const override { return id_; }
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase
-  void assign_coordinates(const VectorDim& coord) { coordinates_ = coord; }
+  void assign_coordinates(const VectorDim& coord) override { coordinates_ = coord; }
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase
-  VectorDim coordinates() const { return coordinates_; }
+  VectorDim coordinates() const override { return coordinates_; }
 
   //! Return degrees of freedom
-  unsigned dof() const { return dof_; }
+  unsigned dof() const override { return dof_; }
 
   //! Assign status
-  void assign_status(bool status) { status_ = status; }
+  void assign_status(bool status) override { status_ = status; }
 
   //! Return status
-  bool status() const { return status_; }
+  bool status() const override { return status_; }
 
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  void update_mass(bool update, unsigned phase, double mass);
+  void update_mass(bool update, unsigned phase, double mass) override;
 
   //! Return mass at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const { return mass_(phase); }
+  double mass(unsigned phase) const override { return mass_(phase); }
 
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  void update_volume(bool update, unsigned phase, double volume);
+  void update_volume(bool update, unsigned phase, double volume) override;
 
   //! Return volume at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const { return volume_(phase); }
+  double volume(unsigned phase) const override { return volume_(phase); }
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -89,11 +89,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
   bool update_external_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force);
+                             const Eigen::VectorXd& force) override;
 
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd external_force(unsigned phase) const {
+  Eigen::VectorXd external_force(unsigned phase) const override {
     return external_force_.col(phase);
   }
 
@@ -103,11 +103,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   bool update_internal_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force);
+                             const Eigen::VectorXd& force) override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd internal_force(unsigned phase) const {
+  Eigen::VectorXd internal_force(unsigned phase) const override {
     return internal_force_.col(phase);
   }
 
@@ -117,20 +117,20 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
   bool update_momentum(bool update, unsigned phase,
-                       const Eigen::VectorXd& momentum);
+                       const Eigen::VectorXd& momentum) override;
 
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd momentum(unsigned phase) const {
+  Eigen::VectorXd momentum(unsigned phase) const override {
     return momentum_.col(phase);
   }
 
   //! Compute velocity from the momentum
-  void compute_velocity();
+  void compute_velocity() override;
 
   //! Return velocity at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned phase) const {
+  Eigen::VectorXd velocity(unsigned phase) const override {
     return velocity_.col(phase);
   }
 
@@ -140,30 +140,30 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
   bool update_acceleration(bool update, unsigned phase,
-                           const Eigen::VectorXd& acceleration);
+                           const Eigen::VectorXd& acceleration) override;
 
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd acceleration(unsigned phase) const {
+  Eigen::VectorXd acceleration(unsigned phase) const override {
     return acceleration_.col(phase);
   }
 
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  bool compute_acceleration_velocity(unsigned phase, double dt);
+  bool compute_acceleration_velocity(unsigned phase, double dt) override;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  bool assign_velocity_constraint(unsigned dir, double velocity);
+  bool assign_velocity_constraint(unsigned dir, double velocity) override;
 
   //! Apply velocity constraints
-  void apply_velocity_constraints();
+  void apply_velocity_constraints() override;
 
   // TODO: Remove debug printing
-  void stats() {
+  void stats() override {
     std::string out = "Node: " + std::to_string(id_) + "\t" +
                       std::to_string(status_) + " velocity: ";
     std::string val = "";

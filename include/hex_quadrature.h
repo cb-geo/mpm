@@ -28,11 +28,11 @@ class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
   //! Return quadrature points
   //! \param[out] qpoints Quadrature points in local coordinates
-  Eigen::MatrixXd quadratures();
+  Eigen::MatrixXd quadratures() override;
 
   //! Return weights
   //! \param[out] weights Weights for quadrature points
-  Eigen::VectorXd weights();
+  Eigen::VectorXd weights() override;
 };
 
 }  // namespace mpm
