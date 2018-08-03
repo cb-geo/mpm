@@ -25,7 +25,7 @@ class LinearElastic : public Material<Tdim> {
   LinearElastic(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
-  virtual ~LinearElastic(){};
+  ~LinearElastic() override{};
 
   //! Delete copy constructor
   LinearElastic(const LinearElastic&) = delete;
@@ -35,17 +35,18 @@ class LinearElastic : public Material<Tdim> {
 
   //! Read material properties
   //! \param[in] material_properties Material properties
-  void properties(const Json& material_properties);
+  void properties(const Json& material_properties) override;
 
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
-  Matrix6x6 elastic_tensor();
+  Matrix6x6 elastic_tensor() override;
 
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain);
+  Vector6d compute_stress(const Vector6d& stress,
+                          const Vector6d& dstrain) override;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -53,10 +54,10 @@ class LinearElastic : public Material<Tdim> {
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr);
+                          const ParticleBase<Tdim>* ptr) override;
 
   //! Check if this material needs a particle handle
-  bool property_handle() const { return false; }
+  bool property_handle() const override { return false; }
 
  protected:
   //! material id

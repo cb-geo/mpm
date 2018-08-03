@@ -32,9 +32,9 @@ bool write_json(unsigned dim, const std::string& file_name) {
       {"title", "Example JSON Input for MPM"},
       {"input_files",
        {{"mesh", "mesh-" + dimension + ".txt"},
-        {"constraints", "mesh_constraints.txt"},
+        {"velocity_constraints", "velocity-constraints.txt"},
         {"particles", "particles-" + dimension + ".txt"},
-        {"initial_stresses", "initial_soil_stress.txt"},
+        {"initial_stresses", "initial-stress.txt"},
         {"materials", "materials.txt"},
         {"traction", "traction.txt"}}},
       {"mesh",
@@ -129,8 +129,14 @@ bool write_mesh_2d() {
     for (auto nid : cell) file << nid << "\t";
     file << "\n";
   }
-
   file.close();
+
+  // Dump mesh velocity constraints
+  std::ofstream file_constraints;
+  file_constraints.open("velocity-constraints.txt");
+  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints.close();
+
   return true;
 }
 
@@ -184,6 +190,13 @@ bool write_particles_2d() {
   }
 
   file.close();
+
+  // Dump mesh velocity constraints
+  std::ofstream file_constraints;
+  file_constraints.open("velocity-constraints.txt");
+  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints.close();
+
   return true;
 }
 

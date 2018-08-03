@@ -30,27 +30,30 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   }
 
   //! Destructor
-  ~ReadMeshAscii() = default;
+  ~ReadMeshAscii() override = default;
 
   //! Read mesh nodes file
   //! \param[in] mesh file name with nodes and cells
   //! \retval coordinates Vector of nodal coordinates
-  std::vector<VectorDim> read_mesh_nodes(const std::string& mesh);
+  std::vector<VectorDim> read_mesh_nodes(const std::string& mesh) override;
 
   //! Read mesh cells file
   //! \param[in] mesh file name with nodes and cells
   //! \retval cells Vector of nodal indices of cells
-  std::vector<std::vector<mpm::Index>> read_mesh_cells(const std::string& mesh);
+  std::vector<std::vector<mpm::Index>> read_mesh_cells(
+      const std::string& mesh) override;
 
   //! Read particles file
   //! \param[in] particles_files file name with particle coordinates
   //! \retval coordinates Vector of particle coordinates
-  std::vector<VectorDim> read_particles(const std::string& particles_file);
+  std::vector<VectorDim> read_particles(
+      const std::string& particles_file) override;
 
   //! Read constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>>
-      read_velocity_constraints(const std::string& velocity_constraints_file);
+      read_velocity_constraints(
+          const std::string& velocity_constraints_file) override;
 
  private:
   //! Logger

@@ -77,8 +77,8 @@ bool mpm::Cell<Tdim>::shapefn(
 
 //! Add a node pointer and return the status of addition of a node
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::add_node(unsigned local_id,
-                               std::shared_ptr<mpm::NodeBase<Tdim>> node_ptr) {
+bool mpm::Cell<Tdim>::add_node(
+    unsigned local_id, const std::shared_ptr<mpm::NodeBase<Tdim>>& node_ptr) {
   bool insertion_status = false;
   try {
     // If number of node ptrs in a cell is less than the maximum number of nodes
@@ -619,7 +619,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
-  
+
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
   nodal_coords.resize(2, indices.size());
@@ -709,7 +709,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = shapefn_->corner_indices();
-  
+
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
   nodal_coords.resize(3, indices.size());

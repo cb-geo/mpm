@@ -24,6 +24,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
+# Clang specific settings
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
+endif()
+
+
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
