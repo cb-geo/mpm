@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "node_base.h"
+#include "logger.h"
 
 namespace mpm {
 
@@ -203,6 +204,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };  // Node class
 }  // namespace mpm
 

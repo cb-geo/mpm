@@ -236,7 +236,6 @@ class Particle : public ParticleBase<Tdim> {
   std::vector<Eigen::MatrixXd> bmatrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
 };  // Particle class
 }  // namespace mpm
 
