@@ -5,6 +5,10 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
   this->initialise();
   cell_ = nullptr;
   material_ = nullptr;
+  //! Logger
+  std::string logger =
+      "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
 //! Construct a particle with id, coordinates and status
@@ -15,6 +19,10 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
   this->initialise();
   cell_ = nullptr;
   material_ = nullptr;
+  //! Logger
+  std::string logger =
+      "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
 // Initialise particle properties
@@ -49,7 +57,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
       throw std::runtime_error("Point cannot be found in cell!");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -77,7 +85,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
       throw std::runtime_error("Material is undefined!");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }
@@ -102,7 +110,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
           "cannot compute local reference coordinates of the particle");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -133,7 +141,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
           "cannot compute shapefns for the particle");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -154,7 +162,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
           "cannot compute volume for the particle");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -175,7 +183,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
           "cannot compute mass for the particle");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -195,7 +203,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
       throw std::runtime_error("Particle mass has not be computed");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -260,7 +268,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
       throw std::runtime_error("Material is invalid");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -303,7 +311,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
       throw std::runtime_error("Material is invalid");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "\t" << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -323,7 +331,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
     velocity_.col(phase) = velocity;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -343,7 +351,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
     momentum_.col(phase) = momentum;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -363,7 +371,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
     acceleration_.col(phase) = acceleration;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -392,7 +400,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
           "cannot compute updated coordinates of the particle");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
