@@ -4,7 +4,6 @@ jobs:
     working_directory: /home/cbgeo/research/mpm
     docker:
       - image: quay.io/cbgeo/mpm
-    parallelism: 4
     steps:
       - checkout
       # GCC-8
