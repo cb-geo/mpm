@@ -8,8 +8,8 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
 
   //! Logger
   std::string logger =
-      "cell-" + std::to_string(Tdim) + "d::" + std::to_string(id);
-  console_ = std::make_shared<spdlog::logger>(logger, mpm::stdout_sink);
+      "cell" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
   try {
     if (shapefnptr->nfunctions() == this->nnodes_) {

@@ -247,7 +247,7 @@ class Cell {
   //! Shape function
   std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
   //! Logger
-  std::shared_ptr<spdlog::logger> console_;
+  std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
 }  // namespace mpm
 
