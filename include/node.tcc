@@ -234,9 +234,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Direction value in the constraint (0, Dim * Nphases)
     const unsigned dir = constraint.first;
     // Direction: dir % Tdim (modulus)
-    const unsigned direction = static_cast<unsigned>(dir % Tdim);
+    const auto direction = static_cast<unsigned>(dir % Tdim);
     // Phase: Integer value of division (dir / Tdim)
-    const unsigned phase = static_cast<unsigned>(dir / Tdim);
+    const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
     this->acceleration_(direction, phase) = 0.;
   }
