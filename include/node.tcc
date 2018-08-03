@@ -9,6 +9,11 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   coordinates_ = coord;
   dof_ = Tdof;
 
+  //! Logger
+  std::string logger =
+      "node" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+
   // Clear any velocity constraints
   velocity_constraints_.clear();
   this->initialise();
@@ -59,10 +64,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     bool update, unsigned phase, const Eigen::VectorXd& force) {
   bool status = false;
   try {
-    if (force.size() != external_force_.size()) {
-      std::cout << external_force_.size() << "\t" << force.size() << "\n";
+    if (force.size() != external_force_.size())
       throw std::runtime_error("Nodal force degrees of freedom don't match");
-    }
 
     // Decide to update or assign
     double factor = 1.0;
@@ -73,7 +76,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     external_force_.col(phase) = external_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -85,10 +88,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     bool update, unsigned phase, const Eigen::VectorXd& force) {
   bool status = false;
   try {
-    if (force.size() != internal_force_.size()) {
-      std::cout << internal_force_.size() << "\t" << force.size() << "\n";
+    if (force.size() != internal_force_.size())
       throw std::runtime_error("Nodal force degrees of freedom don't match");
-    }
 
     // Decide to update or assign
     double factor = 1.0;
@@ -99,7 +100,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -124,7 +125,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -144,8 +145,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
         throw std::runtime_error("Nodal mass is zero or below threshold");
     }
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
-              << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 }
 
@@ -169,7 +169,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
     status = true;
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -197,8 +197,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       throw std::runtime_error("Nodal mass is zero or below threshold");
 
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
-              << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -219,8 +218,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraint(
       throw std::runtime_error("Constraint direction is out of bounds");
 
   } catch (std::exception& exception) {
-    std::cerr << __FILE__ << __LINE__ << "Node: " << id_ << "\t"
-              << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;

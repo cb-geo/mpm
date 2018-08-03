@@ -6,6 +6,11 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
+  //! Logger
+  std::string logger =
+      "cell" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+
   try {
     if (shapefnptr->nfunctions() == this->nnodes_) {
       shapefn_ = shapefnptr;
@@ -14,7 +19,7 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
           "Specified number of shape functions and nodes don't match");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 }
 
@@ -35,7 +40,7 @@ bool mpm::Cell<Tdim>::initialise() {
           "Specified number of nodes for a cell is not present");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }
@@ -70,7 +75,7 @@ bool mpm::Cell<Tdim>::shapefn(
           "Specified number of shape functions is not defined");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }
@@ -92,7 +97,7 @@ bool mpm::Cell<Tdim>::add_node(
           "Number nodes in a cell exceeds the maximum allowed per cell");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return insertion_status;
 }
@@ -111,7 +116,7 @@ bool mpm::Cell<Tdim>::activate_nodes() {
       throw std::runtime_error("No particles in cell, can't activate nodes");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -130,7 +135,7 @@ bool mpm::Cell<Tdim>::add_neighbour(
       throw std::runtime_error("Invalid local id of a cell neighbour");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return insertion_status;
 }
@@ -141,12 +146,10 @@ bool mpm::Cell<Tdim>::add_particle_id(Index id) {
   bool status = false;
   // Check if it is found in the container
   auto itr = std::find(particles_.begin(), particles_.end(), id);
-
   if (itr == particles_.end()) {
     particles_.emplace_back(id);
     status = true;
   }
-
   return status;
 }
 
@@ -213,12 +216,8 @@ inline void mpm::Cell<2>::compute_volume() {
     if (this->volume_ <= 0)
       throw std::runtime_error(
           "Negative or zero volume cell, misconfigured cell!");
-
-    std::cout << "Volume: " << this->volume_ << "\n";
-
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute volume of a cell: " << except.what() << '\n';
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 }
 
@@ -274,12 +273,8 @@ inline void mpm::Cell<3>::compute_volume() {
     if (this->volume_ <= 0)
       throw std::runtime_error(
           "Negative or zero volume cell, misconfigured cell!");
-
-    std::cout << "Volume: " << this->volume_ << "\n";
-
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute volume of a cell: " << except.what() << '\n';
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 }
 
@@ -329,9 +324,8 @@ inline bool mpm::Cell<1>::point_in_cell(
                         (nodes_[1]->coordinates() - point).norm();
 
   // Check if the point is inside the hedron
-  if (std::fabs(length - this->volume_) < tolerance) {
-    status = true;
-  }
+  if (std::fabs(length - this->volume_) < tolerance) status = true;
+
   return status;
 }
 
@@ -385,9 +379,8 @@ inline bool mpm::Cell<2>::point_in_cell(
   }
 
   // Check if the point is inside the hedron
-  if (std::fabs(triareas - volume_) < tolerance) {
-    status = true;
-  }
+  if (std::fabs(triareas - volume_) < tolerance) status = true;
+
   return status;
 }
 
@@ -436,9 +429,8 @@ inline bool mpm::Cell<3>::point_in_cell(
     }
   }
   // Check if the point is inside the hedron
-  if (std::fabs(tetvolumes - volume_) < tolerance) {
-    status = true;
-  }
+  if (std::fabs(tetvolumes - volume_) < tolerance) status = true;
+
   return status;
 }
 
@@ -485,10 +477,8 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point(
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute local coordinate of a point in a cell: "
-              << except.what() << '\n';
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return xi;
 }
@@ -533,10 +523,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute local coordinate of a point in a cell: "
-              << except.what() << '\n';
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return xi;
 }
@@ -594,10 +582,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
     }
-  } catch (std::exception& except) {
-    std::cout << __FILE__ << __LINE__
-              << "Compute local coordinate of a point in a cell: "
-              << except.what() << '\n';
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return xi;
 }
@@ -867,7 +853,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
       strain_rate += bmatrix.at(i) * node_velocity;
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return strain_rate;
 }
