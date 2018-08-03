@@ -4,6 +4,8 @@ jobs:
     working_directory: /home/cbgeo/research/mpm
     docker:
       - image: quay.io/cbgeo/mpm
+    test:
+      parallelism: 4
     steps:
       - checkout
       # GCC-8
@@ -14,7 +16,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4
+            make -j
             ctest -VV
       # Clang-6.0
       - run:
@@ -24,7 +26,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4 
+            make -j 
             ctest -VV
       # cppcheck
       - run:
@@ -45,7 +47,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
-            make -j4
+            make -j
             ctest -VV
             make gcov
             make lcov
