@@ -45,7 +45,8 @@ class LinearElastic : public Material<Tdim> {
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain) override;
+  Vector6d compute_stress(const Vector6d& stress,
+                          const Vector6d& dstrain) override;
 
   //! Compute stress
   //! \param[in] stress Stress
