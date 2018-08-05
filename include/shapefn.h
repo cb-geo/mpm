@@ -31,16 +31,16 @@ class ShapeFn {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::VectorXd shapefn(const VectorDim& xi) = 0;
+  virtual Eigen::VectorXd shapefn(const VectorDim& xi) const = 0;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
-  virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) = 0;
+  virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const = 0;
 
   //! Evaluate and return the B-matrix
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
-  virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) = 0;
+  virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const = 0;
 
   //! Return the degree of shape function
   virtual mpm::ShapeFnDegree degree() const = 0;
@@ -50,16 +50,16 @@ class ShapeFn {
 
   //! Return the side indices of a cell to calculate the cell length
   //! \retval indices Outer-indices that form the sides of the cell
-  virtual Eigen::MatrixXi sides_indices() = 0;
+  virtual Eigen::MatrixXi sides_indices() const = 0;
 
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
-  virtual Eigen::VectorXi corner_indices() = 0;
+  virtual Eigen::VectorXi corner_indices() const = 0;
 
   //! Return indices of a sub-tetrahedrons in a volume
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
-  virtual Eigen::MatrixXi inhedron_indices() = 0;
+  virtual Eigen::MatrixXi inhedron_indices() const = 0;
 };
 
 }  // namespace mpm

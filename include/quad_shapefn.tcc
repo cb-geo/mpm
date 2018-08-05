@@ -10,7 +10,7 @@
 //! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 4, 1> shapefn;
   shapefn(0) = 0.25 * (1 - xi(0)) * (1 - xi(1));
   shapefn(1) = 0.25 * (1 + xi(0)) * (1 - xi(1));
@@ -23,7 +23,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
 //! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 4, 2> grad_shapefn;
   grad_shapefn(0, 0) = -0.25 * (1 - xi(1));
   grad_shapefn(1, 0) = 0.25 * (1 - xi(1));
@@ -68,7 +68,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::unit_cell_coordinates()
 //! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 8, 1> shapefn;
   shapefn(0) = -0.25 * (1. - xi(0)) * (1. - xi(1)) * (xi(0) + xi(1) + 1.);
   shapefn(1) = 0.25 * (1. + xi(0)) * (1. - xi(1)) * (xi(0) - xi(1) - 1.);
@@ -85,7 +85,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
 //! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 8, 2> grad_shapefn;
   grad_shapefn(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
   grad_shapefn(1, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. - xi(1));
@@ -141,7 +141,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::unit_cell_coordinates()
 //! coordinate
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 9, 1> shapefn;
 
   shapefn(0) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) - 1.);
@@ -161,7 +161,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
 //! given local coordinate
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) {
+    const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 9, 2> grad_shapefn;
   // 9-noded
   grad_shapefn(0, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) - 1.);
@@ -230,7 +230,8 @@ inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 9>::degree() const {
 //! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(const VectorDim& xi) {
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi) const {
 
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
@@ -256,7 +257,7 @@ inline std::vector<Eigen::MatrixXd>
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() {
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() const {
   Eigen::Matrix<int, 4, 2> indices;
   // clang-format off
   indices << 0, 1,
@@ -270,7 +271,7 @@ inline Eigen::MatrixXi
 //! Return the corner indices of a cell to calculate the cell volume
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::corner_indices() {
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 4, 1> indices;
   indices << 0, 1, 2, 3;
   return indices;
@@ -279,7 +280,7 @@ inline Eigen::VectorXi
 //! Return indices of a sub-tetrahedrons in a volume
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::inhedron_indices() {
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::inhedron_indices() const {
   Eigen::Matrix<int, 4, Tdim, Eigen::RowMajor> indices;
 
   // clang-format off
