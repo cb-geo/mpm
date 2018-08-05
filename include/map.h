@@ -1,5 +1,5 @@
-#ifndef MPM_HANDLER_H_
-#define MPM_HANDLER_H_
+#ifndef MPM_MAP_H_
+#define MPM_MAP_H_
 
 #include <algorithm>
 #include <unordered_map>
@@ -9,14 +9,14 @@ namespace mpm {
 // Global index type for the node
 using Index = unsigned long long;
 
-// handler class
+// Map class
 //! \brief A class that offers a container and iterators
 //! \tparam T A class with a template argument Tdim
 template <class T>
-class Handler {
+class Map {
  public:
   //! Default constructor
-  Handler<T>() = default;
+  Map<T>() = default;
 
   //! Insert a pointer
   //! \param[in] ptr A shared pointer
@@ -57,9 +57,9 @@ class Handler {
  private:
   // Unordered map of index and pointer
   std::unordered_map<Index, std::shared_ptr<T>> elements_;
-};  // Handler class
+};  // Map class
 
-#include "handler.tcc"
+#include "map.tcc"
 
 }  // namespace mpm
-#endif  // MPM_HANDLER_H_
+#endif  // MPM_MAP_H_
