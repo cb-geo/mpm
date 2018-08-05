@@ -263,7 +263,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
         stress = material_->compute_stress(this->stress_.col(phase),
                                            this->dstrain_.col(phase));
       // Assign stress
-      this->assign_stress(phase, stress);
+      this->stress_.col(phase) = stress;
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -272,14 +272,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     status = false;
   }
   return status;
-}
-
-// Assign stress to the particle
-template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::assign_stress(
-    unsigned phase, const Eigen::Matrix<double, 6, 1>& stress) {
-  // Assign stress
-  stress_.col(phase) = stress;
 }
 
 //! Map body force
