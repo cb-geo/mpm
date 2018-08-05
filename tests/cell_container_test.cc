@@ -8,6 +8,7 @@
 #include "cell.h"
 #include "container.h"
 #include "hex_shapefn.h"
+#include "node.h"
 #include "quad_shapefn.h"
 #include "shapefn.h"
 
@@ -15,8 +16,12 @@
 TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Dimension
   const unsigned Dim = 2;
+  // Degrees of freedom
+  const unsigned Dof = 2;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
+  // Number of phases
+  const unsigned Nphases = 1;
 
   // Tolerance
   const double Tolerance = 1.E-7;
@@ -98,19 +103,57 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
       REQUIRE((*itr)->nfunctions() == 4);
     }
 
-    // Iterate through cell container to update shapefn
-    // 8-noded quadrilateral shape function
-    std::shared_ptr<mpm::ShapeFn<Dim>> quadsf =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 8>>();
+    Eigen::Vector2d coords;
+    coords.setZero();
 
-    cellcontainer->for_each(
-        std::bind(&mpm::Cell<Dim>::shapefn, std::placeholders::_1, quadsf));
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 4., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 4., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    REQUIRE(cell1->add_node(0, node0) == true);
+    REQUIRE(cell1->add_node(1, node1) == true);
+    REQUIRE(cell1->add_node(2, node2) == true);
+    REQUIRE(cell1->add_node(3, node3) == true);
+    REQUIRE(cell1->nnodes() == 4);
+
+    REQUIRE(cell2->add_node(0, node1) == true);
+    REQUIRE(cell2->add_node(1, node4) == true);
+    REQUIRE(cell2->add_node(2, node5) == true);
+    REQUIRE(cell2->add_node(3, node2) == true);
+    REQUIRE(cell2->nnodes() == 4);
 
     // Check if update has gone through
     for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr) {
-      REQUIRE((*itr)->nfunctions() == 8);
-    }
+         ++itr)
+      REQUIRE((*itr)->is_initialised() == false);
+
+    // Iterate through cell container to initialise
+    cellcontainer->for_each(
+        std::bind(&mpm::Cell<Dim>::initialise, std::placeholders::_1));
+
+    // Check if update has gone through
+    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
+         ++itr)
+      REQUIRE((*itr)->is_initialised() == true);
   }
 }
 
@@ -201,8 +244,8 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
       REQUIRE((*itr)->nfunctions() == 8);
     }
 
-    // Iterate through cell container to update shape function
-    // Hexahedron 20 noded function
+    /*
+    // Iterate through cell container to initialise
     std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
         std::make_shared<mpm::HexahedronShapeFn<Dim, 20>>();
 
@@ -214,5 +257,6 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
          ++itr) {
       REQUIRE((*itr)->nfunctions() == 20);
     }
+    */
   }
 }

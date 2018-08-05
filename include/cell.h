@@ -69,10 +69,6 @@ class Cell {
   //! Activate nodes if particle is present
   bool activate_nodes();
 
-  //! Assign shape function
-  //! \param[in] shapefnptr Pointer to a shape function
-  bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
-
   //! Return a pointer to shape function of a cell
   std::shared_ptr<ShapeFn<Tdim>> shapefn_ptr() { return shapefn_; }
 
