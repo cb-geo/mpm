@@ -61,25 +61,6 @@ bool mpm::Cell<Tdim>::is_initialised() const {
            1.0E-10));
 }
 
-//! Assign a shape function to cell
-template <unsigned Tdim>
-bool mpm::Cell<Tdim>::shapefn(
-    const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr) {
-  bool status = false;
-  try {
-    if (shapefnptr->nfunctions() >= this->nnodes_) {
-      shapefn_ = shapefnptr;
-      status = true;
-    } else {
-      throw std::runtime_error(
-          "Specified number of shape functions is not defined");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return status;
-}
-
 //! Add a node pointer and return the status of addition of a node
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_node(

@@ -349,13 +349,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Assign quadrilateral shapefn to cell
-    // 4-noded quadrilateral shape functions
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
-
-    cell1->shapefn(shapefn);
-
     // Compute cell volume
     cell1->compute_volume();
 
@@ -924,13 +917,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     cell1->add_node(7, node7);
 
     REQUIRE(cell1->nnodes() == 8);
-
-    // Assign hexahedron shapefn to cell
-    // 8-noded hexahedron shape functions
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
-
-    cell1->shapefn(shapefn);
 
     // Compute cell volume
     cell1->compute_volume();
