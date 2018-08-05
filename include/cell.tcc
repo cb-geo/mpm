@@ -1,7 +1,7 @@
 //! Constructor with cell id, number of nodes and shapefn
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
-                      const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr)
+                      const std::shared_ptr<const ShapeFn<Tdim>>& shapefnptr)
     : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
