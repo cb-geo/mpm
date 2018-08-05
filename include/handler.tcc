@@ -13,6 +13,12 @@ bool mpm::Handler<T>::insert(mpm::Index id, const std::shared_ptr<T>& ptr) {
   return insertion_status;
 }
 
+//! Remove a pointer at a given id
+template <class T>
+bool mpm::Handler<T>::remove(mpm::Index id) {
+  return elements_.erase(id);
+}
+
 //! Iterate over elements in the container
 template <class T>
 template <class Tunaryfn>

@@ -32,17 +32,28 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
+  // Node 3
+  mpm::Index id3 = 2;
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
+
   // Node handler
   auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
 
-  // Check insert node
-  SECTION("Check insert node functionality") {
+  // Check insert and remove node
+  SECTION("Check insert and remove node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert(node1);
-    REQUIRE(status1 == true);
+    REQUIRE(nodehandler->insert(node1) == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2->id(), node2);
-    REQUIRE(status2 == true);
+    REQUIRE(nodehandler->insert(node2->id(), node2) == true);
+    // Insert node 3 and check status
+    REQUIRE(nodehandler->insert(node3->id(), node3) == true);
+    // Check size of node hanlder
+    REQUIRE(nodehandler->size() == 3);
+    // Remove node 3 and check status
+    REQUIRE(nodehandler->remove(node3->id()) == true);
+    // Try to remove node 3 again
+    REQUIRE(nodehandler->remove(node3->id()) == false);
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
   }
@@ -136,17 +147,28 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
+  // Node 3
+  mpm::Index id3 = 2;
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
+
   // Node handler
   auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert(node1);
-    REQUIRE(status1 == true);
+    REQUIRE(nodehandler->insert(node1) == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2->id(), node2);
-    REQUIRE(status2 == true);
+    REQUIRE(nodehandler->insert(node2->id(), node2) == true);
+    // Insert node 3 and check status
+    REQUIRE(nodehandler->insert(node3->id(), node3) == true);
+    // Check size of node hanlder
+    REQUIRE(nodehandler->size() == 3);
+    // Remove node 3 and check status
+    REQUIRE(nodehandler->remove(node3->id()) == true);
+    // Try to remove node 3 again
+    REQUIRE(nodehandler->remove(node3->id()) == false);
     // Check size of node hanlder
     REQUIRE(nodehandler->size() == 2);
   }
