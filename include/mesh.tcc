@@ -54,10 +54,9 @@ bool mpm::Mesh<Tdim>::add_node(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_node(
     const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
+  const mpm::Index id = node->id();
   // Remove a node if found in the container
-  bool status = nodes_.remove(node);
-  // TODO: Remove node from map_nodes_
-  return status;
+  return (nodes_.remove(node) && map_nodes_.remove(id));
 }
 
 //! Iterate over nodes
