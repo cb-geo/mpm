@@ -111,10 +111,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    particle->assign_stress(Phase, stress);
-    for (unsigned i = 0; i < stress.size(); ++i)
-      REQUIRE(particle->stress(Phase)(i) == Approx(17.51).epsilon(Tolerance));
-
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
@@ -692,10 +688,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
-
-    particle->assign_stress(Phase, stress);
-    for (unsigned i = 0; i < stress.size(); ++i)
-      REQUIRE(particle->stress(Phase)(i) == Approx(17.52).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -1388,10 +1380,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
-
-    particle->assign_stress(Phase, stress);
-    for (unsigned i = 0; i < stress.size(); ++i)
-      REQUIRE(particle->stress(Phase)(i) == Approx(1.).epsilon(Tolerance));
 
     // Check velocity
     Eigen::VectorXd velocity;
