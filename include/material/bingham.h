@@ -67,6 +67,9 @@ class Bingham : public Material<Tdim> {
   using Material<Tdim>::properties_;
 
  private:
+  //! Dirac delta function in Voigt notation
+  Eigen::Matrix<double, 6, 1> dirac_delta() const;
+
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
@@ -79,9 +82,6 @@ class Bingham : public Material<Tdim> {
   double mu_{std::numeric_limits<double>::max()};
   //! Critical yielding shear rate
   double critical_shear_rate_{std::numeric_limits<double>::max()};
-
-  //! Dirac delta function in Voigt notation
-  Eigen::Matrix<double, 6, 1> dirac_delta();
 
 };  // Bingham class
 }  // namespace mpm
