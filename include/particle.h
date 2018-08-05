@@ -120,12 +120,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
-  //! Assign stress to the particle
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] stress A vector of particle stress
-  void assign_stress(unsigned phase,
-                     const Eigen::Matrix<double, 6, 1>& stress) override;
-
   //! Return stress of the particle
   //! \param[in] phase Index corresponding to the phase
   Eigen::Matrix<double, 6, 1> stress(unsigned phase) const override {
