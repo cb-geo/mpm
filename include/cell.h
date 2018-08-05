@@ -9,8 +9,8 @@
 #include "Eigen/LU"
 
 #include "affine_transform.h"
-#include "handler.h"
 #include "logger.h"
+#include "map.h"
 #include "node_base.h"
 #include "shapefn.h"
 
@@ -235,10 +235,10 @@ class Cell {
   std::vector<Index> particles_;
 
   //! Container of node pointers (local id, node pointer)
-  Handler<NodeBase<Tdim>> nodes_;
+  Map<NodeBase<Tdim>> nodes_;
 
   //! Container of cell neighbours
-  Handler<Cell<Tdim>> neighbour_cells_;
+  Map<Cell<Tdim>> neighbour_cells_;
 
   //! Shape function
   std::shared_ptr<const ShapeFn<Tdim>> shapefn_{nullptr};

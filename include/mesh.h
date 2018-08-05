@@ -196,7 +196,7 @@ class Mesh {
   unsigned id_{std::numeric_limits<unsigned>::max()};
 
   //! Container of mesh neighbours
-  Handler<Mesh<Tdim>> neighbour_meshes_;
+  Map<Mesh<Tdim>> neighbour_meshes_;
 
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
@@ -205,7 +205,7 @@ class Mesh {
   Container<NodeBase<Tdim>> nodes_;
 
   //! Map of nodes for fast retrieval
-  Handler<NodeBase<Tdim>> map_nodes_;
+  Map<NodeBase<Tdim>> map_nodes_;
 
   //! Container of cells
   Container<Cell<Tdim>> cells_;
