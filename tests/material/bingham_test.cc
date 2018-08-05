@@ -93,26 +93,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Check material status after assigning material property
     REQUIRE(material->property_handle() == true);
 
-    // Initialise stress
-    mpm::Material<Dim>::Vector6d stress;
-    stress.setZero();
-    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
-
-    // Initialise dstrain
-    mpm::Material<Dim>::Vector6d dstrain;
-    dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0000000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
-
     // Add particle
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
@@ -155,8 +135,24 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
-    // Reset stress
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
+    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise dstrain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0000000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
@@ -189,26 +185,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check material status after assigning material property
     REQUIRE(material->property_handle() == true);
-
-    // Initialise stress
-    mpm::Material<Dim>::Vector6d stress;
-    stress.setZero();
-    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
-
-    // Initialise dstrain
-    mpm::Material<Dim>::Vector6d dstrain;
-    dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0000000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
 
     // Add particle
     mpm::Index pid = 0;
@@ -257,8 +233,24 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
-    // Reset stress
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
+    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise dstrain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0000000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
@@ -352,26 +344,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Check material status after assigning material property
     REQUIRE(material->property_handle() == true);
 
-    // Initialise stress
-    mpm::Material<Dim>::Vector6d stress;
-    stress.setZero();
-    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
-
-    // Initialise dstrain
-    mpm::Material<Dim>::Vector6d dstrain;
-    dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
-
     // Add particle
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
@@ -430,8 +402,24 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
-    // Reset stress
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
+    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise dstrain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0005000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
@@ -464,26 +452,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check material status after assigning material property
     REQUIRE(material->property_handle() == true);
-
-    // Initialise stress
-    mpm::Material<Dim>::Vector6d stress;
-    stress.setZero();
-    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
-
-    // Initialise dstrain
-    mpm::Material<Dim>::Vector6d dstrain;
-    dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
 
     // Add particle
     mpm::Index pid = 0;
@@ -548,8 +516,24 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
-    // Reset stress
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
+    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise dstrain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0005000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     stress = material->compute_stress(stress, dstrain, particle.get());
