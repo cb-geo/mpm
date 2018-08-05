@@ -27,6 +27,10 @@ class Handler {
   //! \param[in] ptr A shared pointer
   bool insert(Index id, const std::shared_ptr<T>& ptr);
 
+  //! Remove a pointer at a given id
+  //! \param[in] id Global/local index of the pointer
+  bool remove(Index id);
+
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
 
