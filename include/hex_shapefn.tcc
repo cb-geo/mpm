@@ -17,7 +17,7 @@
 //! \retval shapefn Shape function of a given cell
 template <>
 inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 8>::shapefn(
-    const Eigen::Matrix<double, 3, 1>& xi) {
+    const Eigen::Matrix<double, 3, 1>& xi) const {
   // 8-noded
   Eigen::Matrix<double, 8, 1> shapefn;
   shapefn(0) = 0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2));
@@ -36,7 +36,7 @@ inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 8>::shapefn(
 //! \retval grad_shapefn Gradient of shape function of a given cell
 template <>
 inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::grad_shapefn(
-    const Eigen::Matrix<double, 3, 1>& xi) {
+    const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 8, 3> grad_shapefn;
   grad_shapefn(0, 0) = -0.125 * (1 - xi(1)) * (1 - xi(2));
   grad_shapefn(1, 0) = 0.125 * (1 - xi(1)) * (1 - xi(2));
@@ -107,7 +107,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::unit_cell_coordinates()
 //! \retval shapefn Shape function of a given cell
 template <>
 inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 20>::shapefn(
-    const Eigen::Matrix<double, 3, 1>& xi) {
+    const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 20, 1> shapefn;
   shapefn(0) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
                (2 + xi(0) + xi(1) + xi(2));
@@ -146,7 +146,7 @@ inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 20>::shapefn(
 //! \retval grad_shapefn Gradient of shape function of a given cell
 template <>
 inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
-    const Eigen::Matrix<double, 3, 1>& xi) {
+    const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 20, 3> grad_shapefn;
 
   grad_shapefn(0, 0) =
@@ -245,7 +245,8 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(const VectorDim& xi) {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi) const {
 
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
@@ -345,7 +346,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() co
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::sides_indices() {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::sides_indices() const {
   Eigen::Matrix<int, 12, 2> indices;
   // clang-format off
   indices << 0, 1,
@@ -370,7 +371,7 @@ inline Eigen::MatrixXi
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::corner_indices() {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 8, 1> indices;
   indices << 0, 1, 2, 3, 4, 5, 6, 7;
   return indices;
@@ -381,7 +382,7 @@ inline Eigen::VectorXi
 //! \retval indices Indices that form sub-tetrahedrons
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::inhedron_indices() {
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::inhedron_indices() const {
   Eigen::Matrix<int, 12, Tdim, Eigen::RowMajor> indices;
 
   // clang-format off
