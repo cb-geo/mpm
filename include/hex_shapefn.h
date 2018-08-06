@@ -101,16 +101,16 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  Eigen::VectorXd shapefn(const VectorDim& xi) override;
+  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) override;
+  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
   //! Evaluate B matrix at given local coordinates
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) override;
+  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
 
   //! Return the degree of shape function
   mpm::ShapeFnDegree degree() const override;
@@ -120,16 +120,16 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
 
   //! Return the side indices of a cell to calculate the cell length
   //! \retval indices Outer-indices that form the sides of the cell
-  Eigen::MatrixXi sides_indices() override;
+  Eigen::MatrixXi sides_indices() const override;
 
   //! Return the corner indices of a cell to calculate the cell volume
   //! \retval indices Outer-indices that form the cell
-  Eigen::VectorXi corner_indices() override;
+  Eigen::VectorXi corner_indices() const override;
 
   //! Return indices of a sub-tetrahedrons in a volume
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
-  Eigen::MatrixXi inhedron_indices() override;
+  Eigen::MatrixXi inhedron_indices() const override;
 };
 
 }  // namespace mpm

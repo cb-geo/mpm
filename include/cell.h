@@ -36,7 +36,7 @@ class Cell {
   //! \param[in] nnodes Number of nodes per cell
   //! \param[in] shapefnptr Pointer to a shape function
   Cell(Index id, unsigned nnodes,
-       const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
+       const std::shared_ptr<const ShapeFn<Tdim>>& shapefnptr);
 
   //! Default destructor
   ~Cell() = default;
@@ -69,12 +69,8 @@ class Cell {
   //! Activate nodes if particle is present
   bool activate_nodes();
 
-  //! Assign shape function
-  //! \param[in] shapefnptr Pointer to a shape function
-  bool shapefn(const std::shared_ptr<ShapeFn<Tdim>>& shapefnptr);
-
   //! Return a pointer to shape function of a cell
-  std::shared_ptr<ShapeFn<Tdim>> shapefn_ptr() { return shapefn_; }
+  std::shared_ptr<const ShapeFn<Tdim>> shapefn_ptr() { return shapefn_; }
 
   //! Return the number of shape functions, returns zero if the shapefunction is
   //! not set.
@@ -245,7 +241,7 @@ class Cell {
   Handler<Cell<Tdim>> neighbour_cells_;
 
   //! Shape function
-  std::shared_ptr<ShapeFn<Tdim>> shapefn_{nullptr};
+  std::shared_ptr<const ShapeFn<Tdim>> shapefn_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
