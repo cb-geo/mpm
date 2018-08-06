@@ -42,6 +42,15 @@ link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# HDF5
+ENABLE_LANGUAGE(C)
+find_package(HDF5 COMPONENTS CXX HL)
+if (HDF5_FOUND)
+  include_directories(${HDF5_INCLUDE_DIRS})
+  link_libraries(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_HL_LIBRARIES})
+  add_definitions(${HDF5_DEFINITIONS})
+endif()
+
 # TBB
 find_package(TBB REQUIRED)
 add_definitions(${TBB_DEFINITIONS})
