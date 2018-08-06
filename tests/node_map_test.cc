@@ -6,11 +6,11 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "handler.h"
+#include "map.h"
 #include "node.h"
 
-//! \brief Check node handler class for 2D case
-TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
+//! \brief Check node map class for 2D case
+TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -32,41 +32,52 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
-  // Node handler
-  auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
+  // Node 3
+  mpm::Index id3 = 2;
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
 
-  // Check insert node
-  SECTION("Check insert node functionality") {
+  // Node map
+  auto nodemap = std::make_shared<mpm::Map<mpm::NodeBase<Dim>>>();
+
+  // Check insert and remove node
+  SECTION("Check insert and remove node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert(node1);
-    REQUIRE(status1 == true);
+    REQUIRE(nodemap->insert(node1) == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2->id(), node2);
-    REQUIRE(status2 == true);
+    REQUIRE(nodemap->insert(node2->id(), node2) == true);
+    // Insert node 3 and check status
+    REQUIRE(nodemap->insert(node3->id(), node3) == true);
     // Check size of node hanlder
-    REQUIRE(nodehandler->size() == 2);
+    REQUIRE(nodemap->size() == 3);
+    // Remove node 3 and check status
+    REQUIRE(nodemap->remove(node3->id()) == true);
+    // Try to remove node 3 again
+    REQUIRE(nodemap->remove(node3->id()) == false);
+    // Check size of node hanlder
+    REQUIRE(nodemap->size() == 2);
   }
 
   SECTION("Check operator []") {
     // Insert node 1
-    nodehandler->insert(id1, node1);
+    nodemap->insert(id1, node1);
     // Insert node 2
-    nodehandler->insert(id2, node2);
+    nodemap->insert(id2, node2);
 
     // Check operator []
-    REQUIRE((*nodehandler)[0]->id() == id1);
-    REQUIRE((*nodehandler)[1]->id() == id2);
+    REQUIRE((*nodemap)[0]->id() == id1);
+    REQUIRE((*nodemap)[1]->id() == id2);
   }
 
   // Check iterator
   SECTION("Check node range iterator") {
     // Insert node 1
-    nodehandler->insert(node1);
+    nodemap->insert(node1);
     // Insert node 2
-    nodehandler->insert(node2);
+    nodemap->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -81,14 +92,14 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   // Check for_each
   SECTION("Check node for_each") {
     // Insert node 1
-    nodehandler->insert(node1);
+    nodemap->insert(node1);
     // Insert node 2
-    nodehandler->insert(node2);
+    nodemap->insert(node2);
     // Check size of node hanlder
-    REQUIRE(nodehandler->size() == 2);
+    REQUIRE(nodemap->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -98,13 +109,13 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
     // Set coordinates to unity
     coords << 1., 1.;
 
-    // Iterate through node handler to update coordinaates
-    nodehandler->for_each(  // function structure
+    // Iterate through node map to update coordinaates
+    nodemap->for_each(  // function structure
         std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -113,8 +124,8 @@ TEST_CASE("Node handler is checked for 2D case", "[nodehandler][2D]") {
   }
 }
 
-//! \brief Check node handler class for 3D case
-TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
+//! \brief Check node map class for 3D case
+TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -136,41 +147,52 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
-  // Node handler
-  auto nodehandler = std::make_shared<mpm::Handler<mpm::NodeBase<Dim>>>();
+  // Node 3
+  mpm::Index id3 = 2;
+  std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
+
+  // Node map
+  auto nodemap = std::make_shared<mpm::Map<mpm::NodeBase<Dim>>>();
 
   // Check insert node
   SECTION("Check insert node functionality") {
     // Insert node 1 and check status
-    bool status1 = nodehandler->insert(node1);
-    REQUIRE(status1 == true);
+    REQUIRE(nodemap->insert(node1) == true);
     // Insert node 2 and check status
-    bool status2 = nodehandler->insert(node2->id(), node2);
-    REQUIRE(status2 == true);
+    REQUIRE(nodemap->insert(node2->id(), node2) == true);
+    // Insert node 3 and check status
+    REQUIRE(nodemap->insert(node3->id(), node3) == true);
     // Check size of node hanlder
-    REQUIRE(nodehandler->size() == 2);
+    REQUIRE(nodemap->size() == 3);
+    // Remove node 3 and check status
+    REQUIRE(nodemap->remove(node3->id()) == true);
+    // Try to remove node 3 again
+    REQUIRE(nodemap->remove(node3->id()) == false);
+    // Check size of node hanlder
+    REQUIRE(nodemap->size() == 2);
   }
 
   SECTION("Check operator []") {
     // Insert node 1
-    nodehandler->insert(id1, node1);
+    nodemap->insert(id1, node1);
     // Insert node 2
-    nodehandler->insert(id2, node2);
+    nodemap->insert(id2, node2);
 
     // Check operator []
-    REQUIRE((*nodehandler)[0]->id() == id1);
-    REQUIRE((*nodehandler)[1]->id() == id2);
+    REQUIRE((*nodemap)[0]->id() == id1);
+    REQUIRE((*nodemap)[1]->id() == id2);
   }
 
   // Check iterator
   SECTION("Check node range iterator") {
     // Insert node 1
-    nodehandler->insert(node1);
+    nodemap->insert(node1);
     // Insert node 2
-    nodehandler->insert(node2);
+    nodemap->insert(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -185,13 +207,13 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
   // Check for_each
   SECTION("Check node for_each") {
     // Insert node 1
-    nodehandler->insert(node1);
+    nodemap->insert(node1);
     // Insert node 2
-    nodehandler->insert(node2);
+    nodemap->insert(node2);
     // Check size of node hanlder
-    REQUIRE(nodehandler->size() == 2);
+    REQUIRE(nodemap->size() == 2);
 
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -201,14 +223,14 @@ TEST_CASE("Node handler is checked for 3D case", "[nodehandler][3D]") {
     // Set coordinates to unity
     coords << 1., 1., 1.;
 
-    // Iterate through node handler to update coordinaates
-    nodehandler->for_each(
+    // Iterate through node map to update coordinaates
+    nodemap->for_each(
         // function structure
         std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodehandler->begin(); itr != nodehandler->end(); ++itr) {
+    for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
       auto coords = ((*itr).second)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
