@@ -73,16 +73,14 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // yielding is defined: rate of shear > critical_shear_rate_^2
   // modulus maps shear rate to shear stress
   const double shear_rate = 2 * strain_rate.dot(strain_rate);
-  double modulus;
+  double modulus = 0;
   if (shear_rate > critical_shear_rate_ * critical_shear_rate_)
     modulus = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
-  else
-    modulus = 0.;
+
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
   Eigen::Matrix<double, 6, 1> tau;
-  tau.setZero();
   tau = modulus * strain_rate;
 
   // Use von Mises criterion
@@ -90,15 +88,14 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   double invariant2 = tau.dot(tau);
   if (invariant2 < 2 * (tau0_ * tau0_)) tau.setZero();
 
-  // Update volumetric and deviatoric stress
-  Eigen::Matrix<double, 6, 1> stress_results;
-  stress_results.setZero();
   // Get dirac delta function in Voigt notation
   const auto dirac_delta = this->dirac_delta();
 
-  stress_results = pressure_new * dirac_delta + tau;
+  // Update volumetric and deviatoric stress
+  Eigen::Matrix<double, 6, 1> updated_stress;
+  updated_stress = pressure_new * dirac_delta + tau;
 
-  return stress_results;
+  return updated_stress;
 }
 
 //! Dirac delta 2D
