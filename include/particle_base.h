@@ -132,6 +132,12 @@ class ParticleBase {
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
 
+  //! Compute pressure
+  virtual bool compute_pressure(unsigned phase, double dt) = 0;
+
+  //! Return pressure
+  virtual double pressure(unsigned phase) const = 0;
+
   //! Map body force
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 

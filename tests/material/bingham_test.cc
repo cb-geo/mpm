@@ -132,17 +132,19 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     cell->add_node(3, node3);
 
     particle->assign_cell(cell);
+    particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
+    particle->compute_pressure(phase, dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000f;
-    dstrain(1) = 0.0005000f;
-    dstrain(2) = 0.0000000f;
-    dstrain(3) = 0.0000000f;
-    dstrain(4) = 0.0000000f;
-    dstrain(5) = 0.0000000f;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0000000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
@@ -224,17 +226,19 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     cell->add_node(3, node3);
 
     particle->assign_cell(cell);
+    particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
+    particle->compute_pressure(phase, dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000f;
-    dstrain(1) = 0.0005000f;
-    dstrain(2) = 0.0000000f;
-    dstrain(3) = 0.0000000f;
-    dstrain(4) = 0.0000000f;
-    dstrain(5) = 0.0000000f;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0000000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
@@ -387,17 +391,19 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     cell->add_node(7, node7);
 
     particle->assign_cell(cell);
+    particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
+    particle->compute_pressure(phase, dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000f;
-    dstrain(1) = 0.0005000f;
-    dstrain(2) = 0.0005000f;
-    dstrain(3) = 0.0000000f;
-    dstrain(4) = 0.0000000f;
-    dstrain(5) = 0.0000000f;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0005000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
@@ -495,17 +501,19 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     cell->add_node(7, node7);
 
     particle->assign_cell(cell);
+    particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
+    particle->compute_pressure(phase, dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000f;
-    dstrain(1) = 0.0005000f;
-    dstrain(2) = 0.0005000f;
-    dstrain(3) = 0.0000000f;
-    dstrain(4) = 0.0000000f;
-    dstrain(5) = 0.0000000f;
+    dstrain(0) = 0.0010000;
+    dstrain(1) = 0.0005000;
+    dstrain(2) = 0.0005000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;

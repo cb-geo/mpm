@@ -53,16 +53,6 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const unsigned phase = 0;
   const auto strain_rate = ptr->strain_rate(phase);
 
-  // Bulk modulus
-  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-
-  // Get volumetric change and update pressure
-  // pressure_new = pressure_old + dpressure
-  // dpressure = K * strain_volumetric
-  const double dpressure = K * (dstrain(0) + dstrain(1) + dstrain(2));
-  const double pressure_old = (stress(0) + stress(1) + stress(2)) / 3.0;
-  const double pressure_new = pressure_old + dpressure;
-
   // Determine accuracy of minimum critical shear rate
   const double shear_rate_threshold = 1.0E-15;
   if (critical_shear_rate_ < shear_rate_threshold)
@@ -77,7 +67,6 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   if (shear_rate > critical_shear_rate_ * critical_shear_rate_)
     modulus = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
 
-
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
   Eigen::Matrix<double, 6, 1> tau;
@@ -85,15 +74,18 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // Use von Mises criterion
   // second invariant of tau > 2 tau0^2
-  double invariant2 = tau.dot(tau);
-  if (invariant2 < 2 * (tau0_ * tau0_)) tau.setZero();
+  double invariant2 = 0.5 * tau.dot(tau);
+  if (invariant2 < (tau0_ * tau0_)) tau.setZero();
+
+  // Get pressure
+  const double pressure = ptr->pressure(phase);
 
   // Get dirac delta function in Voigt notation
   const auto dirac_delta = this->dirac_delta();
 
   // Update volumetric and deviatoric stress
   Eigen::Matrix<double, 6, 1> updated_stress;
-  updated_stress = pressure_new * dirac_delta + tau;
+  updated_stress = -pressure * dirac_delta + tau;
 
   return updated_stress;
 }

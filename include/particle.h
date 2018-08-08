@@ -137,6 +137,14 @@ class Particle : public ParticleBase<Tdim> {
     return stress_.col(phase);
   }
 
+  //! Compute pressure
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_pressure(unsigned phase, double dt) override;
+
+  //! Return pressure
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
+
   //! Map body force
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] pgravity Gravity of a particle
@@ -193,6 +201,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! strain rate
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
+  //! pressure
+  Eigen::Matrix<double, Tnphases, 1> pressure_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Shape functions
