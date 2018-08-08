@@ -100,6 +100,12 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
       //#ifdef _MPM_ISOPARAMETRIC_
       // Get reference location of a particle with isoparametric transformation
       this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
+
+      std::cout << "Local coordinates for point : " << id_ << "\n";
+      for (unsigned i = 0; i < xi_.size(); ++i)
+        std::cout << xi_(i) << "\t";
+      std::cout << "\n";
+      
       //#else
       // Get reference location of a particle on cartesian grid
       // this->xi_ = cell_->local_coordinates_point(this->coordinates_);
@@ -212,6 +218,19 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 // Compute strain of the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
+
+  std::cout << "Bmatrix\n";
+  unsigned k = 0;
+  for (const auto bm : bmatrix_) {
+    std::cout << "Bmatrix : " << k << "\n";
+    for (unsigned i = 0; i < bm.rows(); ++i) {
+      for (unsigned j = 0; j < bm.cols(); ++j) {
+        std::cout << bm(i, j) << "\t";
+      }
+      std::cout << "\n";
+    }
+    ++k;
+  }
   // Strain rate
   Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   // dstrain
@@ -248,22 +267,18 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
-  Eigen::Matrix<double, 6, 1> stress;
-  stress.setZero();
   try {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Check if material needs property handle
       if (material_->property_handle())
         // Calculate stress
-        stress = material_->compute_stress(this->stress_.col(phase),
+        this->stress_.col(phase) = material_->compute_stress(this->stress_.col(phase),
                                            this->dstrain_.col(phase), this);
       else
         // Calculate stress without sending particle handle
-        stress = material_->compute_stress(this->stress_.col(phase),
+        this->stress_.col(phase) = material_->compute_stress(this->stress_.col(phase),
                                            this->dstrain_.col(phase));
-      // Assign stress
-      this->stress_.col(phase) = stress;
     } else {
       throw std::runtime_error("Material is invalid");
     }
