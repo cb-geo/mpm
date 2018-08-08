@@ -73,6 +73,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   strain_.setZero();
   dstrain_.setZero();
   strain_rate_.setZero();
+  pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -320,6 +321,72 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
+  return status;
+}
+
+// Compute pressure
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
+                                                     double dt) {
+  bool status = true;
+  double pressure, dpressure;
+  double bulk_modulus, youngs_modulus, poisson_ratio, volumetric_dstrain;
+
+  // Strain rate for reduced integration
+  Eigen::VectorXd centroid_strain_rate =
+      cell_->compute_strain_rate_reduced(phase);
+
+  // Set dimension of strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+  switch (Tdim) {
+    case (1): {
+      strain_rate(0) = centroid_strain_rate(0);
+      break;
+    }
+    case (2): {
+      strain_rate(0) = centroid_strain_rate(0);
+      strain_rate(1) = centroid_strain_rate(1);
+      strain_rate(3) = centroid_strain_rate(2);
+      break;
+    }
+    default: {
+      strain_rate = centroid_strain_rate;
+      break;
+    }
+  }
+
+  // Get dstrain
+  Eigen::Matrix<double, 6, 1> dstrain;
+  dstrain = strain_rate * dt;
+
+  try {
+    // Check if  material ptr is valid
+    if (material_ != nullptr) {
+
+      // Get material properties
+      youngs_modulus = material_->property("youngs_modulus");
+      poisson_ratio = material_->property("poisson_ratio");
+      bulk_modulus = youngs_modulus / (3.0 * (1. - 2. * poisson_ratio));
+
+      // Get volumetric dstrain, using reduced integration
+      volumetric_dstrain = (dstrain.head(3)).sum();
+
+      // Get dpressure = -K * dvol_strain
+      dpressure = -bulk_modulus * volumetric_dstrain;
+      pressure = pressure_(phase) + dpressure;
+
+      // Assign pressure
+      this->pressure_(phase) = pressure;
+
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+
   return status;
 }
 
