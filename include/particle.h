@@ -182,10 +182,10 @@ class Particle : public ParticleBase<Tdim> {
   //! TODO: Remove
   void stats() override {
     std::string out = "Particle: " + std::to_string(id_) + "\t" +
-                      std::to_string(status_) + " position: ";
+                      std::to_string(status_) + " strain: ";
     std::string val = "";
-    for (unsigned i = 0; i < coordinates_.size(); ++i)
-      val += std::to_string(coordinates_(i, 0)) + "\t";
+    for (unsigned i = 0; i < strain_.rows(); ++i)
+      val += std::to_string(strain_(i, 0)) + "\t";
     out += val + "\n";
 
     std::cout << out;

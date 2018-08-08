@@ -20,9 +20,11 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
     // Gravity
+    std::cout << "GRAVITY SIZE: " << analysis_.at("gravity").size() << "\n";
+    
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == Tdim) {
-      for (unsigned i = 0; i < analysis_.at("gravity").size(); ++i) {
+      for (unsigned i = 0; i < gravity_.size(); ++i) {
         gravity_[i] = analysis_.at("gravity").at(i);
       }
     }
@@ -218,11 +220,21 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                   std::placeholders::_1, phase));
 
+    // Stats
+    // TODO: Remove
+    // Iterate over each particle stats
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
+
+    
+    std::cout << "Gravity: " << this->gravity_(0) << "\t" << this->gravity_(1)
+              << "\t" << this->gravity_(2) << "\n";
+    
     // Iterate over each particle to compute nodal body force
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                   std::placeholders::_1, phase, this->gravity_));
-
+    
     // Iterate over each particle to compute nodal internal force
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
@@ -234,6 +246,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                   std::placeholders::_1, phase, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
+    // TODO: Remove stats
+    meshes_.at(0)->iterate_over_nodes(
+        std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+
+    
     // Iterate over each particle to compute updated position
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
@@ -245,15 +262,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    // Stats
-    // TODO: Remove
-    // Iterate over each particle stats
-    meshes_.at(0)->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
-
-    // TODO: Remove stats
-    meshes_.at(0)->iterate_over_nodes(
-        std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
     /*
         meshes_.at(0)->iterate_over_nodes_predicate(
             std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),

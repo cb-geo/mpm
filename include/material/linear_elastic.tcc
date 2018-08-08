@@ -42,7 +42,7 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain) {
 
-  Vector6d dstress = this->elastic_tensor() * dstrain;
+  const Vector6d dstress = this->elastic_tensor() * dstrain;
   return (stress + dstress);
 }
 
