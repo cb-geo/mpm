@@ -139,7 +139,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000;
+    dstrain(0) = -0.0010000;
     dstrain(1) = 0.0005000;
     dstrain(2) = 0.0000000;
     dstrain(3) = 0.0000000;
@@ -154,8 +154,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(12500).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(12500).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(0.000e+00).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -233,7 +233,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000;
+    dstrain(0) = -0.0010000;
     dstrain(1) = 0.0005000;
     dstrain(2) = 0.0000000;
     dstrain(3) = 0.0000000;
@@ -248,8 +248,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(12145.8400481974).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(11968.7600722961).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-10417020.8266184665).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-10417197.9065943677).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-885.3998795065).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -398,9 +398,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000;
+    dstrain(0) = -0.0010000;
     dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
+    dstrain(2) = 0.0004000;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -413,9 +413,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(16666.66666667).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(16666.66666667).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(0.000e+00).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(0.000e+00).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
@@ -508,9 +508,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
-    dstrain(0) = 0.0010000;
+    dstrain(0) = -0.0010000;
     dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
+    dstrain(2) = 0.0004000;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -523,9 +523,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(16453.03817331399).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(16346.22438237844).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(16410.31247464346).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-9375213.6285614166).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-9375320.4428421259).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-9375256.3542737011).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-534.0714035477).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(-619.5228281154).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(-555.4342596897).epsilon(Tolerance));
