@@ -858,7 +858,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
 
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_reduced(unsigned phase) {
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   // Define strain rate
   Eigen::VectorXd strain_rate;
 
@@ -889,12 +889,13 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_reduced(unsigned phase) {
   try {
     // Get B-Matrix at the centroid
     bmatrix = shapefn_->bmatrix(xi_centroid);
+    for (unsigned i = 0; i < bmatrix.size(); ++i)
 
-    // Check if B-Matrix size and number of nodes match
-    if (this->nfunctions() != bmatrix.size() ||
-        this->nnodes() != bmatrix.size())
-      throw std::runtime_error(
-          "Number of nodes / shapefn doesn't match BMatrix");
+      // Check if B-Matrix size and number of nodes match
+      if (this->nfunctions() != bmatrix.size() ||
+          this->nnodes() != bmatrix.size())
+        throw std::runtime_error(
+            "Number of nodes / shapefn doesn't match BMatrix");
 
     for (unsigned i = 0; i < this->nnodes(); ++i) {
       Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);

@@ -333,25 +333,25 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
   double bulk_modulus, youngs_modulus, poisson_ratio, volumetric_dstrain;
 
   // Strain rate for reduced integration
-  Eigen::VectorXd centroid_strain_rate =
-      cell_->compute_strain_rate_reduced(phase);
+  Eigen::VectorXd strain_rate_centroid =
+      cell_->compute_strain_rate_centroid(phase);
 
   // Set dimension of strain rate
   Eigen::Matrix<double, 6, 1> strain_rate;
   strain_rate.setZero();
   switch (Tdim) {
     case (1): {
-      strain_rate(0) = centroid_strain_rate(0);
+      strain_rate(0) = strain_rate_centroid(0);
       break;
     }
     case (2): {
-      strain_rate(0) = centroid_strain_rate(0);
-      strain_rate(1) = centroid_strain_rate(1);
-      strain_rate(3) = centroid_strain_rate(2);
+      strain_rate(0) = strain_rate_centroid(0);
+      strain_rate(1) = strain_rate_centroid(1);
+      strain_rate(3) = strain_rate_centroid(2);
       break;
     }
     default: {
-      strain_rate = centroid_strain_rate;
+      strain_rate = strain_rate_centroid;
       break;
     }
   }
@@ -370,7 +370,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
       bulk_modulus = youngs_modulus / (3.0 * (1. - 2. * poisson_ratio));
 
       // Get volumetric dstrain, using reduced integration
-      volumetric_dstrain = (dstrain.head(3)).sum();
+      volumetric_dstrain = (dstrain.head(Tdim)).sum();
 
       // Get dpressure = -K * dvol_strain
       dpressure = -bulk_modulus * volumetric_dstrain;
