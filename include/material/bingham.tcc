@@ -53,9 +53,6 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const unsigned phase = 0;
   auto strain_rate = ptr->strain_rate(phase);
 
-  // Get defintion of D for Bingham
-  strain_rate.tail(3) *= 0.5;
-
   // Determine accuracy of minimum critical shear rate
   const double shear_rate_threshold = 1.0E-15;
   if (critical_shear_rate_ < shear_rate_threshold)
@@ -64,21 +61,29 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // Checking yielding from strain rate vs critical yielding shear rate
   // rate of shear = sqrt(2 * strain_rate * strain_rate)
   // yielding is defined: rate of shear > critical_shear_rate_^2
-  // modulus maps shear rate to shear stress
+  // apparent_viscosity maps shear rate to shear stress
   const double shear_rate = 2 * strain_rate.dot(strain_rate);
-  double modulus = 0;
+  double apparent_viscosity = 0;
   if (shear_rate > critical_shear_rate_ * critical_shear_rate_)
-    modulus = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
+    apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
   Eigen::Matrix<double, 6, 1> tau;
-  tau = modulus * strain_rate;
+  tau = apparent_viscosity * strain_rate;
 
   // Use von Mises criterion
-  // second invariant of tau > 2 tau0^2
+  // second invariant of deviatoric stress tau > tau0^2
   double invariant2 = 0.5 * tau.dot(tau);
-  if (invariant2 < (tau0_ * tau0_)) tau.setZero();
+  if (invariant2 < (tau0_ * tau0_)) {
+    tau.setZero();
+  } else {
+    // Get defintion of D for Bingham
+    strain_rate.tail(3) *= 0.5;
+
+    // Get tau from D
+    tau = apparent_viscosity * strain_rate;
+  }
 
   // Get pressure
   const double pressure = ptr->pressure(phase);
