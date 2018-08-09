@@ -180,19 +180,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                 std::placeholders::_1, material));
 
   for (mpm::Index step = 0; step < this->nsteps_; ++step) {
-
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
     meshes_.at(0)->iterate_over_cells(
         std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-
-    // Locate particles
-    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-
-    if (!unlocatable_particles.empty())
-      throw std::runtime_error("Particle outside the mesh domain");
 
     // Iterate over each particle to compute shapefn
     meshes_.at(0)->iterate_over_particles(std::bind(
@@ -236,8 +229,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
                   std::placeholders::_1, phase));
 
-    std::cout << "\n\n Step: " << step << " of " << nsteps_ << "\n";
-
     // Iterate over active nodes to compute acceleratation and velocity
     meshes_.at(0)->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
@@ -249,6 +240,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, phase, this->dt_));
 
+    // Locate particles
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+
+    std::cout << "\n\n Step: " << step << " of " << nsteps_ << "\n";
     // Stats
     // TODO: Remove
     // Iterate over each particle stats
