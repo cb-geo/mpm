@@ -51,7 +51,10 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const ParticleBase<Tdim>* ptr) {
 
   const unsigned phase = 0;
-  const auto strain_rate = ptr->strain_rate(phase);
+  auto strain_rate = ptr->strain_rate(phase);
+
+  // Get defintion of D for Bingham
+  strain_rate.tail(3) *= 0.5;
 
   // Determine accuracy of minimum critical shear rate
   const double shear_rate_threshold = 1.0E-15;
