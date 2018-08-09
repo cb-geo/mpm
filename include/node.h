@@ -167,26 +167,12 @@ class Node : public NodeBase<Tdim> {
 
   // TODO: Remove debug printing
   void stats() override {
-    /*
-    std::string out = "Node: " + std::to_string(id_) + "\t" +
-                      std::to_string(status_) + " int: ";
-    std::string val = "";
+    std::string out =
+        "\nNode: " + std::to_string(id_) + "\t" + std::to_string(status_);
+    out += "\nint_force: ";
     for (unsigned i = 0; i < internal_force_.rows(); ++i)
-      val += std::to_string(internal_force_(i, 0)) + "\t";
-    out += val + "\n";
+      out += std::to_string(internal_force_(i, 0)) + "\t";
     std::cout << out;
-    */
-    std::cout << "\nNode: " << id_ << "\t mass: " << mass_(0);
-    std::cout << "\nInt. force: ";
-    for (unsigned i = 0; i < internal_force_.rows(); ++i)
-      std::cout << internal_force_(i, 0) << "\t";
-    std::cout << "\nExt. force: ";
-    for (unsigned i = 0; i < external_force_.rows(); ++i)
-      std::cout << external_force_(i, 0) << "\t";
-    std::cout << "\nVelocity: ";
-    for (unsigned i = 0; i < velocity_.rows(); ++i)
-      std::cout << velocity_(i, 0) << "\t";
-
   }
 
  private:
