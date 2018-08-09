@@ -296,11 +296,11 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Compute nodal internal forces
-      // volume * pstress
+      // -pstress * volume 
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")),
-          this->stress_.col(phase));
+          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
