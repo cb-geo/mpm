@@ -53,19 +53,26 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const unsigned phase = 0;
   auto strain_rate = ptr->strain_rate(phase);
 
+  // Get defintion of D for Bingham
+  strain_rate.tail(3) *= 0.5;
+
   // Determine accuracy of minimum critical shear rate
   const double shear_rate_threshold = 1.0E-15;
   if (critical_shear_rate_ < shear_rate_threshold)
     critical_shear_rate_ = shear_rate_threshold;
 
   // Checking yielding from strain rate vs critical yielding shear rate
-  // rate of shear = sqrt(2 * strain_rate * strain_rate)
+  // rate of shear = sqrt(2 * D * D) in matrix
+  // Since D is in Voigt notation, need to double shear part
   // yielding is defined: rate of shear > critical_shear_rate_^2
   // apparent_viscosity maps shear rate to shear stress
-  const double shear_rate = 2 * strain_rate.dot(strain_rate);
+  const double shear_rate_squared =
+      2 * (strain_rate.dot(strain_rate) +
+           strain_rate.tail(3).dot(strain_rate.tail(3)));
+
   double apparent_viscosity = 0;
-  if (shear_rate > critical_shear_rate_ * critical_shear_rate_)
-    apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate))) + mu_);
+  if (shear_rate_squared > critical_shear_rate_ * critical_shear_rate_)
+    apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate_squared))) + mu_);
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
@@ -73,19 +80,13 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   tau = apparent_viscosity * strain_rate;
 
   // Use von Mises criterion
-  // second invariant of deviatoric stress tau > tau0^2
-  double invariant2 = 0.5 * tau.dot(tau);
-  if (invariant2 < (tau0_ * tau0_)) {
-    tau.setZero();
-  } else {
-    // Get defintion of D for Bingham
-    strain_rate.tail(3) *= 0.5;
+  // second invariant J2 of deviatoric stress in matrix form
+  // Since tau is in Voigt notation, need to double shear part
+  // yield condition J2 > tau0^2
+  const double invariant2 = 0.5 * (tau.dot(tau) + tau.tail(3).dot(tau.tail(3)));
+  if (invariant2 < (tau0_ * tau0_)) tau.setZero();
 
-    // Get tau from D
-    tau = apparent_viscosity * strain_rate;
-  }
-
-  // Get pressure
+  // Get thermodynamics pressure
   const double pressure = ptr->pressure(phase);
 
   // Get dirac delta function in Voigt notation
