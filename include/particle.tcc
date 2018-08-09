@@ -330,7 +330,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
                                                      double dt) {
   bool status = true;
   double pressure, dpressure;
-  double bulk_modulus, youngs_modulus, poisson_ratio, volumetric_dstrain;
+  double bulk_modulus, youngs_modulus, poisson_ratio, dvolumetric_strain;
 
   // Strain rate for reduced integration
   Eigen::VectorXd strain_rate_centroid =
@@ -370,14 +370,12 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
       bulk_modulus = youngs_modulus / (3.0 * (1. - 2. * poisson_ratio));
 
       // Get volumetric dstrain, using reduced integration
-      volumetric_dstrain = (dstrain.head(Tdim)).sum();
+      dvolumetric_strain = (dstrain.head(Tdim)).sum();
 
       // Get dpressure = -K * dvol_strain
-      dpressure = -bulk_modulus * volumetric_dstrain;
-      pressure = pressure_(phase) + dpressure;
-
+      // pressure = pressure + dpressure
       // Assign pressure
-      this->pressure_(phase) = pressure;
+      this->pressure_(phase) -= bulk_modulus * dvolumetric_strain;
 
     } else {
       throw std::runtime_error("Material is invalid");
