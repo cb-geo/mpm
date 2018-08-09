@@ -21,7 +21,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
     // Gravity
     std::cout << "GRAVITY SIZE: " << analysis_.at("gravity").size() << "\n";
-    
+
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == Tdim) {
       for (unsigned i = 0; i < gravity_.size(); ++i) {
@@ -216,7 +216,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                   std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    
     // Iterate over each particle to calculate strain
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -231,7 +230,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                   std::placeholders::_1, phase, this->gravity_));
-    
+
     // Iterate over each particle to compute nodal internal force
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
@@ -244,7 +243,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
                   std::placeholders::_1, phase, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-    
+
     // Iterate over each particle to compute updated position
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,

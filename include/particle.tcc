@@ -125,14 +125,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
     if (cell_ != nullptr) {
       // Compute local coordinates
       this->compute_reference_location();
-
-      std::cout << "Particle: " << id_ << "\n";
-      std::cout << "coordinates: " << coordinates_ << "\n";
-      std::cout << "xi: " << xi_ << "\n";
-      
       // Get shape function ptr of a cell
       const auto sfn = cell_->shapefn_ptr();
-
       // Compute shape function of the particle
       shapefn_ = sfn->shapefn(this->xi_);
       // Compute gradient shape function of the particle
@@ -245,7 +239,7 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
     if (std::fabs(dstrain(i)) < 1.E-15) dstrain(i) = 0.;
 
   strain_rate_.col(phase) = dstrain;
-  
+
   // dstrain = strain_rate * dt
   dstrain *= dt;
 
@@ -266,8 +260,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
       // Check if material needs property handle
       if (material_->property_handle())
         // Calculate stress
-        this->stress_.col(phase) = material_->compute_stress(this->stress_.col(phase),
-                                           dstrain, this);
+        this->stress_.col(phase) =
+            material_->compute_stress(this->stress_.col(phase), dstrain, this);
       else
         // Calculate stress without sending particle handle
         this->stress_.col(phase) =
@@ -387,18 +381,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
       Eigen::Matrix<double, Tdim, 1> acceleration =
-        cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
+          cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
       this->velocity_.col(phase) += acceleration * dt;
 
-      std::cout << "\n\nPARTICLE: " << id_ << "\n";
-      std::cout << "\noldcoord: " << this->coordinates_ << "\n";
-      std::cout << "\nvelocity: " << this->velocity_.col(phase) << "\n";
-      
       // New position  current position + velocity * dt
       this->coordinates_ += this->velocity_.col(phase) * dt;
-      std::cout << "\nnewcoord: " << this->coordinates_ << "\n";
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

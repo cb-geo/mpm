@@ -67,7 +67,6 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
   for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
     oper(*itr);
   }
-
 }
 
 //! Iterate over nodes
@@ -264,7 +263,6 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
   for (auto itr = particles_.cbegin(); itr != particles_.cend(); ++itr) {
     oper(*itr);
   }
-
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
