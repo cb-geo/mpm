@@ -181,36 +181,12 @@ class Particle : public ParticleBase<Tdim> {
 
   //! TODO: Remove
   void stats() override {
-    /*
-    std::string out = "Particle: " + std::to_string(id_) + "\t" +
-                      std::to_string(status_) + " strain: ";
-    std::string val = "";
-    for (unsigned i = 0; i < strain_.rows(); ++i)
-      val += std::to_string(strain_(i, 0)) + "\t";
-    out += val + "\n";
-
-    std::cout << out;
-    */
-    std::cout << "\nParticle: " << id_;
-/*    std::cout << "\nPosition: ";
-    for (unsigned i = 0; i < coordinates_.rows(); ++i)
-      std::cout << coordinates_(i, 0) << "\t";
-    std::cout << "\nxi: ";
-    for (unsigned i = 0; i < xi_.rows(); ++i)
-      std::cout << xi_(i, 0) << "\t";
-*/
-    std::cout << "\nstrain_rate: ";
-    for (unsigned i = 0; i < strain_rate_.rows(); ++i)
-      std::cout << strain_rate_(i, 0) << "\t";
-    std::cout << "\nstrain: ";
-    for (unsigned i = 0; i < strain_.rows(); ++i)
-      std::cout << strain_(i, 0) << "\t";
-    std::cout << "\nstress: ";
+    std::string out = "\nParticle: " + std::to_string(id_) +
+                      "\t status: " + std::to_string(status_);
+    out += "\nstress: ";
     for (unsigned i = 0; i < stress_.rows(); ++i)
-      std::cout << stress_(i, 0) << "\t";
-    std::cout << "\nShapefn: ";
-    for (unsigned i = 0; i < shapefn_.size(); ++i)
-      std::cout << shapefn_(i) << "\t";
+      out += std::to_string(stress_(i, 0)) + "\t";
+    std::cout << out;
   }
 
  private:
