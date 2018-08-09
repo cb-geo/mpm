@@ -20,9 +20,11 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
     // Gravity
+    std::cout << "GRAVITY SIZE: " << analysis_.at("gravity").size() << "\n";
+
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == Tdim) {
-      for (unsigned i = 0; i < analysis_.at("gravity").size(); ++i) {
+      for (unsigned i = 0; i < gravity_.size(); ++i) {
         gravity_[i] = analysis_.at("gravity").at(i);
       }
     }
@@ -178,7 +180,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                 std::placeholders::_1, material));
 
   for (mpm::Index step = 0; step < this->nsteps_; ++step) {
-
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -245,6 +246,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
+    std::cout << "\n\n Step: " << step << " of " << nsteps_ << "\n";
     // Stats
     // TODO: Remove
     // Iterate over each particle stats
@@ -254,6 +256,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // TODO: Remove stats
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
+
     /*
         meshes_.at(0)->iterate_over_nodes_predicate(
             std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),

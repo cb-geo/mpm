@@ -141,9 +141,18 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
     for (unsigned phase = 0; phase < Tnphases; ++phase) {
       if (mass_(phase) > tolerance) {
         velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
+
+        // Check to see if value is below threshold
+        for (unsigned i = 0; i < velocity_.rows(); ++i)
+          if (std::fabs(velocity_.col(phase)(i)) < 1.E-15)
+            velocity_.col(phase)(i) = 0.;
       } else
         throw std::runtime_error("Nodal mass is zero or below threshold");
     }
+
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -188,8 +197,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
                                         this->internal_force_.col(phase)) /
                                        this->mass_(phase);
 
-      // Velocity = acceleration * dt
-      this->velocity_.col(phase) = this->acceleration_.col(phase) * dt;
+      // Velocity += acceleration * dt
+      this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_velocity_constraints();

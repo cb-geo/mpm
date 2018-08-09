@@ -181,13 +181,11 @@ class Particle : public ParticleBase<Tdim> {
 
   //! TODO: Remove
   void stats() override {
-    std::string out = "Particle: " + std::to_string(id_) + "\t" +
-                      std::to_string(status_) + " position: ";
-    std::string val = "";
-    for (unsigned i = 0; i < coordinates_.size(); ++i)
-      val += std::to_string(coordinates_(i, 0)) + "\t";
-    out += val + "\n";
-
+    std::string out = "\nParticle: " + std::to_string(id_) +
+                      "\t status: " + std::to_string(status_);
+    out += "\nstress: ";
+    for (unsigned i = 0; i < stress_.rows(); ++i)
+      out += std::to_string(stress_(i, 0)) + "\t";
     std::cout << out;
   }
 
@@ -214,6 +212,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
+  //! Strain rate
+  Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
