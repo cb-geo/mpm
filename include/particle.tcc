@@ -296,7 +296,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Compute nodal internal forces
-      // -pstress * volume 
+      // -pstress * volume
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")),
