@@ -196,15 +196,12 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       this->acceleration_.col(phase) = (this->external_force_.col(phase) +
                                         this->internal_force_.col(phase)) /
                                        this->mass_(phase);
-      
+
       // Velocity += acceleration * dt
-      std::cout << "Nodal velocity: " << id_ << "\n";
-      std::cout << "Old: "<< velocity_.col(phase) << "\n";
       this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_velocity_constraints();
-      std::cout << "New: "<< velocity_.col(phase) << "\n";
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
 

@@ -26,14 +26,14 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 4, 2> grad_shapefn;
   grad_shapefn(0, 0) = -0.25 * (1 - xi(1)) * 2.;
-  grad_shapefn(1, 0) = 0.25 * (1 - xi(1))* 2.;
-  grad_shapefn(2, 0) = 0.25 * (1 + xi(1))* 2.;
-  grad_shapefn(3, 0) = -0.25 * (1 + xi(1))* 2.;
+  grad_shapefn(1, 0) = 0.25 * (1 - xi(1)) * 2.;
+  grad_shapefn(2, 0) = 0.25 * (1 + xi(1)) * 2.;
+  grad_shapefn(3, 0) = -0.25 * (1 + xi(1)) * 2.;
 
-  grad_shapefn(0, 1) = -0.25 * (1 - xi(0))* 2.;
-  grad_shapefn(1, 1) = -0.25 * (1 + xi(0))* 2.;
-  grad_shapefn(2, 1) = 0.25 * (1 + xi(0))* 2.;
-  grad_shapefn(3, 1) = 0.25 * (1 - xi(0))* 2.;
+  grad_shapefn(0, 1) = -0.25 * (1 - xi(0)) * 2.;
+  grad_shapefn(1, 1) = -0.25 * (1 + xi(0)) * 2.;
+  grad_shapefn(2, 1) = 0.25 * (1 + xi(0)) * 2.;
+  grad_shapefn(3, 1) = 0.25 * (1 - xi(0)) * 2.;
 
   return grad_shapefn;
 }
