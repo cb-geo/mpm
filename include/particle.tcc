@@ -125,8 +125,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
     if (cell_ != nullptr) {
       // Compute local coordinates
       this->compute_reference_location();
+
       // Get shape function ptr of a cell
       const auto sfn = cell_->shapefn_ptr();
+
       // Compute shape function of the particle
       shapefn_ = sfn->shapefn(this->xi_);
       // Compute gradient shape function of the particle
@@ -210,7 +212,6 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 // Compute strain of the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
-
   // Strain rate
   Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   // dstrain
@@ -238,6 +239,7 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   for (unsigned i = 0; i < dstrain.size(); ++i)
     if (std::fabs(dstrain(i)) < 1.E-15) dstrain(i) = 0.;
 
+  // Assign strain rate
   strain_rate_.col(phase) = dstrain;
 
   // dstrain = strain_rate * dt
