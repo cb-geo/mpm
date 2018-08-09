@@ -883,7 +883,7 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
   // Map internal forces from particle to nodes
   for (unsigned j = 0; j < this->nfunctions(); ++j)
     nodes_[j]->update_internal_force(
-        true, phase, (pvolume * bmatrix.at(j).transpose() * stress));
+        true, phase, (-pvolume * bmatrix.at(j).transpose() * stress));
 }
 
 //! Return velocity at a given point by interpolating from nodes

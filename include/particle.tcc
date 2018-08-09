@@ -100,12 +100,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
       //#ifdef _MPM_ISOPARAMETRIC_
       // Get reference location of a particle with isoparametric transformation
       this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
-
-      std::cout << "Local coordinates for point : " << id_ << "\n";
-      for (unsigned i = 0; i < xi_.size(); ++i)
-        std::cout << xi_(i) << "\t";
-      std::cout << "\n";
-      
       //#else
       // Get reference location of a particle on cartesian grid
       // this->xi_ = cell_->local_coordinates_point(this->coordinates_);
@@ -132,6 +126,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Compute local coordinates
       this->compute_reference_location();
 
+      std::cout << "Particle: " << id_ << "\n";
+      std::cout << "coordinates: " << coordinates_ << "\n";
+      std::cout << "xi: " << xi_ << "\n";
+      
       // Get shape function ptr of a cell
       const auto sfn = cell_->shapefn_ptr();
 
@@ -219,18 +217,6 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 
-  std::cout << "Bmatrix\n";
-  unsigned k = 0;
-  for (const auto bm : bmatrix_) {
-    std::cout << "Bmatrix : " << k << "\n";
-    for (unsigned i = 0; i < bm.rows(); ++i) {
-      for (unsigned j = 0; j < bm.cols(); ++j) {
-        std::cout << bm(i, j) << "\t";
-      }
-      std::cout << "\n";
-    }
-    ++k;
-  }
   // Strain rate
   Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   // dstrain
@@ -254,6 +240,12 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
     }
   }
 
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < dstrain.size(); ++i)
+    if (std::fabs(dstrain(i)) < 1.E-15) dstrain(i) = 0.;
+
+  strain_rate_.col(phase) = dstrain;
+  
   // dstrain = strain_rate * dt
   dstrain *= dt;
 
@@ -270,15 +262,16 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   try {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
+      Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Check if material needs property handle
       if (material_->property_handle())
         // Calculate stress
         this->stress_.col(phase) = material_->compute_stress(this->stress_.col(phase),
-                                           this->dstrain_.col(phase), this);
+                                           dstrain, this);
       else
         // Calculate stress without sending particle handle
-        this->stress_.col(phase) = material_->compute_stress(this->stress_.col(phase),
-                                           this->dstrain_.col(phase));
+        this->stress_.col(phase) =
+            material_->compute_stress(this->stress_.col(phase), dstrain);
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -393,14 +386,19 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
-      Eigen::Matrix<double, Tdim, 1> velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+      Eigen::Matrix<double, Tdim, 1> acceleration =
+        cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) = velocity;
+      this->velocity_.col(phase) += acceleration * dt;
 
+      std::cout << "\n\nPARTICLE: " << id_ << "\n";
+      std::cout << "\noldcoord: " << this->coordinates_ << "\n";
+      std::cout << "\nvelocity: " << this->velocity_.col(phase) << "\n";
+      
       // New position  current position + velocity * dt
-      this->coordinates_ += velocity * dt;
+      this->coordinates_ += this->velocity_.col(phase) * dt;
+      std::cout << "\nnewcoord: " << this->coordinates_ << "\n";
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
