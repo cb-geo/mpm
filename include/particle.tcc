@@ -235,6 +235,13 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
     }
   }
 
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < dstrain.size(); ++i)
+    if (std::fabs(dstrain(i)) < 1.E-15) dstrain(i) = 0.;
+
+  // Assign strain rate
+  strain_rate_.col(phase) = dstrain;
+
   // dstrain = strain_rate * dt
   dstrain *= dt;
 
@@ -248,22 +255,19 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
-  Eigen::Matrix<double, 6, 1> stress;
-  stress.setZero();
   try {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
+      Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Check if material needs property handle
       if (material_->property_handle())
         // Calculate stress
-        stress = material_->compute_stress(this->stress_.col(phase),
-                                           this->dstrain_.col(phase), this);
+        this->stress_.col(phase) =
+            material_->compute_stress(this->stress_.col(phase), dstrain, this);
       else
         // Calculate stress without sending particle handle
-        stress = material_->compute_stress(this->stress_.col(phase),
-                                           this->dstrain_.col(phase));
-      // Assign stress
-      this->stress_.col(phase) = stress;
+        this->stress_.col(phase) =
+            material_->compute_stress(this->stress_.col(phase), dstrain);
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -294,11 +298,11 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Compute nodal internal forces
-      // volume * pstress
+      // -pstress * volume
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")),
-          this->stress_.col(phase));
+          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -378,14 +382,14 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
-      Eigen::Matrix<double, Tdim, 1> velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+      Eigen::Matrix<double, Tdim, 1> acceleration =
+          cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) = velocity;
+      this->velocity_.col(phase) += acceleration * dt;
 
       // New position  current position + velocity * dt
-      this->coordinates_ += velocity * dt;
+      this->coordinates_ += this->velocity_.col(phase) * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
