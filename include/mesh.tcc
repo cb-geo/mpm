@@ -63,10 +63,7 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  //  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
-    oper(*itr);
-  }
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
 }
 
 //! Iterate over nodes
@@ -259,10 +256,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-  //  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
-  for (auto itr = particles_.cbegin(); itr != particles_.cend(); ++itr) {
-    oper(*itr);
-  }
+  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
