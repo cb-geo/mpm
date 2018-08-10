@@ -412,3 +412,45 @@ inline Eigen::MatrixXi
   return indices;
 }
   
+//!          F2  
+//!   3 0----------0 2
+//!     |          |
+//!  F3 |          | F1
+//!     |          |
+//!     |          |
+//!   0 0----------0 1
+//!          F0
+//! Return indices of a face of the element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::face_indices(const unsigned face_id) const {
+  
+  Eigen::Matrix<int, 2, 1> indices;
+  
+  switch(face_id) {
+    case (0): {
+      indices << 0, 1;
+      break;
+    }
+    case (1): {
+      indices << 1, 2;
+      break;
+    }
+    case (2): {
+      indices << 2, 3;
+      break;
+    }
+    case (3): {
+      indices << 3, 0;
+      break;
+    }    
+    default: {
+      indices << 0, 1;
+      std::cout << "Face ID is undefined, using default value of 0.";
+      break;
+    }
+  }
+
+  return indices;
+}
+

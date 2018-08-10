@@ -2,6 +2,7 @@
 #define MPM_HEXAHEDRON_ELEMENT_H_
 
 #include <exception>
+#include <iostream>
 
 #include <Eigen/Dense>
 
@@ -94,10 +95,6 @@ class HexahedronElement : public Element<Tdim> {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     static_assert((Tnfunctions == 8 || Tnfunctions == 20),
                   "Specified number of shape functions is not defined");
-    //! Logger
-    std::string logger = "hexahedron::<" + std::to_string(Tdim) + ", " +
-                         std::to_string(Tnfunctions) + ">";
-    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
   //! Return number of functions
@@ -167,9 +164,15 @@ class HexahedronElement : public Element<Tdim> {
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
 
+  //! Return indices of a face of an element
+  //! \param[in] face_id given id of the face
+  //! \retval indices Indices that make the face
+  Eigen::VectorXi face_indices(const unsigned face_id) const override;
+
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
 };
 
 }  // namespace mpm

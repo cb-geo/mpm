@@ -518,4 +518,69 @@ inline Eigen::MatrixXi
   //clang-format on
   return indices;
 }
+
+
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5  
+//!         Front: F5 
+//!
+//!
+//! Description: 
+//! Bottom face: F0
+//! Right face: F1
+//! Top face: F2
+//! Left face: F3
+//! Behind face: F4
+//! Front face: F5
+//! Return indices of a face of the element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::face_indices(const unsigned face_id) const {
   
+  Eigen::Matrix<int, 4, 1> indices;
+  
+  switch(face_id) {
+    case (0): {
+      indices << 0, 1, 5, 4;
+      break;
+    }
+    case (1): {
+      indices << 5, 1, 2, 0;
+      break;
+    }
+    case (2): {
+      indices << 7, 6, 2, 3;
+      break;
+    }
+    case (3): {
+      indices << 0, 4, 7, 3;
+      break;
+    } 
+    case (4): {
+      indices << 0, 1, 2, 3;
+      break;
+    } 
+    case (5): {
+      indices << 4, 5, 6, 7;
+      break;
+    }    
+    default: {
+      indices << 0, 1, 5, 4;
+      std::cout << "Face ID is undefined, using default value of 0.";
+      break;
+    }
+  }
+
+  return indices;
+}
