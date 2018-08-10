@@ -296,9 +296,8 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
   try {
     // If cell is initialised
     if (this->is_initialised()) {
-      for (unsigned i = 0; i < nodes_.size(); ++i) {
+      for (unsigned i = 0; i < nodes_.size(); ++i)
         coordinates.row(i) = nodes_[i]->coordinates().transpose();
-      }
     } else {
       throw std::runtime_error(
           "Cell is not initialised to return nodal coordinates!");
