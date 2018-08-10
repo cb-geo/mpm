@@ -287,6 +287,28 @@ void mpm::Cell<Tdim>::compute_mean_length() {
   this->mean_length_ /= indices.rows();
 }
 
+//! Return nodal coordinates
+template <unsigned Tdim>
+Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
+  Eigen::MatrixXd coordinates;
+  coordinates.resize(this->nnodes_, Tdim);
+  coordinates.setZero();
+  try {
+    // If cell is initialised
+    if (this->is_initialised()) {
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
+        coordinates.row(i) = nodes_[i]->coordinates().transpose();
+      }
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised to return nodal coordinates!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return coordinates;
+}
+
 //! Check if a point is in a 1D cell by breaking the cell into sub-volumes
 template <>
 inline bool mpm::Cell<1>::point_in_cell(
