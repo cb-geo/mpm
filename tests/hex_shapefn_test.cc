@@ -173,6 +173,44 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Check Jacobian
+    SECTION(
+        "Eight noded hexahedron Jacobian for local coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2., 1., 0.5,
+                4., 2., 1.0,
+                2., 4., 1.0,
+                1., 3., 0.5,
+                2., 1., 1.5,
+                4., 2., 2.0,
+                2., 4., 2.0,
+                1., 3., 1.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5, 0.25,
+                 -0.875, 1.0, 0.00,
+                  0.000, 0.0, 0.50;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hexsf->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
     // Coordinates is (0, 0, 0)
     SECTION("Eight noded hexahedron B-matrix for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
@@ -1011,6 +1049,55 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(gradsf(17, 2) == Approx(0.09375).epsilon(Tolerance));
       REQUIRE(gradsf(18, 2) == Approx(0.28125).epsilon(Tolerance));
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION("20 noded hexahedron Jacobian for local coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 20, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0, 0.50, 
+                4.0, 2.0, 1.00, 
+                2.0, 4.0, 1.00, 
+                1.0, 3.0, 0.50, 
+                2.0, 1.0, 1.50, 
+                4.0, 2.0, 2.00, 
+                2.0, 4.0, 2.00, 
+                1.0, 3.0, 1.50, 
+                3.0, 1.5, 0.75, 
+                1.5, 2.0, 0.50, 
+                2.0, 1.0, 1.00,
+                3.0, 3.0, 1.00, 
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 0.75,
+                2.0, 4.0, 1.50,
+                1.0, 3.0, 1.00,
+                3.0, 1.5, 1.75,
+                1.5, 2.0, 1.50, 
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 1.75;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.90625, 0.21875, 0.109375,
+                 -1.43750, 1.56250, 0.281250,
+                  0.28125,-0.28125, 0.359375;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hexsf->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
     }
 
     // Coordinates is (0, 0, 0)
