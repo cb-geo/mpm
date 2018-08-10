@@ -367,6 +367,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
     Eigen::Matrix<double, 6, 1> stress = (*pitr)->stress(phase);
 
+    Eigen::Matrix<double, 6, 1> strain = (*pitr)->strain(phase);
+
     particle_data[i].id = (*pitr)->id();
 
     particle_data[i].coord_x = coordinates[0];
@@ -384,6 +386,13 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     particle_data[i].tau_yz = stress[4];
     particle_data[i].tau_xz = stress[5];
 
+    particle_data[i].strain_xx = strain[0];
+    particle_data[i].strain_yy = strain[1];
+    particle_data[i].strain_zz = strain[2];
+    particle_data[i].gamma_xy = strain[3];
+    particle_data[i].gamma_yz = strain[4];
+    particle_data[i].gamma_xz = strain[5];
+
     particle_data[i].status = (*pitr)->status();
 
     // Counter
@@ -392,7 +401,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 14;
+  const hsize_t NFIELDS = 20;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
@@ -402,7 +411,10 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
       HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
       HOFFSET(HDF5Particle, tau_xy),     HOFFSET(HDF5Particle, tau_yz),
-      HOFFSET(HDF5Particle, tau_xz),     HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, tau_xz),     HOFFSET(HDF5Particle, strain_xx),
+      HOFFSET(HDF5Particle, strain_yy),  HOFFSET(HDF5Particle, strain_zz),
+      HOFFSET(HDF5Particle, gamma_xy),   HOFFSET(HDF5Particle, gamma_yz),
+      HOFFSET(HDF5Particle, gamma_xz),   HOFFSET(HDF5Particle, status),
   };
 
   size_t dst_sizes[NFIELDS] = {
@@ -412,14 +424,18 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       sizeof(particle_data[0].velocity_z), sizeof(particle_data[0].stress_xx),
       sizeof(particle_data[0].stress_yy),  sizeof(particle_data[0].stress_zz),
       sizeof(particle_data[0].tau_xy),     sizeof(particle_data[0].tau_yz),
-      sizeof(particle_data[0].tau_xz),     sizeof(particle_data[0].status),
+      sizeof(particle_data[0].tau_xz),     sizeof(particle_data[0].strain_xx),
+      sizeof(particle_data[0].strain_yy),  sizeof(particle_data[0].strain_zz),
+      sizeof(particle_data[0].gamma_xy),   sizeof(particle_data[0].gamma_yz),
+      sizeof(particle_data[0].gamma_xz),   sizeof(particle_data[0].status),
   };
 
   // Define particle field information
   const char* field_names[NFIELDS] = {
       "id",         "coord_x",    "coord_y",   "coord_z",   "velocity_x",
       "velocity_y", "velocity_z", "stress_xx", "stress_yy", "stress_zz",
-      "tau_xy",     "tau_yz",     "tau_xz",    "status"};
+      "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx", "strain_yy",
+      "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",  "status"};
 
   hid_t field_type[NFIELDS];
   hid_t string_type;
@@ -442,7 +458,13 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   field_type[10] = H5T_NATIVE_DOUBLE;
   field_type[11] = H5T_NATIVE_DOUBLE;
   field_type[12] = H5T_NATIVE_DOUBLE;
-  field_type[13] = H5T_NATIVE_HBOOL;
+  field_type[13] = H5T_NATIVE_DOUBLE;
+  field_type[14] = H5T_NATIVE_DOUBLE;
+  field_type[15] = H5T_NATIVE_DOUBLE;
+  field_type[16] = H5T_NATIVE_DOUBLE;
+  field_type[17] = H5T_NATIVE_DOUBLE;
+  field_type[18] = H5T_NATIVE_DOUBLE;
+  field_type[19] = H5T_NATIVE_HBOOL;
 
   // Create a new file using default properties.
   file_id =
@@ -469,7 +491,10 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
               << dst_buf[i].velocity_z << '\t' << dst_buf[i].stress_xx << '\t'
               << dst_buf[i].stress_yy << '\t' << dst_buf[i].stress_zz << '\t'
               << dst_buf[i].tau_xy << '\t' << dst_buf[i].tau_yz << '\t'
-              << dst_buf[i].tau_xz << '\t' << dst_buf[i].status << '\n';
+              << dst_buf[i].tau_xz << '\t' << dst_buf[i].strain_xx << '\n';
+    << dst_buf[i].strain_yy << '\t' << dst_buf[i].strain_zz << '\t'
+    << dst_buf[i].gamma_xy << '\t' << dst_buf[i].gamma_yz << '\t'
+    << dst_buf[i].gamma_xz << '\t' << dst_buf[i].status << '\n';
   }
   std::cout << "End of HDF5 data\n";
 #endif
