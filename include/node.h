@@ -2,7 +2,6 @@
 #define MPM_NODE_H_
 
 #include <array>
-#include <iostream>
 #include <limits>
 #include <mutex>
 #include <vector>
@@ -164,16 +163,6 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
-
-  // TODO: Remove debug printing
-  void stats() override {
-    std::string out =
-        "\nNode: " + std::to_string(id_) + "\t" + std::to_string(status_);
-    out += "\nint_force: ";
-    for (unsigned i = 0; i < internal_force_.rows(); ++i)
-      out += std::to_string(internal_force_(i, 0)) + "\t";
-    std::cout << out;
-  }
 
  private:
   //! Mutex

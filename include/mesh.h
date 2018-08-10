@@ -1,7 +1,6 @@
 #ifndef MPM_MESH_H_
 #define MPM_MESH_H_
 
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -16,6 +15,7 @@
 #include "container.h"
 #include "factory.h"
 #include "hdf5.h"
+#include "logger.h"
 #include "material/material.h"
 #include "node.h"
 #include "particle.h"
@@ -178,25 +178,20 @@ class Mesh {
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
-
- protected:
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
-
   //! Container of mesh neighbours
   Map<Mesh<Tdim>> neighbour_meshes_;
-
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
-
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
-
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
-
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class
 }  // namespace mpm
 

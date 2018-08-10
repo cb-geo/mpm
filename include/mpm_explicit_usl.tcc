@@ -36,7 +36,7 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
                 std::placeholders::_1, material));
 
   for (mpm::Index step = 0; step < this->nsteps_; ++step) {
-    console_->info("\nStep: {} of {}.\n", step, nsteps_);
+    console_->info("Step: {} of {}.\n", step, nsteps_);
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -103,22 +103,6 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    // Stats
-    // TODO: Remove
-    // Iterate over each particle stats
-    meshes_.at(0)->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
-
-    // TODO: Remove stats
-    meshes_.at(0)->iterate_over_nodes(
-        std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
-
-    /*
-        meshes_.at(0)->iterate_over_nodes_predicate(
-            std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1),
-            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-    */
     // VTK outputs
     this->write_vtk(step, this->nsteps_);
     // HDF5 outputs

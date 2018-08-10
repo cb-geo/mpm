@@ -5,7 +5,7 @@ double mpm::Material<Tdim>::property(const std::string& key) {
   try {
     result = properties_[key].template get<double>();
   } catch (std::exception& except) {
-    std::cerr << "Material parameter not found: " << except.what() << '\n';
+    console_->error("Material parameter not found: {}", except.what());
   }
   return result;
 }

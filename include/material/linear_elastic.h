@@ -22,7 +22,11 @@ class LinearElastic : public Material<Tdim> {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Constructor with id
-  LinearElastic(unsigned id) : Material<Tdim>(id){};
+  LinearElastic(unsigned id) : Material<Tdim>(id) {
+    //! Logger
+    std::string logger = "material::" + std::to_string(id);
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  };
 
   //! Destructor
   ~LinearElastic() override{};
@@ -66,6 +70,8 @@ class LinearElastic : public Material<Tdim> {
   using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
+  //! Logger
+  using Material<Tdim>::console_;
 
  private:
   //! Elastic stiffness matrix

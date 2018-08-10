@@ -10,7 +10,7 @@ void mpm::LinearElastic<Tdim>::properties(const Json& material_properties) {
     properties_ = material_properties;
     status_ = true;
   } catch (std::exception& except) {
-    std::cerr << "Material parameter not set: " << except.what() << '\n';
+    console_->error("Material parameter not set: {}\n", except.what());
   }
 }
 
