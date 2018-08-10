@@ -131,8 +131,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
       // Compute shape function of the particle
       shapefn_ = sfn->shapefn(this->xi_);
-      // Compute bmatrix of the particle
-      bmatrix_ = sfn->bmatrix(this->xi_);
+      // Compute bmatrix of the particle for reference cell
+      bmatrix_ = sfn->bmatrix(this->xi_, cell_->nodal_coordinates());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
