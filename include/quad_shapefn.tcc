@@ -228,9 +228,10 @@ inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 9>::degree() const {
 
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::jacobian(
-    const Eigen::Matrix<double, 2, 1>& xi,
-    const Eigen::MatrixXd& nodal_coordinates) const {
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::jacobian(
+        const Eigen::Matrix<double, 2, 1>& xi,
+        const Eigen::MatrixXd& nodal_coordinates) const {
   // Get shape functions
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
@@ -252,6 +253,44 @@ inline std::vector<Eigen::MatrixXd>
         const VectorDim& xi) const {
 
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
+  for (unsigned i = 0; i < Tnfunctions; ++i) {
+    Eigen::Matrix<double, 3, Tdim> bi;
+    // clang-format off
+    bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;
+    bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1);
+    bi(2, 0) = grad_shapefn(i, 1); bi(2, 1) = grad_shapefn(i, 0);
+    bmatrix.push_back(bi);
+    // clang-format on
+  }
+  return bmatrix;
+}
+
+//! Return the B-matrix of a Quadrilateral Element at a given local
+//! coordinate for a real cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
+
+  Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+
+  if ((grad_sf.rows() != nodal_coordinates.rows()) ||
+      (xi.size() != nodal_coordinates.cols()))
+    throw std::runtime_error(
+        "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
+        "nodal_coordinates");
+
+  // Jacobian
+  Eigen::Matrix<double, Tdim, Tdim> jacobian =
+      (grad_sf.transpose() * nodal_coordinates);
+
+  // Gradient shapefn of the cell
+  Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
 
   // B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix;
