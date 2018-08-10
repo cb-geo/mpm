@@ -8,9 +8,6 @@
 
 // Eigen
 #include "Eigen/Dense"
-// HDF5
-#include "hdf5.h"
-#include "hdf5_hl.h"
 // TBB
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
@@ -18,22 +15,13 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "hdf5.h"
 #include "material/material.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
 
 namespace mpm {
-
-// Define a struct of particle
-typedef struct HDF5Particle {
-  mpm::Index id;
-  bool status;
-  double coord_x, coord_y, coord_z;
-  double velocity_x, velocity_y, velocity_z;
-  double stress_xx, stress_yy, stress_zz;
-  double tau_xy, tau_yz, tau_xz;
-} HDF5Particle;
 
 //! Mesh class
 //! \brief Base class that stores the information about meshes
