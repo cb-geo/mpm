@@ -180,6 +180,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                 std::placeholders::_1, material));
 
   for (mpm::Index step = 0; step < this->nsteps_; ++step) {
+    console_->info("\nStep: {} of {}.\n", step, nsteps_);
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -246,7 +247,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    std::cout << "\n\n Step: " << step << " of " << nsteps_ << "\n";
     // Stats
     // TODO: Remove
     // Iterate over each particle stats
