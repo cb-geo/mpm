@@ -86,7 +86,7 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
   //! \retval jacobian Jacobian matrix
-  Eigen::MatrixXd jacobian(
+  Eigen::Matrix<double, Tdim, Tdim> jacobian(
       const Eigen::Matrix<double, 2, 1>& xi,
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
@@ -94,6 +94,14 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
   std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
+
+  //! Evaluate the B matrix at given local coordinates for a real cell
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval bmatrix B matrix
+  std::vector<Eigen::MatrixXd> bmatrix(
+      const VectorDim& xi,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
 
   //! Return the degree of shape function
   mpm::ShapeFnDegree degree() const override;

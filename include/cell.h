@@ -121,6 +121,9 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
+  //! Return nodal coordinates
+  Eigen::MatrixXd nodal_coordinates();
+
   //! Check if a point is in a cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
