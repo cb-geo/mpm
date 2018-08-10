@@ -466,6 +466,25 @@ TEST_CASE("Hexahedron shape functions are checked",
       }
     }
 
+    SECTION("Eight noded hexahedron B-matrix and Jacobian failure") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0., 0.;
+
+      Eigen::Matrix<double, 7, Dim> coords;
+      // clang-format off
+      coords << 0., 0., 0.,
+                1., 0., 0., 
+                1., 1., 0.,
+                0., 1., 0.,
+                0., 0., 1.,
+                1., 0., 1., 
+                1., 1., 1.;
+      // clang-format on
+      // Get B-Matrix
+      auto bmatrix = hexsf->bmatrix(xi, coords);
+      auto jacobian = hexsf->jacobian(xi, coords);
+    }
+
     SECTION("Eight noded hexahedron coordinates of unit cell") {
       const unsigned nfunctions = 8;
       // Coordinates of a unit cell
@@ -1352,6 +1371,25 @@ TEST_CASE("Hexahedron shape functions are checked",
         REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("20-noded hexahedron B-matrix and Jacobian failure") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0., 0.;
+
+      Eigen::Matrix<double, 7, Dim> coords;
+      // clang-format off
+      coords << 0., 0., 0.,
+                1., 0., 0., 
+                1., 1., 0.,
+                0., 1., 0.,
+                0., 0., 1.,
+                1., 0., 1., 
+                1., 1., 1.;
+      // clang-format on
+      // Get B-Matrix
+      auto bmatrix = hexsf->bmatrix(xi, coords);
+      auto jacobian = hexsf->jacobian(xi, coords);
     }
 
     SECTION("20-noded hexahedron coordinates of unit cell") {
