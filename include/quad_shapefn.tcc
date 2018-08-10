@@ -235,16 +235,13 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::jacobian(
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
   if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
-      (xi.rows() != nodal_coordinates.cols()))
+      (xi.size() != nodal_coordinates.cols()))
     throw std::runtime_error(
         "Jacobian calculation: Incorrect dimension of xi and "
         "nodal_coordinates");
 
   // Jacobian
-  const Eigen::Matrix<double, 2, 2> jacobian =
-      nodal_coordinates.transpose() * grad_shapefn;
-
-  return jacobian;
+  return (grad_shapefn.transpose() * nodal_coordinates);
 }
 
 //! Return the B-matrix of a Quadrilateral Element at a given local

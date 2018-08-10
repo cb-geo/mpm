@@ -245,18 +245,14 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<Tdim, Tnfunctions>::jacobian(
     const Eigen::MatrixXd& nodal_coordinates) const {
   // Get shape functions
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
-
+  // Check if dimensions are correct
   if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
-      (xi.rows() != nodal_coordinates.cols()))
+      (xi.size() != nodal_coordinates.cols()))
     throw std::runtime_error(
         "Jacobian calculation: Incorrect dimension of xi and "
         "nodal_coordinates");
-
   // Jacobian
-  const Eigen::Matrix<double, 3, 3> jacobian =
-      nodal_coordinates.transpose() * grad_shapefn;
-
-  return jacobian;
+  return (grad_shapefn.transpose() * nodal_coordinates);
 }
 
 //! Return B-matrix of a Hexahedron Element
