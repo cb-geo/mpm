@@ -131,8 +131,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
       // Compute shape function of the particle
       shapefn_ = sfn->shapefn(this->xi_);
-      // Compute gradient shape function of the particle
-      grad_shapefn_ = sfn->grad_shapefn(this->xi_);
       // Compute bmatrix of the particle
       bmatrix_ = sfn->bmatrix(this->xi_);
     } else {

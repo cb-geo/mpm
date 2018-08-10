@@ -37,6 +37,13 @@ class ShapeFn {
   //! \param[in] xi given local coordinates
   virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const = 0;
 
+  //! Compute Jacobian
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval jacobian Jacobian matrix
+  virtual Eigen::MatrixXd jacobian(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
+
   //! Evaluate and return the B-matrix
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix

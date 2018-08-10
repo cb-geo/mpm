@@ -82,6 +82,14 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! \retval grad_shapefn Gradient of shape function of a given cell
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
+  //! Compute Jacobian
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval jacobian Jacobian matrix
+  Eigen::MatrixXd jacobian(
+      const Eigen::Matrix<double, 2, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
   //! Evaluate the B matrix at given local coordinates
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
