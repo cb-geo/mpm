@@ -318,6 +318,21 @@ TEST_CASE("Quadrilateral shape functions are checked",
       }
     }
 
+    SECTION("Four noded quadrilateral B-matrix and Jacobian failure") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0.;
+
+      Eigen::Matrix<double, 3, Dim> coords;
+      // clang-format off
+      coords << 0., 0.,
+                1., 0., 
+                1., 1.;
+      // clang-format on
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(xi, coords);
+      auto jacobian = quadsf->jacobian(xi, coords);
+    }
+
     SECTION("Four noded quadrilateral coordinates of unit cell") {
       const unsigned nfunctions = 4;
 
@@ -753,6 +768,21 @@ TEST_CASE("Quadrilateral shape functions are checked",
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Eight noded quadrilateral B-matrix and Jacobian failure") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0.;
+
+      Eigen::Matrix<double, 3, Dim> coords;
+      // clang-format off
+      coords << 0., 0.,
+                1., 0., 
+                1., 1.;
+      // clang-format on
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(xi, coords);
+      auto jacobian = quadsf->jacobian(xi, coords);
     }
 
     SECTION("Eight noded quadrilateral coordinates of unit cell") {
@@ -1204,6 +1234,21 @@ TEST_CASE("Quadrilateral shape functions are checked",
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Nine noded quadrilateral B-matrix and Jacobian failure") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0.;
+
+      Eigen::Matrix<double, 3, Dim> coords;
+      // clang-format off
+      coords << 0., 0.,
+                1., 0., 
+                1., 1.;
+      // clang-format on
+      // Get B-Matrix
+      auto bmatrix = quadsf->bmatrix(xi, coords);
+      auto jacobian = quadsf->jacobian(xi, coords);
     }
 
     SECTION("Nine noded quadrilateral coordinates of unit cell") {

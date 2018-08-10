@@ -235,12 +235,16 @@ inline Eigen::Matrix<double, Tdim, Tdim>
   // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
-  // Check if matrices dimensions are correct
-  if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
-      (xi.size() != nodal_coordinates.cols()))
-    throw std::runtime_error(
-        "Jacobian calculation: Incorrect dimension of xi and "
-        "nodal_coordinates");
+  try {
+    // Check if matrices dimensions are correct
+    if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
+        (xi.size() != nodal_coordinates.cols()))
+      throw std::runtime_error(
+          "Jacobian calculation: Incorrect dimension of xi and "
+          "nodal_coordinates");
+  } catch (std::exception& exception) {
+    std::cout << exception.what() << "\n";
+  }
 
   // Jacobian dx_i/dxi_j
   return (grad_shapefn.transpose() * nodal_coordinates);
@@ -280,12 +284,16 @@ inline std::vector<Eigen::MatrixXd>
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
-  // Check if matrices dimensions are correct
-  if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-      (xi.size() != nodal_coordinates.cols()))
-    throw std::runtime_error(
-        "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
-        "nodal_coordinates");
+  try {
+    // Check if matrices dimensions are correct
+    if ((grad_sf.rows() != nodal_coordinates.rows()) ||
+        (xi.size() != nodal_coordinates.cols()))
+      throw std::runtime_error(
+          "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
+          "nodal_coordinates");
+  } catch (std::exception& exception) {
+    std::cout << exception.what() << "\n";
+  }
 
   // Jacobian dx_i/dxi_j
   Eigen::Matrix<double, Tdim, Tdim> jacobian =
