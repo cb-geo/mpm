@@ -41,13 +41,20 @@ class ShapeFn {
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
   //! \retval jacobian Jacobian matrix
-  virtual Eigen::MatrixXd jacobian(
+  virtual Eigen::Matrix<double, Tdim, Tdim> jacobian(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
 
   //! Evaluate and return the B-matrix
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix
   virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const = 0;
+
+  //! Evaluate the B matrix at given local coordinates for a real cell
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval bmatrix B matrix
+  virtual std::vector<Eigen::MatrixXd> bmatrix(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
 
   //! Return the degree of shape function
   virtual mpm::ShapeFnDegree degree() const = 0;

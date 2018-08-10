@@ -533,7 +533,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     particle->compute_strain(phase, dt);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
-    strain << 0., 0.125, 0., 0.025, 0., 0.;
+    strain << 0., 0.25, 0., 0.050, 0., 0.;
     // Check strains
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain(phase)(i) ==
@@ -544,12 +544,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     Eigen::Matrix<double, 6, 1> stress;
     // clang-format off
-    stress <<  721153.8461538460,
-              1682692.3076923075,
-               721153.8461538460,
-                96153.8461538462,
-                    0.0000000000,
-                    0.0000000000;
+    stress <<  721153.8461538460 * 2.,
+              1682692.3076923075 * 2.,
+               721153.8461538460 * 2.,
+                96153.8461538462 * 2.,
+                    0.0000000000 * 2.,
+                    0.0000000000 * 2.;
     // clang-format on
     // Check stress
     for (unsigned i = 0; i < stress.rows(); ++i)
@@ -580,10 +580,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Internal force
     Eigen::Matrix<double, 4, 2> internal_force;
     // clang-format off
-    internal_force <<  306490.3846153846,  667067.3076923075,
-                      -258413.4615384615,  174278.8461538461,
-                      -102163.4615384615, -222355.7692307692,
-                       54086.53846153844, -618990.3846153845;
+    internal_force <<  1225961.538461538,  2668269.23076923,
+                      -1033653.846153846,  697115.3846153845,
+                      -408653.8461538461, -889423.0769230769,
+                       216346.1538461538, -2475961.538461538;
     // clang-format on
 
     // Map particle internal force
@@ -602,10 +602,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check nodal velocity
     // TODO: Check nodal velocities
     // clang-format off
-    nodal_velocity <<   54.48717948717948, 118.6087435897436,
-                      -137.82051282051280, 93.96771794871795,	
-                      -163.4615384615385, -353.7502307692308,	
-                        28.84615384615384, -327.1092051282051;
+    nodal_velocity <<  217.9487179487179,  474.3779743589742,
+                      -551.2820512820512,  372.8138717948718,
+                      -653.8461538461538, -1421.057923076923,
+                       115.3846153846153, -1317.49382051282;
     // clang-format on
     // Check nodal velocity
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
@@ -613,25 +613,17 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes[i]->velocity(phase)[j] ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
-    for (unsigned i = 0; i < nodal_velocity.rows(); ++i) {
-      for (unsigned j = 0; j < nodal_velocity.cols(); ++j) {
-        std::cout << std::setprecision(16) << nodes[i]->acceleration(phase)[j]
-                  << "\t";
-      }
-      std::cout << "\n";
-    }
     // TODO: Check nodal acceleration
     Eigen::Matrix<double, 4, 2> nodal_acceleration;
     // clang-format off
-    nodal_acceleration <<  544.8717948717948,  1176.087435897436,
-                          -1378.205128205128,  919.6771794871794,
-                          -1634.615384615384, -3567.502307692308,	
-                           288.4615384615383, -3311.092051282051;
+    nodal_acceleration <<  2179.487179487179, 4733.779743589742, 
+                          -5512.820512820512, 3708.138717948717, 
+                          -6538.461538461537, -14240.57923076923, 
+                           1153.846153846153, -13214.9382051282;
     // clang-format on
-
     // Check nodal acceleration
-    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
-      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+    for (unsigned i = 0; i < nodal_acceleration.rows(); ++i)
+      for (unsigned j = 0; j < nodal_acceleration.cols(); ++j)
         REQUIRE(nodes[i]->acceleration(phase)[j] ==
                 Approx(nodal_acceleration(i, j)).epsilon(Tolerance));
     // Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));
@@ -1340,8 +1332,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                           5673.076923076923, -3301.282051282052, -5170.066410256411;
     // clang-format on
     // Check nodal acceleration
-    for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
-      for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
+    for (unsigned i = 0; i < nodal_acceleration.rows(); ++i)
+      for (unsigned j = 0; j < nodal_acceleration.cols(); ++j)
         REQUIRE(nodes[i]->acceleration(phase)[j] ==
                 Approx(nodal_acceleration(i, j)).epsilon(Tolerance));
     // Approx(nodal_velocity(i, j) / dt).epsilon(Tolerance));

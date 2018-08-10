@@ -109,6 +109,26 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       REQUIRE(cell->mean_length() == Approx(length).epsilon(Tolerance));
     }
 
+    // Check cell coordinates
+    SECTION("Check cell nodal coordinates") {
+      Eigen::Matrix<double, 4, Dim> nodal_coords;
+      // clang-format off
+      nodal_coords << 0., 0.,
+                      2., 0.,
+                      2., 2.,
+                      0., 2.;
+      // clang-format on
+      auto coords = cell->nodal_coordinates();
+
+      // Check if the sizes are the same
+      REQUIRE(coords.size() == nodal_coords.size());
+
+      for (unsigned i = 0; i < 4; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(coords(i, j) ==
+                  Approx(nodal_coords(i, j)).epsilon(Tolerance));
+    }
+
     // Check shape functions
     SECTION("Check shape functions") {
       const auto sf_ptr = cell->shapefn_ptr();
@@ -817,6 +837,30 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check cell length calculations
       REQUIRE(cell->mean_length() == Approx(length).epsilon(Tolerance));
+    }
+
+    // Check cell coordinates
+    SECTION("Check cell nodal coordinates") {
+      Eigen::Matrix<double, 8, Dim> nodal_coords;
+      // clang-format off
+      nodal_coords << 0, 0, 0,
+                      2, 0, 0,
+                      2, 2, 0,
+                      0, 2, 0,
+                      0, 0, 2,
+                      2, 0, 2,
+                      2, 2, 2,
+                      0, 2, 2;
+      // clang-format on
+      auto coords = cell->nodal_coordinates();
+
+      // Check if the sizes are the same
+      REQUIRE(coords.size() == nodal_coords.size());
+
+      for (unsigned i = 0; i < 8; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(coords(i, j) ==
+                  Approx(nodal_coords(i, j)).epsilon(Tolerance));
     }
 
     // Check centroid calculation
