@@ -114,6 +114,8 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/mesh_test.cc
   ${mpm_SOURCE_DIR}/tests/mpm_explicit_test.cc
   ${mpm_SOURCE_DIR}/tests/mpm_explicit_test_unitcell.cc
+  ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
+  ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test_unitcell.cc
   ${mpm_SOURCE_DIR}/tests/node_container_test.cc
   ${mpm_SOURCE_DIR}/tests/node_map_test.cc
   ${mpm_SOURCE_DIR}/tests/node_test.cc
@@ -122,6 +124,8 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/quad_quadrature_test.cc    
   ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
   ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+  ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
+  ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   ${mpm_SOURCE_DIR}/tests/test_main.cc
 )   
 add_executable(mpmtest
