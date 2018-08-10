@@ -224,8 +224,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
-  //! Gradient of shape functions
-  Eigen::MatrixXd grad_shapefn_;
   //! B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix_;
   //! Logger

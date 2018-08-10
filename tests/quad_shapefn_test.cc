@@ -108,6 +108,38 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(3, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Check Jacobian
+    SECTION(
+        "Four noded quadrilateral Jacobian for local coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 4, Dim> coords;
+      // clang-format off
+      coords << 2., 1.,
+                4., 2.,
+                2., 4.,
+                1., 3.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quadsf->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
     // Coordinates is (0,0)
     SECTION("Four noded quadrilateral B-matrix for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
@@ -387,6 +419,43 @@ TEST_CASE("Quadrilateral shape functions are checked",
       REQUIRE(gradsf(5, 1) == Approx(-2.0).epsilon(Tolerance));
       REQUIRE(gradsf(6, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION(
+        "Eight noded quadrilateral Jacobian for local coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0,
+                4.0, 2.0,
+                2.0, 4.0,
+                1.0, 3.0,
+                3.0, 1.5,
+                3.0, 3.0,
+                1.5, 3.5,
+                1.5, 2.0;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quadsf->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
     }
 
     // Coordinates is (0,0)
@@ -727,6 +796,44 @@ TEST_CASE("Quadrilateral shape functions are checked",
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
+    }
+
+    // Check Jacobian
+    SECTION(
+        "Nine noded quadrilateral Jacobian for local coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 9, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0,
+                4.0, 2.0,
+                2.0, 4.0,
+                1.0, 3.0,
+                3.0, 1.5,
+                3.0, 3.0,
+                1.5, 3.5,
+                1.5, 2.0,
+                2.25, 2.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quadsf->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
     }
 
     // Coordinates is (-0.5,-0.5)

@@ -107,6 +107,14 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! \param[in] xi given local coordinates
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
+  //! Compute Jacobian
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval jacobian Jacobian matrix
+  Eigen::MatrixXd jacobian(
+      const Eigen::Matrix<double, 3, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
   //! Evaluate B matrix at given local coordinates
   //! \param[in] xi given local coordinates
   //! \retval bmatrix B matrix

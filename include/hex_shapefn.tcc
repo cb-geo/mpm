@@ -238,11 +238,24 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Compute Jacobian
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::HexahedronShapeFn<Tdim, Tnfunctions>::jacobian(
+    const Eigen::Matrix<double, 3, 1>& xi,
+    const Eigen::MatrixXd& nodal_coordinates) const {
+  // Get shape functions
+  const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+  // Check if dimensions are correct
+  if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
+      (xi.size() != nodal_coordinates.cols()))
+    throw std::runtime_error(
+        "Jacobian calculation: Incorrect dimension of xi and "
+        "nodal_coordinates");
+  // Jacobian
+  return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
 //! Return B-matrix of a Hexahedron Element
-//! \param[in] xi Coordinates of point of interest
-//! \retval bmatrix B-matrix of a given cell
-//! \tparam Tdim Dimension
-//! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
