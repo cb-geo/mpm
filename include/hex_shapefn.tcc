@@ -244,7 +244,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::HexahedronShapeFn<Tdim, Tnfunctions>::jacobian(
         const Eigen::Matrix<double, 3, 1>& xi,
         const Eigen::MatrixXd& nodal_coordinates) const {
-  // Get shape functions
+  // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
   // Check if dimensions are correct
   if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
@@ -261,7 +261,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi) const {
-
+  // Get gradient shape functions
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
   // B-Matrix
@@ -288,20 +288,21 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
-
+  // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
-
+  // Check if matrices dimensions are correct
   if ((grad_sf.rows() != nodal_coordinates.rows()) ||
       (xi.size() != nodal_coordinates.cols()))
     throw std::runtime_error(
         "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
         "nodal_coordinates");
 
-  // Jacobian
+  // Jacobian dx_i/dxi_j
   Eigen::Matrix<double, Tdim, Tdim> jacobian =
       (grad_sf.transpose() * nodal_coordinates);
 
   // Gradient shapefn of the cell
+  // dN/dx = [J]^-1 * dN/dxi
   Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
   
   // B-Matrix
