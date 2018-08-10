@@ -2,10 +2,10 @@
 #define MPM_QUADRILATERALSHAPEFN_H_
 
 #include <exception>
-#include <iostream>
 
 #include <Eigen/Dense>
 
+#include "logger.h"
 #include "shapefn.h"
 
 namespace mpm {
@@ -67,6 +67,11 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
                   "Specified number of shape functions is not defined");
+
+    //! Logger
+    std::string logger = "quadrilateral::<" + std::to_string(Tdim) + ", " +
+                         std::to_string(Tnfunctions) + ">";
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
   //! Return number of shape functions
@@ -121,6 +126,10 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+ private:
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };
 
 }  // namespace mpm

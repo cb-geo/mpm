@@ -1,5 +1,3 @@
-#include <iomanip>
-#include <iostream>
 #include <limits>
 
 #include "catch.hpp"

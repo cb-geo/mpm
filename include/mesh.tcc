@@ -3,6 +3,10 @@ template <unsigned Tdim>
 mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
+  //! Logger
+  std::string logger = "mesh::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+
   particles_.clear();
 }
 
@@ -34,7 +38,7 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
       // If the coordinates vector is empty
       throw std::runtime_error("List of coordinates is empty");
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -119,7 +123,7 @@ bool mpm::Mesh<Tdim>::create_cells(
       throw std::runtime_error("List of nodes of cells is empty");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -176,7 +180,7 @@ bool mpm::Mesh<Tdim>::create_particles(
       throw std::runtime_error("List of coordinates is empty");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -194,7 +198,7 @@ bool mpm::Mesh<Tdim>::add_particle(
     else
       throw std::runtime_error("Particle not found in mesh");
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << '\n';
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -272,7 +276,7 @@ bool mpm::Mesh<Tdim>::add_neighbour(
       throw std::runtime_error("Invalid local id of a mesh neighbour");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return insertion_status;
 }
@@ -337,7 +341,7 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
           "constraints");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;

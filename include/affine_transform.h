@@ -1,7 +1,6 @@
 #ifndef MPM_AFFINE_TRANSFORM_H_
 #define MPM_AFFINE_TRANSFORM_H_
 
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>

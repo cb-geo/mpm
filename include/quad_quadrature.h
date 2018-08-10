@@ -2,7 +2,6 @@
 #define MPM_QUADRILATERAL_QUADRATURE_H_
 
 #include <exception>
-#include <iostream>
 
 #include <Eigen/Dense>
 
