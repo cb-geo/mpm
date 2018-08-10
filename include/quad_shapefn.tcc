@@ -226,6 +226,27 @@ inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 9>::degree() const {
   return mpm::ShapeFnDegree::Quadratic;
 }
 
+//! Compute Jacobian
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::jacobian(
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::MatrixXd& nodal_coordinates) const {
+  // Get shape functions
+  const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+
+  if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
+      (xi.rows() != nodal_coordinates.cols()))
+    throw std::runtime_error(
+        "Jacobian calculation: Incorrect dimension of xi and "
+        "nodal_coordinates");
+
+  // Jacobian
+  const Eigen::Matrix<double, 2, 2> jacobian =
+      nodal_coordinates.transpose() * grad_shapefn;
+
+  return jacobian;
+}
+
 //! Return the B-matrix of a Quadrilateral Element at a given local
 //! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>

@@ -646,9 +646,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian;
-    const auto grad_sf = shapefn_->grad_shapefn(xi);
-    jacobian = unit_cell.transpose() * grad_sf;
+    Eigen::Matrix<double, 2, 2> jacobian = shapefn_->jacobian(xi, unit_cell);
 
     // Shape function
     const auto sf = shapefn_->shapefn(xi);
@@ -735,9 +733,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
     // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian;
-    const auto grad_sf = shapefn_->grad_shapefn(xi);
-    jacobian = unit_cell.transpose() * grad_sf;
+    Eigen::Matrix<double, 3, 3> jacobian = shapefn_->jacobian(xi, unit_cell);
 
     // Shape function
     const auto sf = shapefn_->shapefn(xi);
