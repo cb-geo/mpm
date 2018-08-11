@@ -35,13 +35,10 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   // TODO: Set phase
   const unsigned phase = 0;
 
-  std::cout << __FILE__ << __LINE__ << "\n";
   // Assign id
   this->id_ = particle.id;
-  std::cout << __FILE__ << __LINE__ << this->id_ << "\n";
-
-  // Status
-  this->status_ = particle.status;
+  // Mass
+  this->mass_(phase) = particle.mass;
 
   // Coordinates
   Eigen::Vector3d coordinates;
@@ -52,7 +49,7 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
   // Velocity
   Eigen::Vector3d velocity;
-  velocity << particle.coord_x, particle.coord_y, particle.coord_z;
+  velocity << particle.velocity_x, particle.velocity_y, particle.velocity_z;
   // Initialise velocity
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
 
@@ -65,8 +62,8 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
       particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
       particle.gamma_xz;
 
-  std::cout << __FILE__ << __LINE__ << "\n";
-  std::cout << "Stress: " << this->stress_.col(0) << "\n";
+  // Status
+  this->status_ = particle.status;
   return true;
 }
 

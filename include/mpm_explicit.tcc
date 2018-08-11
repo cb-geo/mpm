@@ -186,24 +186,27 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                 std::placeholders::_1, material));
 
   mpm::Index step = 0;
+  this->uuid_ = "restart";
 
   // Check point restart
-  this->uuid_ = "restart";
-  // Write input geometry to vtk file
-  std::string attribute = "particles";
-  std::string extension = ".h5";
-  step = 5;
-  auto particles_file =
-      io_->output_file(attribute, extension, uuid_, step, this->nsteps_)
-          .string();
-  meshes_.at(0)->read_particles_hdf5(phase, particles_file);
-  // Locate particles
-  auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+  bool restart = analysis_["restart"].template get<bool>();
+  if (restart) {
+    // Write input geometry to vtk file
+    std::string attribute = "particles";
+    std::string extension = ".h5";
+    step = 5;
+    auto particles_file =
+        io_->output_file(attribute, extension, uuid_, step, this->nsteps_)
+            .string();
+    meshes_.at(0)->read_particles_hdf5(phase, particles_file);
+    // Locate particles
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
 
-  if (!unlocatable_particles.empty())
-    throw std::runtime_error("Particle outside the mesh domain");
-  // Increament step
-  ++step;
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+    // Increament step
+    ++step;
+  }
   // End check point restart
 
   for (; step < this->nsteps_; ++step) {
@@ -230,6 +233,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
+
+    // TODO: Remove stats
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
+    // meshes_.at(0)->iterate_over_nodes(
+    //    std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
 
     // Compute nodal velocity
     meshes_.at(0)->iterate_over_nodes_predicate(
