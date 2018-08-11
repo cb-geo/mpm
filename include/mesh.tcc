@@ -539,7 +539,10 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
   // print it by rows
   std::cout << "Printing Particle HDF5 data: \n";
-  for (unsigned i = 0; i < this->nparticles(); ++i) {
+
+  unsigned i = 0;
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    std::cout << "Particle: " << (*pitr)->id() << "\n";
     particle = dst_buf[i];
     std::cout << particle.id << '\t' << particle.coord_x << '\t'
               << particle.coord_y << '\t' << particle.coord_z << '\t'
@@ -551,6 +554,9 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
               << particle.strain_yy << '\t' << particle.strain_zz << '\t'
               << particle.gamma_xy << '\t' << particle.gamma_yz << '\t'
               << particle.gamma_xz << '\t' << particle.status << '\n';
+    // Initialise particle with HDF5 data
+    (*pitr)->initialise_particle(particle);
+    ++i;
   }
   std::cout << "End of HDF5 data\n";
 
