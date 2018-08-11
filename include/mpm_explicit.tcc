@@ -185,7 +185,28 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  for (mpm::Index step = 0; step < this->nsteps_; ++step) {
+  mpm::Index step = 0;
+
+  // Check point restart
+  this->uuid_ = "restart";
+  // Write input geometry to vtk file
+  std::string attribute = "particles";
+  std::string extension = ".h5";
+  step = 5;
+  auto particles_file =
+      io_->output_file(attribute, extension, uuid_, step, this->nsteps_)
+          .string();
+  meshes_.at(0)->read_particles_hdf5(phase, particles_file);
+  // Locate particles
+  auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+  if (!unlocatable_particles.empty())
+    throw std::runtime_error("Particle outside the mesh domain");
+  // Increament step
+  ++step;
+  // End check point restart
+
+  for (; step < this->nsteps_; ++step) {
     console_->info("Step: {} of {}.\n", step, nsteps_);
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
@@ -299,6 +320,4 @@ void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
 
   const unsigned phase = 0;
   meshes_.at(0)->write_particles_hdf5(phase, particles_file);
-  // Read
-  meshes_.at(0)->read_particles_hdf5(phase, particles_file);
 }

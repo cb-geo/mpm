@@ -1,3 +1,5 @@
+#include <iostream>
+
 //! Construct a particle with id and coordinates
 template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
@@ -23,6 +25,49 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+}
+
+//! Initialise particle data from HDF5
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
+    const HDF5Particle& particle) {
+
+  // TODO: Set phase
+  const unsigned phase = 0;
+
+  std::cout << __FILE__ << __LINE__ << "\n";
+  // Assign id
+  this->id_ = particle.id;
+  std::cout << __FILE__ << __LINE__ << this->id_ << "\n";
+
+  // Status
+  this->status_ = particle.status;
+
+  // Coordinates
+  Eigen::Vector3d coordinates;
+  coordinates << particle.coord_x, particle.coord_y, particle.coord_z;
+  // Initialise coordinates
+  for (unsigned i = 0; i < Tdim; ++i)
+    this->coordinates_(i, phase) = coordinates(i);
+
+  // Velocity
+  Eigen::Vector3d velocity;
+  velocity << particle.coord_x, particle.coord_y, particle.coord_z;
+  // Initialise velocity
+  for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
+
+  // Stress
+  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
+      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+
+  // Strain
+  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
+      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
+      particle.gamma_xz;
+
+  std::cout << __FILE__ << __LINE__ << "\n";
+  std::cout << "Stress: " << this->stress_.col(0) << "\n";
+  return true;
 }
 
 // Initialise particle properties

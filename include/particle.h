@@ -44,8 +44,13 @@ class Particle : public ParticleBase<Tdim> {
   //! Delete copy constructor
   Particle(const Particle<Tdim, Tnphases>&) = delete;
 
-  //! Delete assignement operator
+  //! Delete assignment operator
   Particle& operator=(const Particle<Tdim, Tnphases>&) = delete;
+
+  //! Initialise particle from HDF5 data
+  //! \param[in] particle HDF5 data of particle
+  //! \retval status Status of reading HDF5 particle
+  bool initialise_particle(const HDF5Particle& particle) override;
 
   //! Initialise properties
   void initialise() override;
