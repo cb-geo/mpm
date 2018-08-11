@@ -951,3 +951,23 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 
   return acceleration;
 }
+
+//! Assign velocity constraint
+//! Constrain directions can take values between 0 and Dim-1
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                                 double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim-1
+    if (dir >= 0 && dir < (Tdim)) {
+      this->velocity_constraints_.emplace_back(
+          std::tuple<unsigned, unsigned, double>(face_id, dir, velocity));
+    } else
+      throw std::runtime_error("Constraint direction is out of bounds");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

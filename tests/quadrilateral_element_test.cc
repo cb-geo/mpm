@@ -493,7 +493,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Four noded quadrilateral shape function for face indices") {
       // Check for face indices
-      const unsigned face_id = 0;
+      unsigned face_id = 0;
       Eigen::VectorXi indices = quadsf->face_indices(face_id);
       REQUIRE(indices.size() == 2);
 
@@ -501,7 +501,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(indices(1) == 1);
 
       // Check for undefined indices
-      const unsigned face_id_undefined = 20;
+      unsigned face_id_undefined = 20;
       indices = quadsf->face_indices(face_id_undefined);
       REQUIRE(indices.size() == 2);
 
@@ -1090,7 +1090,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Eight noded quadrilateral shape function for face indices") {
       // Check for face indices
-      const unsigned face_id = 1;
+      unsigned face_id = 1;
       Eigen::VectorXi indices = quadsf->face_indices(face_id);
       REQUIRE(indices.size() == 2);
 
@@ -1703,7 +1703,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Nine noded quadrilateral shape function for face indices") {
       // Check for face indices
-      const unsigned face_id = 2;
+      unsigned face_id = 2;
       Eigen::VectorXi indices = quadsf->face_indices(face_id);
       REQUIRE(indices.size() == 2);
 

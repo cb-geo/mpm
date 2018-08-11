@@ -14,6 +14,7 @@
 #include "map.h"
 #include "node_base.h"
 
+
 namespace mpm {
 
 //! Global index type for the cell
@@ -31,7 +32,7 @@ class Cell {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id, number of nodes and elemetn
+  //! Constructor with id, number of nodes and element
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
   //! \param[in] elementptr Pointer to an element type
@@ -222,6 +223,14 @@ class Cell {
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
+  //! Assign velocity constraint
+  //! Directions can take values between 0 and Dim-1
+  //! \param[in] face_id Face of cell of velocity constraint
+  //! \param[in] dir Direction of velocity constraint
+  //! \param[in] velocity Applied velocity constraint
+  bool assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                  double velocity);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -251,6 +260,10 @@ class Cell {
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
+  //! Velocity constraints
+  std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+
 };  // Cell class
 }  // namespace mpm
 

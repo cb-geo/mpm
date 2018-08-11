@@ -767,7 +767,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
     SECTION("Eight noded hexahedron shape function for face indices") {
       // Check for face indices
-      const unsigned face_id = 0;
+      unsigned face_id = 0;
       Eigen::VectorXi indices = hexsf->face_indices(face_id);
       REQUIRE(indices.size() == 4);
 
@@ -777,7 +777,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(3) == 4);
 
       // Check for undefined indices
-      const unsigned face_id_undefined = 20;
+      unsigned face_id_undefined = 20;
       indices = hexsf->face_indices(face_id_undefined);
       REQUIRE(indices.size() == 4);
 
@@ -2087,7 +2087,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
     SECTION("20-noded noded hexahedron shape function for face indices") {
       // Check for face indices
-      const unsigned face_id = 5;
+      unsigned face_id = 5;
       Eigen::VectorXi indices = hexsf->face_indices(face_id);
       REQUIRE(indices.size() == 4);
 
