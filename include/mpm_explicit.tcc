@@ -21,10 +21,12 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
     if (analysis_.at("gravity").is_array() &&
-        analysis_.at("gravity").size() == Tdim) {
+        analysis_.at("gravity").size() == gravity_.size()) {
       for (unsigned i = 0; i < gravity_.size(); ++i) {
         gravity_[i] = analysis_.at("gravity").at(i);
       }
+    } else {
+      throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
     post_process_ = io_->post_processing();
@@ -34,6 +36,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   } catch (std::domain_error& domain_error) {
     console_->error(" {} {} Get analysis object: {}", __FILE__, __LINE__,
                     domain_error.what());
+    abort();
   }
 }
 
