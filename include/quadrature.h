@@ -2,7 +2,6 @@
 #define MPM_QUADRATURE_BASE_H_
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 #include <vector>
 

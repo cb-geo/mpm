@@ -2,10 +2,10 @@
 #define MPM_HEXAHEDRONSHAPEFN_H_
 
 #include <exception>
-#include <iostream>
 
 #include <Eigen/Dense>
 
+#include "logger.h"
 #include "shapefn.h"
 
 //! MPM namespace
@@ -94,6 +94,10 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     static_assert((Tnfunctions == 8 || Tnfunctions == 20),
                   "Specified number of shape functions is not defined");
+    //! Logger
+    std::string logger = "hexahedron::<" + std::to_string(Tdim) + ", " +
+                         std::to_string(Tnfunctions) + ">";
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
   //! Return number of functions
@@ -146,6 +150,10 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+ private:
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };
 
 }  // namespace mpm

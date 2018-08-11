@@ -1,13 +1,13 @@
 #ifndef MPM_MATERIAL_MATERIAL_H_
 #define MPM_MATERIAL_MATERIAL_H_
 
-#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
 #include "json.hpp"
 
 #include "factory.h"
+#include "logger.h"
 #include "particle.h"
 #include "particle_base.h"
 
@@ -34,7 +34,11 @@ class Material {
 
   // Constructor with id
   //! \param[in] id Material id
-  Material(unsigned id) : id_{id} {}
+  Material(unsigned id) : id_{id} {
+    //! Logger
+    std::string logger = "material_base";
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  }
 
   //! Destructor
   virtual ~Material(){};
@@ -92,6 +96,8 @@ class Material {
   bool status_{false};
   //! Material properties
   Json properties_;
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 };  // Material class
 }  // namespace mpm
 
