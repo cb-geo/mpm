@@ -23,9 +23,16 @@ class MPM {
  public:
   //! Constructor
   MPM(std::unique_ptr<IO>&& io) : io_(std::move(io)) {
+
+    analysis_ = io_->analysis();
+
     // Unique id
-    uuid_ =
-        boost::lexical_cast<std::string>(boost::uuids::random_generator()());
+    if (analysis_.find("uuid") != analysis_.end())
+      uuid_ = analysis_["uuid"].template get<std::string>();
+
+    if (uuid_.empty())
+      uuid_ =
+          boost::lexical_cast<std::string>(boost::uuids::random_generator()());
   }
 
   // Initialise mesh and particles
