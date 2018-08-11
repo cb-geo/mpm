@@ -481,31 +481,6 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
                  field_names, dst_offset, field_type, chunk_size, fill_data,
                  compress, particle_data.data());
 
-#ifdef DEBUG
-  std::vector<HDF5Particle> dst_buf;
-  dst_buf.reserve(nparticles);
-  // Read the table
-  H5TBread_table(file_id, "table", dst_size, dst_offset, dst_sizes,
-                 dst_buf.data());
-
-  // print it by rows
-  std::cout << "Printing HDF5 data: \n";
-  for (unsigned i = 0; i < this->nparticles(); ++i) {
-    std::cout << dst_buf[i].id << '\t' << dst_buf[i].coord_x << '\t'
-              << dst_buf[i].coord_y << '\t' << dst_buf[i].coord_z << '\t'
-              << dst_buf[i].velocity_x << '\t' << dst_buf[i].velocity_y << '\t'
-              << dst_buf[i].velocity_z << '\t' << dst_buf[i].stress_xx << '\t'
-              << dst_buf[i].stress_yy << '\t' << dst_buf[i].stress_zz << '\t'
-              << dst_buf[i].tau_xy << '\t' << dst_buf[i].tau_yz << '\t'
-              << dst_buf[i].tau_xz << '\t' << dst_buf[i].strain_xx << '\n';
-    << dst_buf[i].strain_yy << '\t' << dst_buf[i].strain_zz << '\t'
-    << dst_buf[i].gamma_xy << '\t' << dst_buf[i].gamma_yz << '\t'
-    << dst_buf[i].gamma_xz << '\t' << dst_buf[i].status << '\n';
-  }
-  std::cout << "End of HDF5 data\n";
-#endif
-
-  // close the file
   H5Fclose(file_id);
   return true;
 }
@@ -517,6 +492,9 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  // Throw an error if file can't be found
+  if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
+
   // Calculate the size and the offsets of our struct members in memory
   const unsigned nparticles = this->nparticles();
   const hsize_t NRECORDS = nparticles;
@@ -560,18 +538,19 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
                  dst_buf.data());
 
   // print it by rows
-  std::cout << "Printing HDF5 data: \n";
+  std::cout << "Printing Particle HDF5 data: \n";
   for (unsigned i = 0; i < this->nparticles(); ++i) {
-    std::cout << dst_buf[i].id << '\t' << dst_buf[i].coord_x << '\t'
-              << dst_buf[i].coord_y << '\t' << dst_buf[i].coord_z << '\t'
-              << dst_buf[i].velocity_x << '\t' << dst_buf[i].velocity_y << '\t'
-              << dst_buf[i].velocity_z << '\t' << dst_buf[i].stress_xx << '\t'
-              << dst_buf[i].stress_yy << '\t' << dst_buf[i].stress_zz << '\t'
-              << dst_buf[i].tau_xy << '\t' << dst_buf[i].tau_yz << '\t'
-              << dst_buf[i].tau_xz << '\t' << dst_buf[i].strain_xx << '\n'
-              << dst_buf[i].strain_yy << '\t' << dst_buf[i].strain_zz << '\t'
-              << dst_buf[i].gamma_xy << '\t' << dst_buf[i].gamma_yz << '\t'
-              << dst_buf[i].gamma_xz << '\t' << dst_buf[i].status << '\n';
+    particle = dst_buf[i];
+    std::cout << particle.id << '\t' << particle.coord_x << '\t'
+              << particle.coord_y << '\t' << particle.coord_z << '\t'
+              << particle.velocity_x << '\t' << particle.velocity_y << '\t'
+              << particle.velocity_z << '\t' << particle.stress_xx << '\t'
+              << particle.stress_yy << '\t' << particle.stress_zz << '\t'
+              << particle.tau_xy << '\t' << particle.tau_yz << '\t'
+              << particle.tau_xz << '\t' << particle.strain_xx << '\n'
+              << particle.strain_yy << '\t' << particle.strain_zz << '\t'
+              << particle.gamma_xy << '\t' << particle.gamma_yz << '\t'
+              << particle.gamma_xz << '\t' << particle.status << '\n';
   }
   std::cout << "End of HDF5 data\n";
 
