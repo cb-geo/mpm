@@ -254,7 +254,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
           "Jacobian calculation: Incorrect dimension of xi and "
           "nodal_coordinates");
   } catch (std::exception& exception) {
-    std::cout << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 
   // Jacobian
@@ -304,7 +304,7 @@ inline std::vector<Eigen::MatrixXd>
         "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
         "nodal_coordinates");
   } catch (std::exception& exception) {
-    std::cout << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 
   // Jacobian dx_i/dxi_j

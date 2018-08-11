@@ -1,7 +1,6 @@
 #ifndef MPM_READ_MESH_ASCII_H_
 #define MPM_READ_MESH_ASCII_H_
 
-#include <iostream>
 #include <vector>
 
 #include "Eigen/Dense"

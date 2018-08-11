@@ -2,7 +2,6 @@
 #define MPM_HEXAHEDRON_QUADRATURE_H_
 
 #include <exception>
-#include <iostream>
 
 #include <Eigen/Dense>
 
