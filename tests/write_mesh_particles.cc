@@ -57,6 +57,8 @@ bool write_json(unsigned dim, const std::string& file_name) {
         {"nsteps", 10},
         {"gravity", gravity},
         {"boundary_friction", 0.5},
+        {"resume",
+         {{"resume", false}, {"uuid", "uuid-uuid-uuid-uuid"}, {"step", 5}}},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};

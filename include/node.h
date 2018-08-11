@@ -164,17 +164,6 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
-  // TODO: Remove debug printing
-  void stats() override {
-    std::string out =
-        "\nNode: " + std::to_string(id_) + "\t" + std::to_string(status_);
-    out += "\nMass: " + std::to_string(mass_(0));
-    out += "\nMomentum: ";
-    for (unsigned i = 0; i < momentum_.rows(); ++i)
-      out += std::to_string(momentum_(i, 0)) + "\t";
-    console_->info("\n {} \n", out);
-  }
-
  private:
   //! Mutex
   std::mutex node_mutex_;

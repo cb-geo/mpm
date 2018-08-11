@@ -7,6 +7,9 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
 
   // Create a mesh with global id 0
   const mpm::Index id = 0;
+  // Set analysis step to start at 0
+  step_ = 0;
+  // Clear meshes
   meshes_.clear();
   meshes_.emplace_back(std::make_unique<mpm::Mesh<Tdim>>(id));
 
@@ -185,39 +188,15 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  mpm::Index step = 0;
-  this->uuid_ = "restart";
+  // Test if checkpoint resume is needed
+  bool resume = false;
+  if (analysis_.find("resume") != analysis_.end())
+    resume = analysis_["resume"]["resume"].template get<bool>();
+  if (resume) this->checkpoint_resume();
 
-  try {
-    // Check point restart
-    bool restart = false;
-    if (analysis_.find("restart") != analysis_.end())
-      restart = analysis_["restart"].template get<bool>();
-    if (restart) {
-      // Write input geometry to vtk file
-      std::string attribute = "particles";
-      std::string extension = ".h5";
-      step = 5;
-      auto particles_file =
-          io_->output_file(attribute, extension, uuid_, step, this->nsteps_)
-              .string();
-      meshes_.at(0)->read_particles_hdf5(phase, particles_file);
-      // Locate particles
-      auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-
-      if (!unlocatable_particles.empty())
-        throw std::runtime_error("Particle outside the mesh domain");
-      // Increament step
-      ++step;
-    }
-  } catch (std::domain_error& domain_error) {
-    console_->info(" {} {} Restart: {}", __FILE__, __LINE__,
-                   domain_error.what());
-  }
-  // End check point restart
-
-  for (; step < this->nsteps_; ++step) {
-    console_->info("Step: {} of {}.\n", step, nsteps_);
+  // Main loop
+  for (; step_ < nsteps_; ++step_) {
+    console_->info("Step: {} of {}.\n", step_, nsteps_);
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -240,12 +219,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
-
-    // TODO: Remove stats
-    meshes_.at(0)->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::stats, std::placeholders::_1));
-    // meshes_.at(0)->iterate_over_nodes(
-    //    std::bind(&mpm::NodeBase<Tdim>::stats, std::placeholders::_1));
 
     // Compute nodal velocity
     meshes_.at(0)->iterate_over_nodes_predicate(
@@ -290,14 +263,55 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    if (step % output_steps_ == 0) {
+    if (step_ % output_steps_ == 0) {
       // VTK outputs
-      this->write_vtk(step, this->nsteps_);
+      this->write_vtk(this->step_, this->nsteps_);
       // HDF5 outputs
-      this->write_hdf5(step, this->nsteps_);
+      this->write_hdf5(this->step_, this->nsteps_);
     }
   }
   return status;
+}
+
+//! Checkpoint resume
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
+  bool checkpoint = true;
+  try {
+    // TODO: Set phase
+    const unsigned phase = 0;
+
+    // Get unique analysis id
+    this->uuid_ = analysis_["resume"]["uuid"].template get<std::string>();
+    // Get step
+    this->step_ = analysis_["resume"]["step"].template get<mpm::Index>();
+
+    // Input particle h5 file for resume
+    std::string attribute = "particles";
+    std::string extension = ".h5";
+
+    auto particles_file =
+        io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
+            .string();
+    // Load particle information from file
+    meshes_.at(0)->read_particles_hdf5(phase, particles_file);
+    // Locate particles
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+
+    // Increament step
+    ++this->step_;
+
+    console_->info("Checkpoint resume at step {} of {}", this->step_,
+                   this->nsteps_);
+
+  } catch (std::exception& exception) {
+    console_->info(" {} {} Restart: {}", __FILE__, __LINE__, exception.what());
+    checkpoint = false;
+  }
+  return checkpoint;
 }
 
 //! Write VTK files

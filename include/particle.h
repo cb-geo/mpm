@@ -184,16 +184,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position(unsigned phase, double dt) override;
 
-  //! TODO: Remove
-  void stats() override {
-    std::string out = "\nParticle: " + std::to_string(id_) +
-                      "\t status: " + std::to_string(status_);
-    out += "\nVelocity: ";
-    for (unsigned i = 0; i < velocity_.rows(); ++i)
-      out += std::to_string(velocity_(i, 0)) + "\t";
-    console_->info("\n{}", out);
-  }
-
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;

@@ -159,9 +159,6 @@ class ParticleBase {
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
 
-  //! TODO: Remove debug printing
-  virtual void stats() = 0;
-
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
