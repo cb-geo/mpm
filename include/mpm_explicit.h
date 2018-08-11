@@ -44,10 +44,14 @@ class MPMExplicit : public MPM {
   using mpm::MPM::dt_;
   //! Number of steps
   using mpm::MPM::nsteps_;
+  //! Output steps
+  using mpm::MPM::output_steps_;
   //! A unique ptr to IO object
   using mpm::MPM::io_;
   //! JSON analysis object
   using mpm::MPM::analysis_;
+  //! JSON post-process object
+  using mpm::MPM::post_process_;
   //! Logger
   using mpm::MPM::console_;
 
