@@ -1,5 +1,3 @@
-#include <iostream>
-
 // Constructor with id
 template <unsigned Tdim>
 mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
@@ -544,30 +542,13 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   H5TBread_table(file_id, "table", dst_size, dst_offset, dst_sizes,
                  dst_buf.data());
 
-  // print it by rows
-  std::cout << "Printing Particle HDF5 data: \n";
-
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    std::cout << "Particle: " << (*pitr)->id() << "\n";
     particle = dst_buf[i];
-    std::cout << particle.id << '\t' << particle.mass << "\t"
-              << particle.coord_x << '\t' << particle.coord_y << '\t'
-              << particle.coord_z << '\t' << particle.velocity_x << '\t'
-              << particle.velocity_y << '\t' << particle.velocity_z << '\t'
-              << particle.stress_xx << '\t' << particle.stress_yy << '\t'
-              << particle.stress_zz << '\t' << particle.tau_xy << '\t'
-              << particle.tau_yz << '\t' << particle.tau_xz << '\t'
-              << particle.strain_xx << '\n'
-              << particle.strain_yy << '\t' << particle.strain_zz << '\t'
-              << particle.gamma_xy << '\t' << particle.gamma_yz << '\t'
-              << particle.gamma_xz << '\t' << particle.status << '\n';
     // Initialise particle with HDF5 data
     (*pitr)->initialise_particle(particle);
     ++i;
   }
-  std::cout << "End of HDF5 data\n";
-
   // close the file
   H5Fclose(file_id);
   return true;

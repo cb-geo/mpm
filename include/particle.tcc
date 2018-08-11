@@ -1,5 +1,3 @@
-#include <iostream>
-
 //! Construct a particle with id and coordinates
 template <unsigned Tdim, unsigned Tnphases>
 mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
