@@ -26,6 +26,11 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
         gravity_[i] = analysis_.at("gravity").at(i);
       }
     }
+
+    post_process_ = io_->post_processing();
+    // Output steps
+    output_steps_ = post_process_["output_steps"].template get<mpm::Index>();
+
   } catch (std::domain_error& domain_error) {
     console_->error(" {} {} Get analysis object: {}", __FILE__, __LINE__,
                     domain_error.what());
@@ -245,10 +250,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    // VTK outputs
-    this->write_vtk(step, this->nsteps_);
-    // HDF5 outputs
-    this->write_hdf5(step, this->nsteps_);
+    if (step % output_steps_ == 0) {
+      // VTK outputs
+      this->write_vtk(step, this->nsteps_);
+      // HDF5 outputs
+      this->write_hdf5(step, this->nsteps_);
+    }
   }
   return status;
 }

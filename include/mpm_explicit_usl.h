@@ -33,10 +33,14 @@ class MPMExplicitUSL : public MPMExplicit<Tdim> {
   using mpm::MPMExplicit<Tdim>::dt_;
   //! Number of steps
   using mpm::MPMExplicit<Tdim>::nsteps_;
+  //! Output steps
+  using mpm::MPMExplicit<Tdim>::output_steps_;
   //! A unique ptr to IO object
   using mpm::MPMExplicit<Tdim>::io_;
   //! JSON analysis object
   using mpm::MPMExplicit<Tdim>::analysis_;
+  //! JSON post-process object
+  using mpm::MPMExplicit<Tdim>::post_process_;
   //! Logger
   using mpm::MPMExplicit<Tdim>::console_;
 
