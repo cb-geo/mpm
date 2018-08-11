@@ -50,10 +50,14 @@ class MPM {
   double dt_{std::numeric_limits<double>::max()};
   //! Number of steps
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
+  //! Output steps
+  mpm::Index output_steps_{std::numeric_limits<mpm::Index>::max()};
   //! A unique ptr to IO object
   std::unique_ptr<mpm::IO> io_;
   //! JSON analysis object
   Json analysis_;
+  //! JSON post-process object
+  Json post_process_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
 };
