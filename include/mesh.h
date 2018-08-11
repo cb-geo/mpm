@@ -175,6 +175,12 @@ class Mesh {
   //! \retval status Status of writing HDF5 output
   bool write_particles_hdf5(unsigned phase, const std::string& filename);
 
+  //! Read HDF5 particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] filename Name of HDF5 file to write particles data
+  //! \retval status Status of reading HDF5 output
+  bool read_particles_hdf5(unsigned phase, const std::string& filename);
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);

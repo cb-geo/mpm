@@ -1,3 +1,5 @@
+#include <iostream>
+
 // Constructor with id
 template <unsigned Tdim>
 mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
@@ -502,6 +504,76 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   }
   std::cout << "End of HDF5 data\n";
 #endif
+
+  // close the file
+  H5Fclose(file_id);
+  return true;
+}
+
+//! Write particles to HDF5
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
+                                          const std::string& filename) {
+
+  // Create a new file using default properties.
+  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  // Calculate the size and the offsets of our struct members in memory
+  const unsigned nparticles = this->nparticles();
+  const hsize_t NRECORDS = nparticles;
+
+  const hsize_t NFIELDS = 20;
+
+  size_t dst_size = sizeof(HDF5Particle);
+  size_t dst_offset[NFIELDS] = {
+      HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, coord_x),
+      HOFFSET(HDF5Particle, coord_y),    HOFFSET(HDF5Particle, coord_z),
+      HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
+      HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
+      HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
+      HOFFSET(HDF5Particle, tau_xy),     HOFFSET(HDF5Particle, tau_yz),
+      HOFFSET(HDF5Particle, tau_xz),     HOFFSET(HDF5Particle, strain_xx),
+      HOFFSET(HDF5Particle, strain_yy),  HOFFSET(HDF5Particle, strain_zz),
+      HOFFSET(HDF5Particle, gamma_xy),   HOFFSET(HDF5Particle, gamma_yz),
+      HOFFSET(HDF5Particle, gamma_xz),   HOFFSET(HDF5Particle, status),
+  };
+
+  // To get size
+  HDF5Particle particle;
+
+  size_t dst_sizes[NFIELDS] = {
+      sizeof(particle.id),         sizeof(particle.coord_x),
+      sizeof(particle.coord_y),    sizeof(particle.coord_z),
+      sizeof(particle.velocity_x), sizeof(particle.velocity_y),
+      sizeof(particle.velocity_z), sizeof(particle.stress_xx),
+      sizeof(particle.stress_yy),  sizeof(particle.stress_zz),
+      sizeof(particle.tau_xy),     sizeof(particle.tau_yz),
+      sizeof(particle.tau_xz),     sizeof(particle.strain_xx),
+      sizeof(particle.strain_yy),  sizeof(particle.strain_zz),
+      sizeof(particle.gamma_xy),   sizeof(particle.gamma_yz),
+      sizeof(particle.gamma_xz),   sizeof(particle.status),
+  };
+
+  std::vector<HDF5Particle> dst_buf;
+  dst_buf.reserve(nparticles);
+  // Read the table
+  H5TBread_table(file_id, "table", dst_size, dst_offset, dst_sizes,
+                 dst_buf.data());
+
+  // print it by rows
+  std::cout << "Printing HDF5 data: \n";
+  for (unsigned i = 0; i < this->nparticles(); ++i) {
+    std::cout << dst_buf[i].id << '\t' << dst_buf[i].coord_x << '\t'
+              << dst_buf[i].coord_y << '\t' << dst_buf[i].coord_z << '\t'
+              << dst_buf[i].velocity_x << '\t' << dst_buf[i].velocity_y << '\t'
+              << dst_buf[i].velocity_z << '\t' << dst_buf[i].stress_xx << '\t'
+              << dst_buf[i].stress_yy << '\t' << dst_buf[i].stress_zz << '\t'
+              << dst_buf[i].tau_xy << '\t' << dst_buf[i].tau_yz << '\t'
+              << dst_buf[i].tau_xz << '\t' << dst_buf[i].strain_xx << '\n'
+              << dst_buf[i].strain_yy << '\t' << dst_buf[i].strain_zz << '\t'
+              << dst_buf[i].gamma_xy << '\t' << dst_buf[i].gamma_yz << '\t'
+              << dst_buf[i].gamma_xz << '\t' << dst_buf[i].status << '\n';
+  }
+  std::cout << "End of HDF5 data\n";
 
   // close the file
   H5Fclose(file_id);

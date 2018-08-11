@@ -299,4 +299,6 @@ void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
 
   const unsigned phase = 0;
   meshes_.at(0)->write_particles_hdf5(phase, particles_file);
+  // Read
+  meshes_.at(0)->read_particles_hdf5(phase, particles_file);
 }
