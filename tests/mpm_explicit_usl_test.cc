@@ -61,6 +61,8 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == false);
   }
 }
 
@@ -118,5 +120,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == false);
   }
 }

@@ -308,7 +308,9 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
                    this->nsteps_);
 
   } catch (std::exception& exception) {
-    console_->info(" {} {} Restart: {}", __FILE__, __LINE__, exception.what());
+    console_->info(" {} {} Resume failed, restarting analysis: {}", __FILE__,
+                   __LINE__, exception.what());
+    this->step_ = 0;
     checkpoint = false;
   }
   return checkpoint;
