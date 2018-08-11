@@ -103,11 +103,12 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    // VTK outputs
-    this->write_vtk(step, this->nsteps_);
-    // HDF5 outputs
-    this->write_hdf5(step, this->nsteps_);
-    console_->info("USL\n");
+    if (step % output_steps_ == 0) {
+      // VTK outputs
+      this->write_vtk(step, this->nsteps_);
+      // HDF5 outputs
+      this->write_hdf5(step, this->nsteps_);
+    }
   }
   return status;
 }
