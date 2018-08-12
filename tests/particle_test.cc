@@ -3,6 +3,7 @@
 #include "catch.hpp"
 
 #include "cell.h"
+#include "hdf5.h"
 #include "hex_shapefn.h"
 #include "material/material.h"
 #include "node.h"
@@ -164,6 +165,84 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
+  }
+
+  SECTION("Check initialise particle HDF5") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    mpm::HDF5Particle h5_particle;
+    h5_particle.id = 13;
+    h5_particle.mass = 501.5;
+
+    Eigen::Vector3d coords;
+    coords << 1., 2., 3.;
+    h5_particle.coord_x = coords[0];
+    h5_particle.coord_y = coords[1];
+    h5_particle.coord_z = coords[2];
+
+    Eigen::Vector3d velocity;
+    velocity << 1.5, 2.5, 3.5;
+    h5_particle.velocity_x = velocity[0];
+    h5_particle.velocity_y = velocity[1];
+    h5_particle.velocity_z = velocity[2];
+
+    Eigen::Matrix<double, 6, 1> stress;
+    stress << 11.5, -12.5, 13.5, 14.5, -15.5, 16.5;
+    h5_particle.stress_xx = stress[0];
+    h5_particle.stress_yy = stress[1];
+    h5_particle.stress_zz = stress[2];
+    h5_particle.tau_xy = stress[3];
+    h5_particle.tau_yz = stress[4];
+    h5_particle.tau_xz = stress[5];
+
+    Eigen::Matrix<double, 6, 1> strain;
+    strain << 0.115, -0.125, 0.135, 0.145, -0.155, 0.165;
+    h5_particle.strain_xx = strain[0];
+    h5_particle.strain_yy = strain[1];
+    h5_particle.strain_zz = strain[2];
+    h5_particle.gamma_xy = strain[3];
+    h5_particle.gamma_yz = strain[4];
+    h5_particle.gamma_xz = strain[5];
+
+    h5_particle.status = true;
+
+    // Reinitialise particle from HDF5 data
+    REQUIRE(particle->initialise_particle(h5_particle) == true);
+
+    // Check particle id
+    REQUIRE(particle->id() == h5_particle.id);
+    // Check particle mass
+    REQUIRE(particle->mass(Phase) == h5_particle.mass);
+    // Check particle status
+    REQUIRE(particle->status() == h5_particle.status);
+
+    // Check for coordinates
+    auto coordinates = particle->coordinates();
+    REQUIRE(coordinates.size() == Dim);
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    REQUIRE(coordinates.size() == Dim);
+
+    // Check velocity
+    auto pvelocity = particle->velocity(Phase);
+    REQUIRE(pvelocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check stress
+    auto pstress = particle->stress(Phase);
+    REQUIRE(pstress.size() == stress.size());
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(pstress(i) == Approx(stress(i)).epsilon(Tolerance));
+
+    // Check strain
+    auto pstrain = particle->strain(Phase);
+    REQUIRE(pstrain.size() == strain.size());
+    for (unsigned i = 0; i < strain.size(); ++i)
+      REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
   }
 }
 
@@ -757,6 +836,85 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 19.745;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
+  }
+
+  // Check initialise particle from HDF5 file
+  SECTION("Check initialise particle HDF5") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    mpm::HDF5Particle h5_particle;
+    h5_particle.id = 13;
+    h5_particle.mass = 501.5;
+
+    Eigen::Vector3d coords;
+    coords << 1., 2., 3.;
+    h5_particle.coord_x = coords[0];
+    h5_particle.coord_y = coords[1];
+    h5_particle.coord_z = coords[2];
+
+    Eigen::Vector3d velocity;
+    velocity << 1.5, 2.5, 3.5;
+    h5_particle.velocity_x = velocity[0];
+    h5_particle.velocity_y = velocity[1];
+    h5_particle.velocity_z = velocity[2];
+
+    Eigen::Matrix<double, 6, 1> stress;
+    stress << 11.5, -12.5, 13.5, 14.5, -15.5, 16.5;
+    h5_particle.stress_xx = stress[0];
+    h5_particle.stress_yy = stress[1];
+    h5_particle.stress_zz = stress[2];
+    h5_particle.tau_xy = stress[3];
+    h5_particle.tau_yz = stress[4];
+    h5_particle.tau_xz = stress[5];
+
+    Eigen::Matrix<double, 6, 1> strain;
+    strain << 0.115, -0.125, 0.135, 0.145, -0.155, 0.165;
+    h5_particle.strain_xx = strain[0];
+    h5_particle.strain_yy = strain[1];
+    h5_particle.strain_zz = strain[2];
+    h5_particle.gamma_xy = strain[3];
+    h5_particle.gamma_yz = strain[4];
+    h5_particle.gamma_xz = strain[5];
+
+    h5_particle.status = true;
+
+    // Reinitialise particle from HDF5 data
+    REQUIRE(particle->initialise_particle(h5_particle) == true);
+
+    // Check particle id
+    REQUIRE(particle->id() == h5_particle.id);
+    // Check particle mass
+    REQUIRE(particle->mass(Phase) == h5_particle.mass);
+    // Check particle status
+    REQUIRE(particle->status() == h5_particle.status);
+
+    // Check for coordinates
+    auto coordinates = particle->coordinates();
+    REQUIRE(coordinates.size() == Dim);
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    REQUIRE(coordinates.size() == Dim);
+
+    // Check velocity
+    auto pvelocity = particle->velocity(Phase);
+    REQUIRE(pvelocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check stress
+    auto pstress = particle->stress(Phase);
+    REQUIRE(pstress.size() == stress.size());
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(pstress(i) == Approx(stress(i)).epsilon(Tolerance));
+
+    // Check strain
+    auto pstrain = particle->strain(Phase);
+    REQUIRE(pstrain.size() == strain.size());
+    for (unsigned i = 0; i < strain.size(); ++i)
+      REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
   }
 }
 
@@ -1463,5 +1621,84 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 17.51;
     status = particle->assign_acceleration(Phase, acceleration);
     REQUIRE(status == false);
+  }
+
+  // Check initialise particle from HDF5 file
+  SECTION("Check initialise particle HDF5") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+
+    mpm::HDF5Particle h5_particle;
+    h5_particle.id = 13;
+    h5_particle.mass = 501.5;
+
+    Eigen::Vector3d coords;
+    coords << 1., 2., 3.;
+    h5_particle.coord_x = coords[0];
+    h5_particle.coord_y = coords[1];
+    h5_particle.coord_z = coords[2];
+
+    Eigen::Vector3d velocity;
+    velocity << 1.5, 2.5, 3.5;
+    h5_particle.velocity_x = velocity[0];
+    h5_particle.velocity_y = velocity[1];
+    h5_particle.velocity_z = velocity[2];
+
+    Eigen::Matrix<double, 6, 1> stress;
+    stress << 11.5, -12.5, 13.5, 14.5, -15.5, 16.5;
+    h5_particle.stress_xx = stress[0];
+    h5_particle.stress_yy = stress[1];
+    h5_particle.stress_zz = stress[2];
+    h5_particle.tau_xy = stress[3];
+    h5_particle.tau_yz = stress[4];
+    h5_particle.tau_xz = stress[5];
+
+    Eigen::Matrix<double, 6, 1> strain;
+    strain << 0.115, -0.125, 0.135, 0.145, -0.155, 0.165;
+    h5_particle.strain_xx = strain[0];
+    h5_particle.strain_yy = strain[1];
+    h5_particle.strain_zz = strain[2];
+    h5_particle.gamma_xy = strain[3];
+    h5_particle.gamma_yz = strain[4];
+    h5_particle.gamma_xz = strain[5];
+
+    h5_particle.status = true;
+
+    // Reinitialise particle from HDF5 data
+    REQUIRE(particle->initialise_particle(h5_particle) == true);
+
+    // Check particle id
+    REQUIRE(particle->id() == h5_particle.id);
+    // Check particle mass
+    REQUIRE(particle->mass(Phase) == h5_particle.mass);
+    // Check particle status
+    REQUIRE(particle->status() == h5_particle.status);
+
+    // Check for coordinates
+    auto coordinates = particle->coordinates();
+    REQUIRE(coordinates.size() == Dim);
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+    REQUIRE(coordinates.size() == Dim);
+
+    // Check velocity
+    auto pvelocity = particle->velocity(Phase);
+    REQUIRE(pvelocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pvelocity(i) == Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check stress
+    auto pstress = particle->stress(Phase);
+    REQUIRE(pstress.size() == stress.size());
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(pstress(i) == Approx(stress(i)).epsilon(Tolerance));
+
+    // Check strain
+    auto pstrain = particle->strain(Phase);
+    REQUIRE(pstrain.size() == strain.size());
+    for (unsigned i = 0; i < strain.size(); ++i)
+      REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
   }
 }
