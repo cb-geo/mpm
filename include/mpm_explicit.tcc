@@ -281,6 +281,9 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
     // TODO: Set phase
     const unsigned phase = 0;
 
+    if (!analysis_["resume"]["resume"].template get<bool>())
+      throw std::runtime_error("Resume analysis option is disabled!");
+
     // Get unique analysis id
     this->uuid_ = analysis_["resume"]["uuid"].template get<std::string>();
     // Get step
