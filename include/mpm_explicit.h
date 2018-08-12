@@ -31,6 +31,9 @@ class MPMExplicit : public MPM {
   //! Solve
   bool solve() override;
 
+  //! Checkpoint resume
+  bool checkpoint_resume() override;
+
   //! Write VTK files
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
 
@@ -42,6 +45,8 @@ class MPMExplicit : public MPM {
   using mpm::MPM::uuid_;
   //! Time step size
   using mpm::MPM::dt_;
+  //! Current step
+  using mpm::MPM::step_;
   //! Number of steps
   using mpm::MPM::nsteps_;
   //! Output steps

@@ -15,7 +15,8 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
-  bool status = mpm_test::write_json(2, fname);
+  const bool resume = false;
+  bool status = mpm_test::write_json(2, resume, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -61,6 +62,25 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == false);
+  }
+
+  SECTION("Check resume") {
+    // Write JSON file
+    const std::string fname = "mpm-explicit-usl";
+    bool resume = true;
+    bool status = mpm_test::write_json(2, resume, fname);
+
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == true);
+    // Solve
+    REQUIRE(mpm->solve() == true);
   }
 }
 
@@ -72,7 +92,8 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
-  bool status = mpm_test::write_json(3, fname);
+  const bool resume = false;
+  bool status = mpm_test::write_json(3, resume, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -116,6 +137,25 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    // Solve
+    REQUIRE(mpm->solve() == true);
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == false);
+  }
+
+  SECTION("Check resume") {
+    // Write JSON file
+    const std::string fname = "mpm-explicit-usl";
+    bool resume = true;
+    bool status = mpm_test::write_json(3, resume, fname);
+
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == true);
     // Solve
     REQUIRE(mpm->solve() == true);
   }

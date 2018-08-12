@@ -23,9 +23,16 @@ class MPM {
  public:
   //! Constructor
   MPM(std::unique_ptr<IO>&& io) : io_(std::move(io)) {
+
+    analysis_ = io_->analysis();
+
     // Unique id
-    uuid_ =
-        boost::lexical_cast<std::string>(boost::uuids::random_generator()());
+    if (analysis_.find("uuid") != analysis_.end())
+      uuid_ = analysis_["uuid"].template get<std::string>();
+
+    if (uuid_.empty())
+      uuid_ =
+          boost::lexical_cast<std::string>(boost::uuids::random_generator()());
   }
 
   // Initialise mesh and particles
@@ -36,6 +43,9 @@ class MPM {
 
   // Solve
   virtual bool solve() = 0;
+
+  // Check point restart
+  virtual bool checkpoint_resume() = 0;
 
   //! Write VTK files
   virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
@@ -48,6 +58,8 @@ class MPM {
   std::string uuid_;
   //! Time step size
   double dt_{std::numeric_limits<double>::max()};
+  //! Current step
+  mpm::Index step_{0};
   //! Number of steps
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
   //! Output steps

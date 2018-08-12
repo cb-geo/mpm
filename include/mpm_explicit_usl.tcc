@@ -35,8 +35,14 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  for (mpm::Index step = 0; step < this->nsteps_; ++step) {
-    console_->info("Step: {} of {}.\n", step, nsteps_);
+  // Test if checkpoint resume is needed
+  bool resume = false;
+  if (analysis_.find("resume") != analysis_.end())
+    resume = analysis_["resume"]["resume"].template get<bool>();
+  if (resume) this->checkpoint_resume();
+
+  for (; step_ < nsteps_; ++step_) {
+    console_->info("Step: {} of {}.\n", step_, nsteps_);
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -103,11 +109,11 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
-    if (step % output_steps_ == 0) {
+    if (step_ % output_steps_ == 0) {
       // VTK outputs
-      this->write_vtk(step, this->nsteps_);
+      this->write_vtk(step_, this->nsteps_);
       // HDF5 outputs
-      this->write_hdf5(step, this->nsteps_);
+      this->write_hdf5(step_, this->nsteps_);
     }
   }
   return status;

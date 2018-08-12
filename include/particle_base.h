@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "hdf5.h"
 #include "material/material.h"
 
 namespace mpm {
@@ -47,6 +48,11 @@ class ParticleBase {
 
   //! Delete assignement operator
   ParticleBase& operator=(const ParticleBase<Tdim>&) = delete;
+
+  //! Initialise particle HDF5 data
+  //! \param[in] particle HDF5 data of particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(const HDF5Particle& particle) = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }
