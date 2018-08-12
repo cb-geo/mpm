@@ -31,6 +31,8 @@ class MPMExplicitUSL : public MPMExplicit<Tdim> {
   using mpm::MPMExplicit<Tdim>::uuid_;
   //! Time step size
   using mpm::MPMExplicit<Tdim>::dt_;
+  //! Current step
+  using mpm::MPMExplicit<Tdim>::step_;
   //! Number of steps
   using mpm::MPMExplicit<Tdim>::nsteps_;
   //! Output steps

@@ -25,6 +25,46 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
+//! Initialise particle data from HDF5
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
+    const HDF5Particle& particle) {
+
+  // TODO: Set phase
+  const unsigned phase = 0;
+
+  // Assign id
+  this->id_ = particle.id;
+  // Mass
+  this->mass_(phase) = particle.mass;
+
+  // Coordinates
+  Eigen::Vector3d coordinates;
+  coordinates << particle.coord_x, particle.coord_y, particle.coord_z;
+  // Initialise coordinates
+  for (unsigned i = 0; i < Tdim; ++i)
+    this->coordinates_(i, phase) = coordinates(i);
+
+  // Velocity
+  Eigen::Vector3d velocity;
+  velocity << particle.velocity_x, particle.velocity_y, particle.velocity_z;
+  // Initialise velocity
+  for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
+
+  // Stress
+  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
+      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+
+  // Strain
+  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
+      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
+      particle.gamma_xz;
+
+  // Status
+  this->status_ = particle.status;
+  return true;
+}
+
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
