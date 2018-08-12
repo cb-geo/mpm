@@ -3,7 +3,7 @@
 namespace mpm_test {
 
 // Write JSON Configuration file
-bool write_json(unsigned dim, const std::string& file_name) {
+bool write_json(unsigned dim, bool resume, const std::string& file_name) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -31,10 +31,7 @@ bool write_json(unsigned dim, const std::string& file_name) {
       {"input_files",
        {{"mesh", "mesh-" + dimension + ".txt"},
         {"velocity_constraints", "velocity-constraints.txt"},
-        {"particles", "particles-" + dimension + ".txt"},
-        {"initial_stresses", "initial-stress.txt"},
-        {"materials", "materials.txt"},
-        {"traction", "traction.txt"}}},
+        {"particles", "particles-" + dimension + ".txt"}}},
       {"mesh",
        {{"mesh_reader", mesh_reader},
         {"node_type", node_type},
@@ -54,14 +51,17 @@ bool write_json(unsigned dim, const std::string& file_name) {
          {"poisson_ratio", 0.25}}}},
       {"analysis",
        {{"dt", 0.001},
+        {"uuid", file_name + "-" + dimension},
         {"nsteps", 10},
         {"gravity", gravity},
         {"boundary_friction", 0.5},
         {"resume",
-         {{"resume", false}, {"uuid", "uuid-uuid-uuid-uuid"}, {"step", 5}}},
+         {{"resume", resume},
+          {"uuid", file_name + "-" + dimension},
+          {"step", 5}}},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
-      {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
+      {"post_processing", {{"path", "results/"}, {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read
   std::ofstream file;
@@ -190,13 +190,6 @@ bool write_particles_2d() {
   }
 
   file.close();
-
-  // Dump mesh velocity constraints
-  std::ofstream file_constraints;
-  file_constraints.open("velocity-constraints.txt");
-  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
-  file_constraints.close();
-
   return true;
 }
 
@@ -280,6 +273,13 @@ bool write_mesh_3d() {
   }
 
   file.close();
+
+  // Dump mesh velocity constraints
+  std::ofstream file_constraints;
+  file_constraints.open("velocity-constraints.txt");
+  file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
+  file_constraints.close();
+
   return true;
 }
 
