@@ -9,7 +9,7 @@ bool write_json(unsigned dim, bool resume, const std::string& file_name) {
   std::string dimension = "2d";
   auto particle_type = "P2D";
   auto node_type = "N2D";
-  auto cell_type = "SFQ4";
+  auto cell_type = "ED2Q4";
   auto mesh_reader = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
@@ -19,7 +19,7 @@ bool write_json(unsigned dim, bool resume, const std::string& file_name) {
     dimension = "3d";
     particle_type = "P3D";
     node_type = "N3D";
-    cell_type = "SFH8";
+    cell_type = "ED3H8";
     mesh_reader = "Ascii3D";
     material = "LinearElastic3D";
     gravity.clear();

@@ -4,11 +4,11 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "hex_shapefn.h"
+#include "element.h"
+#include "hexahedron_element.h"
 #include "mesh.h"
 #include "node.h"
-#include "quad_shapefn.h"
-#include "shapefn.h"
+#include "quadrilateral_element.h"
 
 //! \brief Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
@@ -23,10 +23,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Tolerance
   const double Tolerance = 1.E-9;
 
-  // Shape function
-  // 4-noded quadrilateral shape functions
-  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+  // 4-noded quadrilateral element
+  std::shared_ptr<mpm::Element<Dim>> element =
+      Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -107,7 +106,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Create cell1
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
@@ -262,11 +261,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Cell 2
     mpm::Index id2 = 1;
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -341,7 +340,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Create cell1
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
@@ -447,18 +446,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                                                    {0, 1, 2, 3},
                                                    // cell #1
                                                    {1, 4, 5, 2}};
-        // Assign quadrilateral shapefn to cell
-        // 4-noded quadrilateral shape functions
-        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+        // Assign 4-noded quadrilateral element to cell
+        std::shared_ptr<mpm::Element<Dim>> element =
+            Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Clear cells and try creating a list of empty cells
@@ -466,7 +464,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         cells.clear();
         // This fails with empty list error in node creation
         gcid = 10;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         // Try with invalid node ids
@@ -475,7 +473,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                  // cell #1
                  {11, 14, 15, 12}};
         gcid = 20;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         SECTION("Check creation of particles") {
@@ -609,10 +607,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   // Tolerance
   const double Tolerance = 1.E-9;
 
-  // Shape function
-  // 8-noded hexahedron shape functions
-  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+  // 8-noded hexahedron element
+  std::shared_ptr<mpm::Element<Dim>> element =
+      Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -692,7 +689,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     // Create cell1
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
@@ -822,11 +819,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mpm::Index id1 = 0;
     Eigen::Vector3d coords;
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Cell 2
     mpm::Index id2 = 1;
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -904,7 +901,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Create cell1
     coords.setZero();
-    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
     // Add nodes to cell
     cell1->add_node(0, node0);
@@ -1031,18 +1028,17 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                                                    {0, 1, 2, 3, 4, 5, 6, 7},
                                                    // cell #1
                                                    {1, 8, 9, 2, 5, 10, 11, 6}};
-        // Assign hexahedron shapefn to cell
-        // 8-noded hexahedron shape functions
-        std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-            Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+        // Assign 8-noded hexahedron element to cell
+        std::shared_ptr<mpm::Element<Dim>> element =
+            Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Clear cells and try creating a list of empty cells
@@ -1050,7 +1046,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         cells.clear();
         // This fails with empty list error in node creation
         gcid = 100;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         // Try with invalid node ids
@@ -1059,7 +1055,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                  // cell #1
                  {71, 88, 89, 82, 85, 80, 81, 86}};
         gcid = 200;
-        mesh->create_cells(gcid, shapefn, cells);
+        mesh->create_cells(gcid, element, cells);
         REQUIRE(mesh->ncells() == ncells);
 
         SECTION("Check creation of particles") {

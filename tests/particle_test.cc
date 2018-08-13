@@ -3,13 +3,13 @@
 #include "catch.hpp"
 
 #include "cell.h"
+#include "element.h"
 #include "hdf5.h"
-#include "hex_shapefn.h"
+#include "hexahedron_element.h"
 #include "material/material.h"
 #include "node.h"
 #include "particle.h"
-#include "quad_shapefn.h"
-#include "shapefn.h"
+#include "quadrilateral_element.h"
 
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
@@ -284,12 +284,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
-    // Shape function
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+    // Element
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::QuadrilateralElement<Dim, 4>>();
 
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Add nodes to cell
     coords << 0.5, 0.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -335,7 +335,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == true);
 
     // Create cell
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(20, Nnodes, shapefn);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(20, Nnodes, element);
 
     cell2->add_node(0, node2);
     cell2->add_node(1, node3);
@@ -381,11 +381,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Shape function
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::QuadrilateralElement<Dim, 4>>();
 
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Add nodes to cell
     coords << 0.5, 0.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -938,11 +938,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Assign hexahedron shape function
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::HexahedronElement<Dim, 8>>();
 
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Add nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -1016,7 +1016,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == true);
 
     // Create cell
-    auto cell2 = std::make_shared<mpm::Cell<Dim>>(20, Nnodes, shapefn);
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(20, Nnodes, element);
 
     cell2->add_node(0, node4);
     cell2->add_node(1, node5);
@@ -1067,11 +1067,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Assign hexahedron shape function
-    std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::HexahedronElement<Dim, 8>>();
 
     // Create cell
-    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, shapefn);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Add nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =

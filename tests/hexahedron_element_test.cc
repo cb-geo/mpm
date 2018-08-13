@@ -1,30 +1,29 @@
-// Hexahedron shape function test
+// Hexahedron element test
 #include <memory>
 
 #include "catch.hpp"
 
-#include "hex_shapefn.h"
+#include "hexahedron_element.h"
 
-//! \brief Check hexahedron shapefn class
-TEST_CASE("Hexahedron shape functions are checked",
-          "[hexsf][hex][shapefn][3D]") {
+//! \brief Check hexahedron element class
+TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
   const unsigned Dim = 3;
   const double Tolerance = 1.E-7;
 
-  //! Check for 8 noded shape function
-  SECTION("Hexahedron shape function with eight nodes") {
+  //! Check for 8 noded element
+  SECTION("Hexahedron element with eight nodes") {
     const unsigned nfunctions = 8;
-    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
+    std::shared_ptr<mpm::Element<Dim>> hex =
+        std::make_shared<mpm::HexahedronElement<Dim, nfunctions>>();
 
     // Check degree
-    REQUIRE(hexsf->degree() == mpm::ShapeFnDegree::Linear);
+    REQUIRE(hex->degree() == mpm::ElementDegree::Linear);
 
     // Coordinates is (0, 0, 0)
-    SECTION("Eight noded hexahedron shape function for coordinates(0, 0, 0)") {
+    SECTION("Eight noded hexahedron element for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -39,7 +38,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(7) == Approx(0.125).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -72,11 +71,10 @@ TEST_CASE("Hexahedron shape functions are checked",
     }
 
     // Coordinates is (-1, -1, -1);
-    SECTION(
-        "Eight noded hexahedron shape function for coordinates(-1, -1, -1)") {
+    SECTION("Eight noded hexahedron element for coordinates(-1, -1, -1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1., -1.;
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
 
@@ -90,7 +88,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -123,10 +121,10 @@ TEST_CASE("Hexahedron shape functions are checked",
     }
 
     // Coordinates is (1, 1, 1)
-    SECTION("Eight noded hexahedron shape function for coordinates(1, 1, 1)") {
+    SECTION("Eight noded hexahedron element for coordinates(1, 1, 1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1., 1.;
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -141,7 +139,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -200,7 +198,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       // clang-format on
 
       // Get Jacobian
-      auto jac = hexsf->jacobian(xi, coords);
+      auto jac = hex->jacobian(xi, coords);
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -216,10 +214,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -252,10 +250,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       coords << 0.5, 0.5, 0.5;
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -289,10 +287,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       coords << -0.5, -0.5, -0.5;
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -337,10 +335,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi);
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -386,10 +384,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi);
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -435,10 +433,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi);
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -481,8 +479,8 @@ TEST_CASE("Hexahedron shape functions are checked",
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(xi, coords);
-      auto jacobian = hexsf->jacobian(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords);
+      auto jacobian = hex->jacobian(xi, coords);
     }
 
     SECTION("Eight noded hexahedron coordinates of unit cell") {
@@ -500,7 +498,7 @@ TEST_CASE("Hexahedron shape functions are checked",
                    -1.,  1.,  1.;
       // clang-format on
 
-      auto coordinates = hexsf->unit_cell_coordinates();
+      auto coordinates = hex->unit_cell_coordinates();
       REQUIRE(coordinates.rows() == nfunctions);
       REQUIRE(coordinates.cols() == Dim);
       for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
@@ -511,9 +509,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       }
     }
 
-    SECTION("Eight noded hexahedron shape function for sides indices") {
+    SECTION("Eight noded hexahedron element for sides indices") {
       // Check for sides indices
-      Eigen::MatrixXi indices = hexsf->sides_indices();
+      Eigen::MatrixXi indices = hex->sides_indices();
       REQUIRE(indices.rows() == 12);
       REQUIRE(indices.cols() == 2);
       REQUIRE(indices(0, 0) == 0);
@@ -553,9 +551,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(indices(11, 1) == 7);
     }
 
-    SECTION("Eight noded hexahedron shape function for corner indices") {
+    SECTION("Eight noded hexahedron element for corner indices") {
       // Check for volume indices
-      Eigen::VectorXi indices = hexsf->corner_indices();
+      Eigen::VectorXi indices = hex->corner_indices();
       REQUIRE(indices.size() == 8);
       REQUIRE(indices(0) == 0);
       REQUIRE(indices(1) == 1);
@@ -567,9 +565,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(indices(7) == 7);
     }
 
-    SECTION("Eight noded hexahedron shape function for inhedron indices") {
+    SECTION("Eight noded hexahedron element for inhedron indices") {
       // Check for inhedron indices
-      Eigen::MatrixXi indices = hexsf->inhedron_indices();
+      Eigen::MatrixXi indices = hex->inhedron_indices();
       REQUIRE(indices.rows() == 12);
       REQUIRE(indices.cols() == 3);
       REQUIRE(indices(0, 0) == 0);
@@ -623,20 +621,20 @@ TEST_CASE("Hexahedron shape functions are checked",
   }
 
   // 20-Node (Serendipity) Hexahedron Element
-  //! Check for 8 noded shape function
-  SECTION("Hexahedron shape function with twenty nodes") {
+  //! Check for 8 noded element
+  SECTION("Hexahedron element with twenty nodes") {
     const unsigned nfunctions = 20;
-    std::shared_ptr<mpm::ShapeFn<Dim>> hexsf =
-        std::make_shared<mpm::HexahedronShapeFn<Dim, nfunctions>>();
+    std::shared_ptr<mpm::Element<Dim>> hex =
+        std::make_shared<mpm::HexahedronElement<Dim, nfunctions>>();
 
     // Check degree
-    REQUIRE(hexsf->degree() == mpm::ShapeFnDegree::Quadratic);
+    REQUIRE(hex->degree() == mpm::ElementDegree::Quadratic);
 
     // Coordinates is (0, 0, 0)
-    SECTION("Twenty noded hexahedron shape function for coordinates(0, 0, 0)") {
+    SECTION("Twenty noded hexahedron element for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -686,7 +684,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(19) == Approx(0.25).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -828,11 +826,11 @@ TEST_CASE("Hexahedron shape functions are checked",
 
     // Coordinates is (-0.5, -0.5, -0,5)
     SECTION(
-        "Twenty noded hexahedron shape function for coordinates(-0.5, "
+        "Twenty noded hexahedron element for coordinates(-0.5, "
         "-0.5, -0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -0.5, -0.5, -0.5;
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -882,7 +880,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(19) == Approx(0.046875).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1023,11 +1021,11 @@ TEST_CASE("Hexahedron shape functions are checked",
     }
     // Coordinates is (0.5, 0.5, 0,5)
     SECTION(
-        "Twenty noded hexahedron shape function for coordinates(0.5, "
+        "Twenty noded hexahedron element for coordinates(0.5, "
         "0.5, 0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 0.5, 0.5, 0.5;
-      auto shapefn = hexsf->shapefn(coords);
+      auto shapefn = hex->shapefn(coords);
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1077,7 +1075,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(shapefn(19) == Approx(0.421875).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1255,7 +1253,7 @@ TEST_CASE("Hexahedron shape functions are checked",
       // clang-format on
 
       // Get Jacobian
-      auto jac = hexsf->jacobian(xi, coords);
+      auto jac = hex->jacobian(xi, coords);
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -1271,10 +1269,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1307,10 +1305,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       coords << 0.5, 0.5, 0.5;
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1343,10 +1341,10 @@ TEST_CASE("Hexahedron shape functions are checked",
       coords << -0.5, -0.5, -0.5;
 
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(coords);
+      auto bmatrix = hex->bmatrix(coords);
 
       // Check gradient of shape functions
-      auto gradsf = hexsf->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords);
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1388,8 +1386,8 @@ TEST_CASE("Hexahedron shape functions are checked",
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = hexsf->bmatrix(xi, coords);
-      auto jacobian = hexsf->jacobian(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords);
+      auto jacobian = hex->jacobian(xi, coords);
     }
 
     SECTION("20-noded hexahedron coordinates of unit cell") {
@@ -1420,7 +1418,7 @@ TEST_CASE("Hexahedron shape functions are checked",
                     0.,  1.,  1.;
       // clang-format on
 
-      auto coordinates = hexsf->unit_cell_coordinates();
+      auto coordinates = hex->unit_cell_coordinates();
       REQUIRE(coordinates.rows() == nfunctions);
       REQUIRE(coordinates.cols() == Dim);
       for (unsigned i = 0; i < nfunctions; ++i) {  // Iterate through nfunctions
@@ -1431,9 +1429,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       }
     }
 
-    SECTION("20-noded hexahedron shape function for sides indices") {
+    SECTION("20-noded hexahedron element for sides indices") {
       // Check for sides indices
-      Eigen::MatrixXi indices = hexsf->sides_indices();
+      Eigen::MatrixXi indices = hex->sides_indices();
       REQUIRE(indices.rows() == 12);
       REQUIRE(indices.cols() == 2);
       REQUIRE(indices(0, 0) == 0);
@@ -1473,9 +1471,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(indices(11, 1) == 7);
     }
 
-    SECTION("20-noded hexahedron shape function for corner indices") {
+    SECTION("20-noded hexahedron element for corner indices") {
       // Check for volume indices
-      Eigen::VectorXi indices = hexsf->corner_indices();
+      Eigen::VectorXi indices = hex->corner_indices();
       REQUIRE(indices.size() == 8);
       REQUIRE(indices(0) == 0);
       REQUIRE(indices(1) == 1);
@@ -1487,9 +1485,9 @@ TEST_CASE("Hexahedron shape functions are checked",
       REQUIRE(indices(7) == 7);
     }
 
-    SECTION("20-noded hexahedron shape function for inhedron indices") {
+    SECTION("20-noded hexahedron element for inhedron indices") {
       // Check for inhedron indices
-      Eigen::MatrixXi indices = hexsf->inhedron_indices();
+      Eigen::MatrixXi indices = hex->inhedron_indices();
       REQUIRE(indices.rows() == 12);
       REQUIRE(indices.cols() == 3);
       REQUIRE(indices(0, 0) == 0);
