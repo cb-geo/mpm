@@ -4,17 +4,17 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "mpm_explicit.h"
+#include "mpm_explicit_usf.h"
 #include "write_mesh_particles_unitcell.h"
 
-// Check MPM Explicit
-TEST_CASE("MPM 2D Explicit implementation is checked in unitcells",
+// Check MPM Explicit USF
+TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
           "[MPM][2D][Explicit][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 2;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit";
+  const std::string fname = "mpm-explicit-usf";
   bool status = mpm_test::write_json_unitcell(2, fname);
   REQUIRE(status == true);
 
@@ -30,16 +30,16 @@ TEST_CASE("MPM 2D Explicit implementation is checked in unitcells",
   int argc = 7;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicit2D",
+                  (char*)"-a",  (char*)"MPMExplicitUSF2D",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-2d-unitcell.json"};
+                  (char*)"-i",  (char*)"mpm-explicit-usf-2d-unitcell.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicitUSF<Dim>>(std::move(io));
 
     // Initialise mesh
     REQUIRE(mpm->initialise_mesh_particles() == true);
@@ -58,20 +58,20 @@ TEST_CASE("MPM 2D Explicit implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicitUSF<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }
 }
 
 // Check MPM Explicit
-TEST_CASE("MPM 3D Explicit implementation is checked in unitcells",
-          "[MPM][3D][Explicit][1Phase][unitcell]") {
+TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
+          "[MPM][3D][Explicit][USF][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 3;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit";
+  const std::string fname = "mpm-explicit-usf";
   bool status = mpm_test::write_json_unitcell(3, fname);
   REQUIRE(status == true);
 
@@ -87,16 +87,16 @@ TEST_CASE("MPM 3D Explicit implementation is checked in unitcells",
   int argc = 7;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicit3D",
+                  (char*)"-a",  (char*)"MPMExplicitUSF3D",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-3d-unitcell.json"};
+                  (char*)"-i",  (char*)"mpm-explicit-usf-3d-unitcell.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicitUSF<Dim>>(std::move(io));
 
     // Initialise mesh
     REQUIRE(mpm->initialise_mesh_particles() == true);
@@ -115,7 +115,7 @@ TEST_CASE("MPM 3D Explicit implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicitUSF<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }

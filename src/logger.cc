@@ -20,6 +20,10 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_logger =
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_logger =
     spdlog::stdout_color_st("MPMExplicit");
 
+// Create a logger for MPM Explicit USF
+const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usf_logger =
+    spdlog::stdout_color_st("MPMExplicitUSF");
+
 // Create a logger for MPM Explicit USL
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usl_logger =
     spdlog::stdout_color_st("MPMExplicitUSL");
