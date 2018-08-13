@@ -51,6 +51,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
 
 ### Run MPM
+> See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
@@ -63,7 +64,8 @@ Where:
 
 ```
    -a <analysis>,  --analysis <analysis>
-     (required)  MPM analysis
+     (required)  MPM analysis 
+     (MPMExplicitUSF3D / MPMExplicitUSF2D / MPMExplicitUSL3D / MPMExplicitUSL2D)
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]
