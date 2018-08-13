@@ -16,7 +16,7 @@
 //! \param[in] xi Coordinates of point of interest
 //! \retval shapefn Shape function of a given cell
 template <>
-inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 8>::shapefn(
+inline Eigen::VectorXd mpm::HexahedronElement<3, 8>::shapefn(
     const Eigen::Matrix<double, 3, 1>& xi) const {
   // 8-noded
   Eigen::Matrix<double, 8, 1> shapefn;
@@ -35,7 +35,7 @@ inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 8>::shapefn(
 //! \param[in] xi Coordinates of point of interest
 //! \retval grad_shapefn Gradient of shape function of a given cell
 template <>
-inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::grad_shapefn(
+inline Eigen::MatrixXd mpm::HexahedronElement<3, 8>::grad_shapefn(
     const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 8, 3> grad_shapefn;
   grad_shapefn(0, 0) = -0.125 * (1 - xi(1)) * (1 - xi(2));
@@ -69,7 +69,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::grad_shapefn(
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::unit_cell_coordinates()
+inline Eigen::MatrixXd mpm::HexahedronElement<3, 8>::unit_cell_coordinates()
     const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 8, 3> unit_cell;
@@ -106,7 +106,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 8>::unit_cell_coordinates()
 //! \param[in] xi Coordinates of point of interest
 //! \retval shapefn Shape function of a given cell
 template <>
-inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 20>::shapefn(
+inline Eigen::VectorXd mpm::HexahedronElement<3, 20>::shapefn(
     const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 20, 1> shapefn;
   shapefn(0) = -0.125 * (1 - xi(0)) * (1 - xi(1)) * (1 - xi(2)) *
@@ -145,7 +145,7 @@ inline Eigen::VectorXd mpm::HexahedronShapeFn<3, 20>::shapefn(
 //! \param[in] xi Coordinates of point of interest
 //! \retval grad_shapefn Gradient of shape function of a given cell
 template <>
-inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
+inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::grad_shapefn(
     const Eigen::Matrix<double, 3, 1>& xi) const {
   Eigen::Matrix<double, 20, 3> grad_shapefn;
 
@@ -241,7 +241,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::grad_shapefn(
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::jacobian(
+    mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian(
         const Eigen::Matrix<double, 3, 1>& xi,
         const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
@@ -264,7 +264,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 //! Return B-matrix of a Hexahedron Element
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
+    mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
@@ -291,7 +291,7 @@ inline std::vector<Eigen::MatrixXd>
 //! coordinate for a real cell
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::bmatrix(
+    mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
@@ -333,25 +333,25 @@ inline std::vector<Eigen::MatrixXd>
   return bmatrix;
 }
 
-//! Return the degree of shape function
+//! Return the degree of element
 //! 8-noded hexahedron
 template <>
-inline  mpm::ShapeFnDegree 
-mpm::HexahedronShapeFn<3, 8>::degree() const {
-  return mpm::ShapeFnDegree::Linear;
+inline  mpm::ElementDegree
+mpm::HexahedronElement<3, 8>::degree() const {
+  return mpm::ElementDegree::Linear;
 }
 
 //! Return the degree of shape function
 //! 8-noded hexahedron
 template <>
-inline  mpm::ShapeFnDegree 
-mpm::HexahedronShapeFn<3, 20>::degree() const {
-  return mpm::ShapeFnDegree::Quadratic;
+inline  mpm::ElementDegree
+mpm::HexahedronElement<3, 20>::degree() const {
+  return mpm::ElementDegree::Quadratic;
 }
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() const {
+inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::unit_cell_coordinates() const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 20, 3> unit_cell;
   // clang-format off
@@ -411,7 +411,7 @@ inline Eigen::MatrixXd mpm::HexahedronShapeFn<3, 20>::unit_cell_coordinates() co
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::sides_indices() const {
+    mpm::HexahedronElement<Tdim, Tnfunctions>::sides_indices() const {
   Eigen::Matrix<int, 12, 2> indices;
   // clang-format off
   indices << 0, 1,
@@ -436,7 +436,7 @@ inline Eigen::MatrixXi
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::corner_indices() const {
+    mpm::HexahedronElement<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 8, 1> indices;
   indices << 0, 1, 2, 3, 4, 5, 6, 7;
   return indices;
@@ -447,7 +447,7 @@ inline Eigen::VectorXi
 //! \retval indices Indices that form sub-tetrahedrons
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::HexahedronShapeFn<Tdim, Tnfunctions>::inhedron_indices() const {
+    mpm::HexahedronElement<Tdim, Tnfunctions>::inhedron_indices() const {
   Eigen::Matrix<int, 12, Tdim, Eigen::RowMajor> indices;
 
   // clang-format off

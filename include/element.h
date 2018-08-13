@@ -1,5 +1,5 @@
-#ifndef MPM_SHAPEFN_H_
-#define MPM_SHAPEFN_H_
+#ifndef MPM_ELEMENT_H_
+#define MPM_ELEMENT_H_
 
 #include <vector>
 
@@ -7,24 +7,24 @@
 
 namespace mpm {
 
-// Degree of shape function
-enum ShapeFnDegree { Linear = 1, Quadratic = 2 };
+// Degree of Element
+enum ElementDegree { Linear = 1, Quadratic = 2 };
 
 //! Base class of shape functions
 //! \brief Base class that stores the information about shape functions
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class ShapeFn {
+class Element {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor
   //! Assign variables to zero
-  ShapeFn(){};
+  Element(){};
 
   //! Destructor
-  virtual ~ShapeFn() {}
+  virtual ~Element() {}
 
   //! Return number of functions
   virtual unsigned nfunctions() const = 0;
@@ -56,8 +56,8 @@ class ShapeFn {
   virtual std::vector<Eigen::MatrixXd> bmatrix(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
 
-  //! Return the degree of shape function
-  virtual mpm::ShapeFnDegree degree() const = 0;
+  //! Return the degree of element
+  virtual mpm::ElementDegree degree() const = 0;
 
   //! Return nodal coordinates of a unit cell
   virtual Eigen::MatrixXd unit_cell_coordinates() const = 0;
@@ -77,4 +77,4 @@ class ShapeFn {
 };
 
 }  // namespace mpm
-#endif  // MPM_SHAPEFN_H_
+#endif  // MPM_ELEMENTx_H_

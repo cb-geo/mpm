@@ -84,7 +84,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
-  ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/src/element.cc
   ${mpm_SOURCE_DIR}/src/vtk_writer.cc
   ${mpm_SOURCE_DIR}/src/main.cc
 )
@@ -103,12 +103,12 @@ SET(test_src
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
-  ${mpm_SOURCE_DIR}/src/shapefn.cc
+  ${mpm_SOURCE_DIR}/src/element.cc
   ${mpm_SOURCE_DIR}/src/vtk_writer.cc
   ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
   ${mpm_SOURCE_DIR}/tests/cell_test.cc
+  ${mpm_SOURCE_DIR}/tests/hexahedron_element_test.cc
   ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
-  ${mpm_SOURCE_DIR}/tests/hex_shapefn_test.cc
   ${mpm_SOURCE_DIR}/tests/io_test.cc
   ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
   ${mpm_SOURCE_DIR}/tests/mesh_test.cc
@@ -121,8 +121,8 @@ SET(test_src
   ${mpm_SOURCE_DIR}/tests/node_test.cc
   ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
   ${mpm_SOURCE_DIR}/tests/particle_test.cc
+  ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
   ${mpm_SOURCE_DIR}/tests/quad_quadrature_test.cc    
-  ${mpm_SOURCE_DIR}/tests/quad_shapefn_test.cc
   ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
   ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
   ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc

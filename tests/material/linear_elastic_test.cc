@@ -5,12 +5,9 @@
 #include "json.hpp"
 
 #include "cell.h"
-#include "hex_shapefn.h"
 #include "material/material.h"
 #include "node.h"
 #include "particle.h"
-#include "quad_shapefn.h"
-#include "shapefn.h"
 
 //! Check linearelastic class in 2D
 TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
