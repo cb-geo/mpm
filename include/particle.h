@@ -153,32 +153,6 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
-  //! Assign momentum to the particle
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] momentum A vector of particle momentum
-  //! \retval status Assignment status
-  bool assign_momentum(unsigned phase,
-                       const Eigen::VectorXd& momentum) override;
-
-  //! Return momentum of the particle
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd momentum(unsigned phase) const override {
-    return momentum_.col(phase);
-  }
-
-  //! Assign acceleration to the particle
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] acceleration A vector of particle acceleration
-  //! \retval status Assignment status
-  bool assign_acceleration(unsigned phase,
-                           const Eigen::VectorXd& acceleration) override;
-
-  //! Return acceleration of the particle
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd acceleration(unsigned phase) const override {
-    return acceleration_.col(phase);
-  }
-
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
@@ -213,10 +187,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
-  //! Momentum
-  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
-  //! Acceleration
-  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix
