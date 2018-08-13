@@ -1,18 +1,18 @@
-#ifndef MPM_HEXAHEDRONSHAPEFN_H_
-#define MPM_HEXAHEDRONSHAPEFN_H_
+#ifndef MPM_HEXAHEDRON_ELEMENT_H_
+#define MPM_HEXAHEDRON_ELEMENT_H_
 
 #include <exception>
 
 #include <Eigen/Dense>
 
+#include "element.h"
 #include "logger.h"
-#include "shapefn.h"
 
 //! MPM namespace
 namespace mpm {
 
-//! Hexahedron shape function class derived from ShapeFn class
-//! \brief Shape functions of a hexahedron element
+//! Hexahedron element class derived from Element class
+//! \brief Hexahedron element
 //! \details 8-noded and 20-noded hexahedron element \n
 //! Shape function, gradient shape function, B-matrix, indices \n
 //! 8-node (Trilinear) Hexahedron Element \n
@@ -83,14 +83,14 @@ namespace mpm {
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
-class HexahedronShapeFn : public ShapeFn<Tdim> {
+class HexahedronElement : public Element<Tdim> {
 
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  HexahedronShapeFn() : mpm::ShapeFn<Tdim>() {
+  HexahedronElement() : mpm::Element<Tdim>() {
     static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
     static_assert((Tnfunctions == 8 || Tnfunctions == 20),
                   "Specified number of shape functions is not defined");
@@ -105,10 +105,12 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
+  //! \retval shapefn Shape function of a given cell
   Eigen::VectorXd shapefn(const VectorDim& xi) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
+  //! \retval grad_shapefn Gradient of shape function of a given cell
   Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
   //! Compute Jacobian
@@ -133,7 +135,7 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
   //! Return the degree of shape function
-  mpm::ShapeFnDegree degree() const override;
+  mpm::ElementDegree degree() const override;
 
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
@@ -157,6 +159,6 @@ class HexahedronShapeFn : public ShapeFn<Tdim> {
 };
 
 }  // namespace mpm
-#include "hex_shapefn.tcc"
+#include "hexahedron_element.tcc"
 
-#endif  // MPM_HEXAHEDRONSHAPEFN_H_
+#endif  // MPM_HEXAHEDRON_ELEMENT_H_

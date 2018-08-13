@@ -7,10 +7,10 @@
 
 #include "cell.h"
 #include "container.h"
-#include "hex_shapefn.h"
+#include "element.h"
+#include "hexahedron_element.h"
 #include "node.h"
-#include "quad_shapefn.h"
-#include "shapefn.h"
+#include "quadrilateral_element.h"
 
 //! \brief Check cell container class for 2D case
 TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
@@ -26,17 +26,17 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  // Shape function
-  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      std::make_shared<mpm::QuadrilateralShapeFn<Dim, 4>>();
+  // Element
+  std::shared_ptr<mpm::Element<Dim>> element =
+      std::make_shared<mpm::QuadrilateralElement<Dim, 4>>();
 
   // Cell 1
   mpm::Index id1 = 0;
-  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
   // Cell 2
   mpm::Index id2 = 1;
-  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
@@ -171,17 +171,17 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  // Shape function
-  std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-      std::make_shared<mpm::HexahedronShapeFn<Dim, 8>>();
+  // Element
+  std::shared_ptr<mpm::Element<Dim>> element =
+      std::make_shared<mpm::HexahedronElement<Dim, 8>>();
 
   // Cell 1
   mpm::Index id1 = 0;
-  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, shapefn);
+  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
 
   // Cell 2
   mpm::Index id2 = 1;
-  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, shapefn);
+  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
   // Cell container
   auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();

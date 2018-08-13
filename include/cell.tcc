@@ -1,7 +1,7 @@
-//! Constructor with cell id, number of nodes and shapefn
+//! Constructor with cell id, number of nodes and element
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
-                      const std::shared_ptr<const ShapeFn<Tdim>>& shapefnptr)
+                      const std::shared_ptr<const Element<Tdim>>& elementptr)
     : id_{id}, nnodes_{nnodes} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -12,8 +12,8 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
   try {
-    if (shapefnptr->nfunctions() == this->nnodes_) {
-      shapefn_ = shapefnptr;
+    if (elementptr->nfunctions() == this->nnodes_) {
+      element_ = elementptr;
     } else {
       throw std::runtime_error(
           "Specified number of shape functions and nodes don't match");
@@ -154,7 +154,7 @@ inline void mpm::Cell<1>::compute_volume() {
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->corner_indices();
+    Eigen::VectorXi indices = element_->corner_indices();
     // Quadrilateral
     if (indices.size() == 4) {
 
@@ -207,7 +207,7 @@ inline void mpm::Cell<2>::compute_volume() {
 template <>
 inline void mpm::Cell<3>::compute_volume() {
   try {
-    Eigen::VectorXi indices = shapefn_->corner_indices();
+    Eigen::VectorXi indices = element_->corner_indices();
     // Hexahedron
     if (indices.size() == 8) {
       // Node numbering as read in by mesh file
@@ -263,7 +263,7 @@ inline void mpm::Cell<3>::compute_volume() {
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_centroid() {
   // Get indices of corner nodes
-  Eigen::VectorXi indices = shapefn_->corner_indices();
+  Eigen::VectorXi indices = element_->corner_indices();
 
   // Calculate the centroid of the cell
   centroid_.setZero();
@@ -277,7 +277,7 @@ void mpm::Cell<Tdim>::compute_centroid() {
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_mean_length() {
   // Get the indices of sub-triangles
-  Eigen::MatrixXi indices = shapefn_->sides_indices();
+  Eigen::MatrixXi indices = element_->sides_indices();
   this->mean_length_ = 0.;
   // Calculate the mean length
   for (unsigned i = 0; i < indices.rows(); ++i)
@@ -343,7 +343,7 @@ inline bool mpm::Cell<2>::point_in_cell(
     this->compute_volume();
 
   // Get the indices of sub-triangles
-  Eigen::MatrixXi indices = shapefn_->inhedron_indices();
+  Eigen::MatrixXi indices = element_->inhedron_indices();
 
   // Initialise sub-triangle areas to 0
   double triareas = 0.;
@@ -398,7 +398,7 @@ inline bool mpm::Cell<3>::point_in_cell(
     this->compute_volume();
 
   // Get the indices of sub-tetrahedron
-  Eigen::MatrixXi indices = shapefn_->inhedron_indices();
+  Eigen::MatrixXi indices = element_->inhedron_indices();
 
   // Initialise sub-tetrahedra volumes to 0
   double tetvolumes = 0.;
@@ -459,7 +459,7 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point(
 
   try {
     // Indices of corner nodes
-    Eigen::VectorXi indices = shapefn_->corner_indices();
+    Eigen::VectorXi indices = element_->corner_indices();
 
     // Linear
     if (indices.size() == 2) {
@@ -494,7 +494,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
 
   try {
     // Indices of corner nodes
-    Eigen::VectorXi indices = shapefn_->corner_indices();
+    Eigen::VectorXi indices = element_->corner_indices();
 
     // Quadrilateral
     if (indices.size() == 4) {
@@ -541,7 +541,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
 
   try {
     // Indices of corner nodes
-    Eigen::VectorXi indices = shapefn_->corner_indices();
+    Eigen::VectorXi indices = element_->corner_indices();
 
     // Hexahedron
     if (indices.size() == 8) {
@@ -612,7 +612,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   const double tolerance = 1.e-10;
 
   // Get indices of corner nodes
-  Eigen::VectorXi indices = shapefn_->corner_indices();
+  Eigen::VectorXi indices = element_->corner_indices();
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
@@ -626,10 +626,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Coordinates of a unit cell
-  const auto unit_cell = shapefn_->unit_cell_coordinates();
+  const auto unit_cell = element_->unit_cell_coordinates();
 
   // Affine transformation, using linear interpolation for the initial guess
-  if (shapefn_->degree() == mpm::ShapeFnDegree::Linear) {
+  if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
     Eigen::Matrix<double, 2, 2> A;
     A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
@@ -650,7 +650,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Shape function
-    const auto sf = shapefn_->shapefn(xi);
+    const auto sf = element_->shapefn(xi);
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
@@ -667,10 +667,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian = shapefn_->jacobian(xi, unit_cell);
+    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian(xi, unit_cell);
 
     // Shape function
-    const auto sf = shapefn_->shapefn(xi);
+    const auto sf = element_->shapefn(xi);
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
@@ -700,7 +700,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   const double tolerance = 1.e-11;
 
   // Get indices of corner nodes
-  Eigen::VectorXi indices = shapefn_->corner_indices();
+  Eigen::VectorXi indices = element_->corner_indices();
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
@@ -714,10 +714,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   }
 
   // Coordinates of a unit cell
-  const auto unit_cell = shapefn_->unit_cell_coordinates();
+  const auto unit_cell = element_->unit_cell_coordinates();
 
   // Affine transformation, using linear interpolation for the initial guess
-  if (shapefn_->degree() == mpm::ShapeFnDegree::Linear) {
+  if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
     Eigen::Matrix<double, 3, 3> A;
     A = nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
@@ -738,7 +738,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Shape function
-    const auto sf = shapefn_->shapefn(xi);
+    const auto sf = element_->shapefn(xi);
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
@@ -754,10 +754,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
     // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian = shapefn_->jacobian(xi, unit_cell);
+    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian(xi, unit_cell);
 
     // Shape function
-    const auto sf = shapefn_->shapefn(xi);
+    const auto sf = element_->shapefn(xi);
 
     // Residual f(x)
     Eigen::Matrix<double, 3, 1> residual;
@@ -787,7 +787,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
                                                    unsigned phase,
                                                    double pvolume) {
-  const auto shapefns = shapefn_->shapefn(xi);
+  const auto shapefns = element_->shapefn(xi);
   for (unsigned i = 0; i < shapefns.size(); ++i) {
     nodes_[i]->update_volume(true, phase, shapefns(i) * pvolume);
   }

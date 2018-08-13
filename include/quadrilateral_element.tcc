@@ -9,7 +9,7 @@
 //! Return shape functions of a 4-node Quadrilateral Element at a given local
 //! coordinate
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
+inline Eigen::VectorXd mpm::QuadrilateralElement<2, 4>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 4, 1> shapefn;
   shapefn(0) = 0.25 * (1 - xi(0)) * (1 - xi(1));
@@ -22,7 +22,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 4>::shapefn(
 //! Return gradient of shape functions of a 4-node Quadrilateral Element at a
 //! given local coordinate
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 4>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 4, 2> grad_shapefn;
   grad_shapefn(0, 0) = -0.25 * (1 - xi(1));
@@ -40,7 +40,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::grad_shapefn(
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::unit_cell_coordinates()
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 4>::unit_cell_coordinates()
     const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 4, 2> unit_cell;
@@ -67,7 +67,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 4>::unit_cell_coordinates()
 //! Return shape functions of a 8-node Quadrilateral Element at a given local
 //! coordinate
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
+inline Eigen::VectorXd mpm::QuadrilateralElement<2, 8>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 8, 1> shapefn;
   shapefn(0) = -0.25 * (1. - xi(0)) * (1. - xi(1)) * (xi(0) + xi(1) + 1.);
@@ -84,7 +84,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 8>::shapefn(
 //! Return gradient of shape functions of a 8-node Quadrilateral Element at a
 //! given local coordinate
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 8>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 8, 2> grad_shapefn;
   grad_shapefn(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
@@ -109,7 +109,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::grad_shapefn(
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::unit_cell_coordinates()
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 8>::unit_cell_coordinates()
     const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 8, 2> unit_cell;
@@ -140,7 +140,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 8>::unit_cell_coordinates()
 //! Return shape functions of a 9-node Quadrilateral Element at a given local
 //! coordinate
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
+inline Eigen::VectorXd mpm::QuadrilateralElement<2, 9>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 9, 1> shapefn;
 
@@ -160,7 +160,7 @@ inline Eigen::VectorXd mpm::QuadrilateralShapeFn<2, 9>::shapefn(
 //! Return gradient of shape functions of a 9-node Quadrilateral Element at a
 //! given local coordinate
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 9>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi) const {
   Eigen::Matrix<double, 9, 2> grad_shapefn;
   // 9-noded
@@ -187,7 +187,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::grad_shapefn(
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::unit_cell_coordinates()
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 9>::unit_cell_coordinates()
     const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 9, 2> unit_cell;
@@ -205,31 +205,31 @@ inline Eigen::MatrixXd mpm::QuadrilateralShapeFn<2, 9>::unit_cell_coordinates()
   return unit_cell;
 }
 
-//! Return the degree of shape function
+//! Return the degree of element
 //! 4-noded quadrilateral
 template <>
-inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 4>::degree() const {
-  return mpm::ShapeFnDegree::Linear;
+inline mpm::ElementDegree mpm::QuadrilateralElement<2, 4>::degree() const {
+  return mpm::ElementDegree::Linear;
 }
 
-//! Return the degree of shape function
+//! Return the degree of element
 //! 8-noded quadrilateral
 template <>
-inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 8>::degree() const {
-  return mpm::ShapeFnDegree::Quadratic;
+inline mpm::ElementDegree mpm::QuadrilateralElement<2, 8>::degree() const {
+  return mpm::ElementDegree::Quadratic;
 }
 
-//! Return the degree of shape function
+//! Return the degree of element
 //! 9-noded quadrilateral
 template <>
-inline mpm::ShapeFnDegree mpm::QuadrilateralShapeFn<2, 9>::degree() const {
-  return mpm::ShapeFnDegree::Quadratic;
+inline mpm::ElementDegree mpm::QuadrilateralElement<2, 9>::degree() const {
+  return mpm::ElementDegree::Quadratic;
 }
 
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::jacobian(
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
         const Eigen::Matrix<double, 2, 1>& xi,
         const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
@@ -254,7 +254,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 //! coordinate
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
@@ -279,7 +279,7 @@ inline std::vector<Eigen::MatrixXd>
 //! coordinate for a real cell
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::bmatrix(
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
@@ -325,7 +325,7 @@ inline std::vector<Eigen::MatrixXd>
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::sides_indices() const {
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::sides_indices() const {
   Eigen::Matrix<int, 4, 2> indices;
   // clang-format off
   indices << 0, 1,
@@ -339,7 +339,7 @@ inline Eigen::MatrixXi
 //! Return the corner indices of a cell to calculate the cell volume
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::corner_indices() const {
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 4, 1> indices;
   indices << 0, 1, 2, 3;
   return indices;
@@ -348,7 +348,7 @@ inline Eigen::VectorXi
 //! Return indices of a sub-tetrahedrons in a volume
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::inhedron_indices() const {
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::inhedron_indices() const {
   Eigen::Matrix<int, 4, Tdim, Eigen::RowMajor> indices;
 
   // clang-format off

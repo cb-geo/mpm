@@ -82,16 +82,16 @@ void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
-    mpm::Index gcid, const std::shared_ptr<mpm::ShapeFn<Tdim>>& shapefn,
+    mpm::Index gcid, const std::shared_ptr<mpm::Element<Tdim>>& element,
     const std::vector<std::vector<mpm::Index>>& cells) {
   bool status = true;
   try {
     // Check if node id list is not empty
     if (!cells.empty()) {
       for (const auto& nodes : cells) {
-        // Create cell with shapefn
+        // Create cell with element
         auto cell =
-            std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), shapefn);
+            std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
 
         // Cell local node id
         unsigned local_nid = 0;

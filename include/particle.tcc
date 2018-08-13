@@ -164,13 +164,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Compute local coordinates
       this->compute_reference_location();
 
-      // Get shape function ptr of a cell
-      const auto sfn = cell_->shapefn_ptr();
+      // Get element ptr of a cell
+      const auto element = cell_->element_ptr();
 
       // Compute shape function of the particle
-      shapefn_ = sfn->shapefn(this->xi_);
+      shapefn_ = element->shapefn(this->xi_);
       // Compute bmatrix of the particle for reference cell
-      bmatrix_ = sfn->bmatrix(this->xi_, cell_->nodal_coordinates());
+      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

@@ -9,10 +9,10 @@
 #include "Eigen/LU"
 
 #include "affine_transform.h"
+#include "element.h"
 #include "logger.h"
 #include "map.h"
 #include "node_base.h"
-#include "shapefn.h"
 
 namespace mpm {
 
@@ -31,12 +31,12 @@ class Cell {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id, number of nodes and shapefn
+  //! Constructor with id, number of nodes and elemetn
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
-  //! \param[in] shapefnptr Pointer to a shape function
+  //! \param[in] elementptr Pointer to an element type
   Cell(Index id, unsigned nnodes,
-       const std::shared_ptr<const ShapeFn<Tdim>>& shapefnptr);
+       const std::shared_ptr<const Element<Tdim>>& elementptr);
 
   //! Default destructor
   ~Cell() = default;
@@ -54,7 +54,7 @@ class Cell {
   bool initialise();
 
   //! Return the initialisation status of cells
-  //! \retval initialisation_status Cell has nodes, shape functions and volumes
+  //! \retval initialisation_status Cell has nodes, element type and volumes
   bool is_initialised() const;
 
   //! Return the number of particles
@@ -69,13 +69,13 @@ class Cell {
   //! Activate nodes if particle is present
   bool activate_nodes();
 
-  //! Return a pointer to shape function of a cell
-  std::shared_ptr<const ShapeFn<Tdim>> shapefn_ptr() { return shapefn_; }
+  //! Return a pointer to element type of a cell
+  std::shared_ptr<const Element<Tdim>> element_ptr() { return element_; }
 
-  //! Return the number of shape functions, returns zero if the shapefunction is
+  //! Return the number of shape functions, returns zero if the element type is
   //! not set.
   unsigned nfunctions() const {
-    return (this->shapefn_ != nullptr ? this->shapefn_->nfunctions() : 0);
+    return (this->element_ != nullptr ? this->element_->nfunctions() : 0);
   };
 
   //! Add a node pointer to cell
@@ -244,7 +244,7 @@ class Cell {
   Map<Cell<Tdim>> neighbour_cells_;
 
   //! Shape function
-  std::shared_ptr<const ShapeFn<Tdim>> shapefn_{nullptr};
+  std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
