@@ -231,6 +231,19 @@ class Cell {
   bool assign_velocity_constraint(unsigned face_id, unsigned dir,
                                   double velocity);
 
+  //! Compute normal vector
+  //! \param[in] face_id Face of cell of velocity constraint
+  void compute_normal();
+
+  //! Return number of normal vectors
+  //! \retval number of normal vectors
+  unsigned nnormal() const { return velocity_constraints_normals_.size(); }
+
+  //! Return unit normal vector, positive pointing outside of the element
+  //! \param[in] id of constraint
+  //! \retval unit normal vector
+  Eigen::VectorXd normal(unsigned id);
+
   //! Compute inverse of rotation matrix for orthogonal axis coordinate system
   //! \param[in] alpha Euler alpha angle in radians
   //! \param[in] beta Euler beta angle in radians
@@ -271,6 +284,9 @@ class Cell {
 
   //! Velocity constraints
   std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+
+  //! Normal of face with velocity constraints
+  std::vector<Eigen::VectorXd> velocity_constraints_normals_;
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;

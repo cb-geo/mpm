@@ -972,7 +972,97 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   return status;
 }
 
-//! Compute inverse of rotation matrix for orthogonal axis coordinate system
+//! Compute normal 2d
+template <>
+inline void mpm::Cell<2>::compute_normal() {
+
+  Eigen::Matrix<double, 2, 1> a, b, normal_vector;
+  Eigen::VectorXi indices;
+  mpm::Index face_id;
+
+  for (const auto& velocity_constraint : this->velocity_constraints_) {
+    // Get face_id
+    face_id = std::get<0>(velocity_constraint);
+
+    // Get the nodes of the face
+    indices = shapefn_->face_indices(face_id);
+
+    // Compute the vector to calculate normal (perpendicular)
+    // a = node(0) - node(1)
+    a = (this->nodes_[indices(0)])->coordinates() -
+        (this->nodes_[indices(1)])->coordinates();
+
+    // Compute normal and make unit vector
+    // normal = a x b
+    // Note that definition of a and b are such that normal is always out of
+    // page
+    normal_vector(0) = -a(1);
+    normal_vector(1) = a(0);
+    normal_vector /= normal_vector.norm();
+
+    // Store to private variable
+    velocity_constraints_normals_.emplace_back(normal_vector);
+  }
+}
+
+//! Compute normal 3d
+template <>
+inline void mpm::Cell<3>::compute_normal() {
+
+  Eigen::Matrix<double, 3, 1> a, b, normal_vector;
+  Eigen::VectorXi indices;
+  mpm::Index face_id;
+
+  for (const auto& velocity_constraint : this->velocity_constraints_) {
+    // Get face_id
+    face_id = std::get<0>(velocity_constraint);
+
+    // Get the nodes of the face
+    indices = shapefn_->face_indices(face_id);
+
+    // Compute two vectors to calculate normal
+    // a = node(1) - node(0)
+    // b = node(3) - node(0)
+    a = (this->nodes_[indices(1)])->coordinates() -
+        (this->nodes_[indices(0)])->coordinates();
+    b = (this->nodes_[indices(3)])->coordinates() -
+        (this->nodes_[indices(0)])->coordinates();
+
+    // Compute normal and make unit vector
+    // normal = a x b
+    // Note that definition of a and b are such that normal is always out of
+    // page
+    normal_vector = a.cross(b);
+    normal_vector /= normal_vector.norm();
+
+    // Store to private variable
+    velocity_constraints_normals_.emplace_back(normal_vector);
+  }
+}
+
+//! Return unit normal vector
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::normal(unsigned id) {
+
+  Eigen::Matrix<double, Tdim, 1> normal_vector;
+  normal_vector.setZero();
+
+  try {
+    // Check if id is within the range of normal vector
+    if (id < this->velocity_constraints_normals_.size()) {
+      // return normal vector depending on id
+      normal_vector = this->velocity_constraints_normals_[id];
+    } else {
+      throw std::runtime_error("Specified id is out of range.");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return normal_vector;
+}
+
+//! Compute inverse of 2d rotation matrix for orthogonal axis coordinate system
 template <>
 inline Eigen::MatrixXd mpm::Cell<2>::compute_inverse_rotation_matrix(
     double alpha, double beta, double gamma) {
@@ -998,7 +1088,7 @@ inline Eigen::MatrixXd mpm::Cell<2>::compute_inverse_rotation_matrix(
   return inverse_rotation_matrix;
 }
 
-//! Compute inverse of rotation matrix for orthogonal axis coordinate system
+//! Compute inverse of 3d rotation matrix for orthogonal axis coordinate system
 template <>
 inline Eigen::MatrixXd mpm::Cell<3>::compute_inverse_rotation_matrix(double alpha, double beta, double gamma) {
 
