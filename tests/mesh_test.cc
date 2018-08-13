@@ -25,7 +25,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
   // 4-noded quadrilateral element
   std::shared_ptr<mpm::Element<Dim>> element =
-      Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+      Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -448,7 +448,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                                                    {1, 4, 5, 2}};
         // Assign 4-noded quadrilateral element to cell
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+            Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
         // Global cell index
         mpm::Index gcid = 0;
@@ -609,7 +609,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
   // 8-noded hexahedron element
   std::shared_ptr<mpm::Element<Dim>> element =
-      Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+      Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -1030,7 +1030,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                                                    {1, 8, 9, 2, 5, 10, 11, 6}};
         // Assign 8-noded hexahedron element to cell
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+            Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
         // Global cell index
         mpm::Index gcid = 0;

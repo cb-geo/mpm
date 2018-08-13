@@ -27,7 +27,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   // Shape function
   // 4-noded quadrilateral shape functions
   std::shared_ptr<mpm::Element<Dim>> element =
-      Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+      Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
   Eigen::Vector2d coords;
   coords.setZero();
@@ -242,7 +242,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+            Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
         mpm::Index id = 0;
         auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
@@ -316,7 +316,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+            Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
         mpm::Index id = 0;
         auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
@@ -361,7 +361,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     SECTION("Check 4-noded Quadrilateral") {
       // 4-noded quadrilateral shape functions
       std::shared_ptr<mpm::Element<Dim>> element =
-          Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+          Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       REQUIRE(cell->nfunctions() == 4);
 
@@ -373,7 +373,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       // 8-noded quadrilateral shape functions
       const unsigned nnodes = 8;
       std::shared_ptr<mpm::Element<Dim>> element =
-          Factory<mpm::Element<Dim>>::instance()->create("SFQ8");
+          Factory<mpm::Element<Dim>>::instance()->create("ED2Q8");
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, element);
       REQUIRE(cell->nfunctions() == 8);
     }
@@ -382,7 +382,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       // 9-noded quadrilateral shape functions
       const unsigned nnodes = 9;
       std::shared_ptr<mpm::Element<Dim>> element =
-          Factory<mpm::Element<Dim>>::instance()->create("SFQ9");
+          Factory<mpm::Element<Dim>>::instance()->create("ED2Q9");
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, element);
       REQUIRE(cell->nfunctions() == 9);
     }
@@ -456,7 +456,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
-        Factory<mpm::Element<Dim>>::instance()->create("SFQ4");
+        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
     // Local coordinate of a particle
     Eigen::Vector2d xi = Eigen::Vector2d::Zero();
@@ -769,7 +769,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   // 8-noded hexahedron shape functions
   std::shared_ptr<mpm::Element<Dim>> element =
-      Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+      Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -996,7 +996,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+            Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
         mpm::Index id = 0;
         auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
@@ -1087,7 +1087,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
-            Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+            Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
         // Cell 1
         mpm::Index id1 = 0;
@@ -1216,7 +1216,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     SECTION("Check 8-noded Hexahedron") {
       // 8-noded hexahedron shape functions
       std::shared_ptr<mpm::Element<Dim>> element =
-          Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+          Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       REQUIRE(cell->nfunctions() == 8);
@@ -1230,7 +1230,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       // 20-noded hexahedron shape functions
       const unsigned nnodes = 20;
       std::shared_ptr<mpm::Element<Dim>> element =
-          Factory<mpm::Element<Dim>>::instance()->create("SFH20");
+          Factory<mpm::Element<Dim>>::instance()->create("ED3H20");
 
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, element);
       REQUIRE(cell->nfunctions() == 20);
@@ -1334,7 +1334,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
-        Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+        Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
     //! Check Cell IDs
     mpm::Index id = 0;
@@ -1405,7 +1405,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
-        Factory<mpm::Element<Dim>>::instance()->create("SFH8");
+        Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
     //! Check Cell IDs
     mpm::Index id = 0;
