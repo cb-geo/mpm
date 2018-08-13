@@ -83,11 +83,11 @@ class Mesh {
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
-  //! \param[in] shapefn Shape function of the cell
+  //! \param[in] element Element type
   //! \param[in] cells Node ids of cells
   //! \retval status Create cells status
   bool create_cells(mpm::Index gnid,
-                    const std::shared_ptr<mpm::ShapeFn<Tdim>>& shapefn,
+                    const std::shared_ptr<mpm::Element<Tdim>>& element,
                     const std::vector<std::vector<mpm::Index>>& cells);
 
   //! Add a cell from the mesh

@@ -1,17 +1,17 @@
-#ifndef MPM_QUADRILATERALSHAPEFN_H_
-#define MPM_QUADRILATERALSHAPEFN_H_
+#ifndef MPM_QUADRILATERAL_ELEMENT_H_
+#define MPM_QUADRILATERAL_ELEMENT_H_
 
 #include <exception>
 
 #include <Eigen/Dense>
 
+#include "element.h"
 #include "logger.h"
-#include "shapefn.h"
 
 namespace mpm {
 
-//! Quadrilateral shape function class derived from ShapeFn class
-//! \brief Shape functions of a quadrilateral element
+//! Quadrilateral element class derived from Element class
+//! \brief Quadrilateral element
 //! \details 4-noded, 8-noded, and 9-noded quadrilateral element \n
 //! Shape function, gradient shape function, B-matrix, indices \n
 //! 4-node Quadrilateral Element \n
@@ -56,14 +56,14 @@ namespace mpm {
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
-class QuadrilateralShapeFn : public ShapeFn<Tdim> {
+class QuadrilateralElement : public Element<Tdim> {
 
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralShapeFn() : mpm::ShapeFn<Tdim>() {
+  QuadrilateralElement() : mpm::Element<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
                   "Specified number of shape functions is not defined");
@@ -109,7 +109,7 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
   //! Return the degree of shape function
-  mpm::ShapeFnDegree degree() const override;
+  mpm::ElementDegree degree() const override;
 
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
@@ -133,6 +133,6 @@ class QuadrilateralShapeFn : public ShapeFn<Tdim> {
 };
 
 }  // namespace mpm
-#include "quad_shapefn.tcc"
+#include "quadrilateral_element.tcc"
 
-#endif  // MPM_QUADRILATERALSHAPEFN_H_
+#endif  // MPM_QUADRILATERAL_ELEMENT_H_

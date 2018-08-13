@@ -80,13 +80,13 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
-    std::shared_ptr<mpm::ShapeFn<Tdim>> shapefn =
-        Factory<mpm::ShapeFn<Tdim>>::instance()->create(cell_type);
+    std::shared_ptr<mpm::Element<Tdim>> element =
+        Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
 
     // Create cells from file
     bool cell_status = meshes_.at(0)->create_cells(
-        gid,      // global id
-        shapefn,  // Shape function
+        gid,                                                    // global id
+        element,                                                // element tyep
         mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
 
     if (!cell_status)
