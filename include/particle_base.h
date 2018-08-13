@@ -142,20 +142,6 @@ class ParticleBase {
   //! Return velocity
   virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
 
-  //! Assign momentum
-  virtual bool assign_momentum(unsigned phase,
-                               const Eigen::VectorXd& momentum) = 0;
-
-  //! Return momentum
-  virtual Eigen::VectorXd momentum(unsigned phase) const = 0;
-
-  //! Assign acceleration
-  virtual bool assign_acceleration(unsigned phase,
-                                   const Eigen::VectorXd& acceleration) = 0;
-
-  //! Return acceleration
-  virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
-
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
 
