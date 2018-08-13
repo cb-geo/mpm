@@ -971,3 +971,48 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   }
   return status;
 }
+
+//! Compute inverse of rotation matrix for orthogonal axis coordinate system
+template <>
+inline Eigen::MatrixXd mpm::Cell<2>::compute_inverse_rotation_matrix(
+    double alpha, double beta, double gamma) {
+
+  Eigen::Matrix<double, 3, 3> rotation_matrix_3d;
+
+  // beta = 0 implies no rotation on z axis
+  if (fabs(beta) > 1.E-12) beta = 0;
+
+  // clang-format off
+  rotation_matrix_3d << cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),  -cos(alpha)*sin(gamma) - sin(alpha)*cos(beta)*cos(gamma),   sin(beta)*sin(alpha),
+                        sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),  -sin(alpha)*sin(gamma) + cos(alpha)*cos(beta)*cos(gamma),  -sin(beta)*cos(alpha),
+                        sin(beta)*sin(gamma),                                      sin(beta)*cos(gamma),                                      cos(beta);                                 
+  // clang-format on  
+
+  // Take block 2x2 matrix 
+  Eigen::Matrix<double, 2, 2> inverse_rotation_matrix;
+  inverse_rotation_matrix = rotation_matrix_3d.block<2, 2>(0, 0);                   
+
+  // Invert rotation matrix
+  inverse_rotation_matrix = inverse_rotation_matrix.inverse();
+
+  return inverse_rotation_matrix;
+}
+
+//! Compute inverse of rotation matrix for orthogonal axis coordinate system
+template <>
+inline Eigen::MatrixXd mpm::Cell<3>::compute_inverse_rotation_matrix(double alpha, double beta, double gamma) {
+
+  Eigen::Matrix<double, 3, 3> rotation_matrix;
+
+  // clang-format off
+  rotation_matrix << cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),  -cos(alpha)*sin(gamma) - sin(alpha)*cos(beta)*cos(gamma),   sin(beta)*sin(alpha),
+                     sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),  -sin(alpha)*sin(gamma) + cos(alpha)*cos(beta)*cos(gamma),  -sin(beta)*cos(alpha),
+                     sin(beta)*sin(gamma),                                      sin(beta)*cos(gamma),                                      cos(beta);
+  // clang-format on
+
+  // Invert rotation matrix
+  Eigen::Matrix<double, 3, 3> inverse_rotation_matrix;
+  inverse_rotation_matrix = rotation_matrix.inverse();
+
+  return inverse_rotation_matrix;
+}

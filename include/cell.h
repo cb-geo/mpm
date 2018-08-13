@@ -55,7 +55,7 @@ class Cell {
   bool initialise();
 
   //! Return the initialisation status of cells
-  //! \retval initialisation_status Cell has nodes, element type and volumes
+  //! \retval initialisation_status Cell has nodes, shape functions and volumes
   bool is_initialised() const;
 
   //! Return the number of particles
@@ -231,6 +231,14 @@ class Cell {
   bool assign_velocity_constraint(unsigned face_id, unsigned dir,
                                   double velocity);
 
+  //! Compute inverse of rotation matrix for orthogonal axis coordinate system
+  //! \param[in] alpha Euler alpha angle in radians
+  //! \param[in] beta Euler beta angle in radians
+  //! \param[in] gamma Euler gamma angle in radians
+  //! \retval inverse of Euler rotation matrix R
+  Eigen::MatrixXd compute_inverse_rotation_matrix(double alpha, double beta,
+                                                  double gamma);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -263,6 +271,9 @@ class Cell {
 
   //! Velocity constraints
   std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+
+  //! Logger
+  std::unique_ptr<spdlog::logger> console_;
 
 };  // Cell class
 }  // namespace mpm

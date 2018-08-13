@@ -176,7 +176,6 @@ class HexahedronElement : public Element<Tdim> {
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
 };
 
 }  // namespace mpm
