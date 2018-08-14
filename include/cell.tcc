@@ -166,23 +166,23 @@ inline void mpm::Cell<2>::compute_volume() {
       //   |  /    \ |
       // 0 0---------0 1
       //         d
-      const double a = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
+      const double a = (nodes_[indices(0)]->coordinates() -
+                        nodes_[indices(3)]->coordinates())
                            .norm();
-      const double b = (nodes_[indices[2]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
+      const double b = (nodes_[indices(2)]->coordinates() -
+                        nodes_[indices(3)]->coordinates())
                            .norm();
-      const double c = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
+      const double c = (nodes_[indices(1)]->coordinates() -
+                        nodes_[indices(2)]->coordinates())
                            .norm();
-      const double d = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[1]]->coordinates())
+      const double d = (nodes_[indices(0)]->coordinates() -
+                        nodes_[indices(1)]->coordinates())
                            .norm();
-      const double p = (nodes_[indices[0]]->coordinates() -
-                        nodes_[indices[2]]->coordinates())
+      const double p = (nodes_[indices(0)]->coordinates() -
+                        nodes_[indices(2)]->coordinates())
                            .norm();
-      const double q = (nodes_[indices[1]]->coordinates() -
-                        nodes_[indices[3]]->coordinates())
+      const double q = (nodes_[indices(1)]->coordinates() -
+                        nodes_[indices(3)]->coordinates())
                            .norm();
 
       // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
@@ -227,14 +227,14 @@ inline void mpm::Cell<3>::compute_volume() {
       // Calculation of hexahedron volume from
       // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
 
-      const auto a = nodes_[indices[7]]->coordinates();
-      const auto b = nodes_[indices[6]]->coordinates();
-      const auto c = nodes_[indices[2]]->coordinates();
-      const auto d = nodes_[indices[3]]->coordinates();
-      const auto e = nodes_[indices[4]]->coordinates();
-      const auto f = nodes_[indices[5]]->coordinates();
-      const auto g = nodes_[indices[1]]->coordinates();
-      const auto h = nodes_[indices[0]]->coordinates();
+      const auto a = nodes_[indices(7)]->coordinates();
+      const auto b = nodes_[indices(6)]->coordinates();
+      const auto c = nodes_[indices(2)]->coordinates();
+      const auto d = nodes_[indices(3)]->coordinates();
+      const auto e = nodes_[indices(4)]->coordinates();
+      const auto f = nodes_[indices(5)]->coordinates();
+      const auto g = nodes_[indices(1)]->coordinates();
+      const auto h = nodes_[indices(0)]->coordinates();
 
       volume_ =
           (1.0 / 12) *
@@ -268,7 +268,7 @@ void mpm::Cell<Tdim>::compute_centroid() {
   // Calculate the centroid of the cell
   centroid_.setZero();
   for (unsigned i = 0; i < indices.size(); ++i)
-    centroid_ += nodes_[indices[i]]->coordinates();
+    centroid_ += nodes_[indices(i)]->coordinates();
 
   centroid_ /= indices.size();
 }
@@ -466,13 +466,13 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point(
       //
       // 0 0---------0 1
       //        l
-      const double length = (nodes_[indices[0]]->coordinates() -
-                             nodes_[indices[1]]->coordinates())
+      const double length = (nodes_[indices(0)]->coordinates() -
+                             nodes_[indices(1)]->coordinates())
                                 .norm();
 
       const Eigen::Matrix<double, 1, 1> centre =
-          (nodes_[indices[0]]->coordinates() +
-           nodes_[indices[1]]->coordinates()) /
+          (nodes_[indices(0)]->coordinates() +
+           nodes_[indices(1)]->coordinates()) /
           2.0;
 
       xi(0) = 2. * (point(0) - centre(0)) / length;
@@ -506,18 +506,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       //   | /   \ |
       // 0 0---------0 1
       //         d
-      const double xlength = (nodes_[indices[0]]->coordinates() -
-                              nodes_[indices[1]]->coordinates())
+      const double xlength = (nodes_[indices(0)]->coordinates() -
+                              nodes_[indices(1)]->coordinates())
                                  .norm();
-      const double ylength = (nodes_[indices[1]]->coordinates() -
-                              nodes_[indices[2]]->coordinates())
+      const double ylength = (nodes_[indices(1)]->coordinates() -
+                              nodes_[indices(2)]->coordinates())
                                  .norm();
 
       const Eigen::Matrix<double, 2, 1> centre =
-          (nodes_[indices[0]]->coordinates() +
-           nodes_[indices[1]]->coordinates() +
-           nodes_[indices[2]]->coordinates() +
-           nodes_[indices[3]]->coordinates()) /
+          (nodes_[indices(0)]->coordinates() +
+           nodes_[indices(1)]->coordinates() +
+           nodes_[indices(2)]->coordinates() +
+           nodes_[indices(3)]->coordinates()) /
           4.0;
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
@@ -560,21 +560,21 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
       //     4               5
       //
 
-      const double xlength = (nodes_[indices[0]]->coordinates() -
-                              nodes_[indices[1]]->coordinates())
+      const double xlength = (nodes_[indices(0)]->coordinates() -
+                              nodes_[indices(1)]->coordinates())
                                  .norm();
-      const double ylength = (nodes_[indices[1]]->coordinates() -
-                              nodes_[indices[2]]->coordinates())
+      const double ylength = (nodes_[indices(1)]->coordinates() -
+                              nodes_[indices(2)]->coordinates())
                                  .norm();
-      const double zlength = (nodes_[indices[1]]->coordinates() -
-                              nodes_[indices[5]]->coordinates())
+      const double zlength = (nodes_[indices(1)]->coordinates() -
+                              nodes_[indices(5)]->coordinates())
                                  .norm();
 
       // Compute centre
       Eigen::Matrix<double, 3, 1> centre;
       centre.setZero();
       for (unsigned i = 0; i < indices.size(); ++i)
-        centre += nodes_[indices[i]]->coordinates();
+        centre += nodes_[indices(i)]->coordinates();
       centre /= indices.size();
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
@@ -619,7 +619,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   nodal_coords.resize(2, indices.size());
 
   for (unsigned j = 0; j < indices.size(); ++j) {
-    Eigen::Matrix<double, 2, 1> node = nodes_[indices[j]]->coordinates();
+    Eigen::Matrix<double, 2, 1> node = nodes_[indices(j)]->coordinates();
     for (unsigned i = 0; i < 2; ++i) {
       nodal_coords(i, j) = node[i];
     }
@@ -707,7 +707,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   nodal_coords.resize(3, indices.size());
 
   for (unsigned j = 0; j < indices.size(); ++j) {
-    Eigen::Matrix<double, 3, 1> node = nodes_[indices[j]]->coordinates();
+    Eigen::Matrix<double, 3, 1> node = nodes_[indices(j)]->coordinates();
     for (unsigned i = 0; i < 3; ++i) {
       nodal_coords(i, j) = node[i];
     }
