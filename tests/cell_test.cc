@@ -749,11 +749,11 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
       // 4-noded quadrilateral shape functions
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          Factory<mpm::ShapeFn<Dim>>::instance()->create("SFQ4");
+      std::shared_ptr<mpm::Element<Dim>> element =
+          Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       cell->add_node(0, node0);
       cell->add_node(1, node1);
       cell->add_node(2, node2);
@@ -785,7 +785,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check inverse rotation matrix") {
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       cell->add_node(0, node0);
       cell->add_node(1, node1);
       cell->add_node(2, node2);
@@ -1938,11 +1938,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
       // 8-noded hexahedron shape functions
-      std::shared_ptr<mpm::ShapeFn<Dim>> shapefn =
-          Factory<mpm::ShapeFn<Dim>>::instance()->create("SFH8");
+      std::shared_ptr<mpm::Element<Dim>> element =
+          Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
 
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       cell->add_node(0, node0);
       cell->add_node(1, node1);
       cell->add_node(2, node2);
@@ -1980,7 +1980,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     SECTION("Check inverse rotation matrix") {
       mpm::Index id = 0;
-      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, shapefn);
+      auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       cell->add_node(0, node0);
       cell->add_node(1, node1);
       cell->add_node(2, node2);

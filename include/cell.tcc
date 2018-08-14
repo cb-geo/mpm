@@ -985,7 +985,7 @@ inline void mpm::Cell<2>::compute_normal() {
     face_id = std::get<0>(velocity_constraint);
 
     // Get the nodes of the face
-    indices = shapefn_->face_indices(face_id);
+    indices = element_->face_indices(face_id);
 
     // Compute the vector to calculate normal (perpendicular)
     // a = node(0) - node(1)
@@ -1018,7 +1018,7 @@ inline void mpm::Cell<3>::compute_normal() {
     face_id = std::get<0>(velocity_constraint);
 
     // Get the nodes of the face
-    indices = shapefn_->face_indices(face_id);
+    indices = element_->face_indices(face_id);
 
     // Compute two vectors to calculate normal
     // a = node(1) - node(0)

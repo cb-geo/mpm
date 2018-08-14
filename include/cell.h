@@ -14,7 +14,6 @@
 #include "map.h"
 #include "node_base.h"
 
-
 namespace mpm {
 
 //! Global index type for the cell
@@ -279,8 +278,6 @@ class Cell {
 
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
-  //! Logger
-  std::unique_ptr<spdlog::logger> console_;
 
   //! Velocity constraints
   std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;

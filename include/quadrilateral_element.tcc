@@ -423,7 +423,7 @@ inline Eigen::MatrixXi
 //! Return indices of a face of the element
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
-    mpm::QuadrilateralShapeFn<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
   
   Eigen::Matrix<int, 2, 1> indices;
   
