@@ -134,6 +134,12 @@ class HexahedronElement : public Element<Tdim> {
       const VectorDim& xi,
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
+  //! Evaluate the mass matrix
+  //! \param[in] xi_s Vector of local coordinates
+  //! \retval mass_matrix mass matrix
+  Eigen::MatrixXd mass_matrix(
+      const std::vector<VectorDim>& xi_s) const override;
+
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;
 
