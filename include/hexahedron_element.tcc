@@ -333,6 +333,25 @@ inline std::vector<Eigen::MatrixXd>
   return bmatrix;
 }
 
+//! Return mass_matrix of a Hexahedron Element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd
+    mpm::HexahedronElement<Tdim, Tnfunctions>::mass_matrix(
+      const std::vector<VectorDim>& xi_s) const {
+  // Mass matrix
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions>  mass_matrix;
+  mass_matrix.setZero();
+  for (unsigned i = 0; i < Tnfunctions; ++i) {
+    for (unsigned j = 0; j < Tnfunctions; ++j) {
+      for (const auto& xi : xi_s) {
+        const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
+        mass_matrix(i,j) += (shape_fn(i) * shape_fn(j));
+      }
+    }
+  }
+  return mass_matrix;
+}
+
 //! Return the degree of element
 //! 8-noded hexahedron
 template <>
