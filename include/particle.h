@@ -199,8 +199,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
-  //! strain rate
-  Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! pressure
   Eigen::Matrix<double, Tnphases, 1> pressure_;
   //! Velocity
