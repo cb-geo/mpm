@@ -257,8 +257,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-104166.6666666667).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-104166.6666666667).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-208333.3333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-208333.3333333333).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -356,8 +356,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-10417098.99495921).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-10417315.15910548).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-20833765.64471337).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-20833981.80040339).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-540.38922505).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -641,9 +641,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-93750.000).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-93750.000).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-93750.000).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-41666.66666666666).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-41666.66666666666).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-41666.66666666666).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
@@ -756,9 +756,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-9375373.074181436).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-9375335.766763293).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-9374253.851637128).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-4167039.740848102).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-4167002.433429959).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-4165920.518303796).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-391.727890507).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(55.961127215).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(-186.537090718).epsilon(Tolerance));
