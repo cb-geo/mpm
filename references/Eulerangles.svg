@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.0"
+   width="688"
+   height="775"
+   id="eulerangles">
+
+  <title>Eulerangles</title>
+  <desc>
+     Eulerangles
+     from Wikimedia Commons
+     about: http://commons.wikimedia.org/wiki/Image:Eulerangles.svg
+  </desc>
+  
+  <path
+     d="
+M 112.591,614.343 C 116.693,680.362 150.503,773.216 243.261,773.187 C 320.068,773.163 393.668,710.746 441.78,647.851 C 306.553,675.488 194.392,654.435 112.591,614.342 z"
+     style="fill:#ffffff;fill-opacity:1;stroke:none"
+     id="white_lower_half" />
+  <path
+     d="M 112.38976,612.86879 C 117.42268,684.03929 145.3473,739.95039 194.45226,762.65012 C 267.62368,796.47462 366.45929,746.69229 442.13976,647.46259"
+     style="fill:none;fill-opacity:1;stroke:#eb2d2e;stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="path12382" />
+  <path
+     d="M 647.99362,471.82672 C 647.99362,576.09544 503.2711,660.62194 324.74681,660.62194 C 146.22252,660.62194 1.4999905,576.09544 1.4999905,471.82672 C 1.4999905,367.558 146.22252,283.0315 324.7468,283.0315 C 503.2711,283.0315 647.99362,367.558 647.99362,471.82672 L 647.99362,471.82672 z "
+     style="fill:none;fill-opacity:1;stroke:#008dd1;stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="path2323" />
+  <g
+     id="arrow_y">
+    <path
+       d="M 325,466.75 L 642.08,466.75"
+       style="fill:none;stroke:#008dd1;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_y" />
+    <path
+       d="M 612.07665,467.22142 L 600.27228,479.41392 L 642.07273,466.73627 L 599.88416,455.41706 L 612.07665,467.22142 z "
+       style="fill:#008dd1;fill-rule:evenodd;stroke:#008dd1;stroke-width:2.4pt;marker-start:none"
+       id="arrowhead_y" />
+  </g>
+  <path
+     d="M 441.88977,647.05619 C 464.05281,617.99833 484.21154,584.71263 501.17102,548.02503 C 535.57287,473.60493 550.7635,398.14183 547.98352,334.05633 C 548.07724,334.10803 548.17115,334.16073 548.26477,334.21253 C 544.93717,258.95733 516.77012,199.41323 465.70227,175.80631 C 450.45964,168.76015 434.13759,165.34335 417.10852,165.24381 C 415.97325,165.23717 414.81225,165.25237 413.67102,165.27506 C 349.15716,166.55776 275.50616,214.68459 216.35851,293.15003 C 216.11903,293.20043 215.87898,293.25563 215.63976,293.30633"
+     style="fill:#ffffff;fill-opacity:1;stroke:#eb2d2e;stroke-width:3;;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     id="path11396" />
+  <g
+     id="g3506">
+    <path
+       d="M 214.453,293.719 L 491.484,723.813"
+       style="fill:none;stroke:#00aa4f;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_N" />
+    <path
+       d="M 475.24243,698.57848 L 458.6559,694.98867 L 491.48834,723.79892 L 478.83225,681.99194 L 475.24243,698.57848 z "
+       style="fill:#00aa4f;fill-rule:evenodd;stroke:#00aa4f;stroke-width:2.4pt;marker-start:none"
+       id="path3512" />
+  </g>
+  <text
+     x="494.64572"
+     y="765.84717"
+     style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#00aa4f;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text13359"
+     xml:space="preserve"><tspan
+       x="494.64572"
+       y="765.84717"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#00aa4f;fill-opacity:1;font-family:Times New Roman"
+       id="tspan13361">N</tspan></text>
+  <g
+     id="arrow_x">
+    <path
+       d="M 325.5,466 L 205.609,642.219"
+       style="fill:none;stroke:#008dd1;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_x" />
+    <path
+       d="M 222.55123,617.46705 L 219.42031,600.7878 L 205.61581,642.22976 L 239.23047,614.33614 L 222.55123,617.46705 z "
+       style="fill:#008dd1;fill-rule:evenodd;stroke:#008dd1;stroke-width:2.4pt;marker-start:none"
+       id="arrowhead_x" />
+  </g>
+  <text
+     x="156.52582"
+     y="746.62305"
+     transform="scale(1.0868608,0.920081)"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text14442"
+     xml:space="preserve"><tspan
+       x="156.52582"
+       y="746.62305"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1;stroke-opacity:1;font-family:Times New Roman"
+       id="tspan14444">x</tspan></text>
+  <text
+     x="608.22498"
+     y="511.67343"
+     transform="scale(1.0868608,0.920081)"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text15495"
+     xml:space="preserve"><tspan
+       x="608.22498"
+       y="511.67343"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1;stroke-opacity:1;font-family:Times New Roman"
+       id="tspan15497">y</tspan></text>
+  <text
+     x="286.65585"
+     y="33.120461"
+     transform="scale(1.0868608,0.920081)"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text15501"
+     xml:space="preserve"><tspan
+       x="286.65585"
+       y="33.120461"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#008dd1;fill-opacity:1;stroke:#50b1df;stroke-width:1;stroke-opacity:1;font-family:Times New Roman"
+       id="tspan15503">z</tspan></text>
+  <g
+     id="arrow_z">
+    <path
+       d="M 325.3,465.535 L 325.3,42"
+       style="fill:none;stroke:#008dd1;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_z" />
+    <path
+       d="M 325.3,76.387 L 339.6,90 L 325.3,42.046 L 311.8,90 L 325.3,76.387 L 325.3,76.387 z"
+       style="fill:#008dd1;fill-rule:evenodd;stroke:#008dd1;stroke-width:2.74754028pt;stroke-miterlimit:10"
+       id="arrowhead_z" />
+  </g>
+  <text
+     x="3.711575"
+     y="256.73026"
+     style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text17562"
+     xml:space="preserve"><tspan
+       x="3.711575"
+       y="256.73026"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;stroke:none;stroke-opacity:1;font-family:Times New Roman"
+       id="tspan17564">Z</tspan></text>
+  <g
+     id="arrow_X">
+    <path
+       d="M 325.000,464.703 L 518.141,499.047"
+       style="fill:none;stroke:#eb2d2e;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_X" />
+    <path
+       d="M 488.59136,493.80952 L 474.68275,503.53323 L 518.13176,499.04063 L 478.86764,479.90091 L 488.59136,493.80952 z "
+       style="fill:#eb2d2e;fill-rule:evenodd;stroke:#eb2d2e;stroke-width:2.4pt;marker-start:none"
+       id="arrowhead_X" />
+  </g>
+  <text
+     x="528.99091"
+     y="519.36993"
+     style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text20565"
+     xml:space="preserve"><tspan
+       x="528.99091"
+       y="519.36993"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;font-family:Times New Roman"
+       id="tspan20567">X</tspan></text>
+  <g
+     id="arrow_Y">
+    <path
+       d="M 324.938,465.828 L 466.19,183.24"
+       style="fill:none;stroke:#eb2d2e;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_Y" />
+    <path
+       d="M 453.44,208.69 L 458.807,224.792 L 466.857,181.859 L 437.341,214.059 L 453.44,208.692 z"
+       style="fill:#eb2d2e;fill-rule:evenodd;stroke:#eb2d2e;stroke-width:2.4pt;marker-start:none"
+       id="arrowhead_Y" />
+  </g>
+  <g
+     id="arrow_Z">
+    <path
+       d="M 48.156,262.797 L 325.4,465.1"
+       style="fill:none;stroke:#eb2d2e;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_Z" />
+    <path
+       d="M 72.389732,280.4784 L 89.157189,277.8607 L 48.15828,262.79121 L 75.007436,297.24586 L 72.389732,280.4784 z "
+       style="fill:#eb2d2e;fill-rule:evenodd;stroke:#eb2d2e;stroke-width:2.4pt;marker-start:none"
+       id="arrowhead_Z" />
+  </g>
+  <text
+     x="452.2193"
+     y="163.79622"
+     style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text20573"
+     xml:space="preserve"><tspan
+       x="452.2193"
+       y="163.79622"
+       style="font-size:48px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#eb2d2e;fill-opacity:1;font-family:Times New Roman"
+       id="tspan20575">Y</tspan></text>
+  <g
+     id="arrow_alpha">
+    <path
+       d="M 280.674,531.717 C 309.087,538.627 336.587,538.607 363.342,532.692"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_alpha" />
+    <path
+       d="M 347.359,528.737 L 368.081,531.847 L 350.281,542.903 C 352.495,538.086 351.297,532.369 347.359,528.737 z"
+       style="fill:#000000;stroke:none"
+       id="arrowhead_alpha" />
+  </g>
+  <text
+     x="310"
+     y="575"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text22598"
+     xml:space="preserve"><tspan
+       x="310"
+       y="575"
+       id="tspan22600">α</tspan></text>
+  <g
+     id="arrow_beta">
+    <path
+       d="M 265.4,413.89 C 280.416,396.443 301.787,384.585 325.316,383.17"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_beta" />
+    <path
+       d="M 279.47676,407.91167 L 261.56162,418.78009 L 268.16776,398.89457 C 269.54744,404.01301 274.12626,407.64072 279.47676,407.91167 z"
+       style="fill:#000000;stroke:none"
+       id="arrowhead_beta" />
+  </g>
+  <text
+     x="271.40201"
+     y="356.73535"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text22604"
+     xml:space="preserve"><tspan
+       x="271.40201"
+       y="356.73535"
+       id="tspan22606">β</tspan></text>
+  <g
+     id="arrow_gamma">
+    <path
+       d="M 397.416,577.941 C 415.327,554.908 433.572,522.032 444.696,490.34"
+       style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-opacity:1"
+       id="arrowline_gamma" />
+    <path
+       d="M 432.585,501.546 L 446.4,485.79 L 446.083,506.742 C 443.227,502.276 437.769,500.194 432.585,501.546 z"
+       style="fill:#000000;stroke:none"
+       id="arrowhead_gamma" />
+  </g>
+  <text
+     x="431.0061"
+     y="564.82678"
+     style="font-size:48px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+     id="text22610"
+     xml:space="preserve"><tspan
+       x="431.0061"
+       y="564.82678"
+       id="tspan22612">γ</tspan></text>
+</svg>
