@@ -1,6 +1,7 @@
 #ifndef MPM_MATERIAL_BINGHAM_H_
 #define MPM_MATERIAL_BINGHAM_H_
 
+#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
@@ -65,6 +66,8 @@ class Bingham : public Material<Tdim> {
   using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
+  //! Logger
+  using Material<Tdim>::console_;
 
  private:
   //! Dirac delta function in Voigt notation

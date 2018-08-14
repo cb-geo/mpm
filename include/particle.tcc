@@ -75,8 +75,6 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   strain_rate_.setZero();
   pressure_.setZero();
   velocity_.setZero();
-  momentum_.setZero();
-  acceleration_.setZero();
 }
 
 // Assign a cell to particle
@@ -282,19 +280,10 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 
   // Assign strain rate
   strain_rate_.col(phase) = particle_strain_rate;
-
   // Update dstrain
   dstrain_.col(phase) = particle_strain_rate * dt;
   // Update strain
   strain_.col(phase) += particle_strain_rate * dt;
-}
-
-// Return strain rate
-template <unsigned Tdim, unsigned Tnphases>
-Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::strain_rate(
-    unsigned phase) const {
-  Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-  return strain_rate;
 }
 
 // Compute stress
@@ -408,11 +397,11 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     // Check if  material ptr is valid
     if (material_ != nullptr) {
       // Compute nodal internal forces
-      // volume * pstress
+      // -pstress * volume
       cell_->compute_nodal_internal_force(
           this->bmatrix_, phase,
           (this->mass_(phase) / material_->property("density")),
-          this->stress_.col(phase));
+          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -435,46 +424,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
     }
     // Assign velocity
     velocity_.col(phase) = velocity;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-// Assign momentum to the particle
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_momentum(
-    unsigned phase, const Eigen::VectorXd& momentum) {
-  bool status = false;
-  try {
-    if (momentum.size() != momentum_.size()) {
-      throw std::runtime_error(
-          "Particle momentum degrees of freedom don't match");
-    }
-    // Assign momentum
-    momentum_.col(phase) = momentum;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Assign acceleration to the particle
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_acceleration(
-    unsigned phase, const Eigen::VectorXd& acceleration) {
-  bool status = false;
-  try {
-    if (acceleration.size() != acceleration_.size()) {
-      throw std::runtime_error(
-          "Particle acceleration degrees of freedom don't match");
-    }
-    // Assign acceleration
-    acceleration_.col(phase) = acceleration;
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

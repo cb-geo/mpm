@@ -888,7 +888,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
 
   try {
     // Get B-Matrix at the centroid
-    bmatrix = shapefn_->bmatrix(xi_centroid);
+    bmatrix = element_->bmatrix(xi_centroid);
     for (unsigned i = 0; i < bmatrix.size(); ++i)
 
       // Check if B-Matrix size and number of nodes match
