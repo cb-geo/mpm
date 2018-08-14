@@ -883,27 +883,15 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> xi_centroid;
   xi_centroid.setZero();
 
-  // Initialize B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix;
+  // Get B-Matrix at the centroid
+  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+  for (unsigned i = 0; i < bmatrix.size(); ++i)
 
-  try {
-    // Get B-Matrix at the centroid
-    bmatrix = element_->bmatrix(xi_centroid);
-    for (unsigned i = 0; i < bmatrix.size(); ++i)
-
-      // Check if B-Matrix size and number of nodes match
-      if (this->nfunctions() != bmatrix.size() ||
-          this->nnodes() != bmatrix.size())
-        throw std::runtime_error(
-            "Number of nodes / shapefn doesn't match BMatrix");
-
+    // Compute strain rate
     for (unsigned i = 0; i < this->nnodes(); ++i) {
       Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
       strain_rate += bmatrix.at(i) * node_velocity;
     }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
 
   return strain_rate;
 }

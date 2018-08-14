@@ -22,12 +22,9 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {
 
-  Eigen::Matrix<double, 6, 6> de;
-  de.setZero();
-
   throw std::runtime_error("Elastic tensor is not used for this material");
 
-  return de;
+  return Eigen::Matrix<double, 6, 6>::Zero();
 }
 
 //! Compute stress without a particle handle is undefined in the Bingham model,
@@ -36,12 +33,9 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain) {
 
-  Vector6d stress_results;
-  stress_results.setZero();
-
   throw std::runtime_error("Stress computation for this material is not valid");
 
-  return stress_results;
+  return Vector6d::Zero();
 }
 
 //! Compute stress

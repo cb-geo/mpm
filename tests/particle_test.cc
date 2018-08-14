@@ -601,7 +601,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute pressure
     REQUIRE(particle->compute_pressure(phase, dt) == true);
     // Pressure
-    double pressure = -833333.3333333333;
+    const double pressure = -6666666.66666667;
     // Check pressure
     REQUIRE(particle->pressure(phase) == Approx(pressure).epsilon(Tolerance));
 
@@ -1346,7 +1346,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_pressure(phase, dt) == true);
 
     // Strain
-    double pressure = -4166666.666666666;
+    const double pressure = -33333333.33333333;
     // Check pressure
     REQUIRE(particle->pressure(phase) == Approx(pressure).epsilon(Tolerance));
 
