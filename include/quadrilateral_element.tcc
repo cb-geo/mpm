@@ -326,7 +326,7 @@ inline Eigen::MatrixXd
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::mass_matrix(
         const std::vector<VectorDim>& xi_s) const {
   // Mass matrix
-  Eigen::Matrix<double, Tnfunctions, Tnfunctions>  mass_matrix;
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions> mass_matrix;
   mass_matrix.setZero();
   for (const auto& xi : xi_s) {
     const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
