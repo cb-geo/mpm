@@ -351,7 +351,7 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
 
 //! Assign velocity constraints to cells
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_velocity_constraints(
+bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
     const std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>&
         velocity_constraints) {
   bool status = false;
@@ -370,7 +370,7 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
         double velocity = std::get<3>(velocity_constraint);
 
         // Apply constraint
-        status = map_cells_[cell_id]->assign_velocity_constraint(face_id, dir,
+        status = map_cells_[cell_id]->assign_cell_velocity_constraint(face_id, dir,
                                                                  velocity);
 
         if (!status)
@@ -383,7 +383,7 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
           "constraints");
     }
   } catch (std::exception& exception) {
-    std::cerr << exception.what() << "\n";
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;

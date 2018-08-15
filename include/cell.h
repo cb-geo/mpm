@@ -54,7 +54,7 @@ class Cell {
   bool initialise();
 
   //! Return the initialisation status of cells
-  //! \retval initialisation_status Cell has nodes, shape functions and volumes
+  //! \retval initialisation_status Cell has nodes, element type and volumes
   bool is_initialised() const;
 
   //! Return the number of particles
@@ -227,21 +227,20 @@ class Cell {
   //! \param[in] face_id Face of cell of velocity constraint
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  bool assign_velocity_constraint(unsigned face_id, unsigned dir,
+  bool assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
                                   double velocity);
 
   //! Compute normal vector
-  //! \param[in] face_id Face of cell of velocity constraint
   void compute_normal();
 
   //! Return number of normal vectors
   //! \retval number of normal vectors
-  unsigned nnormal() const { return velocity_constraints_normals_.size(); }
+  unsigned nnormal() const { return face_normals_.size(); }
 
   //! Return unit normal vector, positive pointing outside of the element
-  //! \param[in] id of constraint
+  //! \param[in] face_id of constraint
   //! \retval unit normal vector
-  Eigen::VectorXd normal(unsigned id);
+  Eigen::VectorXd normal(unsigned face_id);
 
   //! Compute inverse of rotation matrix for orthogonal axis coordinate system
   //! \param[in] alpha Euler alpha angle in radians
@@ -280,10 +279,11 @@ class Cell {
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
 
   //! Velocity constraints
+  //! first-> face_id, second->pair of direction [0/1/2] and velocity value
   std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
 
   //! Normal of face with velocity constraints
-  std::vector<Eigen::VectorXd> velocity_constraints_normals_;
+  std::vector<Eigen::VectorXd> face_normals_;
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
