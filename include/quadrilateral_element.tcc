@@ -1,4 +1,3 @@
-#include <iostream>
 // 4-node Quadrilateral Element
 //! 3 0----------0 2
 //!   |          |
