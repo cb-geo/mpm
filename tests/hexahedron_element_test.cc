@@ -1,3 +1,6 @@
+#include <iostream>
+#include <iomanip>
+
 // Hexahedron element test
 #include <memory>
 
@@ -481,6 +484,74 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Get B-Matrix
       auto bmatrix = hex->bmatrix(xi, coords);
       auto jacobian = hex->jacobian(xi, coords);
+    }
+
+    // Mass matrix of a cell
+    SECTION("Eight noded hexahedron mass-matrix") {
+      std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      const double one_by_sqrt3 = std::fabs(1 / std::sqrt(3));
+      xi << -one_by_sqrt3, -one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+
+      xi << -one_by_sqrt3, -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+
+      REQUIRE(xi_s.size() == 8);
+
+      // Get mass matrix
+      const auto mass_matrix = hex->mass_matrix(xi_s);
+
+      // Check size of mass-matrix
+      REQUIRE(mass_matrix.rows() == nfunctions);
+      REQUIRE(mass_matrix.cols() == nfunctions);
+
+      // Sum should be equal to 1. * xi_s.size()
+      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+
+      std::cout << "\nMass Matrix:\n" << std::setprecision(16) << mass_matrix << "\n";
+
+      Eigen::Matrix<double, 8, 8> mass;
+      // clang-format off
+      mass << 0.29629629629629640, 0.14814814814814810, 0.07407407407407404,
+              0.14814814814814810, 0.14814814814814810, 0.07407407407407404,
+              0.03703703703703701, 0.07407407407407404, 0.14814814814814810,
+              0.29629629629629640, 0.14814814814814810, 0.07407407407407404,
+              0.07407407407407404, 0.14814814814814810, 0.07407407407407403,
+              0.03703703703703701, 0.07407407407407404, 0.14814814814814810,
+              0.29629629629629640, 0.14814814814814810, 0.03703703703703701,
+              0.07407407407407404, 0.14814814814814810, 0.07407407407407404,
+              0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
+              0.29629629629629640, 0.07407407407407404, 0.03703703703703701,
+              0.07407407407407404, 0.14814814814814810, 0.14814814814814810,
+              0.07407407407407404, 0.03703703703703701, 0.07407407407407404,
+              0.29629629629629630, 0.14814814814814810, 0.07407407407407404,
+              0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
+              0.07407407407407404, 0.03703703703703701, 0.14814814814814810,
+              0.29629629629629630, 0.14814814814814810, 0.07407407407407404, 
+              0.03703703703703701, 0.07407407407407403, 0.14814814814814810, 
+              0.07407407407407404, 0.07407407407407404, 0.14814814814814810, 
+              0.29629629629629630, 0.14814814814814810, 0.07407407407407404, 
+              0.03703703703703701, 0.07407407407407404, 0.14814814814814810, 
+              0.14814814814814810, 0.07407407407407404, 0.14814814814814810, 
+              0.2962962962962963;
+      // clang-format on
+      for (unsigned i = 0; i < nfunctions; ++i)
+        for (unsigned j = 0; j < nfunctions; ++j)
+          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
     }
 
     SECTION("Eight noded hexahedron coordinates of unit cell") {
