@@ -825,6 +825,61 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       auto jacobian = quad->jacobian(xi, coords);
     }
 
+    // Mass matrix of a cell
+    SECTION("Eight noded quadrilateral mass-matrix") {
+      std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      const double one_by_sqrt3 = std::fabs(1 / std::sqrt(3));
+      xi <<-one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      
+      REQUIRE(xi_s.size() == 4);
+
+      // Get mass matrix
+      const auto mass_matrix = quad->mass_matrix(xi_s);
+
+      // Check size of mass-matrix
+      REQUIRE(mass_matrix.rows() == nfunctions);
+      REQUIRE(mass_matrix.cols() == nfunctions);
+
+      // Sum should be equal to 1. * xi_s.size()
+      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+
+      Eigen::Matrix<double, 8, 8> mass;
+      mass << 0.07407407407407406, 0.00000000000000, 0.037037037037037,
+          -0.00000000000000000, -0.07407407407407397, -0.1481481481481481,
+          -0.1481481481481481, -0.07407407407407397, 0.0, 0.07407407407407407,
+          0.0, 0.037037037037037, -0.07407407407407397, -0.07407407407407397,
+          -0.1481481481481481, -0.1481481481481481, 0.037037037037037,
+          0.000000000000000, 0.07407407407407407, 0.000000000000000,
+          -0.1481481481481481, -0.07407407407407396, -0.07407407407407397,
+          -0.1481481481481481, 0.0000000000000, 0.037037037037037,
+          0.0000000000000, 0.07407407407407406, -0.1481481481481481,
+          -0.1481481481481481, -0.07407407407407399, -0.07407407407407396,
+          -0.07407407407407397, -0.07407407407407397, -0.1481481481481481,
+          -0.1481481481481481, 0.5925925925925922, 0.4444444444444442,
+          0.2962962962962961, 0.4444444444444442, -0.1481481481481481,
+          -0.07407407407407397, -0.07407407407407396, -0.1481481481481481,
+          0.4444444444444442, 0.5925925925925923, 0.4444444444444442,
+          0.2962962962962961, -0.1481481481481481, -0.1481481481481481,
+          -0.07407407407407397, -0.07407407407407399, 0.2962962962962961,
+          0.4444444444444442, 0.5925925925925923, 0.4444444444444442,
+          -0.07407407407407397, -0.1481481481481481, -0.1481481481481481,
+          -0.07407407407407396, 0.4444444444444442, 0.2962962962962961,
+          0.4444444444444442, 0.5925925925925923;
+
+      for (unsigned i = 0; i < nfunctions; ++i)
+        for (unsigned j = 0; j < nfunctions; ++j)
+          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+    }
+
     SECTION("Eight noded quadrilateral coordinates of unit cell") {
       const unsigned nfunctions = 8;
 
@@ -1091,6 +1146,67 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
+    }
+
+    // Mass matrix of a cell
+    SECTION("Nine noded quadrilateral mass-matrix") {
+      std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      const double one_by_sqrt3 = std::fabs(1 / std::sqrt(3));
+      xi << -one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+
+      REQUIRE(xi_s.size() == 4);
+
+      // Get mass matrix
+      const auto mass_matrix = quad->mass_matrix(xi_s);
+
+      // Check size of mass-matrix
+      REQUIRE(mass_matrix.rows() == nfunctions);
+      REQUIRE(mass_matrix.cols() == nfunctions);
+
+      // Sum should be equal to 1. * xi_s.size()
+      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+
+      Eigen::Matrix<double, 9, 9> mass;
+      mass << 0.04938271604938273, -0.02469135802469136, 0.01234567901234568,
+          -0.02469135802469136, 0.04938271604938271, -0.02469135802469136,
+          -0.02469135802469136, 0.04938271604938272, 0.04938271604938271,
+          -0.02469135802469136, 0.04938271604938273, -0.02469135802469136,
+          0.01234567901234568, 0.04938271604938271, 0.04938271604938272,
+          -0.02469135802469136, -0.02469135802469136, 0.04938271604938271,
+          0.01234567901234568, -0.02469135802469136, 0.04938271604938273,
+          -0.02469135802469136, -0.02469135802469136, 0.04938271604938271,
+          0.04938271604938272, -0.02469135802469135, 0.0493827160493827,
+          -0.02469135802469136, 0.01234567901234568, -0.02469135802469136,
+          0.04938271604938273, -0.02469135802469135, -0.02469135802469135,
+          0.04938271604938271, 0.04938271604938271, 0.0493827160493827,
+          0.04938271604938271, 0.04938271604938271, -0.02469135802469136,
+          -0.02469135802469135, 0.1975308641975308, 0.04938271604938271,
+          -0.09876543209876538, 0.04938271604938271, 0.1975308641975307,
+          -0.02469135802469136, 0.04938271604938272, 0.04938271604938271,
+          -0.02469135802469135, 0.04938271604938271, 0.1975308641975308,
+          0.0493827160493827, -0.09876543209876538, 0.1975308641975307,
+          -0.02469135802469136, -0.02469135802469136, 0.04938271604938272,
+          0.04938271604938271, -0.09876543209876538, 0.0493827160493827,
+          0.1975308641975308, 0.0493827160493827, 0.1975308641975307,
+          0.04938271604938272, -0.02469135802469136, -0.02469135802469135,
+          0.04938271604938271, 0.04938271604938271, -0.09876543209876538,
+          0.0493827160493827, 0.1975308641975308, 0.1975308641975307,
+          0.04938271604938271, 0.04938271604938271, 0.0493827160493827,
+          0.0493827160493827, 0.1975308641975307, 0.1975308641975307,
+          0.1975308641975307, 0.1975308641975307, 0.7901234567901227;
+
+      for (unsigned i = 0; i < nfunctions; ++i)
+        for (unsigned j = 0; j < nfunctions; ++j)
+          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
     }
 
     // Check Jacobian
