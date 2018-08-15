@@ -332,6 +332,47 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       auto jacobian = quad->jacobian(xi, coords);
     }
 
+    // Mass matrix of a cell
+    SECTION("Four noded quadrilateral mass-matrix") {
+      std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      const double one_by_sqrt3 = std::fabs(1 / std::sqrt(3));
+      xi <<-one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      
+      REQUIRE(xi_s.size() == 4);
+      
+      // Get mass matrix
+      const auto mass_matrix = quad->mass_matrix(xi_s);
+
+      // Check size of mass-matrix
+      REQUIRE(mass_matrix.rows() == nfunctions);
+      REQUIRE(mass_matrix.cols() == nfunctions);
+
+      // Sum should be equal to 1. * xi_s.size()
+      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+
+      Eigen::Matrix<double, 4, 4> mass;
+      // clang-format off
+      mass <<  0.4444444444444445, 0.2222222222222222, 0.1111111111111111, 0.2222222222222222,
+               0.2222222222222222, 0.4444444444444445, 0.2222222222222222, 0.1111111111111111,
+               0.1111111111111111, 0.2222222222222222, 0.4444444444444445, 0.2222222222222222,
+               0.2222222222222222, 0.1111111111111111, 0.2222222222222222, 0.4444444444444445;
+      // clang-format on
+      
+      for (unsigned i = 0; i < nfunctions; ++i)
+        for (unsigned j = 0; j < nfunctions; ++j)
+          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+        
+    }
+
     SECTION("Four noded quadrilateral coordinates of unit cell") {
       const unsigned nfunctions = 4;
 
