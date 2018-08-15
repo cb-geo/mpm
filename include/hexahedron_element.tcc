@@ -1,6 +1,3 @@
-#include <iostream>
-#include <iomanip>
-
 // 8-node (Trilinear) Hexahedron Element
 //!        3               2
 //!          0_ _ _ _ _ _0
@@ -346,7 +343,6 @@ inline Eigen::MatrixXd
   mass_matrix.setZero();
   for (const auto& xi : xi_s) {
     const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
-    std::cout << "Shapefn: " << std::setprecision(16) << shape_fn << "\n";
     mass_matrix += (shape_fn * shape_fn.transpose());
   }
   return mass_matrix;
