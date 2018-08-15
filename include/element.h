@@ -26,7 +26,7 @@ class Element {
   //! Destructor
   virtual ~Element() {}
 
-  //! Return number of functions
+  //! Return number of shape functions
   virtual unsigned nfunctions() const = 0;
 
   //! Evaluate shape functions at given local coordinates
@@ -55,6 +55,12 @@ class Element {
   //! \retval bmatrix B matrix
   virtual std::vector<Eigen::MatrixXd> bmatrix(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
+
+  //! Evaluate the mass matrix
+  //! \param[in] xi_s Vector of local coordinates
+  //! \retval mass_matrix mass matrix
+  virtual Eigen::MatrixXd mass_matrix(
+      const std::vector<VectorDim>& xi_s) const = 0;
 
   //! Return the degree of element
   virtual mpm::ElementDegree degree() const = 0;
