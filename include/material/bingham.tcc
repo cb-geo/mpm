@@ -46,6 +46,19 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const ParticleBase<Tdim>* ptr) {
 
   const unsigned phase = 0;
+
+  // Bulk modulus
+  const double bulk_modulus =
+      youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
+  // Get volumetric strain from particle
+  const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
+
+  // Compute thermodynamic pressure
+  // thermodynamic_pressure = -bulk_modulus * volstrain
+  // Expansion causes a decrease in thermodynamic pressure
+  const double thermodynamic_pressure = -bulk_modulus * volumetric_strain;
+
   auto strain_rate = ptr->strain_rate(phase);
 
   // Convert strain rate to rate of deformation tensor
@@ -73,8 +86,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
-  Eigen::Matrix<double, 6, 1> tau;
-  tau = apparent_viscosity * strain_rate;
+  Eigen::Matrix<double, 6, 1> tau = apparent_viscosity * strain_rate;
 
   // von Mises criterion
   // second invariant J2 of deviatoric stress in matrix form
@@ -83,25 +95,11 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const double invariant2 = 0.5 * (tau.dot(tau) + tau.tail(3).dot(tau.tail(3)));
   if (invariant2 < (tau0_ * tau0_)) tau.setZero();
 
-  // Get dirac delta function in Voigt notation
-  const auto dirac_delta = this->dirac_delta();
-
-  // Bulk modulus
-  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-
-  // Get volumetric strain from particle
-  const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
-
-  // Compute thermodynamics pressure
-  // thermodynamic_pressure = - K * volstrain
-  // compression is negative
-  const double thermodynamic_pressure = -K * volumetric_strain;
-
   // Update volumetric and deviatoric stress
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
-  Eigen::Matrix<double, 6, 1> updated_stress;
-  updated_stress = -thermodynamic_pressure * dirac_delta + tau;
+  const Eigen::Matrix<double, 6, 1> updated_stress =
+      -thermodynamic_pressure * this->dirac_delta() + tau;
 
   return updated_stress;
 }
