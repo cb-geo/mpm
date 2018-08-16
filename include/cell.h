@@ -228,7 +228,7 @@ class Cell {
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
   bool assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
-                                  double velocity);
+                                       double velocity);
 
   //! Compute normal vector
   void compute_normal();

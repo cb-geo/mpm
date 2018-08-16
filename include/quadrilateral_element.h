@@ -54,6 +54,18 @@ namespace mpm {
 //!  0      4       1
 //!
 //! </pre>
+//! Face numbering for 4-node, 8-node and 9-node Quadrilateral Element \n
+//! <pre>
+//!
+//!          F2
+//!   3 0----------0 2
+//!     |          |
+//!  F3 |          | F1
+//!     |          |
+//!     |          |
+//!   0 0----------0 1
+//!          F0
+//! </pre>
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>

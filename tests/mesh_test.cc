@@ -599,12 +599,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
           velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
 
-          REQUIRE(mesh->assign_cell_velocity_constraints(velocity_constraints) ==
-                  true);
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == true);
           // When constraints fail
           velocity_constraints.emplace_back(std::make_tuple(1, 2, 2, 0.0));
-          REQUIRE(mesh->assign_cell_velocity_constraints(velocity_constraints) ==
-                  false);
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == false);
         }
       }
     }
@@ -1220,13 +1220,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
           velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
 
-          REQUIRE(mesh->assign_cell_velocity_constraints(velocity_constraints) ==
-                  true);
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == true);
 
           // When constraints fail
           velocity_constraints.emplace_back(std::make_tuple(1, 2, 3, -10.5));
-          REQUIRE(mesh->assign_cell_velocity_constraints(velocity_constraints) ==
-                  false);
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == false);
         }
       }
     }

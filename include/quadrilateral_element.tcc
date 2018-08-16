@@ -425,32 +425,29 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
   
-  Eigen::Matrix<int, 2, 1> indices;
+  Eigen::Matrix<int, 4, 2> indices;
   
-  switch(face_id) {
-    case (0): {
-      indices << 0, 1;
-      break;
+  // clang-format off
+  indices << 0, 1,
+             1, 2,
+             2, 3,
+             3, 0;
+  // clang-format on
+
+  // Make return_indices
+  Eigen::Matrix<int, 2, 1> return_indices;
+  try {
+    // Check if face_id is within range
+    if (face_id < indices.rows()) {
+      return_indices = (indices.row(face_id)).transpose();
+    } else {
+      return_indices = (indices.row(0)).transpose();
+      throw std::runtime_error(
+          "Face ID is undefined, using default value of 0.");
     }
-    case (1): {
-      indices << 1, 2;
-      break;
-    }
-    case (2): {
-      indices << 2, 3;
-      break;
-    }
-    case (3): {
-      indices << 3, 0;
-      break;
-    }    
-    default: {
-      indices << 0, 1;
-      std::cout << "Face ID is undefined, using default value of 0.";
-      break;
-    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 
-  return indices;
+  return return_indices;
 }
-

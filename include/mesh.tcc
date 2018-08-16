@@ -370,8 +370,8 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
         double velocity = std::get<3>(velocity_constraint);
 
         // Apply constraint
-        status = map_cells_[cell_id]->assign_cell_velocity_constraint(face_id, dir,
-                                                                 velocity);
+        status = map_cells_[cell_id]->assign_cell_velocity_constraint(
+            face_id, dir, velocity);
 
         if (!status)
           throw std::runtime_error(

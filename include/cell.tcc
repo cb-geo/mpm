@@ -955,8 +955,9 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 //! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim-1
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
-                                                 double velocity) {
+bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
+                                                      unsigned dir,
+                                                      double velocity) {
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases - 1
@@ -993,9 +994,10 @@ inline void mpm::Cell<2>::compute_normal() {
         (this->nodes_[indices(1)])->coordinates();
 
     // Compute normal and make unit vector
-    // The normal vector n to vector a is defined such that the dot product between a and n is always 0
-    // In 2D, n(0) = -a(1), n(1) = a(0) 
-    // Note that the reverse does not work to produce normal that is positive pointing out of the element
+    // The normal vector n to vector a is defined such that the dot product
+    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
+    // the reverse does not work to produce normal that is positive pointing out
+    // of the element
     normal_vector(0) = -a(1);
     normal_vector(1) = a(0);
     normal_vector /= normal_vector.norm();
