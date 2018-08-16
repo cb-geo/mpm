@@ -71,7 +71,9 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
   strain_.setZero();
+  volumetric_strain_centroid_.setZero();
   dstrain_.setZero();
+  strain_rate_.setZero();
   velocity_.setZero();
 }
 
@@ -278,11 +280,24 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
 
   // Assign strain rate
   strain_rate_.col(phase) = particle_strain_rate;
-
   // Update dstrain
   dstrain_.col(phase) = particle_strain_rate * dt;
   // Update strain
   strain_.col(phase) += particle_strain_rate * dt;
+
+  // Compute at centroid
+  // Strain rate for reduced integration
+  Eigen::VectorXd strain_rate_centroid =
+      cell_->compute_strain_rate_centroid(phase);
+
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
+    if (std::fabs(strain_rate_centroid(i)) < 1.E-15)
+      strain_rate_centroid(i) = 0.;
+
+  // Assign volumetric strain at centroid
+  volumetric_strain_centroid_(phase) +=
+      dt * strain_rate_centroid.head(Tdim).sum();
 }
 
 // Compute stress
@@ -290,7 +305,7 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
   try {
-    // Check if  material ptr is valid
+    // Check if material ptr is valid
     if (material_ != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Check if material needs property handle

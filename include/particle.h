@@ -122,6 +122,19 @@ class Particle : public ParticleBase<Tdim> {
     return strain_.col(phase);
   }
 
+  //! Return strain rate of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, 6, 1> strain_rate(unsigned phase) const override {
+    return strain_rate_.col(phase);
+  };
+
+  //! Return volumetric strain of centroid
+  //! \param[in] phase Index corresponding to the phase
+  //! \retval volumetric strain at centroid
+  double volumetric_strain_centroid(unsigned phase) const override {
+    return volumetric_strain_centroid_(phase);
+  }
+
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
@@ -181,6 +194,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
+  //! Volumetric strain at centroid
+  Eigen::Matrix<double, Tnphases, 1> volumetric_strain_centroid_;
   //! Strain rate
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
