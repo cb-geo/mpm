@@ -472,7 +472,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_stress(phase) == false);
 
     // Test compute pressure before material assignment
-    REQUIRE(particle->compute_pressure(phase, dt) == false);
+    REQUIRE(particle->compute_pressure(phase) == false);
 
     // Test compute internal force before material assignment
     REQUIRE(particle->map_internal_force(phase) == false);
@@ -598,8 +598,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
 
+    // Compute strain at centroid
+    particle->compute_strain_centroid(phase, dt);
+    // Test should be made
+
     // Compute pressure
-    REQUIRE(particle->compute_pressure(phase, dt) == true);
+    REQUIRE(particle->compute_pressure(phase) == true);
     // Pressure
     const double pressure = -6666666.66666667;
     // Check pressure
@@ -1196,7 +1200,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_stress(phase) == false);
 
     // Test compute pressure before material assignment
-    REQUIRE(particle->compute_pressure(phase, dt) == false);
+    REQUIRE(particle->compute_pressure(phase) == false);
 
     // Test compute internal force before material assignment
     REQUIRE(particle->map_internal_force(phase) == false);
@@ -1342,8 +1346,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
 
+    // Compute strain at centroid
+    particle->compute_strain_centroid(phase, dt);
+    // Test should be made
+
     // Compute pressure
-    REQUIRE(particle->compute_pressure(phase, dt) == true);
+    REQUIRE(particle->compute_pressure(phase) == true);
 
     // Strain
     const double pressure = -33333333.33333333;

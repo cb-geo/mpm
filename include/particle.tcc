@@ -71,8 +71,10 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
   stress_.setZero();
   strain_.setZero();
+  strain_centroid_.setZero();
   dstrain_.setZero();
   strain_rate_.setZero();
+  strain_rate_centroid_.setZero();
   pressure_.setZero();
   velocity_.setZero();
 }
@@ -286,12 +288,65 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   strain_.col(phase) += particle_strain_rate * dt;
 }
 
+// Compute strain of the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::compute_strain_centroid(unsigned phase,
+                                                            double dt) {
+  // Strain rate for reduced integration at centroid
+  Eigen::VectorXd strain_rate_centroid =
+      cell_->compute_strain_rate_centroid(phase);
+
+  // centroid_strain_rate
+  Eigen::Matrix<double, 6, 1> centroid_strain_rate;
+  centroid_strain_rate.setZero();
+
+  // Set dimension of strain rate
+  switch (Tdim) {
+    case (1): {
+      centroid_strain_rate(0) = strain_rate_centroid(0);
+      break;
+    }
+    case (2): {
+      centroid_strain_rate(0) = strain_rate_centroid(0);
+      centroid_strain_rate(1) = strain_rate_centroid(1);
+      centroid_strain_rate(3) = strain_rate_centroid(2);
+      break;
+    }
+    default: {
+      centroid_strain_rate = strain_rate_centroid;
+      break;
+    }
+  }
+
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < centroid_strain_rate.size(); ++i)
+    if (std::fabs(centroid_strain_rate(i)) < 1.E-15)
+      centroid_strain_rate(i) = 0.;
+
+  // Assign strain rate at centroid
+  strain_rate_centroid_.col(phase) = centroid_strain_rate;
+  // Update strain at centroid
+  strain_centroid_.col(phase) += centroid_strain_rate * dt;
+}
+
+//! Volumetric strain of centroid
+template <unsigned Tdim, unsigned Tnphases>
+double mpm::Particle<Tdim, Tnphases>::volumetric_strain_centroid(
+    unsigned phase) const {
+  // epsilon_v = epsilon_11 + epsilon_22 + epsilon_33
+  // epsilon_33 = 0 in 2D case
+  const double volumetric_strain_centroid =
+      strain_centroid_.col(phase).head(3).sum();
+
+  return volumetric_strain_centroid;
+}
+
 // Compute stress
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
   try {
-    // Check if  material ptr is valid
+    // Check if material ptr is valid
     if (material_ != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Check if material needs property handle
@@ -315,57 +370,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
 
 // Compute pressure
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
-                                                     double dt) {
+bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase) {
   bool status = true;
-  double pressure, dpressure;
-  double bulk_modulus, youngs_modulus, poisson_ratio, dvolumetric_strain;
-
-  // Strain rate for reduced integration
-  Eigen::VectorXd strain_rate_centroid =
-      cell_->compute_strain_rate_centroid(phase);
-
-  // Set dimension of strain rate
-  Eigen::Matrix<double, 6, 1> strain_rate;
-  strain_rate.setZero();
-  switch (Tdim) {
-    case (1): {
-      strain_rate(0) = strain_rate_centroid(0);
-      break;
-    }
-    case (2): {
-      strain_rate(0) = strain_rate_centroid(0);
-      strain_rate(1) = strain_rate_centroid(1);
-      strain_rate(3) = strain_rate_centroid(2);
-      break;
-    }
-    default: {
-      strain_rate = strain_rate_centroid;
-      break;
-    }
-  }
-
-  // Get dstrain
-  Eigen::Matrix<double, 6, 1> dstrain;
-  dstrain = strain_rate * dt;
-
   try {
-    // Check if  material ptr is valid
+    // Check if material ptr is valid
     if (material_ != nullptr) {
-
-      // Get material properties
-      youngs_modulus = material_->property("youngs_modulus");
-      poisson_ratio = material_->property("poisson_ratio");
-      bulk_modulus = youngs_modulus / (3.0 * (1. - 2. * poisson_ratio));
-
-      // Get volumetric dstrain, using reduced integration
-      dvolumetric_strain = (dstrain.head(Tdim)).sum();
-
-      // Get dpressure = -K * dvol_strain
-      // pressure = pressure + dpressure
-      // Assign pressure
-      this->pressure_(phase) -= bulk_modulus * dvolumetric_strain;
-
+      this->pressure_(phase) =
+          material_->compute_pressure(this->volumetric_strain_centroid(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -373,7 +384,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure(unsigned phase,
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
-
   return status;
 }
 

@@ -139,7 +139,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -238,7 +239,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -337,7 +339,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -507,7 +510,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -622,7 +626,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -737,7 +742,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_material(material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
-    particle->compute_pressure(phase, dt);
+    particle->compute_strain_centroid(phase, dt);
+    particle->compute_pressure(phase);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
