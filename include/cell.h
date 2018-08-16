@@ -201,6 +201,10 @@ class Cell {
   Eigen::VectorXd compute_strain_rate(
       const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
+  //! Compute strain rate for reduced integration at the centroid of cell
+  //! \param[in] phase Phase associate to the particle
+  Eigen::VectorXd compute_strain_rate_centroid(unsigned phase);
+
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle

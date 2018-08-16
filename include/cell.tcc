@@ -856,6 +856,31 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
   return strain_rate;
 }
 
+//! Compute strain rate for reduced integration at the centroid of cell
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
+  // Get centroid local coordinates, which are zeros
+  Eigen::Matrix<double, Tdim, 1> xi_centroid;
+  xi_centroid.setZero();
+
+  // Get B-Matrix at the centroid
+  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+
+  // Define strain rate
+  Eigen::VectorXd strain_rate_centroid;
+  strain_rate_centroid.resize(bmatrix.at(0).rows());
+  strain_rate_centroid.setZero();
+
+  // Compute strain rate
+  for (unsigned i = 0; i < bmatrix.size(); ++i) {
+    for (unsigned i = 0; i < this->nnodes(); ++i) {
+      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
+      strain_rate_centroid += bmatrix.at(i) * node_velocity;
+    }
+  }
+  return strain_rate_centroid;
+}
+
 //! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
