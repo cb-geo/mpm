@@ -295,11 +295,9 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
     if (std::fabs(strain_rate_centroid(i)) < 1.E-15)
       strain_rate_centroid(i) = 0.;
 
-  // Calculate dvolumetric strain
-  const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
-
   // Assign volumetric strain at centroid
-  volumetric_strain_centroid_(phase) += dvolumetric_strain;
+  volumetric_strain_centroid_(phase) +=
+      dt * strain_rate_centroid.head(Tdim).sum();
 }
 
 // Compute stress

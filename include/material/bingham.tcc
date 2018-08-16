@@ -48,7 +48,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const unsigned phase = 0;
   auto strain_rate = ptr->strain_rate(phase);
 
-  // Get defintion of D for Bingham, store it as strain_rate
+  // Convert strain rate to rate of deformation tensor
   strain_rate.tail(3) *= 0.5;
 
   // Set threshold for minimum critical shear rate
@@ -93,15 +93,15 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
 
   // Compute thermodynamics pressure
-  // thermodynamics_pressure = - K * volstrain
+  // thermodynamic_pressure = - K * volstrain
   // compression is negative
-  const double thermodynamics_pressure = -K * volumetric_strain;
+  const double thermodynamic_pressure = -K * volumetric_strain;
 
   // Update volumetric and deviatoric stress
-  // stress = -thermodynamics_pressure I + tau, where I is identity matrix or
+  // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   Eigen::Matrix<double, 6, 1> updated_stress;
-  updated_stress = -thermodynamics_pressure * dirac_delta + tau;
+  updated_stress = -thermodynamic_pressure * dirac_delta + tau;
 
   return updated_stress;
 }
