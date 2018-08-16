@@ -33,7 +33,8 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain) {
 
-  throw std::runtime_error("Stress computation for this material is not valid");
+  throw std::runtime_error(
+      "Stress computation for this material requires a particle handle");
 
   return Vector6d::Zero();
 }
@@ -47,23 +48,25 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const unsigned phase = 0;
   auto strain_rate = ptr->strain_rate(phase);
 
-  // Get defintion of D for Bingham
+  // Get defintion of D for Bingham, store it as strain_rate
   strain_rate.tail(3) *= 0.5;
 
-  // Determine accuracy of minimum critical shear rate
+  // Set threshold for minimum critical shear rate
   const double shear_rate_threshold = 1.0E-15;
   if (critical_shear_rate_ < shear_rate_threshold)
     critical_shear_rate_ = shear_rate_threshold;
 
-  // Checking yielding from strain rate vs critical yielding shear rate
-  // rate of shear = sqrt(2 * D * D) in matrix
-  // Since D is in Voigt notation, need to double shear part
-  // yielding is defined: rate of shear > critical_shear_rate_^2
-  // apparent_viscosity maps shear rate to shear stress
+  // Rate of shear = sqrt(2 * D_ij * D_ij)
+  // Since D (D_ij) is in Voigt notation (D_i), and the definition above is in
+  // matrix, the last 3 components have to be doubled D_ij * D_ij = D_0^2 +
+  // D_1^2 + D_2^2 + 2*D_3^2 + 2*D_4^2 + 2*D_5^2 Yielding is defined: rate of
+  // shear > critical_shear_rate_^2 Checking yielding from strain rate vs
+  // critical yielding shear rate
   const double shear_rate_squared =
       2 * (strain_rate.dot(strain_rate) +
            strain_rate.tail(3).dot(strain_rate.tail(3)));
 
+  // Apparent_viscosity maps shear rate to shear stress
   double apparent_viscosity = 0;
   if (shear_rate_squared > critical_shear_rate_ * critical_shear_rate_)
     apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate_squared))) + mu_);
@@ -73,7 +76,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   Eigen::Matrix<double, 6, 1> tau;
   tau = apparent_viscosity * strain_rate;
 
-  // Use von Mises criterion
+  // von Mises criterion
   // second invariant J2 of deviatoric stress in matrix form
   // Since tau is in Voigt notation, need to double shear part
   // yield condition J2 > tau0^2
@@ -87,10 +90,26 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const auto dirac_delta = this->dirac_delta();
 
   // Update volumetric and deviatoric stress
+  // stress = -p I + tau, where I is identity matrix or direc_delta in Voigt
+  // notation
   Eigen::Matrix<double, 6, 1> updated_stress;
   updated_stress = -pressure * dirac_delta + tau;
 
   return updated_stress;
+}
+
+//! Compute pressure
+template <unsigned Tdim>
+double mpm::Bingham<Tdim>::compute_pressure(double volumetric_strain) {
+
+  // Bulk modulus
+  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
+  // pressure = - K * volstrain
+  // compression is negative
+  double pressure = -K * volumetric_strain;
+
+  return pressure;
 }
 
 //! Dirac delta 2D

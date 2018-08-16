@@ -84,6 +84,11 @@ class Material {
                                   const Vector6d& dstrain,
                                   const ParticleBase<Tdim>* ptr) = 0;
 
+  //! Compute pressure
+  //! \param[in] volumetric_strain Volumetric strain
+  //! \retval updated pressure Updated value of pressure
+  virtual double compute_pressure(double volumetric_strain) = 0;
+
   //! Check if this material needs a particle handle
   //! Set true, if material needs other parameters from the particle
   //! For eg, dstrain_rate. These function calls can only to const functions
