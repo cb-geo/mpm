@@ -120,21 +120,11 @@ class ParticleBase {
   //! Compute strain
   virtual void compute_strain(unsigned phase, double dt) = 0;
 
-  //! Compute strain at centroid
-  virtual void compute_strain_centroid(unsigned phase, double dt) = 0;
-
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain(unsigned phase) const = 0;
 
-  //! Strain at centroid
-  virtual Eigen::Matrix<double, 6, 1> strain_centroid(unsigned phase) const = 0;
-
   //! Strain rate
   virtual Eigen::Matrix<double, 6, 1> strain_rate(unsigned phase) const = 0;
-
-  //! Strain rate at centroid
-  virtual Eigen::Matrix<double, 6, 1> strain_rate_centroid(
-      unsigned phase) const = 0;
 
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid(unsigned phase) const = 0;
@@ -144,12 +134,6 @@ class ParticleBase {
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
-
-  //! Compute pressure
-  virtual bool compute_pressure(unsigned phase) = 0;
-
-  //! Return pressure
-  virtual double pressure(unsigned phase) const = 0;
 
   //! Map body force
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;

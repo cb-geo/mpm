@@ -116,21 +116,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   void compute_strain(unsigned phase, double dt) override;
 
-  //! Compute strain at centroid
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Analysis time step
-  void compute_strain_centroid(unsigned phase, double dt) override;
-
   //! Return strain of the particle
   //! \param[in] phase Index corresponding to the phase
   Eigen::Matrix<double, 6, 1> strain(unsigned phase) const override {
     return strain_.col(phase);
-  }
-
-  //! Return strain of centroid of cell in which particle is in
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> strain_centroid(unsigned phase) const override {
-    return strain_centroid_.col(phase);
   }
 
   //! Return strain rate of the particle
@@ -139,16 +128,12 @@ class Particle : public ParticleBase<Tdim> {
     return strain_rate_.col(phase);
   };
 
-  //! Return strain rate of centroid of cell in which particle is in
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> strain_rate_centroid(
-      unsigned phase) const override {
-    return strain_rate_centroid_.col(phase);
-  };
-
   //! Return volumetric strain of centroid
   //! \param[in] phase Index corresponding to the phase
-  double volumetric_strain_centroid(unsigned phase) const override;
+  //! \retval volumetric strain at centroid
+  double volumetric_strain_centroid(unsigned phase) const override {
+    return volumetric_strain_centroid_(phase);
+  }
 
   //! Compute stress
   bool compute_stress(unsigned phase) override;
@@ -158,14 +143,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> stress(unsigned phase) const override {
     return stress_.col(phase);
   }
-
-  //! Compute pressure
-  //! \param[in] phase Index corresponding to the phase
-  bool compute_pressure(unsigned phase) override;
-
-  //! Return pressure
-  //! \param[in] phase Index corresponding to the phase
-  double pressure(unsigned phase) const override { return pressure_(phase); }
 
   //! Map body force
   //! \param[in] phase Index corresponding to the phase
@@ -217,16 +194,12 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
-  //! Strains at centroid
-  Eigen::Matrix<double, 6, Tnphases> strain_centroid_;
+  //! Volumetric strain at centroid
+  Eigen::Matrix<double, Tnphases, 1> volumetric_strain_centroid_;
   //! Strain rate
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
-  //! Strain rate at centroid
-  Eigen::Matrix<double, 6, Tnphases> strain_rate_centroid_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
-  //! pressure
-  Eigen::Matrix<double, Tnphases, 1> pressure_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Shape functions

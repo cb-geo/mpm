@@ -471,9 +471,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
 
-    // Test compute pressure before material assignment
-    REQUIRE(particle->compute_pressure(phase) == false);
-
     // Test compute internal force before material assignment
     REQUIRE(particle->map_internal_force(phase) == false);
 
@@ -581,6 +578,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
 
+    // Check volumetric strain at centroid
+    const double volumetric_strain = 0.8;
+    REQUIRE(particle->volumetric_strain_centroid(phase) ==
+            Approx(volumetric_strain).epsilon(Tolerance));
+
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
@@ -597,17 +599,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < stress.rows(); ++i)
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
-
-    // Compute strain at centroid
-    particle->compute_strain_centroid(phase, dt);
-    // Test should be made
-
-    // Compute pressure
-    REQUIRE(particle->compute_pressure(phase) == true);
-    // Pressure
-    const double pressure = -6666666.66666667;
-    // Check pressure
-    REQUIRE(particle->pressure(phase) == Approx(pressure).epsilon(Tolerance));
 
     // Check body force
     Eigen::Matrix<double, 2, 1> gravity;
@@ -1199,9 +1190,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress(phase) == false);
 
-    // Test compute pressure before material assignment
-    REQUIRE(particle->compute_pressure(phase) == false);
-
     // Test compute internal force before material assignment
     REQUIRE(particle->map_internal_force(phase) == false);
 
@@ -1329,6 +1317,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->strain(phase)(i) ==
               Approx(strain(i)).epsilon(Tolerance));
 
+    // Check volumetric strain at centroid
+    const double volumetric_strain = 4.;
+    REQUIRE(particle->volumetric_strain_centroid(phase) ==
+            Approx(volumetric_strain).epsilon(Tolerance));
+
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
 
@@ -1345,18 +1338,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < stress.rows(); ++i)
       REQUIRE(particle->stress(phase)(i) ==
               Approx(stress(i)).epsilon(Tolerance));
-
-    // Compute strain at centroid
-    particle->compute_strain_centroid(phase, dt);
-    // Test should be made
-
-    // Compute pressure
-    REQUIRE(particle->compute_pressure(phase) == true);
-
-    // Strain
-    const double pressure = -33333333.33333333;
-    // Check pressure
-    REQUIRE(particle->pressure(phase) == Approx(pressure).epsilon(Tolerance));
 
     // Check body force
     Eigen::Matrix<double, 3, 1> gravity;

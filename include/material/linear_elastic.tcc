@@ -54,17 +54,3 @@ Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
 
   return this->compute_stress(stress, dstrain);
 }
-
-//! Compute pressure
-template <unsigned Tdim>
-double mpm::LinearElastic<Tdim>::compute_pressure(double volumetric_strain) {
-
-  // Bulk modulus
-  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-
-  // pressure = - K * volstrain
-  // compression is negative
-  double pressure = -K * volumetric_strain;
-
-  return pressure;
-}

@@ -78,38 +78,32 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // von Mises criterion
   // second invariant J2 of deviatoric stress in matrix form
-  // Since tau is in Voigt notation, need to double shear part
+  // Since tau is in Voigt notation, multiply shear part by 2 just like D
   // yield condition J2 > tau0^2
   const double invariant2 = 0.5 * (tau.dot(tau) + tau.tail(3).dot(tau.tail(3)));
   if (invariant2 < (tau0_ * tau0_)) tau.setZero();
 
-  // Get thermodynamics pressure
-  const double pressure = ptr->pressure(phase);
-
   // Get dirac delta function in Voigt notation
   const auto dirac_delta = this->dirac_delta();
-
-  // Update volumetric and deviatoric stress
-  // stress = -p I + tau, where I is identity matrix or direc_delta in Voigt
-  // notation
-  Eigen::Matrix<double, 6, 1> updated_stress;
-  updated_stress = -pressure * dirac_delta + tau;
-
-  return updated_stress;
-}
-
-//! Compute pressure
-template <unsigned Tdim>
-double mpm::Bingham<Tdim>::compute_pressure(double volumetric_strain) {
 
   // Bulk modulus
   const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
-  // pressure = - K * volstrain
-  // compression is negative
-  double pressure = -K * volumetric_strain;
+  // Get volumetric strain from particle
+  const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
 
-  return pressure;
+  // Compute thermodynamics pressure
+  // thermodynamics_pressure = - K * volstrain
+  // compression is negative
+  const double thermodynamics_pressure = -K * volumetric_strain;
+
+  // Update volumetric and deviatoric stress
+  // stress = -thermodynamics_pressure I + tau, where I is identity matrix or
+  // direc_delta in Voigt notation
+  Eigen::Matrix<double, 6, 1> updated_stress;
+  updated_stress = -thermodynamics_pressure * dirac_delta + tau;
+
+  return updated_stress;
 }
 
 //! Dirac delta 2D
