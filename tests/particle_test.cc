@@ -169,6 +169,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     h5_particle.gamma_yz = strain[4];
     h5_particle.gamma_xz = strain[5];
 
+    h5_particle.epsilon_v = strain.head(Dim).sum();
+
     h5_particle.status = true;
 
     // Reinitialise particle from HDF5 data
@@ -205,6 +207,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(pstrain.size() == strain.size());
     for (unsigned i = 0; i < strain.size(); ++i)
       REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
+
+    // Check particle volumetric strain centroid
+    REQUIRE(particle->volumetric_strain_centroid(Phase) ==
+            h5_particle.epsilon_v);
   }
 }
 
@@ -807,6 +813,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     h5_particle.gamma_yz = strain[4];
     h5_particle.gamma_xz = strain[5];
 
+    h5_particle.epsilon_v = strain.head(Dim).sum();
+
     h5_particle.status = true;
 
     // Reinitialise particle from HDF5 data
@@ -843,6 +851,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(pstrain.size() == strain.size());
     for (unsigned i = 0; i < strain.size(); ++i)
       REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
+
+    // Check particle volumetric strain centroid
+    REQUIRE(particle->volumetric_strain_centroid(Phase) ==
+            h5_particle.epsilon_v);
   }
 }
 
@@ -1559,6 +1571,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     h5_particle.gamma_yz = strain[4];
     h5_particle.gamma_xz = strain[5];
 
+    h5_particle.epsilon_v = strain.head(Dim).sum();
+
     h5_particle.status = true;
 
     // Reinitialise particle from HDF5 data
@@ -1595,5 +1609,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(pstrain.size() == strain.size());
     for (unsigned i = 0; i < strain.size(); ++i)
       REQUIRE(pstrain(i) == Approx(strain(i)).epsilon(Tolerance));
+
+    // Check particle volumetric strain centroid
+    REQUIRE(particle->volumetric_strain_centroid(Phase) ==
+            h5_particle.epsilon_v);
   }
 }
