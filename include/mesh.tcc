@@ -398,6 +398,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     particle_data[i].gamma_yz = strain[4];
     particle_data[i].gamma_xz = strain[5];
 
+    particle_data[i].epsilon_v = (*pitr)->volumetric_strain_centroid(phase);
+
     particle_data[i].status = (*pitr)->status();
 
     // Counter
@@ -406,7 +408,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 21;
+  const hsize_t NFIELDS = 22;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
@@ -420,7 +422,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, strain_xx),  HOFFSET(HDF5Particle, strain_yy),
       HOFFSET(HDF5Particle, strain_zz),  HOFFSET(HDF5Particle, gamma_xy),
       HOFFSET(HDF5Particle, gamma_yz),   HOFFSET(HDF5Particle, gamma_xz),
-      HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, epsilon_v),  HOFFSET(HDF5Particle, status),
   };
 
   size_t dst_sizes[NFIELDS] = {
@@ -434,7 +436,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       sizeof(particle_data[0].strain_xx),  sizeof(particle_data[0].strain_yy),
       sizeof(particle_data[0].strain_zz),  sizeof(particle_data[0].gamma_xy),
       sizeof(particle_data[0].gamma_yz),   sizeof(particle_data[0].gamma_xz),
-      sizeof(particle_data[0].status),
+      sizeof(particle_data[0].epsilon_v),  sizeof(particle_data[0].status),
   };
 
   // Define particle field information
@@ -443,7 +445,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       "velocity_x", "velocity_y", "velocity_z", "stress_xx", "stress_yy",
       "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx",
       "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",
-      "status"};
+      "epsilon_v",  "status"};
 
   hid_t field_type[NFIELDS];
   hid_t string_type;
@@ -473,7 +475,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   field_type[17] = H5T_NATIVE_DOUBLE;
   field_type[18] = H5T_NATIVE_DOUBLE;
   field_type[19] = H5T_NATIVE_DOUBLE;
-  field_type[20] = H5T_NATIVE_HBOOL;
+  field_type[20] = H5T_NATIVE_DOUBLE;
+  field_type[21] = H5T_NATIVE_HBOOL;
 
   // Create a new file using default properties.
   file_id =
@@ -502,7 +505,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   const unsigned nparticles = this->nparticles();
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 21;
+  const hsize_t NFIELDS = 22;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
@@ -516,7 +519,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, strain_xx),  HOFFSET(HDF5Particle, strain_yy),
       HOFFSET(HDF5Particle, strain_zz),  HOFFSET(HDF5Particle, gamma_xy),
       HOFFSET(HDF5Particle, gamma_yz),   HOFFSET(HDF5Particle, gamma_xz),
-      HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, epsilon_v),  HOFFSET(HDF5Particle, status),
   };
 
   // To get size
@@ -533,7 +536,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       sizeof(particle.strain_xx),  sizeof(particle.strain_yy),
       sizeof(particle.strain_zz),  sizeof(particle.gamma_xy),
       sizeof(particle.gamma_yz),   sizeof(particle.gamma_xz),
-      sizeof(particle.status),
+      sizeof(particle.epsilon_v),  sizeof(particle.status),
   };
 
   std::vector<HDF5Particle> dst_buf;

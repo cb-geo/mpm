@@ -60,6 +60,9 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
       particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
       particle.gamma_xz;
 
+  // Volumetric strain
+  this->volumetric_strain_centroid_(phase) = particle.epsilon_v;
+
   // Status
   this->status_ = particle.status;
   return true;
