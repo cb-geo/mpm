@@ -365,7 +365,7 @@ inline Eigen::MatrixXd
     // Gradient shapefn of the cell
     // dN/dx = [J]^-1 * dN/dxi
     const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-    
+
     laplace_matrix += (grad_shapefn * grad_shapefn.transpose());
   }
   return laplace_matrix;
