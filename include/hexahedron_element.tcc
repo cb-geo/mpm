@@ -282,6 +282,7 @@ inline std::vector<Eigen::MatrixXd>
     bi(3, 0) = grad_shapefn(i, 1); bi(3, 1) = grad_shapefn(i, 0); bi(3, 2) = 0.;
     bi(4, 0) = 0.;                 bi(4, 1) = grad_shapefn(i, 2); bi(4, 2) = grad_shapefn(i, 1);
     bi(5, 0) = grad_shapefn(i, 2); bi(5, 1) = 0.;                 bi(5, 2) = grad_shapefn(i, 0);
+    // clang-format on
     bmatrix.push_back(bi);
   }
   return bmatrix;
@@ -299,10 +300,10 @@ inline std::vector<Eigen::MatrixXd>
   try {
     // Check if matrices dimensions are correct
     if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-      (xi.size() != nodal_coordinates.cols()))
-    throw std::runtime_error(
-        "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
-        "nodal_coordinates");
+        (xi.size() != nodal_coordinates.cols()))
+      throw std::runtime_error(
+          "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
+          "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -314,7 +315,7 @@ inline std::vector<Eigen::MatrixXd>
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
   Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-  
+
   // B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix;
   bmatrix.reserve(Tnfunctions);
@@ -328,6 +329,7 @@ inline std::vector<Eigen::MatrixXd>
     bi(3, 0) = grad_shapefn(i, 1); bi(3, 1) = grad_shapefn(i, 0); bi(3, 2) = 0.;
     bi(4, 0) = 0.;                 bi(4, 1) = grad_shapefn(i, 2); bi(4, 2) = grad_shapefn(i, 1);
     bi(5, 0) = grad_shapefn(i, 2); bi(5, 1) = 0.;                 bi(5, 2) = grad_shapefn(i, 0);
+    // clang-format on
     bmatrix.push_back(bi);
   }
   return bmatrix;
@@ -335,11 +337,10 @@ inline std::vector<Eigen::MatrixXd>
 
 //! Return mass_matrix of a Hexahedron Element
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
-    mpm::HexahedronElement<Tdim, Tnfunctions>::mass_matrix(
-      const std::vector<VectorDim>& xi_s) const {
+inline Eigen::MatrixXd mpm::HexahedronElement<Tdim, Tnfunctions>::mass_matrix(
+    const std::vector<VectorDim>& xi_s) const {
   // Mass matrix
-  Eigen::Matrix<double, Tnfunctions, Tnfunctions>  mass_matrix;
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions> mass_matrix;
   mass_matrix.setZero();
   for (const auto& xi : xi_s) {
     const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
@@ -348,25 +349,61 @@ inline Eigen::MatrixXd
   return mass_matrix;
 }
 
+//! Return the laplace_matrix of a Hexahedron Element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd
+    mpm::HexahedronElement<Tdim, Tnfunctions>::laplace_matrix(
+        const std::vector<VectorDim>& xi_s,
+        const Eigen::MatrixXd& nodal_coordinates) const {
+
+  try {
+    // Check if matrices dimensions are correct
+    if ((this->nfunctions() != nodal_coordinates.rows()) ||
+        (xi_s.at(0).size() != nodal_coordinates.cols()))
+      throw std::runtime_error(
+          "Jacobian calculation: Incorrect dimension of xi & nodes");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  // Laplace matrix
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions> laplace_matrix;
+  laplace_matrix.setZero();
+  for (const auto& xi : xi_s) {
+    // Get gradient shape functions
+    const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+
+    // Jacobian dx_i/dxi_j
+    const Eigen::Matrix<double, Tdim, Tdim> jacobian =
+        (grad_sf.transpose() * nodal_coordinates);
+
+    // Gradient shapefn of the cell
+    // dN/dx = [J]^-1 * dN/dxi
+    const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+
+    laplace_matrix += (grad_shapefn * grad_shapefn.transpose());
+  }
+  return laplace_matrix;
+}
+
 //! Return the degree of element
 //! 8-noded hexahedron
 template <>
-inline  mpm::ElementDegree
-mpm::HexahedronElement<3, 8>::degree() const {
+inline mpm::ElementDegree mpm::HexahedronElement<3, 8>::degree() const {
   return mpm::ElementDegree::Linear;
 }
 
 //! Return the degree of shape function
 //! 8-noded hexahedron
 template <>
-inline  mpm::ElementDegree
-mpm::HexahedronElement<3, 20>::degree() const {
+inline mpm::ElementDegree mpm::HexahedronElement<3, 20>::degree() const {
   return mpm::ElementDegree::Quadratic;
 }
 
 //! Return nodal coordinates of a unit cell
 template <>
-inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::unit_cell_coordinates() const {
+inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::unit_cell_coordinates()
+    const {
   // Coordinates of a unit cell
   Eigen::Matrix<double, 20, 3> unit_cell;
   // clang-format off

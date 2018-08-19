@@ -334,6 +334,43 @@ inline Eigen::MatrixXd
   return mass_matrix;
 }
 
+//! Return the laplace_matrix of a quadrilateral Element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::laplace_matrix(
+        const std::vector<VectorDim>& xi_s,
+        const Eigen::MatrixXd& nodal_coordinates) const {
+
+  try {
+    // Check if matrices dimensions are correct
+    if ((this->nfunctions() != nodal_coordinates.rows()) ||
+        (xi_s.at(0).size() != nodal_coordinates.cols()))
+      throw std::runtime_error(
+          "Jacobian calculation: Incorrect dimension of xi & nodes");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  // Laplace matrix
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions> laplace_matrix;
+  laplace_matrix.setZero();
+  for (const auto& xi : xi_s) {
+    // Get gradient shape functions
+    const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+
+    // Jacobian dx_i/dxi_j
+    const Eigen::Matrix<double, Tdim, Tdim> jacobian =
+        (grad_sf.transpose() * nodal_coordinates);
+
+    // Gradient shapefn of the cell
+    // dN/dx = [J]^-1 * dN/dxi
+    const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+
+    laplace_matrix += (grad_shapefn * grad_shapefn.transpose());
+  }
+  return laplace_matrix;
+}
+
 //! Return the indices of a cell sides
 //! \retval indices Sides that form the cell
 //! \tparam Tdim Dimension
