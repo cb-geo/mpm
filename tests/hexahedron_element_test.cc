@@ -1768,9 +1768,6 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Get laplace matrix
       const auto laplace_matrix = hex->laplace_matrix(xi_s, coords);
 
-      std::cout << "\n Laplace matrix: " << std::setprecision(16)
-                << laplace_matrix;
-
       // Check size of laplace-matrix
       REQUIRE(laplace_matrix.rows() == nfunctions);
       REQUIRE(laplace_matrix.cols() == nfunctions);

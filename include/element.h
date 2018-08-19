@@ -1,5 +1,3 @@
-#include <iostream>
-
 #ifndef MPM_ELEMENT_H_
 #define MPM_ELEMENT_H_
 
