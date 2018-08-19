@@ -70,6 +70,14 @@ class Element {
       const std::vector<VectorDim>& xi_s,
       const Eigen::MatrixXd& nodal_coordinates) const = 0;
 
+  //! Evaluate the Divergence matrix at given local coordinates for a real cell
+  //! \param[in] xi_s Vector of local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval divergence_matrix Divergence matrix
+  virtual Eigen::MatrixXd divergence_matrix(
+      const std::vector<VectorDim>& xi_s,
+      const Eigen::MatrixXd& nodal_coordinates) const = 0;
+
   //! Return the degree of element
   virtual mpm::ElementDegree degree() const = 0;
 

@@ -122,6 +122,14 @@ class QuadrilateralElement : public Element<Tdim> {
       const std::vector<VectorDim>& xi_s,
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
+  //! Evaluate the Divergence matrix at given local coordinates for a real cell
+  //! \param[in] xi_s Vector of local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval divergence_matrix Divergence matrix
+  Eigen::MatrixXd divergence_matrix(
+      const std::vector<VectorDim>& xi_s,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;
 
