@@ -416,7 +416,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
       for (unsigned i = 0; i < nfunctions; ++i)
         for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(laplace_matrix(i, j) == Approx(laplace(i, j)).epsilon(Tolerance));
+          REQUIRE(laplace_matrix(i, j) ==
+                  Approx(laplace(i, j)).epsilon(Tolerance));
     }
 
     SECTION("Four noded quadrilateral coordinates of unit cell") {
@@ -1323,7 +1324,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
           REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
     }
 
-    
     // Laplace matrix of a cell
     SECTION("Four noded quadrilateral laplace-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
@@ -1392,10 +1392,11 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
           -0.5420198927041027, -0.2061657961534028, -1.163025605543604,
           -0.4327652020858722, -0.675282329150958, -0.5054484913212045,
           -0.2457639515310967, -0.917481724483721, 4.687952992973963;
-      
+
       for (unsigned i = 0; i < nfunctions; ++i)
         for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(laplace_matrix(i, j) == Approx(laplace(i, j)).epsilon(Tolerance));
+          REQUIRE(laplace_matrix(i, j) ==
+                  Approx(laplace(i, j)).epsilon(Tolerance));
     }
 
     // Check Jacobian
