@@ -381,8 +381,6 @@ inline Eigen::MatrixXd
     // dN/dx = [J]^-1 * dN/dxi
     const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
 
-    std::cout << "\nGrad shapefn: " << grad_shapefn << "\n";
-
     laplace_matrix += (grad_shapefn * grad_shapefn.transpose());
   }
   return laplace_matrix;
