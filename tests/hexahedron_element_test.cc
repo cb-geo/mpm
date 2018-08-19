@@ -549,6 +549,89 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
     }
 
+    // Laplace matrix of a cell
+    SECTION("Eight noded hexahedron laplace-matrix") {
+      std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      const double one_by_sqrt3 = std::fabs(1 / std::sqrt(3));
+      xi << -one_by_sqrt3, -one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3, -one_by_sqrt3;
+      xi_s.emplace_back(xi);
+
+      xi << -one_by_sqrt3, -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, -one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << one_by_sqrt3, one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+      xi << -one_by_sqrt3, one_by_sqrt3, one_by_sqrt3;
+      xi_s.emplace_back(xi);
+
+      REQUIRE(xi_s.size() == 8);
+
+      // Nodal coordinates
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2., 1., 0.5,
+                4., 2., 1.0,
+                2., 4., 1.0,
+                1., 3., 0.5,
+                2., 1., 1.5,
+                4., 2., 2.0,
+                2., 4., 2.0,
+                1., 3., 1.5;
+      // clang-format on
+
+      // Get laplace matrix
+      const auto laplace_matrix = hex->laplace_matrix(xi_s, coords);
+
+      std::cout << "\n Laplace matrix: " << std::setprecision(16)
+                << laplace_matrix;
+
+      // Check size of laplace-matrix
+      REQUIRE(laplace_matrix.rows() == nfunctions);
+      REQUIRE(laplace_matrix.cols() == nfunctions);
+
+      // Sum should be equal to 1. * xi_s.size()
+      REQUIRE(laplace_matrix.sum() == Approx(0.).epsilon(Tolerance));
+
+      Eigen::Matrix<double, 8, 8> laplace;
+      // clang-format off
+      laplace <<  0.9643677583341226,  0.261044778874057,  -0.1901695368724208,
+                  0.2334579956379644, -0.6204508598313142, -0.2200815520760039,
+                 -0.1638493372007791, -0.264319246865626,   0.261044778874057,
+                  1.242773383095871,   0.4330321922069018,  0.1222723413095025,
+                 -0.7574835440234503, -0.726073928639958,  -0.26533034028844,
+                 -0.3102348825344837, -0.1901695368724208,  0.4330321922069018,
+                  2.27268250189131,    0.3331516005618761, -0.6905145911387602,
+                 -0.7630346561745743, -0.4913341040024276, -0.9038134064719052,
+                  0.2334579956379644,  0.1222723413095025,  0.3331516005618761,
+                  1.134597613242935,  -0.6628500090327518, -0.2316871676231324,
+                 -0.2307894607206865, -0.6981529133757072, -0.6204508598313142,
+                 -0.7574835440234503, -0.6905145911387602, -0.6628500090327518,
+                  1.887162135673954,   0.4504916955937011, -0.185224986473325,
+                  0.5788701592319462, -0.2200815520760039, -0.726073928639958,
+                 -0.7630346561745743, -0.2316871676231324,  0.4504916955937011,
+                  1.186264235677633,   0.1769044815337366,  0.1272168917085984,
+                 -0.1638493372007791, -0.26533034028844, -  0.4913341040024276,
+                 -0.2307894607206865, -0.185224986473325,   0.1769044815337366,
+                  1.095314415432314,   0.0643093317196072, -0.264319246865626,
+                 -0.3102348825344837, -0.9038134064719052, -0.6981529133757072,
+                  0.5788701592319462,  0.1272168917085984,  0.0643093317196072,
+                  1.40612406658757;
+      // clang-format on
+      for (unsigned i = 0; i < nfunctions; ++i)
+        for (unsigned j = 0; j < nfunctions; ++j)
+          REQUIRE(laplace_matrix(i, j) ==
+                  Approx(laplace(i, j)).epsilon(Tolerance));
+    }
+
     SECTION("Eight noded hexahedron coordinates of unit cell") {
       const unsigned nfunctions = 8;
       // Coordinates of a unit cell
