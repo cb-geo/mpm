@@ -601,6 +601,24 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
     }
+
+    SECTION("Four noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      unsigned face_id = 0;
+      Eigen::VectorXi indices = quad->face_indices(face_id);
+      REQUIRE(indices.size() == 2);
+
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+
+      // Check for undefined indices
+      unsigned face_id_undefined = 20;
+      indices = quad->face_indices(face_id_undefined);
+      REQUIRE(indices.size() == 2);
+
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+    }
   }
 
   //! Check for 8 noded element
@@ -1311,6 +1329,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
+    }
+
+    SECTION("Eight noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      unsigned face_id = 1;
+      Eigen::VectorXi indices = quad->face_indices(face_id);
+      REQUIRE(indices.size() == 2);
+
+      REQUIRE(indices(0) == 1);
+      REQUIRE(indices(1) == 2);
     }
   }
 
@@ -2049,6 +2077,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
+    }
+
+    SECTION("Nine noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      unsigned face_id = 2;
+      Eigen::VectorXi indices = quad->face_indices(face_id);
+      REQUIRE(indices.size() == 2);
+
+      REQUIRE(indices(0) == 2);
+      REQUIRE(indices(1) == 3);
     }
   }
 }

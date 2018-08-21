@@ -455,3 +455,33 @@ inline Eigen::MatrixXi
   return indices;
 }
   
+//!          F2  
+//!   3 0----------0 2
+//!     |          |
+//!  F3 |          | F1
+//!     |          |
+//!     |          |
+//!   0 0----------0 1
+//!          F0
+//! Return indices of a face of the element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
+  
+  // Make return_indices
+  Eigen::Matrix<int, 2, 1> return_indices;
+  try {
+    // Check if face_id is within range
+    if (face_id < face_indices_quadrilateral.size()) {
+      return_indices = face_indices_quadrilateral.find(face_id)->second;
+    } else {
+      return_indices = face_indices_quadrilateral.find(0)->second;
+      throw std::runtime_error(
+          "Face ID is undefined, using default value of 0.");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return return_indices;
+}
