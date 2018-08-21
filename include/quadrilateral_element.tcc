@@ -373,7 +373,7 @@ inline Eigen::MatrixXd
 
 //! Return the divergence_matrix of a quadrilateral Element
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
+inline std::array<Eigen::MatrixXd, Tdim>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::divergence_matrix(
         const std::vector<VectorDim>& xi_s,
         const Eigen::MatrixXd& nodal_coordinates) const {
@@ -388,26 +388,32 @@ inline Eigen::MatrixXd
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 
-  // Divergence matrix
-  Eigen::Matrix<double, Tnfunctions, Tnfunctions> divergence_matrix;
-  divergence_matrix.setZero();
-  for (const auto& xi : xi_s) {
-    // Shape function
-    const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
-    // Get gradient shape functions
-    const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+  // Divergence matrices
+  std::array<Eigen::MatrixXd, Tdim> divergence_matrices;
 
-    // Jacobian dx_i/dxi_j
-    const Eigen::Matrix<double, Tdim, Tdim> jacobian =
-        (grad_sf.transpose() * nodal_coordinates);
+  for (unsigned i = 0; i < Tdim; ++i) {
+    // Divergence matrix
+    Eigen::Matrix<double, Tnfunctions, Tnfunctions> divergence_matrix;
+    divergence_matrix.setZero();
+    for (const auto& xi : xi_s) {
+      // Shape function
+      const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
+      // Get gradient shape functions
+      const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
-    // Gradient shapefn of the cell
-    // dN/dx = [J]^-1 * dN/dxi
-    const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+      // Jacobian dx_i/dxi_j
+      const Eigen::Matrix<double, Tdim, Tdim> jacobian =
+          (grad_sf.transpose() * nodal_coordinates);
 
-    divergence_matrix += (shape_fn * grad_shapefn.transpose());
+      // Gradient shapefn of the cell
+      // dN/dx = [J]^-1 * dN/dxi
+      const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+
+      divergence_matrix += (shape_fn * grad_shapefn.col(i).transpose());
+    }
+    divergence_matrices.at(i) = divergence_matrix;
   }
-  return divergence_matrix;
+  return divergence_matrices;
 }
 
 //! Return the indices of a cell sides

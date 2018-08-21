@@ -151,8 +151,8 @@ class HexahedronElement : public Element<Tdim> {
   //! Evaluate the Divergence matrix at given local coordinates for a real cell
   //! \param[in] xi_s Vector of local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval divergence_matrix Divergence matrix
-  Eigen::MatrixXd divergence_matrix(
+  //! \retval divergence_matrices Divergence matrices
+  std::array<Eigen::MatrixXd, Tdim> divergence_matrix(
       const std::vector<VectorDim>& xi_s,
       const Eigen::MatrixXd& nodal_coordinates) const override;
 
