@@ -65,7 +65,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! constructor with number of shape functions
   QuadrilateralElement() : mpm::Element<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
+    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9 ||
+                   Tnfunctions == 16),
                   "Specified number of shape functions is not defined");
 
     //! Logger
@@ -113,14 +114,6 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval mass_matrix mass matrix
   Eigen::MatrixXd mass_matrix(
       const std::vector<VectorDim>& xi_s) const override;
-
-  //! Evaluate the Laplace matrix at given local coordinates for a real cell
-  //! \param[in] xi_s Vector of local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval laplace_matrix Laplace matrix
-  Eigen::MatrixXd laplace_matrix(
-      const std::vector<VectorDim>& xi_s,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
 
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;

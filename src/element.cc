@@ -15,6 +15,10 @@ static Register<mpm::Element<2>, mpm::QuadrilateralElement<2, 8>> quad8(
 static Register<mpm::Element<2>, mpm::QuadrilateralElement<2, 9>> quad9(
     "ED2Q9");
 
+// Quadrilateral uGIMP element
+static Register<mpm::Element<2>, mpm::QuadrilateralElement<2, 16>> GIMP(
+    "ED2QGIMP");
+
 // Hexahedron 8-noded element
 static Register<mpm::Element<3>, mpm::HexahedronElement<3, 8>> hex8("ED3H8");
 
