@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <iostream>
+#include <map>
 
 #include <Eigen/Dense>
 
@@ -103,8 +104,21 @@ namespace mpm {
 //!
 //! Bottom face: F0, Right face: F1, Top face: F2,
 //! Left face: F3, Behind face: F4, Front face: F5
-//!
 //! </pre>
+//!
+//! Namespace containing constants of face id
+
+const std::map<unsigned, Eigen::VectorXi> face_indices_hexahedron{
+
+    {0, Eigen::Matrix<int, 4, 1>(0, 1, 5, 4)},
+    {1, Eigen::Matrix<int, 4, 1>(5, 1, 2, 0)},
+    {2, Eigen::Matrix<int, 4, 1>(7, 6, 2, 3)},
+    {3, Eigen::Matrix<int, 4, 1>(0, 4, 7, 3)},
+    {4, Eigen::Matrix<int, 4, 1>(0, 1, 2, 3)},
+    {5, Eigen::Matrix<int, 4, 1>(4, 5, 6, 7)}
+
+};
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
