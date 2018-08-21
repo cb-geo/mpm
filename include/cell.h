@@ -231,7 +231,7 @@ class Cell {
                                        double velocity);
 
   //! Compute normal vector
-  void compute_normal();
+  void compute_normals();
 
   //! Return number of normal vectors
   //! \retval number of normal vectors
@@ -280,9 +280,11 @@ class Cell {
 
   //! Velocity constraints
   //! first-> face_id, second->pair of direction [0/1/2] and velocity value
+  // std::map<unsigned, std::map<unsigned, double>> velocity_constraints_;
   std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
 
   //! Normal of face with velocity constraints
+  // std::map<unsigned, Eigen::VectorXd> face_normals_;
   std::vector<Eigen::VectorXd> face_normals_;
 
   //! Logger

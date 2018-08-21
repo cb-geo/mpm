@@ -761,7 +761,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       cell->assign_cell_velocity_constraint(0, 1, 0.5);
 
-      cell->compute_normal();
+      cell->compute_normals();
 
       REQUIRE(cell->nnormal() == 1);
 
@@ -1954,7 +1954,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       cell->assign_cell_velocity_constraint(0, 2, 0.5);
 
-      cell->compute_normal();
+      cell->compute_normals();
 
       REQUIRE(cell->nnormal() == 1);
 

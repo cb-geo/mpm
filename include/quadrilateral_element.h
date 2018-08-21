@@ -2,7 +2,6 @@
 #define MPM_QUADRILATERAL_ELEMENT_H_
 
 #include <exception>
-#include <iostream>
 #include <map>
 
 #include <Eigen/Dense>
