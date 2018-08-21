@@ -205,6 +205,149 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 9>::unit_cell_coordinates()
   return unit_cell;
 }
 
+// --------------------------------- GIMP CW START ----------------------------
+
+//!   13----------12----------11----------10
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//! 		        (-1, 1)	    (1,1)
+//!   14----------3-----------2-----------9
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |   Point   |           |
+//!   |           | location  |           |
+//!   |           |           |           |
+//!   15----------0-----------1-----------8
+//!		         (-1,-1)	    (1,-1)
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   4-----------5-----------6-----------7
+
+//! Return shape functions of a 16-node Quadrilateral GIMP Element at a given
+//! local coordinate
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralElement<2, 16>::shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi) const {
+
+  Eigen::Matrix<double, 16, 1> shapefn;
+
+  //! Matrix to store local node coordinates
+  Eigen::Matrix<double, 16, 2> local_node;
+
+  //! TODO: write call to calculate local coordinates
+  local_node = this->unit_cell_coordinates();
+
+  //! TODO: write call to number of points in cell
+  double no_points = this->nparticles();
+
+  //! length of element in local coordinate (TODO: double check)
+  double el_len = 2;
+
+  //! point length = element length / number of points in cell.
+  double p_len = el_len / no_points;
+
+  //! local node x & y valyes
+  double xni, yni;
+  double numnodes = 16;
+
+  //! local point - local node
+  double xpxi, ypyi;
+
+  //! local shapefunctions for x and y coordinates
+  double sxni, syni;
+
+  //! shape function grad
+  // double //dxni, //dyni;
+
+  for (unsigned n = 0; n < numnodes; n++) {
+    xni = local_node(n, 0);
+    yni = local_node(n, 1);
+    xpxi = xi_(0) - xni;  // local point x - local node x
+    ypyi = xi_(1) - yni;  // local point x - local node x
+
+    //! x direction
+    if (xpxi >= el_len + p_len) {
+      sxni = 0;
+      // dxni = 0;
+    } else if (xpxi > -el_len - p_len && xpxi <= -el_len + p_len) {
+      sxni = ((el_len + p_len + xpxi) * (el_len + p_len + xpxi)) / 4 * el_len *
+             p_len;
+      ////dxni = (el_len + p_len + xpxi) / 2 * el_len * p_len;
+    } else if (xpxi > -el_len + p_len && xpxi <= -p_len) {
+      sxni = 1 + (xpxi / el_len);
+      // dxni = 1 / el_len;
+    } else if (xpxi > -p_len && xpxi <= p_len) {
+      sxni = 1 - (((xpxi * xpxi) + (p_len * p_len)) / 2 * el_len * p_len);
+      // dxni = -(xpxi / el_len * p_len);
+    } else if (xpxi > p_len && xpxi <= el_len - p_len) {
+      sxni = 1 - (xpxi / el_len);
+      // dxni = -(1 / el_len);
+    } else if (xpxi > el_len - p_len && xpxi <= el_len + p_len) {
+      sxni = ((el_len + p_len + xpxi) * (el_len + p_len + xpxi)) / 4 * el_len *
+             p_len;
+      // dxni = -((el_len + p_len + xpxi) / 2 * el_len * p_len);
+    }
+    //! y direction
+    if (ypyi >= el_len + p_len) {
+      syni = 0;
+      // dyni = 0;
+    } else if (ypyi > -el_len - p_len && ypyi <= -el_len + p_len) {
+      syni = ((el_len + p_len + ypyi) * (el_len + p_len + ypyi)) / 4 * el_len *
+             p_len;
+      // dyni = (el_len + p_len + ypyi) / 2 * el_len * p_len;
+    } else if (ypyi > -el_len + p_len && ypyi <= -p_len) {
+      syni = 1 + (ypyi / el_len);
+      // dyni = 1 / el_len;
+    } else if (ypyi > -p_len && ypyi <= p_len) {
+      syni = 1 - (((ypyi * ypyi) + (p_len * p_len)) / 2 * el_len * p_len);
+      // dyni = -(ypyi / el_len * p_len);
+    } else if (ypyi > p_len && ypyi <= el_len - p_len) {
+      syni = 1 - (ypyi / el_len);
+      // dyni = -(1 / el_len);
+    } else if (ypyi > el_len - p_len && ypyi <= el_len + p_len) {
+      syni = ((el_len + p_len + ypyi) * (el_len + p_len + ypyi)) / 4 * el_len *
+             p_len;
+      // dyni = -((el_len + p_len + ypyi) / 2 * el_len * p_len);
+    }
+    shapefn(n) = sxni * syni;
+  }
+
+  return shapefn;
+}
+
+//! Return nodal coordinates of a unit cell
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 16>::unit_cell_coordinates()
+    const {
+  // Coordinates of a unit cell
+  Eigen::Matrix<double, 16, 2> unit_cell;
+  // clang-format off
+  unit_cell << -1., -1.,
+                1., -1.,
+               -1.,  1.,
+                1.,  1.,
+               -3., -3.,
+               -1., -3.,
+                1., -3.,
+                3., -3.,
+                3., -1.,
+                3.,  1.,
+                3.,  3.,
+                1.,  3.,
+               -1.,  3.,
+               -3.,  3.,
+               -3.,  1.,
+               -3., -1.;
+
+  // clang-format on
+  return unit_cell;
+}
 //! Return the degree of element
 //! 4-noded quadrilateral
 template <>
@@ -334,43 +477,6 @@ inline Eigen::MatrixXd
   return mass_matrix;
 }
 
-//! Return the laplace_matrix of a quadrilateral Element
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
-    mpm::QuadrilateralElement<Tdim, Tnfunctions>::laplace_matrix(
-        const std::vector<VectorDim>& xi_s,
-        const Eigen::MatrixXd& nodal_coordinates) const {
-
-  try {
-    // Check if matrices dimensions are correct
-    if ((this->nfunctions() != nodal_coordinates.rows()) ||
-        (xi_s.at(0).size() != nodal_coordinates.cols()))
-      throw std::runtime_error(
-          "Jacobian calculation: Incorrect dimension of xi & nodes");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-
-  // Laplace matrix
-  Eigen::Matrix<double, Tnfunctions, Tnfunctions> laplace_matrix;
-  laplace_matrix.setZero();
-  for (const auto& xi : xi_s) {
-    // Get gradient shape functions
-    const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
-
-    // Jacobian dx_i/dxi_j
-    const Eigen::Matrix<double, Tdim, Tdim> jacobian =
-        (grad_sf.transpose() * nodal_coordinates);
-
-    // Gradient shapefn of the cell
-    // dN/dx = [J]^-1 * dN/dxi
-    const Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-
-    laplace_matrix += (grad_shapefn * grad_shapefn.transpose());
-  }
-  return laplace_matrix;
-}
-
 //! Return the indices of a cell sides
 //! \retval indices Sides that form the cell
 //! \tparam Tdim Dimension
@@ -411,4 +517,3 @@ inline Eigen::MatrixXi
   //clang-format on
   return indices;
 }
-  
