@@ -604,7 +604,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Four noded quadrilateral shape function for face indices") {
       // Check for face indices
-      Eigen::Matrix<unsigned, 4, 2> indices;
+      Eigen::Matrix<int, 4, 2> indices;
       // clang-format off
       indices << 0, 1, 
                  1, 2, 
@@ -613,8 +613,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
-            quad->face_indices(i);
+        auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 2);
         REQUIRE(check_indices.cols() == 1);
 
@@ -1336,7 +1335,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Eight noded quadrilateral shape function for face indices") {
       // Check for face indices
-      Eigen::Matrix<unsigned, 4, 2> indices;
+      Eigen::Matrix<int, 4, 2> indices;
       // clang-format off
       indices << 0, 1, 
                  1, 2, 
@@ -1345,8 +1344,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
-            quad->face_indices(i);
+        auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 2);
         REQUIRE(check_indices.cols() == 1);
 
@@ -2095,7 +2093,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Nine noded quadrilateral shape function for face indices") {
       // Check for face indices
-      Eigen::Matrix<unsigned, 4, 2> indices;
+      Eigen::Matrix<int, 4, 2> indices;
       // clang-format off
       indices << 0, 1, 
                  1, 2, 
@@ -2105,8 +2103,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
-            quad->face_indices(i);
+        auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 2);
         REQUIRE(check_indices.cols() == 1);
 
