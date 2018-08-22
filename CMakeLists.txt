@@ -91,10 +91,10 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/vtk_writer.cc
 )
 
-add_library(mpmlib STATIC ${mpm_src})
+add_library(lmpm STATIC ${mpm_src})
 
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
-target_link_libraries(mpm mpmlib)
+target_link_libraries(mpm lmpm)
 
 # Unit test
 if(MPM_BUILD_TESTING)
@@ -126,7 +126,7 @@ if(MPM_BUILD_TESTING)
   add_executable(mpmtest
     ${test_src}
   )
-  target_link_libraries(mpmtest mpmlib)
+  target_link_libraries(mpmtest lmpm)
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
   enable_testing()
 endif()
