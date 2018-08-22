@@ -610,14 +610,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(indices(0) == 0);
       REQUIRE(indices(1) == 1);
-
-      // Check for undefined indices
-      unsigned face_id_undefined = 20;
-      indices = quad->face_indices(face_id_undefined);
-      REQUIRE(indices.size() == 2);
-
-      REQUIRE(indices(0) == 0);
-      REQUIRE(indices(1) == 1);
     }
   }
 
