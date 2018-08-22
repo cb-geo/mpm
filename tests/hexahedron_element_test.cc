@@ -923,16 +923,6 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(1) == 1);
       REQUIRE(indices(2) == 5);
       REQUIRE(indices(3) == 4);
-
-      // Check for undefined indices
-      unsigned face_id_undefined = 20;
-      indices = hex->face_indices(face_id_undefined);
-      REQUIRE(indices.size() == 4);
-
-      REQUIRE(indices(0) == 0);
-      REQUIRE(indices(1) == 1);
-      REQUIRE(indices(2) == 5);
-      REQUIRE(indices(3) == 4);
     }
   }
 
