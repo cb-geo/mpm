@@ -201,15 +201,16 @@ class QuadrilateralElement : public Element<Tdim> {
   //! Return indices of a face of an element
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
-  Eigen::VectorXi face_indices(unsigned face_id) const override;
+  Eigen::Matrix<unsigned, 2 * (Tdim - 1), 1> face_indices(
+      unsigned face_id) const override;
 
  private:
-  //! Namespace containing constants of face id
-  const std::map<unsigned, Eigen::VectorXi> face_indices_quadrilateral{
-      {0, Eigen::Matrix<int, 2, 1>(0, 1)},
-      {1, Eigen::Matrix<int, 2, 1>(1, 2)},
-      {2, Eigen::Matrix<int, 2, 1>(2, 3)},
-      {3, Eigen::Matrix<int, 2, 1>(3, 0)}};
+  //! Constants of face id and associate nodes
+  const std::map<unsigned, Eigen::Matrix<unsigned, 2, 1>>
+      face_indices_quadrilateral_{{0, Eigen::Matrix<unsigned, 2, 1>(0, 1)},
+                                  {1, Eigen::Matrix<unsigned, 2, 1>(1, 2)},
+                                  {2, Eigen::Matrix<unsigned, 2, 1>(2, 3)},
+                                  {3, Eigen::Matrix<unsigned, 2, 1>(3, 0)}};
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
