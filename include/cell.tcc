@@ -958,3 +958,153 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 
   return acceleration;
 }
+
+//! Assign velocity constraint
+//! Constrain directions can take values between 0 and Dim-1
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
+                                                      unsigned dir,
+                                                      double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases - 1
+    if (dir >= 0 && dir < Tdim) {
+      this->velocity_constraints_.emplace_back(
+          std::tuple<unsigned, unsigned, double>(face_id, dir, velocity));
+    } else
+      throw std::runtime_error("Constraint direction is out of bounds");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute normal 2d
+template <>
+inline void mpm::Cell<2>::compute_normals() {
+
+  for (const auto& velocity_constraint : this->velocity_constraints_) {
+    // Get face_id
+    const auto face_id = std::get<0>(velocity_constraint);
+
+    // Get the nodes of the face
+    Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute the vector to calculate normal (perpendicular)
+    // a = node(0) - node(1)
+    Eigen::Matrix<double, 2, 1> a = (this->nodes_[indices(0)])->coordinates() -
+                                    (this->nodes_[indices(1)])->coordinates();
+
+    // Compute normal and make unit vector
+    // The normal vector n to vector a is defined such that the dot product
+    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
+    // the reverse does not work to produce normal that is positive pointing out
+    // of the element
+    Eigen::Matrix<double, 2, 1> normal_vector;
+    normal_vector(0) = -a(1);
+    normal_vector(1) = a(0);
+    normal_vector /= normal_vector.norm();
+
+    // Store to private variable
+    face_normals_.emplace_back(normal_vector);
+  }
+}
+
+//! Compute normal 3d
+template <>
+inline void mpm::Cell<3>::compute_normals() {
+
+  for (const auto& velocity_constraint : this->velocity_constraints_) {
+    // Get face_id
+    const auto face_id = std::get<0>(velocity_constraint);
+
+    // Get the nodes of the face
+    Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute two vectors to calculate normal
+    // a = node(1) - node(0)
+    // b = node(3) - node(0)
+    Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+    Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+
+    // Compute normal and make unit vector
+    // normal = a x b
+    // Note that definition of a and b are such that normal is always out of
+    // page
+    Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
+    normal_vector /= normal_vector.norm();
+
+    // Store to private variable
+    face_normals_.emplace_back(normal_vector);
+  }
+}
+
+//! Return unit normal vector
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::normal(unsigned face_id) {
+
+  Eigen::Matrix<double, Tdim, 1> normal_vector;
+  normal_vector.setZero();
+
+  try {
+    // Check if face_id is within the range of normal vector
+    if (face_id < this->face_normals_.size()) {
+      // return normal vector depending on face_id
+      normal_vector = this->face_normals_.at(face_id);
+    } else {
+      throw std::runtime_error("Specified face_id is out of range.");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return normal_vector;
+}
+
+//! Compute inverse of 2d rotation matrix for orthogonal axis coordinate system
+template <>
+inline Eigen::MatrixXd mpm::Cell<2>::compute_inverse_rotation_matrix(
+    double alpha, double beta, double gamma) {
+
+  // beta = 0 implies no rotation on z axis
+  if (std::fabs(beta) > 1.E-12) beta = 0;
+
+  Eigen::Matrix<double, 3, 3> rotation_matrix_3d;
+
+  // clang-format off
+  rotation_matrix_3d << cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),  -cos(alpha)*sin(gamma) - sin(alpha)*cos(beta)*cos(gamma),   sin(beta)*sin(alpha),
+                        sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),  -sin(alpha)*sin(gamma) + cos(alpha)*cos(beta)*cos(gamma),  -sin(beta)*cos(alpha),
+                        sin(beta)*sin(gamma),                                      sin(beta)*cos(gamma),                                      cos(beta);                                 
+  // clang-format on  
+
+  // Take block 2x2 matrix 
+  Eigen::Matrix<double, 2, 2> inverse_rotation_matrix;
+  inverse_rotation_matrix = rotation_matrix_3d.block<2, 2>(0, 0);                   
+
+  // Invert rotation matrix
+  inverse_rotation_matrix = inverse_rotation_matrix.inverse();
+
+  return inverse_rotation_matrix;
+}
+
+//! Compute inverse of 3d rotation matrix for orthogonal axis coordinate system
+template <>
+inline Eigen::MatrixXd mpm::Cell<3>::compute_inverse_rotation_matrix(double alpha, double beta, double gamma) {
+
+  Eigen::Matrix<double, 3, 3> rotation_matrix;
+
+  // clang-format off
+  rotation_matrix << cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),  -cos(alpha)*sin(gamma) - sin(alpha)*cos(beta)*cos(gamma),   sin(beta)*sin(alpha),
+                     sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),  -sin(alpha)*sin(gamma) + cos(alpha)*cos(beta)*cos(gamma),  -sin(beta)*cos(alpha),
+                     sin(beta)*sin(gamma),                                      sin(beta)*cos(gamma),                                      cos(beta);
+  // clang-format on
+
+  // Invert rotation matrix
+  Eigen::Matrix<double, 3, 3> inverse_rotation_matrix;
+  inverse_rotation_matrix = rotation_matrix.inverse();
+
+  return inverse_rotation_matrix;
+}
