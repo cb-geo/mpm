@@ -109,6 +109,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/src/read_mesh.cc
     ${mpm_SOURCE_DIR}/src/element.cc
     ${mpm_SOURCE_DIR}/src/vtk_writer.cc
+    ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/hexahedron_element_test.cc
@@ -131,7 +132,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
-    ${mpm_SOURCE_DIR}/tests/test_main.cc
   )   
   add_executable(mpmtest
     ${test_src}
