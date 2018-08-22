@@ -605,8 +605,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Four noded quadrilateral shape function for face indices") {
       // Check for face indices
       Eigen::Matrix<unsigned, 4, 2> indices;
-      indices << 0, 1, 1, 2, 2, 3, 3, 0;
-
+      // clang-format off
+      indices << 0, 1, 
+                 1, 2, 
+                 2, 3, 
+                 3, 0;
+      // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
         Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
@@ -1333,8 +1337,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Eight noded quadrilateral shape function for face indices") {
       // Check for face indices
       Eigen::Matrix<unsigned, 4, 2> indices;
-      indices << 0, 1, 1, 2, 2, 3, 3, 0;
-
+      // clang-format off
+      indices << 0, 1, 
+                 1, 2, 
+                 2, 3, 
+                 3, 0;
+      // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
         Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
@@ -2088,7 +2096,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Nine noded quadrilateral shape function for face indices") {
       // Check for face indices
       Eigen::Matrix<unsigned, 4, 2> indices;
-      indices << 0, 1, 1, 2, 2, 3, 3, 0;
+      // clang-format off
+      indices << 0, 1, 
+                 1, 2, 
+                 2, 3, 
+                 3, 0;
+      // clang-format on
 
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
