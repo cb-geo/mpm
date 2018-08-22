@@ -915,16 +915,20 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
     SECTION("Eight noded hexahedron shape function for face indices") {
       // Check for face indices
-      unsigned face_id = 0;
-      Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> indices =
-          hex->face_indices(face_id);
-      REQUIRE(indices.rows() == 4);
-      REQUIRE(indices.cols() == 1);
+      Eigen::Matrix<unsigned, 6, 4> indices;
+      indices << 0, 1, 5, 4, 5, 1, 2, 0, 7, 6, 2, 3, 0, 4, 7, 3, 0, 1, 2, 3, 4,
+          5, 6, 7;
 
-      REQUIRE(indices(0) == 0);
-      REQUIRE(indices(1) == 1);
-      REQUIRE(indices(2) == 5);
-      REQUIRE(indices(3) == 4);
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
+            hex->face_indices(i);
+        REQUIRE(check_indices.rows() == 4);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 
@@ -2399,16 +2403,20 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
     SECTION("20-noded noded hexahedron shape function for face indices") {
       // Check for face indices
-      unsigned face_id = 5;
-      Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> indices =
-          hex->face_indices(face_id);
-      REQUIRE(indices.rows() == 4);
-      REQUIRE(indices.cols() == 1);
+      Eigen::Matrix<unsigned, 6, 4> indices;
+      indices << 0, 1, 5, 4, 5, 1, 2, 0, 7, 6, 2, 3, 0, 4, 7, 3, 0, 1, 2, 3, 4,
+          5, 6, 7;
 
-      REQUIRE(indices(0) == 4);
-      REQUIRE(indices(1) == 5);
-      REQUIRE(indices(2) == 6);
-      REQUIRE(indices(3) == 7);
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
+            hex->face_indices(i);
+        REQUIRE(check_indices.rows() == 4);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 }

@@ -604,14 +604,19 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Four noded quadrilateral shape function for face indices") {
       // Check for face indices
-      unsigned face_id = 0;
-      Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> indices =
-          quad->face_indices(face_id);
-      REQUIRE(indices.rows() == 2);
-      REQUIRE(indices.cols() == 1);
+      Eigen::Matrix<unsigned, 4, 2> indices;
+      indices << 0, 1, 1, 2, 2, 3, 3, 0;
 
-      REQUIRE(indices(0) == 0);
-      REQUIRE(indices(1) == 1);
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
+            quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 2);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 
@@ -1327,14 +1332,19 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Eight noded quadrilateral shape function for face indices") {
       // Check for face indices
-      unsigned face_id = 1;
-      Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> indices =
-          quad->face_indices(face_id);
-      REQUIRE(indices.rows() == 2);
-      REQUIRE(indices.cols() == 1);
+      Eigen::Matrix<unsigned, 4, 2> indices;
+      indices << 0, 1, 1, 2, 2, 3, 3, 0;
 
-      REQUIRE(indices(0) == 1);
-      REQUIRE(indices(1) == 2);
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
+            quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 2);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 
@@ -2077,14 +2087,19 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Nine noded quadrilateral shape function for face indices") {
       // Check for face indices
-      unsigned face_id = 2;
-      Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> indices =
-          quad->face_indices(face_id);
-      REQUIRE(indices.rows() == 2);
-      REQUIRE(indices.cols() == 1);
+      Eigen::Matrix<unsigned, 4, 2> indices;
+      indices << 0, 1, 1, 2, 2, 3, 3, 0;
 
-      REQUIRE(indices(0) == 2);
-      REQUIRE(indices(1) == 3);
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        Eigen::Matrix<unsigned, 2 * (Dim - 1), 1> check_indices =
+            quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 2);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 }
