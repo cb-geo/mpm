@@ -473,11 +473,10 @@ inline Eigen::VectorXi
   try {
     // Check if face_id is within range
     if (face_id < face_indices_quadrilateral.size()) {
-      return_indices = face_indices_quadrilateral.find(face_id)->second;
+      return_indices = face_indices_quadrilateral.at(face_id);
     } else {
-      return_indices = face_indices_quadrilateral.find(0)->second;
       throw std::runtime_error(
-          "Face ID is undefined, using default value of 0.");
+          "Face ID is undefined.");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
