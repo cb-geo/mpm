@@ -10,6 +10,7 @@
 
 #include "affine_transform.h"
 #include "element.h"
+// #include "geometry.h"
 #include "logger.h"
 #include "map.h"
 #include "node_base.h"
@@ -237,6 +238,9 @@ class Cell {
   bool assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
                                        double velocity);
 
+  //! Apply velocity constraints
+  void apply_cell_velocity_constraints();
+
   //! Compute normal vector
   void compute_normals();
 
@@ -248,14 +252,6 @@ class Cell {
   //! \param[in] face_id of constraint
   //! \retval unit normal vector
   Eigen::VectorXd normal(unsigned face_id);
-
-  //! Compute inverse of rotation matrix for orthogonal axis coordinate system
-  //! \param[in] alpha Euler alpha angle in radians
-  //! \param[in] beta Euler beta angle in radians
-  //! \param[in] gamma Euler gamma angle in radians
-  //! \retval inverse of Euler rotation matrix R
-  Eigen::MatrixXd compute_inverse_rotation_matrix(double alpha, double beta,
-                                                  double gamma);
 
  protected:
   //! cell id
