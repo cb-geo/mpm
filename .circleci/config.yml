@@ -15,7 +15,6 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j4
-            ctest -VV
       # Clang-6.0
       - run:
           name: Clang-6.0 build
