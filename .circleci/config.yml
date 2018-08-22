@@ -47,6 +47,6 @@ jobs:
             make -j4
             ctest -VV
             make gcov
-            make lcov
-            bash <(curl -s https://codecov.io/bash) -X gcov
-
+            lcov --directory . --capture --output-file coverage.info # capture coverage info
+            lcov --list coverage.info #debug info
+            bash <(curl -s https://codecov.io/bash)
