@@ -31,7 +31,7 @@ class Cell {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id, number of nodes and elemetn
+  //! Constructor with id, number of nodes and element
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
   //! \param[in] elementptr Pointer to an element type
@@ -229,6 +229,34 @@ class Cell {
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
+  //! Assign velocity constraint
+  //! Directions can take values between 0 and Dim-1
+  //! \param[in] face_id Face of cell of velocity constraint
+  //! \param[in] dir Direction of velocity constraint
+  //! \param[in] velocity Applied velocity constraint
+  bool assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
+                                       double velocity);
+
+  //! Compute normal vector
+  void compute_normals();
+
+  //! Return number of normal vectors
+  //! \retval number of normal vectors
+  unsigned nnormal() const { return face_normals_.size(); }
+
+  //! Return unit normal vector, positive pointing outside of the element
+  //! \param[in] face_id of constraint
+  //! \retval unit normal vector
+  Eigen::VectorXd normal(unsigned face_id);
+
+  //! Compute inverse of rotation matrix for orthogonal axis coordinate system
+  //! \param[in] alpha Euler alpha angle in radians
+  //! \param[in] beta Euler beta angle in radians
+  //! \param[in] gamma Euler gamma angle in radians
+  //! \retval inverse of Euler rotation matrix R
+  Eigen::MatrixXd compute_inverse_rotation_matrix(double alpha, double beta,
+                                                  double gamma);
+
  protected:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
@@ -256,8 +284,19 @@ class Cell {
 
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+
+  //! Velocity constraints
+  //! first-> face_id, second->pair of direction [0/1/2] and velocity value
+  // std::map<unsigned, std::map<unsigned, double>> velocity_constraints_;
+  std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+
+  //! Normal of face with velocity constraints
+  // std::map<unsigned, Eigen::VectorXd> face_normals_;
+  std::vector<Eigen::VectorXd> face_normals_;
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
 };  // Cell class
 }  // namespace mpm
 
