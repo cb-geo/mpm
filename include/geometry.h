@@ -19,10 +19,10 @@ class Geometry {
   //! Constructor
   Geometry(){};
 
-  //! Compute inverse of rotation matrix for orthogonal axis coordinate system
+  //! Return inverse rotation matrix for orthogonal axis coordinate system
   //! \param[in] angles Rotation angles depending on dimension
   //! \retval inverse of Euler rotation matrix R
-  Eigen::Matrix<double, Tdim, Tdim> compute_inverse_rotation_matrix(
+  Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
       const Eigen::Matrix<double, Tdim, 1>& angles);
 
  private:
