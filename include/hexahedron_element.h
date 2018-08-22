@@ -238,18 +238,17 @@ class HexahedronElement : public Element<Tdim> {
   //! Return indices of a face of an element
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
-  Eigen::Matrix<unsigned, 2 * (Tdim - 1), 1> face_indices(
-      unsigned face_id) const override;
+  Eigen::MatrixXi face_indices(unsigned face_id) const override;
 
  private:
   //! Constants of face id and associate nodes
-  const std::map<unsigned, Eigen::Matrix<unsigned, 4, 1>>
-      face_indices_hexahedron_{{0, Eigen::Matrix<unsigned, 4, 1>(0, 1, 5, 4)},
-                               {1, Eigen::Matrix<unsigned, 4, 1>(5, 1, 2, 0)},
-                               {2, Eigen::Matrix<unsigned, 4, 1>(7, 6, 2, 3)},
-                               {3, Eigen::Matrix<unsigned, 4, 1>(0, 4, 7, 3)},
-                               {4, Eigen::Matrix<unsigned, 4, 1>(0, 1, 2, 3)},
-                               {5, Eigen::Matrix<unsigned, 4, 1>(4, 5, 6, 7)}};
+  const std::map<unsigned, Eigen::Matrix<int, 4, 1>> face_indices_hexahedron_{
+      {0, Eigen::Matrix<int, 4, 1>(0, 1, 5, 4)},
+      {1, Eigen::Matrix<int, 4, 1>(5, 1, 2, 0)},
+      {2, Eigen::Matrix<int, 4, 1>(7, 6, 2, 3)},
+      {3, Eigen::Matrix<int, 4, 1>(0, 4, 7, 3)},
+      {4, Eigen::Matrix<int, 4, 1>(0, 1, 2, 3)},
+      {5, Eigen::Matrix<int, 4, 1>(4, 5, 6, 7)}};
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
