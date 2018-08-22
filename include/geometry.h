@@ -5,14 +5,13 @@
 #include <memory>
 
 #include "Eigen/Dense"
-#include "Eigen/LU"
 
 #include "logger.h"
 
 namespace mpm {
 
 //! Geometry class
-//! \brief Base class that computes geometry mathematics
+//! \brief Base class that performs geometric manipulations / operations
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class Geometry {
@@ -21,12 +20,12 @@ class Geometry {
   Geometry(){};
 
   //! Compute inverse of rotation matrix for orthogonal axis coordinate system
-  //! \param[in] agnles Rotation angles depending on dimension
+  //! \param[in] angles Rotation angles depending on dimension
   //! \retval inverse of Euler rotation matrix R
-  Eigen::MatrixXd compute_inverse_rotation_matrix(
-      const Eigen::VectorXd& angles);
+  Eigen::Matrix<double, Tdim, Tdim> compute_inverse_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, 1>& angles);
 
- protected:
+ private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 

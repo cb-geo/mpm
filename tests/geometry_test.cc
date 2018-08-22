@@ -17,7 +17,7 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
 
   SECTION("Check inverse rotation matrix") {
 
-    auto geometry = std::make_shared<mpm::Geometry<Dim>>();
+    auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
     Eigen::Matrix<double, 2, 1> angles;
     // clang-format off
@@ -33,14 +33,12 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
         geometry->compute_inverse_rotation_matrix(angles);
     REQUIRE(check_inverse_rotation_matrix.cols() == 2);
     REQUIRE(check_inverse_rotation_matrix.rows() == 2);
-    REQUIRE(check_inverse_rotation_matrix(0, 0) ==
-            Approx(inverse_rotation_matrix(0, 0)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(1, 0) ==
-            Approx(inverse_rotation_matrix(1, 0)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(0, 1) ==
-            Approx(inverse_rotation_matrix(0, 1)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(1, 1) ==
-            Approx(inverse_rotation_matrix(1, 1)).epsilon(Tolerance));
+    for (unsigned i = 0; i < check_inverse_rotation_matrix.rows(); ++i) {
+      for (unsigned j = 0; j < check_inverse_rotation_matrix.cols(); ++j) {
+        REQUIRE(check_inverse_rotation_matrix(i, j) ==
+                Approx(inverse_rotation_matrix(i, j)).epsilon(Tolerance));
+      }
+    }
   }
 }
 
@@ -54,7 +52,7 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
 
   SECTION("Check inverse rotation matrix") {
 
-    auto geometry = std::make_shared<mpm::Geometry<Dim>>();
+    auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
     Eigen::Matrix<double, 3, 1> angles;
     // clang-format off
@@ -73,23 +71,11 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
         geometry->compute_inverse_rotation_matrix(angles);
     REQUIRE(check_inverse_rotation_matrix.cols() == 3);
     REQUIRE(check_inverse_rotation_matrix.rows() == 3);
-    REQUIRE(check_inverse_rotation_matrix(0, 0) ==
-            Approx(inverse_rotation_matrix(0, 0)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(0, 1) ==
-            Approx(inverse_rotation_matrix(0, 1)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(0, 2) ==
-            Approx(inverse_rotation_matrix(0, 2)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(1, 0) ==
-            Approx(inverse_rotation_matrix(1, 0)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(1, 1) ==
-            Approx(inverse_rotation_matrix(1, 1)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(1, 2) ==
-            Approx(inverse_rotation_matrix(1, 2)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(2, 0) ==
-            Approx(inverse_rotation_matrix(2, 0)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(2, 1) ==
-            Approx(inverse_rotation_matrix(2, 1)).epsilon(Tolerance));
-    REQUIRE(check_inverse_rotation_matrix(2, 2) ==
-            Approx(inverse_rotation_matrix(2, 2)).epsilon(Tolerance));
+    for (unsigned i = 0; i < check_inverse_rotation_matrix.rows(); ++i) {
+      for (unsigned j = 0; j < check_inverse_rotation_matrix.cols(); ++j) {
+        REQUIRE(check_inverse_rotation_matrix(i, j) ==
+                Approx(inverse_rotation_matrix(i, j)).epsilon(Tolerance));
+      }
+    }
   }
 }
