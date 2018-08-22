@@ -9,11 +9,10 @@ inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
   const double cos_beta = cos(angles(1));
   const double sin_beta = sin(angles(1));
 
-  Eigen::Matrix<double, 2, 2> rotation_matrix;
-
   // clang-format off
-  rotation_matrix << cos_alpha*cos_beta - sin_alpha*sin_beta,  -cos_alpha*sin_beta - sin_alpha*cos_beta,
-                     sin_alpha*cos_beta + cos_alpha*sin_beta,  -sin_alpha*sin_beta + cos_alpha*cos_beta;                                 
+  const Eigen::Matrix<double, 2, 2> rotation_matrix = 
+    (Eigen::Matrix<double, 2, 2>() << cos_alpha*cos_beta - sin_alpha*sin_beta,  -cos_alpha*sin_beta - sin_alpha*cos_beta,
+                                      sin_alpha*cos_beta + cos_alpha*sin_beta,  -sin_alpha*sin_beta + cos_alpha*cos_beta).finished();                                 
   // clang-format on            
 
   // Return inverted rotation matrix
@@ -33,12 +32,12 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
   const double cos_gamma = cos(angles(2));
   const double sin_gamma = sin(angles(2));
 
-  Eigen::Matrix<double, 3, 3> rotation_matrix;
-
   // clang-format off
-  rotation_matrix << cos_alpha*cos_beta - sin_alpha*cos_gamma*sin_beta,  -cos_alpha*sin_beta - sin_alpha*cos_gamma*cos_beta,   sin_gamma*sin_alpha,
-                     sin_alpha*cos_beta + cos_alpha*cos_gamma*sin_beta,  -sin_alpha*sin_beta + cos_alpha*cos_gamma*cos_beta,  -sin_gamma*cos_alpha,
-                     sin_gamma*sin_beta,                                  sin_gamma*cos_beta,                                  cos_gamma;
+  const Eigen::Matrix<double, 3, 3> rotation_matrix = 
+
+    (Eigen::Matrix<double, 3, 3>() << cos_alpha*cos_beta - sin_alpha*cos_gamma*sin_beta,  -cos_alpha*sin_beta - sin_alpha*cos_gamma*cos_beta,   sin_gamma*sin_alpha,
+                                      sin_alpha*cos_beta + cos_alpha*cos_gamma*sin_beta,  -sin_alpha*sin_beta + cos_alpha*cos_gamma*cos_beta,  -sin_gamma*cos_alpha,
+                                      sin_gamma*sin_beta,                                  sin_gamma*cos_beta,                                  cos_gamma).finished();
   // clang-format on
 
   // Return inverted rotation matrix
