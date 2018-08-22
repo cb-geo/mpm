@@ -91,7 +91,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/vtk_writer.cc
 )
 
-add_library(lmpm STATIC ${mpm_src})
+add_library(lmpm SHARED ${mpm_src})
 
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
