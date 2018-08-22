@@ -46,3 +46,15 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
   // Return inverted rotation matrix
   return rotation_matrix.inverse();
 }
+
+//! Return angle between two vectors in radians
+template <unsigned Tdim>
+double mpm::Geometry<Tdim>::angle_between_two_vectors(
+    const Eigen::VectorXd& vector_a, const Eigen::VectorXd& vector_b) {
+
+  // angle between vector a and b = arccos( a dot b / ||a|| ||b||)
+  const double angle =
+      acos((vector_a.normalized()).dot((vector_b.normalized())));
+
+  return angle;
+}
