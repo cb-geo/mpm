@@ -17,13 +17,13 @@ template <unsigned Tdim>
 class Geometry {
  public:
   //! Constructor
-  Geometry(){};
+  Geometry() = default;
 
   //! Return inverse rotation matrix for orthogonal axis coordinate system
   //! \param[in] angles Rotation angles depending on dimension
   //! \retval inverse of Euler rotation matrix R
   Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
-      const Eigen::Matrix<double, Tdim, 1>& angles);
+      const Eigen::Matrix<double, Tdim, 1>& angles) const;
 
  private:
   //! Logger
