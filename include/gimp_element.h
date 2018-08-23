@@ -1,5 +1,5 @@
-#ifndef MPM_QUADRILATERAL_ELEMENT_H_
-#define MPM_QUADRILATERAL_ELEMENT_H_
+#ifndef MPM_GIMP_ELEMENT_H_
+#define MPM_GIMP_ELEMENT_H_
 
 #include <exception>
 
@@ -10,66 +10,45 @@
 
 namespace mpm {
 
-//! Quadrilateral element class derived from Element class
-//! \brief Quadrilateral element
-//! \details 4-noded, 8-noded, and 9-noded quadrilateral element \n
-//! Shape function, gradient shape function, B-matrix, indices \n
-//! 4-node Quadrilateral Element \n
-//! <pre>
-//!
-//! 3 0----------0 2
-//!   |          |
-//!   |          |
-//!   |          |
-//!   |          |
-//! 0 0----------0 1
-//!
-//! </pre>
-//! 8-node Quadrilateral Element
-//! <pre>
-//!
-//!  3      6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0           0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//! 0       4       1
-//!
-//! </pre>
-//! 9-node Quadrilateral Element
-//! <pre>
-//!
-//! 3       6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0   8 0     0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//!  0      4       1
-//!
+//!   13----------12----------11----------10
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//! 		        (-1, 1)	    (1,1)
+//!   14----------3-----------2-----------9
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |   Point   |           |
+//!   |           | location  |           |
+//!   |           |           |           |
+//!   15----------0-----------1-----------8
+//!		         (-1,-1)	    (1,-1)
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   4-----------5-----------6-----------7
 //! </pre>
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
-class QuadrilateralElement : public Element<Tdim> {
+class GimpElement : public Element<Tdim> {
 
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralElement() : mpm::Element<Tdim>() {
+  GimpElement() : mpm::Element<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
+    static_assert((Tnfunctions == 16),
                   "Specified number of shape functions is not defined");
 
     //! Logger
-    std::string logger = "quadrilateral::<" + std::to_string(Tdim) + ", " +
+    std::string logger = "Gimp::<" + std::to_string(Tdim) + ", " +
                          std::to_string(Tnfunctions) + ">";
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
@@ -142,7 +121,12 @@ class QuadrilateralElement : public Element<Tdim> {
   Eigen::MatrixXi inhedron_indices() const override;
 
   //! Return number of particles in center cell
-  void number_of_particles(const unsigned nparticles) { return; }
+  void number_of_particles(const unsigned nparticles) {
+    nparticles_ = nparticles;
+  }
+
+ public:
+  unsigned nparticles_;
 
  private:
   //! Logger
@@ -150,6 +134,6 @@ class QuadrilateralElement : public Element<Tdim> {
 };
 
 }  // namespace mpm
-#include "quadrilateral_element.tcc"
+#include "gimp_element.tcc"
 
 #endif  // MPM_QUADRILATERAL_ELEMENT_H_

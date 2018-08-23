@@ -167,6 +167,9 @@ class HexahedronElement : public Element<Tdim> {
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
 
+  //! Return number of particles in center cell
+  void number_of_particles(const unsigned nparticles) { return; }
+
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
