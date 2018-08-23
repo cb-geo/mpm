@@ -88,6 +88,9 @@ class Element {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   virtual Eigen::MatrixXi inhedron_indices() const = 0;
+
+  //! Return number of particles in center cell
+  virtual void number_of_particles(const unsigned nparticles) = 0;
 };
 
 }  // namespace mpm

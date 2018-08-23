@@ -172,6 +172,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
+      // store number of points in cell
+      element->number_of_particles(cell_->nparticles());
+
       // Compute shape function of the particle
       shapefn_ = element->shapefn(this->xi_);
       // Compute bmatrix of the particle for reference cell
