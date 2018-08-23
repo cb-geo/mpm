@@ -123,18 +123,15 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )   
-  add_executable(mpmtest
-    ${test_src}
-  )
+  add_executable(mpmtest ${test_src})
   target_link_libraries(mpmtest lmpm)
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
   enable_testing()
 endif()
 
 # Coverage
-add_executable(mpmtest_coverage
-  ${mpm_src}
-  ${test_src}
-)
 find_package(codecov)
-add_coverage(mpmtest_coverage)
+if(ENABLE_COVERAGE)
+  add_executable(mpmtest_coverage ${mpm_src} ${test_src})
+  add_coverage(mpmtest_coverage)
+endif()
