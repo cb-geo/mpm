@@ -48,7 +48,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 
 ### Compile without tests
 
-To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=off /path/to/CMakeLists.txt`.
+To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
 
 
 ### Run tests

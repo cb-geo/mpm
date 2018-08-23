@@ -255,6 +255,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return Eigen::Matrix<double, Tdim, Tdim>::Zero();
   }
 
   // Jacobian
@@ -297,15 +298,20 @@ inline std::vector<Eigen::MatrixXd>
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
   try {
     // Check if matrices dimensions are correct
     if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-        (xi.size() != nodal_coordinates.cols()))
+        (xi.rows() != nodal_coordinates.cols()))
       throw std::runtime_error(
           "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return bmatrix;
   }
 
   // Jacobian dx_i/dxi_j
@@ -315,10 +321,6 @@ inline std::vector<Eigen::MatrixXd>
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
   Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-
-  // B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix;
-  bmatrix.reserve(Tnfunctions);
 
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     // clang-format off

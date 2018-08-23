@@ -1,3 +1,5 @@
+#include <iostream>
+
 // Quadrilateral element test
 #include <memory>
 
