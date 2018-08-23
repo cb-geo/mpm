@@ -6,8 +6,6 @@
 
 #include "Eigen/Dense"
 
-#include "logger.h"
-
 namespace mpm {
 
 //! Geometry class
@@ -24,10 +22,6 @@ class Geometry {
   //! \retval inverse of Euler rotation matrix R
   Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
       const Eigen::Matrix<double, Tdim, 1>& angles) const;
-
- private:
-  //! Logger
-  std::unique_ptr<spdlog::logger> console_;
 
 };  // Geometry class
 }  // namespace mpm
