@@ -112,6 +112,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
+    ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/hexahedron_element_test.cc
     ${mpm_SOURCE_DIR}/tests/hex_quadrature_test.cc  
     ${mpm_SOURCE_DIR}/tests/io_test.cc
