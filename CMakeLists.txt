@@ -132,10 +132,9 @@ if(MPM_BUILD_TESTING)
 endif()
 
 # Coverage
-find_package(codecov)
-add_coverage(lmpm)
-add_coverage(mpm)
+option(ENABLE_COVERAGE "enable code coverage" Off)
 
-if(MPM_BUILD_TESTING)
-  add_coverage(mpmtest)
+if(ENABLE_COVERAGE)
+  include(CodeCoverage)
+  APPEND_COVERAGE_COMPILER_FLAGS()
 endif()
