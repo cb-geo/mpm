@@ -89,26 +89,16 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
   ${mpm_SOURCE_DIR}/src/vtk_writer.cc
-  ${mpm_SOURCE_DIR}/src/main.cc
 )
-add_executable(mpm
-  ${mpm_src}
-)
+
+add_library(lmpm SHARED ${mpm_src})
+
+add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
+target_link_libraries(mpm lmpm)
 
 # Unit test
 if(MPM_BUILD_TESTING)
   SET(test_src
-    ${mpm_SOURCE_DIR}/src/affine_transform.cc
-    ${mpm_SOURCE_DIR}/src/cell.cc
-    ${mpm_SOURCE_DIR}/src/io.cc
-    ${mpm_SOURCE_DIR}/src/logger.cc
-    ${mpm_SOURCE_DIR}/src/material.cc
-    ${mpm_SOURCE_DIR}/src/mpm.cc
-    ${mpm_SOURCE_DIR}/src/node.cc
-    ${mpm_SOURCE_DIR}/src/particle.cc
-    ${mpm_SOURCE_DIR}/src/read_mesh.cc
-    ${mpm_SOURCE_DIR}/src/element.cc
-    ${mpm_SOURCE_DIR}/src/vtk_writer.cc
     ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
@@ -134,17 +124,15 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )   
-  add_executable(mpmtest
-    ${test_src}
-  )
+  add_executable(mpmtest ${test_src})
+  target_link_libraries(mpmtest lmpm)
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
   enable_testing()
 endif()
 
 # Coverage
 find_package(codecov)
-add_coverage(mpm)
-
-if(MPM_BUILD_TESTING)
-  add_coverage(mpmtest)
+if(ENABLE_COVERAGE)
+  add_executable(mpmtest_coverage ${mpm_src} ${test_src})
+  add_coverage(mpmtest_coverage)
 endif()
