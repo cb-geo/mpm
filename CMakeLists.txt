@@ -133,6 +133,8 @@ endif()
 
 # Coverage
 find_package(codecov)
+add_coverage(lmpm)
+add_coverage(liblmpm.so)
 add_coverage(mpm)
 
 if(MPM_BUILD_TESTING)
