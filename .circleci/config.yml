@@ -47,4 +47,5 @@ jobs:
             make mpmtest_coverage -j4
             ./mpmtest_coverage
             make gcov
+            make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov
