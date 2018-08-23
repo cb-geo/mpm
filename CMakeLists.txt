@@ -132,9 +132,9 @@ if(MPM_BUILD_TESTING)
 endif()
 
 # Coverage
-option(ENABLE_COVERAGE "enable code coverage" Off)
-
-if(ENABLE_COVERAGE)
-  include(CodeCoverage)
-  APPEND_COVERAGE_COMPILER_FLAGS()
-endif()
+add_executable(mpmtest_coverage
+  ${mpm_src}
+  ${test_src}
+)
+find_package(codecov)
+add_coverage(mpmtest_coverage)
