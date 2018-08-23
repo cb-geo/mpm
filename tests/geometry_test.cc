@@ -23,6 +23,7 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
     // clang-format off
     angles << 45. * M_PI / 180.,   // alpha
               30. * M_PI / 180.;   // beta
+    // clang-format on
 
     Eigen::Matrix<double, 2, 2> inverse_rotation_matrix;
     // clang-format off
