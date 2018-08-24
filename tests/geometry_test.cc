@@ -16,7 +16,6 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
   const double Tolerance = 1.E-7;
 
   SECTION("Check inverse rotation matrix") {
-
     // Make geometry
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
@@ -44,7 +43,6 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
   }
 
   SECTION("Check angle between two vectors") {
-
     // Make geometry
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
@@ -52,10 +50,11 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
     vector_a << 3, 0;
     Eigen::Matrix<double, 2, 1> vector_b;
     vector_b << -2, 2;
+
     const double angle = 2.356194490192345;
 
-    auto check_angle = geometry->angle_between_two_vectors(vector_a, vector_b);
-    REQUIRE(check_angle == Approx(angle).epsilon(Tolerance));
+    REQUIRE(geometry->angle_between_two_vectors(vector_a, vector_b) ==
+            Approx(angle).epsilon(Tolerance));
   }
 }
 
@@ -68,7 +67,6 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
   const double Tolerance = 1.E-7;
 
   SECTION("Check inverse rotation matrix") {
-
     // Make geometry
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
@@ -98,18 +96,17 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
   }
 
   SECTION("Check angle between two vectors") {
-
     // Make geometry
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
-    Eigen::Matrix<double, 2, 1> vector_a;
+    Eigen::Matrix<double, 3, 1> vector_a;
     vector_a << 3, 0, 0;
-    Eigen::Matrix<double, 2, 1> vector_b;
+    Eigen::Matrix<double, 3, 1> vector_b;
     vector_b << -2, 2, 0;
 
     const double angle = 2.356194490192345;
 
-    auto check_angle = geometry->angle_between_two_vectors(vector_a, vector_b);
-    REQUIRE(check_angle == Approx(angle).epsilon(Tolerance));
+    REQUIRE(geometry->angle_between_two_vectors(vector_a, vector_b) ==
+            Approx(angle).epsilon(Tolerance));
   }
 }
