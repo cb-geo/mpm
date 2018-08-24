@@ -100,11 +100,11 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
     Eigen::Matrix<double, 3, 1> vector_a;
-    vector_a << 3, 0, 0;
+    vector_a << 3, 0, 4;
     Eigen::Matrix<double, 3, 1> vector_b;
-    vector_b << -2, 2, 0;
+    vector_b << -2, 2, 4;
 
-    const double angle = 2.356194490192345;
+    const double angle = 1.150261991510931;
 
     REQUIRE(geometry->angle_between_two_vectors(vector_a, vector_b) ==
             Approx(angle).epsilon(Tolerance));

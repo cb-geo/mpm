@@ -27,7 +27,7 @@ class Geometry {
   //! \param[in] vector_a First vector
   //! \param[in] vecotr_b Second vector
   //! \retval anti-clockwise angle from vector_a to vector_b
-  double angle_between_two_vectors(
+  const double angle_between_two_vectors(
       const Eigen::Matrix<double, Tdim, 1>& vector_a,
       const Eigen::Matrix<double, Tdim, 1>& vector_b);
 
