@@ -2,6 +2,7 @@
 #define MPM_HEXAHEDRON_ELEMENT_H_
 
 #include <exception>
+#include <map>
 
 #include <Eigen/Dense>
 
@@ -80,6 +81,43 @@ namespace mpm {
 //!
 //!
 //! </pre>
+//!
+//! Face numbering for 8-node, 20-node and 27-node Hexaheron Element \n
+//!
+//! <pre>
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
+//!         Front: F5
+//!
+//!
+//! Bottom face: F0, Right face: F1, Top face: F2,
+//! Left face: F3, Behind face: F4, Front face: F5
+//! </pre>
+//!
+//! Namespace containing constants of face id
+
+const std::map<unsigned, Eigen::VectorXi> face_indices_hexahedron{
+
+    {0, Eigen::Matrix<int, 4, 1>(0, 1, 5, 4)},
+    {1, Eigen::Matrix<int, 4, 1>(5, 1, 2, 0)},
+    {2, Eigen::Matrix<int, 4, 1>(7, 6, 2, 3)},
+    {3, Eigen::Matrix<int, 4, 1>(0, 4, 7, 3)},
+    {4, Eigen::Matrix<int, 4, 1>(0, 1, 2, 3)},
+    {5, Eigen::Matrix<int, 4, 1>(4, 5, 6, 7)}
+
+};
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -166,6 +204,11 @@ class HexahedronElement : public Element<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+  //! Return indices of a face of an element
+  //! \param[in] face_id given id of the face
+  //! \retval indices Indices that make the face
+  Eigen::VectorXi face_indices(unsigned face_id) const override;
 
  private:
   //! Logger

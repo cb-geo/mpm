@@ -133,6 +133,8 @@ bool mpm::Mesh<Tdim>::create_cells(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   bool insertion_status = cells_.add(cell);
+  // Add cell to map
+  if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
 }
 
@@ -141,8 +143,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   // Remove a cell if found in the container
-  bool status = cells_.remove(cell);
-  return status;
+  const mpm::Index id = cell->id();
+  return (cells_.remove(cell) && map_cells_.remove(id));
 }
 
 //! Iterate over cells
@@ -313,7 +315,7 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(
   return particle_stresses;
 }
 
-//! Assign velocity constraints
+//! Assign velocity constraints to nodes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_velocity_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
@@ -338,6 +340,46 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
     } else {
       throw std::runtime_error(
           "No nodes have been assigned in mesh, cannot assign velocity "
+          "constraints");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign velocity constraints to cells
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>&
+        velocity_constraints) {
+  bool status = false;
+  try {
+    if (nodes_.size()) {
+      for (const auto& velocity_constraint : velocity_constraints) {
+        // Cell id
+        mpm::Index cell_id = std::get<0>(velocity_constraint);
+        // Face id
+        mpm::Index face_id = std::get<1>(velocity_constraint);
+        // Direction of the local coordinate system of the face
+        // Tdim = 2: Normal = y local axis, = 1
+        // Tdim = 3: Normal = z local axis, = 2
+        unsigned dir = std::get<2>(velocity_constraint);
+        // Velocity
+        double velocity = std::get<3>(velocity_constraint);
+
+        // Apply constraint
+        status = map_cells_[cell_id]->assign_cell_velocity_constraint(
+            face_id, dir, velocity);
+
+        if (!status)
+          throw std::runtime_error(
+              "Cell or face or velocity constraint is invalid");
+      }
+    } else {
+      throw std::runtime_error(
+          "No cells have been assigned in mesh, cannot assign velocity "
           "constraints");
     }
   } catch (std::exception& exception) {

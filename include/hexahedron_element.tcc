@@ -520,4 +520,45 @@ inline Eigen::MatrixXi
   //clang-format on
   return indices;
 }
+
+
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5  
+//!         Front: F5 
+//!
+//!
+//! Bottom face: F0, Right face: F1, Top face: F2, 
+//! Left face: F3, Behind face: F4, Front face: F5
+//! Return indices of a face of the element
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXi
+    mpm::HexahedronElement<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
   
+  // Make return_indices
+  Eigen::Matrix<int, 4, 1> return_indices;
+  try {
+    // Check if face_id is within range
+    if (face_id < face_indices_hexahedron.size()) {
+      return_indices = face_indices_hexahedron.find(face_id)->second;
+    } else {
+      return_indices = face_indices_hexahedron.find(0)->second;
+      throw std::runtime_error(
+          "Face ID is undefined, using default value of 0.");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return return_indices;
+}

@@ -764,6 +764,28 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(11, 1) == 1);
       REQUIRE(indices(11, 2) == 2);
     }
+
+    SECTION("Eight noded hexahedron shape function for face indices") {
+      // Check for face indices
+      unsigned face_id = 0;
+      Eigen::VectorXi indices = hex->face_indices(face_id);
+      REQUIRE(indices.size() == 4);
+
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 5);
+      REQUIRE(indices(3) == 4);
+
+      // Check for undefined indices
+      unsigned face_id_undefined = 20;
+      indices = hex->face_indices(face_id_undefined);
+      REQUIRE(indices.size() == 4);
+
+      REQUIRE(indices(0) == 0);
+      REQUIRE(indices(1) == 1);
+      REQUIRE(indices(2) == 5);
+      REQUIRE(indices(3) == 4);
+    }
   }
 
   // 20-Node (Serendipity) Hexahedron Element
@@ -2061,6 +2083,18 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(11, 0) == 3);
       REQUIRE(indices(11, 1) == 1);
       REQUIRE(indices(11, 2) == 2);
+    }
+
+    SECTION("20-noded noded hexahedron shape function for face indices") {
+      // Check for face indices
+      unsigned face_id = 5;
+      Eigen::VectorXi indices = hex->face_indices(face_id);
+      REQUIRE(indices.size() == 4);
+
+      REQUIRE(indices(0) == 4);
+      REQUIRE(indices(1) == 5);
+      REQUIRE(indices(2) == 6);
+      REQUIRE(indices(3) == 7);
     }
   }
 }

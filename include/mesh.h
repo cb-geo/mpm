@@ -1,6 +1,7 @@
 #ifndef MPM_MESH_H_
 #define MPM_MESH_H_
 
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -148,10 +149,17 @@ class Mesh {
   //! \param[in] phase Index corresponding to the phase
   std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses(unsigned phase);
 
-  //! Assign velocity constraints
+  //! Assign velocity constraints to nodes
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
   bool assign_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          velocity_constraints);
+
+  //! Assign velocity constraints to cells
+  //! \param[in] velocity_constraints Constraint at cell id, phase id, dir, and
+  //! velocity
+  bool assign_cell_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>&
           velocity_constraints);
 
   //! Return status of the mesh. A mesh is active, if at least one particle is
@@ -184,6 +192,8 @@ class Mesh {
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
+
+ protected:
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Container of mesh neighbours
@@ -196,6 +206,8 @@ class Mesh {
   Map<NodeBase<Tdim>> map_nodes_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Map of cells for fast retrieval
+  Map<Cell<Tdim>> map_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class
