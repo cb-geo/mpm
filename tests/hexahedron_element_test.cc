@@ -1710,7 +1710,6 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
-
       // Jacobian result
       Eigen::Matrix<double, Dim, Dim> jacobian;
       // clang-format off
