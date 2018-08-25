@@ -171,6 +171,60 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
     }
 
+    SECTION("Eight noded hexahedron shapefn with deformation gradient") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+      auto shapefn = hex->shapefn(coords, psize, defgrad);
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.125).epsilon(Tolerance));
+
+      // Check gradient of shape functions
+      auto gradsf = hex->grad_shapefn(coords, psize, defgrad);
+      REQUIRE(gradsf.rows() == nfunctions);
+      REQUIRE(gradsf.cols() == Dim);
+
+      REQUIRE(gradsf(0, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 0) == Approx(-0.125).epsilon(Tolerance));
+
+      REQUIRE(gradsf(0, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 1) == Approx(0.125).epsilon(Tolerance));
+
+      REQUIRE(gradsf(0, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 2) == Approx(0.125).epsilon(Tolerance));
+    }
+
     // Check Jacobian
     SECTION(
         "Eight noded hexahedron Jacobian for local coordinates(0.5,0.5,0.5)") {
@@ -199,6 +253,47 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       // Get Jacobian
       auto jac = hex->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION("Eight noded hexahedron Jacobian with deformation gradient") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2., 1., 0.5,
+                4., 2., 1.0,
+                2., 4., 1.0,
+                1., 3., 0.5,
+                2., 1., 1.5,
+                4., 2., 2.0,
+                2., 4., 2.0,
+                1., 3., 1.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5, 0.25,
+                 -0.875, 1.0, 0.00,
+                  0.000, 0.0, 0.50;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian(xi, coords, psize, defgrad);
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -437,6 +532,59 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       // Check gradient of shape functions
       auto gradsf = hex->grad_shapefn(xi);
+      gradsf *= 2.;
+
+      // Check size of B-matrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    SECTION("Eight noded hexahedron B-matrix with deformation gradient") {
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0., 0., 0.;
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 0., 0., 0.,
+                1., 0., 0., 
+                1., 1., 0.,
+                0., 1., 0.,
+                0., 0., 1.,
+                1., 0., 1., 
+                1., 1., 1.,
+                0., 1., 1.;
+      // clang-format on
+
+      // Get B-Matrix
+      auto bmatrix = hex->bmatrix(xi, coords, psize, defgrad);
+
+      // Check gradient of shape functions
+      auto gradsf = hex->grad_shapefn(xi, psize, defgrad);
       gradsf *= 2.;
 
       // Check size of B-matrix
