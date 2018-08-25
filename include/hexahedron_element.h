@@ -191,6 +191,9 @@ class HexahedronElement : public Element<Tdim> {
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;
 
+  //! Return the type of shape function
+  mpm::ShapefnType shapefn_type() const { return mpm::ShapefnType::NORMAL_MPM; }
+
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
 
