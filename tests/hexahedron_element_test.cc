@@ -1509,6 +1509,124 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
     }
 
+    SECTION("Twenty noded hexahedron element with grad deformation") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      auto shapefn = hex->shapefn(coords, psize, defgrad);
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      // Edge nodes
+      REQUIRE(shapefn(0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(-0.25).epsilon(Tolerance));
+
+      // Midside nodes
+      REQUIRE(shapefn(8) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(9) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(10) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(11) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(12) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(13) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(14) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(15) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(16) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(17) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(18) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(19) == Approx(0.25).epsilon(Tolerance));
+
+      // Check gradient of shape functions
+      auto gradsf = hex->grad_shapefn(coords, psize, defgrad);
+      REQUIRE(gradsf.rows() == nfunctions);
+      REQUIRE(gradsf.cols() == Dim);
+
+      // Derivatives with respect to eta-direction
+      // Edge nodes
+      REQUIRE(gradsf(0, 0) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 0) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 0) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 0) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 0) == Approx(+0.125).epsilon(Tolerance));
+
+      // Midside nodes
+      REQUIRE(gradsf(8, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(16, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(17, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(18, 0) == Approx(+0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(19, 0) == Approx(0.0).epsilon(Tolerance));
+
+      // Derivatives with respect to psi-direction
+      // Edge nodes
+      REQUIRE(gradsf(0, 1) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 1) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 1) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 1) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 1) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 1) == Approx(-0.125).epsilon(Tolerance));
+
+      // Midside nodes
+      REQUIRE(gradsf(8, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(16, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(17, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(18, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(19, 1) == Approx(0.25).epsilon(Tolerance));
+
+      // Derivatives with respect to mu-direction
+      // Edge nodes
+      REQUIRE(gradsf(0, 2) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 2) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 2) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 2) == Approx(+0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(4, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 2) == Approx(-0.125).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 2) == Approx(-0.125).epsilon(Tolerance));
+
+      // Midside nodes
+      REQUIRE(gradsf(8, 2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 2) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 2) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 2) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 2) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(16, 2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(17, 2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(18, 2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(19, 2) == Approx(0.25).epsilon(Tolerance));
+    }
+
     // Check Jacobian
     SECTION("20 noded hexahedron Jacobian for local coordinates(0.5,0.5,0.5)") {
       Eigen::Matrix<double, 20, Dim> coords;
@@ -1548,6 +1666,61 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       // Get Jacobian
       auto jac = hex->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check Jacobian with deformation gradient
+    SECTION("20 noded hexahedron Jacobian with deformation gradient") {
+      Eigen::Matrix<double, 20, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0, 0.50, 
+                4.0, 2.0, 1.00, 
+                2.0, 4.0, 1.00, 
+                1.0, 3.0, 0.50, 
+                2.0, 1.0, 1.50, 
+                4.0, 2.0, 2.00, 
+                2.0, 4.0, 2.00, 
+                1.0, 3.0, 1.50, 
+                3.0, 1.5, 0.75, 
+                1.5, 2.0, 0.50, 
+                2.0, 1.0, 1.00,
+                3.0, 3.0, 1.00, 
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 0.75,
+                2.0, 4.0, 1.50,
+                1.0, 3.0, 1.00,
+                3.0, 1.5, 1.75,
+                1.5, 2.0, 1.50, 
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 1.75;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize << 0.25, 0.5, 0.75;
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.90625, 0.21875, 0.109375,
+                 -1.43750, 1.56250, 0.281250,
+                  0.28125,-0.28125, 0.359375;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian(xi, coords, psize, defgrad);
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
