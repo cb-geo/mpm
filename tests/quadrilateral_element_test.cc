@@ -107,6 +107,40 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(gradsf(3, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Check shapefn with deformation gradient
+    SECTION(
+        "Four noded quadrilateral element shapefn with deformation gradient") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+      auto shapefn = quad->shapefn(coords, psize, defgrad);
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.25).epsilon(Tolerance));
+
+      // Check gradient of shape functions
+      auto gradsf = quad->grad_shapefn(coords, psize, defgrad);
+      REQUIRE(gradsf.rows() == nfunctions);
+      REQUIRE(gradsf.cols() == Dim);
+
+      REQUIRE(gradsf(0, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(0, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 1) == Approx(0.25).epsilon(Tolerance));
+    }
+
     // Check Jacobian
     SECTION(
         "Four noded quadrilateral Jacobian for local coordinates(0.5,0.5)") {
@@ -129,6 +163,43 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       // Get Jacobian
       auto jac = quad->jacobian(xi, coords);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION(
+        "Four noded quadrilateral Jacobian with deformation gradient") {
+      Eigen::Matrix<double, 4, Dim> coords;
+      // clang-format off
+      coords << 2., 1.,
+                4., 2.,
+                2., 4.,
+                1., 3.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian(xi, coords, psize, defgrad);
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -299,6 +370,46 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       // Get B-Matrix
       auto bmatrix = quad->bmatrix(xi, coords);
+
+      // Check gradient of shape functions
+      auto gradsf = quad->grad_shapefn(xi);
+      gradsf *= 2.;
+
+      // Check size of B-matrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
+
+    // Check BMatrix with deformation gradient
+    SECTION("Four noded quadrilateral B-matrix cell with deformation gradient") {
+      // Reference coordinates
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Nodal coordinates
+      Eigen::Matrix<double, 4, Dim> coords;
+      // clang-format off
+      coords << 0., 0.,
+                1., 0.,
+                1., 1.,
+                0., 1.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      // Get B-Matrix
+      auto bmatrix = quad->bmatrix(xi, coords, psize, defgrad);
 
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi);
