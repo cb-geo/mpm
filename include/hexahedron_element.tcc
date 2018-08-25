@@ -326,8 +326,7 @@ inline std::vector<Eigen::MatrixXd>
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
-        const VectorDim& xi,
-        const Eigen::MatrixXd& nodal_coordinates) const {
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
