@@ -11,7 +11,7 @@ namespace mpm {
 enum ElementDegree { Linear = 1, Quadratic = 2 };
 
 // Element Shapefn
-enum ElementShapefn { NORMAL_MPM = 1, GIMP = 2, CPDI = 3 };
+enum ShapefnType { NORMAL_MPM = 1, GIMP = 2, CPDI = 3 };
 
 //! Base class of shape functions
 //! \brief Base class that stores the information about shape functions
@@ -114,8 +114,8 @@ class Element {
   //! Return the degree of element
   virtual mpm::ElementDegree degree() const = 0;
 
-  //! Return the shapefn of element
-  // virtual mpm::ElementShapefn shapefn() const = 0;
+  //! Return the shapefn type of element
+  virtual mpm::ShapefnType shapefn_type() const = 0;
 
   //! Return nodal coordinates of a unit cell
   virtual Eigen::MatrixXd unit_cell_coordinates() const = 0;
