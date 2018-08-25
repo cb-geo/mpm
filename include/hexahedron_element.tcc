@@ -238,6 +238,26 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return shape functions of a Hexahedron Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd mpm::HexahedronElement<Tdim, Tnfunctions>::shapefn(
+    const Eigen::Matrix<double, Tdim, 1>& xi,
+    const Eigen::Matrix<double, Tdim, 1>& particle_size,
+    const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::shapefn(xi);
+}
+
+//! Return gradient shape functions of a Hexahedron Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::HexahedronElement<Tdim, Tnfunctions>::grad_shapefn(
+    const Eigen::Matrix<double, Tdim, 1>& xi,
+    const Eigen::Matrix<double, Tdim, 1>& particle_size,
+    const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::grad_shapefn(xi);
+}
+
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
@@ -260,6 +280,18 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 
   // Jacobian
   return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
+//! Compute Jacobian
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian(
+        const Eigen::Matrix<double, 3, 1>& xi,
+        const Eigen::MatrixXd& nodal_coordinates,
+        const Eigen::Matrix<double, 3, 1>& particle_size,
+        const Eigen::Matrix<double, 3, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian(
+      xi, nodal_coordinates);
 }
 
 //! Return B-matrix of a Hexahedron Element
@@ -294,7 +326,8 @@ inline std::vector<Eigen::MatrixXd>
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
-        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
+        const VectorDim& xi,
+        const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
@@ -335,6 +368,17 @@ inline std::vector<Eigen::MatrixXd>
     bmatrix.push_back(bi);
   }
   return bmatrix;
+}
+
+//! Compute Bmatrix
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
+      xi, nodal_coordinates);
 }
 
 //! Return mass_matrix of a Hexahedron Element
