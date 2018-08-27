@@ -48,20 +48,10 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
 }
 
 //! Return angle between two vectors in radians
-template <>
-inline const double mpm::Geometry<2>::angle_between_two_vectors(
-    const Eigen::Matrix<double, 2, 1>& vector_a,
-    const Eigen::Matrix<double, 2, 1>& vector_b) {
-
-  // return angle between vector a and b = arccos( a dot b / ||a|| ||b||)
-  return acos((vector_a.normalized()).dot((vector_b.normalized())));
-}
-
-//! Return angle between two vectors in radians
-template <>
-inline const double mpm::Geometry<3>::angle_between_two_vectors(
-    const Eigen::Matrix<double, 3, 1>& vector_a,
-    const Eigen::Matrix<double, 3, 1>& vector_b) {
+template <unsigned Tdim>
+inline const double mpm::Geometry<Tdim>::angle_between_vectors(
+    const Eigen::Matrix<double, Tdim, 1>& vector_a,
+    const Eigen::Matrix<double, Tdim, 1>& vector_b) {
 
   // return angle between vector a and b = arccos( a dot b / ||a|| ||b||)
   return acos((vector_a.normalized()).dot((vector_b.normalized())));
