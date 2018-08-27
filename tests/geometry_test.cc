@@ -53,7 +53,7 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
 
     const double angle = 2.356194490192345;
 
-    REQUIRE(geometry->angle_between_two_vectors(vector_a, vector_b) ==
+    REQUIRE(geometry->angle_between_vectors(vector_a, vector_b) ==
             Approx(angle).epsilon(Tolerance));
   }
 }
@@ -106,7 +106,7 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
 
     const double angle = 1.150261991510931;
 
-    REQUIRE(geometry->angle_between_two_vectors(vector_a, vector_b) ==
+    REQUIRE(geometry->angle_between_vectors(vector_a, vector_b) ==
             Approx(angle).epsilon(Tolerance));
   }
 }
