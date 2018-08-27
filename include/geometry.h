@@ -17,8 +17,8 @@ class Geometry {
   //! Constructor
   Geometry() = default;
 
-  //! Return the inverse Euler rotation matrix for an orthogonal axis coordinate system
-  //! \param[in] angles Rotation angles depending on the dimension
+  //! Return the inverse Euler rotation matrix for an orthogonal axis coordinate
+  //! system \param[in] angles Rotation angles depending on the dimension
   Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
       const Eigen::Matrix<double, Tdim, 1>& angles) const;
 
