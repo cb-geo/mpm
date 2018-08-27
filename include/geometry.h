@@ -17,16 +17,14 @@ class Geometry {
   //! Constructor
   Geometry() = default;
 
-  //! Return inverse rotation matrix for orthogonal axis coordinate system
-  //! \param[in] angles Rotation angles depending on dimension
-  //! \retval inverse of Euler rotation matrix R
+  //! Return the inverse Euler rotation matrix for an orthogonal axis coordinate system
+  //! \param[in] angles Rotation angles depending on the dimension
   Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
       const Eigen::Matrix<double, Tdim, 1>& angles) const;
 
-  //! Return angle between two vectors in radians
+  //! Return the angle between two vectors in radians
   //! \param[in] vector_a First vector
   //! \param[in] vecotr_b Second vector
-  //! \retval anti-clockwise angle from vector_a to vector_b
   const double angle_between_vectors(
       const Eigen::Matrix<double, Tdim, 1>& vector_a,
       const Eigen::Matrix<double, Tdim, 1>& vector_b);

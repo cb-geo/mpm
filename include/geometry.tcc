@@ -1,8 +1,7 @@
-//! Compute inverse of 2d rotation matrix for orthogonal axis coordinate system
+//! Compute the inverse of a 2d rotation matrix for an orthogonal axis coordinate system
 template <>
 inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
     const Eigen::Matrix<double, 2, 1>& angles) const {
-
   // Get cos and sin of angles
   const double cos_alpha_cos_beta = cos(angles(0)) * cos(angles(1));
   const double cos_alpha_sin_beta = cos(angles(0)) * sin(angles(1));
@@ -15,11 +14,11 @@ inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
                                       sin_alpha_cos_beta + cos_alpha_sin_beta,  -sin_alpha_sin_beta + cos_alpha_cos_beta).finished();                                 
   // clang-format on            
 
-  // Return inverted rotation matrix
+  // inverted rotation matrix
   return rotation_matrix.inverse();
 }
 
-//! Compute inverse of 3d rotation matrix for orthogonal axis coordinate system
+//! Compute the inverse of a 3d rotation matrix for an orthogonal axis coordinate system
 template <>
 inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(const 
     Eigen::Matrix<double, 3, 1>& angles) const {
@@ -43,16 +42,15 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
                                       sin_beta_sin_gamma,                                  cos_beta_sin_gamma,                                  cos_gamma).finished();
   // clang-format on
 
-  // Return inverted rotation matrix
+  // inverted rotation matrix
   return rotation_matrix.inverse();
 }
 
-//! Return angle between two vectors in radians
+//! Return the angle between two vectors in radians
 template <unsigned Tdim>
 inline const double mpm::Geometry<Tdim>::angle_between_vectors(
     const Eigen::Matrix<double, Tdim, 1>& vector_a,
     const Eigen::Matrix<double, Tdim, 1>& vector_b) {
-
-  // return angle between vector a and b = arccos( a dot b / ||a|| ||b||)
+  // angle between two vectors a and b = arccos( a dot b / ||a|| ||b||)
   return acos((vector_a.normalized()).dot((vector_b.normalized())));
 }
