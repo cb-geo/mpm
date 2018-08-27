@@ -1,4 +1,5 @@
-//! Compute the inverse of a 2d rotation matrix for an orthogonal axis coordinate system
+//! Compute the inverse of a 2d rotation matrix for an orthogonal axis
+//! coordinate system
 template <>
 inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
     const Eigen::Matrix<double, 2, 1>& angles) const {
