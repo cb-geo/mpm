@@ -1,6 +1,8 @@
 #ifndef MPM_ELEMENT_H_
 #define MPM_ELEMENT_H_
 
+#include <exception>
+#include <map>
 #include <vector>
 
 #include <Eigen/Dense>
