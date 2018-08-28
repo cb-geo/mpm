@@ -613,7 +613,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        auto check_indices = quad->face_indices(i);
+        const auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 2);
         REQUIRE(check_indices.cols() == 1);
 
@@ -1344,7 +1344,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        auto check_indices = quad->face_indices(i);
+        const auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 3);
         REQUIRE(check_indices.cols() == 1);
 
@@ -2103,7 +2103,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
-        auto check_indices = quad->face_indices(i);
+        const auto check_indices = quad->face_indices(i);
         REQUIRE(check_indices.rows() == 3);
         REQUIRE(check_indices.cols() == 1);
 
