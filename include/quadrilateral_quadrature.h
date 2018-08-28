@@ -36,6 +36,6 @@ class QuadrilateralQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
 }  // namespace mpm
 
-#include "quad_quadrature.tcc"
+#include "quadrilateral_quadrature.tcc"
 
 #endif  // MPM_QUADRILATERAL_QUADRATURE_H_
