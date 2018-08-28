@@ -570,7 +570,7 @@ template <>
 inline Eigen::MatrixXi
     mpm::HexahedronElement<3, 8>::face_indices(unsigned face_id) const {
   
-  //! Constants of face id and associate nodes
+  //! Face ids and its associated nodal indices
   const std::map<unsigned, Eigen::Matrix<int, 4, 1>> face_indices_hexahedron{
       {0, Eigen::Matrix<int, 4, 1>(0, 1, 5, 4)},
       {1, Eigen::Matrix<int, 4, 1>(5, 1, 2, 0)},
@@ -592,18 +592,16 @@ template <>
 inline Eigen::MatrixXi
     mpm::HexahedronElement<3, 20>::face_indices(unsigned face_id) const {
   
-  //! Constants of face id and associate nodes
+  //! Face ids and its associated nodal indices
+  // clang-format off
   const std::map<unsigned, Eigen::Matrix<int, 8, 1>> face_indices_hexahedron{
-      {0, (Eigen::Matrix<int, 8, 1>() << 0, 1, 5, 4, 8, 12, 16, 10).finished()},
-      {1,
-       (Eigen::Matrix<int, 8, 1>() << 5, 1, 2, 0, 12, 11, 14, 18).finished()},
-      {2,
-       (Eigen::Matrix<int, 8, 1>() << 7, 6, 2, 3, 19, 14, 13, 15).finished()},
-      {3, (Eigen::Matrix<int, 8, 1>() << 0, 4, 7, 3, 10, 17, 15, 9).finished()},
-      {4, (Eigen::Matrix<int, 8, 1>() << 1, 0, 3, 2, 8, 9, 13, 11).finished()},
-      {5,
-       (Eigen::Matrix<int, 8, 1>() << 4, 5, 6, 7, 16, 18, 19, 17).finished()}};
-
+      {0, (Eigen::Matrix<int, 8, 1>() << 0, 1, 5, 4,  8, 12, 16, 10).finished()},
+      {1, (Eigen::Matrix<int, 8, 1>() << 5, 1, 2, 0, 12, 11, 14, 18).finished()},
+      {2, (Eigen::Matrix<int, 8, 1>() << 7, 6, 2, 3, 19, 14, 13, 15).finished()},
+      {3, (Eigen::Matrix<int, 8, 1>() << 0, 4, 7, 3, 10, 17, 15,  9).finished()},
+      {4, (Eigen::Matrix<int, 8, 1>() << 1, 0, 3, 2,  8,  9, 13, 11).finished()},
+      {5, (Eigen::Matrix<int, 8, 1>() << 4, 5, 6, 7, 16, 18, 19, 17).finished()}};
+  //clang-format on
   try {
     return face_indices_hexahedron.at(face_id);
   } catch (std::exception& exception) {

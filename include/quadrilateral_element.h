@@ -1,9 +1,6 @@
 #ifndef MPM_QUADRILATERAL_ELEMENT_H_
 #define MPM_QUADRILATERAL_ELEMENT_H_
 
-#include <exception>
-#include <map>
-
 #include <Eigen/Dense>
 
 #include "element.h"

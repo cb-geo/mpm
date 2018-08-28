@@ -1,9 +1,6 @@
 #ifndef MPM_HEXAHEDRON_ELEMENT_H_
 #define MPM_HEXAHEDRON_ELEMENT_H_
 
-#include <exception>
-#include <map>
-
 #include <Eigen/Dense>
 
 #include "element.h"
@@ -102,7 +99,7 @@ namespace mpm {
 //!
 //!
 //! Bottom face: F0, Right face: F1, Top face: F2,
-//! Left face: F3, Behind face: F4, Front face: F5
+//! Left face: F3, Rear face: F4, Front face: F5
 //! </pre>
 //!
 //! \tparam Tdim Dimension

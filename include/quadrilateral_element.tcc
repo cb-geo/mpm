@@ -461,7 +461,7 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 4>::face_indices(unsigned face_id) const {
   
-  //! Constants of face id and associate nodes
+  //! Face ids and its associated nodal indices
   const std::map<unsigned, Eigen::Matrix<int, 2, 1>>
       face_indices_quadrilateral{{0, Eigen::Matrix<int, 2, 1>(0, 1)},
                                  {1, Eigen::Matrix<int, 2, 1>(1, 2)},
@@ -480,7 +480,7 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 8>::face_indices(unsigned face_id) const {
   
-  //! Constants of face id and associate nodes
+  //! Face ids and its associated nodal indices
   const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
       face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
                                  {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
@@ -499,7 +499,7 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 9>::face_indices(unsigned face_id) const {
   
-  //! Constants of face id and associate nodes
+  //! Face ids and its associated nodal indices
   const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
       face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
                                  {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
