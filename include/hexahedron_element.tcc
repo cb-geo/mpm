@@ -584,12 +584,36 @@ inline Eigen::MatrixXi
 //! Bottom face: F0, Right face: F1, Top face: F2, 
 //! Left face: F3, Behind face: F4, Front face: F5
 //! Return indices of a face of the element
-template <unsigned Tdim, unsigned Tnfunctions>
+//! 8-noded hexahedron
+template <>
 inline Eigen::MatrixXi
-    mpm::HexahedronElement<Tdim, Tnfunctions>::face_indices(unsigned face_id) const {
+    mpm::HexahedronElement<3, 8>::face_indices(unsigned face_id) const {
   
   // Make return_indices
-  Eigen::Matrix<int, 2 * (Tdim - 1), 1> return_indices;
+  Eigen::Matrix<int, 4, 1> return_indices;
+  try {
+    // Check if face_id is within range
+    if (face_id < face_indices_hexahedron_.size()) {
+      return_indices = face_indices_hexahedron_.at(face_id).head(4);
+    } else {
+      throw std::runtime_error(
+          "Face ID is undefined.");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return return_indices;
+}
+
+//! Return indices of a face of the element
+//! 20-noded hexahedron
+template <>
+inline Eigen::MatrixXi
+    mpm::HexahedronElement<3, 20>::face_indices(unsigned face_id) const {
+  
+  // Make return_indices
+  Eigen::Matrix<int, 8, 1> return_indices;
   try {
     // Check if face_id is within range
     if (face_id < face_indices_hexahedron_.size()) {
