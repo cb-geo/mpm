@@ -226,12 +226,30 @@ inline mpm::ElementDegree mpm::QuadrilateralElement<2, 9>::degree() const {
   return mpm::ElementDegree::Quadratic;
 }
 
+//! Return shape functions of a Quadrilateral Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(
+    const VectorDim& xi, const VectorDim& particle_size,
+    const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(xi);
+}
+
+//! Return gradient shape functions of a Quadrilateral Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(
+        const VectorDim& xi, const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(xi);
+}
+
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
-        const Eigen::Matrix<double, 2, 1>& xi,
-        const Eigen::MatrixXd& nodal_coordinates) const {
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
 
@@ -244,10 +262,22 @@ inline Eigen::Matrix<double, Tdim, Tdim>
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return Eigen::Matrix<double, Tdim, Tdim>::Zero();
   }
 
   // Jacobian dx_i/dxi_j
   return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
+//! Compute Jacobian with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
+      xi, nodal_coordinates);
 }
 
 //! Return the B-matrix of a Quadrilateral Element at a given local
@@ -284,15 +314,20 @@ inline std::vector<Eigen::MatrixXd>
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
   try {
     // Check if matrices dimensions are correct
     if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-        (xi.size() != nodal_coordinates.cols()))
+        (xi.rows() != nodal_coordinates.cols()))
       throw std::runtime_error(
           "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return bmatrix;
   }
 
   // Jacobian dx_i/dxi_j
@@ -302,10 +337,6 @@ inline std::vector<Eigen::MatrixXd>
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
   Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-
-  // B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix;
-  bmatrix.reserve(Tnfunctions);
 
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     Eigen::Matrix<double, 3, Tdim> bi;
@@ -317,6 +348,18 @@ inline std::vector<Eigen::MatrixXd>
     // clang-format on
   }
   return bmatrix;
+}
+
+//! Return the B-matrix of a Quadrilateral Element at a given local
+//! coordinate for a real cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
+      xi, nodal_coordinates);
 }
 
 //! Return mass_matrix of a Hexahedron Element
