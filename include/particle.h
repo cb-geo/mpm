@@ -171,6 +171,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position(unsigned phase, double dt) override;
 
+  //! Compute updated position of the particle based on nodal velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;
