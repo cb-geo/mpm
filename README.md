@@ -46,6 +46,15 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
+### Compile mpm or mpmtest
+
+* To compile either `mpm` or `mpmtest` alone, run `make mpm -jN` or `make mpmtest -jN` (where N is the number of cores).
+
+### Compile without tests [Editing CMake options]
+
+To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
+
+
 ### Run tests
 
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
@@ -86,6 +95,3 @@ Where:
 ## References
 * [Aspect](https://github.com/geodynamics/aspect)
 * [Dealii](https://github.com/dealii/dealii)
-
-
-

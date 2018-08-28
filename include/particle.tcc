@@ -396,14 +396,43 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Get interpolated nodal velocity
+      // Get interpolated nodal acceleration
       Eigen::Matrix<double, Tdim, 1> acceleration =
           cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
-      // Update particle velocity to interpolated nodal velocity
+      // Update particle velocity from interpolated nodal acceleration
       this->velocity_.col(phase) += acceleration * dt;
 
       // New position  current position + velocity * dt
+      this->coordinates_ += this->velocity_.col(phase) * dt;
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated coordinates of the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated position of the particle based on nodal velocity
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
+    unsigned phase, double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal velocity
+      Eigen::Matrix<double, Tdim, 1> velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+
+      // Update particle velocity to interpolated nodal velocity
+      this->velocity_.col(phase) += velocity;
+
+      // New position current position + velocity * dt
       this->coordinates_ += this->velocity_.col(phase) * dt;
     } else {
       throw std::runtime_error(

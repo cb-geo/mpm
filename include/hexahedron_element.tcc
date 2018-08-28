@@ -238,6 +238,26 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return shape functions of a Hexahedron Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd mpm::HexahedronElement<Tdim, Tnfunctions>::shapefn(
+    const Eigen::Matrix<double, Tdim, 1>& xi,
+    const Eigen::Matrix<double, Tdim, 1>& particle_size,
+    const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::shapefn(xi);
+}
+
+//! Return gradient shape functions of a Hexahedron Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::HexahedronElement<Tdim, Tnfunctions>::grad_shapefn(
+    const Eigen::Matrix<double, Tdim, 1>& xi,
+    const Eigen::Matrix<double, Tdim, 1>& particle_size,
+    const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::grad_shapefn(xi);
+}
+
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
@@ -255,10 +275,23 @@ inline Eigen::Matrix<double, Tdim, Tdim>
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return Eigen::Matrix<double, Tdim, Tdim>::Zero();
   }
 
   // Jacobian
   return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
+//! Compute Jacobian
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian(
+        const Eigen::Matrix<double, 3, 1>& xi,
+        const Eigen::MatrixXd& nodal_coordinates,
+        const Eigen::Matrix<double, 3, 1>& particle_size,
+        const Eigen::Matrix<double, 3, 1>& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian(
+      xi, nodal_coordinates);
 }
 
 //! Return B-matrix of a Hexahedron Element
@@ -297,15 +330,20 @@ inline std::vector<Eigen::MatrixXd>
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
 
+  // B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+  bmatrix.reserve(Tnfunctions);
+
   try {
     // Check if matrices dimensions are correct
     if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-        (xi.size() != nodal_coordinates.cols()))
+        (xi.rows() != nodal_coordinates.cols()))
       throw std::runtime_error(
           "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
           "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return bmatrix;
   }
 
   // Jacobian dx_i/dxi_j
@@ -315,10 +353,6 @@ inline std::vector<Eigen::MatrixXd>
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
   Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-
-  // B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix;
-  bmatrix.reserve(Tnfunctions);
 
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     // clang-format off
@@ -333,6 +367,17 @@ inline std::vector<Eigen::MatrixXd>
     bmatrix.push_back(bi);
   }
   return bmatrix;
+}
+
+//! Compute Bmatrix
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::HexahedronElement<Tdim, Tnfunctions>::bmatrix(
+      xi, nodal_coordinates);
 }
 
 //! Return mass_matrix of a Hexahedron Element
