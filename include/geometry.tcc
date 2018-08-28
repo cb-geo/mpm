@@ -47,7 +47,7 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
   return rotation_matrix.inverse();
 }
 
-//! Return the angle between two vectors in radians
+//! Compute the angle between two vectors in radians
 template <unsigned Tdim>
 inline const double mpm::Geometry<Tdim>::angle_between_vectors(
     const Eigen::Matrix<double, Tdim, 1>& vector_a,
