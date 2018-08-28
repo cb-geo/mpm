@@ -469,12 +469,16 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 4>::face_indices(unsigned face_id) const {
   
-  // Make return_indices
-  Eigen::Matrix<int, 2, 1> return_indices;
+  //! Constants of face id and associate nodes
+  const std::map<unsigned, Eigen::Matrix<int, 2, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 2, 1>(0, 1)},
+                                 {1, Eigen::Matrix<int, 2, 1>(1, 2)},
+                                 {2, Eigen::Matrix<int, 2, 1>(2, 3)},
+                                 {3, Eigen::Matrix<int, 2, 1>(3, 0)}}; 
   try {
     // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral_.size()) {
-      return_indices = face_indices_quadrilateral_.at(face_id).head(2);
+    if (face_id < face_indices_quadrilateral.size()) {
+      return face_indices_quadrilateral.at(face_id);
     } else {
       throw std::runtime_error(
           "Face ID is undefined.");
@@ -482,8 +486,6 @@ inline Eigen::MatrixXi
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
-
-  return return_indices;
 }
 
 //! Return indices of a face of the element
@@ -492,12 +494,16 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 8>::face_indices(unsigned face_id) const {
   
-  // Make return_indices
-  Eigen::Matrix<int, 3, 1> return_indices;
+  //! Constants of face id and associate nodes
+  const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
+                                 {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
+                                 {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
+                                 {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
   try {
     // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral_.size()) {
-      return_indices = face_indices_quadrilateral_.at(face_id);
+    if (face_id < face_indices_quadrilateral.size()) {
+      return face_indices_quadrilateral.at(face_id);
     } else {
       throw std::runtime_error(
           "Face ID is undefined.");
@@ -505,8 +511,6 @@ inline Eigen::MatrixXi
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
-
-  return return_indices;
 }
 
 //! Return indices of a face of the element
@@ -515,12 +519,16 @@ template <>
 inline Eigen::MatrixXi
     mpm::QuadrilateralElement<2, 9>::face_indices(unsigned face_id) const {
   
-  // Make return_indices
-  Eigen::Matrix<int, 3, 1> return_indices;
+  //! Constants of face id and associate nodes
+  const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
+                                 {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
+                                 {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
+                                 {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
   try {
     // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral_.size()) {
-      return_indices = face_indices_quadrilateral_.at(face_id);
+    if (face_id < face_indices_quadrilateral.size()) {
+      return face_indices_quadrilateral.at(face_id);
     } else {
       throw std::runtime_error(
           "Face ID is undefined.");
@@ -528,6 +536,4 @@ inline Eigen::MatrixXi
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
-
-  return return_indices;
 }
