@@ -564,25 +564,6 @@ inline Eigen::MatrixXi
   return indices;
 }
 
-
-//!            Behind: F4
-//!        3      F2       2
-//!          0_ _ _ _ _ _0
-//!         /|           /|
-//!        / |          / |
-//!     7 0_ |_ _ _ _ _0 6|
-//!       |  |         |  |
-//!    F3 |  |         |  |   F1
-//!       |  0_ _ _ _ _|_ 0
-//!       | / 0        | / 1
-//!       |/     F0    |/
-//!       0_ _ _ _ _ _ 0
-//!     4               5  
-//!         Front: F5 
-//!
-//!
-//! Bottom face: F0, Right face: F1, Top face: F2, 
-//! Left face: F3, Behind face: F4, Front face: F5
 //! Return indices of a face of the element
 //! 8-noded hexahedron
 template <>
@@ -599,13 +580,7 @@ inline Eigen::MatrixXi
       {5, Eigen::Matrix<int, 4, 1>(4, 5, 6, 7)}};
 
   try {
-    // Check if face_id is within range
-    if (face_id < face_indices_hexahedron.size()) {
-      return face_indices_hexahedron.at(face_id);
-    } else {
-      throw std::runtime_error(
-          "Face ID is undefined.");
-    }
+    return face_indices_hexahedron.at(face_id);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -630,13 +605,7 @@ inline Eigen::MatrixXi
        (Eigen::Matrix<int, 8, 1>() << 4, 5, 6, 7, 16, 18, 19, 17).finished()}};
 
   try {
-    // Check if face_id is within range
-    if (face_id < face_indices_hexahedron.size()) {
-      return face_indices_hexahedron.at(face_id);
-    } else {
-      throw std::runtime_error(
-          "Face ID is undefined.");
-    }
+    return face_indices_hexahedron.at(face_id);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

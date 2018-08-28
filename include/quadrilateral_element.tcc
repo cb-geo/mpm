@@ -455,14 +455,6 @@ inline Eigen::MatrixXi
   return indices;
 }
   
-//!          F2  
-//!   3 0----------0 2
-//!     |          |
-//!  F3 |          | F1
-//!     |          |
-//!     |          |
-//!   0 0----------0 1
-//!          F0
 //! Return indices of a face of the element
 //! 4-noded quadrilateral
 template <>
@@ -476,13 +468,7 @@ inline Eigen::MatrixXi
                                  {2, Eigen::Matrix<int, 2, 1>(2, 3)},
                                  {3, Eigen::Matrix<int, 2, 1>(3, 0)}}; 
   try {
-    // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral.size()) {
-      return face_indices_quadrilateral.at(face_id);
-    } else {
-      throw std::runtime_error(
-          "Face ID is undefined.");
-    }
+    return face_indices_quadrilateral.at(face_id);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -501,13 +487,7 @@ inline Eigen::MatrixXi
                                  {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
                                  {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
   try {
-    // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral.size()) {
-      return face_indices_quadrilateral.at(face_id);
-    } else {
-      throw std::runtime_error(
-          "Face ID is undefined.");
-    }
+    return face_indices_quadrilateral.at(face_id);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -526,13 +506,7 @@ inline Eigen::MatrixXi
                                  {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
                                  {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
   try {
-    // Check if face_id is within range
-    if (face_id < face_indices_quadrilateral.size()) {
-      return face_indices_quadrilateral.at(face_id);
-    } else {
-      throw std::runtime_error(
-          "Face ID is undefined.");
-    }
+    return face_indices_quadrilateral.at(face_id);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
