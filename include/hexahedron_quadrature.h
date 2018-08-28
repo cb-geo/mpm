@@ -36,6 +36,6 @@ class HexahedronQuadrature : public QuadratureBase<Tdim, Tnquadratures> {
 
 }  // namespace mpm
 
-#include "hex_quadrature.tcc"
+#include "hexahedron_quadrature.tcc"
 
 #endif  // MPM_HEXAHEDRON_QUADRATURE_H_
