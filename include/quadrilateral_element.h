@@ -204,13 +204,6 @@ class QuadrilateralElement : public Element<Tdim> {
   Eigen::MatrixXi face_indices(unsigned face_id) const override;
 
  private:
-  //! Constants of face id and associate nodes
-  const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
-      face_indices_quadrilateral_{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
-                                  {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
-                                  {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
-                                  {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
-
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };
