@@ -151,6 +151,9 @@ class ParticleBase {
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
 
+  //! Compute updated position based on nodal velocity
+  virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
