@@ -921,7 +921,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                  5, 1, 2, 0, 
                  7, 6, 2, 3, 
                  0, 4, 7, 3, 
-                 0, 1, 2, 3, 
+                 1, 0, 3, 2, 
                  4, 5, 6, 7;
       // clang-format on      
 
@@ -2409,21 +2409,21 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
     SECTION("20-noded noded hexahedron shape function for face indices") {
       // Check for face indices
-      Eigen::Matrix<int, 6, 4> indices;
+      Eigen::Matrix<int, 6, 8> indices;
       // clang-format off
-      indices << 0, 1, 5, 4, 
-                 5, 1, 2, 0, 
-                 7, 6, 2, 3, 
-                 0, 4, 7, 3, 
-                 0, 1, 2, 3, 
-                 4, 5, 6, 7;
+      indices << 0, 1, 5, 4,  8, 12, 16, 10, 
+                 5, 1, 2, 0, 12, 11, 14, 18, 
+                 7, 6, 2, 3, 19, 14, 13, 15, 
+                 0, 4, 7, 3, 10, 17, 15,  9, 
+                 1, 0, 3, 2,  8,  9, 13, 11, 
+                 4, 5, 6, 7, 16, 18, 19, 17;
       // clang-format on  
 
       // Check for all face indices
       for (unsigned i = 0; i < indices.rows(); ++i) {
         auto check_indices =
             hex->face_indices(i);
-        REQUIRE(check_indices.rows() == 4);
+        REQUIRE(check_indices.rows() == 8);
         REQUIRE(check_indices.cols() == 1);
 
         for (unsigned j = 0; j < indices.cols(); ++j)
