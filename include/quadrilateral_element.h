@@ -87,7 +87,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
+  Eigen::VectorXd shapefn(const VectorDim& xi,
+                          const unsigned& number_of_particles,
                           const VectorDim& deformation_gradient) const override;
 
   //! Evaluate gradient of shape functions
@@ -101,7 +102,7 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval grad_shapefn Gradient of shape function of a given cell
   Eigen::MatrixXd grad_shapefn(
-      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& xi, const unsigned& number_of_particles,
       const VectorDim& deformation_gradient) const override;
 
   //! Compute Jacobian
@@ -120,7 +121,7 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
+      const unsigned& number_of_particles,
       const VectorDim& deformation_gradient) const override;
 
   //! Evaluate the B matrix at given local coordinates
@@ -144,7 +145,7 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval bmatrix B matrix
   std::vector<Eigen::MatrixXd> bmatrix(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
+      const unsigned& number_of_particles,
       const VectorDim& deformation_gradient) const override;
 
   //! Evaluate the mass matrix
@@ -182,9 +183,6 @@ class QuadrilateralElement : public Element<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
-
-  //! Return number of particles in center cell
-  void number_of_particles(const unsigned nparticles) { return; }
 
  private:
   //! Logger
