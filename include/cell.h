@@ -236,11 +236,11 @@ class Cell {
   //! \param[in] face_id Face of cell of velocity constraint
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  bool assign_cell_velocity_constraint(unsigned face_id, unsigned dir,
-                                       double velocity);
+  bool assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                  double velocity);
 
   //! Apply velocity constraints
-  void apply_cell_velocity_constraints();
+  void apply_velocity_constraints();
 
   //! Compute normal vector
   void compute_normals();
@@ -284,8 +284,7 @@ class Cell {
 
   //! Velocity constraints
   //! first-> face_id, second->pair of direction [0/1/2] and velocity value
-  // std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
-  std::map<unsigned, std::vector<std::tuple<unsigned, double>>>
+  std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
 
   //! Normal of face with velocity constraints

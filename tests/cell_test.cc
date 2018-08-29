@@ -780,9 +780,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       cell->add_node(2, node2);
       cell->add_node(3, node3);
 
-      cell->assign_cell_velocity_constraint(0, 0, 0.5);
-      cell->assign_cell_velocity_constraint(0, 1, 0.6);
-      cell->assign_cell_velocity_constraint(1, 1, 0.7);
+      cell->assign_velocity_constraint(0, 0, 0.5);
+      cell->assign_velocity_constraint(0, 1, 0.6);
+      cell->assign_velocity_constraint(1, 1, 0.7);
 
       cell->compute_normals();
 
@@ -1970,9 +1970,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       cell->add_node(6, node6);
       cell->add_node(7, node7);
 
-      cell->assign_cell_velocity_constraint(0, 0, 0.5);
-      cell->assign_cell_velocity_constraint(0, 1, 0.6);
-      cell->assign_cell_velocity_constraint(1, 2, 0.7);
+      cell->assign_velocity_constraint(0, 0, 0.5);
+      cell->assign_velocity_constraint(0, 1, 0.6);
+      cell->assign_velocity_constraint(1, 2, 0.7);
 
       cell->compute_normals();
 
