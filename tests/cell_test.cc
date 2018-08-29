@@ -757,7 +757,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       std::shared_ptr<mpm::NodeBase<Dim>> node0 =
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-      coords << 4., 3.;
+      coords << 4., 1.;
       std::shared_ptr<mpm::NodeBase<Dim>> node1 =
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
@@ -780,27 +780,36 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       cell->add_node(2, node2);
       cell->add_node(3, node3);
 
-      cell->assign_cell_velocity_constraint(0, 1, 0.5);
+      cell->assign_cell_velocity_constraint(0, 0, 0.5);
+      cell->assign_cell_velocity_constraint(0, 1, 0.6);
+      cell->assign_cell_velocity_constraint(1, 1, 0.7);
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 1);
+      REQUIRE(cell->nnormal() == 2);
 
       // Check normal vector when id is out of range range
       Eigen::Vector2d zero_normal_vector;
       zero_normal_vector << 0., 0.;
       auto check_zero_normal_vector = cell->normal(100);
-      REQUIRE(check_zero_normal_vector(0) == zero_normal_vector(0));
-      REQUIRE(check_zero_normal_vector(1) == zero_normal_vector(1));
+      for (unsigned i = 0; i < Dim; i++) {
+        REQUIRE(check_zero_normal_vector(i) == zero_normal_vector(i));
+      }
 
       // Check normal vector
-      Eigen::Vector2d normal_vector;
-      normal_vector << 0.6, -0.8;
+      Eigen::Matrix<double, 2, Dim> normal_vector;
+
+      // clang-format off
+      normal_vector << 0.242535625036333, -0.970142500145332,
+                       0.447213595499958,  0.894427190999916;
+      // clang-format on
+
       for (unsigned i = 0; i < cell->nnormal(); ++i) {
-        auto check_normal_vector = cell->normal(i);
-        REQUIRE(check_normal_vector.size() == 2);
-        REQUIRE(check_normal_vector(0) == normal_vector(0));
-        REQUIRE(check_normal_vector(1) == normal_vector(1));
+        REQUIRE(cell->normal(i).size() == Dim);
+        for (unsigned j = 0; j < cell->normal(i).size(); ++j) {
+          REQUIRE(cell->normal(i)(j) ==
+                  Approx(normal_vector(i, j)).epsilon(Tolerance));
+        }
       }
     }
   }
@@ -1918,7 +1927,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       std::shared_ptr<mpm::NodeBase<Dim>> node0 =
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-      coords << 2, 0, 0;
+      coords << 4, 1, 1;
       std::shared_ptr<mpm::NodeBase<Dim>> node1 =
           std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
@@ -1961,29 +1970,36 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       cell->add_node(6, node6);
       cell->add_node(7, node7);
 
-      cell->assign_cell_velocity_constraint(0, 2, 0.5);
+      cell->assign_cell_velocity_constraint(0, 0, 0.5);
+      cell->assign_cell_velocity_constraint(0, 1, 0.6);
+      cell->assign_cell_velocity_constraint(1, 2, 0.7);
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 1);
+      REQUIRE(cell->nnormal() == 2);
 
       // Check normal vector when id is out of range range
       Eigen::Vector3d zero_normal_vector;
       zero_normal_vector << 0., 0., 0.;
       auto check_zero_normal_vector = cell->normal(100);
-      REQUIRE(check_zero_normal_vector(0) == zero_normal_vector(0));
-      REQUIRE(check_zero_normal_vector(1) == zero_normal_vector(1));
-      REQUIRE(check_zero_normal_vector(2) == zero_normal_vector(2));
+      for (unsigned i = 0; i < Dim; i++) {
+        REQUIRE(check_zero_normal_vector(i) == zero_normal_vector(i));
+      }
 
       // Check normal vector
-      Eigen::Vector3d normal_vector;
-      normal_vector << 0.0, -1.0, 0.;
+      Eigen::Matrix<double, 2, Dim> normal_vector;
+
+      // clang-format off
+      normal_vector <<  0.242535625036333, -0.970142500145332,  0.,
+                       -0.301511344577764,  0.904534033733291,  0.301511344577764;
+      // clang-format on
+
       for (unsigned i = 0; i < cell->nnormal(); ++i) {
-        auto check_normal_vector = cell->normal(i);
-        REQUIRE(check_normal_vector.size() == 3);
-        REQUIRE(check_normal_vector(0) == normal_vector(0));
-        REQUIRE(check_normal_vector(1) == normal_vector(1));
-        REQUIRE(check_normal_vector(2) == normal_vector(2));
+        REQUIRE(cell->normal(i).size() == Dim);
+        for (unsigned j = 0; j < cell->normal(i).size(); ++j) {
+          REQUIRE(cell->normal(i)(j) ==
+                  Approx(normal_vector(i, j)).epsilon(Tolerance));
+        }
       }
     }
   }

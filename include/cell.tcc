@@ -969,8 +969,14 @@ bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases - 1
     if (dir >= 0 && dir < Tdim) {
-      this->velocity_constraints_.emplace_back(
-          std::tuple<unsigned, unsigned, double>(face_id, dir, velocity));
+      if (velocity_constraints_.find(face_id) == velocity_constraints_.end())
+        this->velocity_constraints_.insert(
+            std::make_pair<unsigned, std::vector<std::tuple<unsigned, double>>>(
+                static_cast<unsigned>(face_id),
+                std::vector<std::tuple<unsigned, double>>()));
+
+      this->velocity_constraints_.at(face_id).emplace_back(
+          std::tuple<unsigned, double>(dir, velocity));
     } else
       throw std::runtime_error("Constraint direction is out of bounds");
   } catch (std::exception& exception) {
@@ -982,12 +988,7 @@ bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
 
 //! Apply velocity constraints
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_cell_velocity_constraints() {
-
-
-
-}
-
+void mpm::Cell<Tdim>::apply_cell_velocity_constraints() {}
 
 //! Compute normal 2d
 template <>
@@ -995,7 +996,7 @@ inline void mpm::Cell<2>::compute_normals() {
 
   for (const auto& velocity_constraint : this->velocity_constraints_) {
     // Get face_id
-    const auto face_id = std::get<0>(velocity_constraint);
+    const auto face_id = velocity_constraint.first;
 
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);
@@ -1026,7 +1027,7 @@ inline void mpm::Cell<3>::compute_normals() {
 
   for (const auto& velocity_constraint : this->velocity_constraints_) {
     // Get face_id
-    const auto face_id = std::get<0>(velocity_constraint);
+    const auto face_id = velocity_constraint.first;
 
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);

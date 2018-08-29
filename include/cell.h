@@ -2,6 +2,7 @@
 #define MPM_CELL_H_
 
 #include <limits>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -283,11 +284,11 @@ class Cell {
 
   //! Velocity constraints
   //! first-> face_id, second->pair of direction [0/1/2] and velocity value
-  // std::map<unsigned, std::map<unsigned, double>> velocity_constraints_;
-  std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+  // std::vector<std::tuple<unsigned, unsigned, double>> velocity_constraints_;
+  std::map<unsigned, std::vector<std::tuple<unsigned, double>>>
+      velocity_constraints_;
 
   //! Normal of face with velocity constraints
-  // std::map<unsigned, Eigen::VectorXd> face_normals_;
   std::vector<Eigen::VectorXd> face_normals_;
 
   //! Logger
