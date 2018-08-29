@@ -912,6 +912,29 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(11, 1) == 1);
       REQUIRE(indices(11, 2) == 2);
     }
+
+    SECTION("Eight noded hexahedron shape function for face indices") {
+      // Check for face indices
+      Eigen::Matrix<int, 6, 4> indices;
+      // clang-format off
+      indices << 0, 1, 5, 4, 
+                 5, 1, 2, 0, 
+                 7, 6, 2, 3, 
+                 0, 4, 7, 3, 
+                 1, 0, 3, 2, 
+                 4, 5, 6, 7;
+      // clang-format on      
+
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        const auto check_indices = hex->face_indices(i);
+        REQUIRE(check_indices.rows() == 4);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
+    }
   }
 
   // 20-Node (Serendipity) Hexahedron Element
@@ -2381,6 +2404,29 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(indices(11, 0) == 3);
       REQUIRE(indices(11, 1) == 1);
       REQUIRE(indices(11, 2) == 2);
+    }
+
+    SECTION("20-noded noded hexahedron shape function for face indices") {
+      // Check for face indices
+      Eigen::Matrix<int, 6, 8> indices;
+      // clang-format off
+      indices << 0, 1, 5, 4,  8, 12, 16, 10, 
+                 5, 1, 2, 0, 12, 11, 14, 18, 
+                 7, 6, 2, 3, 19, 14, 13, 15, 
+                 0, 4, 7, 3, 10, 17, 15,  9, 
+                 1, 0, 3, 2,  8,  9, 13, 11, 
+                 4, 5, 6, 7, 16, 18, 19, 17;
+      // clang-format on  
+
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        const auto check_indices = hex->face_indices(i);
+        REQUIRE(check_indices.rows() == 8);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 }
