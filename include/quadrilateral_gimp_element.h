@@ -54,23 +54,6 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi,
-                          const unsigned& number_of_particles,
-                          const VectorDim& deformation_gradient) const override;
-  //! Evaluate gradient of shape functions
-  //! \param[in] xi given local coordinates
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(
-      const VectorDim& xi, const unsigned& number_of_particles,
-      const VectorDim& deformation_gradient) const override;
-
   //! Return the type of shape function
   mpm::ShapefnType shapefn_type() const { return mpm::ShapefnType::GIMP; }
 
