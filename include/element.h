@@ -138,7 +138,7 @@ class Element {
   //! Return indices of a face of an element
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
-  virtual Eigen::MatrixXi face_indices(unsigned face_id) const = 0;
+  virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
 };
 
 }  // namespace mpm
