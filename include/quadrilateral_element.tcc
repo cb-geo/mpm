@@ -230,7 +230,7 @@ inline mpm::ElementDegree mpm::QuadrilateralElement<2, 9>::degree() const {
 //! coordinate, with particle size and deformation gradient
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXd mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(
-    const VectorDim& xi, const VectorDim& particle_size,
+    const VectorDim& xi, const unsigned& number_of_particles,
     const VectorDim& deformation_gradient) const {
   return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(xi);
 }
@@ -240,7 +240,7 @@ inline Eigen::VectorXd mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXd
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(
-        const VectorDim& xi, const VectorDim& particle_size,
+        const VectorDim& xi, const unsigned& number_of_particles,
         const VectorDim& deformation_gradient) const {
   return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(xi);
 }
@@ -274,7 +274,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const VectorDim& particle_size,
+        const unsigned& number_of_particles,
         const VectorDim& deformation_gradient) const {
   return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
       xi, nodal_coordinates);
@@ -356,7 +356,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const VectorDim& particle_size,
+        const unsigned& number_of_particles,
         const VectorDim& deformation_gradient) const {
   return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
       xi, nodal_coordinates);
@@ -454,4 +454,3 @@ inline Eigen::MatrixXi
   //clang-format on
   return indices;
 }
-  

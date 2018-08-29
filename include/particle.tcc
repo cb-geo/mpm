@@ -172,13 +172,28 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
-      // store number of points in cell
-      element->number_of_particles(cell_->nparticles());
+      if (element->shapefn_type() == mpm::ShapefnType::NORMAL_MPM) {
 
-      // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_);
-      // Compute bmatrix of the particle for reference cell
-      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
+        // Compute shape function of the particle
+        shapefn_ = element->shapefn(this->xi_);
+        // Compute bmatrix of the particle for reference cell
+        bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
+
+      } else if (element->shapefn_type() == mpm::ShapefnType::GIMP) {
+        Eigen::Matrix<double, Tdim, 1> deformation_gradient;
+        deformation_gradient.setZero();
+
+        // Compute shape function of the GIMP particle
+        shapefn_ = element->shapefn(this->xi_, cell_->nparticles(),
+                                    deformation_gradient);
+
+        // Compute bmatrix of the particle for reference cell
+        bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
+
+      } else {
+
+        // Compute functions for CPDI MPM
+      }
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
