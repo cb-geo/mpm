@@ -601,6 +601,26 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
     }
+
+    SECTION("Four noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      Eigen::Matrix<int, 4, 2> indices;
+      // clang-format off
+      indices << 0, 1, 
+                 1, 2, 
+                 2, 3, 
+                 3, 0;
+      // clang-format on
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        const auto check_indices = quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 2);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
+    }
   }
 
   //! Check for 8 noded element
@@ -1311,6 +1331,26 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
+    }
+
+    SECTION("Eight noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      Eigen::Matrix<int, 4, 3> indices;
+      // clang-format off
+      indices << 0, 1, 4, 
+                 1, 2, 5, 
+                 2, 3, 6, 
+                 3, 0, 7;
+      // clang-format on
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        const auto check_indices = quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 3);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 
@@ -2049,6 +2089,27 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(indices(3, 0) == 3);
       REQUIRE(indices(3, 1) == 0);
+    }
+
+    SECTION("Nine noded quadrilateral shape function for face indices") {
+      // Check for face indices
+      Eigen::Matrix<int, 4, 3> indices;
+      // clang-format off
+      indices << 0, 1, 4, 
+                 1, 2, 5, 
+                 2, 3, 6, 
+                 3, 0, 7;
+      // clang-format on
+
+      // Check for all face indices
+      for (unsigned i = 0; i < indices.rows(); ++i) {
+        const auto check_indices = quad->face_indices(i);
+        REQUIRE(check_indices.rows() == 3);
+        REQUIRE(check_indices.cols() == 1);
+
+        for (unsigned j = 0; j < indices.cols(); ++j)
+          REQUIRE(check_indices(j) == indices(i, j));
+      }
     }
   }
 }
