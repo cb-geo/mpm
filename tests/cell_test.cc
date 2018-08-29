@@ -482,7 +482,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
       for (const auto& node : nodes)
         REQUIRE(node->volume(phase) == Approx(2.0).epsilon(Tolerance));
     }
@@ -1548,7 +1548,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
       REQUIRE(nodes.size() == 8);
       for (const auto& node : nodes)
         REQUIRE(node->volume(phase) == Approx(1.0).epsilon(Tolerance));
