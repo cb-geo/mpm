@@ -25,7 +25,7 @@
 //! local coordinate
 template <>
 inline Eigen::VectorXd
-    mpm::QuadrilateralGIMPElement::QuadrilateralElement<2, 16>::shapefn(
+    mpm::QuadrilateralGIMPElement<2, 16>::QuadrilateralElement<2, 4>::shapefn(
         const Eigen::Matrix<double, 2, 1>& xi,
         const unsigned& number_of_particles,
         const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
@@ -33,7 +33,7 @@ inline Eigen::VectorXd
   Eigen::Matrix<double, 16, 1> shapefn;
 
   //! Matrix to store local node coordinates
-  Eigen::Matrix<double, 16, 2> local_node = this->unit_cell_coordinates();
+  Eigen::Matrix<double, 16, 2> local_node;  //= this->unit_cell_coordinates();
 
   //! length and volume of element in local coordinate (TODO: double check)
   const double element_length = 2;
@@ -113,15 +113,16 @@ inline Eigen::VectorXd
 //! Return gradient of shape functions of a 16-node Quadrilateral Element at a
 //! given local coordinate
 template <>
-inline Eigen::MatrixXd
-    mpm::QuadrilateralGIMPElement::QuadrilateralElement<2, 16>::grad_shapefn(
+inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::
+    QuadrilateralElement<2, 4>::grad_shapefn(
         const Eigen::Matrix<double, 2, 1>& xi,
         const unsigned& number_of_particles,
         const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 16, 2> grad_shapefn;
 
   //! Matrix to store local node coordinates
-  Eigen::Matrix<double, 16, 2> local_node = this->unit_cell_coordinates();
+  Eigen::Matrix<double, 16, 2> local_node;  // = TODO:
+                                            // this->unit_cell_coordinates();
 
   //! length and volume of element in local coordinate (TODO: double check)
   const double element_length = 2;
@@ -215,79 +216,4 @@ inline Eigen::MatrixXd
     grad_shapefn(0, n) = dyni * sxni;
   }
   return grad_shapefn;
-}
-
-//! Compute Jacobian with particle size and deformation gradient
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::Matrix<double, Tdim, Tdim> mpm::QuadrilateralGIMPElement::
-    QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
-        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const unsigned& number_of_particles,
-        const VectorDim& deformation_gradient) const {
-  // Get gradient shape functions
-  const Eigen::MatrixXd grad_shapefn =
-      this->grad_shapefn(xi, number_of_particles, deformation_gradient);
-
-  try {
-    // Check if matrices dimensions are correct
-    if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
-        (xi.size() != nodal_coordinates.cols()))
-      throw std::runtime_error(
-          "Jacobian calculation: Incorrect dimension of xi and "
-          "nodal_coordinates");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    return Eigen::Matrix<double, Tdim, Tdim>::Zero();
-  }
-
-  // Jacobian dx_i/dxi_j
-  return (grad_shapefn.transpose() * nodal_coordinates);
-}
-
-//! Return the B-matrix of a Quadrilateral Element at a given local
-//! coordinate for a real cell
-template <unsigned Tdim, unsigned Tnfunctions>
-inline std::vector<Eigen::MatrixXd> mpm::QuadrilateralGIMPElement::
-    QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
-        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const unsigned& number_of_particles,
-        const VectorDim& deformation_gradient) const {
-  // Get gradient shape functions
-  const Eigen::MatrixXd grad_sf =
-      this->grad_shapefn(xi, number_of_particles, deformation_gradient);
-
-  // B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix;
-  bmatrix.reserve(Tnfunctions);
-
-  try {
-    // Check if matrices dimensions are correct
-    if ((grad_sf.rows() != nodal_coordinates.rows()) ||
-        (xi.rows() != nodal_coordinates.cols()))
-      throw std::runtime_error(
-          "BMatrix - Jacobian calculation: Incorrect dimension of xi and "
-          "nodal_coordinates");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    return bmatrix;
-  }
-
-  // Jacobian dx_i/dxi_j
-  Eigen::Matrix<double, Tdim, Tdim> jacobian =
-      (grad_sf.transpose() * nodal_coordinates);
-
-  // Gradient shapefn of the cell
-  // dN/dx = [J]^-1 * dN/dxi
-  Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
-
-  for (unsigned i = 0; i < Tnfunctions; ++i) {
-    Eigen::Matrix<double, 3, Tdim> bi;
-    // clang-format off
-        bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;
-        bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1);
-        bi(2, 0) = grad_shapefn(i, 1); bi(2, 1) = grad_shapefn(i, 0);
-        bmatrix.push_back(bi);
-    // clang-format on
-  }
-  return bmatrix;
 }
