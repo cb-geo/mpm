@@ -1,8 +1,6 @@
 #ifndef MPM_QUADRILATERAL_ELEMENT_H_
 #define MPM_QUADRILATERAL_ELEMENT_H_
 
-#include <Eigen/Dense>
-
 #include "element.h"
 #include "logger.h"
 
@@ -198,7 +196,7 @@ class QuadrilateralElement : public Element<Tdim> {
   //! Return indices of a face of an element
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
-  Eigen::MatrixXi face_indices(unsigned face_id) const override;
+  Eigen::VectorXi face_indices(unsigned face_id) const override;
 
  private:
   //! Logger

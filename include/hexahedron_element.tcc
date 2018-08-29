@@ -567,7 +567,7 @@ inline Eigen::MatrixXi
 //! Return indices of a face of the element
 //! 8-noded hexahedron
 template <>
-inline Eigen::MatrixXi
+inline Eigen::VectorXi
     mpm::HexahedronElement<3, 8>::face_indices(unsigned face_id) const {
   
   //! Face ids and its associated nodal indices
@@ -579,17 +579,13 @@ inline Eigen::MatrixXi
       {4, Eigen::Matrix<int, 4, 1>(1, 0, 3, 2)},
       {5, Eigen::Matrix<int, 4, 1>(4, 5, 6, 7)}};
 
-  try {
-    return face_indices_hexahedron.at(face_id);
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
+  return face_indices_hexahedron.at(face_id);
 }
 
 //! Return indices of a face of the element
 //! 20-noded hexahedron
 template <>
-inline Eigen::MatrixXi
+inline Eigen::VectorXi
     mpm::HexahedronElement<3, 20>::face_indices(unsigned face_id) const {
   
   //! Face ids and its associated nodal indices
@@ -601,10 +597,7 @@ inline Eigen::MatrixXi
       {3, (Eigen::Matrix<int, 8, 1>() << 0, 4, 7, 3, 10, 17, 15,  9).finished()},
       {4, (Eigen::Matrix<int, 8, 1>() << 1, 0, 3, 2,  8,  9, 13, 11).finished()},
       {5, (Eigen::Matrix<int, 8, 1>() << 4, 5, 6, 7, 16, 18, 19, 17).finished()}};
-  //clang-format on
-  try {
-    return face_indices_hexahedron.at(face_id);
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
+  // clang-format on
+
+  return face_indices_hexahedron.at(face_id);
 }
