@@ -962,21 +962,21 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 //! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim-1
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
-                                                      unsigned dir,
-                                                      double velocity) {
+bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                                 double velocity) {
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases - 1
     if (dir >= 0 && dir < Tdim) {
       if (velocity_constraints_.find(face_id) == velocity_constraints_.end())
         this->velocity_constraints_.insert(
-            std::make_pair<unsigned, std::vector<std::tuple<unsigned, double>>>(
+            std::make_pair<unsigned, std::vector<std::pair<unsigned, double>>>(
                 static_cast<unsigned>(face_id),
-                std::vector<std::tuple<unsigned, double>>()));
+                std::vector<std::pair<unsigned, double>>()));
 
-      this->velocity_constraints_.at(face_id).emplace_back(
-          std::tuple<unsigned, double>(dir, velocity));
+      this->velocity_constraints_[face_id].emplace_back(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
     } else
       throw std::runtime_error("Constraint direction is out of bounds");
   } catch (std::exception& exception) {
@@ -988,7 +988,7 @@ bool mpm::Cell<Tdim>::assign_cell_velocity_constraint(unsigned face_id,
 
 //! Apply velocity constraints
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_cell_velocity_constraints() {}
+void mpm::Cell<Tdim>::apply_velocity_constraints() {}
 
 //! Compute normal 2d
 template <>
