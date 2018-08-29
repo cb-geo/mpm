@@ -784,12 +784,10 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
 
 //! Map particle volume to nodes
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
-                                                   unsigned phase,
-                                                   double pvolume) {
-  const auto shapefns = element_->shapefn(xi);
-  for (unsigned i = 0; i < shapefns.size(); ++i) {
-    nodes_[i]->update_volume(true, phase, shapefns(i) * pvolume);
+void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pvolume) {
+  for (unsigned i = 0; i < shapefn.size(); ++i) {
+    nodes_[i]->update_volume(true, phase, shapefn(i) * pvolume);
   }
 }
 
