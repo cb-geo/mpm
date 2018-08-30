@@ -41,7 +41,7 @@ class Element {
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   virtual Eigen::VectorXd shapefn(
-      const VectorDim& xi, const unsigned& number_of_particles,
+      const VectorDim& xi, const unsigned& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
   //! Evaluate gradient of shape functions
@@ -53,7 +53,7 @@ class Element {
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   virtual Eigen::MatrixXd grad_shapefn(
-      const VectorDim& xi, const unsigned& number_of_particles,
+      const VectorDim& xi, const unsigned& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
   //! Compute Jacobian
@@ -71,7 +71,7 @@ class Element {
   //! \retval jacobian Jacobian matrix
   virtual Eigen::Matrix<double, Tdim, Tdim> jacobian(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const unsigned& number_of_particles,
+      const unsigned& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
   //! Evaluate and return the B-matrix
@@ -94,7 +94,7 @@ class Element {
   //! \retval bmatrix B matrix
   virtual std::vector<Eigen::MatrixXd> bmatrix(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const unsigned& number_of_particles,
+      const unsigned& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
   //! Evaluate the mass matrix
@@ -132,6 +132,8 @@ class Element {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   virtual Eigen::MatrixXi inhedron_indices() const = 0;
+
+  virtual unsigned unit_cell_volume() const = 0;
 };
 
 }  // namespace mpm
