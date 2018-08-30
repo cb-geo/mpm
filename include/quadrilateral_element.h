@@ -198,6 +198,9 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval indices Indices that make the face
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
+  //! Return unit cell volume 2D 2*2
+  double unit_cell_volume() const { return 4.; }
+
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
