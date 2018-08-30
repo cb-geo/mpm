@@ -139,7 +139,8 @@ class Element {
   //! \retval indices Indices that make the face
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
 
-
+  //! Return unit cell volume for particle size calculation
+  //! \retval unit cell volume
   virtual double unit_cell_volume() const = 0;
 };
 

@@ -1,11 +1,6 @@
 #ifndef MPM_GIMP_ELEMENT_H_
 #define MPM_GIMP_ELEMENT_H_
 
-#include <exception>
-
-#include <Eigen/Dense>
-
-#include "logger.h"
 #include "quadrilateral_element.h"
 
 namespace mpm {
