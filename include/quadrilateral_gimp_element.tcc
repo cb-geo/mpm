@@ -51,75 +51,43 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
                 -3., -1.;
   // clang-format on
 
-  //! length and volume of element in local coordinate (TODO: double check)
+  //! length and volume of element in local coordinate
   const double element_length = 2;
-  const double element_volume = 4;  // 2*2
 
-  //! local node x & y valyes
-  double xni, yni;
-  const double numnodes = 16;
+  //! loop to iterate over nodes
+  for (unsigned n = 0; n < 16; ++n) {
+    Eigen::Matrix<double, 2, 1> sni;
 
-  //! local particle - local node
-  double xpxi, ypyi;
+    //! loop to iterate over dimensions
+    for (unsigned i = 0; i < 2; ++i) {
+      double ni = local_node(n, i);
+      double npni = xi(i) - ni;  // local particle  - local node
 
-  //! local shapefunctions for x and y coordinates
-  double sxni, syni;
-
-  for (unsigned n = 0; n < numnodes; n++) {
-    xni = local_node(n, 0);
-    yni = local_node(n, 1);
-    xpxi = xi(0) - xni;  // local particle x - local node x
-    ypyi = xi(1) - yni;  // local particle x - local node x
-
-    //! x direction
-    if (xpxi >= element_length + particle_size(1, 1)) {
-      sxni = 0;
-    } else if (xpxi > -element_length - particle_size(1, 1) &&
-               xpxi <= -element_length + particle_size(1, 1)) {
-      sxni = ((element_length + particle_size(1, 1) + xpxi) *
-              (element_length + particle_size(1, 1) + xpxi)) /
-             4 * element_length * particle_size(1, 1);
-    } else if (xpxi > -element_length + particle_size(1, 1) &&
-               xpxi <= -particle_size(1, 1)) {
-      sxni = 1 + (xpxi / element_length);
-    } else if (xpxi > -particle_size(1, 1) && xpxi <= particle_size(1, 1)) {
-      sxni =
-          1 - (((xpxi * xpxi) + (particle_size(1, 1) * particle_size(1, 1))) /
-               2 * element_length * particle_size(1, 1));
-    } else if (xpxi > particle_size(1, 1) &&
-               xpxi <= element_length - particle_size(1, 1)) {
-      sxni = 1 - (xpxi / element_length);
-    } else if (xpxi > element_length - particle_size(1, 1) &&
-               xpxi <= element_length + particle_size(1, 1)) {
-      sxni = ((element_length + particle_size(1, 1) + xpxi) *
-              (element_length + particle_size(1, 1) + xpxi)) /
-             4 * element_length * particle_size(1, 1);
+      //! Conditional shape function statement see: Bardenhagen 2004
+      if (npni >= element_length + particle_size(i)) {
+        sni(i) = 0;
+      } else if (npni > -element_length - particle_size(i) &&
+                 npni <= -element_length + particle_size(i)) {
+        sni(i) = ((element_length + particle_size(i) + npni) *
+                  (element_length + particle_size(i) + npni)) /
+                 4 * element_length * particle_size(i);
+      } else if (npni > -element_length + particle_size(i) &&
+                 npni <= -particle_size(i)) {
+        sni(i) = 1 + (npni / element_length);
+      } else if (npni > -particle_size(i) && npni <= particle_size(i)) {
+        sni(i) = 1 - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                      2 * element_length * particle_size(i));
+      } else if (npni > particle_size(i) &&
+                 npni <= element_length - particle_size(i)) {
+        sni(i) = 1 - (npni / element_length);
+      } else if (npni > element_length - particle_size(i) &&
+                 npni <= element_length + particle_size(i)) {
+        sni(i) = ((element_length + particle_size(i) + npni) *
+                  (element_length + particle_size(i) + npni)) /
+                 4 * element_length * particle_size(i);
+      }
     }
-    //! y direction
-    if (ypyi >= element_length + particle_size(2, 1)) {
-      syni = 0;
-    } else if (ypyi > -element_length - particle_size(2, 1) &&
-               ypyi <= -element_length + particle_size(2, 1)) {
-      syni = ((element_length + particle_size(2, 1) + ypyi) *
-              (element_length + particle_size(2, 1) + ypyi)) /
-             4 * element_length * particle_size(2, 1);
-    } else if (ypyi > -element_length + particle_size(2, 1) &&
-               ypyi <= -particle_size(2, 1)) {
-      syni = 1 + (ypyi / element_length);
-    } else if (ypyi > -particle_size(2, 1) && ypyi <= particle_size(2, 1)) {
-      syni =
-          1 - (((ypyi * ypyi) + (particle_size(2, 1) * particle_size(2, 1))) /
-               2 * element_length * particle_size(2, 1));
-    } else if (ypyi > particle_size(2, 1) &&
-               ypyi <= element_length - particle_size(2, 1)) {
-      syni = 1 - (ypyi / element_length);
-    } else if (ypyi > element_length - particle_size(2, 1) &&
-               ypyi <= element_length + particle_size(2, 1)) {
-      syni = ((element_length + particle_size(2, 1) + ypyi) *
-              (element_length + particle_size(2, 1) + ypyi)) /
-             4 * element_length * particle_size(2, 1);
-    }
-    shapefn(n) = sxni * syni;
+    shapefn(n) = sni(0) * sni(1);
   }
 
   return shapefn;
@@ -156,93 +124,52 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
 
   //! length and volume of element in local coordinate (TODO: double check)
   const double element_length = 2;
-  const double element_volume = 2 * 2;
-
-  //! local node x & y valyes
-  double xni, yni;
-  const double numnodes = 16;
-
-  //! local particle - local node
-  double xpxi, ypyi;
-
-  //! local shapefunctions for x and y coordinates
-  double sxni, syni;
 
   //! shape function grad
   double dxni, dyni;
+  for (unsigned n = 0; n < 16; ++n) {
 
-  for (unsigned n = 0; n < numnodes; n++) {
-    xni = local_node(n, 0);
-    yni = local_node(n, 1);
-    xpxi = xi(0) - xni;  // local particle x - local node x
-    ypyi = xi(1) - yni;  // local particle y - local node y
+    Eigen::Matrix<double, 2, 1> sni;
+    Eigen::Matrix<double, 2, 1> dni;
 
-    //! x direction
-    if (xpxi >= element_length + particle_size(1, 1)) {
-      sxni = 0;
-      dxni = 0;
-    } else if (xpxi > -element_length - particle_size(1, 1) &&
-               xpxi <= -element_length + particle_size(1, 1)) {
-      sxni = ((element_length + particle_size(1, 1) + xpxi) *
-              (element_length + particle_size(1, 1) + xpxi)) /
-             4 * element_length * particle_size(1, 1);
-      dxni = (element_length + particle_size(1, 1) + xpxi) / 2 *
-             element_length * particle_size(1, 1);
-    } else if (xpxi > -element_length + particle_size(1, 1) &&
-               xpxi <= -particle_size(1, 1)) {
-      sxni = 1 + (xpxi / element_length);
-      dxni = 1 / element_length;
-    } else if (xpxi > -particle_size(1, 1) && xpxi <= particle_size(1, 1)) {
-      sxni =
-          1 - (((xpxi * xpxi) + (particle_size(1, 1) * particle_size(1, 1))) /
-               2 * element_length * particle_size(1, 1));
-      dxni = -(xpxi / element_length * particle_size(1, 1));
-    } else if (xpxi > particle_size(1, 1) &&
-               xpxi <= element_length - particle_size(1, 1)) {
-      sxni = 1 - (xpxi / element_length);
-      dxni = -(1 / element_length);
-    } else if (xpxi > element_length - particle_size(1, 1) &&
-               xpxi <= element_length + particle_size(1, 1)) {
-      sxni = ((element_length + particle_size(1, 1) + xpxi) *
-              (element_length + particle_size(1, 1) + xpxi)) /
-             4 * element_length * particle_size(1, 1);
-      dxni = -((element_length + particle_size(1, 1) + xpxi) / 2 *
-               element_length * particle_size(1, 1));
+    for (unsigned i = 0; i < 2; ++i) {
+      double ni = local_node(n, i);
+      double npni = xi(i) - ni;  // local particle  - local node
+
+      //! x direction
+      if (npni >= element_length + particle_size(i)) {
+        sni(i) = 0;
+        dni(i) = 0;
+      } else if (npni > -element_length - particle_size(i) &&
+                 npni <= -element_length + particle_size(i)) {
+        sni(i) = ((element_length + particle_size(i) + npni) *
+                  (element_length + particle_size(i) + npni)) /
+                 4 * element_length * particle_size(i);
+        dni(i) = (element_length + particle_size(i) + npni) / 2 *
+                 element_length * particle_size(i);
+      } else if (npni > -element_length + particle_size(i) &&
+                 npni <= -particle_size(i)) {
+        sni(i) = 1 + (npni / element_length);
+        dni(i) = 1 / element_length;
+      } else if (npni > -particle_size(i) && npni <= particle_size(i)) {
+        sni(i) = 1 - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                      2 * element_length * particle_size(i));
+        dni(i) = -(npni / element_length * particle_size(i));
+      } else if (npni > particle_size(i) &&
+                 npni <= element_length - particle_size(i)) {
+        sni(i) = 1 - (npni / element_length);
+        dni(i) = -(1 / element_length);
+      } else if (npni > element_length - particle_size(i) &&
+                 npni <= element_length + particle_size(i)) {
+        sni(i) = ((element_length + particle_size(i) + npni) *
+                  (element_length + particle_size(i) + npni)) /
+                 4 * element_length * particle_size(i);
+        dni(i) = -((element_length + particle_size(i) + npni) / 2 *
+                   element_length * particle_size(i));
+      }
     }
-    //! y direction
-    if (ypyi >= element_length + particle_size(2, 1)) {
-      syni = 0;
-      dyni = 0;
-    } else if (ypyi > -element_length - particle_size(2, 1) &&
-               ypyi <= -element_length + particle_size(2, 1)) {
-      syni = ((element_length + particle_size(2, 1) + ypyi) *
-              (element_length + particle_size(2, 1) + ypyi)) /
-             4 * element_length * particle_size(2, 1);
-      dyni = (element_length + particle_size(2, 1) + ypyi) / 2 *
-             element_length * particle_size(2, 1);
-    } else if (ypyi > -element_length + particle_size(2, 1) &&
-               ypyi <= -particle_size(2, 1)) {
-      syni = 1 + (ypyi / element_length);
-      dyni = 1 / element_length;
-    } else if (ypyi > -particle_size(2, 1) && ypyi <= particle_size(2, 1)) {
-      syni =
-          1 - (((ypyi * ypyi) + (particle_size(2, 1) * particle_size(2, 1))) /
-               2 * element_length * particle_size(2, 1));
-      dyni = -(ypyi / element_length * particle_size(2, 1));
-    } else if (ypyi > particle_size(2, 1) &&
-               ypyi <= element_length - particle_size(2, 1)) {
-      syni = 1 - (ypyi / element_length);
-      dyni = -(1 / element_length);
-    } else if (ypyi > element_length - particle_size(2, 1) &&
-               ypyi <= element_length + particle_size(2, 1)) {
-      syni = ((element_length + particle_size(2, 1) + ypyi) *
-              (element_length + particle_size(2, 1) + ypyi)) /
-             4 * element_length * particle_size(2, 1);
-      dyni = -((element_length + particle_size(2, 1) + ypyi) / 2 *
-               element_length * particle_size(2, 1));
-    }
-    grad_shapefn(1, n) = dxni * syni;
-    grad_shapefn(0, n) = dyni * sxni;
+    grad_shapefn(1, n) = dni(0) * sni(1);
+    grad_shapefn(0, n) = dni(1) * sni(0);
   }
   return grad_shapefn;
 }

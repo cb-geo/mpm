@@ -181,8 +181,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
         //! Set particle size based on dimension
         Eigen::Matrix<double, Tdim, 1> particle_size;
-        for (unsigned i = 0; i <= Tdim; ++i) {
-          particle_size(i, 1) = particle_length;
+        for (unsigned i = 0; i == Tdim; ++i) {
+          particle_size(i) = particle_length;
         }
         // Compute shape function of the GIMP particle
         shapefn_ =
