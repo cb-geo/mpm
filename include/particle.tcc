@@ -183,9 +183,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
         Eigen::Matrix<double, Tdim, 1> deformation_gradient;
         deformation_gradient.setZero();
 
+        //! particle length = element length / number of particles in cell.
+        const unsigned particle_size =
+            sqrt(element->unit_cell_volume() / cell_->nparticles());
+
         // Compute shape function of the GIMP particle
-        shapefn_ = element->shapefn(this->xi_, cell_->nparticles(),
-                                    deformation_gradient);
+        shapefn_ =
+            element->shapefn(this->xi_, particle_size, deformation_gradient);
 
         // Compute bmatrix of the particle for reference cell
         bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());

@@ -112,8 +112,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         "Four noded quadrilateral element shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
       auto shapefn = quad->shapefn(coords, psize, defgrad);
@@ -183,8 +183,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 1., 3.;
       // clang-format on
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -403,8 +403,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 0., 1.;
       // clang-format on
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -435,7 +435,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -745,8 +745,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         "Eight noded quadrilateral element shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
       auto shapefn = quad->shapefn(coords, psize, defgrad);
@@ -838,8 +838,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 1.5, 2.0;
       // clang-format on
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -1075,8 +1075,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 0., 0.5;
       // clang-format on
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.5, 0.5;
+      const unsigned psize = 0;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad << 0.5, 0.5;
 
@@ -1107,7 +1106,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -1461,8 +1460,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Nine noded quadrilateral element with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.5, 0.1;
+      const unsigned psize = 0;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad << -0.25, 0.1;
 
@@ -1747,8 +1745,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0.5, 0.5;
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize << -0.5, -0.5;
+      const unsigned psize = 0;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad << -0.5, -0.5;
 
@@ -1921,8 +1918,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << -0.5, -0.5;
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize << -0.5, -0.5;
+      const unsigned psize = 0;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad << -0.5, -0.5;
 
@@ -1967,7 +1963,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix

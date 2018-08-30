@@ -174,8 +174,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Eight noded hexahedron shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
       auto shapefn = hex->shapefn(coords, psize, defgrad);
@@ -279,8 +279,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0.5, 0.5, 0.5;
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -420,11 +420,11 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, 8, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.,
                 0., 1., 1.;
       // clang-format on
@@ -469,11 +469,11 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, 8, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.,
                 0., 1., 1.;
       // clang-format on
@@ -518,11 +518,11 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, 8, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.,
                 0., 1., 1.;
       // clang-format on
@@ -563,19 +563,19 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0., 0., 0.;
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
       Eigen::Matrix<double, 8, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.,
                 0., 1., 1.;
       // clang-format on
@@ -619,11 +619,11 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, 7, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -684,12 +684,12 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
               0.29629629629629630, 0.14814814814814810, 0.07407407407407404,
               0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
               0.07407407407407404, 0.03703703703703701, 0.14814814814814810,
-              0.29629629629629630, 0.14814814814814810, 0.07407407407407404, 
-              0.03703703703703701, 0.07407407407407403, 0.14814814814814810, 
-              0.07407407407407404, 0.07407407407407404, 0.14814814814814810, 
-              0.29629629629629630, 0.14814814814814810, 0.07407407407407404, 
-              0.03703703703703701, 0.07407407407407404, 0.14814814814814810, 
-              0.14814814814814810, 0.07407407407407404, 0.14814814814814810, 
+              0.29629629629629630, 0.14814814814814810, 0.07407407407407404,
+              0.03703703703703701, 0.07407407407407403, 0.14814814814814810,
+              0.07407407407407404, 0.07407407407407404, 0.14814814814814810,
+              0.29629629629629630, 0.14814814814814810, 0.07407407407407404,
+              0.03703703703703701, 0.07407407407407404, 0.14814814814814810,
+              0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
               0.2962962962962963;
       // clang-format on
       for (unsigned i = 0; i < nfunctions; ++i)
@@ -1512,8 +1512,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Twenty noded hexahedron element with grad deformation") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize.setZero();
+      const unsigned psize = 0;
+
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -1631,24 +1631,24 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("20 noded hexahedron Jacobian for local coordinates(0.5,0.5,0.5)") {
       Eigen::Matrix<double, 20, Dim> coords;
       // clang-format off
-      coords << 2.0, 1.0, 0.50, 
-                4.0, 2.0, 1.00, 
-                2.0, 4.0, 1.00, 
-                1.0, 3.0, 0.50, 
-                2.0, 1.0, 1.50, 
-                4.0, 2.0, 2.00, 
-                2.0, 4.0, 2.00, 
-                1.0, 3.0, 1.50, 
-                3.0, 1.5, 0.75, 
-                1.5, 2.0, 0.50, 
+      coords << 2.0, 1.0, 0.50,
+                4.0, 2.0, 1.00,
+                2.0, 4.0, 1.00,
+                1.0, 3.0, 0.50,
+                2.0, 1.0, 1.50,
+                4.0, 2.0, 2.00,
+                2.0, 4.0, 2.00,
+                1.0, 3.0, 1.50,
+                3.0, 1.5, 0.75,
+                1.5, 2.0, 0.50,
                 2.0, 1.0, 1.00,
-                3.0, 3.0, 1.00, 
+                3.0, 3.0, 1.00,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 0.75,
                 2.0, 4.0, 1.50,
                 1.0, 3.0, 1.00,
                 3.0, 1.5, 1.75,
-                1.5, 2.0, 1.50, 
+                1.5, 2.0, 1.50,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 1.75;
       // clang-format on
@@ -1680,24 +1680,24 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("20 noded hexahedron Jacobian with deformation gradient") {
       Eigen::Matrix<double, 20, Dim> coords;
       // clang-format off
-      coords << 2.0, 1.0, 0.50, 
-                4.0, 2.0, 1.00, 
-                2.0, 4.0, 1.00, 
-                1.0, 3.0, 0.50, 
-                2.0, 1.0, 1.50, 
-                4.0, 2.0, 2.00, 
-                2.0, 4.0, 2.00, 
-                1.0, 3.0, 1.50, 
-                3.0, 1.5, 0.75, 
-                1.5, 2.0, 0.50, 
+      coords << 2.0, 1.0, 0.50,
+                4.0, 2.0, 1.00,
+                2.0, 4.0, 1.00,
+                1.0, 3.0, 0.50,
+                2.0, 1.0, 1.50,
+                4.0, 2.0, 2.00,
+                2.0, 4.0, 2.00,
+                1.0, 3.0, 1.50,
+                3.0, 1.5, 0.75,
+                1.5, 2.0, 0.50,
                 2.0, 1.0, 1.00,
-                3.0, 3.0, 1.00, 
+                3.0, 3.0, 1.00,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 0.75,
                 2.0, 4.0, 1.50,
                 1.0, 3.0, 1.00,
                 3.0, 1.5, 1.75,
-                1.5, 2.0, 1.50, 
+                1.5, 2.0, 1.50,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 1.75;
       // clang-format on
@@ -1705,8 +1705,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0.5, 0.5, 0.5;
 
-      Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.25, 0.5, 0.75;
+      const unsigned psize = 0;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -1844,11 +1843,11 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, 7, Dim> coords;
       // clang-format off
       coords << 0., 0., 0.,
-                1., 0., 0., 
+                1., 0., 0.,
                 1., 1., 0.,
                 0., 1., 0.,
                 0., 0., 1.,
-                1., 0., 1., 
+                1., 0., 1.,
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -2063,24 +2062,24 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Nodal coordinates
       Eigen::Matrix<double, 20, Dim> coords;
       // clang-format off
-      coords << 2.0, 1.0, 0.50, 
-                4.0, 2.0, 1.00, 
-                2.0, 4.0, 1.00, 
-                1.0, 3.0, 0.50, 
-                2.0, 1.0, 1.50, 
-                4.0, 2.0, 2.00, 
-                2.0, 4.0, 2.00, 
-                1.0, 3.0, 1.50, 
-                3.0, 1.5, 0.75, 
-                1.5, 2.0, 0.50, 
+      coords << 2.0, 1.0, 0.50,
+                4.0, 2.0, 1.00,
+                2.0, 4.0, 1.00,
+                1.0, 3.0, 0.50,
+                2.0, 1.0, 1.50,
+                4.0, 2.0, 2.00,
+                2.0, 4.0, 2.00,
+                1.0, 3.0, 1.50,
+                3.0, 1.5, 0.75,
+                1.5, 2.0, 0.50,
                 2.0, 1.0, 1.00,
-                3.0, 3.0, 1.00, 
+                3.0, 3.0, 1.00,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 0.75,
                 2.0, 4.0, 1.50,
                 1.0, 3.0, 1.00,
                 3.0, 1.5, 1.75,
-                1.5, 2.0, 1.50, 
+                1.5, 2.0, 1.50,
                 4.0, 2.0, 1.50,
                 1.5, 3.5, 1.75;
       // clang-format on
