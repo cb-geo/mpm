@@ -174,8 +174,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Eight noded hexahedron shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      const unsigned psize = 0;
-
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
       auto shapefn = hex->shapefn(coords, psize, defgrad);
@@ -279,8 +279,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0.5, 0.5, 0.5;
-      const unsigned psize = 0;
-
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -563,8 +563,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0., 0., 0.;
 
-      const unsigned psize = 0;
-
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -1512,8 +1512,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Twenty noded hexahedron element with grad deformation") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      const unsigned psize = 0;
-
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -1705,7 +1705,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0.5, 0.5, 0.5;
 
-      const unsigned psize = 0;
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize << 0.25, 0.5, 0.75;
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
