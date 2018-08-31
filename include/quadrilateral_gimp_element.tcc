@@ -30,6 +30,11 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
 
   Eigen::Matrix<double, 16, 1> shapefn;
 
+  //! Dimension
+  const unsigned Dim = 2;
+  //! Nodes in GIMP function
+  const unsigned Nfunctions = 16;
+
   //! Matrix to store local node coordinates
   Eigen::Matrix<double, 16, 2> local_node;
   // clang-format off
@@ -51,15 +56,18 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
                 -3., -1.;
   // clang-format on
 
-  //! length and volume of element in local coordinate
+  //! length of element in local coordinate
   const double element_length = 2;
 
   //! loop to iterate over nodes
-  for (unsigned n = 0; n < 16; ++n) {
+  for (unsigned n = 0; n < Nfunctions; ++n) {
+
+    //! local shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> sni;
 
     //! loop to iterate over dimensions
-    for (unsigned i = 0; i < 2; ++i) {
+    for (unsigned i = 0; i < Dim; ++i) {
+
       double ni = local_node(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
@@ -101,6 +109,11 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 16, 2> grad_shapefn;
 
+  //! Dimension
+  const unsigned Dim = 2;
+  //! Nodes in GIMP function
+  const unsigned Nfunctions = 16;
+
   //! Matrix to store local node coordinates
   Eigen::Matrix<double, 16, 2> local_node;
   // clang-format off
@@ -122,17 +135,18 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
                 -3., -1.;
   // clang-format on
 
-  //! length and volume of element in local coordinate (TODO: double check)
+  //! length of element in local coordinate
   const double element_length = 2;
 
   //! shape function grad
   double dxni, dyni;
-  for (unsigned n = 0; n < 16; ++n) {
-
+  for (unsigned n = 0; n < Nfunctions; ++n) {
+    //! local shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> sni;
+    //! local grad shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> dni;
 
-    for (unsigned i = 0; i < 2; ++i) {
+    for (unsigned i = 0; i < Dim; ++i) {
       double ni = local_node(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
