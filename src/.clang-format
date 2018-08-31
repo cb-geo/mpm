@@ -44,4 +44,3 @@ SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 4
 ...
-
