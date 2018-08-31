@@ -172,32 +172,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
-      if (element->shapefn_type() == mpm::ShapefnType::GIMP) {
-        Eigen::Matrix<double, Tdim, 1> deformation_gradient;
-        deformation_gradient.setZero();
-        //! particle length = element length / number of particles in cell.
-        const unsigned particle_length =
-            sqrt(element->unit_cell_volume() / cell_->nparticles());
-
-        //! Set particle size based on dimension
-        Eigen::Matrix<double, Tdim, 1> particle_size;
-        for (unsigned i = 0; i == Tdim; ++i) {
-          particle_size(i) = particle_length;
-        }
-        // Compute shape function of the GIMP particle
-        shapefn_ =
-            element->shapefn(this->xi_, particle_size, deformation_gradient);
-        // Compute bmatrix of the particle for reference cell
-        bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
-      } else if (element->shapefn_type() == mpm::ShapefnType::CPDI) {
-        //! Compute CPDI
-      } else {
-        // Compute shape function of the particle
-        shapefn_ = element->shapefn(this->xi_);
-        // Compute bmatrix of the particle for reference cell
-        bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
-      }
-
+      // Compute shape function of the particle
+      shapefn_ = element->shapefn(this->xi_);
+      // Compute bmatrix of the particle for reference cell
+      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

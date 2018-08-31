@@ -236,7 +236,7 @@ class HexahedronElement : public Element<Tdim> {
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
   //! Return unit cell volume 3D 2*2*2
-  double unit_cell_volume() const { return 8; }
+  double unit_cell_volume() const { return 8.; }
 
  private:
   //! Logger
