@@ -49,8 +49,6 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
 
-  Eigen::Matrix<double, 16, 1> shapefn;
-
   //! Dimension
   const unsigned Dim = 2;
   //! Nodes in GIMP function
@@ -62,7 +60,8 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
   //! Matrix to store local node coordinates
   const Eigen::Matrix<double, 16, 2> local_node =
       this->local_node_coordinates();
-
+  //! To store shape functions
+  Eigen::Matrix<double, 16, 1> shapefn;
   //! loop to iterate over nodes
   for (unsigned n = 0; n < Nfunctions; ++n) {
     //! local shape function in current plane (x, y or z)
@@ -108,7 +107,6 @@ template <>
 inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
-  Eigen::Matrix<double, 16, 2> grad_shapefn;
 
   //! Dimension
   const unsigned Dim = 2;
@@ -118,7 +116,8 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
   //! Matrix to store local node coordinates
   const Eigen::Matrix<double, 16, 2> local_node =
       this->local_node_coordinates();
-
+  //! To store grad shape functions
+  Eigen::Matrix<double, 16, 2> grad_shapefn;
   //! length of element in local coordinate
   const double element_length = 2.;
   //! loop to iterate over nodes
