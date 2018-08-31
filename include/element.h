@@ -1,6 +1,7 @@
 #ifndef MPM_ELEMENT_H_
 #define MPM_ELEMENT_H_
 
+#include <exception>
 #include <map>
 #include <vector>
 
@@ -140,7 +141,6 @@ class Element {
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
 
   //! Return unit cell volume for particle size calculation
-  //! \retval unit_cell_volume Unit cell volume
   virtual double unit_cell_volume() const = 0;
 };
 
