@@ -2,11 +2,8 @@
 //!   |           |           |           |
 //!   |           |           |           |
 //!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
 //!   |        (-1, 1)      (1,1)         |
 //!   14----------3-----------2-----------9
-//!   |           |           |           |
 //!   |           |           |           |
 //!   |           |particle   |           |
 //!   |           | location  |           |
@@ -16,25 +13,12 @@
 //!   |           |           |           |
 //!   |           |           |           |
 //!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
 //!   4-----------5-----------6-----------7
 
-// RENAME TO QUAD GIMP
-//! Return shape functions of a 16-node Quadrilateral GIMP Element at a given
-//! local coordinate
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
-    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
-
-  Eigen::Matrix<double, 16, 1> shapefn;
-
-  //! Dimension
-  const unsigned Dim = 2;
-  //! Nodes in GIMP function
-  const unsigned Nfunctions = 16;
-
+inline Eigen::MatrixXd
+    mpm::QuadrilateralGIMPElement<2, 16>::local_node_coordinates() const {
+  // Coordinates of a unit cell
   //! Matrix to store local node coordinates
   Eigen::Matrix<double, 16, 2> local_node;
   // clang-format off
@@ -55,19 +39,36 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
                 -3.,  1.,
                 -3., -1.;
   // clang-format on
+  return local_node;
+}
+
+//! Return shape functions of a 16-node Quadrilateral GIMP Element at a given
+//! local coordinate
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
+    const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
+
+  Eigen::Matrix<double, 16, 1> shapefn;
+
+  //! Dimension
+  const unsigned Dim = 2;
+  //! Nodes in GIMP function
+  const unsigned Nfunctions = 16;
 
   //! length of element in local coordinate
-  const double element_length = 2;
+  const double element_length = 2.;
+
+  //! Matrix to store local node coordinates
+  const Eigen::Matrix<double, 16, 2> local_node =
+      this->local_node_coordinates();
 
   //! loop to iterate over nodes
   for (unsigned n = 0; n < Nfunctions; ++n) {
-
     //! local shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> sni;
-
     //! loop to iterate over dimensions
     for (unsigned i = 0; i < Dim; ++i) {
-
       double ni = local_node(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
@@ -115,42 +116,23 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
   const unsigned Nfunctions = 16;
 
   //! Matrix to store local node coordinates
-  Eigen::Matrix<double, 16, 2> local_node;
-  // clang-format off
-  local_node << -1., -1.,
-                 1., -1.,
-                -1.,  1.,
-                 1.,  1.,
-                -3., -3.,
-                -1., -3.,
-                 1., -3.,
-                 3., -3.,
-                 3., -1.,
-                 3.,  1.,
-                 3.,  3.,
-                 1.,  3.,
-                -1.,  3.,
-                -3.,  3.,
-                -3.,  1.,
-                -3., -1.;
-  // clang-format on
+  const Eigen::Matrix<double, 16, 2> local_node =
+      this->local_node_coordinates();
 
   //! length of element in local coordinate
-  const double element_length = 2;
-
-  //! shape function grad
-  double dxni, dyni;
+  const double element_length = 2.;
+  //! loop to iterate over nodes
   for (unsigned n = 0; n < Nfunctions; ++n) {
     //! local shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> sni;
     //! local grad shape function in current plane (x, y or z)
     Eigen::Matrix<double, 2, 1> dni;
-
+    //! loop to iterate over dimensions
     for (unsigned i = 0; i < Dim; ++i) {
       double ni = local_node(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
-      //! x direction
+      //! Conditional grad shape function statement see: Zhang 2016
       if (npni >= element_length + particle_size(i)) {
         sni(i) = 0;
         dni(i) = 0;

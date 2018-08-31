@@ -5,29 +5,6 @@
 
 namespace mpm {
 
-//!   13          12          11         10
-//!   0-----------0-----------0-----------0
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |        (-1, 1)      (1,1)         |
-//!   0-----------0-----------0-----------0
-//!   | 14      3 |         2 |         9 |
-//!   |           |           |           |
-//!   |           |   Point   |           |
-//!   |           |  location |           |
-//!   |         0 |         1 |           |
-//!   0-----------0-----------0-----------0
-//!   | 15     (-1,-1)	    (1,-1)      8 |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   0-----------0-----------0-----------0
-//!   4           5           6           7
 //! </pre>
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
@@ -96,6 +73,8 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
+  Eigen::MatrixXd local_node_coordinates() const;
 };
 
 }  // namespace mpm
