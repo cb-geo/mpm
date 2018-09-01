@@ -5,7 +5,34 @@
 
 namespace mpm {
 
+//! Quadrilateral GIMP element class derived from Quadrilateral
+//! \brief Quadrilateral GIMP element
+//! \details 16-noded quadrilateral GIMP element \n
+//! Shape function, gradient shape function, B-matrix, indices \n
+//! 16-node Quadrilateral GIMP Element \n
+//!
+//! <pre>
+//!
+//!   13----------12----------11----------10
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |        (-1, 1)      (1,1)         |
+//!   14----------3-----------2-----------9
+//!   |           |           |           |
+//!   |           | particle  |           |
+//!   |           | location  |           |
+//!   |           |           |           |
+//!   15----------0-----------1-----------8
+//!   |        (-1,-1)      (1,-1)        |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   |           |           |           |
+//!   4-----------5-----------6-----------7
+//!
 //! </pre>
+//!
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -67,15 +94,18 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
   */
+  
   //! Return the type of shape function
-  mpm::ShapefnType shapefn_type() const override;
-  { return mpm::ShapefnType::GIMP; }
+  mpm::ShapefnType shapefn_type() const override {
+    return mpm::ShapefnType::GIMP;
+  }
 
  private:
+  //! Return natural nodal coordinates
+  Eigen::MatrixXd natural_nodal_coordinates() const;
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
-  Eigen::MatrixXd local_node_coordinates() const;
 };
 
 }  // namespace mpm

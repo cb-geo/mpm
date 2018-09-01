@@ -1,45 +1,28 @@
-//!   13----------12----------11----------10
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |        (-1, 1)      (1,1)         |
-//!   14----------3-----------2-----------9
-//!   |           |           |           |
-//!   |           |particle   |           |
-//!   |           | location  |           |
-//!   |           |           |           |
-//!   15----------0-----------1-----------8
-//!   |        (-1,-1)      (1,-1)        |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   |           |           |           |
-//!   4-----------5-----------6-----------7
-
+// Return natural nodal coordinates
 template <>
 inline Eigen::MatrixXd
-    mpm::QuadrilateralGIMPElement<2, 16>::local_node_coordinates() const {
-  // Coordinates of a unit cell
-  //! Matrix to store local node coordinates
-  Eigen::Matrix<double, 16, 2> local_node;
+    mpm::QuadrilateralGIMPElement<2, 16>::natural_nodal_coordinates() const {
+  //! Natural coordinates of nodes
+  Eigen::Matrix<double, 16, 2> local_nodes;
   // clang-format off
-  local_node << -1., -1.,
-                 1., -1.,
-                -1.,  1.,
-                 1.,  1.,
-                -3., -3.,
-                -1., -3.,
-                 1., -3.,
-                 3., -3.,
-                 3., -1.,
-                 3.,  1.,
-                 3.,  3.,
-                 1.,  3.,
-                -1.,  3.,
-                -3.,  3.,
-                -3.,  1.,
-                -3., -1.;
+  local_nodes << -1., -1.,
+                  1., -1.,
+                 -1.,  1.,
+                  1.,  1.,
+                 -3., -3.,
+                 -1., -3.,
+                  1., -3.,
+                  3., -3.,
+                  3., -1.,
+                  3.,  1.,
+                  3.,  3.,
+                  1.,  3.,
+                 -1.,  3.,
+                 -3.,  3.,
+                 -3.,  1.,
+                 -3., -1.;
   // clang-format on
-  return local_node;
+  return local_nodes;
 }
 
 //! Return shape functions of a 16-node Quadrilateral GIMP Element at a given
@@ -57,9 +40,9 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
   //! length of element in local coordinate
   const double element_length = 2.;
 
-  //! Matrix to store local node coordinates
-  const Eigen::Matrix<double, 16, 2> local_node =
-      this->local_node_coordinates();
+  //! Natural nodal coordinates
+  const Eigen::Matrix<double, 16, 2> local_nodes =
+      this->natural_nodal_coordinates();
   //! To store shape functions
   Eigen::Matrix<double, 16, 1> shapefn;
   //! loop to iterate over nodes
@@ -68,7 +51,7 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
     Eigen::Matrix<double, 2, 1> sni;
     //! loop to iterate over dimensions
     for (unsigned i = 0; i < Dim; ++i) {
-      double ni = local_node(n, i);
+      double ni = local_nodes(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
       //! Conditional shape function statement see: Bardenhagen 2004
@@ -113,9 +96,9 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
   //! Nodes in GIMP function
   const unsigned Nfunctions = 16;
 
-  //! Matrix to store local node coordinates
-  const Eigen::Matrix<double, 16, 2> local_node =
-      this->local_node_coordinates();
+  //! Natural nodal coordinates
+  const Eigen::Matrix<double, 16, 2> local_nodes =
+      this->natural_nodal_coordinates();
   //! To store grad shape functions
   Eigen::Matrix<double, 16, 2> grad_shapefn;
   //! length of element in local coordinate
@@ -128,7 +111,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
     Eigen::Matrix<double, 2, 1> dni;
     //! loop to iterate over dimensions
     for (unsigned i = 0; i < Dim; ++i) {
-      double ni = local_node(n, i);
+      double ni = local_nodes(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
 
       //! Conditional grad shape function statement see: Zhang 2016
