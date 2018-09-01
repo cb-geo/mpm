@@ -94,7 +94,7 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
   */
-  
+
   //! Return the type of shape function
   mpm::ShapefnType shapefn_type() const override {
     return mpm::ShapefnType::GIMP;
