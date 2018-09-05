@@ -119,6 +119,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
