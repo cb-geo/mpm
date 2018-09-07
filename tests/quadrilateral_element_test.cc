@@ -435,7 +435,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0.,
+                1., 0., 
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -1127,7 +1127,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0.,
+                1., 0., 
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -2007,7 +2007,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0.,
+                1., 0., 
                 1., 1.;
       // clang-format on
       // Get B-Matrix
