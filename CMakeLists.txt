@@ -67,10 +67,10 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 # VTK
 find_package(VTK)
 if (VTK_FOUND)
-#  include(${VTK_USE_FILE})
-#  link_libraries(${VTK_LIBRARIES})
-#  add_definitions("-DUSE_VTK")
-#  set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
+  include(${VTK_USE_FILE})
+  link_libraries(${VTK_LIBRARIES})
+  add_definitions("-DUSE_VTK")
+  set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
 # Include directories

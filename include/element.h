@@ -139,9 +139,6 @@ class Element {
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
-
-  //! Return unit cell volume for particle size calculation
-  virtual double unit_cell_volume() const = 0;
 };
 
 }  // namespace mpm
