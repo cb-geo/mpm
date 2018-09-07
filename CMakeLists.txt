@@ -66,8 +66,11 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 
 # VTK
 find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
-link_libraries(${VTK_LIBRARIES})
+if (VTK_FOUND)
+  include(${VTK_USE_FILE})
+  link_libraries(${VTK_LIBRARIES})
+  set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
+endif()
 
 # Include directories
 include_directories(BEFORE
@@ -88,10 +91,9 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
-  ${mpm_SOURCE_DIR}/src/vtk_writer.cc
 )
 
-add_library(lmpm SHARED ${mpm_src})
+add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
 
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
