@@ -205,6 +205,21 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
   return checkpoint;
 }
 
+//! Write HDF5 files
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
+  // Write input geometry to vtk file
+  std::string attribute = "particles";
+  std::string extension = ".h5";
+
+  auto particles_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+
+  const unsigned phase = 0;
+  meshes_.at(0)->write_particles_hdf5(phase, particles_file);
+}
+
+#ifdef USE_VTK
 //! Write VTK files
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
@@ -228,17 +243,4 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   vtk_writer->write_vector_point_data(
       stress_file, meshes_.at(0)->particle_stresses(phase), attribute);
 }
-
-//! Write HDF5 files
-template <unsigned Tdim>
-void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
-  // Write input geometry to vtk file
-  std::string attribute = "particles";
-  std::string extension = ".h5";
-
-  auto particles_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-
-  const unsigned phase = 0;
-  meshes_.at(0)->write_particles_hdf5(phase, particles_file);
-}
+#endif

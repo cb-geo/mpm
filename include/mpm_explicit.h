@@ -34,8 +34,10 @@ class MPMExplicit : public MPM {
   //! Checkpoint resume
   bool checkpoint_resume() override;
 
+#ifdef USE_VTK
   //! Write VTK files
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
+#endif
 
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
