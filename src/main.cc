@@ -4,7 +4,6 @@
 
 #include "io.h"
 #include "mpm.h"
-#include "vtk_writer.h"
 
 int main(int argc, char** argv) {
   // Logger level (trace, debug, info, warn, error, critical, off)
