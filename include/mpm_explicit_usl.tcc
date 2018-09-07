@@ -110,10 +110,12 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
       throw std::runtime_error("Particle outside the mesh domain");
 
     if (step_ % output_steps_ == 0) {
-      // VTK outputs
-      this->write_vtk(step_, this->nsteps_);
       // HDF5 outputs
       this->write_hdf5(step_, this->nsteps_);
+#ifdef USE_VTK
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
+#endif
     }
   }
   return status;
