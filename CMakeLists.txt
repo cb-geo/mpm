@@ -135,6 +135,6 @@ endif()
 # Coverage
 find_package(codecov)
 if(ENABLE_COVERAGE)
-  add_executable(mpmtest_coverage ${mpm_src} ${test_src})
+  add_executable(mpmtest_coverage ${mpm_vtk} ${mpm_src} ${test_src})
   add_coverage(mpmtest_coverage)
 endif()
