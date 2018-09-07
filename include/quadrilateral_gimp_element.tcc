@@ -55,27 +55,27 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
       double npni = xi(i) - ni;  // local particle  - local node
 
       //! Conditional shape function statement see: Bardenhagen 2004
-      if (npni <= -element_length - particle_size(i)) {
+      if (npni <= (-element_length - particle_size(i))) {
         sni(i) = 0.;
-      } else if (-element_length - particle_size(i) < npni &&
-                 npni <= -element_length + particle_size(i)) {
-        sni(i) = std::pow(element_length + particle_size(i) + npni, 2) /
-                 (4 * (element_length * particle_size(i)));
-      } else if (-element_length + particle_size(i) < npni &&
+      } else if ((-element_length - particle_size(i)) < npni &&
+                 npni <= (-element_length + particle_size(i))) {
+        sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
+                 (4. * (element_length * particle_size(i)));
+      } else if ((-element_length + particle_size(i)) < npni &&
                  npni <= -particle_size(i)) {
-        sni(i) = 1 + (npni / element_length);
+        sni(i) = 1. + (npni / element_length);
       } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
-        sni(i) = 1 - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                      (2 * element_length * particle_size(i)));
+        sni(i) = 1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                       (2. * element_length * particle_size(i)));
       } else if (particle_size(i) < npni &&
                  npni <= element_length - particle_size(i)) {
-        sni(i) = 1 - (npni / element_length);
-      } else if (element_length - particle_size(i) < npni &&
+        sni(i) = 1. - (npni / element_length);
+      } else if ((element_length - particle_size(i)) < npni &&
                  npni <= element_length + particle_size(i)) {
-        sni(i) = std::pow(element_length + particle_size(i) - npni, 2) /
-                 (4 * element_length * particle_size(i));
-      } else if (element_length + particle_size(i) < npni) {
-        sni(i) = 0;
+        sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
+                 (4. * element_length * particle_size(i));
+      } else if ((element_length + particle_size(i)) < npni) {
+        sni(i) = 0.;
       }
     }
     shapefn(n) = sni(0) * sni(1);
@@ -114,38 +114,38 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
       double ni = local_nodes(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
       //! Conditional shape function statement see: Bardenhagen 2004
-      if (npni <= -element_length - particle_size(i)) {
+      if (npni <= (-element_length - particle_size(i))) {
         sni(i) = 0.;
         dni(i) = 0.;
 
-      } else if (-element_length - particle_size(i) < npni &&
-                 npni <= -element_length + particle_size(i)) {
+      } else if ((-element_length - particle_size(i)) < npni &&
+                 npni <= (-element_length + particle_size(i))) {
 
-        sni(i) = std::pow(element_length + particle_size(i) + npni, 2) /
-                 (4 * (element_length * particle_size(i)));
+        sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
+                 (4. * (element_length * particle_size(i)));
         dni(i) = (element_length + particle_size(i) + npni) /
-                 (2 * element_length * particle_size(i));
-      } else if (-element_length + particle_size(i) < npni &&
+                 (2. * element_length * particle_size(i));
+      } else if ((-element_length + particle_size(i)) < npni &&
                  npni <= -particle_size(i)) {
-        sni(i) = 1 + (npni / element_length);
-        dni(i) = 1 / element_length;
+        sni(i) = 1. + (npni / element_length);
+        dni(i) = 1. / element_length;
       } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
-        sni(i) = 1 - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                      (2 * element_length * particle_size(i)));
+        sni(i) = 1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                       (2. * element_length * particle_size(i)));
         dni(i) = -(npni / (element_length * particle_size(i)));
       } else if (particle_size(i) < npni &&
                  npni <= element_length - particle_size(i)) {
-        sni(i) = 1 - (npni / element_length);
-        dni(i) = -(1 / element_length);
-      } else if (element_length - particle_size(i) < npni &&
+        sni(i) = 1. - (npni / element_length);
+        dni(i) = -(1. / element_length);
+      } else if ((element_length - particle_size(i)) < npni &&
                  npni <= element_length + particle_size(i)) {
-        sni(i) = std::pow(element_length + particle_size(i) - npni, 2) /
-                 (4 * element_length * particle_size(i));
+        sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
+                 (4. * element_length * particle_size(i));
         dni(i) = -((element_length + particle_size(i) - npni) /
-                   (2 * element_length * particle_size(i)));
-      } else if (element_length + particle_size(i) < npni) {
-        sni(i) = 0;
-        dni(i) = 0;
+                   (2. * element_length * particle_size(i)));
+      } else if ((element_length + particle_size(i)) < npni) {
+        sni(i) = 0.;
+        dni(i) = 0.;
       }
     }
     grad_shapefn(n, 0) = dni(0) * sni(1);

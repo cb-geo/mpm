@@ -23,10 +23,14 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
     SECTION(
         "16 Node quadrilateral element matrix for coordinate(0,0), Size "
         "(0,0)") {
+
+      // Coordinate location of point (x,y)
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
+      // Particle size (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
       psize.setZero();
+      // Deformation gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -96,10 +100,13 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
     SECTION(
         "16 Node quadrilateral element matrix for coordinate(-1,-1), Size "
         "(0,0)") {
+      // Coordinate location of point (x,y)
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1, -1;
+      // Particle size (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
       psize.setZero();
+      // Deformation gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -171,10 +178,13 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
     SECTION(
         "16 Node quadrilateral element matrix for coordinate(1,1), Size "
         "(1,1)") {
+      // Coordinate location of point (x,y)
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1, 1;
+      // Particle size (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
       psize.setZero();
+      // Deformation gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
 
@@ -237,6 +247,161 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       REQUIRE(gradsf(10, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(11, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(12, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 1) == Approx(0.0).epsilon(Tolerance));
+    }
+
+    // Coordinates is (-0.8,-0.8) Size is (0.25,0.25)
+    SECTION(
+        "16 Node quadrilateral element matrix for coordinate(-0.8,-0.8), Size "
+        "(0.25,0.25)") {
+      // Location of point (x,y)
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords << -0.8, -0.8;
+      // Size of particle (x,y)
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize << 0.25, 0.25;
+      // Deformarion gradient
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      auto shapefn = quad->shapefn(coords, psize, defgrad);
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.80550625).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.090871875).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.0102515625).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.090871875).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(1.5625e-06).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.001121875).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.0001265625).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(8) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(9) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(10) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(11) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(12) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(13) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(14) == Approx(0.0001265625).epsilon(Tolerance));
+      REQUIRE(shapefn(15) == Approx(0.001121875).epsilon(Tolerance));
+
+      // Check gradient of shape functions
+      auto gradsf = quad->grad_shapefn(coords, psize, defgrad);
+      REQUIRE(gradsf.rows() == nfunctions);
+      REQUIRE(gradsf.cols() == Dim);
+
+      REQUIRE(gradsf(0, 0) == Approx(-0.359).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 0) == Approx(0.403875).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 0) == Approx(0.0455625).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 0) == Approx(-0.0405).epsilon(Tolerance));
+
+      REQUIRE(gradsf(4, 0) == Approx(-6.25e-05).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 0) == Approx(-0.0005).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 0) == Approx(0.0005625).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(8, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 0) == Approx(-0.0050625).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 0) == Approx(-0.044875).epsilon(Tolerance));
+
+      REQUIRE(gradsf(0, 1) == Approx(-0.359).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 1) == Approx(-0.0405).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 1) == Approx(0.0455625).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 1) == Approx(0.403875).epsilon(Tolerance));
+
+      REQUIRE(gradsf(4, 1) == Approx(-6.25e-05).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 1) == Approx(-0.044875).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 1) == Approx(-0.0050625).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 1) == Approx(0.0005625).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 1) == Approx(-0.0005).epsilon(Tolerance));
+    }
+    // Coordinates is (0.8,0.8) Size is (0.25,0.25)
+    SECTION(
+        "16 Node quadrilateral element matrix for coordinate(0.8,0.8), Size "
+        "(0.25,0.25)") {
+      // Location of point (x,y)
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords << 0.8, 0.8;
+      // Size of particle (x,y)
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize << 0.25, 0.25;
+      // Deformarion gradient
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      auto shapefn = quad->shapefn(coords, psize, defgrad);
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.0102515625).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.090871875).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.80550625).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.090871875).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(8) == Approx(0.0001265625).epsilon(Tolerance));
+      REQUIRE(shapefn(9) == Approx(0.001121875).epsilon(Tolerance));
+      REQUIRE(shapefn(10) == Approx(1.5625e-06).epsilon(Tolerance));
+      REQUIRE(shapefn(11) == Approx(0.001121875).epsilon(Tolerance));
+      REQUIRE(shapefn(12) == Approx(0.0001265625).epsilon(Tolerance));
+      REQUIRE(shapefn(13) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(14) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(15) == Approx(0.0).epsilon(Tolerance));
+
+      // Check gradient of shape functions
+      auto gradsf = quad->grad_shapefn(coords, psize, defgrad);
+      REQUIRE(gradsf.rows() == nfunctions);
+      REQUIRE(gradsf.cols() == Dim);
+
+      REQUIRE(gradsf(0, 0) == Approx(-0.0455625).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 0) == Approx(0.0405).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 0) == Approx(0.359).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 0) == Approx(-0.403875).epsilon(Tolerance));
+
+      REQUIRE(gradsf(4, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(8, 0) == Approx(0.0050625).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 0) == Approx(0.044875).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 0) == Approx(6.25e-05).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 0) == Approx(0.0005).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 0) == Approx(-0.0005625).epsilon(Tolerance));
+      REQUIRE(gradsf(13, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(14, 0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(15, 0) == Approx(0.0).epsilon(Tolerance));
+
+      REQUIRE(gradsf(0, 1) == Approx(-0.0455625).epsilon(Tolerance));
+      REQUIRE(gradsf(1, 1) == Approx(-0.403875).epsilon(Tolerance));
+      REQUIRE(gradsf(2, 1) == Approx(0.359).epsilon(Tolerance));
+      REQUIRE(gradsf(3, 1) == Approx(0.0405).epsilon(Tolerance));
+
+      REQUIRE(gradsf(4, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(5, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(6, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(gradsf(8, 1) == Approx(-0.0005625).epsilon(Tolerance));
+      REQUIRE(gradsf(9, 1) == Approx(0.0005).epsilon(Tolerance));
+      REQUIRE(gradsf(10, 1) == Approx(6.25e-05).epsilon(Tolerance));
+      REQUIRE(gradsf(11, 1) == Approx(0.044875).epsilon(Tolerance));
+      REQUIRE(gradsf(12, 1) == Approx(0.0050625).epsilon(Tolerance));
       REQUIRE(gradsf(13, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(14, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(15, 1) == Approx(0.0).epsilon(Tolerance));
