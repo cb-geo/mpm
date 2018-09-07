@@ -26,6 +26,8 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 * [Eigen](http://eigen.tuxfamily.org/)
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
 * [HDF5](https://support.hdfgroup.org/HDF5/)
+
+#### Optional
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
