@@ -140,8 +140,8 @@ class Element {
   //! \retval indices Indices that make the face
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
 
-  //! Return unit cell volume for particle size calculation
-  virtual double unit_cell_volume() const = 0;
+  //! Return unit element volume for particle size calculation
+  virtual double unit_element_volume() const = 0;
 };
 
 }  // namespace mpm
