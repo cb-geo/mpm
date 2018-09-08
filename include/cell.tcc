@@ -988,16 +988,16 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
 
 //! Apply velocity constraints
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_velocity_constraints() {}
+void mpm::Cell<Tdim>::apply_velocity_constraints() {
 
-//! Compute normal 2d
+  // TODO
+}
+
+//! Compute all face normal 3d
 template <>
 inline void mpm::Cell<2>::compute_normals() {
 
-  for (const auto& velocity_constraint : this->velocity_constraints_) {
-    // Get face_id
-    const auto face_id = velocity_constraint.first;
-
+  for (unsigned face_id = 0; face_id < 4; ++face_id) {
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);
 
@@ -1014,21 +1014,19 @@ inline void mpm::Cell<2>::compute_normals() {
     Eigen::Matrix<double, 2, 1> normal_vector;
     normal_vector(0) = -a(1);
     normal_vector(1) = a(0);
-    normal_vector /= normal_vector.norm();
+    normal_vector = normal_vector.normalized();
 
     // Store to private variable
-    face_normals_.emplace_back(normal_vector);
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
   }
 }
 
-//! Compute normal 3d
+//! Compute all face normal 3d
 template <>
 inline void mpm::Cell<3>::compute_normals() {
 
-  for (const auto& velocity_constraint : this->velocity_constraints_) {
-    // Get face_id
-    const auto face_id = velocity_constraint.first;
-
+  for (unsigned face_id = 0; face_id < 6; ++face_id) {
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);
 
@@ -1045,31 +1043,16 @@ inline void mpm::Cell<3>::compute_normals() {
     // Note that definition of a and b are such that normal is always out of
     // page
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
-    normal_vector /= normal_vector.norm();
+    normal_vector = normal_vector.normalized();
 
     // Store to private variable
-    face_normals_.emplace_back(normal_vector);
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
   }
 }
 
 //! Return unit normal vector
-template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::normal(unsigned face_id) {
-
-  Eigen::Matrix<double, Tdim, 1> normal_vector;
-  normal_vector.setZero();
-
-  try {
-    // Check if face_id is within the range of normal vector
-    if (face_id < this->face_normals_.size()) {
-      // return normal vector depending on face_id
-      normal_vector = this->face_normals_.at(face_id);
-    } else {
-      throw std::runtime_error("Specified face_id is out of range.");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-
-  return normal_vector;
-}
+// template <unsigned Tdim>
+// Eigen::VectorXd mpm::Cell<Tdim>::normal(unsigned face_id) {
+//   return this->face_normals_.at(face_id);
+// }

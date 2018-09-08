@@ -1,4 +1,5 @@
 #include <cmath>
+
 #include <limits>
 #include <memory>
 
@@ -747,9 +748,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   }
 
   SECTION("Check velocity boundary conditions") {
-
     SECTION("Check normal vector") {
-
       Eigen::Vector2d coords;
       coords.setZero();
 
@@ -786,22 +785,16 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 2);
-
-      // Check normal vector when id is out of range range
-      Eigen::Vector2d zero_normal_vector;
-      zero_normal_vector << 0., 0.;
-      auto check_zero_normal_vector = cell->normal(100);
-      for (unsigned i = 0; i < Dim; i++) {
-        REQUIRE(check_zero_normal_vector(i) == zero_normal_vector(i));
-      }
+      REQUIRE(cell->nnormal() == 4);
 
       // Check normal vector
-      Eigen::Matrix<double, 2, Dim> normal_vector;
+      Eigen::Matrix<double, 4, Dim> normal_vector;
 
       // clang-format off
-      normal_vector << 0.242535625036333, -0.970142500145332,
-                       0.447213595499958,  0.894427190999916;
+      normal_vector <<  0.242535625036333, -0.970142500145332,
+                        0.447213595499958,  0.894427190999916,
+                        0.,                 1.,
+                       -1.,                 0.;
       // clang-format on
 
       for (unsigned i = 0; i < cell->nnormal(); ++i) {
@@ -1976,22 +1969,18 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 2);
-
-      // Check normal vector when id is out of range range
-      Eigen::Vector3d zero_normal_vector;
-      zero_normal_vector << 0., 0., 0.;
-      auto check_zero_normal_vector = cell->normal(100);
-      for (unsigned i = 0; i < Dim; i++) {
-        REQUIRE(check_zero_normal_vector(i) == zero_normal_vector(i));
-      }
+      REQUIRE(cell->nnormal() == 6);
 
       // Check normal vector
-      Eigen::Matrix<double, 2, Dim> normal_vector;
+      Eigen::Matrix<double, 6, Dim> normal_vector;
 
       // clang-format off
       normal_vector <<  0.242535625036333, -0.970142500145332,  0.,
-                       -0.301511344577764,  0.904534033733291,  0.301511344577764;
+                       -0.301511344577764,  0.904534033733291,  0.301511344577764,
+                        0.,                 1.,                 0.,
+                       -1.,                 0.,                 0.,
+                        0.301511344577764, -0.301511344577764, -0.904534033733291,
+                        0.,                 0.,                 1.;
       // clang-format on
 
       for (unsigned i = 0; i < cell->nnormal(); ++i) {
