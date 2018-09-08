@@ -155,10 +155,10 @@ class Mesh {
           velocity_constraints);
 
   //! Assign velocity constraints to cells
-  //! \param[in] velocity_constraints Constraint at cell id, phase id, dir, and
+  //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
   //! velocity
   bool assign_cell_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>&
+      const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
 
   //! Assign particles tractions

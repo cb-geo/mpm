@@ -615,7 +615,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         // Test assign velocity constraints to cells
         SECTION("Check assign velocity constraints to cells") {
           // Vector of particle coordinates
-          std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>
+          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
               velocity_constraints;
           // Constraint
           velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
@@ -1258,7 +1258,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         // Test assign velocity constraints to cells
         SECTION("Check assign velocity constraints to cells") {
           // Vector of particle coordinates
-          std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>
+          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
               velocity_constraints;
           // Constraint
           velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));

@@ -11,7 +11,7 @@
 
 #include "affine_transform.h"
 #include "element.h"
-// #include "geometry.h"
+#include "geometry.h"
 #include "logger.h"
 #include "map.h"
 #include "node_base.h"
@@ -252,7 +252,9 @@ class Cell {
   //! Return unit normal vector, positive pointing outside of the element
   //! \param[in] face_id of constraint
   //! \retval unit normal vector
-  Eigen::VectorXd normal(unsigned face_id);
+  Eigen::VectorXd normal(unsigned face_id) const {
+    return this->face_normals_.at(face_id);
+  }
 
  protected:
   //! cell id
@@ -288,11 +290,11 @@ class Cell {
       velocity_constraints_;
 
   //! Normal of face with velocity constraints
-  std::vector<Eigen::VectorXd> face_normals_;
+  //! first-> face_id, second->vector of the normal
+  std::map<unsigned, Eigen::VectorXd> face_normals_;
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
 };  // Cell class
 }  // namespace mpm
 

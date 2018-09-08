@@ -383,7 +383,7 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
 //! Assign velocity constraints to cells
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
-    const std::vector<std::tuple<mpm::Index, mpm::Index, unsigned, double>>&
+    const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
         velocity_constraints) {
   bool status = false;
   try {
@@ -392,7 +392,7 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
         // Cell id
         mpm::Index cell_id = std::get<0>(velocity_constraint);
         // Face id
-        mpm::Index face_id = std::get<1>(velocity_constraint);
+        unsigned face_id = std::get<1>(velocity_constraint);
         // Direction of the local coordinate system of the face
         // Tdim = 2, Normal is y local axis, dir = 1
         // Tdim = 3, Normal is z local axis, dir = 2
