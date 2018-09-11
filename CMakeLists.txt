@@ -47,7 +47,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 # HDF5
 ENABLE_LANGUAGE(C)
-find_package(HDF5 COMPONENTS CXX)
+find_package(HDF5 COMPONENTS CXX HL)
 if (HDF5_FOUND)
   include_directories(${HDF5_INCLUDE_DIRS})
   link_libraries(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_HL_LIBRARIES})
