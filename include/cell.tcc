@@ -993,11 +993,14 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
   // TODO
 }
 
-//! Compute all face normal 3d
+//! Compute all face normal 2d
 template <>
 inline void mpm::Cell<2>::compute_normals() {
 
-  for (unsigned face_id = 0; face_id < 4; ++face_id) {
+  //! Set number of faces
+  const unsigned nfaces = 4;
+
+  for (unsigned face_id = 0; face_id < nfaces; ++face_id) {
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);
 
@@ -1026,7 +1029,10 @@ inline void mpm::Cell<2>::compute_normals() {
 template <>
 inline void mpm::Cell<3>::compute_normals() {
 
-  for (unsigned face_id = 0; face_id < 6; ++face_id) {
+  //! Set number of faces
+  const unsigned nfaces = 6;
+
+  for (unsigned face_id = 0; face_id < nfaces; ++face_id) {
     // Get the nodes of the face
     Eigen::VectorXi indices = element_->face_indices(face_id);
 

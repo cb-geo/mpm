@@ -390,15 +390,15 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
     if (nodes_.size()) {
       for (const auto& velocity_constraint : velocity_constraints) {
         // Cell id
-        mpm::Index cell_id = std::get<0>(velocity_constraint);
+        const mpm::Index cell_id = std::get<0>(velocity_constraint);
         // Face id
-        unsigned face_id = std::get<1>(velocity_constraint);
+        const unsigned face_id = std::get<1>(velocity_constraint);
         // Direction of the local coordinate system of the face
         // Tdim = 2, Normal is y local axis, dir = 1
         // Tdim = 3, Normal is z local axis, dir = 2
-        unsigned dir = std::get<2>(velocity_constraint);
+        const unsigned dir = std::get<2>(velocity_constraint);
         // Velocity
-        double velocity = std::get<3>(velocity_constraint);
+        const double velocity = std::get<3>(velocity_constraint);
 
         // Apply constraint
         status = map_cells_[cell_id]->assign_velocity_constraint(face_id, dir,
