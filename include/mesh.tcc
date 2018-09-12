@@ -387,31 +387,33 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
         velocity_constraints) {
   bool status = false;
   try {
+    // Check the number of nodes
     if (nodes_.size()) {
-      for (const auto& velocity_constraint : velocity_constraints) {
-        // Cell id
-        const mpm::Index cell_id = std::get<0>(velocity_constraint);
-        // Face id
-        const unsigned face_id = std::get<1>(velocity_constraint);
-        // Direction of the local coordinate system of the face
-        // Tdim = 2, Normal is y local axis, dir = 1
-        // Tdim = 3, Normal is z local axis, dir = 2
-        const unsigned dir = std::get<2>(velocity_constraint);
-        // Velocity
-        const double velocity = std::get<3>(velocity_constraint);
-
-        // Apply constraint
-        status = map_cells_[cell_id]->assign_velocity_constraint(face_id, dir,
-                                                                 velocity);
-
-        if (!status)
-          throw std::runtime_error(
-              "Cell or face or velocity constraint is invalid");
-      }
     } else {
       throw std::runtime_error(
           "No cells have been assigned in mesh, cannot assign velocity "
           "constraints");
+    }
+    // Loop through all the velocity constraints
+    for (const auto& velocity_constraint : velocity_constraints) {
+      // Cell id
+      const mpm::Index cell_id = std::get<0>(velocity_constraint);
+      // Face id
+      const unsigned face_id = std::get<1>(velocity_constraint);
+      // Direction of the local coordinate system of the face
+      // Tdim = 2, Normal is y local axis, dir = 1
+      // Tdim = 3, Normal is z local axis, dir = 2
+      const unsigned dir = std::get<2>(velocity_constraint);
+      // Velocity
+      const double velocity = std::get<3>(velocity_constraint);
+
+      // Apply constraint
+      status = map_cells_[cell_id]->assign_velocity_constraint(face_id, dir,
+                                                               velocity);
+
+      if (!status)
+        throw std::runtime_error(
+            "Cell or face or velocity constraint is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
