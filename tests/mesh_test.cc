@@ -569,8 +569,31 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
             }
+
+            // Test assign particles tractions
+            SECTION("Check assign particles tractions") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_tractions;
+              // Constraint
+              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      true);
+              // When tractions fail
+              particles_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+            }
           }
         }
+
         // Test assign velocity constraints
         SECTION("Check assign velocity constraints") {
           // Vector of particle coordinates
@@ -1171,6 +1194,28 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+            }
+
+            // Test assign particles tractions
+            SECTION("Check assign particles tractions") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_tractions;
+              // Constraint
+              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      true);
+              // When tractions fail
+              particles_tractions.emplace_back(std::make_tuple(3, 3, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
             }
           }
         }

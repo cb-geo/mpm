@@ -154,9 +154,9 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
-  //! Assign particle tractions
+  //! Assign particles tractions
   //! \param[in] particle_tractions Traction at dir on particle
-  bool assign_particle_tractions(
+  bool assign_particles_tractions(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
