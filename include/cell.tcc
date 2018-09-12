@@ -890,6 +890,15 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
                                      (shapefn(i) * pgravity * pmass));
 }
 
+//! Compute the nodal traction force of a cell from particle mass and gravity
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_traction_force(
+    const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction) {
+  // Map external forces from particle to nodes
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_external_force(true, phase, (shapefn(i) * traction));
+}
+
 //! Compute the nodal internal force  of a cell from particle stress and
 //! volume
 template <unsigned Tdim>
