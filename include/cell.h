@@ -289,7 +289,7 @@ class Cell {
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
 
-  //! Normal of face with velocity constraints
+  //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
 

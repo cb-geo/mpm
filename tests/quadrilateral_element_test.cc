@@ -620,6 +620,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         for (unsigned j = 0; j < indices.cols(); ++j)
           REQUIRE(check_indices(j) == indices(i, j));
       }
+
+      // Check number of faces
+      const unsigned check_nfaces = 4;
+      REQUIRE(check_nfaces == quad->nfaces());
     }
   }
 
@@ -1351,6 +1355,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         for (unsigned j = 0; j < indices.cols(); ++j)
           REQUIRE(check_indices(j) == indices(i, j));
       }
+
+      // Check number of faces
+      const unsigned check_nfaces = 4;
+      REQUIRE(check_nfaces == quad->nfaces());
     }
   }
 
@@ -2110,6 +2118,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
         for (unsigned j = 0; j < indices.cols(); ++j)
           REQUIRE(check_indices(j) == indices(i, j));
       }
+
+      // Check number of faces
+      const unsigned check_nfaces = 4;
+      REQUIRE(check_nfaces == quad->nfaces());
     }
   }
 }

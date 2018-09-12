@@ -934,6 +934,10 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
         for (unsigned j = 0; j < indices.cols(); ++j)
           REQUIRE(check_indices(j) == indices(i, j));
       }
+
+      // Check number of faces
+      const unsigned check_nfaces = 6;
+      REQUIRE(check_nfaces == hex->nfaces());
     }
   }
 
@@ -2427,6 +2431,10 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
         for (unsigned j = 0; j < indices.cols(); ++j)
           REQUIRE(check_indices(j) == indices(i, j));
       }
+
+      // Check number of faces
+      const unsigned check_nfaces = 6;
+      REQUIRE(check_nfaces == hex->nfaces());
     }
   }
 }
