@@ -66,9 +66,9 @@ inline Eigen::Matrix<double, Tdim, 1>
   Eigen::Matrix<double, Tdim, Tdim> original_axes;
   original_axes.setIdentity();
 
-  // Compute line of nodes vector that bisects original x and y unit vectors
+  // Compute line of nodes vector that bisects original x and y unit vector
   Eigen::Matrix<double, Tdim, 1> line_of_nodes =
-      original_axes.col(2).cross(new_axes.col(2));
+      original_axes.col(0) + original_axes.col(1);
   line_of_nodes = line_of_nodes.normalized();
 
   // Make a vector of euler angles
