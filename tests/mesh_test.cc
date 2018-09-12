@@ -575,7 +575,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Vector of particle coordinates
               std::vector<std::tuple<mpm::Index, unsigned, double>>
                   particles_tractions;
-              // Constraint
+              // Tractions
               particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
               particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
               particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
@@ -1201,7 +1201,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               // Vector of particle coordinates
               std::vector<std::tuple<mpm::Index, unsigned, double>>
                   particles_tractions;
-              // Constraint
+              // Tractions
               particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
               particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
               particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
