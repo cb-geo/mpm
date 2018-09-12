@@ -406,20 +406,28 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
                                                     double traction) {
   bool status = false;
   try {
-    if (phase < 0 || phase > Tnphases || direction < 0 ||
-        direction > Tnphases) {
+    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
       throw std::runtime_error(
           "Particle traction direction / phase is invalid");
     }
     // Assign traction
-    traction_(direction, phase) = traction;
+    traction_(direction, phase) =
+        traction * this->volume_ / this->size_(direction);
     status = true;
     this->set_traction_ = true;
   } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+//! Map traction force
+//! \param[in] phase Index corresponding to the phase
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::map_traction_force(unsigned phase) {
+  // Compute nodal traction forces
+  cell_->compute_nodal_traction_force(this->shapefn_, phase,
+                                      this->traction_.col(phase));
 }
 
 // Compute updated position of the particle
