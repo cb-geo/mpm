@@ -245,10 +245,6 @@ class Cell {
   //! Compute normal vector
   void compute_normals();
 
-  //! Return number of normal vectors
-  //! \retval number of normal vectors
-  unsigned nnormal() const { return face_normals_.size(); }
-
   //! Return unit normal vector, positive pointing outside of the element
   //! \param[in] face_id of constraint
   //! \retval unit normal vector
@@ -285,7 +281,7 @@ class Cell {
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
 
   //! Velocity constraints
-  //! first-> face_id, second->pair of direction [0/1/2] and velocity value
+  //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
 

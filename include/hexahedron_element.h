@@ -236,14 +236,11 @@ class HexahedronElement : public Element<Tdim> {
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
   //! Return number of faces
-  unsigned nfaces() const { return nfaces_; }
+  unsigned nfaces() const { return 6; }
 
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
-  //! Number of faces = 6
-  const unsigned nfaces_{6};
 };
 
 }  // namespace mpm

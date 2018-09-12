@@ -966,7 +966,7 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
                                                  double velocity) {
   bool status = true;
   try {
-    //! Constrain directions can take values between 0 and Dim * Nphases - 1
+    //! Constraint directions can take values between 0 and Dim * Nphases - 1
     if (dir >= 0 && dir < Tdim) {
       if (velocity_constraints_.find(face_id) == velocity_constraints_.end())
         this->velocity_constraints_.insert(
@@ -993,14 +993,14 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
   // TODO
 }
 
-//! Compute all face normal 2d
+//! Compute all face normals 2d
 template <>
 inline void mpm::Cell<2>::compute_normals() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
     // Get the nodes of the face
-    Eigen::VectorXi indices = element_->face_indices(face_id);
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
 
     // Compute the vector to calculate normal (perpendicular)
     // a = node(0) - node(1)
@@ -1013,24 +1013,22 @@ inline void mpm::Cell<2>::compute_normals() {
     // the reverse does not work to produce normal that is positive pointing out
     // of the element
     Eigen::Matrix<double, 2, 1> normal_vector;
-    normal_vector(0) = -a(1);
-    normal_vector(1) = a(0);
+    normal_vector << -a(1), a(0);
     normal_vector = normal_vector.normalized();
 
-    // Store to private variable
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
   }
 }
 
-//! Compute all face normal 3d
+//! Compute all face normals 3d
 template <>
 inline void mpm::Cell<3>::compute_normals() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
     // Get the nodes of the face
-    Eigen::VectorXi indices = element_->face_indices(face_id);
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
 
     // Compute two vectors to calculate normal
     // a = node(1) - node(0)
@@ -1047,7 +1045,6 @@ inline void mpm::Cell<3>::compute_normals() {
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
     normal_vector = normal_vector.normalized();
 
-    // Store to private variable
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
   }

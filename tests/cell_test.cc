@@ -785,8 +785,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 4);
-
       // Check normal vector
       Eigen::Matrix<double, 4, Dim> normal_vector;
 
@@ -797,7 +795,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                        -1.,                 0.;
       // clang-format on
 
-      for (unsigned i = 0; i < cell->nnormal(); ++i) {
+      for (unsigned i = 0; i < 4; ++i) {
         REQUIRE(cell->normal(i).size() == Dim);
         for (unsigned j = 0; j < cell->normal(i).size(); ++j) {
           REQUIRE(cell->normal(i)(j) ==
@@ -1969,8 +1967,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       cell->compute_normals();
 
-      REQUIRE(cell->nnormal() == 6);
-
       // Check normal vector
       Eigen::Matrix<double, 6, Dim> normal_vector;
 
@@ -1983,7 +1979,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                         0.,                 0.,                 1.;
       // clang-format on
 
-      for (unsigned i = 0; i < cell->nnormal(); ++i) {
+      for (unsigned i = 0; i < 6; ++i) {
         REQUIRE(cell->normal(i).size() == Dim);
         for (unsigned j = 0; j < cell->normal(i).size(); ++j) {
           REQUIRE(cell->normal(i)(j) ==
