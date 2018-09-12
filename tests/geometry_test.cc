@@ -47,9 +47,9 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
     Eigen::Matrix<double, 2, 1> vector_a;
-    vector_a << 3, 0;
+    vector_a << 3., 0.;
     Eigen::Matrix<double, 2, 1> vector_b;
-    vector_b << -2, 2;
+    vector_b << -2., 2.;
 
     const double angle = 2.356194490192345;
 
@@ -63,15 +63,15 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
 
     Eigen::Matrix<double, Dim, Dim> new_axes;
     // clang-format off
-    new_axes << 2, -2,
-                2,  2;
+    new_axes << 2., -2.,
+                2.,  2.;
     // clang-format on
 
     Eigen::Matrix<double, Dim, 1> check_euler_angles;
-    check_euler_angles << 0.78539816339, 0;
+    check_euler_angles << 0.78539816339, 0.;
 
     for (unsigned i = 0; i < Dim; ++i) {
-      REQUIRE(geometry->euler_angles(new_axes)(i) ==
+      REQUIRE(geometry->euler_angles_cartesian(new_axes)(i) ==
               Approx(check_euler_angles(i)).epsilon(Tolerance));
     }
   }
@@ -119,9 +119,9 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
     const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
 
     Eigen::Matrix<double, 3, 1> vector_a;
-    vector_a << 3, 0, 4;
+    vector_a << 3., 0., 4.;
     Eigen::Matrix<double, 3, 1> vector_b;
-    vector_b << -2, 2, 4;
+    vector_b << -2., 2., 4.;
 
     const double angle = 1.150261991510931;
 
@@ -135,16 +135,16 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
 
     Eigen::Matrix<double, Dim, Dim> new_axes;
     // clang-format off
-    new_axes << 2, -2, -2,
-                0,  0, -2,
-                2,  2,  0;
+    new_axes << 2., -2., -2.,
+                0.,  0., -2.,
+                2.,  2.,  0.;
     // clang-format on
 
     Eigen::Matrix<double, Dim, 1> check_euler_angles;
     check_euler_angles << 0.78539816339, 1.0471975512, 1.57079632679;
 
     for (unsigned i = 0; i < Dim; ++i) {
-      REQUIRE(geometry->euler_angles(new_axes)(i) ==
+      REQUIRE(geometry->euler_angles_cartesian(new_axes)(i) ==
               Approx(check_euler_angles(i)).epsilon(Tolerance));
     }
   }

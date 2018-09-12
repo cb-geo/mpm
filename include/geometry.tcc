@@ -56,58 +56,35 @@ inline const double mpm::Geometry<Tdim>::angle_between_vectors(
   return acos((vector_a.normalized()).dot((vector_b.normalized())));
 }
 
-//! Compute 2D euler angles as shown in documentation
-template <>
-inline Eigen::Matrix<double, 2, 1> mpm::Geometry<2>::euler_angles(
-    const Eigen::Matrix<double, 2, 2>& new_axes) {
+//! Compute euler angles with respect to the Cartesian coordinates
+template <unsigned Tdim>
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Geometry<Tdim>::euler_angles_cartesian(
+        const Eigen::Matrix<double, Tdim, Tdim>& new_axes) {
 
   // Make cartesian coordinate system
-  Eigen::Matrix<double, 2, 2> original_axes;
+  Eigen::Matrix<double, Tdim, Tdim> original_axes;
   original_axes.setIdentity();
 
   // Compute N vector as shown in documentation
-  Eigen::Matrix<double, 2, 1> N_vector =
+  Eigen::Matrix<double, Tdim, 1> n_vector =
       original_axes.col(0) + original_axes.col(1);
-  N_vector = N_vector.normalized();
+  n_vector = n_vector.normalized();
 
   // Make vector containing euler angles
-  Eigen::Matrix<double, 2, 1> euler_angles;
+  Eigen::Matrix<double, Tdim, 1> euler_angles;
 
   // Compute alpha
-  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), N_vector);
+  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), n_vector);
 
   // Compute beta
-  euler_angles(1) = this->angle_between_vectors(N_vector, new_axes.col(0));
-
-  return euler_angles;
-}
-
-//! Compute 3D euler angles as shown in documentation
-template <>
-inline Eigen::Matrix<double, 3, 1> mpm::Geometry<3>::euler_angles(
-    const Eigen::Matrix<double, 3, 3>& new_axes) {
-
-  // Make cartesian coordinate system
-  Eigen::Matrix<double, 3, 3> original_axes;
-  original_axes.setIdentity();
-
-  // Compute N vector as shown in documentation
-  Eigen::Matrix<double, 3, 1> N_vector =
-      original_axes.col(0) + original_axes.col(1);
-  N_vector = N_vector.normalized();
-
-  // Make vector containing euler angles
-  Eigen::Matrix<double, 3, 1> euler_angles;
-
-  // Compute alpha
-  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), N_vector);
-
-  // Compute beta
-  euler_angles(1) = this->angle_between_vectors(N_vector, new_axes.col(0));
+  euler_angles(1) = this->angle_between_vectors(n_vector, new_axes.col(0));
 
   // Compute gamma
-  euler_angles(2) =
-      this->angle_between_vectors(new_axes.col(2), original_axes.col(2));
+  if (Tdim == 3) {
+    euler_angles(2) =
+        this->angle_between_vectors(new_axes.col(2), original_axes.col(2));
+  }
 
   return euler_angles;
 }
