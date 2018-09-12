@@ -349,10 +349,12 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
 
 //! Assign particle tractions
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_particle_tractions(
+bool mpm::Mesh<Tdim>::assign_particles_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
   bool status = false;
+  // TODO: Remove phase
+  const unsigned phase = 0;
   try {
     if (nodes_.size()) {
       for (const auto& particle_traction : particle_tractions) {
@@ -364,10 +366,16 @@ bool mpm::Mesh<Tdim>::assign_particle_tractions(
         double traction = std::get<2>(particle_traction);
 
         // Apply traction
-        // status = map_particles_[pid]->assign_particle_traction(dir,
-        // particle);
+        for (auto pitr = particles_.cbegin(); pitr != particles_.cend();
+             ++pitr) {
+          if ((*pitr)->id() == pid) {
+            status = (*pitr)->assign_traction(phase, dir, traction);
+            break;
+          }
+        }
 
-        if (!status) throw std::runtime_error("Particle traction is invalid");
+        if (!status)
+          throw std::runtime_error("Particle not found / traction is invalid");
       }
     } else {
       throw std::runtime_error(
