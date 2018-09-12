@@ -17,26 +17,25 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
                                    const std::vector<VectorDim>& coordinates) {
   bool status = true;
   try {
-    // Check if nodal coordinates is not empty
-    if (!coordinates.empty()) {
-      for (const auto& node_coordinates : coordinates) {
-        // Add node to mesh and check
-        bool insert_status = this->add_node(
-            // Create a node of particular
-            Factory<mpm::NodeBase<Tdim>, mpm::Index,
-                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(node_type, static_cast<mpm::Index>(gnid),
-                         node_coordinates));
-
-        // Increament node id
-        if (insert_status) ++gnid;
-        // When addition of node fails
-        else
-          throw std::runtime_error("Addition of node to mesh failed!");
-      }
-    } else
-      // If the coordinates vector is empty
+    // Check if nodal coordinates is empty
+    if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
+    // Iterate over all coordinates
+    for (const auto& node_coordinates : coordinates) {
+      // Add node to mesh and check
+      bool insert_status = this->add_node(
+          // Create a node of particular
+          Factory<mpm::NodeBase<Tdim>, mpm::Index,
+                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
+              ->create(node_type, static_cast<mpm::Index>(gnid),
+                       node_coordinates));
+
+      // Increment node id
+      if (insert_status) ++gnid;
+      // When addition of node fails
+      else
+        throw std::runtime_error("Addition of node to mesh failed!");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -86,41 +85,39 @@ bool mpm::Mesh<Tdim>::create_cells(
     const std::vector<std::vector<mpm::Index>>& cells) {
   bool status = true;
   try {
-    // Check if node id list is not empty
-    if (!cells.empty()) {
-      for (const auto& nodes : cells) {
-        // Create cell with element
-        auto cell =
-            std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
-
-        // Cell local node id
-        unsigned local_nid = 0;
-        // For nodeids in a given cell
-        for (auto nid : nodes) {
-          cell->add_node(local_nid, map_nodes_[nid]);
-          ++local_nid;
-        }
-
-        // Add cell to mesh
-        bool insert_cell = false;
-        // Check if cell has all nodes before inserting to mesh
-        if (cell->nnodes() == nodes.size()) {
-          // Initialise cell before insertion
-          cell->initialise();
-          // If cell is initialised insert to mesh
-          if (cell->is_initialised()) insert_cell = this->add_cell(cell);
-        } else
-          throw std::runtime_error("Invalid node ids for cell!");
-
-        // Increament global cell id
-        if (insert_cell) ++gcid;
-        // When addition of cell fails
-        else
-          throw std::runtime_error("Addition of cell to mesh failed!");
-      }
-    } else {
-      // If the coordinates vector is empty
+    // Check if nodes in cell list is not empty
+    if (cells.empty())
       throw std::runtime_error("List of nodes of cells is empty");
+
+    for (const auto& nodes : cells) {
+      // Create cell with element
+      auto cell =
+          std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
+
+      // Cell local node id
+      unsigned local_nid = 0;
+      // For nodeids in a given cell
+      for (auto nid : nodes) {
+        cell->add_node(local_nid, map_nodes_[nid]);
+        ++local_nid;
+      }
+
+      // Add cell to mesh
+      bool insert_cell = false;
+      // Check if cell has all nodes before inserting to mesh
+      if (cell->nnodes() == nodes.size()) {
+        // Initialise cell before insertion
+        cell->initialise();
+        // If cell is initialised insert to mesh
+        if (cell->is_initialised()) insert_cell = this->add_cell(cell);
+      } else
+        throw std::runtime_error("Invalid node ids for cell!");
+
+      // Increment global cell id
+      if (insert_cell) ++gcid;
+      // When addition of cell fails
+      else
+        throw std::runtime_error("Addition of cell to mesh failed!");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -159,25 +156,23 @@ bool mpm::Mesh<Tdim>::create_particles(
     const std::vector<VectorDim>& coordinates) {
   bool status = true;
   try {
-    // Check if particle coordinates is not empty
-    if (!coordinates.empty()) {
-      for (const auto& particle_coordinates : coordinates) {
-        // Add particle to mesh and check
-        bool insert_status = this->add_particle(
-            Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(particle_type, static_cast<mpm::Index>(gpid),
-                         particle_coordinates));
-
-        // Increament particle id
-        if (insert_status) ++gpid;
-        // When addition of particle fails
-        else
-          throw std::runtime_error("Addition of particle to mesh failed!");
-      }
-    } else {
-      // If the coordinates vector is empty
+    // Check if particle coordinates is empty
+    if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
+    // Iterate over particle coordinates
+    for (const auto& particle_coordinates : coordinates) {
+      // Add particle to mesh and check
+      bool insert_status = this->add_particle(
+          Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
+              ->create(particle_type, static_cast<mpm::Index>(gpid),
+                       particle_coordinates));
+
+      // Increment particle id
+      if (insert_status) ++gpid;
+      // When addition of particle fails
+      else
+        throw std::runtime_error("Addition of particle to mesh failed!");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -320,25 +315,24 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
         velocity_constraints) {
   bool status = false;
   try {
-    if (nodes_.size()) {
-      for (const auto& velocity_constraint : velocity_constraints) {
-        // Node id
-        mpm::Index nid = std::get<0>(velocity_constraint);
-        // Direction
-        unsigned dir = std::get<1>(velocity_constraint);
-        // Velocity
-        double velocity = std::get<2>(velocity_constraint);
-
-        // Apply constraint
-        status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
-
-        if (!status)
-          throw std::runtime_error("Node or velocity constraint is invalid");
-      }
-    } else {
+    if (!nodes_.size())
       throw std::runtime_error(
           "No nodes have been assigned in mesh, cannot assign velocity "
           "constraints");
+
+    for (const auto& velocity_constraint : velocity_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(velocity_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
+
+      if (!status)
+        throw std::runtime_error("Node or velocity constraint is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -356,30 +350,26 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
-    if (nodes_.size()) {
-      for (const auto& particle_traction : particle_tractions) {
-        // Particle id
-        mpm::Index pid = std::get<0>(particle_traction);
-        // Direction
-        unsigned dir = std::get<1>(particle_traction);
-        // Traction
-        double traction = std::get<2>(particle_traction);
-
-        // Apply traction
-        for (auto pitr = particles_.cbegin(); pitr != particles_.cend();
-             ++pitr) {
-          if ((*pitr)->id() == pid) {
-            status = (*pitr)->assign_traction(phase, dir, traction);
-            break;
-          }
-        }
-
-        if (!status)
-          throw std::runtime_error("Particle not found / traction is invalid");
-      }
-    } else {
+    if (!particles_.size())
       throw std::runtime_error(
           "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_traction : particle_tractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_traction);
+      // Direction
+      unsigned dir = std::get<1>(particle_traction);
+      // Traction
+      double traction = std::get<2>(particle_traction);
+
+      // Apply traction
+      for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+        if ((*pitr)->id() == pid) {
+          status = (*pitr)->assign_traction(phase, dir, traction);
+          break;
+        }
+      }
+      if (!status)
+        throw std::runtime_error("Particle not found / traction is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
