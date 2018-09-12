@@ -72,12 +72,16 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
+  size_.setZero();
+  volume_ = std::numeric_limits<double>::max();
   stress_.setZero();
   strain_.setZero();
   volumetric_strain_centroid_.setZero();
   dstrain_.setZero();
   strain_rate_.setZero();
   velocity_.setZero();
+  set_traction_ = false;
+  traction_.setZero();
 }
 
 // Assign a cell to particle
@@ -388,6 +392,29 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
     // Assign velocity
     velocity_.col(phase) = velocity;
     status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Assign traction to the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
+                                                    unsigned direction,
+                                                    double traction) {
+  bool status = false;
+  try {
+    if (phase < 0 || phase > Tnphases || direction < 0 ||
+        direction > Tnphases) {
+      throw std::runtime_error(
+          "Particle traction direction / phase is invalid");
+    }
+    // Assign traction
+    traction_(direction, phase) = traction;
+    status = true;
+    this->set_traction_ = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
