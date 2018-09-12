@@ -180,6 +180,10 @@ class Particle : public ParticleBase<Tdim> {
     return traction_.col(phase);
   }
 
+  //! Map traction force
+  //! \param[in] phase Index corresponding to the phase
+  void map_traction_force(unsigned phase) override;
+
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
