@@ -37,6 +37,8 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->id_ = particle.id;
   // Mass
   this->mass_(phase) = particle.mass;
+  // Volume
+  this->assign_volume(particle.volume);
 
   // Coordinates
   Eigen::Vector3d coordinates;
