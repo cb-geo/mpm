@@ -127,6 +127,39 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 0;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   SECTION("Check initialise particle HDF5") {
@@ -790,6 +823,39 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 19.745;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 1;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   // Check initialise particle from HDF5 file
@@ -1567,6 +1633,39 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 1;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   // Check initialise particle from HDF5 file

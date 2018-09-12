@@ -166,6 +166,20 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Assign traction to the particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction(unsigned phase, unsigned direction,
+                       double traction) override;
+
+  //! Return traction of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd traction(unsigned phase) const override {
+    return traction_.col(phase);
+  }
+
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
@@ -209,6 +223,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Set traction
+  bool set_traction_{false};
+  //! Traction
+  Eigen::Matrix<double, Tdim, Tnphases> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix
