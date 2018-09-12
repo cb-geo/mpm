@@ -27,11 +27,12 @@ class Geometry {
       const Eigen::Matrix<double, Tdim, 1>& vector_a,
       const Eigen::Matrix<double, Tdim, 1>& vector_b);
 
-  //! Compute euler angles as shown in documentation
+  //! Compute euler angles with respect to the Cartesian coordinates
   //! \param[in] new_axes New orthogonal coordinate systems (2 vectors for 2D, 3
-  //! vectors for 3D) \retval euler_angles Euler Angles (2 angles for 2D, 3
+  //! vectors for 3D)
+  //! \retval euler_angles Euler Angles (2 angles for 2D, 3
   //! angles for 3D)
-  Eigen::Matrix<double, Tdim, 1> euler_angles(
+  Eigen::Matrix<double, Tdim, 1> euler_angles_cartesian(
       const Eigen::Matrix<double, Tdim, Tdim>& new_axes);
 };
 }  // namespace mpm
