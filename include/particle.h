@@ -78,7 +78,7 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
-  void assign_volume(double volume) override { volume_ = volume; }
+  void assign_volume(double volume) override;
 
   //! Return volume
   double volume() const override { return volume_; }
@@ -195,6 +195,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Size of particle
+  Eigen::Matrix<double, 1, Tdim> size_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
