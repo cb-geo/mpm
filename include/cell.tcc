@@ -890,7 +890,7 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
                                      (shapefn(i) * pgravity * pmass));
 }
 
-//! Compute the nodal traction force of a cell from particle mass and gravity
+//! Compute the nodal traction force of a cell from particle
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_traction_force(
     const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction) {
