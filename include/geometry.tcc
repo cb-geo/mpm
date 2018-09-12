@@ -66,25 +66,25 @@ inline Eigen::Matrix<double, Tdim, 1>
   Eigen::Matrix<double, Tdim, Tdim> original_axes;
   original_axes.setIdentity();
 
-  // Compute N vector as shown in documentation
-  Eigen::Matrix<double, Tdim, 1> n_vector =
+  // Compute N vector
+  Eigen::Matrix<double, Tdim, 1> line_of_nodes =
       original_axes.col(0) + original_axes.col(1);
-  n_vector = n_vector.normalized();
+  line_of_nodes = line_of_nodes.normalized();
 
-  // Make vector containing euler angles
+  // Make a vector of euler angles
   Eigen::Matrix<double, Tdim, 1> euler_angles;
 
   // Compute alpha
-  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), n_vector);
+  euler_angles(0) =
+      this->angle_between_vectors(original_axes.col(0), line_of_nodes);
 
   // Compute beta
-  euler_angles(1) = this->angle_between_vectors(n_vector, new_axes.col(0));
+  euler_angles(1) = this->angle_between_vectors(line_of_nodes, new_axes.col(0));
 
   // Compute gamma
-  if (Tdim == 3) {
+  if (Tdim == 3)
     euler_angles(2) =
         this->angle_between_vectors(new_axes.col(2), original_axes.col(2));
-  }
 
   return euler_angles;
 }
