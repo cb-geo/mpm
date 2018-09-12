@@ -213,6 +213,13 @@ class Cell {
   void compute_nodal_body_force(const Eigen::VectorXd& shapefn, unsigned phase,
                                 double pmass, const VectorDim& pgravity);
 
+  //! Compute the nodal traction force of a cell from the particle
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] traction Traction force from the particle
+  void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
+                                    unsigned phase, const VectorDim& traction);
+
   //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
