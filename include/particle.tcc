@@ -188,7 +188,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
   return status;
 }
 
-// Compute volume of particle
+// Assign volume to the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::assign_volume(double volume) {
+  this->volume_ = volume;
+  // Compute size of particle in each direction
+  const double length = std::pow(volume, 1. / Tdim);
+  // Set particle size as length on each side
+  this->size_.fill(length);
+}
+
+// Compute volume of the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
   bool status = true;
@@ -196,7 +206,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Volume of the cell / # of particles
-      this->volume_ = cell_->volume() / cell_->nparticles();
+      this->assign_volume(cell_->volume() / cell_->nparticles());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
