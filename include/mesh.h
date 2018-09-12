@@ -154,6 +154,12 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
+  //! Assign particles tractions
+  //! \param[in] particle_tractions Traction at dir on particle
+  bool assign_particles_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_tractions);
+
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }

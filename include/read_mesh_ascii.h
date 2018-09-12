@@ -54,6 +54,11 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
 
+  //! Read traction file
+  //! \param[in] traction_files file name with particle tractions
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_particles_tractions(const std::string& traction_file) override;
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
