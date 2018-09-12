@@ -66,7 +66,7 @@ inline Eigen::Matrix<double, Tdim, 1>
   Eigen::Matrix<double, Tdim, Tdim> original_axes;
   original_axes.setIdentity();
 
-  // Compute line of nodes vector that bisects original x and y axes
+  // Compute line of nodes vector that bisects original x and y unit vectors
   Eigen::Matrix<double, Tdim, 1> line_of_nodes =
       original_axes.col(2).cross(new_axes.col(2));
   line_of_nodes = line_of_nodes.normalized();
