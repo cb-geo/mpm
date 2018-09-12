@@ -56,6 +56,25 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
     REQUIRE(geometry->angle_between_vectors(vector_a, vector_b) ==
             Approx(angle).epsilon(Tolerance));
   }
+
+  SECTION("Check euler angles computations") {
+    // Make geometry
+    const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
+
+    Eigen::Matrix<double, Dim, Dim> new_axes;
+    // clang-format off
+    new_axes << 2, -2,
+                2,  2;
+    // clang-format on
+
+    Eigen::Matrix<double, Dim, 1> check_euler_angles;
+    check_euler_angles << 0.78539816339, 0;
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      REQUIRE(geometry->euler_angles(new_axes)(i) ==
+              Approx(check_euler_angles(i)).epsilon(Tolerance));
+    }
+  }
 }
 
 //! \brief Check cell class for 3D case
@@ -108,5 +127,25 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
 
     REQUIRE(geometry->angle_between_vectors(vector_a, vector_b) ==
             Approx(angle).epsilon(Tolerance));
+  }
+
+  SECTION("Check euler angles computations") {
+    // Make geometry
+    const auto geometry = std::make_unique<mpm::Geometry<Dim>>();
+
+    Eigen::Matrix<double, Dim, Dim> new_axes;
+    // clang-format off
+    new_axes << 2, -2, -2,
+                0,  0, -2,
+                2,  2,  0;
+    // clang-format on
+
+    Eigen::Matrix<double, Dim, 1> check_euler_angles;
+    check_euler_angles << 0.78539816339, 1.0471975512, 1.57079632679;
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      REQUIRE(geometry->euler_angles(new_axes)(i) ==
+              Approx(check_euler_angles(i)).epsilon(Tolerance));
+    }
   }
 }

@@ -55,3 +55,59 @@ inline const double mpm::Geometry<Tdim>::angle_between_vectors(
   // angle between two vectors a and b = arccos( a dot b / ||a|| ||b||)
   return acos((vector_a.normalized()).dot((vector_b.normalized())));
 }
+
+//! Compute 2D euler angles as shown in documentation
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Geometry<2>::euler_angles(
+    const Eigen::Matrix<double, 2, 2>& new_axes) {
+
+  // Make cartesian coordinate system
+  Eigen::Matrix<double, 2, 2> original_axes;
+  original_axes.setIdentity();
+
+  // Compute N vector as shown in documentation
+  Eigen::Matrix<double, 2, 1> N_vector =
+      original_axes.col(0) + original_axes.col(1);
+  N_vector = N_vector.normalized();
+
+  // Make vector containing euler angles
+  Eigen::Matrix<double, 2, 1> euler_angles;
+
+  // Compute alpha
+  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), N_vector);
+
+  // Compute beta
+  euler_angles(1) = this->angle_between_vectors(N_vector, new_axes.col(0));
+
+  return euler_angles;
+}
+
+//! Compute 3D euler angles as shown in documentation
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Geometry<3>::euler_angles(
+    const Eigen::Matrix<double, 3, 3>& new_axes) {
+
+  // Make cartesian coordinate system
+  Eigen::Matrix<double, 3, 3> original_axes;
+  original_axes.setIdentity();
+
+  // Compute N vector as shown in documentation
+  Eigen::Matrix<double, 3, 1> N_vector =
+      original_axes.col(0) + original_axes.col(1);
+  N_vector = N_vector.normalized();
+
+  // Make vector containing euler angles
+  Eigen::Matrix<double, 3, 1> euler_angles;
+
+  // Compute alpha
+  euler_angles(0) = this->angle_between_vectors(original_axes.col(0), N_vector);
+
+  // Compute beta
+  euler_angles(1) = this->angle_between_vectors(N_vector, new_axes.col(0));
+
+  // Compute gamma
+  euler_angles(2) =
+      this->angle_between_vectors(new_axes.col(2), original_axes.col(2));
+
+  return euler_angles;
+}
