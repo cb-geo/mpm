@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <limits>
 #include <memory>
 
@@ -571,6 +573,27 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           REQUIRE(node->external_force(phase)(i) ==
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check particle traction force mapping") {
+      // Check external force at nodes
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+      // Apply traction force
+      Eigen::Vector2d tractionforce;
+      tractionforce << 1.5, 2.5;
+      // Calculate traction force at nodes
+      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+
+      // Check traction force
+      tractionforce *= 0.25;  // traction force * shapefn value (0.25)
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < tractionforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(tractionforce(i)).epsilon(Tolerance));
     }
 
     SECTION("Check particle internal force mapping") {
@@ -1638,6 +1661,27 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
           REQUIRE(node->external_force(phase)(i) ==
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check particle traction force mapping") {
+      // Check external force at nodes
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+      // Apply traction force
+      Eigen::Vector3d tractionforce;
+      tractionforce << 1.5, 2.5, 3.7;
+      // Calculate traction force at nodes
+      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+
+      // Check traction force
+      tractionforce *= 0.125;  // traction force * shapefn value (0.25)
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < tractionforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(tractionforce(i)).epsilon(Tolerance));
     }
 
     SECTION("Check particle internal force mapping") {
