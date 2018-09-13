@@ -252,7 +252,7 @@ class Cell {
     return this->face_normals_.at(face_id);
   }
 
- protected:
+ private:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
 

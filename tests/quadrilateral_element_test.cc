@@ -622,8 +622,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       }
 
       // Check number of faces
-      const unsigned check_nfaces = 4;
-      REQUIRE(check_nfaces == quad->nfaces());
+      REQUIRE(quad->nfaces() == 4);
     }
   }
 
@@ -1357,8 +1356,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       }
 
       // Check number of faces
-      const unsigned check_nfaces = 4;
-      REQUIRE(check_nfaces == quad->nfaces());
+      REQUIRE(quad->nfaces() == 4);
     }
   }
 
@@ -2120,8 +2118,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       }
 
       // Check number of faces
-      const unsigned check_nfaces = 4;
-      REQUIRE(check_nfaces == quad->nfaces());
+      REQUIRE(quad->nfaces() == 4);
     }
   }
 }

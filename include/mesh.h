@@ -209,8 +209,6 @@ class Mesh {
   Map<NodeBase<Tdim>> map_nodes_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
-  //! Map of cells for fast retrieval
-  Map<Cell<Tdim>> map_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class

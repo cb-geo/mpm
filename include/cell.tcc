@@ -967,13 +967,7 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   bool status = true;
   try {
     //! Constraint directions can take values between 0 and Dim * Nphases - 1
-    if (dir >= 0 && dir < Tdim) {
-      if (velocity_constraints_.find(face_id) == velocity_constraints_.end())
-        this->velocity_constraints_.insert(
-            std::make_pair<unsigned, std::vector<std::pair<unsigned, double>>>(
-                static_cast<unsigned>(face_id),
-                std::vector<std::pair<unsigned, double>>()));
-
+    if (dir >= 0) {
       this->velocity_constraints_[face_id].emplace_back(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));
