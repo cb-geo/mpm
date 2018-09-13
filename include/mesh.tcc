@@ -130,8 +130,6 @@ bool mpm::Mesh<Tdim>::create_cells(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   bool insertion_status = cells_.add(cell);
-  // Add cell to map
-  if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
 }
 
@@ -141,7 +139,7 @@ bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   // Remove a cell if found in the container
   const mpm::Index id = cell->id();
-  return (cells_.remove(cell) && map_cells_.remove(id));
+  return (cells_.remove(cell));
 }
 
 //! Iterate over cells
@@ -388,8 +386,7 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
   bool status = false;
   try {
     // Check the number of nodes
-    if (nodes_.size()) {
-    } else {
+    if (!nodes_.size()) {
       throw std::runtime_error(
           "No cells have been assigned in mesh, cannot assign velocity "
           "constraints");
@@ -408,8 +405,12 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
       const double velocity = std::get<3>(velocity_constraint);
 
       // Apply constraint
-      status = map_cells_[cell_id]->assign_velocity_constraint(face_id, dir,
-                                                               velocity);
+      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+        if ((*citr)->id() == cell_id) {
+          status = (*citr)->assign_velocity_constraint(face_id, dir, velocity);
+          break;
+        }
+      }
 
       if (!status)
         throw std::runtime_error(

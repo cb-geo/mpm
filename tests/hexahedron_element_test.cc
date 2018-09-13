@@ -936,8 +936,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       }
 
       // Check number of faces
-      const unsigned check_nfaces = 6;
-      REQUIRE(check_nfaces == hex->nfaces());
+      REQUIRE(hex->nfaces() == 6);
     }
   }
 
@@ -2433,8 +2432,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       }
 
       // Check number of faces
-      const unsigned check_nfaces = 6;
-      REQUIRE(check_nfaces == hex->nfaces());
+      REQUIRE(hex->nfaces() == 6);
     }
   }
 }
