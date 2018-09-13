@@ -66,7 +66,10 @@ std::string mpm::IO::file_name(const std::string& filename) {
     file_name = working_dir_ +
                 json_["input_files"][filename].template get<std::string>();
   } catch (const std::exception& except) {
-    console_->warn("Invalid JSON argument: {}", except.what());
+    console_->warn("Invalid JSON argument: {}; error: {}", filename,
+                   except.what());
+    file_name.clear();
+    return file_name;
   }
 
   // Check if a file is present, if not set file_name to empty
@@ -88,7 +91,7 @@ bool mpm::IO::check_file(const std::string& filename) {
     file.close();
   } catch (std::ifstream::failure& exception) {
     status = false;
-    console_->error("Failed to find file: {}", exception.what());
+    console_->error("Failed to find file {}: {}", filename, exception.what());
   }
   return status;
 }

@@ -70,12 +70,14 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
       throw std::runtime_error("Addition of nodes to mesh failed");
 
     // Read and assign velocity constraints
-    bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
-        mesh_reader->read_velocity_constraints(
-            io_->file_name("velocity_constraints")));
-    if (!velocity_constraints)
-      throw std::runtime_error(
-          "Velocity constraints are not properly assigned");
+    if (!io_->file_name("velocity_constraints").empty()) {
+      bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
+          mesh_reader->read_velocity_constraints(
+              io_->file_name("velocity_constraints")));
+      if (!velocity_constraints)
+        throw std::runtime_error(
+            "Velocity constraints are not properly assigned");
+    }
 
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -110,6 +112,16 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
+
+    // Read and assign particles tractions
+    if (!io_->file_name("particles_tractions").empty()) {
+      bool particles_tractions = meshes_.at(0)->assign_particles_tractions(
+          mesh_reader->read_particles_tractions(
+              io_->file_name("particles_tractions")));
+      if (!particles_tractions)
+        throw std::runtime_error(
+            "Particles tractions are not properly assigned");
+    }
 
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
