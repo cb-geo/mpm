@@ -241,8 +241,8 @@ class Cell {
   //! Apply velocity constraints
   void apply_velocity_constraints();
 
-  //! Compute normal and parallel vectors to the face of the element
-  void compute_normals_and_parallels();
+  //! Compute new coordinate axes of the element
+  void compute_new_coordinate_axes();
 
  private:
   //! cell id
@@ -277,13 +277,9 @@ class Cell {
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
 
-  //! Normal of face
-  //! first-> face_id, second->vector of the normal
-  std::map<unsigned, Eigen::VectorXd> face_normals_;
-
   //! Parallel of face
-  //! first-> face_id, second->vector of the parallel
-  std::map<unsigned, Eigen::MatrixXd> face_parallels_;
+  //! first-> face_id, second->new coordinate axes
+  std::map<unsigned, Eigen::MatrixXd> new_coordinate_axes_;
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;

@@ -969,14 +969,11 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
 
 //! Apply velocity constraints
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_velocity_constraints() {
-
-  // TODO
-}
+void mpm::Cell<Tdim>::apply_velocity_constraints() {}
 
 //! Compute all face normals and parallels 2d
 template <>
-inline void mpm::Cell<2>::compute_normals_and_parallels() {
+inline void mpm::Cell<2>::compute_new_coordinate_axes() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
@@ -999,17 +996,20 @@ inline void mpm::Cell<2>::compute_normals_and_parallels() {
     normal_vector << -parallel_vector(1), parallel_vector(0);
     normal_vector = normal_vector.normalized();
 
-    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
-        static_cast<unsigned>(face_id), normal_vector));
+    // Assemble to a new coordinate axes
+    // New x axis is parralel vector, new y is normal
+    Eigen::Matrix<double, 2, 2> new_coordinate_axes;
+    new_coordinate_axes.col(0) = parallel_vector;
+    new_coordinate_axes.col(1) = normal_vector;
 
-    face_parallels_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
-        static_cast<unsigned>(face_id), parallel_vector));
+    new_coordinate_axes_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), new_coordinate_axes));
   }
 }
 
 //! Compute all face normals and parallels 3d
 template <>
-inline void mpm::Cell<3>::compute_normals_and_parallels() {
+inline void mpm::Cell<3>::compute_new_coordinate_axes() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
@@ -1032,16 +1032,14 @@ inline void mpm::Cell<3>::compute_normals_and_parallels() {
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
     normal_vector = normal_vector.normalized();
 
-    // Assume a as the new x-axis, the new y-axis has to be orthogonal to a and
-    // normal parallel_vector = normal_vector x a
-    Eigen::Matrix<double, 3, 2> parallel_vectors;
-    parallel_vectors.col(0) = a.normalized();
-    parallel_vectors.col(1) = (normal_vector.cross(a)).normalized();
+    // Assume a as the new x-axis, and normal as the new z-axis, the new y-axis
+    // has to be orthogonal to a and normal parallel_vector = normal_vector x a
+    Eigen::Matrix<double, 3, 3> new_coordinate_axes;
+    new_coordinate_axes.col(0) = a.normalized();
+    new_coordinate_axes.col(1) = (normal_vector.cross(a)).normalized();
+    new_coordinate_axes.col(2) = normal_vector;
 
-    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
-        static_cast<unsigned>(face_id), normal_vector));
-
-    face_parallels_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
-        static_cast<unsigned>(face_id), parallel_vectors));
+    new_coordinate_axes_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), new_coordinate_axes));
   }
 }
