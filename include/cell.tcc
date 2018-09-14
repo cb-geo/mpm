@@ -969,7 +969,65 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
 
 //! Apply velocity constraints
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_velocity_constraints() {}
+void mpm::Cell<Tdim>::apply_velocity_constraints() {
+
+  // Assum phase = 0 - TODO: make it general
+  const unsigned phase = 0;
+
+  // Copy nodal velocities and accelerations
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    constrained_nodal_velocity_.insert(
+        std::make_pair<unsigned, Eigen::VectorXd>(i,
+                                                  nodes_[i]->velocity(phase)));
+    constrained_nodal_acceleration_.insert(
+        std::make_pair<unsigned, Eigen::VectorXd>(
+            i, nodes_[i]->acceleration(phase)));
+  }
+
+  // Set velocity constraint
+  for (auto iterator = this->velocity_constraints_.begin();
+       iterator != this->velocity_constraints_.end(); ++iterator) {
+    // Get face id
+    const auto face_id = iterator->first;
+    // Loop through all the velocity constraints
+    for (const auto& constraint : this->velocity_constraints_[face_id]) {
+      // Direction value in the constraint (0, Dim * Nphases)
+      const auto dir = constraint.first;
+      // Direction: dir % Tdim (modulus)
+      const auto direction = static_cast<unsigned>(dir % Tdim);
+      // Phase: Integer value of division (dir / Tdim)
+      // const auto phase = static_cast<unsigned>(dir / Tdim);
+
+      // Get inverse rotation matrix
+      Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+          geometry_->inverse_rotation_matrix(geometry_->euler_angles_cartesian(
+              this->new_coordinate_axes_[face_id]));
+
+      // Get the nodes of the face
+      const Eigen::VectorXi node_indices = element_->face_indices(face_id);
+
+      // Apply it to the nodes
+      for (unsigned j = 0; j < node_indices.size(); ++j) {
+        auto nodal_velocity = constrained_nodal_velocity_[node_indices(j)];
+        auto nodal_acceleration =
+            constrained_nodal_acceleration_[node_indices(j)];
+
+        // Rotate velocity and acceleration vectors to new coordinate axes
+        nodal_velocity *= inverse_rotation_matrix;
+        nodal_acceleration *= inverse_rotation_matrix;
+
+        // Apply velocity boundary conditions in new coordinate axes
+        nodal_velocity(direction) = constraint.second;
+        nodal_acceleration(direction) = 0.;
+
+        // Rotate velocity and acceleration vectors back to original coordinate
+        // axes
+        nodal_velocity *= inverse_rotation_matrix.inverse();
+        nodal_acceleration *= inverse_rotation_matrix.inverse();
+      }
+    }
+  }
+}
 
 //! Compute all face normals and parallels 2d
 template <>
@@ -1026,7 +1084,7 @@ inline void mpm::Cell<3>::compute_new_coordinate_axes() {
                                     (this->nodes_[indices(0)])->coordinates();
 
     // Compute normal and make unit vector
-    // normal = a x b
+    // normal = a x b (non-commutative)
     // Note that definition of a and b are such that normal is always out of
     // page
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
@@ -1034,6 +1092,7 @@ inline void mpm::Cell<3>::compute_new_coordinate_axes() {
 
     // Assume a as the new x-axis, and normal as the new z-axis, the new y-axis
     // has to be orthogonal to a and normal parallel_vector = normal_vector x a
+    // (non-commutative)
     Eigen::Matrix<double, 3, 3> new_coordinate_axes;
     new_coordinate_axes.col(0) = a.normalized();
     new_coordinate_axes.col(1) = (normal_vector.cross(a)).normalized();

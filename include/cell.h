@@ -281,6 +281,16 @@ class Cell {
   //! first-> face_id, second->new coordinate axes
   std::map<unsigned, Eigen::MatrixXd> new_coordinate_axes_;
 
+  //! Constrained nodal velocity
+  std::map<unsigned, Eigen::VectorXd> constrained_nodal_velocity_;
+
+  //! Constrained nodal acceleration
+  std::map<unsigned, Eigen::VectorXd> constrained_nodal_acceleration_;
+
+  //! Geometry class to access functions
+  std::unique_ptr<Geometry<Tdim>> geometry_ =
+      std::make_unique<Geometry<Tdim>>();
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
