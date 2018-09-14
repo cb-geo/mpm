@@ -960,14 +960,13 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 }
 
 //! Assign velocity constraint
-//! Constrain directions can take values between 0 and Dim-1
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
                                                  double velocity) {
   bool status = true;
   try {
     //! Constraint directions can take values between 0 and Dim * Nphases - 1
-    if (dir >= 0) {
+    if (dir >= 0 && face_id < element_->nfaces()) {
       this->velocity_constraints_[face_id].emplace_back(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));
@@ -978,13 +977,6 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
     status = false;
   }
   return status;
-}
-
-//! Apply velocity constraints
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::apply_velocity_constraints() {
-
-  // TODO
 }
 
 //! Compute all face normals 2d
