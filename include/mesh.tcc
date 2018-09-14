@@ -138,8 +138,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   // Remove a cell if found in the container
-  const mpm::Index id = cell->id();
-  return (cells_.remove(cell));
+  bool status = cells_.remove(cell);
+  return status;
 }
 
 //! Iterate over cells

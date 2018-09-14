@@ -232,25 +232,14 @@ class Cell {
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
   //! Assign velocity constraint
-  //! Directions can take values between 0 and Dim-1
   //! \param[in] face_id Face of cell of velocity constraint
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
   bool assign_velocity_constraint(unsigned face_id, unsigned dir,
                                   double velocity);
 
-  //! Apply velocity constraints
-  void apply_velocity_constraints();
-
   //! Compute normal vector
   void compute_normals();
-
-  //! Return unit normal vector, positive pointing outside of the element
-  //! \param[in] face_id of constraint
-  //! \retval unit normal vector
-  Eigen::VectorXd normal(unsigned face_id) const {
-    return this->face_normals_.at(face_id);
-  }
 
  private:
   //! cell id
