@@ -967,37 +967,49 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   return status;
 }
 
-//! Compute all face normals 2d
+//! Apply velocity constraints
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::apply_velocity_constraints() {
+
+  // TODO
+}
+
+//! Compute all face normals and parallels 2d
 template <>
-inline void mpm::Cell<2>::compute_normals() {
+inline void mpm::Cell<2>::compute_normals_and_parallels() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
     // Get the nodes of the face
     const Eigen::VectorXi indices = element_->face_indices(face_id);
 
-    // Compute the vector to calculate normal (perpendicular)
-    // a = node(0) - node(1)
-    Eigen::Matrix<double, 2, 1> a = (this->nodes_[indices(0)])->coordinates() -
-                                    (this->nodes_[indices(1)])->coordinates();
+    // Compute parallel and make unit vector
+    // parallel_vector = node(0) - node(1)
+    Eigen::Matrix<double, 2, 1> parallel_vector =
+        (this->nodes_[indices(0)])->coordinates() -
+        (this->nodes_[indices(1)])->coordinates();
+    parallel_vector = parallel_vector.normalized();
 
     // Compute normal and make unit vector
-    // The normal vector n to vector a is defined such that the dot product
-    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
-    // the reverse does not work to produce normal that is positive pointing out
-    // of the element
+    // The normal vector n to vector parallel_vector is defined such that the
+    // dot product between parallel_vector and n is always 0 In 2D, n(0) =
+    // -parallel_vector(1), n(1) = parallel_vector(0) Note that the reverse does
+    // not work to produce normal that is positive pointing out of the element
     Eigen::Matrix<double, 2, 1> normal_vector;
-    normal_vector << -a(1), a(0);
+    normal_vector << -parallel_vector(1), parallel_vector(0);
     normal_vector = normal_vector.normalized();
 
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
+
+    face_parallels_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), parallel_vector));
   }
 }
 
-//! Compute all face normals 3d
+//! Compute all face normals and parallels 3d
 template <>
-inline void mpm::Cell<3>::compute_normals() {
+inline void mpm::Cell<3>::compute_normals_and_parallels() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
@@ -1007,6 +1019,7 @@ inline void mpm::Cell<3>::compute_normals() {
     // Compute two vectors to calculate normal
     // a = node(1) - node(0)
     // b = node(3) - node(0)
+    // Note that b is not necessarily orthogonal to both a and the normal vector
     Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
                                     (this->nodes_[indices(0)])->coordinates();
     Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
@@ -1019,7 +1032,16 @@ inline void mpm::Cell<3>::compute_normals() {
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
     normal_vector = normal_vector.normalized();
 
+    // Assume a as the new x-axis, the new y-axis has to be orthogonal to a and
+    // normal parallel_vector = normal_vector x a
+    Eigen::Matrix<double, 3, 2> parallel_vectors;
+    parallel_vectors.col(0) = a.normalized();
+    parallel_vectors.col(1) = (normal_vector.cross(a)).normalized();
+
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
+
+    face_parallels_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), parallel_vectors));
   }
 }
