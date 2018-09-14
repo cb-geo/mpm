@@ -235,6 +235,9 @@ class HexahedronElement : public Element<Tdim> {
   //! \retval indices Indices that make the face
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
+  //! Return the number of faces in a hexahedron
+  unsigned nfaces() const { return 6; }
+
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;

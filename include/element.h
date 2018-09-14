@@ -139,6 +139,9 @@ class Element {
   //! \param[in] face_id given id of the face
   //! \retval indices Indices that make the face
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
+
+  //! Return number of faces
+  virtual unsigned nfaces() const = 0;
 };
 
 }  // namespace mpm
