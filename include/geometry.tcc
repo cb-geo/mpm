@@ -1,7 +1,7 @@
 //! Compute the inverse of a 2d rotation matrix for an orthogonal axis
 //! coordinate system
 template <>
-inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
+inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::rotation_matrix(
     const Eigen::Matrix<double, 2, 1>& angles) const {
   // Get cos and sin of angles
   const double cos_alpha_cos_beta = cos(angles(0)) * cos(angles(1));
@@ -16,12 +16,12 @@ inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::inverse_rotation_matrix(
   // clang-format on            
 
   // inverted rotation matrix
-  return rotation_matrix.inverse();
+  return rotation_matrix;
 }
 
 //! Compute the inverse of a 3d rotation matrix for an orthogonal axis coordinate system
 template <>
-inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(const 
+inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const 
     Eigen::Matrix<double, 3, 1>& angles) const {
 
   // Get cos and sin of angles
@@ -44,7 +44,7 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::inverse_rotation_matrix(con
   // clang-format on
 
   // inverted rotation matrix
-  return rotation_matrix.inverse();
+  return rotation_matrix;
 }
 
 //! Compute the angle between two vectors in radians
