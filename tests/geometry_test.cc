@@ -25,19 +25,18 @@ TEST_CASE("Geometry is checked for 2D case", "[geometry][2D]") {
               30. * M_PI / 180.;   // beta
     // clang-format on
 
-    Eigen::Matrix<double, 2, 2> inverse_rotation_matrix;
+    Eigen::Matrix<double, 2, 2> rotation_matrix;
     // clang-format off
-    inverse_rotation_matrix <<  0.258819045102521, 0.965925826289068,
-                               -0.965925826289068, 0.258819045102521;
+    rotation_matrix <<  0.258819045102521, -0.965925826289068,
+                        0.965925826289068,  0.258819045102521;
     // clang-format on
-    auto check_inverse_rotation_matrix =
-        geometry->inverse_rotation_matrix(angles);
-    REQUIRE(check_inverse_rotation_matrix.cols() == 2);
-    REQUIRE(check_inverse_rotation_matrix.rows() == 2);
-    for (unsigned i = 0; i < check_inverse_rotation_matrix.rows(); ++i) {
-      for (unsigned j = 0; j < check_inverse_rotation_matrix.cols(); ++j) {
-        REQUIRE(check_inverse_rotation_matrix(i, j) ==
-                Approx(inverse_rotation_matrix(i, j)).epsilon(Tolerance));
+    auto check_rotation_matrix = geometry->rotation_matrix(angles);
+    REQUIRE(check_rotation_matrix.cols() == 2);
+    REQUIRE(check_rotation_matrix.rows() == 2);
+    for (unsigned i = 0; i < check_rotation_matrix.rows(); ++i) {
+      for (unsigned j = 0; j < check_rotation_matrix.cols(); ++j) {
+        REQUIRE(check_rotation_matrix(i, j) ==
+                Approx(rotation_matrix(i, j)).epsilon(Tolerance));
       }
     }
   }
@@ -96,20 +95,19 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
               60. * M_PI / 180.;   // gamma
     // clang-format on
 
-    Eigen::Matrix<double, 3, 3> inverse_rotation_matrix;
+    Eigen::Matrix<double, 3, 3> rotation_matrix;
     // clang-format off
-    inverse_rotation_matrix <<  0.435595740399158,  0.789149130992431,  0.433012701892219,
-                               -0.659739608441171, -0.047367172745376,  0.75,
-                                0.612372435695794, -0.612372435695795,  0.5;
+    rotation_matrix <<  0.4355957403991584,  -0.6597396084411712,    0.6123724356957941,
+                        0.7891491309924313,  -0.047367172745375934, -0.6123724356957948,
+                        0.43301270189221946,  0.75,                  0.5;
     // clang-format on
-    const auto check_inverse_rotation_matrix =
-        geometry->inverse_rotation_matrix(angles);
-    REQUIRE(check_inverse_rotation_matrix.cols() == 3);
-    REQUIRE(check_inverse_rotation_matrix.rows() == 3);
-    for (unsigned i = 0; i < check_inverse_rotation_matrix.rows(); ++i) {
-      for (unsigned j = 0; j < check_inverse_rotation_matrix.cols(); ++j) {
-        REQUIRE(check_inverse_rotation_matrix(i, j) ==
-                Approx(inverse_rotation_matrix(i, j)).epsilon(Tolerance));
+    const auto check_rotation_matrix = geometry->rotation_matrix(angles);
+    REQUIRE(check_rotation_matrix.cols() == 3);
+    REQUIRE(check_rotation_matrix.rows() == 3);
+    for (unsigned i = 0; i < check_rotation_matrix.rows(); ++i) {
+      for (unsigned j = 0; j < check_rotation_matrix.cols(); ++j) {
+        REQUIRE(check_rotation_matrix(i, j) ==
+                Approx(rotation_matrix(i, j)).epsilon(Tolerance));
       }
     }
   }

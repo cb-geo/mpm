@@ -14,10 +14,10 @@ class Geometry {
   //! Constructor
   Geometry() = default;
 
-  //! Compute the inverse Euler rotation matrix for an orthogonal axis
+  //! Compute the Euler rotation matrix for an orthogonal axis
   //! coordinate system
   //! \param[in] angles Rotation angles depending on the dimension
-  Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix(
+  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix(
       const Eigen::Matrix<double, Tdim, 1>& angles) const;
 
   //! Compute the angle between two vectors in radians
