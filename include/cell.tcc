@@ -1013,17 +1013,21 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
             constrained_nodal_acceleration_[node_indices(j)];
 
         // Rotate velocity and acceleration vectors to new coordinate axes
-        nodal_velocity *= inverse_rotation_matrix;
-        nodal_acceleration *= inverse_rotation_matrix;
+        constrained_nodal_velocity_[node_indices(j)] *= inverse_rotation_matrix;
+        constrained_nodal_acceleration_[node_indices(j)] *=
+            inverse_rotation_matrix;
 
         // Apply velocity boundary conditions in new coordinate axes
-        nodal_velocity(direction) = constraint.second;
-        nodal_acceleration(direction) = 0.;
+        constrained_nodal_velocity_[node_indices(j)](direction) =
+            constraint.second;
+        constrained_nodal_acceleration_[node_indices(j)](direction) = 0.;
 
         // Rotate velocity and acceleration vectors back to original coordinate
         // axes
-        nodal_velocity *= inverse_rotation_matrix.inverse();
-        nodal_acceleration *= inverse_rotation_matrix.inverse();
+        constrained_nodal_velocity_[node_indices(j)] *=
+            inverse_rotation_matrix.inverse();
+        constrained_nodal_acceleration_[node_indices(j)] *=
+            inverse_rotation_matrix.inverse();
       }
     }
   }
