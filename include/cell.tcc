@@ -999,8 +999,8 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
       // const auto phase = static_cast<unsigned>(dir / Tdim);
 
       // Get inverse rotation matrix
-      Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
-          geometry_->inverse_rotation_matrix(geometry_->euler_angles_cartesian(
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
+          geometry_->rotation_matrix(geometry_->euler_angles_cartesian(
               this->new_coordinate_axes_[face_id]));
 
       // Get the nodes of the face
@@ -1008,14 +1008,11 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
 
       // Apply it to the nodes
       for (unsigned j = 0; j < node_indices.size(); ++j) {
-        auto nodal_velocity = constrained_nodal_velocity_[node_indices(j)];
-        auto nodal_acceleration =
-            constrained_nodal_acceleration_[node_indices(j)];
-
         // Rotate velocity and acceleration vectors to new coordinate axes
-        constrained_nodal_velocity_[node_indices(j)] *= inverse_rotation_matrix;
+        constrained_nodal_velocity_[node_indices(j)] *=
+            rotation_matrix.inverse();
         constrained_nodal_acceleration_[node_indices(j)] *=
-            inverse_rotation_matrix;
+            rotation_matrix.inverse();
 
         // Apply velocity boundary conditions in new coordinate axes
         constrained_nodal_velocity_[node_indices(j)](direction) =
@@ -1024,10 +1021,8 @@ void mpm::Cell<Tdim>::apply_velocity_constraints() {
 
         // Rotate velocity and acceleration vectors back to original coordinate
         // axes
-        constrained_nodal_velocity_[node_indices(j)] *=
-            inverse_rotation_matrix.inverse();
-        constrained_nodal_acceleration_[node_indices(j)] *=
-            inverse_rotation_matrix.inverse();
+        constrained_nodal_velocity_[node_indices(j)] *= rotation_matrix;
+        constrained_nodal_acceleration_[node_indices(j)] *= rotation_matrix;
       }
     }
   }
