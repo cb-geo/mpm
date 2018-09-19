@@ -140,7 +140,7 @@ class Element {
   //! \retval indices Indices that make the face
   virtual Eigen::VectorXi face_indices(unsigned face_id) const = 0;
 
-  //! Return unit element volume for particle size calculation
+  //! Return unit element volume
   virtual double unit_element_volume() const = 0;
 };
 
