@@ -5,7 +5,7 @@ inline Eigen::MatrixXd
   //! Natural coordinates of nodes
   Eigen::Matrix<double, 16, 2> local_nodes;
   // clang-format off
-  local_nodes << -1., -1.,
+  (local_nodes << -1., -1.,
                   1., -1.,
                   1.,  1.,
                  -1.,  1.,
@@ -20,7 +20,7 @@ inline Eigen::MatrixXd
                  -1.,  3.,
                  -3.,  3.,
                  -3.,  1.,
-                 -3., -1.;
+                 -3., -1.).finished();
   // clang-format on
   return local_nodes;
 }
@@ -152,4 +152,27 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
     grad_shapefn(n, 1) = dni(1) * sni(0);
   }
   return grad_shapefn;
+}
+
+//! Return the B-matrix of a Quadrilateral Element at a given local
+//! coordinate for a real cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::vector<Eigen::MatrixXd>
+    mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
+      xi, nodal_coordinates);
+}
+
+//! Compute Jacobian with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::jacobian(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
+      xi, nodal_coordinates);
 }

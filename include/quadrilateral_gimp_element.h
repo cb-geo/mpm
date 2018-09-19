@@ -71,7 +71,6 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
 
-  /*
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
@@ -93,7 +92,6 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
-  */
 
   //! Return the type of shape function
   mpm::ShapefnType shapefn_type() const override {
