@@ -967,37 +967,106 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   return status;
 }
 
-//! Compute all face normals 2d
+//! Apply velocity constraints
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::apply_velocity_constraints() {
+
+  // Assum phase = 0 - TODO: make it general
+  const unsigned phase = 0;
+
+  // Copy nodal velocities and accelerations
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    constrained_nodal_velocity_.insert(
+        std::make_pair<unsigned, Eigen::VectorXd>(i,
+                                                  nodes_[i]->velocity(phase)));
+    constrained_nodal_acceleration_.insert(
+        std::make_pair<unsigned, Eigen::VectorXd>(
+            i, nodes_[i]->acceleration(phase)));
+  }
+
+  // Set velocity constraint
+  for (auto iterator = this->velocity_constraints_.begin();
+       iterator != this->velocity_constraints_.end(); ++iterator) {
+    // Get face id
+    const auto face_id = iterator->first;
+    // Loop through all the velocity constraints
+    for (const auto& constraint : this->velocity_constraints_[face_id]) {
+      // Direction value in the constraint (0, Dim * Nphases)
+      const auto dir = constraint.first;
+      // Direction: dir % Tdim (modulus)
+      const auto direction = static_cast<unsigned>(dir % Tdim);
+      // Phase: Integer value of division (dir / Tdim)
+      // const auto phase = static_cast<unsigned>(dir / Tdim);
+
+      // Get inverse rotation matrix
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
+          geometry_->rotation_matrix(geometry_->euler_angles_cartesian(
+              this->new_coordinate_axes_[face_id]));
+
+      // Get the nodes of the face
+      const Eigen::VectorXi node_indices = element_->face_indices(face_id);
+
+      // Apply it to the nodes
+      for (unsigned j = 0; j < node_indices.size(); ++j) {
+        // Rotate velocity and acceleration vectors to new coordinate axes
+        constrained_nodal_velocity_[node_indices(j)] *=
+            rotation_matrix.inverse();
+        constrained_nodal_acceleration_[node_indices(j)] *=
+            rotation_matrix.inverse();
+
+        // Apply velocity boundary conditions in new coordinate axes
+        constrained_nodal_velocity_[node_indices(j)](direction) =
+            constraint.second;
+        constrained_nodal_acceleration_[node_indices(j)](direction) = 0.;
+
+        // Rotate velocity and acceleration vectors back to original coordinate
+        // axes
+        constrained_nodal_velocity_[node_indices(j)] *= rotation_matrix;
+        constrained_nodal_acceleration_[node_indices(j)] *= rotation_matrix;
+      }
+    }
+  }
+}
+
+//! Compute all face normals and parallels 2d
 template <>
-inline void mpm::Cell<2>::compute_normals() {
+inline void mpm::Cell<2>::compute_new_coordinate_axes() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
     // Get the nodes of the face
     const Eigen::VectorXi indices = element_->face_indices(face_id);
 
-    // Compute the vector to calculate normal (perpendicular)
-    // a = node(0) - node(1)
-    Eigen::Matrix<double, 2, 1> a = (this->nodes_[indices(0)])->coordinates() -
-                                    (this->nodes_[indices(1)])->coordinates();
+    // Compute parallel and make unit vector
+    // parallel_vector = node(0) - node(1)
+    Eigen::Matrix<double, 2, 1> parallel_vector =
+        (this->nodes_[indices(0)])->coordinates() -
+        (this->nodes_[indices(1)])->coordinates();
+    parallel_vector = parallel_vector.normalized();
 
     // Compute normal and make unit vector
-    // The normal vector n to vector a is defined such that the dot product
-    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
-    // the reverse does not work to produce normal that is positive pointing out
-    // of the element
+    // The normal vector n to vector parallel_vector is defined such that the
+    // dot product between parallel_vector and n is always 0 In 2D, n(0) =
+    // -parallel_vector(1), n(1) = parallel_vector(0) Note that the reverse does
+    // not work to produce normal that is positive pointing out of the element
     Eigen::Matrix<double, 2, 1> normal_vector;
-    normal_vector << -a(1), a(0);
+    normal_vector << -parallel_vector(1), parallel_vector(0);
     normal_vector = normal_vector.normalized();
 
-    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
-        static_cast<unsigned>(face_id), normal_vector));
+    // Assemble to a new coordinate axes
+    // New x axis is parralel vector, new y is normal
+    Eigen::Matrix<double, 2, 2> new_coordinate_axes;
+    new_coordinate_axes.col(0) = parallel_vector;
+    new_coordinate_axes.col(1) = normal_vector;
+
+    new_coordinate_axes_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), new_coordinate_axes));
   }
 }
 
-//! Compute all face normals 3d
+//! Compute all face normals and parallels 3d
 template <>
-inline void mpm::Cell<3>::compute_normals() {
+inline void mpm::Cell<3>::compute_new_coordinate_axes() {
 
   //! Set number of faces from element
   for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
@@ -1007,19 +1076,28 @@ inline void mpm::Cell<3>::compute_normals() {
     // Compute two vectors to calculate normal
     // a = node(1) - node(0)
     // b = node(3) - node(0)
+    // Note that b is not necessarily orthogonal to both a and the normal vector
     Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
                                     (this->nodes_[indices(0)])->coordinates();
     Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
                                     (this->nodes_[indices(0)])->coordinates();
 
     // Compute normal and make unit vector
-    // normal = a x b
+    // normal = a x b (non-commutative)
     // Note that definition of a and b are such that normal is always out of
     // page
     Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
     normal_vector = normal_vector.normalized();
 
-    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
-        static_cast<unsigned>(face_id), normal_vector));
+    // Assume a as the new x-axis, and normal as the new z-axis, the new y-axis
+    // has to be orthogonal to a and normal parallel_vector = normal_vector x a
+    // (non-commutative)
+    Eigen::Matrix<double, 3, 3> new_coordinate_axes;
+    new_coordinate_axes.col(0) = a.normalized();
+    new_coordinate_axes.col(1) = (normal_vector.cross(a)).normalized();
+    new_coordinate_axes.col(2) = normal_vector;
+
+    new_coordinate_axes_.insert(std::make_pair<unsigned, Eigen::MatrixXd>(
+        static_cast<unsigned>(face_id), new_coordinate_axes));
   }
 }

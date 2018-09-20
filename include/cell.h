@@ -238,8 +238,11 @@ class Cell {
   bool assign_velocity_constraint(unsigned face_id, unsigned dir,
                                   double velocity);
 
-  //! Compute normal vector
-  void compute_normals();
+  //! Apply velocity constraints
+  void apply_velocity_constraints();
+
+  //! Compute new coordinate axes of the element
+  void compute_new_coordinate_axes();
 
  private:
   //! cell id
@@ -274,9 +277,19 @@ class Cell {
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
 
-  //! Normal of face
-  //! first-> face_id, second->vector of the normal
-  std::map<unsigned, Eigen::VectorXd> face_normals_;
+  //! Parallel of face
+  //! first-> face_id, second->new coordinate axes
+  std::map<unsigned, Eigen::MatrixXd> new_coordinate_axes_;
+
+  //! Constrained nodal velocity
+  std::map<unsigned, Eigen::VectorXd> constrained_nodal_velocity_;
+
+  //! Constrained nodal acceleration
+  std::map<unsigned, Eigen::VectorXd> constrained_nodal_acceleration_;
+
+  //! Geometry class to access functions
+  std::unique_ptr<Geometry<Tdim>> geometry_ =
+      std::make_unique<Geometry<Tdim>>();
 
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
