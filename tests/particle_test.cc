@@ -765,15 +765,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle velocity
     // TODO: Check velocity
     velocity << 0., 0.019;
-    //  velocity << 0., -0.981;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     // TODO: Check coords
-    coords << 0.75, .7519;
-    // coords << 0.75, .6519;  // (0.75 - 0.0981)
+    coords << 0.75, .8394;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -783,15 +781,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
     // Check particle velocity
     // TODO: Check velocity
-    velocity << 0., 0.913;
-    //  velocity << 0., -0.981;
+    velocity << 0., 0.894;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     // TODO: Check coords
-    coords << 0.75, .8432;
+    coords << 0.75, .9288;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -1633,7 +1630,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // TODO: Check particle position
     // Updated particle coordinate
-    coords << 1.5, 1.6, 1.6019;
+    coords << 1.5, 2.0875, 2.5769;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -1643,14 +1640,14 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
     // TODO: Check particle velocity
     // Check particle velocity
-    velocity << 0., 6.875, 11.788;
+    velocity << 0., 5.875, 10.769;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // TODO: Check particle position
     // Updated particle coordinate
-    coords << 1.5, 2.2875, 2.7807;
+    coords << 1.5, 2.675, 3.6538;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
