@@ -447,6 +447,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
       // Update particle velocity from interpolated nodal acceleration
       this->velocity_.col(phase) += acceleration * dt;
 
+      // Get interpolated nodal velocity
+      Eigen::Matrix<double, Tdim, 1> velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+
       // New position  current position + velocity * dt
       this->coordinates_ += this->velocity_.col(phase) * dt;
     } else {
@@ -474,7 +478,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) += velocity;
+      this->velocity_.col(phase) = velocity;
 
       // New position current position + velocity * dt
       this->coordinates_ += this->velocity_.col(phase) * dt;
