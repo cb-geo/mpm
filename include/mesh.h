@@ -148,10 +148,17 @@ class Mesh {
   //! \param[in] phase Index corresponding to the phase
   std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses(unsigned phase);
 
-  //! Assign velocity constraints
+  //! Assign velocity constraints to nodes
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
   bool assign_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          velocity_constraints);
+
+  //! Assign velocity constraints to cells
+  //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
+  //! velocity
+  bool assign_cell_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
 
   //! Assign particles tractions
