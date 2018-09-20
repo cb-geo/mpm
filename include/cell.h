@@ -2,6 +2,7 @@
 #define MPM_CELL_H_
 
 #include <limits>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -10,6 +11,7 @@
 
 #include "affine_transform.h"
 #include "element.h"
+#include "geometry.h"
 #include "logger.h"
 #include "map.h"
 #include "node_base.h"
@@ -31,7 +33,7 @@ class Cell {
   //! Define DOF for stresses
   static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
 
-  //! Constructor with id, number of nodes and elemetn
+  //! Constructor with id, number of nodes and element
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
   //! \param[in] elementptr Pointer to an element type
@@ -229,7 +231,17 @@ class Cell {
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
- protected:
+  //! Assign velocity constraint
+  //! \param[in] face_id Face of cell of velocity constraint
+  //! \param[in] dir Direction of velocity constraint
+  //! \param[in] velocity Applied velocity constraint
+  bool assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                  double velocity);
+
+  //! Compute normal vector
+  void compute_normals();
+
+ private:
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
 
@@ -256,6 +268,16 @@ class Cell {
 
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+
+  //! Velocity constraints
+  //! key: face_id, value: pair of direction [0/1/2] and velocity value
+  std::map<unsigned, std::vector<std::pair<unsigned, double>>>
+      velocity_constraints_;
+
+  //! Normal of face
+  //! first-> face_id, second->vector of the normal
+  std::map<unsigned, Eigen::VectorXd> face_normals_;
+
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class
