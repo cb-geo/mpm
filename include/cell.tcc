@@ -85,22 +85,10 @@ bool mpm::Cell<Tdim>::add_node(
 
 //! Activate nodes if particle is present
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::activate_nodes() {
-  bool status = true;
-  try {
-    // If number of particles are present, set node status to active
-    if (particles_.size() > 0) {
-      // Activate all nodes
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-        nodes_[i]->assign_status(true);
-    } else {
-      throw std::runtime_error("No particles in cell, can't activate nodes");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Cell<Tdim>::activate_nodes() {
+  // If number of particles are present, set all associated nodes as active
+  if (particles_.size() > 0)
+    for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
 }
 
 //! Add a neighbour cell and return the status of addition of a node

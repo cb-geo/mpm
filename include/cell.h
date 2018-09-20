@@ -69,7 +69,7 @@ class Cell {
   unsigned nnodes() const { return nodes_.size(); }
 
   //! Activate nodes if particle is present
-  bool activate_nodes();
+  void activate_nodes();
 
   //! Return a pointer to element type of a cell
   std::shared_ptr<const Element<Tdim>> element_ptr() { return element_; }
