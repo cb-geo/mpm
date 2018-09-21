@@ -249,6 +249,7 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 
   // TODO fix phase
   unsigned phase = 0;
+  
   // Write stress vector
   attribute = "stresses";
   auto stress_file =
@@ -256,5 +257,22 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   vtk_writer->write_vector_point_data(
       stress_file, meshes_.at(0)->particles_vector_data(attribute, phase),
       attribute);
+
+  // Write strain vector
+  attribute = "strains";
+  auto strain_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(
+      strain_file, meshes_.at(0)->particles_vector_data(attribute, phase),
+      attribute);
+
+  // Write velocity vector
+  attribute = "velocities";
+  auto velocity_file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_vector_point_data(
+      velocity_file, meshes_.at(0)->particles_vector_data(attribute, phase),
+      attribute);
+
 }
 #endif
