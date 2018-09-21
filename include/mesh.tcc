@@ -292,20 +292,20 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
-//! Return particle stresses
+//! Return particle vector data
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_vector_data(
     unsigned phase) {
-  std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses;
+  std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    Eigen::Vector3d stresses;
-    stresses.setZero();
-    auto pstress = (*pitr)->stress(phase);
+    Eigen::Vector3d data;
+    data.setZero();
+    auto pdata = (*pitr)->stress(phase);
     // Fill stresses to the size of dimensions
-    for (unsigned i = 0; i < Tdim; ++i) stresses(i) = pstress(i);
-    particle_stresses.emplace_back(stresses);
+    for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+    vector_data.emplace_back(data);
   }
-  return particle_stresses;
+  return vector_data;
 }
 
 //! Assign velocity constraints to nodes
