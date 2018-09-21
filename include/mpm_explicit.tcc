@@ -254,6 +254,7 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   auto stress_file =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_vector_point_data(
-      stress_file, meshes_.at(0)->particle_vector_data(phase), attribute);
+      stress_file, meshes_.at(0)->particles_vector_data(attribute, phase),
+      attribute);
 }
 #endif
