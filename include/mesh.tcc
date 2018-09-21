@@ -292,20 +292,46 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
-//! Return particle stresses
+//! Return particle vector data
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(
-    unsigned phase) {
-  std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    Eigen::Vector3d stresses;
-    stresses.setZero();
-    auto pstress = (*pitr)->stress(phase);
-    // Fill stresses to the size of dimensions
-    for (unsigned i = 0; i < Tdim; ++i) stresses(i) = pstress(i);
-    particle_stresses.emplace_back(stresses);
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
+    const std::string& attribute, unsigned phase) {
+  std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
+  try {
+    // Iterate over particles
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      Eigen::Vector3d data;
+      data.setZero();
+      // Stresses
+      if (attribute == "stresses") {
+        auto pdata = (*pitr)->stress(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Strains
+      else if (attribute == "strains") {
+        auto pdata = (*pitr)->strain(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Velocities
+      else if (attribute == "velocities") {
+        auto pdata = (*pitr)->velocity(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Error
+      else
+        throw std::runtime_error("Invalid particle vector data attribute: !");
+      // Add to a vector of data
+      vector_data.emplace_back(data);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
+                    attribute);
+    vector_data.clear();
   }
-  return particle_stresses;
+  return vector_data;
 }
 
 //! Assign velocity constraints to nodes
