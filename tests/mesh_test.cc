@@ -536,8 +536,20 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() ==
+            std::string attribute = "stresses";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
                     mesh->nparticles());
+            // Particle strains
+            attribute = "strains";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle velocities
+            attribute = "velocities";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle invalid data
+            attribute = "invalid";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
 
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
@@ -1181,8 +1193,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() ==
+            std::string attribute = "stresses";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
                     mesh->nparticles());
+            // Particle strains
+            attribute = "strains";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle velocities
+            attribute = "velocities";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle invalid data
+            attribute = "invalid";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
