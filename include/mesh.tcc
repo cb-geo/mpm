@@ -294,16 +294,42 @@ std::vector<Eigen::Matrix<double, 3, 1>>
 
 //! Return particle vector data
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_vector_data(
-    unsigned phase) {
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
+    const std::string& attribute, unsigned phase) {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    Eigen::Vector3d data;
-    data.setZero();
-    auto pdata = (*pitr)->stress(phase);
-    // Fill stresses to the size of dimensions
-    for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
-    vector_data.emplace_back(data);
+  try {
+    // Iterate over particles
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      Eigen::Vector3d data;
+      data.setZero();
+      // Stresses
+      if (attribute == "stresses") {
+        auto pdata = (*pitr)->stress(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Strains
+      else if (attribute == "strains") {
+        auto pdata = (*pitr)->strain(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Velocities
+      else if (attribute == "velocities") {
+        auto pdata = (*pitr)->velocity(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Error
+      else
+        throw std::runtime_error("Invalid particle vector data attribute: !");
+      // Add to a vector of data
+      vector_data.emplace_back(data);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
+                    attribute);
+    vector_data.clear();
   }
   return vector_data;
 }
