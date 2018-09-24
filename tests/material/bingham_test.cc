@@ -121,7 +121,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> element =
-        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+        Factory<mpm::Element<Dim>>::instance()->create("E2DQ4");
 
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, element);
 
@@ -215,7 +215,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
-        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+        Factory<mpm::Element<Dim>>::instance()->create("E2DQ4");
 
     node0->assign_velocity_constraint(0, 0.02);
     node0->assign_velocity_constraint(1, 0.03);
@@ -313,7 +313,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
-        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+        Factory<mpm::Element<Dim>>::instance()->create("E2DQ4");
 
     node0->assign_velocity_constraint(0, 2);
     node0->assign_velocity_constraint(1, 3);
@@ -482,7 +482,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
-        Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+        Factory<mpm::Element<Dim>>::instance()->create("E3DH8");
 
     auto cell = std::make_shared<mpm::Cell<Dim>>(cell_id, Nnodes, shapefn);
 
@@ -591,7 +591,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
-        Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+        Factory<mpm::Element<Dim>>::instance()->create("E3DH8");
 
     node0->assign_velocity_constraint(0, 0.02);
     node0->assign_velocity_constraint(1, 0.03);
@@ -705,7 +705,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
-        Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+        Factory<mpm::Element<Dim>>::instance()->create("E3DH8");
 
     node0->assign_velocity_constraint(0, 2);
     node0->assign_velocity_constraint(1, 3);
