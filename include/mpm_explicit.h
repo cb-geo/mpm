@@ -68,7 +68,7 @@ class MPMExplicit : public MPM {
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
-  //! VTK parameters
+  //! VTK attributes
   std::vector<std::string> vtk_attributes_;
 
 };  // MPMExplicit class
