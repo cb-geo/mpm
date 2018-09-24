@@ -37,9 +37,31 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     output_steps_ = post_process_["output_steps"].template get<mpm::Index>();
 
   } catch (std::domain_error& domain_error) {
-    console_->error(" {} {} Get analysis object: {}", __FILE__, __LINE__,
+    console_->error("{} {} Get analysis object: {}", __FILE__, __LINE__,
                     domain_error.what());
     abort();
+  }
+
+  // Default VTK attributes
+  std::vector<std::string> vtk = {"velocities", "stresses", "strains"};
+  try {
+    if (post_process_.at("vtk").is_array() &&
+        post_process_.at("vtk").size() > 0) {
+      for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
+        std::string attribute =
+            post_process_["vtk"][i].template get<std::string>();
+        if (std::find(vtk.begin(), vtk.end(), attribute) != vtk.end())
+          vtk_attributes_.emplace_back(attribute);
+        else
+          throw std::runtime_error("Specificed VTK argument is incorrect");
+      }
+    } else {
+      throw std::runtime_error(
+          "Specificed VTK arguments are incorrect, using defaults");
+    }
+  } catch (std::exception& exception) {
+    vtk_attributes_ = vtk;
+    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
 }
 
@@ -209,7 +231,7 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
                    this->nsteps_);
 
   } catch (std::exception& exception) {
-    console_->info(" {} {} Resume failed, restarting analysis: {}", __FILE__,
+    console_->info("{} {} Resume failed, restarting analysis: {}", __FILE__,
                    __LINE__, exception.what());
     this->step_ = 0;
     checkpoint = false;
@@ -240,9 +262,8 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
 
   // Write input geometry to vtk file
-  std::string attribute = "geometry";
   std::string extension = ".vtp";
-
+  std::string attribute = "geometry";
   auto meshfile =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
@@ -250,28 +271,13 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   // TODO fix phase
   unsigned phase = 0;
 
-  // Write stress vector
-  attribute = "stresses";
-  auto stress_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(
-      stress_file, meshes_.at(0)->particles_vector_data(attribute, phase),
-      attribute);
-
-  // Write strain vector
-  attribute = "strains";
-  auto strain_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(
-      strain_file, meshes_.at(0)->particles_vector_data(attribute, phase),
-      attribute);
-
-  // Write velocity vector
-  attribute = "velocities";
-  auto velocity_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(
-      velocity_file, meshes_.at(0)->particles_vector_data(attribute, phase),
-      attribute);
+  for (const auto& attribute : vtk_attributes_) {
+    // Write vector
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_vector_point_data(
+        file, meshes_.at(0)->particles_vector_data(attribute, phase),
+        attribute);
+  }
 }
 #endif
