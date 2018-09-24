@@ -24,7 +24,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"traction", "traction.txt"}}},
         {"mesh",
          {{"mesh_reader", "Ascii3D"},
-          {"cell_type", "ED3H8"},
+          {"cell_type", "E3DH8"},
           {"particle_type", "P3D"}}},
         {"materials",
          {{{"id", 0},
