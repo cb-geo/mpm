@@ -61,7 +61,10 @@ bool write_json(unsigned dim, bool resume, const std::string& file_name) {
           {"step", 5}}},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
-      {"post_processing", {{"path", "results/"}, {"output_steps", 5}}}};
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk", {{"stresses", "strains", "velocity"}}},
+        {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read
   std::ofstream file;
