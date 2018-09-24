@@ -56,11 +56,11 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
           throw std::runtime_error("Specificed VTK argument is incorrect");
       }
     } else {
-      vtk_attributes_ = vtk;
       throw std::runtime_error(
           "Specificed VTK arguments are incorrect, using defaults");
     }
   } catch (std::exception& exception) {
+    vtk_attributes_ = vtk;
     console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
 }
