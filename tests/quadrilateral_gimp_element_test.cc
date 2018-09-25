@@ -406,5 +406,82 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       REQUIRE(gradsf(14, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(15, 1) == Approx(0.0).epsilon(Tolerance));
     }
+
+    // Check Jacobian
+    SECTION("Four noded quadrilateral Jacobian with deformation gradient") {
+      Eigen::Matrix<double, 16, Dim> coords;
+      // clang-format off
+      coords << 2., 1.,
+                4., 2.,
+                2., 4.,
+                1., 3.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian(xi, coords, psize, defgrad);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check BMatrix with deformation gradient
+    SECTION(
+        "Four noded quadrilateral B-matrix cell with deformation gradient") {
+      // Reference coordinates
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Nodal coordinates
+      Eigen::Matrix<double, 16, Dim> coords;
+      // clang-format off
+      coords << 0., 0.,
+                1., 0.,
+                1., 1.,
+                0., 1.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> psize;
+      psize.setZero();
+      Eigen::Matrix<double, Dim, 1> defgrad;
+      defgrad.setZero();
+
+      // Get B-Matrix
+      auto bmatrix = quad->bmatrix(xi, coords, psize, defgrad);
+
+      // Check gradient of shape functions
+      auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
+      gradsf *= 2.;
+
+      // Check size of B-matrix
+      REQUIRE(bmatrix.size() == nfunctions);
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+      }
+    }
   }
 }
