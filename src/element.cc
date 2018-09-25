@@ -16,7 +16,7 @@ static Register<mpm::Element<2>, mpm::QuadrilateralElement<2, 8>> quad8(
 static Register<mpm::Element<2>, mpm::QuadrilateralElement<2, 9>> quad9(
     "ED2Q9");
 
-// Quadrilateral 4-node-base uGIMP element
+// Quadrilateral 4-node-base GIMP element
 static Register<mpm::Element<2>, mpm::QuadrilateralGIMPElement<2, 16>>
     quad_gimp16("ED2Q16G");
 

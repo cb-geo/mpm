@@ -9,8 +9,6 @@ namespace mpm {
 //! \brief Quadrilateral GIMP element
 //! \details 16-noded quadrilateral GIMP element \n
 //! Shape function, gradient shape function, B-matrix, indices \n
-//! 16-node Quadrilateral GIMP Element \n
-//!
 //! <pre>
 //!
 //!   13----------12----------11----------10
