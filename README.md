@@ -44,7 +44,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
+0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ /path/to/CMakeLists.txt`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
