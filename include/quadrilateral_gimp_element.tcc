@@ -35,21 +35,21 @@ inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
   //! length of element in local coordinate
   const double element_length = 2.;
   //! Nodes in GIMP function
-  const unsigned Nfunctions = 16;
+  const unsigned nfunctions = 16;
   //! Dimension
-  const unsigned Dim = 2;
+  const unsigned dim = 2;
   //! Natural nodal coordinates
-  const Eigen::Matrix<double, Nfunctions, Dim> local_nodes =
+  const Eigen::Matrix<double, nfunctions, dim> local_nodes =
       this->natural_nodal_coordinates();
   //! To store shape functions
-  Eigen::Matrix<double, Nfunctions, 1> shapefn;
+  Eigen::Matrix<double, nfunctions, 1> shapefn;
 
   //! loop to iterate over nodes
-  for (unsigned n = 0; n < Nfunctions; ++n) {
+  for (unsigned n = 0; n < nfunctions; ++n) {
     //! local shape function in current plane (x, y or z)
-    Eigen::Matrix<double, Dim, 1> sni;
+    Eigen::Matrix<double, dim, 1> sni;
     //! loop to iterate over dimensions
-    for (unsigned i = 0; i < Dim; ++i) {
+    for (unsigned i = 0; i < dim; ++i) {
       double ni = local_nodes(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
       //! Conditional shape function statement see: Bardenhagen 2004
@@ -93,22 +93,22 @@ inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
   //! length of element in local coordinate
   const double element_length = 2.;
   //! Nodes in GIMP function
-  const unsigned Nfunctions = 16;
+  const unsigned nfunctions = 16;
   //! Dimension
-  const unsigned Dim = 2;
+  const unsigned dim = 2;
   //! Natural nodal coordinates
-  const Eigen::Matrix<double, Nfunctions, Dim> local_nodes =
+  const Eigen::Matrix<double, nfunctions, dim> local_nodes =
       this->natural_nodal_coordinates();
   //! To store grad shape functions
-  Eigen::Matrix<double, Nfunctions, Dim> grad_shapefn;
+  Eigen::Matrix<double, nfunctions, dim> grad_shapefn;
   //! loop to iterate over nodes
-  for (unsigned n = 0; n < Nfunctions; ++n) {
+  for (unsigned n = 0; n < nfunctions; ++n) {
     //! local shape function in current plane (x, y or z)
-    Eigen::Matrix<double, Dim, 1> sni;
+    Eigen::Matrix<double, dim, 1> sni;
     //! local grad shape function in current plane (x, y or z)
-    Eigen::Matrix<double, Dim, 1> dni;
+    Eigen::Matrix<double, dim, 1> dni;
     //! loop to iterate over dimensions
-    for (unsigned i = 0; i < Dim; ++i) {
+    for (unsigned i = 0; i < dim; ++i) {
       double ni = local_nodes(n, i);
       double npni = xi(i) - ni;  // local particle  - local node
       //! Conditional shape function statement see: Bardenhagen 2004
