@@ -411,10 +411,24 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
     SECTION("Four noded quadrilateral Jacobian with deformation gradient") {
       Eigen::Matrix<double, 16, Dim> coords;
       // clang-format off
-      coords << 2., 1.,
-                4., 2.,
-                2., 4.,
-                1., 3.;
+      // clang-format off
+      coords << -1., -1.,
+                 1., -1.,
+                 1.,  1.,
+                -1.,  1.,
+                -3., -3.,
+                -1., -3.,
+                 1., -3.,
+                 3., -3.,
+                 3., -1.,
+                 3.,  1.,
+                 3.,  3.,
+                 1.,  3.,
+                -1.,  3.,
+                -3.,  3.,
+                -3.,  1.,
+                -3., -1.;
+      // clang-format on
       // clang-format on
 
       Eigen::Matrix<double, Dim, 1> psize;
@@ -423,12 +437,12 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       defgrad.setZero();
 
       Eigen::Matrix<double, Dim, 1> xi;
-      xi << 0.5, 0.5;
+      xi << 0, 0;
 
       Eigen::Matrix<double, Dim, Dim> jacobian;
       // clang-format off
-      jacobian << 0.625, 0.5,
-                 -0.875, 1.0;
+      jacobian << 1.0, 0,
+                 0, 1.0;
       // clang-format on
 
       // Get Jacobian
@@ -453,10 +467,22 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       // Nodal coordinates
       Eigen::Matrix<double, 16, Dim> coords;
       // clang-format off
-      coords << 0., 0.,
-                1., 0.,
-                1., 1.,
-                0., 1.;
+      coords << -1., -1.,
+                 1., -1.,
+                 1.,  1.,
+                -1.,  1.,
+                -3., -3.,
+                -1., -3.,
+                 1., -3.,
+                 3., -3.,
+                 3., -1.,
+                 3.,  1.,
+                 3.,  3.,
+                 1.,  3.,
+                -1.,  3.,
+                -3.,  3.,
+                -3.,  1.,
+                -3., -1.;
       // clang-format on
 
       Eigen::Matrix<double, Dim, 1> psize;
@@ -469,7 +495,7 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
 
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
-      gradsf *= 2.;
+      // gradsf *= 2.;
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
