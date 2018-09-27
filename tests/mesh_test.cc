@@ -536,8 +536,20 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() ==
+            std::string attribute = "stresses";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
                     mesh->nparticles());
+            // Particle strains
+            attribute = "strains";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle velocities
+            attribute = "velocities";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle invalid data
+            attribute = "invalid";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
 
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
@@ -569,10 +581,32 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
             }
+
+            // Test assign particles tractions
+            SECTION("Check assign particles tractions") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_tractions;
+              // Tractions
+              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      true);
+              // When tractions fail
+              particles_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+            }
           }
         }
-        // Test assign velocity constraints
-        SECTION("Check assign velocity constraints") {
+        // Test assign velocity constraints to nodes
+        SECTION("Check assign velocity constraints to nodes") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, double>>
               velocity_constraints;
@@ -588,6 +622,23 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
           REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
                   false);
+        }
+
+        // Test assign velocity constraints to cells
+        SECTION("Check assign velocity constraints to cells") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
+
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == true);
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(1, 10, 1, 0.0));
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == false);
         }
       }
     }
@@ -1142,8 +1193,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
-            REQUIRE(mesh->particle_stresses(phase).size() ==
+            std::string attribute = "stresses";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
                     mesh->nparticles());
+            // Particle strains
+            attribute = "strains";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle velocities
+            attribute = "velocities";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+                    mesh->nparticles());
+            // Particle invalid data
+            attribute = "invalid";
+            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
@@ -1172,10 +1235,32 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
             }
+
+            // Test assign particles tractions
+            SECTION("Check assign particles tractions") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_tractions;
+              // Tractions
+              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      true);
+              // When tractions fail
+              particles_tractions.emplace_back(std::make_tuple(3, 3, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+            }
           }
         }
-        // Test assign velocity constraints
-        SECTION("Check assign velocity constraints") {
+        // Test assign velocity constraints to nodes
+        SECTION("Check assign velocity constraints to nodes") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, double>>
               velocity_constraints;
@@ -1192,6 +1277,24 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           velocity_constraints.emplace_back(std::make_tuple(3, 3, 0.0));
           REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
                   false);
+        }
+
+        // Test assign velocity constraints to cells
+        SECTION("Check assign velocity constraints to cells") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
+
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == true);
+
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(1, 10, 1, -10.5));
+          REQUIRE(mesh->assign_cell_velocity_constraints(
+                      velocity_constraints) == false);
         }
       }
     }

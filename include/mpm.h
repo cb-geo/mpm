@@ -13,7 +13,10 @@
 #include "mesh.h"
 #include "read_mesh.h"
 #include "read_mesh_ascii.h"
+
+#ifdef USE_VTK
 #include "vtk_writer.h"
+#endif
 
 namespace mpm {
 //! MPM class
@@ -47,11 +50,13 @@ class MPM {
   // Check point restart
   virtual bool checkpoint_resume() = 0;
 
-  //! Write VTK files
-  virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
-
   //! Write HDF5 files
   virtual void write_hdf5(mpm::Index step, mpm::Index max_steps) = 0;
+
+#ifdef USE_VTK
+  //! Write VTK files
+  virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
+#endif
 
  protected:
   //! A unique id for the analysis

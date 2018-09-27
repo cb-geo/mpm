@@ -1,10 +1,6 @@
 #ifndef MPM_HEXAHEDRON_ELEMENT_H_
 #define MPM_HEXAHEDRON_ELEMENT_H_
 
-#include <exception>
-
-#include <Eigen/Dense>
-
 #include "element.h"
 #include "logger.h"
 
@@ -80,6 +76,30 @@ namespace mpm {
 //!
 //!
 //! </pre>
+//!
+//! Face numbering for 8-node, 20-node and 27-node Hexaheron Element \n
+//!
+//! <pre>
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
+//!         Front: F5
+//!
+//!
+//! Bottom face: F0, Right face: F1, Top face: F2,
+//! Left face: F3, Rear face: F4, Front face: F5
+//! </pre>
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -209,6 +229,14 @@ class HexahedronElement : public Element<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+  //! Return indices of a face of an element
+  //! \param[in] face_id given id of the face
+  //! \retval indices Indices that make the face
+  Eigen::VectorXi face_indices(unsigned face_id) const override;
+
+  //! Return the number of faces in a hexahedron
+  unsigned nfaces() const { return 6; }
 
  private:
   //! Logger

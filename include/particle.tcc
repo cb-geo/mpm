@@ -37,6 +37,8 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->id_ = particle.id;
   // Mass
   this->mass_(phase) = particle.mass;
+  // Volume
+  this->assign_volume(particle.volume);
 
   // Coordinates
   Eigen::Vector3d coordinates;
@@ -72,12 +74,16 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
   mass_.setZero();
+  size_.setZero();
+  volume_ = std::numeric_limits<double>::max();
   stress_.setZero();
   strain_.setZero();
   volumetric_strain_centroid_.setZero();
   dstrain_.setZero();
   strain_rate_.setZero();
   velocity_.setZero();
+  set_traction_ = false;
+  traction_.setZero();
 }
 
 // Assign a cell to particle
@@ -188,7 +194,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
   return status;
 }
 
-// Compute volume of particle
+// Assign volume to the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::assign_volume(double volume) {
+  this->volume_ = volume;
+  // Compute size of particle in each direction
+  const double length = std::pow(volume, 1. / Tdim);
+  // Set particle size as length on each side
+  this->size_.fill(length);
+}
+
+// Compute volume of the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
   bool status = true;
@@ -196,7 +212,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Volume of the cell / # of particles
-      this->volume_ = cell_->volume() / cell_->nparticles();
+      this->assign_volume(cell_->volume() / cell_->nparticles());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -385,6 +401,37 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
   return status;
 }
 
+// Assign traction to the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
+                                                    unsigned direction,
+                                                    double traction) {
+  bool status = false;
+  try {
+    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
+      throw std::runtime_error(
+          "Particle traction direction / phase is invalid");
+    }
+    // Assign traction
+    traction_(direction, phase) =
+        traction * this->volume_ / this->size_(direction);
+    status = true;
+    this->set_traction_ = true;
+  } catch (std::exception& exception) {
+    status = false;
+  }
+  return status;
+}
+
+//! Map traction force
+//! \param[in] phase Index corresponding to the phase
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::map_traction_force(unsigned phase) {
+  // Compute nodal traction forces
+  cell_->compute_nodal_traction_force(this->shapefn_, phase,
+                                      this->traction_.col(phase));
+}
+
 // Compute updated position of the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
@@ -394,14 +441,18 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal acceleration
-      Eigen::Matrix<double, Tdim, 1> acceleration =
+      Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
           cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
       // Update particle velocity from interpolated nodal acceleration
-      this->velocity_.col(phase) += acceleration * dt;
+      this->velocity_.col(phase) += nodal_acceleration * dt;
+
+      // Get interpolated nodal velocity
+      Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // New position  current position + velocity * dt
-      this->coordinates_ += this->velocity_.col(phase) * dt;
+      this->coordinates_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -427,7 +478,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) += velocity;
+      this->velocity_.col(phase) = velocity;
 
       // New position current position + velocity * dt
       this->coordinates_ += this->velocity_.col(phase) * dt;

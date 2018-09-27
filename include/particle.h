@@ -78,7 +78,7 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
-  void assign_volume(double volume) override { volume_ = volume; }
+  void assign_volume(double volume) override;
 
   //! Return volume
   double volume() const override { return volume_; }
@@ -166,6 +166,24 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Assign traction to the particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction(unsigned phase, unsigned direction,
+                       double traction) override;
+
+  //! Return traction of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd traction(unsigned phase) const override {
+    return traction_.col(phase);
+  }
+
+  //! Map traction force
+  //! \param[in] phase Index corresponding to the phase
+  void map_traction_force(unsigned phase) override;
+
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
@@ -195,6 +213,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Size of particle
+  Eigen::Matrix<double, 1, Tdim> size_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
@@ -207,6 +227,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Set traction
+  bool set_traction_{false};
+  //! Traction
+  Eigen::Matrix<double, Tdim, Tnphases> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix

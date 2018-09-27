@@ -455,3 +455,50 @@ inline Eigen::MatrixXi
   return indices;
 }
   
+//! Return indices of a face of the element
+//! 4-noded quadrilateral
+template <>
+inline Eigen::VectorXi
+    mpm::QuadrilateralElement<2, 4>::face_indices(unsigned face_id) const {
+  
+  //! Face ids and its associated nodal indices
+  const std::map<unsigned, Eigen::Matrix<int, 2, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 2, 1>(0, 1)},
+                                 {1, Eigen::Matrix<int, 2, 1>(1, 2)},
+                                 {2, Eigen::Matrix<int, 2, 1>(2, 3)},
+                                 {3, Eigen::Matrix<int, 2, 1>(3, 0)}}; 
+
+  return face_indices_quadrilateral.at(face_id);
+}
+
+//! Return indices of a face of the element
+//! 8-noded quadrilateral
+template <>
+inline Eigen::VectorXi
+    mpm::QuadrilateralElement<2, 8>::face_indices(unsigned face_id) const {
+  
+  //! Face ids and its associated nodal indices
+  const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
+                                 {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
+                                 {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
+                                 {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
+
+  return face_indices_quadrilateral.at(face_id);
+}
+
+//! Return indices of a face of the element
+//! 9-noded quadrilateral
+template <>
+inline Eigen::VectorXi
+    mpm::QuadrilateralElement<2, 9>::face_indices(unsigned face_id) const {
+  
+  //! Face ids and its associated nodal indices
+  const std::map<unsigned, Eigen::Matrix<int, 3, 1>>
+      face_indices_quadrilateral{{0, Eigen::Matrix<int, 3, 1>(0, 1, 4)},
+                                 {1, Eigen::Matrix<int, 3, 1>(1, 2, 5)},
+                                 {2, Eigen::Matrix<int, 3, 1>(2, 3, 6)},
+                                 {3, Eigen::Matrix<int, 3, 1>(3, 0, 7)}};
+
+  return face_indices_quadrilateral.at(face_id);
+}

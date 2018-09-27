@@ -26,6 +26,8 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 * [Eigen](http://eigen.tuxfamily.org/)
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
 * [HDF5](https://support.hdfgroup.org/HDF5/)
+
+#### Optional
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -42,7 +44,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
+0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ /path/to/CMakeLists.txt`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
