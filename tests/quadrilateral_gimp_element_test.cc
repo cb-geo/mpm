@@ -467,22 +467,22 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       // Nodal coordinates
       Eigen::Matrix<double, 16, Dim> coords;
       // clang-format off
-      coords << -2., -2.,
-                 2., -2.,
-                 2.,  2.,
-                -2.,  2.,
-                -3., -3.,
-                -2., -3.,
-                 2., -3.,
-                 3., -3.,
-                 3., -2.,
-                 3.,  2.,
-                 3.,  3.,
-                 2.,  3.,
-                -2.,  3.,
-                -3.,  3.,
-                -3.,  2.,
-                -3., -2.;
+      coords <<  1.,1.,
+                 2.,1.,
+                 2.,2.,
+                 1.,2.,
+                 0,0,
+                 1.,0,
+                 2.,0,
+                 3.,0,
+                 3.,1.,
+                 3.,2.,
+                 3.,3.,
+                 2.,3.,
+                 1.,3.,
+                 0,3.,
+                 0,2.,
+                 0,1.;
       // clang-format on
 
       Eigen::Matrix<double, Dim, 1> psize;
@@ -495,7 +495,7 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
 
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
-      gradsf *= 0.5;
+      gradsf *= 2;
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
