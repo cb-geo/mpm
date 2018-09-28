@@ -89,11 +89,10 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   Eigen::Matrix<double, 6, 1> tau = apparent_viscosity * strain_rate;
 
   // von Mises criterion
-  // second invariant J2 of deviatoric stress in matrix form
-  // Since tau is in Voigt notation, multiply shear part by 2 just like D
-  // yield condition J2 > tau0^2
-  const double invariant2 = 0.5 * (tau.dot(tau) + tau.tail(3).dot(tau.tail(3)));
-  if (invariant2 < (tau0_ * tau0_)) tau.setZero();
+  // trace of second invariant J2 of deviatoric stress in matrix form
+  // Since tau is in Voigt notation, only the first three numbers matter
+  const double trace_invariant2 = 0.5 * (tau.head(3)).dot(tau.head(3));
+  if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
   // Update volumetric and deviatoric stress
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
