@@ -13,6 +13,8 @@ typedef struct HDF5Particle {
   mpm::Index id;
   // Mass
   double mass;
+  // Volume
+  double volume;
   // Coordinates
   double coord_x, coord_y, coord_z;
   // Velocity

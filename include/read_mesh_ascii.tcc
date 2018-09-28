@@ -170,13 +170,13 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
   return coordinates;
 }
 
-//! Return coordinates of particles
+//! Return velocity constraints of particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>
     mpm::ReadMeshAscii<Tdim>::read_velocity_constraints(
         const std::string& velocity_constraints_file) {
 
-  // Nodal coordinates
+  // Nodal velocity constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
   constraints.clear();
 
@@ -212,4 +212,48 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
     console_->error("Read velocity constraints: {}", exception.what());
   }
   return constraints;
+}
+
+//! Return particles traction
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::ReadMeshAscii<Tdim>::read_particles_tractions(
+        const std::string& traction_file) {
+
+  // particle tractions
+  std::vector<std::tuple<mpm::Index, unsigned, double>> tractions;
+  tractions.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(traction_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Direction
+            unsigned dir;
+            // Traction
+            double traction;
+            // Read stream
+            istream >> id >> dir >> traction;
+            tractions.emplace_back(std::make_tuple(id, dir, traction));
+          }
+        }
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("Read traction : {}", exception.what());
+  }
+  return tractions;
 }

@@ -148,6 +148,16 @@ class ParticleBase {
   //! Return velocity
   virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
 
+  //! Assign traction
+  virtual bool assign_traction(unsigned phase, unsigned direction,
+                               double traction) = 0;
+
+  //! Return traction
+  virtual Eigen::VectorXd traction(unsigned phase) const = 0;
+
+  //! Map traction force
+  virtual void map_traction_force(unsigned phase) = 0;
+
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
 
