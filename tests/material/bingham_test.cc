@@ -274,8 +274,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
+    jmaterial["tau0"] = 200;
+    jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
@@ -353,10 +353,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-20833765.64471337).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-20833981.80040339).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-20833520.3557401).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-20833613.8669434).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-540.38922505).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-233.778008402801).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
   }
@@ -655,8 +655,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
+    jmaterial["tau0"] = 200;
+    jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
@@ -750,11 +750,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-4167039.740848102).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-4167002.433429959).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-4165920.518303796).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-391.727890507).epsilon(Tolerance));
-    REQUIRE(check_stress(4) == Approx(55.961127215).epsilon(Tolerance));
-    REQUIRE(check_stress(5) == Approx(-186.537090718).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-4166810.21531557).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-4166795.86045068).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-4166379.56936886).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-150.726081349795).epsilon(Tolerance));
+    REQUIRE(check_stress(4) == Approx(21.532297335685).epsilon(Tolerance));
+    REQUIRE(check_stress(5) == Approx(-71.7743244522832).epsilon(Tolerance));
   }
 }
