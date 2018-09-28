@@ -91,6 +91,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // von Mises criterion
   // trace of second invariant J2 of deviatoric stress in matrix form
   // Since tau is in Voigt notation, only the first three numbers matter
+  // yield condition trace of the invariant > tau0^2
   const double trace_invariant2 = 0.5 * (tau.head(3)).dot(tau.head(3));
   if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
