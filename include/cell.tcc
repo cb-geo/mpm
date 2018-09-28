@@ -85,22 +85,10 @@ bool mpm::Cell<Tdim>::add_node(
 
 //! Activate nodes if particle is present
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::activate_nodes() {
-  bool status = true;
-  try {
-    // If number of particles are present, set node status to active
-    if (particles_.size() > 0) {
-      // Activate all nodes
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-        nodes_[i]->assign_status(true);
-    } else {
-      throw std::runtime_error("No particles in cell, can't activate nodes");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Cell<Tdim>::activate_nodes() {
+  // If number of particles are present, set all associated nodes as active
+  if (particles_.size() > 0)
+    for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
 }
 
 //! Add a neighbour cell and return the status of addition of a node
@@ -890,6 +878,15 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
                                      (shapefn(i) * pgravity * pmass));
 }
 
+//! Compute the nodal traction force of a cell from particle
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_traction_force(
+    const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction) {
+  // Map external forces from particle to nodes
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_external_force(true, phase, (shapefn(i) * traction));
+}
+
 //! Compute the nodal internal force  of a cell from particle stress and
 //! volume
 template <unsigned Tdim>
@@ -948,4 +945,81 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 
   return acceleration;
+}
+
+//! Assign velocity constraint
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                                 double velocity) {
+  bool status = true;
+  try {
+    //! Constraint directions can take values between 0 and Dim * Nphases - 1
+    if (dir >= 0 && face_id < element_->nfaces()) {
+      this->velocity_constraints_[face_id].emplace_back(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
+    } else
+      throw std::runtime_error("Constraint direction is out of bounds");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute all face normals 2d
+template <>
+inline void mpm::Cell<2>::compute_normals() {
+
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute the vector to calculate normal (perpendicular)
+    // a = node(0) - node(1)
+    Eigen::Matrix<double, 2, 1> a = (this->nodes_[indices(0)])->coordinates() -
+                                    (this->nodes_[indices(1)])->coordinates();
+
+    // Compute normal and make unit vector
+    // The normal vector n to vector a is defined such that the dot product
+    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
+    // the reverse does not work to produce normal that is positive pointing out
+    // of the element
+    Eigen::Matrix<double, 2, 1> normal_vector;
+    normal_vector << -a(1), a(0);
+    normal_vector = normal_vector.normalized();
+
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
+  }
+}
+
+//! Compute all face normals 3d
+template <>
+inline void mpm::Cell<3>::compute_normals() {
+
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute two vectors to calculate normal
+    // a = node(1) - node(0)
+    // b = node(3) - node(0)
+    Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+    Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+
+    // Compute normal and make unit vector
+    // normal = a x b
+    // Note that definition of a and b are such that normal is always out of
+    // page
+    Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
+    normal_vector = normal_vector.normalized();
+
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
+  }
 }

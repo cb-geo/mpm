@@ -64,6 +64,11 @@ class ReadMesh {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
 
+  //! Read particles traction file
+  //! \param[in] traction_files file name with particle tractions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_particles_tractions(const std::string& traction_file) = 0;
+
 };  // ReadMesh class
 }  // namespace mpm
 

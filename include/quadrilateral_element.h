@@ -198,6 +198,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval indices Indices that make the face
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
+  //! Return the number of faces in a quadrilateral
+  unsigned nfaces() const { return 4; }
   //! Return unit element volume 2D 2*2
   double unit_element_volume() const { return 4.; }
 

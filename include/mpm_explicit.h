@@ -34,8 +34,10 @@ class MPMExplicit : public MPM {
   //! Checkpoint resume
   bool checkpoint_resume() override;
 
+#ifdef USE_VTK
   //! Write VTK files
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
+#endif
 
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
@@ -66,6 +68,8 @@ class MPMExplicit : public MPM {
   std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! VTK attributes
+  std::vector<std::string> vtk_attributes_;
 
 };  // MPMExplicit class
 }  // namespace mpm

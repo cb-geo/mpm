@@ -144,15 +144,30 @@ class Mesh {
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
-  //! Return particle stresses
+  //! Return particles vector data
+  //! \param[in] attribute Name of the vector data attribute
   //! \param[in] phase Index corresponding to the phase
-  std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses(unsigned phase);
+  std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
+      const std::string& attribute, unsigned phase);
 
-  //! Assign velocity constraints
+  //! Assign velocity constraints to nodes
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
   bool assign_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
+
+  //! Assign velocity constraints to cells
+  //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
+  //! velocity
+  bool assign_cell_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
+          velocity_constraints);
+
+  //! Assign particles tractions
+  //! \param[in] particle_tractions Traction at dir on particle
+  bool assign_particles_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_tractions);
 
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
