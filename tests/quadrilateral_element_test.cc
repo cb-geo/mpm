@@ -435,7 +435,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -606,9 +606,9 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check for face indices
       Eigen::Matrix<int, 4, 2> indices;
       // clang-format off
-      indices << 0, 1, 
-                 1, 2, 
-                 2, 3, 
+      indices << 0, 1,
+                 1, 2,
+                 2, 3,
                  3, 0;
       // clang-format on
       // Check for all face indices
@@ -1130,7 +1130,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -1340,9 +1340,9 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check for face indices
       Eigen::Matrix<int, 4, 3> indices;
       // clang-format off
-      indices << 0, 1, 4, 
-                 1, 2, 5, 
-                 2, 3, 6, 
+      indices << 0, 1, 4,
+                 1, 2, 5,
+                 2, 3, 6,
                  3, 0, 7;
       // clang-format on
       // Check for all face indices
@@ -2013,7 +2013,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       Eigen::Matrix<double, 3, Dim> coords;
       // clang-format off
       coords << 0., 0.,
-                1., 0., 
+                1., 0.,
                 1., 1.;
       // clang-format on
       // Get B-Matrix
@@ -2101,9 +2101,9 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check for face indices
       Eigen::Matrix<int, 4, 3> indices;
       // clang-format off
-      indices << 0, 1, 4, 
-                 1, 2, 5, 
-                 2, 3, 6, 
+      indices << 0, 1, 4,
+                 1, 2, 5,
+                 2, 3, 6,
                  3, 0, 7;
       // clang-format on
 
@@ -2119,6 +2119,11 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       // Check number of faces
       REQUIRE(quad->nfaces() == 4);
+    }
+
+    SECTION("Quadrilateral element volume") {
+      // Check element volume
+      REQUIRE(quad->unit_element_volume() == 4);
     }
   }
 }
