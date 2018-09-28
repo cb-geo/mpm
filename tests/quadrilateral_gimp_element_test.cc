@@ -509,5 +509,9 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
     }
+    SECTION("Center cell gimp element volume") {
+      // Check element volume
+      REQUIRE(quad->unit_element_volume() == 4);
+    }
   }
 }
