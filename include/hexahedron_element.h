@@ -237,6 +237,8 @@ class HexahedronElement : public Element<Tdim> {
 
   //! Return the number of faces in a hexahedron
   unsigned nfaces() const { return 6; }
+  //! Return unit element volume 3D 2*2*2
+  double unit_element_volume() const { return 8.; }
 
  private:
   //! Logger

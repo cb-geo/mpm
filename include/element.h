@@ -142,6 +142,8 @@ class Element {
 
   //! Return number of faces
   virtual unsigned nfaces() const = 0;
+  //! Return unit element volume
+  virtual double unit_element_volume() const = 0;
 };
 
 }  // namespace mpm
