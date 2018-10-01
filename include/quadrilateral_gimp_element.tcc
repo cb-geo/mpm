@@ -79,7 +79,7 @@ inline Eigen::VectorXd
               "GIMP shapefn: Point location outside area of influence");
         }
       }
-      shapefn(n) = sni(0) * sni(1);
+      shapefn(n) = sni(0) * sni(1);  // See: Pruijn, N.S., 2016. Eq(4.30)
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -115,7 +115,8 @@ inline Eigen::MatrixXd
       for (unsigned i = 0; i < Tdim; ++i) {
         double ni = local_nodes(n, i);
         double npni = xi(i) - ni;  // local particle  - local node
-        //! Conditional shape function statement see: Bardenhagen 2004
+        //! Conditional shape function statement
+        // see: Pruijn, N.S., 2016. Eq(4.30)
         if (npni <= (-element_length - particle_size(i))) {
           sni(i) = 0.;
           dni(i) = 0.;
@@ -153,8 +154,9 @@ inline Eigen::MatrixXd
               "GIMP grad shapefn: Point location outside area of influence");
         }
       }
+      // see: Pruijn, N.S., 2016. Eq(4.32)
       grad_shapefn(n, 0) = dni(0) * sni(1);
-      grad_shapefn(n, 1) = dni(1) * sni(0);  // find ref for this (review paper)
+      grad_shapefn(n, 1) = dni(1) * sni(0);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

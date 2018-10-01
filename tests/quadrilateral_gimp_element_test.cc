@@ -429,7 +429,6 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
                 -3.,  1.,
                 -3., -1.;
       // clang-format on
-      // clang-format on
 
       Eigen::Matrix<double, Dim, 1> psize;
       psize.setZero();
@@ -437,7 +436,7 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       defgrad.setZero();
 
       Eigen::Matrix<double, Dim, 1> xi;
-      xi << 0, 0;
+      xi << 0., 0.;
 
       Eigen::Matrix<double, Dim, Dim> jacobian;
       // clang-format off
@@ -511,7 +510,7 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
     }
     SECTION("Center cell gimp element volume") {
       // Check element volume
-      REQUIRE(quad->unit_element_volume() == 4);
+      REQUIRE(quad->unit_element_volume() == Approx(4).epsilon(Tolerance));
     }
   }
 }

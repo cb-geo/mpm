@@ -2436,7 +2436,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     }
     SECTION("Hexahedron element volume") {
       // Check element volume
-      REQUIRE(hex->unit_element_volume() == 8);
+      REQUIRE(hex->unit_element_volume() == Approx(8).epsilon(Tolerance));
     }
   }
 }
