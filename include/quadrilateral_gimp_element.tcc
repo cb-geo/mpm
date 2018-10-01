@@ -1,11 +1,11 @@
 // Return natural nodal coordinates
-template <>
-inline Eigen::MatrixXd
-    mpm::QuadrilateralGIMPElement<2, 16>::natural_nodal_coordinates() const {
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<
+    Tdim, Tnfunctions>::natural_nodal_coordinates() const {
   //! Natural coordinates of nodes
   // clang-format off
-  const Eigen::Matrix<double, 16, 2> local_nodes =
-  (Eigen::Matrix<double, 16, 2>() << -1., -1.,
+  const Eigen::Matrix<double, Tnfunctions, Tdim> local_nodes =
+  (Eigen::Matrix<double, Tnfunctions, Tdim>() << -1., -1.,
                                       1., -1.,
                                       1.,  1.,
                                      -1.,  1.,
@@ -27,127 +27,138 @@ inline Eigen::MatrixXd
 
 //! Return shape functions of a 16-node Quadrilateral GIMP Element at a given
 //! local coordinate
-template <>
-inline Eigen::VectorXd mpm::QuadrilateralGIMPElement<2, 16>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
-    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd
+    mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::shapefn(
+        const Eigen::Matrix<double, Tdim, 1>& xi,
+        const VectorDim& particle_size,
+        const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
 
   //! length of element in local coordinate
   const double element_length = 2.;
-  //! Nodes in GIMP function
-  const unsigned nfunctions = 16;
-  //! Dimension
-  const unsigned dim = 2;
   //! Natural nodal coordinates
-  const Eigen::Matrix<double, nfunctions, dim> local_nodes =
+  const Eigen::Matrix<double, Tnfunctions, Tdim> local_nodes =
       this->natural_nodal_coordinates();
   //! To store shape functions
-  Eigen::Matrix<double, nfunctions, 1> shapefn;
+  Eigen::Matrix<double, Tnfunctions, 1> shapefn;
 
-  //! loop to iterate over nodes
-  for (unsigned n = 0; n < nfunctions; ++n) {
-    //! local shape function in current plane (x, y or z)
-    Eigen::Matrix<double, dim, 1> sni;
-    //! loop to iterate over dimensions
-    for (unsigned i = 0; i < dim; ++i) {
-      double ni = local_nodes(n, i);
-      double npni = xi(i) - ni;  // local particle  - local node
-      //! Conditional shape function statement see: Bardenhagen 2004
-      if (npni <= (-element_length - particle_size(i))) {
-        sni(i) = 0.;
-      } else if ((-element_length - particle_size(i)) < npni &&
-                 npni <= (-element_length + particle_size(i))) {
-        sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
-                 (4. * (element_length * particle_size(i)));
-      } else if ((-element_length + particle_size(i)) < npni &&
-                 npni <= -particle_size(i)) {
-        sni(i) = 1. + (npni / element_length);
-      } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
-        sni(i) = 1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                       (2. * element_length * particle_size(i)));
-      } else if (particle_size(i) < npni &&
-                 npni <= element_length - particle_size(i)) {
-        sni(i) = 1. - (npni / element_length);
-      } else if ((element_length - particle_size(i)) < npni &&
-                 npni <= element_length + particle_size(i)) {
-        sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
-                 (4. * element_length * particle_size(i));
-      } else  // if ((element_length + particle_size(i)) < npni)
-      {
-        sni(i) = 0.;
+  try {
+    //! loop to iterate over nodes
+    for (unsigned n = 0; n < Tnfunctions; ++n) {
+      //! local shape function in current plane (x, y or z)
+      Eigen::Matrix<double, Tdim, 1> sni;
+      //! loop to iterate over dimensions
+      for (unsigned i = 0; i < Tdim; ++i) {
+        double ni = local_nodes(n, i);
+        double npni = xi(i) - ni;  // local particle  - local node
+        //! Conditional shape function statement see: Bardenhagen 2004
+        if (npni <= (-element_length - particle_size(i))) {
+          sni(i) = 0.;
+        } else if ((-element_length - particle_size(i)) < npni &&
+                   npni <= (-element_length + particle_size(i))) {
+          sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
+                   (4. * (element_length * particle_size(i)));
+        } else if ((-element_length + particle_size(i)) < npni &&
+                   npni <= -particle_size(i)) {
+          sni(i) = 1. + (npni / element_length);
+        } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
+          sni(i) =
+              1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                    (2. * element_length * particle_size(i)));
+        } else if (particle_size(i) < npni &&
+                   npni <= (element_length - particle_size(i))) {
+          sni(i) = 1. - (npni / element_length);
+        } else if ((element_length - particle_size(i)) < npni &&
+                   npni <= element_length + particle_size(i)) {
+          sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
+                   (4. * element_length * particle_size(i));
+        } else if ((element_length + particle_size(i)) < npni) {
+          sni(i) = 0.;
+        } else {
+          throw std::runtime_error(
+              "GIMP shapefn: Point location outside area of influence");
+        }
       }
+      shapefn(n) = sni(0) * sni(1);
     }
-    shapefn(n) = sni(0) * sni(1);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return shapefn;
   }
-
   return shapefn;
 }
 
 //! Return gradient of shape functions of a 16-node Quadrilateral Element at a
 //! given local coordinate
-template <>
-inline Eigen::MatrixXd mpm::QuadrilateralGIMPElement<2, 16>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi, const VectorDim& particle_size,
-    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd
+    mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::grad_shapefn(
+        const Eigen::Matrix<double, Tdim, 1>& xi,
+        const VectorDim& particle_size,
+        const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
 
   //! length of element in local coordinate
   const double element_length = 2.;
-  //! Nodes in GIMP function
-  const unsigned nfunctions = 16;
-  //! Dimension
-  const unsigned dim = 2;
   //! Natural nodal coordinates
-  const Eigen::Matrix<double, nfunctions, dim> local_nodes =
+  const Eigen::Matrix<double, Tnfunctions, Tdim> local_nodes =
       this->natural_nodal_coordinates();
   //! To store grad shape functions
-  Eigen::Matrix<double, nfunctions, dim> grad_shapefn;
-  //! loop to iterate over nodes
-  for (unsigned n = 0; n < nfunctions; ++n) {
-    //! local shape function in current plane (x, y or z)
-    Eigen::Matrix<double, dim, 1> sni;
-    //! local grad shape function in current plane (x, y or z)
-    Eigen::Matrix<double, dim, 1> dni;
-    //! loop to iterate over dimensions
-    for (unsigned i = 0; i < dim; ++i) {
-      double ni = local_nodes(n, i);
-      double npni = xi(i) - ni;  // local particle  - local node
-      //! Conditional shape function statement see: Bardenhagen 2004
-      if (npni <= (-element_length - particle_size(i))) {
-        sni(i) = 0.;
-        dni(i) = 0.;
-      } else if ((-element_length - particle_size(i)) < npni &&
-                 npni <= (-element_length + particle_size(i))) {
+  Eigen::Matrix<double, Tnfunctions, Tdim> grad_shapefn;
+  try {
+    //! loop to iterate over nodes
+    for (unsigned n = 0; n < Tnfunctions; ++n) {
+      //! local shape function in current plane (x, y or z)
+      Eigen::Matrix<double, Tdim, 1> sni;
+      //! local grad shape function in current plane (x, y or z)
+      Eigen::Matrix<double, Tdim, 1> dni;
+      //! loop to iterate over dimensions
+      for (unsigned i = 0; i < Tdim; ++i) {
+        double ni = local_nodes(n, i);
+        double npni = xi(i) - ni;  // local particle  - local node
+        //! Conditional shape function statement see: Bardenhagen 2004
+        if (npni <= (-element_length - particle_size(i))) {
+          sni(i) = 0.;
+          dni(i) = 0.;
+        } else if ((-element_length - particle_size(i)) < npni &&
+                   npni <= (-element_length + particle_size(i))) {
 
-        sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
-                 (4. * (element_length * particle_size(i)));
-        dni(i) = (element_length + particle_size(i) + npni) /
-                 (2. * element_length * particle_size(i));
-      } else if ((-element_length + particle_size(i)) < npni &&
-                 npni <= -particle_size(i)) {
-        sni(i) = 1. + (npni / element_length);
-        dni(i) = 1. / element_length;
-      } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
-        sni(i) = 1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                       (2. * element_length * particle_size(i)));
-        dni(i) = -(npni / (element_length * particle_size(i)));
-      } else if (particle_size(i) < npni &&
-                 npni <= element_length - particle_size(i)) {
-        sni(i) = 1. - (npni / element_length);
-        dni(i) = -(1. / element_length);
-      } else if ((element_length - particle_size(i)) < npni &&
-                 npni <= element_length + particle_size(i)) {
-        sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
-                 (4. * element_length * particle_size(i));
-        dni(i) = -((element_length + particle_size(i) - npni) /
-                   (2. * element_length * particle_size(i)));
-      } else  // if ((element_length + particle_size(i)) < npni)
-      {
-        sni(i) = 0.;
-        dni(i) = 0.;
+          sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
+                   (4. * (element_length * particle_size(i)));
+          dni(i) = (element_length + particle_size(i) + npni) /
+                   (2. * element_length * particle_size(i));
+        } else if ((-element_length + particle_size(i)) < npni &&
+                   npni <= -particle_size(i)) {
+          sni(i) = 1. + (npni / element_length);
+          dni(i) = 1. / element_length;
+        } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
+          sni(i) =
+              1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
+                    (2. * element_length * particle_size(i)));
+          dni(i) = -(npni / (element_length * particle_size(i)));
+        } else if (particle_size(i) < npni &&
+                   npni <= (element_length - particle_size(i))) {
+          sni(i) = 1. - (npni / element_length);
+          dni(i) = -(1. / element_length);
+        } else if ((element_length - particle_size(i)) < npni &&
+                   npni <= (element_length + particle_size(i))) {
+          sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
+                   (4. * element_length * particle_size(i));
+          dni(i) = -((element_length + particle_size(i) - npni) /
+                     (2. * element_length * particle_size(i)));
+        } else if ((element_length + particle_size(i)) < npni) {
+          sni(i) = 0.;
+          dni(i) = 0.;
+        } else {
+          throw std::runtime_error(
+              "GIMP grad shapefn: Point location outside area of influence");
+        }
       }
+      grad_shapefn(n, 0) = dni(0) * sni(1);
+      grad_shapefn(n, 1) = dni(1) * sni(0);  // find ref for this (review paper)
     }
-    grad_shapefn(n, 0) = dni(0) * sni(1);
-    grad_shapefn(n, 1) = dni(1) * sni(0);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    return grad_shapefn;
   }
   return grad_shapefn;
 }
