@@ -2123,7 +2123,7 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
     SECTION("Quadrilateral element volume") {
       // Check element volume
-      REQUIRE(quad->unit_element_volume() == 4);
+      REQUIRE(quad->unit_element_volume() == Approx(4).epsilon(Tolerance));
     }
   }
 }
