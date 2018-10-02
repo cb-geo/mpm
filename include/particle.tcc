@@ -211,8 +211,14 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Volume of the cell / # of particles
-      this->assign_volume(cell_->volume() / cell_->nparticles());
+      // Check if volume has been initialized
+      if (this->volume_ != std::numeric_limits<double>::max()) {
+        // new volume = current volume * (1 + dvolumetric strain)
+        this->assign_volume(this->volume_ * (1 + (this->dstrain_.head(3)).sum()));
+      } else {
+        // Volume of the cell / # of particles
+        this->assign_volume(cell_->volume() / cell_->nparticles());   
+      } 
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
