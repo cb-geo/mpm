@@ -45,6 +45,7 @@ class Factory {
   }
 
   //! Check if an element is registered
+  //! \param[in] item Item to be checked in registry
   //! \retval status Return true if element is registered or false otherwise
   bool check(const std::string& item) const {
     bool status = false;
