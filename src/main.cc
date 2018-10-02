@@ -16,8 +16,14 @@ int main(int argc, char** argv) {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
-    // Get analysis
+    // Get analysis type
     const std::string analysis = io->analysis_type();
+
+    // Check if the specified analysis type is valid
+    auto analyses =
+        Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->list();
+    if (std::find(analyses.begin(), analyses.end(), analysis) == analyses.end())
+      throw std::runtime_error("Specified MPM analysis type is invalid.");
 
     // Create an MPM analysis
     auto mpm =
