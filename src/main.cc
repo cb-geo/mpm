@@ -19,11 +19,6 @@ int main(int argc, char** argv) {
     // Get analysis type
     const std::string analysis = io->analysis_type();
 
-    // Check if the specified analysis type is valid
-    if (!Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->check(
-            analysis))
-      throw std::runtime_error("Specified MPM analysis type is invalid.");
-
     // Create an MPM analysis
     auto mpm =
         Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(

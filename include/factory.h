@@ -32,6 +32,9 @@ class Factory {
   //! \param[in] args Variadic template arguments
   //! \retval shared_ptr<Tbaseclass> Shared pointer to a base class
   std::shared_ptr<Tbaseclass> create(const std::string& key, Targs&&... args) {
+    if (!this->check(key))
+      throw std::runtime_error("Invalid key: " + key +
+                               ", not found in the factory register!");
     return registry.at(key)->create(std::forward<Targs>(args)...);
   }
 
