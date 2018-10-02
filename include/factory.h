@@ -38,22 +38,13 @@ class Factory {
     return registry.at(key)->create(std::forward<Targs>(args)...);
   }
 
-  //! List registered elements
-  //! \retval factory_items Return list of items in the registry
-  std::vector<std::string> list() const {
-    std::vector<std::string> factory_items;
-    for (const auto& keyvalue : registry)
-      factory_items.push_back(keyvalue.first);
-    return factory_items;
-  }
-
   //! Check if an element is registered
-  //! \param[in] item Item to be checked in registry
-  //! \retval status Return true if element is registered or false otherwise
-  bool check(const std::string& item) const {
+  //! \param[in] key Key to be checked in registry
+  //! \retval status Return if key is in registry or not
+  bool check(const std::string& key) const {
     bool status = false;
     for (const auto& keyvalue : registry)
-      if (keyvalue.first == item) status = true;
+      if (keyvalue.first == key) status = true;
     return status;
   }
 
