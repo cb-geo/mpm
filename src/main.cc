@@ -20,9 +20,8 @@ int main(int argc, char** argv) {
     const std::string analysis = io->analysis_type();
 
     // Check if the specified analysis type is valid
-    auto analyses =
-        Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->list();
-    if (std::find(analyses.begin(), analyses.end(), analysis) == analyses.end())
+    if (!Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->check(
+            analysis))
       throw std::runtime_error("Specified MPM analysis type is invalid.");
 
     // Create an MPM analysis
