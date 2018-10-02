@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
-    // Get analysis
+    // Get analysis type
     const std::string analysis = io->analysis_type();
 
     // Create an MPM analysis
