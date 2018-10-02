@@ -44,6 +44,15 @@ class Factory {
     return factory_items;
   }
 
+  //! Check if an element is registered
+  //! \retval status Return true if element is registered or false otherwise
+  bool check(const std::string& item) const {
+    bool status = false;
+    for (const auto& keyvalue : registry)
+      if (keyvalue.first == item) status = true;
+    return status;
+  }
+
  private:
   // Private constructor
   Factory() = default;
