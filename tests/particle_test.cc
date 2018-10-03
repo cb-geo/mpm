@@ -669,6 +669,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check traction force
     double traction = 7.68;
     const unsigned direction = 1;
+    // TODO: Remove this and compute the forces properly
     // Assign volume
     particle->assign_volume(2.0);
     // Assign traction to particle
@@ -713,6 +714,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // clang-format on
 
     // Map particle internal force
+    // TODO: Remove this and compute the forces properly
+    particle->assign_volume(1.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
@@ -1513,6 +1516,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     double traction = 7.68;
     const unsigned direction = 2;
     // Assign volume
+    // TODO: Remove this and compute the forces properly
     particle->assign_volume(2.0);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
@@ -1564,6 +1568,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // clang-format on
 
     // Map particle internal force
+    // TODO: Remove this and compute the forces properly
+    particle->assign_volume(8.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
