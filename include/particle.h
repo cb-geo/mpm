@@ -235,6 +235,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd shapefn_;
   //! B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix_;
+  //! Density correction because of volume change
+  double density_correction_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Particle class

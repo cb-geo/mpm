@@ -208,11 +208,24 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(double volume) {
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume() {
   bool status = true;
+  // Assume one phase only for now
+  const unsigned phase = 0;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Volume of the cell / # of particles
-      this->assign_volume(cell_->volume() / cell_->nparticles());
+      // Check if volume has been initialized
+      if (this->volume_ != std::numeric_limits<double>::max()) {
+        // new volume = current volume * (1 + dvolumetric strain)
+        this->assign_volume(this->volume_ *
+                            (1 + (this->dstrain_.head(3)).sum()));
+        // density correction = current density / density from material
+        density_correction_ =
+            mass_(phase) / volume_ / material_->property("density");
+      } else {
+        // Volume of the cell / # of particles
+        this->assign_volume(cell_->volume() / cell_->nparticles());
+        density_correction_ = 1;
+      }
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -233,7 +246,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     // Check if particle volume is set and material ptr is valid
     if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
       // Mass = volume of particle * density
-      this->mass_(phase) = volume_ * material_->property("density");
+      this->mass_(phase) =
+          volume_ * material_->property("density") * density_correction_;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! or material is invalid"
