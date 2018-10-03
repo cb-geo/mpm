@@ -67,16 +67,19 @@ To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TY
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
 ```
-./mpm  -a <analysis> [-i <input_file>] -f <working_dir> [--] [--version]
+./mpm  -f <working_dir> [-i <input_file>] [--] [--version]
        [-h]
+```
+
+For example:
+
+```
+./mpm -f ./mpm/3d-landslide/ -i mpm-usf-3d.json
 ```
 
 Where:
 
 ```
-   -a <analysis>,  --analysis <analysis>
-     (required)  MPM analysis 
-     (MPMExplicitUSF3D / MPMExplicitUSF2D / MPMExplicitUSL3D / MPMExplicitUSL2D)
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]
