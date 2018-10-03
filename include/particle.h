@@ -90,6 +90,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
 
+  //! Update volume based on centre volumetric strain rate
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_volume_strainrate(unsigned phase, double dt) override;
+
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
   bool compute_mass(unsigned phase) override;
@@ -227,6 +232,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tnphases, 1> volumetric_strain_centroid_;
   //! Strain rate
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
+  //! Strain rate centroid
+  Eigen::Matrix<double, 6, Tnphases> strain_rate_centroid_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
