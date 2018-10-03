@@ -477,7 +477,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
     particle_data[i].id = (*pitr)->id();
     particle_data[i].mass = (*pitr)->mass(phase);
-    particle_data[i].volume = (*pitr)->volume();
+    particle_data[i].volume = (*pitr)->volume(phase);
 
     particle_data[i].coord_x = coordinates[0];
     particle_data[i].coord_y = coordinates[1];
