@@ -129,9 +129,9 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(status == false);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 0;
@@ -471,7 +471,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute updated particle location from nodal velocity should fail
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume() == false);
+    REQUIRE(particle->compute_volume(Phase) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -484,13 +484,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(1.0).epsilon(Tolerance));
 
     // Check reference location
     coords << -0.5, -0.5;
@@ -524,7 +524,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
 
     // Compute mass
     REQUIRE(particle->compute_mass(phase) == true);
@@ -671,7 +671,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     const unsigned direction = 1;
     // TODO: Remove this and compute the forces properly
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
     // Map traction force
@@ -715,7 +715,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Map particle internal force
     // TODO: Remove this and compute the forces properly
-    particle->assign_volume(1.0);
+    particle->assign_volume(Phase, 1.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
@@ -866,9 +866,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(status == false);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 1;
@@ -1293,7 +1293,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute updated particle location from nodal velocity should fail
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume() == false);
+    REQUIRE(particle->compute_volume(Phase) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1306,13 +1306,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(8.0).epsilon(Tolerance));
 
     // Check reference location
     coords << 0.5, 0.5, 0.5;
@@ -1346,7 +1346,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
 
     // Compute mass
     REQUIRE(particle->compute_mass(phase) == true);
@@ -1517,7 +1517,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     const unsigned direction = 2;
     // Assign volume
     // TODO: Remove this and compute the forces properly
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
     // Map traction force
@@ -1569,7 +1569,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Map particle internal force
     // TODO: Remove this and compute the forces properly
-    particle->assign_volume(8.0);
+    particle->assign_volume(Phase, 8.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
@@ -1727,9 +1727,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(status == false);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 1;
