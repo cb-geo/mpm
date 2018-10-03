@@ -74,7 +74,7 @@ The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm c
 For example:
 
 ```
-./mpm -f ./mpm/3d-landslide/ -i mpm-usf-3d.json
+./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json
 ```
 
 Where:
