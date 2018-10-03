@@ -37,7 +37,7 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 
   // Compute volume
   meshes_.at(0)->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
+      &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1, phase));
 
   // Compute mass
   meshes_.at(0)->iterate_over_particles(std::bind(
