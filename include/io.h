@@ -34,7 +34,9 @@ class IO {
   bool check_file(const std::string& file_name);
 
   //! Return analysis
-  std::string analysis_type() const { return analysis_; }
+  std::string analysis_type() const {
+    return json_["analysis"]["type"].template get<std::string>();
+  }
 
   //! Return json analysis object
   Json analysis() const { return json_["analysis"]; }
@@ -67,8 +69,6 @@ class IO {
   std::string input_file_{"mpm.json"};
   //! Input JSON object
   Json json_;
-  //! Analysis
-  std::string analysis_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
 };
