@@ -173,8 +173,6 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
-  //! Volume
-  double volume_{std::numeric_limits<double>::max()};
   //! Reference coordinates (in a cell)
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
