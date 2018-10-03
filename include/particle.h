@@ -78,12 +78,16 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] volume Volume of particle for the phase
   void assign_volume(unsigned phase, double volume) override;
 
   //! Return volume
+  //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
   //! Compute volume as cell volume / nparticles
+  //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
 
   //! Compute mass as volume * density
