@@ -1,7 +1,6 @@
 #ifndef MPM_MATERIAL_BINGHAM_H_
 #define MPM_MATERIAL_BINGHAM_H_
 
-#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
