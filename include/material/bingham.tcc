@@ -75,14 +75,15 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // D_1^2 + D_2^2 + 2*D_3^2 + 2*D_4^2 + 2*D_5^2 Yielding is defined: rate of
   // shear > critical_shear_rate_^2 Checking yielding from strain rate vs
   // critical yielding shear rate
-  const double shear_rate_squared =
-      2 * (strain_rate.dot(strain_rate) +
-           strain_rate.tail(3).dot(strain_rate.tail(3)));
+  double shear_rate =
+      std::sqrt(2 * (strain_rate.dot(strain_rate) +
+                     strain_rate.tail(3).dot(strain_rate.tail(3))));
+  if (shear_rate < shear_rate_threshold) shear_rate = shear_rate_threshold;
 
   // Apparent_viscosity maps shear rate to shear stress
   double apparent_viscosity = 0;
-  if (shear_rate_squared > critical_shear_rate_ * critical_shear_rate_)
-    apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate_squared))) + mu_);
+  if (shear_rate * shear_rate > critical_shear_rate_ * critical_shear_rate_)
+    apparent_viscosity = 2 * ((tau0_ / shear_rate) + mu_);
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
