@@ -471,7 +471,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute updated particle location from nodal velocity should fail
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume(Phase) == false);
+    REQUIRE(particle->compute_volume(phase) == false);
+    // Update volume should fail
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -627,6 +629,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     const double volumetric_strain = 0.8;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Update volume strain rate
+    REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->volume(phase) == Approx(1.8).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -1293,7 +1300,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute updated particle location from nodal velocity should fail
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume(Phase) == false);
+    REQUIRE(particle->compute_volume(phase) == false);
+    // Update volume should fail
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1469,6 +1478,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     const double volumetric_strain = 4.;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Update volume strain rate
+    REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->volume(phase) == Approx(40.0).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
