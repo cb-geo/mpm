@@ -105,6 +105,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, phase, this->dt_));
 
+    // Iterate over each particle to update particle volume
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                  std::placeholders::_1, phase, this->dt_));
+
     // Locate particles
     auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
 
