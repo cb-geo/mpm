@@ -81,10 +81,10 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // Apparent_viscosity maps shear rate to shear stress
   // Check if shear rate is 0
-  double apparent_viscosity = 0;
+  double apparent_viscosity = 0.;
   if (shear_rate * shear_rate > critical_shear_rate_ * critical_shear_rate_) {
     if (shear_rate < shear_rate_threshold) shear_rate = shear_rate_threshold;
-    apparent_viscosity = 2 * ((tau0_ / shear_rate) + mu_);
+    apparent_viscosity = 2. * ((tau0_ / shear_rate) + mu_);
   }
 
   // Compute shear change to volumetric
