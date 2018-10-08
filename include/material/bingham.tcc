@@ -76,7 +76,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // shear > critical_shear_rate_^2 Checking yielding from strain rate vs
   // critical yielding shear rate
   double shear_rate =
-      std::sqrt(2 * (strain_rate.dot(strain_rate) +
+      std::sqrt(2. * (strain_rate.dot(strain_rate) +
                      strain_rate.tail(3).dot(strain_rate.tail(3))));
 
   // Apparent_viscosity maps shear rate to shear stress
