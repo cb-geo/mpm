@@ -169,6 +169,11 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
+  //! Assign particles stresses
+  //! \param[in] particle_stresses Initial stresses of particle
+  bool assign_particles_stresses(
+      const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses);
+
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }

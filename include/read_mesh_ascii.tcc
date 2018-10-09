@@ -54,8 +54,10 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read mesh nodes: {}", exception.what());
+    file.close();
   }
 
   return coordinates;
@@ -121,8 +123,10 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read mesh cells: {}", exception.what());
+    file.close();
   }
 
   return cells;
@@ -163,11 +167,56 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read particle coordinates: {}", exception.what());
+    file.close();
   }
 
   return coordinates;
+}
+
+//! Return stresses of particles
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 6, 1>>
+    mpm::ReadMeshAscii<Tdim>::read_particles_stresses(
+        const std::string& particles_stresses) {
+
+  // Nodal stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> stresses;
+  stresses.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(particles_stresses.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          // Stresses
+          Eigen::Matrix<double, 6, 1> stress;
+          while (istream.good()) {
+            // Read to stress
+            for (unsigned i = 0; i < stress.size(); ++i) istream >> stress[i];
+            break;
+          }
+          stresses.emplace_back(stress);
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read particle stresses: {}", exception.what());
+    file.close();
+  }
+  return stresses;
 }
 
 //! Return velocity constraints of particles
@@ -208,8 +257,10 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read velocity constraints: {}", exception.what());
+    file.close();
   }
   return constraints;
 }
@@ -252,8 +303,10 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read traction : {}", exception.what());
+    file.close();
   }
   return tractions;
 }
