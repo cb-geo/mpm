@@ -78,13 +78,22 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
-  void assign_volume(double volume) override;
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] volume Volume of particle for the phase
+  void assign_volume(unsigned phase, double volume) override;
 
   //! Return volume
-  double volume() const override { return volume_; }
+  //! \param[in] phase Index corresponding to the phase
+  double volume(unsigned phase) const override { return volume_(phase); }
 
   //! Compute volume as cell volume / nparticles
-  bool compute_volume() override;
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_volume(unsigned phase) override;
+
+  //! Update volume based on centre volumetric strain rate
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_volume_strainrate(unsigned phase, double dt) override;
 
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
@@ -99,12 +108,12 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
   void assign_mass(unsigned phase, double mass) override {
-    mass_(0, phase) = mass;
+    mass_(phase) = mass;
   }
 
   //! Return mass of the particlesx
   //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const override { return mass_(0, phase); }
+  double mass(unsigned phase) const override { return mass_(phase); }
 
   //! Assign material
   //! \param[in] material Pointer to a material
@@ -207,12 +216,12 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Volume
-  using ParticleBase<Tdim>::volume_;
   //! Material
   using ParticleBase<Tdim>::material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Volume
+  Eigen::Matrix<double, 1, Tnphases> volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Stresses

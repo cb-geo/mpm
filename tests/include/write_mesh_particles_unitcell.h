@@ -5,7 +5,8 @@
 namespace mpm_test {
 
 // Write JSON Configuration file
-bool write_json_unitcell(unsigned dim, const std::string& file_name);
+bool write_json_unitcell(unsigned dim, const std::string& analysis,
+                         const std::string& file_name);
 
 // Write Mesh file in 2D
 bool write_mesh_2d_unitcell();
