@@ -91,6 +91,23 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
   }
 
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -404,6 +421,23 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Remove assigned cell
     particle->remove_cell();
     REQUIRE(particle->assign_cell(cell) == true);
+  }
+
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
   //! Test particle, cell and node functions
@@ -1204,6 +1238,23 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Remove assigned cell
     particle->remove_cell();
     REQUIRE(particle->assign_cell(cell) == true);
+  }
+
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
   //! Test particle, cell and node functions
