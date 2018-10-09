@@ -58,6 +58,12 @@ class ReadMesh {
   virtual std::vector<VectorDim> read_particles(
       const std::string& particles_file) = 0;
 
+  //! Read particle stresses
+  //! \param[in] particles_stresses file name with particle stresses
+  //! \retval stresses Vector of particle stresses
+  virtual std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
+      const std::string& particles_stresses) = 0;
+
   //! Read velocity constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>

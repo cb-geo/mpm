@@ -132,6 +132,10 @@ class ParticleBase {
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid(unsigned phase) const = 0;
 
+  //! Initial stress
+  virtual void initial_stress(unsigned phase,
+                              const Eigen::Matrix<double, 6, 1>&) = 0;
+
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
 
