@@ -145,6 +145,16 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
             "Particles tractions are not properly assigned");
     }
 
+    // Read and assign particles stresses
+    if (!io_->file_name("particles_stresses").empty()) {
+      bool particles_stresses = meshes_.at(0)->assign_particles_stresses(
+          mesh_reader->read_particles_stresses(
+              io_->file_name("particles_stresses")));
+      if (!particles_stresses)
+        throw std::runtime_error(
+            "Particles stresses are not properly assigned");
+    }
+
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
                     exception.what());
