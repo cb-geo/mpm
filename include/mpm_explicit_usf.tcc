@@ -35,6 +35,14 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
+  // Compute volume
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1, phase));
+
+  // Compute mass
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
   // Test if checkpoint resume is needed
   bool resume = false;
   if (analysis_.find("resume") != analysis_.end())
@@ -55,13 +63,6 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
 
-    // Compute volume
-    meshes_.at(0)->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
-
-    // Compute mass
-    meshes_.at(0)->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
     // Assign mass and momentum to nodes
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -102,6 +103,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     // Iterate over each particle to compute updated position
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                  std::placeholders::_1, phase, this->dt_));
+
+    // Iterate over each particle to update particle volume
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
                   std::placeholders::_1, phase, this->dt_));
 
     // Locate particles

@@ -3,7 +3,8 @@
 namespace mpm_test {
 
 // Write JSON Configuration file
-bool write_json_unitcell(unsigned dim, const std::string& file_name) {
+bool write_json_unitcell(unsigned dim, const std::string& analysis,
+                         const std::string& file_name) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -53,7 +54,8 @@ bool write_json_unitcell(unsigned dim, const std::string& file_name) {
          {"youngs_modulus", 1.5E+6},
          {"poisson_ratio", 0.25}}}},
       {"analysis",
-       {{"dt", 0.001},
+       {{"type", analysis},
+        {"dt", 0.001},
         {"nsteps", 10},
         {"gravity", gravity},
         {"boundary_friction", 0.5},
