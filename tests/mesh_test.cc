@@ -603,6 +603,44 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
             }
+
+            // Test assign particles stresses
+            SECTION("Check assign particles stresses") {
+              // Vector of particle stresses
+              std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+              REQUIRE(mesh->nparticles() == 8);
+
+              // Stresses
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.0));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.1));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.2));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.3));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.4));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.5));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.6));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.7));
+
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      true);
+              // When stresses fail
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.8));
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      false);
+              unsigned id = 1;
+              auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(id);
+              REQUIRE(mesh_fail->assign_particles_stresses(
+                          particles_stresses) == false);
+            }
           }
         }
         // Test assign velocity constraints to nodes
@@ -1256,6 +1294,60 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign particles stresses
+            SECTION("Check assign particles stresses") {
+              // Vector of particle stresses
+              std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              // Stresses
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.0));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.1));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.2));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.4));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.3));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.5));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.6));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.7));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.8));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.9));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.10));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.11));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.12));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.13));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.14));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.15));
+
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      true);
+              // When stresses fail
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.16));
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      false);
+              unsigned id = 1;
+              auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(id);
+              REQUIRE(mesh_fail->assign_particles_stresses(
+                          particles_stresses) == false);
             }
           }
         }

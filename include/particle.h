@@ -144,6 +144,14 @@ class Particle : public ParticleBase<Tdim> {
     return volumetric_strain_centroid_(phase);
   }
 
+  //! Initial stress
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] stress Initial sress corresponding to the phase
+  virtual void initial_stress(
+      unsigned phase, const Eigen::Matrix<double, 6, 1>& stress) override {
+    this->stress_.col(phase) = stress;
+  }
+
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
