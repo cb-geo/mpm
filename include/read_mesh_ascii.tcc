@@ -54,8 +54,10 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read mesh nodes: {}", exception.what());
+    file.close();
   }
 
   return coordinates;
@@ -121,8 +123,10 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read mesh cells: {}", exception.what());
+    file.close();
   }
 
   return cells;
@@ -163,8 +167,10 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read particle coordinates: {}", exception.what());
+    file.close();
   }
 
   return coordinates;
@@ -208,8 +214,10 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read velocity constraints: {}", exception.what());
+    file.close();
   }
   return constraints;
 }
@@ -252,8 +260,10 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
         }
       }
     }
+    file.close();
   } catch (std::exception& exception) {
     console_->error("Read traction : {}", exception.what());
+    file.close();
   }
   return tractions;
 }
