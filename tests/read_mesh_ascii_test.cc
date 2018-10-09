@@ -313,7 +313,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Dump initial stresses as an input file to be read
     std::ofstream file;
-    file.open("stresses-2d.txt");
+    file.open("particle-stresses-2d.txt");
     // Write particle coordinates
     for (const auto& stress : particles_stresses) {
       for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
@@ -334,7 +334,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       REQUIRE(stresses.size() == 0);
 
       // Check stresses
-      stresses = read_mesh->read_particles_stresses("stresses-2d.txt");
+      stresses = read_mesh->read_particles_stresses("particle-stresses-2d.txt");
       // Check number of particles
       REQUIRE(stresses.size() == particles_stresses.size());
 
@@ -699,7 +699,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Dump initial stresses as an input file to be read
     std::ofstream file;
-    file.open("stresses-3d.txt");
+    file.open("particle-stresses-3d.txt");
     // Write particle coordinates
     for (const auto& stress : particles_stresses) {
       for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
@@ -720,7 +720,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       REQUIRE(stresses.size() == 0);
 
       // Check stresses
-      stresses = read_mesh->read_particles_stresses("stresses-3d.txt");
+      stresses = read_mesh->read_particles_stresses("particle-stresses-3d.txt");
       // Check number of particles
       REQUIRE(stresses.size() == particles_stresses.size());
 
