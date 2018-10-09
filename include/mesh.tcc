@@ -404,6 +404,34 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
   return status;
 }
 
+//! Assign particle stresses
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_stresses(
+    const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign stresses");
+
+    if (particles_.size() != particle_stresses.size())
+      throw std::runtime_error(
+          "Number of particles in mesh and initial stresses don't match");
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      (*pitr)->initial_stress(phase, particle_stresses.at(i));
+      ++i;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign velocity constraints to cells
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
