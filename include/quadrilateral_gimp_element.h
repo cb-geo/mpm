@@ -52,6 +52,9 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
+  //! Return number of shape functions
+  unsigned nfunctions() const override { return Tnfunctions; }
+
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size

@@ -849,8 +849,23 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> xi_centroid;
   xi_centroid.setZero();
 
-  // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+  //! B-Matrix
+  std::vector<Eigen::MatrixXd> bmatrix;
+
+  if (element_->shapefn_type() == mpm::ShapefnType::GIMP) {
+    // Compute bmatrix for GIMP
+    bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates(),
+                                Eigen::Matrix<double, Tdim, 1>::Zero(),
+                                Eigen::Matrix<double, Tdim, 1>::Zero());
+  } else if (element_->shapefn_type() == mpm::ShapefnType::CPDI) {
+    //! Compute CPDI bmatrix
+    bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates(),
+                                Eigen::Matrix<double, Tdim, 1>::Zero(),
+                                Eigen::Matrix<double, Tdim, 1>::Zero());
+  } else {
+    // Get B-Matrix at the centroid
+    bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+  }
 
   // Define strain rate at centroid
   Eigen::VectorXd strain_rate_centroid;
