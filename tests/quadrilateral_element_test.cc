@@ -23,7 +23,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Four noded quadrilateral element for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -34,7 +35,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(3) == Approx(0.25).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -52,7 +54,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Four noded quadrilateral element for coordinates(-1, -1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -63,7 +66,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(3) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -81,7 +85,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Four noded quadrilateral element for coordinates(1,1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -92,7 +97,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(3) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -162,7 +168,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get Jacobian
-      auto jac = quad->jacobian(xi, coords);
+      auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -210,78 +217,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     }
 
     // Coordinates is (0,0)
-    SECTION("Four noded quadrilateral B-matrix for coordinates(0,0)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords.setZero();
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0.5,0.5)
-    SECTION("Four noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << 0.5, 0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (-0.5,-0.5)
-    SECTION("Four noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << -0.5, -0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0,0)
     SECTION("Four noded quadrilateral B-matrix cell for coordinates(0,0)") {
       // Reference coordinates
       Eigen::Matrix<double, Dim, 1> xi;
@@ -297,10 +232,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -332,10 +269,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -368,10 +307,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -439,8 +380,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
-      auto jacobian = quad->jacobian(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
+      auto jacobian = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                     Eigen::Vector2d::Zero());
     }
 
     // Mass matrix of a cell
@@ -639,7 +582,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Eight noded quadrilateral element for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -654,7 +598,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(7) == Approx(0.5).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -681,7 +626,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Eight noded quadrilateral element for coordinates(-1,-1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -696,7 +642,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -725,7 +672,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Eight noded quadrilateral element for coordinates(1, 1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -740,7 +688,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -836,7 +785,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get Jacobian
-      auto jac = quad->jacobian(xi, coords);
+      auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -889,78 +839,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     }
 
     // Coordinates is (0,0)
-    SECTION("Eight noded quadrilateral B-matrix for coordinates(0,0)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords.setZero();
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0.5,0.5)
-    SECTION("Eight noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << 0.5, 0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (-0.5,-0.5)
-    SECTION("Eight noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << -0.5, -0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0,0)
     SECTION("Eight noded quadrilateral B-matrix cell for coordinates(0,0)") {
       // Reference coordinates
       Eigen::Matrix<double, Dim, 1> xi;
@@ -980,10 +858,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -1020,10 +900,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -1060,10 +942,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -1134,8 +1018,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
-      auto jacobian = quad->jacobian(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
+      auto jacobian = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                     Eigen::Vector2d::Zero());
     }
 
     // Mass matrix of a cell
@@ -1373,7 +1259,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Nine noded quadrilateral element for coordinates(0,0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1389,7 +1276,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(8) == Approx(1.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1418,7 +1306,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Nine noded quadrilateral element for coordinates(-1,-1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1434,7 +1323,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(8) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1463,7 +1353,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     SECTION("Nine noded quadrilateral element for coordinates(1, 1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1.;
-      auto shapefn = quad->shapefn(coords);
+      auto shapefn = quad->shapefn(coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1479,7 +1370,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(shapefn(8) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
+      auto gradsf = quad->grad_shapefn(coords, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1551,54 +1443,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(gradsf(6, 1) == Approx(0.5).epsilon(Tolerance));
       REQUIRE(gradsf(7, 1) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
-    }
-
-    // Coordinates is (0,0)
-    SECTION("Nine noded quadrilateral B-matrix for coordinates(0,0)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords.setZero();
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0.5,0.5)
-    SECTION("Nine noded quadrilateral B-matrix for coordinates(0.5,0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << 0.5, 0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
     }
 
     // Mass matrix of a cell
@@ -1764,7 +1608,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get Jacobian
-      auto jac = quad->jacobian(xi, coords);
+      auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -1817,30 +1662,6 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
           REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
     }
 
-    // Coordinates is (-0.5,-0.5)
-    SECTION("Nine noded quadrilateral B-matrix for coordinates(-0.5,-0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << -0.5, -0.5;
-
-      // Get B-Matrix
-      auto bmatrix = quad->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
     // Coordinates is (0,0)
     SECTION("Nine noded quadrilateral B-matrix cell for coordinates(0,0)") {
       // Reference coordinates
@@ -1862,10 +1683,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -1902,10 +1725,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -1943,10 +1768,12 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = quad->grad_shapefn(xi);
+      auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
+                                       Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -2017,8 +1844,10 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = quad->bmatrix(xi, coords);
-      auto jacobian = quad->jacobian(xi, coords);
+      auto bmatrix = quad->bmatrix(xi, coords, Eigen::Vector2d::Zero(),
+                                   Eigen::Vector2d::Zero());
+      auto jacobian = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
+                                     Eigen::Vector2d::Zero());
     }
 
     SECTION("Nine noded quadrilateral coordinates of unit cell") {

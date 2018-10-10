@@ -179,9 +179,12 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       const auto element = cell_->element_ptr();
 
       // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_);
+      shapefn_ = element->shapefn(this->xi_, this->size_,
+                                  Eigen::Matrix<double, Tdim, 1>::Zero());
       // Compute bmatrix of the particle for reference cell
-      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates());
+      bmatrix_ =
+          element->bmatrix(this->xi_, cell_->nodal_coordinates(), this->size_,
+                           Eigen::Matrix<double, Tdim, 1>::Zero());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

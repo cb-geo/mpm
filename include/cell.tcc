@@ -638,7 +638,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Shape function
-    const auto sf = element_->shapefn(xi);
+    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                      Eigen::Matrix<double, 2, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
@@ -655,10 +656,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian(xi, unit_cell);
+    Eigen::Matrix<double, 2, 2> jacobian =
+        element_->jacobian(xi, unit_cell, Eigen::Matrix<double, 2, 1>::Zero(),
+                           Eigen::Matrix<double, 2, 1>::Zero());
 
     // Shape function
-    const auto sf = element_->shapefn(xi);
+    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                      Eigen::Matrix<double, 2, 1>::Zero());
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
@@ -726,7 +730,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Shape function
-    const auto sf = element_->shapefn(xi);
+    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                      Eigen::Matrix<double, 3, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
@@ -742,10 +747,13 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
     // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian(xi, unit_cell);
+    Eigen::Matrix<double, 3, 3> jacobian =
+        element_->jacobian(xi, unit_cell, Eigen::Matrix<double, 3, 1>::Zero(),
+                           Eigen::Matrix<double, 3, 1>::Zero());
 
     // Shape function
-    const auto sf = element_->shapefn(xi);
+    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                      Eigen::Matrix<double, 3, 1>::Zero());
 
     // Residual f(x)
     Eigen::Matrix<double, 3, 1> residual;
@@ -850,7 +858,9 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   xi_centroid.setZero();
 
   // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates(),
+                                   Eigen::Matrix<double, Tdim, 1>::Zero(),
+                                   Eigen::Matrix<double, Tdim, 1>::Zero());
 
   // Define strain rate at centroid
   Eigen::VectorXd strain_rate_centroid;

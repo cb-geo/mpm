@@ -125,21 +125,11 @@ class HexahedronElement : public Element<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
-
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
   Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
                           const VectorDim& deformation_gradient) const override;
-
-  //! Evaluate gradient of shape functions
-  //! \param[in] xi given local coordinates
-  //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
@@ -153,14 +143,6 @@ class HexahedronElement : public Element<Tdim> {
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const Eigen::Matrix<double, 3, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
-
-  //! Compute Jacobian
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
@@ -169,19 +151,6 @@ class HexahedronElement : public Element<Tdim> {
       const Eigen::MatrixXd& nodal_coordinates,
       const Eigen::Matrix<double, 3, 1>& particle_size,
       const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
-
-  //! Evaluate B matrix at given local coordinates
-  //! \param[in] xi given local coordinates
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
-
-  //! Evaluate the B matrix at given local coordinates for a real cell
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(
-      const VectorDim& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
