@@ -7,10 +7,12 @@
 //! 0 0----------0 1
 
 //! Return shape functions of a 4-node Quadrilateral Element at a given local
-//! coordinate
+//! coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralElement<2, 4>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 4, 1> shapefn;
   shapefn(0) = 0.25 * (1 - xi(0)) * (1 - xi(1));
   shapefn(1) = 0.25 * (1 + xi(0)) * (1 - xi(1));
@@ -20,10 +22,12 @@ inline Eigen::VectorXd mpm::QuadrilateralElement<2, 4>::shapefn(
 }
 
 //! Return gradient of shape functions of a 4-node Quadrilateral Element at a
-//! given local coordinate
+//! given local coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 4>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 4, 2> grad_shapefn;
   grad_shapefn(0, 0) = -0.25 * (1 - xi(1));
   grad_shapefn(1, 0) = 0.25 * (1 - xi(1));
@@ -65,10 +69,12 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 4>::unit_cell_coordinates()
 //! 0       4       1
 
 //! Return shape functions of a 8-node Quadrilateral Element at a given local
-//! coordinate
+//! coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralElement<2, 8>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 8, 1> shapefn;
   shapefn(0) = -0.25 * (1. - xi(0)) * (1. - xi(1)) * (xi(0) + xi(1) + 1.);
   shapefn(1) = 0.25 * (1. + xi(0)) * (1. - xi(1)) * (xi(0) - xi(1) - 1.);
@@ -82,10 +88,12 @@ inline Eigen::VectorXd mpm::QuadrilateralElement<2, 8>::shapefn(
 }
 
 //! Return gradient of shape functions of a 8-node Quadrilateral Element at a
-//! given local coordinate
+//! given local coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 8>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 8, 2> grad_shapefn;
   grad_shapefn(0, 0) = 0.25 * (2. * xi(0) + xi(1)) * (1. - xi(1));
   grad_shapefn(1, 0) = 0.25 * (2. * xi(0) - xi(1)) * (1. - xi(1));
@@ -138,10 +146,12 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 8>::unit_cell_coordinates()
 //!  0      4       1
 
 //! Return shape functions of a 9-node Quadrilateral Element at a given local
-//! coordinate
+//! coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::VectorXd mpm::QuadrilateralElement<2, 9>::shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 9, 1> shapefn;
 
   shapefn(0) = 0.25 * xi(0) * xi(1) * (xi(0) - 1.) * (xi(1) - 1.);
@@ -158,10 +168,12 @@ inline Eigen::VectorXd mpm::QuadrilateralElement<2, 9>::shapefn(
 }
 
 //! Return gradient of shape functions of a 9-node Quadrilateral Element at a
-//! given local coordinate
+//! given local coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 9>::grad_shapefn(
-    const Eigen::Matrix<double, 2, 1>& xi) const {
+    const Eigen::Matrix<double, 2, 1>& xi,
+    const Eigen::Matrix<double, 2, 1>& particle_size,
+    const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 9, 2> grad_shapefn;
   // 9-noded
   grad_shapefn(0, 0) = 0.25 * xi(1) * (xi(1) - 1.) * (2 * xi(0) - 1.);
@@ -226,32 +238,15 @@ inline mpm::ElementDegree mpm::QuadrilateralElement<2, 9>::degree() const {
   return mpm::ElementDegree::Quadratic;
 }
 
-//! Return shape functions of a Quadrilateral Element at a given local
-//! coordinate, with particle size and deformation gradient
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXd mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(
-    const VectorDim& xi, const VectorDim& particle_size,
-    const VectorDim& deformation_gradient) const {
-  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn(xi);
-}
-
-//! Return gradient shape functions of a Quadrilateral Element at a given local
-//! coordinate, with particle size and deformation gradient
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
-    mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(
-        const VectorDim& xi, const VectorDim& particle_size,
-        const VectorDim& deformation_gradient) const {
-  return this->mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(xi);
-}
-
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
-  const Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+  const Eigen::MatrixXd grad_shapefn =
+      this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                         Eigen::Matrix<double, Tdim, 1>::Zero());
 
   try {
     // Check if matrices dimensions are correct
@@ -287,7 +282,9 @@ inline std::vector<Eigen::MatrixXd>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi) const {
   // Get gradient shape functions
-  Eigen::MatrixXd grad_shapefn = this->grad_shapefn(xi);
+  Eigen::MatrixXd grad_shapefn =
+      this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                         Eigen::Matrix<double, Tdim, 1>::Zero());
 
   // B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix;
@@ -312,7 +309,9 @@ inline std::vector<Eigen::MatrixXd>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::bmatrix(
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const {
   // Get gradient shape functions
-  Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+  Eigen::MatrixXd grad_sf =
+      this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                         Eigen::Matrix<double, Tdim, 1>::Zero());
 
   // B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix;
@@ -371,7 +370,9 @@ inline Eigen::MatrixXd
   Eigen::Matrix<double, Tnfunctions, Tnfunctions> mass_matrix;
   mass_matrix.setZero();
   for (const auto& xi : xi_s) {
-    const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
+    const Eigen::Matrix<double, Tnfunctions, 1> shape_fn =
+        this->shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                      Eigen::Matrix<double, Tdim, 1>::Zero());
     mass_matrix += (shape_fn * shape_fn.transpose());
   }
   return mass_matrix;
@@ -399,7 +400,9 @@ inline Eigen::MatrixXd
   laplace_matrix.setZero();
   for (const auto& xi : xi_s) {
     // Get gradient shape functions
-    const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+    const Eigen::MatrixXd grad_sf =
+        this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                           Eigen::Matrix<double, Tdim, 1>::Zero());
 
     // Jacobian dx_i/dxi_j
     const Eigen::Matrix<double, Tdim, Tdim> jacobian =

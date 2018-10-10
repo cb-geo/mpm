@@ -89,21 +89,11 @@ class QuadrilateralElement : public Element<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
-
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
   Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
                           const VectorDim& deformation_gradient) const override;
-
-  //! Evaluate gradient of shape functions
-  //! \param[in] xi given local coordinates
-  //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates

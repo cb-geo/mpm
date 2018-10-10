@@ -36,19 +36,11 @@ class Element {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::VectorXd shapefn(const VectorDim& xi) const = 0;
-
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   virtual Eigen::VectorXd shapefn(
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
-
-  //! Evaluate gradient of shape functions
-  //! \param[in] xi given local coordinates
-  virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const = 0;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
