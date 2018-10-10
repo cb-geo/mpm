@@ -71,13 +71,6 @@ class Material {
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& dstrain) = 0;
-
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
