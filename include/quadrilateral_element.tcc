@@ -247,8 +247,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
         const VectorDim& deformation_gradient) const {
   // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn =
-      this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
-                         Eigen::Matrix<double, Tdim, 1>::Zero());
+      this->grad_shapefn(xi, particle_size, deformation_gradient);
 
   try {
     // Check if matrices dimensions are correct
@@ -276,8 +275,7 @@ inline std::vector<Eigen::MatrixXd>
         const VectorDim& deformation_gradient) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf =
-      this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
-                         Eigen::Matrix<double, Tdim, 1>::Zero());
+      this->grad_shapefn(xi, particle_size, deformation_gradient);
 
   // B-Matrix
   std::vector<Eigen::MatrixXd> bmatrix;
