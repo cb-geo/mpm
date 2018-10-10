@@ -96,6 +96,9 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
     return mpm::ShapefnType::GIMP;
   }
 
+  //! Return number of shape functions
+  unsigned nfunctions() const override { return Tnfunctions; }
+
  private:
   //! Return natural nodal coordinates
   Eigen::MatrixXd natural_nodal_coordinates() const;
