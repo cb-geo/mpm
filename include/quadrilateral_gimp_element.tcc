@@ -31,7 +31,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXd
     mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::shapefn(
         const Eigen::Matrix<double, Tdim, 1>& xi,
-        const VectorDim& particle_size,
+        const Eigen::Matrix<double, Tdim, 1>& particle_size,
         const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
 
   //! length of element in local coordinate
@@ -94,7 +94,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXd
     mpm::QuadrilateralGIMPElement<Tdim, Tnfunctions>::grad_shapefn(
         const Eigen::Matrix<double, Tdim, 1>& xi,
-        const VectorDim& particle_size,
+        const Eigen::Matrix<double, Tdim, 1>& particle_size,
         const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
 
   //! length of element in local coordinate
