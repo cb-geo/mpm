@@ -179,9 +179,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       const auto element = cell_->element_ptr();
 
       // Compute shape function of the particle
-      shapefn_ =
-          element->shapefn(this->xi_, Eigen::Matrix<double, Tdim, 1>::Zero(),
-                           Eigen::Matrix<double, Tdim, 1>::Zero());
+      shapefn_ = element->shapefn(this->xi_, this->size_,
+                                  Eigen::Matrix<double, Tdim, 1>::Zero());
       // Compute bmatrix of the particle for reference cell
       bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
                                   Eigen::Matrix<double, Tdim, 1>::Zero(),
