@@ -353,15 +353,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     // Check if material ptr is valid
     if (material_ != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
-      // Check if material needs property handle
-      if (material_->property_handle())
-        // Calculate stress
-        this->stress_.col(phase) =
-            material_->compute_stress(this->stress_.col(phase), dstrain, this);
-      else
-        // Calculate stress without sending particle handle
-        this->stress_.col(phase) =
-            material_->compute_stress(this->stress_.col(phase), dstrain);
+      // Calculate stress
+      this->stress_.col(phase) =
+          material_->compute_stress(this->stress_.col(phase), dstrain, this);
     } else {
       throw std::runtime_error("Material is invalid");
     }

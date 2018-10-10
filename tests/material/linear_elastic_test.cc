@@ -16,6 +16,12 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
   const unsigned Dim = 2;
 
+  // Add particle
+  mpm::Index pid = 0;
+  Eigen::Matrix<double, Dim, 1> coords;
+  coords.setZero();
+  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
@@ -152,7 +158,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain);
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -174,7 +180,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     stress.setZero();
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain);
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -183,12 +189,6 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.00000000000000e+00).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.00000000000000e+00).epsilon(Tolerance));
-
-    // Add particle
-    mpm::Index pid = 0;
-    Eigen::Matrix<double, Dim, 1> coords;
-    coords << 0.75, 0.75;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
 
     // Reset stress
     stress.setZero();
@@ -215,6 +215,12 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
 
   const unsigned Dim = 3;
 
+  // Add particle
+  mpm::Index pid = 0;
+  Eigen::Matrix<double, Dim, 1> coords;
+  coords.setZero();
+  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
@@ -351,7 +357,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain);
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
@@ -373,7 +379,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     stress.setZero();
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain);
+    stress = material->compute_stress(stress, strain, particle.get());
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
@@ -382,12 +388,6 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(stress(3) == Approx(3.84615384615385e+01).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(7.69230769230769e+01).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(1.15384615384615e+02).epsilon(Tolerance));
-
-    // Add particle
-    mpm::Index pid = 0;
-    Eigen::Matrix<double, Dim, 1> coords;
-    coords << 0.75, 0.75, 0.75;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
 
     // Reset stress
     stress.setZero();
