@@ -89,9 +89,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     material->properties(jmaterial);
 
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
-
     // Add particle
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
@@ -181,9 +178,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
@@ -279,9 +273,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
@@ -438,9 +429,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     material->properties(jmaterial);
 
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
-
     // Add particle
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
@@ -546,9 +534,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
@@ -660,9 +645,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["critical_shear_rate"] = 0.2;
 
     material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
