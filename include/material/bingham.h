@@ -44,19 +44,10 @@ class Bingham : public Material<Tdim> {
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress,
-                          const Vector6d& dstrain) override;
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
                           const ParticleBase<Tdim>* ptr) override;
-
-  //! Check if this material needs a particle handle
-  bool property_handle() const override { return true; }
 
  protected:
   //! material id

@@ -71,23 +71,11 @@ class Material {
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& dstrain) = 0;
-
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
                                   const Vector6d& dstrain,
                                   const ParticleBase<Tdim>* ptr) = 0;
-
-  //! Check if this material needs a particle handle
-  //! Set true, if material needs other parameters from the particle
-  //! For eg, dstrain_rate. These function calls can only to const functions
-  virtual bool property_handle() const = 0;
 
  protected:
   //! material id
