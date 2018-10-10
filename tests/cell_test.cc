@@ -472,8 +472,21 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     pgravity << 0., 9.814;
     // Phase
     unsigned phase = 0;
-    const auto shapefns_xi = element->shapefn(xi);
-    const auto bmatrix = element->bmatrix(xi);
+    // Nodal coordinates
+    Eigen::Matrix<double, 4, Dim> coords;
+    // clang-format off
+      coords << 0., 0.,
+                2., 0.,
+                2., 2.,
+                0., 2.;
+    // clang-format on
+
+    const auto shapefns_xi =
+        element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto bmatrix =
+        element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -674,7 +687,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875;
@@ -684,7 +699,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.1875, 0.1875;
@@ -723,7 +739,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (0.5, 0.5)
       xi << 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -734,7 +752,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (-0.5, -0.5)
       xi << -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -1559,8 +1578,25 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Phase
     unsigned phase = 0;
 
-    const auto shapefns_xi = element->shapefn(xi);
-    const auto bmatrix = element->bmatrix(xi);
+    // Nodal coords
+    Eigen::Matrix<double, 8, Dim> coords;
+    // clang-format off
+      coords << 0., 0., 0.,
+                2., 0., 0.,
+                2., 2., 0.,
+                0., 2., 0.,
+                0., 0., 2.,
+                2., 0., 2.,
+                2., 2., 2.,
+                0., 2., 2.;
+    // clang-format on
+
+    const auto shapefns_xi =
+        element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto bmatrix =
+        element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -1775,7 +1811,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.5875, 0.5875, 0.5875;
@@ -1785,7 +1823,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875, 0.2875;
@@ -1826,7 +1865,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (0.5, 0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -1837,7 +1878,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (-0.5, -0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
