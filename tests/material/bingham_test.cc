@@ -70,6 +70,13 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -410,6 +417,13 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 
   SECTION("Bingham check stresses with no strain rate") {

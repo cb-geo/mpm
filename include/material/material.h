@@ -64,6 +64,11 @@ class Material {
   //! \retval result Value of material property
   double property(const std::string& key);
 
+  //! Compute thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Thermodynamic pressure for volumetric strain
+  virtual double thermodynamic_pressure(double volumetric_strain) = 0;
+
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;

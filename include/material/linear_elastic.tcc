@@ -14,6 +14,15 @@ void mpm::LinearElastic<Tdim>::properties(const Json& material_properties) {
   }
 }
 
+//! Compute pressure
+template <unsigned Tdim>
+double mpm::LinearElastic<Tdim>::thermodynamic_pressure(
+    double volumetric_strain) {
+  // Bulk modulus
+  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+  return (-K * volumetric_strain);
+}
+
 //! Return elastic tensor
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 6> mpm::LinearElastic<Tdim>::elastic_tensor() {

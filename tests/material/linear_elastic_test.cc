@@ -77,6 +77,11 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     const double a1 = 13461538.461566667;
     const double a2 = 5769230.769166667;
 
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
+
     mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
     REQUIRE(de(0, 0) == Approx(a1).epsilon(Tolerance));
     REQUIRE(de(0, 1) == Approx(a2).epsilon(Tolerance));
@@ -259,6 +264,11 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     const double G = 3846153.846153846;
     const double a1 = 13461538.461566667;
     const double a2 = 5769230.769166667;
+
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
     REQUIRE(de(0, 0) == Approx(a1).epsilon(Tolerance));
