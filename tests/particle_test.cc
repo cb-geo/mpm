@@ -649,6 +649,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    // Check pressure
+    REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
+
     // Compute strain
     particle->compute_strain(phase, dt);
     // Strain
@@ -663,6 +666,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     const double volumetric_strain = 0.8;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Check updated pressure
+    const double K = 8333333.333333333;
+    REQUIRE(particle->pressure(phase) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
@@ -1514,6 +1522,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    // Check pressure
+    REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
+
     // Compute strain
     particle->compute_strain(phase, dt);
     // Strain
@@ -1529,6 +1540,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     const double volumetric_strain = 4.;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Check updated pressure
+    const double K = 8333333.333333333;
+    REQUIRE(particle->pressure(phase) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));

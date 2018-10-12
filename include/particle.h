@@ -148,11 +148,6 @@ class Particle : public ParticleBase<Tdim> {
     return volumetric_strain_centroid_(phase);
   }
 
-  //! Update pressure of the particles
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(unsigned phase, double dvolumetric_strain) override;
-
   //! Initial stress
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress Initial sress corresponding to the phase
@@ -219,6 +214,12 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
+ private:
+  //! Update pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
+  bool update_pressure(unsigned phase, double dvolumetric_strain);
 
  private:
   //! particle id
