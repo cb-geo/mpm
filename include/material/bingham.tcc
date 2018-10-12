@@ -18,6 +18,14 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
   }
 }
 
+//! Compute pressure
+template <unsigned Tdim>
+double mpm::Bingham<Tdim>::thermodynamic_pressure(double volumetric_strain) {
+  // Bulk modulus
+  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+  return (-K * volumetric_strain);
+}
+
 //! Elastic tensor is not defined in Bingham model, throws an error
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {

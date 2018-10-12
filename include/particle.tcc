@@ -73,17 +73,18 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
-  mass_.setZero();
-  size_.setZero();
-  volume_.fill(std::numeric_limits<double>::max());
-  stress_.setZero();
-  strain_.setZero();
-  volumetric_strain_centroid_.setZero();
   dstrain_.setZero();
-  strain_rate_.setZero();
-  velocity_.setZero();
+  mass_.setZero();
+  pressure_.setZero();
   set_traction_ = false;
+  size_.setZero();
+  strain_rate_.setZero();
+  strain_.setZero();
+  stress_.setZero();
   traction_.setZero();
+  velocity_.setZero();
+  volume_.fill(std::numeric_limits<double>::max());
+  volumetric_strain_centroid_.setZero();
 }
 
 // Assign a cell to particle
@@ -344,8 +345,11 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
       strain_rate_centroid(i) = 0.;
 
   // Assign volumetric strain at centroid
-  volumetric_strain_centroid_(phase) +=
-      dt * strain_rate_centroid.head(Tdim).sum();
+  const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
+  volumetric_strain_centroid_(phase) += dvolumetric_strain;
+
+  // Update thermodynamic pressure
+  this->update_pressure(phase, dvolumetric_strain);
 }
 
 // Compute stress
@@ -508,6 +512,27 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
       throw std::runtime_error(
           "Cell is not initialised! "
           "cannot compute updated coordinates of the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Update pressure
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::update_pressure(unsigned phase,
+                                                    double dvolumetric_strain) {
+  bool status = true;
+  try {
+    // Check if material ptr is valid
+    if (material_ != nullptr) {
+      // Update pressure
+      this->pressure_(phase) +=
+          material_->thermodynamic_pressure(dvolumetric_strain);
+    } else {
+      throw std::runtime_error("Material is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

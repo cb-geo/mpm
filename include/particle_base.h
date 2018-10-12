@@ -120,6 +120,9 @@ class ParticleBase {
   //! Return mass
   virtual double mass(unsigned phase) const = 0;
 
+  //! Return pressure
+  virtual double pressure(unsigned phase) const = 0;
+
   //! Compute strain
   virtual void compute_strain(unsigned phase, double dt) = 0;
 
