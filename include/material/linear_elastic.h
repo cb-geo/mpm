@@ -41,6 +41,11 @@ class LinearElastic : public Material<Tdim> {
   //! \param[in] material_properties Material properties
   void properties(const Json& material_properties) override;
 
+  //! Thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Pressure for volumetric strain
+  double thermodynamic_pressure(double volumetric_strain) override;
+
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor() override;

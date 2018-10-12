@@ -111,7 +111,7 @@ class Particle : public ParticleBase<Tdim> {
     mass_(phase) = mass;
   }
 
-  //! Return mass of the particlesx
+  //! Return mass of the particles
   //! \param[in] phase Index corresponding to the phase
   double mass(unsigned phase) const override { return mass_(phase); }
 
@@ -119,6 +119,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] material Pointer to a material
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
+
+  //! Return pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -143,6 +147,11 @@ class Particle : public ParticleBase<Tdim> {
   double volumetric_strain_centroid(unsigned phase) const override {
     return volumetric_strain_centroid_(phase);
   }
+
+  //! Update pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
+  bool update_pressure(unsigned phase, double dvolumetric_strain) override;
 
   //! Initial stress
   //! \param[in] phase Index corresponding to the phase
@@ -232,6 +241,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
