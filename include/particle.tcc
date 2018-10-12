@@ -540,4 +540,3 @@ bool mpm::Particle<Tdim, Tnphases>::update_pressure(unsigned phase,
   }
   return status;
 }
-
