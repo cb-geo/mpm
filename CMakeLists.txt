@@ -129,6 +129,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/node_container_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
