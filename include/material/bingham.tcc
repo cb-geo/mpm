@@ -43,18 +43,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   const unsigned phase = 0;
 
-  // Bulk modulus
-  const double bulk_modulus =
-      youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-
-  // Get volumetric strain from particle
-  const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
-
-  // Compute thermodynamic pressure
-  // thermodynamic_pressure = -bulk_modulus * volstrain
-  // Expansion causes a decrease in thermodynamic pressure
-  const double thermodynamic_pressure = -bulk_modulus * volumetric_strain;
-
+  // Get strain rate
   auto strain_rate = ptr->strain_rate(phase);
 
   // Convert strain rate to rate of deformation tensor
@@ -93,10 +82,11 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
   // Update volumetric and deviatoric stress
+  // thermodynamic pressure is from material point
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -thermodynamic_pressure * this->dirac_delta() + tau;
+      -ptr->pressure(phase) * this->dirac_delta() + tau;
 
   return updated_stress;
 }
