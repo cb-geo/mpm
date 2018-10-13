@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 // Eigen
@@ -202,6 +203,8 @@ class Mesh {
   bool read_particles_hdf5(unsigned phase, const std::string& filename);
 
  private:
+  //! Mutex
+  std::mutex mesh_mutex_;
   // Locate a particle in mesh cells
   bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
   //! mesh id
