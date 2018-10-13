@@ -219,8 +219,8 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
       particles_.cbegin(), particles_.cend(),
       [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
         // If particle is not found in mesh add to a list of particles
+        std::lock_guard<std::mutex> guard(mesh_mutex_);
         if (!this->locate_particle_cells(particle))
-          // Needs a lock guard here
           particles.emplace_back(particle);
       });
 
