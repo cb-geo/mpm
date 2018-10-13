@@ -4,6 +4,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include "Eigen/Dense"
@@ -242,6 +243,8 @@ class Cell {
   void compute_normals();
 
  private:
+  //! Mutex
+  std::mutex cell_mutex_;
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
 
