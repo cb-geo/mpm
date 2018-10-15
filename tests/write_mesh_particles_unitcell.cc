@@ -183,6 +183,7 @@ bool write_particles_2d_unitcell() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-2d-unitcell.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -203,6 +204,7 @@ bool write_particles_2d_unitcell() {
 
   // Dump initial stresses as an input file to be read
   file.open("initial-stresses-2d.txt");
+  file << particles_stresses.size() << "\n";
   // Write particle coordinates
   for (const auto& stress : particles_stresses) {
     for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
@@ -367,6 +369,7 @@ bool write_particles_3d_unitcell() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-3d-unitcell.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -390,6 +393,7 @@ bool write_particles_3d_unitcell() {
 
   // Dump initial stresses as an input file to be read
   file.open("initial-stresses-3d.txt");
+  file << particles_stresses.size() << "\n";
   // Write particle coordinates
   for (const auto& stress : particles_stresses) {
     for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
