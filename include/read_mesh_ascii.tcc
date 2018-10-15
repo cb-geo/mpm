@@ -182,7 +182,6 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         }
       }
     }
-    console_->error("Read particle: {}", coordinates.size());
     file.close();
   } catch (std::exception& exception) {
     console_->error("Read particle coordinates: {}", exception.what());
