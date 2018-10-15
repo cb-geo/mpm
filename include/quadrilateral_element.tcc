@@ -255,9 +255,11 @@ inline Eigen::Matrix<double, Tdim, Tdim>
         const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
         const VectorDim& particle_size,
         const VectorDim& deformation_gradient) const {
+
   // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn =
-      this->grad_shapefn(xi, particle_size, deformation_gradient);
+      mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(
+          xi, particle_size, deformation_gradient);
 
   try {
     // Check if matrices dimensions are correct
