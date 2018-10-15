@@ -35,10 +35,6 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  // Compute volume
-  meshes_.at(0)->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1, phase));
-
   // Compute mass
   meshes_.at(0)->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
