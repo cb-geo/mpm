@@ -208,9 +208,10 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
                                                   double volume) {
   this->volume_(phase) = volume;
   // Compute size of particle in each direction
-  const double length = std::pow(this->volume_(phase), 1. / Tdim);
+  const double length =
+      std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
   // Set particle size as length on each side
-  this->size_.fill(length);
+  this->size_ = Eigen::Matrix<double, Tdim, 1>::Constant(length);
 }
 
 // Compute volume of the particle
@@ -448,6 +449,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
     status = true;
     this->set_traction_ = true;
   } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
