@@ -208,9 +208,10 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
                                                   double volume) {
   this->volume_(phase) = volume;
   // Compute size of particle in each direction
-  const double length = std::pow(this->volume_(phase), 1. / Tdim);
+  const double length =
+      std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
   // Set particle size as length on each side
-  this->size_.fill(length);
+  this->size_ = Eigen::Matrix<double, Tdim, 1>::Constant(length);
 }
 
 // Compute volume of the particle
@@ -438,9 +439,10 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
                                                     double traction) {
   bool status = false;
   try {
-    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
+    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim ||
+        this->volume_(phase) == std::numeric_limits<double>::max()) {
       throw std::runtime_error(
-          "Particle traction direction / phase is invalid");
+          "Particle traction property: volume / direction / phase is invalid");
     }
     // Assign traction
     traction_(direction, phase) =
@@ -448,6 +450,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
     status = true;
     this->set_traction_ = true;
   } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
@@ -457,9 +460,10 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
 //! \param[in] phase Index corresponding to the phase
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::map_traction_force(unsigned phase) {
-  // Compute nodal traction forces
-  cell_->compute_nodal_traction_force(this->shapefn_, phase,
-                                      this->traction_.col(phase));
+  if (this->set_traction_)
+    // Map particle traction forces to nodes
+    cell_->compute_nodal_traction_force(this->shapefn_, phase,
+                                        this->traction_.col(phase));
 }
 
 // Compute updated position of the particle

@@ -594,6 +594,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              // Compute volume
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
+                            std::placeholders::_1, phase));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
               // When tractions fail
               particles_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
@@ -1284,6 +1291,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
               particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              // Compute volume
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
+                            std::placeholders::_1, phase));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
