@@ -89,6 +89,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                   std::placeholders::_1, phase, this->gravity_));
 
+    // Iterate over each particle to map traction force to nodes
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
+                  std::placeholders::_1, phase));
+
     // Iterate over each particle to compute nodal internal force
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
