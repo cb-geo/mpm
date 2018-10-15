@@ -60,6 +60,15 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
   Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
                           const VectorDim& deformation_gradient) const override;
 
+  //! Evaluate local shape functions at given local coordinates
+  //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval shapefn Shape function of a given cell
+  Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
+
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
@@ -76,6 +85,17 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
+
+  //! Compute Jacobian local
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
