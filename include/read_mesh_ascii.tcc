@@ -35,6 +35,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
             if (!read_first_line) {
               // Read number of nodes and cells
               istream >> nnodes >> ncells;
+              coordinates.reserve(nnodes);
               read_first_line = true;
               break;
             }
@@ -101,6 +102,7 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
             if (!read_first_line) {
               // Read number of nodes and cells
               istream >> nnodes >> ncells;
+              cells.reserve(ncells);
               read_first_line = true;
               break;
             }
@@ -142,6 +144,12 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
   std::vector<VectorDim> coordinates;
   coordinates.clear();
 
+  // Expected number of particles
+  mpm::Index nparticles;
+
+  // bool to check firstline
+  bool read_first_line = false;
+
   // input file stream
   std::fstream file;
   file.open(particles_file.c_str(), std::ios::in);
@@ -156,17 +164,25 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
-          // Coordinates
-          Eigen::Matrix<double, Tdim, 1> coords;
           while (istream.good()) {
+            if (!read_first_line) {
+              // Read number of nodes and cells
+              istream >> nparticles;
+              coordinates.reserve(nparticles);
+              read_first_line = true;
+              break;
+            }
+            // Coordinates
+            Eigen::Matrix<double, Tdim, 1> coords;
             // Read to coordinates
             for (unsigned i = 0; i < Tdim; ++i) istream >> coords[i];
+            coordinates.emplace_back(coords);
             break;
           }
-          coordinates.emplace_back(coords);
         }
       }
     }
+    console_->error("Read particle: {}", coordinates.size());
     file.close();
   } catch (std::exception& exception) {
     console_->error("Read particle coordinates: {}", exception.what());
@@ -186,6 +202,12 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   std::vector<Eigen::Matrix<double, 6, 1>> stresses;
   stresses.clear();
 
+  // Expected number of particles
+  mpm::Index nparticles;
+
+  // bool to check firstline
+  bool read_first_line = false;
+
   // input file stream
   std::fstream file;
   file.open(particles_stresses.c_str(), std::ios::in);
@@ -200,14 +222,21 @@ std::vector<Eigen::Matrix<double, 6, 1>>
         // ignore comment lines (# or !) or blank lines
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
-          // Stresses
-          Eigen::Matrix<double, 6, 1> stress;
           while (istream.good()) {
+            if (!read_first_line) {
+              // Read number of nodes and cells
+              istream >> nparticles;
+              stresses.reserve(nparticles);
+              read_first_line = true;
+              break;
+            }
+            // Stresses
+            Eigen::Matrix<double, 6, 1> stress;
             // Read to stress
             for (unsigned i = 0; i < stress.size(); ++i) istream >> stress[i];
+            stresses.emplace_back(stress);
             break;
           }
-          stresses.emplace_back(stress);
         }
       }
     }
