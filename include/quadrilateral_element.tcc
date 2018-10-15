@@ -238,6 +238,16 @@ inline mpm::ElementDegree mpm::QuadrilateralElement<2, 9>::degree() const {
   return mpm::ElementDegree::Quadratic;
 }
 
+//! Return local shape functions of a Quadrilateral Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::shapefn_local(
+        const VectorDim& xi, const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  return this->shapefn(xi, particle_size, deformation_gradient);
+}
+
 //! Compute Jacobian with particle size and deformation gradient
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
@@ -263,6 +273,18 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 
   // Jacobian dx_i/dxi_j
   return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
+//! Compute Jacobian local with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian_local(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
+  // Jacobian dx_i/dxi_j
+  return this->jacobian(xi, nodal_coordinates, particle_size,
+                        deformation_gradient);
 }
 
 //! Return the B-matrix of a Quadrilateral Element at a given local
