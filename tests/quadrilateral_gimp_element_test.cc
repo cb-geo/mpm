@@ -6,7 +6,8 @@
 #include "quadrilateral_gimp_element.h"
 
 //! \brief Check quadrilateral element class
-TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
+TEST_CASE("Quadrilateral gimp elements are checked",
+          "[quad][element][2D][gimp]") {
   const unsigned Dim = 2;
   const double Tolerance = 1.E-7;
 
