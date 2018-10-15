@@ -68,6 +68,8 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
 // Initialise mesh and particles
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
+  // TODO: Fix phase
+  const unsigned phase = 0;
   bool status = true;
   try {
     // Get mesh properties
@@ -134,6 +136,11 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
+
+    // Compute volume
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
+                  std::placeholders::_1, phase));
 
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
