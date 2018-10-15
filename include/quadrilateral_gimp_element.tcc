@@ -261,6 +261,6 @@ inline Eigen::Matrix<double, Tdim, Tdim>
         const VectorDim& particle_size,
         const VectorDim& deformation_gradient) const {
   // Jacobian dx_i/dxi_j
-  return mpm::QuadrilateralElement<Tdim, 4>::jacobian(
+  return mpm::QuadrilateralElement<2, 4>::jacobian(
       xi, nodal_coordinates, particle_size, deformation_gradient);
 }
