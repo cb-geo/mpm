@@ -113,6 +113,22 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(gradsf(3, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Coordinates is (0,0)
+    SECTION("Four noded local sf quadrilateral element for coordinates(0,0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = quad->shapefn_local(coords, Eigen::Vector2d::Zero(),
+                                         Eigen::Vector2d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.25).epsilon(Tolerance));
+    }
+
     // Check shapefn with deformation gradient
     SECTION(
         "Four noded quadrilateral element shapefn with deformation gradient") {
@@ -170,6 +186,40 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Get Jacobian
       auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
                                 Eigen::Vector2d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Four noded quadrilateral local Jacobian for local "
+        "coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 4, Dim> coords;
+      // clang-format off
+      coords << 2., 1.,
+                4., 2.,
+                2., 4.,
+                1., 3.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian_local(xi, coords, Eigen::Vector2d::Zero(),
+                                      Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -713,6 +763,26 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
     }
 
     // Coordinates is (0,0)
+    SECTION("Eight noded local sf quadrilateral element for coordinates(0,0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = quad->shapefn_local(coords, Eigen::Vector2d::Zero(),
+                                         Eigen::Vector2d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.5).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.5).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.5).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.5).epsilon(Tolerance));
+    }
+
+    // Coordinates is (0,0)
     SECTION(
         "Eight noded quadrilateral element shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
@@ -787,6 +857,45 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Get Jacobian
       auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
                                 Eigen::Vector2d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Eight noded quadrilateral local Jacobian for local "
+        "coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0,
+                4.0, 2.0,
+                2.0, 4.0,
+                1.0, 3.0,
+                3.0, 1.5,
+                3.0, 3.0,
+                1.5, 3.5,
+                1.5, 2.0;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian_local(xi, coords, Eigen::Vector2d::Zero(),
+                                      Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -1396,6 +1505,27 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Coordinates is (0,0)
+    SECTION("Nine noded local sf quadrilateral element for coordinates(0,0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = quad->shapefn_local(coords, Eigen::Vector2d::Zero(),
+                                         Eigen::Vector2d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(shapefn(8) == Approx(1.0).epsilon(Tolerance));
+    }
+
     SECTION("Nine noded quadrilateral element with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
@@ -1610,6 +1740,46 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Get Jacobian
       auto jac = quad->jacobian(xi, coords, Eigen::Vector2d::Zero(),
                                 Eigen::Vector2d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Nine noded quadrilateral local Jacobian for local "
+        "coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 9, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0,
+                4.0, 2.0,
+                2.0, 4.0,
+                1.0, 3.0,
+                3.0, 1.5,
+                3.0, 3.0,
+                1.5, 3.5,
+                1.5, 2.0,
+                2.25, 2.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian_local(xi, coords, Eigen::Vector2d::Zero(),
+                                      Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());

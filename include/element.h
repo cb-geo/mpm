@@ -42,6 +42,14 @@ class Element {
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
+  //! Evaluate local shape functions at given coordinates
+  //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  virtual Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const = 0;
+
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
@@ -57,6 +65,17 @@ class Element {
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   virtual Eigen::Matrix<double, Tdim, Tdim> jacobian(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const = 0;
+
+  //! Compute Jacobian local
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  virtual Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
       const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;

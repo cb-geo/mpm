@@ -250,6 +250,16 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::grad_shapefn(
   return grad_shapefn;
 }
 
+//! Return local shape functions of a Hexahedron Element at a given local
+//! coordinate, with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::VectorXd mpm::HexahedronElement<Tdim, Tnfunctions>::shapefn_local(
+    const Eigen::Matrix<double, Tdim, 1>& xi,
+    const Eigen::Matrix<double, Tdim, 1>& particle_size,
+    const Eigen::Matrix<double, Tdim, 1>& deformation_gradient) const {
+  return this->shapefn(xi, particle_size, deformation_gradient);
+}
+
 //! Compute Jacobian
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
@@ -275,6 +285,19 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 
   // Jacobian
   return (grad_shapefn.transpose() * nodal_coordinates);
+}
+
+//! Compute Jacobian local with particle size and deformation gradient
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, Tdim>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::jacobian_local(
+        const Eigen::Matrix<double, 3, 1>& xi,
+        const Eigen::MatrixXd& nodal_coordinates,
+        const Eigen::Matrix<double, 3, 1>& particle_size,
+        const Eigen::Matrix<double, 3, 1>& deformation_gradient) const {
+  // Jacobian dx_i/dxi_j
+  return this->jacobian(xi, nodal_coordinates, particle_size,
+                        deformation_gradient);
 }
 
 //! Compute Bmatrix

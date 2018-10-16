@@ -177,6 +177,27 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Coordinates is (0, 0, 0)
+    SECTION(
+        "Eight noded local sf hexahedron element for coordinates(0, 0, 0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = hex->shapefn_local(coords, Eigen::Vector3d::Zero(),
+                                        Eigen::Vector3d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.125).epsilon(Tolerance));
+    }
+
     SECTION("Eight noded hexahedron shapefn with deformation gradient") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
@@ -260,6 +281,46 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Get Jacobian
       auto jac = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
                                Eigen::Vector3d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Eight noded hexahedron local Jacobian for local "
+        "coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2., 1., 0.5,
+                4., 2., 1.0,
+                2., 4., 1.0,
+                1., 3., 0.5,
+                2., 1., 1.5,
+                4., 2., 2.0,
+                2., 4., 2.0,
+                1., 3., 1.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5, 0.25,
+                 -0.875, 1.0, 0.00,
+                  0.000, 0.0, 0.50;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian_local(xi, coords, Eigen::Vector3d::Zero(),
+                                     Eigen::Vector3d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -1448,6 +1509,62 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
     }
 
+    // Coordinates is (0, 0, 0)
+    SECTION(
+        "Twenty noded local sf hexahedron element for coordinates(0, 0, 0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = hex->shapefn_local(coords, Eigen::Vector3d::Zero(),
+                                        Eigen::Vector3d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      // Edge nodes
+      // N0 = 0.125*(1 - xi(0))(1. - xi(1))(1 - xi(2))(-xi(0) - xi(1) -xi(2) -2)
+      // N1 = 0.125*(1 + xi(0))(1. - xi(1))(1 - xi(2))(+xi(0) - xi(1) -xi(2) -2)
+      // N2 = 0.125*(1 + xi(0))(1. + xi(1))(1 - xi(2))(+xi(0) + xi(1) -xi(2) -2)
+      // N3 = 0.125*(1 - xi(0))(1. + xi(1))(1 - xi(2))(-xi(0) + xi(1) -xi(2) -2)
+      // N4 = 0.125*(1 - xi(0))(1. - xi(1))(1 + xi(2))(-xi(0) - xi(1) +xi(2) -2)
+      // N5 = 0.125*(1 + xi(0))(1. - xi(1))(1 + xi(2))(+xi(0) - xi(1) +xi(2) -2)
+      // N6 = 0.125*(1 + xi(0))(1. + xi(1))(1 + xi(2))(+xi(0) + xi(1) +xi(2) -2)
+      // N7 = 0.125*(1 - xi(0))(1. + xi(1))(1 + xi(2))(-xi(0) + xi(1) +xi(2) -2)
+      REQUIRE(shapefn(0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(-0.25).epsilon(Tolerance));
+
+      // Midside nodes
+      // N8 = 0.25*(1 - xi(0)^2)(1 - xi(1))(1 - xi(2))
+      // N9 = 0.25*(1 - xi(0))(1 - xi(1)^2)(1 - xi(2))
+      // N10 = 0.25*(1 - xi(0))(1 - xi(1))(1 - xi(2)^2)
+      // N11 = 0.25*(1 + xi(0))(1 - xi(1)^2)(1 - xi(2))
+      // N12 = 0.25*(1 + xi(0))(1 - xi(1))(1 - xi(2)^2)
+      // N13 = 0.25*(1 - xi(0)^2)(1 + xi(1))(1 - xi(2))
+      // N14 = 0.25*(1 + xi(0))(1 + xi(1))(1 - xi(2)^2)
+      // N15 = 0.25*(1 - xi(0))(1 + xi(1))(1 - xi(2)^2)
+      // N16 = 0.25*(1 - xi(0)^2)(1 - xi(1))(1 + xi(2))
+      // N17 = 0.25*(1 - xi(0))(1 - xi(1)^2)(1 + xi(2))
+      // N18 = 0.25*(1 + xi(0))(1 - xi(1)^2)(1 + xi(2))
+      // N19 = 0.25*(1 - xi(0)^2)(1 + xi(1))(1 + xi(2))
+      REQUIRE(shapefn(8) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(9) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(10) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(11) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(12) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(13) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(14) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(15) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(16) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(17) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(18) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(19) == Approx(0.25).epsilon(Tolerance));
+    }
+
     SECTION("Twenty noded hexahedron element with grad deformation") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
@@ -1606,6 +1723,58 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Get Jacobian
       auto jac = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
                                Eigen::Vector3d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION(
+        "20 noded hexahedron local Jacobian for local "
+        "coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 20, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0, 0.50,
+                4.0, 2.0, 1.00,
+                2.0, 4.0, 1.00,
+                1.0, 3.0, 0.50,
+                2.0, 1.0, 1.50,
+                4.0, 2.0, 2.00,
+                2.0, 4.0, 2.00,
+                1.0, 3.0, 1.50,
+                3.0, 1.5, 0.75,
+                1.5, 2.0, 0.50,
+                2.0, 1.0, 1.00,
+                3.0, 3.0, 1.00,
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 0.75,
+                2.0, 4.0, 1.50,
+                1.0, 3.0, 1.00,
+                3.0, 1.5, 1.75,
+                1.5, 2.0, 1.50,
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 1.75;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.90625, 0.21875, 0.109375,
+                 -1.43750, 1.56250, 0.281250,
+                  0.28125,-0.28125, 0.359375;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian_local(xi, coords, Eigen::Vector3d::Zero(),
+                                     Eigen::Vector3d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
