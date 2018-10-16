@@ -568,7 +568,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
-      xi(2) = 2. * (point(2) - centre(2)) / ylength;
+      xi(2) = 2. * (point(2) - centre(2)) / zlength;
 
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
