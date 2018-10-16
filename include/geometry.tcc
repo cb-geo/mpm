@@ -34,7 +34,6 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const
   const double cos_alpha_sin_gamma = cos(angles(0)) * sin(angles(2));
   const double sin_alpha_sin_gamma = sin(angles(0)) * sin(angles(2));
   const double cos_gamma = cos(angles(2));
-  const double sin_gamma = sin(angles(2));
 
   // clang-format off
   const Eigen::Matrix<double, 3, 3> rotation_matrix = 

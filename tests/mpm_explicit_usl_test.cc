@@ -71,7 +71,7 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     const std::string fname = "mpm-explicit-usl";
     const std::string analysis = "MPMExplicitUSL2D";
     bool resume = true;
-    bool status = mpm_test::write_json(2, resume, analysis, fname);
+    REQUIRE(mpm_test::write_json(2, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
@@ -149,7 +149,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     const std::string fname = "mpm-explicit-usl";
     const std::string analysis = "MPMExplicitUSL3D";
     bool resume = true;
-    bool status = mpm_test::write_json(3, resume, analysis, fname);
+    REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
