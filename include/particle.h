@@ -151,8 +151,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Initial stress
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] stress Initial sress corresponding to the phase
-  virtual void initial_stress(
-      unsigned phase, const Eigen::Matrix<double, 6, 1>& stress) override {
+  void initial_stress(unsigned phase,
+                      const Eigen::Matrix<double, 6, 1>& stress) override {
     this->stress_.col(phase) = stress;
   }
 
