@@ -638,9 +638,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
 
-    // Shape function
-    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 2, 1>::Zero(),
-                                      Eigen::Matrix<double, 2, 1>::Zero());
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                Eigen::Matrix<double, 2, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
@@ -656,14 +657,15 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
-    // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian =
-        element_->jacobian(xi, unit_cell, Eigen::Matrix<double, 2, 1>::Zero(),
-                           Eigen::Matrix<double, 2, 1>::Zero());
+    // Calculate local Jacobian
+    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian_local(
+        xi, unit_cell, Eigen::Matrix<double, 2, 1>::Zero(),
+        Eigen::Matrix<double, 2, 1>::Zero());
 
-    // Shape function
-    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 2, 1>::Zero(),
-                                      Eigen::Matrix<double, 2, 1>::Zero());
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                Eigen::Matrix<double, 2, 1>::Zero());
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
@@ -730,9 +732,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
 
-    // Shape function
-    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 3, 1>::Zero(),
-                                      Eigen::Matrix<double, 3, 1>::Zero());
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                Eigen::Matrix<double, 3, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
@@ -747,14 +750,15 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
-    // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian =
-        element_->jacobian(xi, unit_cell, Eigen::Matrix<double, 3, 1>::Zero(),
-                           Eigen::Matrix<double, 3, 1>::Zero());
+    // Calculate local Jacobian
+    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian_local(
+        xi, unit_cell, Eigen::Matrix<double, 3, 1>::Zero(),
+        Eigen::Matrix<double, 3, 1>::Zero());
 
-    // Shape function
-    const auto sf = element_->shapefn(xi, Eigen::Matrix<double, 3, 1>::Zero(),
-                                      Eigen::Matrix<double, 3, 1>::Zero());
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                Eigen::Matrix<double, 3, 1>::Zero());
 
     // Residual f(x)
     Eigen::Matrix<double, 3, 1> residual;
