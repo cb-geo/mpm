@@ -25,7 +25,7 @@ class Bingham : public Material<Tdim> {
   Bingham(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
-  virtual ~Bingham() override{};
+  ~Bingham() override{};
 
   //! Delete copy constructor
   Bingham(const Bingham&) = delete;
