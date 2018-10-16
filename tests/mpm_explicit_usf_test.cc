@@ -71,7 +71,7 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     const std::string fname = "mpm-explicit-usf";
     const std::string analysis = "MPMExplicitUSF2D";
     bool resume = true;
-    bool status = mpm_test::write_json(2, resume, analysis, fname);
+    REQUIRE(mpm_test::write_json(2, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
@@ -149,7 +149,7 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
     const std::string fname = "mpm-explicit-usf";
     const std::string analysis = "MPMExplicitUSF3D";
     bool resume = true;
-    bool status = mpm_test::write_json(3, resume, analysis, fname);
+    REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
