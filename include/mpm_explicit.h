@@ -29,7 +29,7 @@ class MPMExplicit : public MPM {
   bool initialise_materials() override;
 
   //! Solve
-  virtual bool solve() = 0;
+  bool solve() override = 0;
 
   //! Checkpoint resume
   bool checkpoint_resume() override;

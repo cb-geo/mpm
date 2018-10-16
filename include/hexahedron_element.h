@@ -202,7 +202,9 @@ class HexahedronElement : public Element<Tdim> {
   mpm::ElementDegree degree() const override;
 
   //! Return the type of shape function
-  mpm::ShapefnType shapefn_type() const { return mpm::ShapefnType::NORMAL_MPM; }
+  mpm::ShapefnType shapefn_type() const override {
+    return mpm::ShapefnType::NORMAL_MPM;
+  }
 
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
@@ -226,9 +228,9 @@ class HexahedronElement : public Element<Tdim> {
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
   //! Return the number of faces in a hexahedron
-  unsigned nfaces() const { return 6; }
+  unsigned nfaces() const override { return 6; }
   //! Return unit element volume 3D 2*2*2
-  double unit_element_volume() const { return 8.; }
+  double unit_element_volume() const override { return 8.; }
 
  private:
   //! Logger
