@@ -45,6 +45,13 @@ link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# MPI
+find_package(MPI)
+if (MPI_FOUND)
+  include_directories(${MPI_CXX_INCLUDE_DIRS})
+  link_libraries(${MPI_CXX_LIBRARIES})
+endif()
+
 # HDF5
 ENABLE_LANGUAGE(C)
 find_package(HDF5 COMPONENTS CXX HL)

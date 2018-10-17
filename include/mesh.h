@@ -11,6 +11,8 @@
 // TBB
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
+// MPI
+#include "mpi.h"
 
 #include "cell.h"
 #include "container.h"
@@ -84,9 +86,10 @@ class Mesh {
 
   //! All reduce over nodal vector property
   //! \tparam Tgetfunctor Functor for getter
+  //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
-  template <typename Tgetfunctor>
-  void allreduce_node_scalar_property(Tgetfunctor getter);
+  template <typename Tgetfunctor, typename Tsetfunctor>
+  void allreduce_node_scalar_property(Tgetfunctor getter, Tsetfunctor setter);
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id

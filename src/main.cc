@@ -1,6 +1,7 @@
 #include <memory>
 
 #include "spdlog/spdlog.h"
+#include "mpi.h"
 
 #include "io.h"
 #include "mpm.h"
@@ -11,6 +12,14 @@ int main(int argc, char** argv) {
 
   // Initialise logger
   auto console = spdlog::stdout_color_mt("main");
+
+  // Initialise MPI
+  MPI_Init(&argc, &argv);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
   try {
     // Create an IO object
@@ -30,4 +39,6 @@ int main(int argc, char** argv) {
   } catch (std::exception& exception) {
     console->error("MPM main: {}", exception.what());
   }
+
+  MPI_Finalize();
 }
