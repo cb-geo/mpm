@@ -171,15 +171,13 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
 
     if (step_ % output_steps_ == 0) {
 #ifdef USE_MPI
-      // Run if there is more than a single MPI task
-      if (mpi_rank == 0) {
-        // HDF5 outputs
-        this->write_hdf5(this->step_, this->nsteps_);
+      // HDF5 outputs
+      this->write_hdf5(this->step_, this->nsteps_);
 #ifdef USE_VTK
-        // VTK outputs
-        this->write_vtk(this->step_, this->nsteps_);
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
 #endif  // VTK
-      }
+
 #else  // MPI Else
        // HDF5 outputs
       this->write_hdf5(this->step_, this->nsteps_);
