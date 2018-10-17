@@ -121,26 +121,51 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 #ifdef USE_MPI
     int mpi_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    // Create MPI array type
+    MPI_Datatype array_t;
+    MPI_Type_vector(Tdim, 1, 1, MPI_DOUBLE, &array_t);
+    MPI_Type_commit(&array_t);
+
+    auto all_particles =
+        mesh_reader->read_particles(io_->file_name("particles"));
+
+    // Calculate chunk size to split router
+    int chunk_size = all_particles.size() / mpi_size;
+    MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    std::vector<Eigen::Matrix<double, Tdim, 1>> particles(chunk_size);
+
+    // Send particle chunks to different compute nodes
+    MPI_Scatter(all_particles.data(), chunk_size, array_t, particles.data(),
+                particles.size(), array_t, 0, MPI_COMM_WORLD);
+
+    // Calculate the remaining chunk of od_pairs and add to rank 0
+    int chunk_remainder = all_particles.size() % mpi_size;
     if (mpi_rank == 0) {
-      // Particle type
-      const auto particle_type =
-          mesh_props["particle_type"].template get<std::string>();
-      // Create particles from file
-      bool particle_status = meshes_.at(0)->create_particles(
-          gid,            // global id
-          particle_type,  // particle type
-          mesh_reader->read_particles(
-              io_->file_name("particles")));  // coordinates
-
-      if (!particle_status)
-        throw std::runtime_error("Addition of particles to mesh failed");
-
-      // Locate particles in cell
-      auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-
-      if (!unlocatable_particles.empty())
-        throw std::runtime_error("Particle outside the mesh domain");
+      particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
+                       all_particles.end());
     }
+
+    // Particle type
+    const auto particle_type =
+        mesh_props["particle_type"].template get<std::string>();
+    // Create particles from file
+    bool particle_status =
+        meshes_.at(0)->create_particles(gid,            // global id
+                                        particle_type,  // particle type
+                                        particles);     // coordinates
+
+    if (!particle_status)
+      throw std::runtime_error("Addition of particles to mesh failed");
+
+    // Locate particles in cell
+    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
 #else
     // Particle type
     const auto particle_type =
