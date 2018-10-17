@@ -48,6 +48,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # MPI
 find_package(MPI)
 if (MPI_FOUND)
+  add_definitions("-DUSE_MPI")
   include_directories(${MPI_CXX_INCLUDE_DIRS})
   link_libraries(${MPI_CXX_LIBRARIES})
 endif()
