@@ -1,5 +1,5 @@
-# 2D/3D Material Point Method (mpm)
-> Cambridge Berkeley - Geomechanics
+# CB-Geo High-Performance Material Point Method (CB-Geo mpm)
+> [CB-Geo Computational Geomechanics Research Group](https://www.cb-geo.com)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/cb-geo/mpm/develop/license.md)
 [![Developer docs](https://img.shields.io/badge/developer-docs-blue.svg)](http://cb-geo.github.io/mpm)
@@ -28,6 +28,7 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
+* [MPI](https://www.open-mpi.org/)
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -36,7 +37,7 @@ Please run the following command:
 
 ```shell
 dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
-                   git hdf5 hdf5-devel kernel-devel lcov\
+                   git hdf5 hdf5-devel hdf5-openmpi hdf5-openmpi-devel kernel-devel lcov\
                    make openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
                    voro++ voro++-devel vtk vtk-devel wget
 ```
@@ -55,7 +56,6 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 ### Compile without tests [Editing CMake options]
 
 To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
-
 
 ### Run tests
 
@@ -97,6 +97,38 @@ Where:
      Displays usage information and exits.
 ```
 
-## References
-* [Aspect](https://github.com/geodynamics/aspect)
-* [Dealii](https://github.com/dealii/dealii)
+## Compile with MPI (Running on a cluster)
+
+The CB-Geo MPM code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
+
+Additional steps to load `OpenMPI` on Fedora:
+
+```
+source /etc/profile.d/modules.sh
+export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+module load mpi/openmpi-x86_64
+```
+
+Compile with OpenMPI:
+
+```
+mkdir build && cd build 
+export CXX_COMPILER=mpicxx
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+make -jN
+```
+
+### Running the code with MPI
+
+To run the CB-Geo mpm code on a cluster with MPI:
+
+```
+mpirun -N <#-MPI-tasks> ./mpm -f /path/to/input-dir/ -i mpm.json
+```
+
+For example to run the code on 4 compute nodes (MPI tasks):
+
+```
+mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
+```
+
