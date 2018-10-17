@@ -37,7 +37,7 @@ Please run the following command:
 
 ```shell
 dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
-                   git hdf5 hdf5-devel kernel-devel lcov\
+                   git hdf5 hdf5-devel hdf5-openmpi hdf5-openmpi-devel kernel-devel lcov\
                    make openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
                    voro++ voro++-devel vtk vtk-devel wget
 ```
@@ -97,7 +97,7 @@ Where:
      Displays usage information and exits.
 ```
 
-## Compile with MPI
+## Compile with MPI (Running on a cluster)
 
 The CB-Geo MPM code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
 
@@ -126,9 +126,9 @@ To run the CB-Geo mpm code on a cluster with MPI:
 mpirun -N <#-MPI-tasks> ./mpm -f /path/to/input-dir/ -i mpm.json
 ```
 
-For example to run the code on 2 compute nodes:
+For example to run the code on 4 compute nodes (MPI tasks):
 
 ```
-mpirun -N 2 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
+mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 ```
 
