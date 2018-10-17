@@ -107,8 +107,8 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
   if (mpi_size > 1)
-    attribute_name += "-" + std::to_string(mpi_rank) + "_" +
-                      std::to_string(mpi_size - 1) + "-";
+    attribute_name +=
+        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size) + "-";
 #endif
 
   file_name.str(std::string());
