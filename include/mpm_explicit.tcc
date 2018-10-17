@@ -118,6 +118,30 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
+#ifdef USE_MPI
+    int mpi_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    if (mpi_rank == 0) {
+      // Particle type
+      const auto particle_type =
+          mesh_props["particle_type"].template get<std::string>();
+      // Create particles from file
+      bool particle_status = meshes_.at(0)->create_particles(
+          gid,            // global id
+          particle_type,  // particle type
+          mesh_reader->read_particles(
+              io_->file_name("particles")));  // coordinates
+
+      if (!particle_status)
+        throw std::runtime_error("Addition of particles to mesh failed");
+
+      // Locate particles in cell
+      auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+
+      if (!unlocatable_particles.empty())
+        throw std::runtime_error("Particle outside the mesh domain");
+    }
+#else
     // Particle type
     const auto particle_type =
         mesh_props["particle_type"].template get<std::string>();
@@ -136,6 +160,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
+
+#endif
 
     // Compute volume
     meshes_.at(0)->iterate_over_particles(

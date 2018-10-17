@@ -12,6 +12,9 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
   bool status = true;
 
 #ifdef USE_MPI
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
   // Get number of MPI ranks
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -53,7 +56,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 
   // Main loop
   for (; step_ < nsteps_; ++step_) {
+#ifdef USE_MPI
+    if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
+#else
     console_->info("Step: {} of {}.\n", step_, nsteps_);
+#endif
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
@@ -162,12 +169,17 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
       throw std::runtime_error("Particle outside the mesh domain");
 
     if (step_ % output_steps_ == 0) {
-      // HDF5 outputs
-      this->write_hdf5(this->step_, this->nsteps_);
+#ifdef USE_MPI
+      // Run if there is more than a single MPI task
+      if (mpi_rank == 0) {
+        // HDF5 outputs
+        this->write_hdf5(this->step_, this->nsteps_);
 #ifdef USE_VTK
-      // VTK outputs
-      this->write_vtk(this->step_, this->nsteps_);
-#endif
+        // VTK outputs
+        this->write_vtk(this->step_, this->nsteps_);
+#endif  // VTK
+      }
+#endif  // MPI
     }
   }
   return status;
