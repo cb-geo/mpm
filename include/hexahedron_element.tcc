@@ -431,9 +431,13 @@ inline std::array<Eigen::MatrixXd, Tdim>
     divergence_matrix.setZero();
     for (const auto& xi : xi_s) {
       // Shape function
-      const Eigen::Matrix<double, Tnfunctions, 1> shape_fn = this->shapefn(xi);
+      const Eigen::Matrix<double, Tnfunctions, 1> shape_fn =
+          this->shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                        Eigen::Matrix<double, Tdim, 1>::Zero());
       // Get gradient shape functions
-      const Eigen::MatrixXd grad_sf = this->grad_shapefn(xi);
+      const Eigen::MatrixXd grad_sf =
+          this->grad_shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
+                             Eigen::Matrix<double, Tdim, 1>::Zero());
 
       // Jacobian dx_i/dxi_j
       const Eigen::Matrix<double, Tdim, Tdim> jacobian =
