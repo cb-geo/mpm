@@ -9,9 +9,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   const mpm::Index id = 0;
   // Set analysis step to start at 0
   step_ = 0;
-  // Clear meshes
-  meshes_.clear();
-  meshes_.emplace_back(std::make_unique<mpm::Mesh<Tdim>>(id));
+  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id);
 
   // Empty all materials
   materials_.clear();
@@ -85,7 +83,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Node type
     const auto node_type = mesh_props["node_type"].template get<std::string>();
     // Create nodes from file
-    bool node_status = meshes_.at(0)->create_nodes(
+    bool node_status = mesh_->create_nodes(
         gid,                                                    // global id
         node_type,                                              // node type
         mesh_reader->read_mesh_nodes(io_->file_name("mesh")));  // coordinates
@@ -95,7 +93,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Read and assign velocity constraints
     if (!io_->file_name("velocity_constraints").empty()) {
-      bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
+      bool velocity_constraints = mesh_->assign_velocity_constraints(
           mesh_reader->read_velocity_constraints(
               io_->file_name("velocity_constraints")));
       if (!velocity_constraints)
@@ -110,7 +108,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
         Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
 
     // Create cells from file
-    bool cell_status = meshes_.at(0)->create_cells(
+    bool cell_status = mesh_->create_cells(
         gid,                                                    // global id
         element,                                                // element tyep
         mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
@@ -118,11 +116,18 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
+    // Initialise MPI ranks and size
+    int mpi_rank = 0;
+    int mpi_size = 1;
+    int chunk_size = 0;
+
+    // Get all particles
+    const auto all_particles =
+        mesh_reader->read_particles(io_->file_name("particles"));
+
 #ifdef USE_MPI
-    int mpi_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     // Get number of MPI ranks
-    int mpi_size;
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     // Create MPI array type
@@ -130,11 +135,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     MPI_Type_vector(Tdim, 1, 1, MPI_DOUBLE, &array_t);
     MPI_Type_commit(&array_t);
 
-    auto all_particles =
-        mesh_reader->read_particles(io_->file_name("particles"));
-
     // Calculate chunk size to split router
-    int chunk_size = all_particles.size() / mpi_size;
+    chunk_size = all_particles.size() / mpi_size;
     MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     std::vector<Eigen::Matrix<double, Tdim, 1>> particles(chunk_size);
 
@@ -148,54 +150,38 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
       particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
                        all_particles.end());
     }
-
-    // Particle type
-    const auto particle_type =
-        mesh_props["particle_type"].template get<std::string>();
-    // Create particles from file
-    bool particle_status =
-        meshes_.at(0)->create_particles(mpi_rank * chunk_size,  // global id
-                                        particle_type,          // particle type
-                                        particles);             // coordinates
-
-    if (!particle_status)
-      throw std::runtime_error("Addition of particles to mesh failed");
-
-    // Locate particles in cell
-    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-
-    if (!unlocatable_particles.empty())
-      throw std::runtime_error("Particle outside the mesh domain");
 #else
-    // Particle type
-    const auto particle_type =
-        mesh_props["particle_type"].template get<std::string>();
-    // Create particles from file
-    bool particle_status = meshes_.at(0)->create_particles(
-        gid,            // global id
-        particle_type,  // particle type
-        mesh_reader->read_particles(
-            io_->file_name("particles")));  // coordinates
-
-    if (!particle_status)
-      throw std::runtime_error("Addition of particles to mesh failed");
-
-    // Locate particles in cell
-    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
-
-    if (!unlocatable_particles.empty())
-      throw std::runtime_error("Particle outside the mesh domain");
-
+    // If not-MPI then copy all_particles to particles
+    const auto particles = all_particles;
 #endif
 
+    // Particle type
+    const auto particle_type =
+        mesh_props["particle_type"].template get<std::string>();
+
+    // Create particles from file
+    bool particle_status =
+        mesh_->create_particles(mpi_rank * chunk_size,  // global id
+                                particle_type,          // particle type
+                                particles);             // coordinates
+
+    if (!particle_status)
+      throw std::runtime_error("Addition of particles to mesh failed");
+
+    // Locate particles in cell
+    auto unlocatable_particles = mesh_->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+
     // Compute volume
-    meshes_.at(0)->iterate_over_particles(
+    mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
                   std::placeholders::_1, phase));
 
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
-      bool particles_tractions = meshes_.at(0)->assign_particles_tractions(
+      bool particles_tractions = mesh_->assign_particles_tractions(
           mesh_reader->read_particles_tractions(
               io_->file_name("particles_tractions")));
       if (!particles_tractions)
@@ -205,8 +191,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Read and assign particles stresses
     if (!io_->file_name("particles_stresses").empty()) {
-      bool particles_stresses = meshes_.at(0)->assign_particles_stresses(
-          mesh_reader->read_particles_stresses(
+      bool particles_stresses =
+          mesh_->assign_particles_stresses(mesh_reader->read_particles_stresses(
               io_->file_name("particles_stresses")));
       if (!particles_stresses)
         throw std::runtime_error(
@@ -285,9 +271,9 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
     // Load particle information from file
-    meshes_.at(0)->read_particles_hdf5(phase, particles_file);
+    mesh_->read_particles_hdf5(phase, particles_file);
     // Locate particles
-    auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
+    auto unlocatable_particles = mesh_->locate_particles_mesh();
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
@@ -318,14 +304,14 @@ void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
   const unsigned phase = 0;
-  meshes_.at(0)->write_particles_hdf5(phase, particles_file);
+  mesh_->write_particles_hdf5(phase, particles_file);
 }
 
 #ifdef USE_VTK
 //! Write VTK files
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
-  const auto coordinates = meshes_.at(0)->particle_coordinates();
+  const auto coordinates = mesh_->particle_coordinates();
   // VTK PolyData writer
   auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
 
@@ -344,8 +330,7 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
-        file, meshes_.at(0)->particles_vector_data(attribute, phase),
-        attribute);
+        file, mesh_->particles_vector_data(attribute, phase), attribute);
   }
 }
 #endif
