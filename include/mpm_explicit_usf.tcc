@@ -11,6 +11,12 @@ template <unsigned Tdim>
 bool mpm::MPMExplicitUSF<Tdim>::solve() {
   bool status = true;
 
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
   // Phase
   const unsigned phase = 0;
   // Initialise material
@@ -65,11 +71,21 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
                   std::placeholders::_1, phase));
 
 #ifdef USE_MPI
-    // MPI all reduce nodal mass
-    meshes_.at(0)->allreduce_nodal_scalar_property(
-        std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
-        std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                  false, phase, std::placeholders::_2));
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce nodal mass
+      meshes_.at(0)->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
+                    false, phase, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      meshes_.at(0)->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+    }
 #endif
 
     // Compute nodal velocity
@@ -102,6 +118,26 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
                   std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce external force
+      meshes_.at(0)->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+      // MPI all reduce internal force
+      meshes_.at(0)->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+    }
+#endif
 
     // Iterate over active nodes to compute acceleratation and velocity
     meshes_.at(0)->iterate_over_nodes_predicate(
