@@ -78,6 +78,19 @@ void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
   }
 }
 
+//! All reduce over nodal scalar property
+template <unsigned Tdim>
+template <typename Tgetfunctor>
+void mpm::Mesh<Tdim>::allreduce_node_scalar_property(Tgetfunctor getter) {
+  mpm::Index nnodes = this->nodes_.size();
+  std::vector<double> prop_get(nnodes), prop_set(nnodes);
+
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    prop_get.at((*itr)->id()) = getter(*itr);
+    console_->error("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
+  }
+}
+
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
