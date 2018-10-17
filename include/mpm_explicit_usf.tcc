@@ -56,11 +56,13 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 
   // Main loop
   for (; step_ < nsteps_; ++step_) {
+
 #ifdef USE_MPI
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 #else
     console_->info("Step: {} of {}.\n", step_, nsteps_);
 #endif
+
     // Initialise nodes
     meshes_.at(0)->iterate_over_nodes(
         std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
