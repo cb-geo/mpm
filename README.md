@@ -99,7 +99,7 @@ Where:
 
 ## Compile with MPI (Running on a cluster)
 
-The CB-Geo MPM code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
+The CB-Geo mpm code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
 
 Additional steps to load `OpenMPI` on Fedora:
 

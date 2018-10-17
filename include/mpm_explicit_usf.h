@@ -49,7 +49,7 @@ class MPMExplicitUSF : public MPMExplicit<Tdim> {
   //! Gravity
   using mpm::MPMExplicit<Tdim>::gravity_;
   //! Mesh object
-  using mpm::MPMExplicit<Tdim>::meshes_;
+  using mpm::MPMExplicit<Tdim>::mesh_;
   //! Materials
   using mpm::MPMExplicit<Tdim>::materials_;
 
