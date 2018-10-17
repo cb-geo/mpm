@@ -181,6 +181,14 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         this->write_vtk(this->step_, this->nsteps_);
 #endif  // VTK
       }
+#else  // MPI Else
+       // HDF5 outputs
+      this->write_hdf5(this->step_, this->nsteps_);
+#ifdef USE_VTK
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
+#endif  // VTK
+
 #endif  // MPI
     }
   }
