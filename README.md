@@ -1,4 +1,4 @@
-# CB-Geo High-Performance Material Point Method (CB-Geo mpm)
+# High-Performance Material Point Method (CB-Geo mpm)
 > [CB-Geo Computational Geomechanics Research Group](https://www.cb-geo.com)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/cb-geo/mpm/develop/license.md)
