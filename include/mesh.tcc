@@ -84,10 +84,7 @@ template <unsigned Tdim>
 template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
-  // Get number of MPI ranks
-  int mpi_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-  // Run only if more than a single MPI Rank is found
+  // Create vector of nodal scalars
   mpm::Index nnodes = this->nodes_.size();
   std::vector<double> prop_get(nnodes), prop_set(nnodes);
 
@@ -108,11 +105,7 @@ template <unsigned Tdim>
 template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
-  // Get number of MPI ranks
-  int mpi_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-  // Run only if more than a single MPI Rank is found
+  // Create vector of nodal vectors
   mpm::Index nnodes = this->nodes_.size();
   std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
       prop_set(nnodes);
