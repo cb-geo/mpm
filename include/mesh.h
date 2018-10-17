@@ -8,11 +8,13 @@
 
 // Eigen
 #include "Eigen/Dense"
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
 // TBB
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
-// MPI
-#include "mpi.h"
 
 #include "cell.h"
 #include "container.h"
@@ -84,12 +86,14 @@ class Mesh {
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
 
+#ifdef USE_MPI
   //! All reduce over nodal vector property
   //! \tparam Tgetfunctor Functor for getter
   //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
   template <typename Tgetfunctor, typename Tsetfunctor>
   void allreduce_node_scalar_property(Tgetfunctor getter, Tsetfunctor setter);
+#endif
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id

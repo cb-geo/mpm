@@ -78,6 +78,7 @@ void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
   }
 }
 
+#ifdef USE_MPI
 //! All reduce over nodal scalar property
 template <unsigned Tdim>
 template <typename Tgetfunctor, typename Tsetfunctor>
@@ -105,6 +106,7 @@ void mpm::Mesh<Tdim>::allreduce_node_scalar_property(Tgetfunctor getter,
     }
   }
 }
+#endif
 
 //! Create cells from node lists
 template <unsigned Tdim>
