@@ -87,12 +87,21 @@ class Mesh {
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
 
 #ifdef USE_MPI
+  //! All reduce over nodal scalar property
+  //! \tparam Tgetfunctor Functor for getter
+  //! \tparam Tsetfunctor Functor for setter
+  //! \param[in] getter Getter function
+  template <typename Tgetfunctor, typename Tsetfunctor>
+  void allreduce_nodal_scalar_property(Tgetfunctor getter, Tsetfunctor setter);
+#endif
+
+#ifdef USE_MPI
   //! All reduce over nodal vector property
   //! \tparam Tgetfunctor Functor for getter
   //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
   template <typename Tgetfunctor, typename Tsetfunctor>
-  void allreduce_node_scalar_property(Tgetfunctor getter, Tsetfunctor setter);
+  void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
 
   //! Create cells from list of nodes

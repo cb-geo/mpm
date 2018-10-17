@@ -66,10 +66,10 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 
 #ifdef USE_MPI
     // MPI all reduce nodal mass
-    meshes_.at(0)->allreduce_node_scalar_property(
+    meshes_.at(0)->allreduce_nodal_scalar_property(
         std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
         std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                  true, phase, std::placeholders::_2));
+                  false, phase, std::placeholders::_2));
 #endif
 
     // Compute nodal velocity

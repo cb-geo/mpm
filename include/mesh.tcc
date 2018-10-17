@@ -82,29 +82,63 @@ void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
 //! All reduce over nodal scalar property
 template <unsigned Tdim>
 template <typename Tgetfunctor, typename Tsetfunctor>
-void mpm::Mesh<Tdim>::allreduce_node_scalar_property(Tgetfunctor getter,
-                                                     Tsetfunctor setter) {
+void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
+                                                      Tsetfunctor setter) {
   // Get number of MPI ranks
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   // Run only if more than a single MPI Rank is found
-  if (mpi_size > 1) {
-    mpm::Index nnodes = this->nodes_.size();
-    std::vector<double> prop_get(nnodes), prop_set(nnodes);
+  mpm::Index nnodes = this->nodes_.size();
+  std::vector<double> prop_get(nnodes), prop_set(nnodes);
 
-    for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
-      prop_get.at((*itr)->id()) = getter(*itr);
-      console_->info("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
-    }
-
-    MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
-                  MPI_COMM_WORLD);
-
-    for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
-      setter(*itr, prop_set.at((*itr)->id()));
-      console_->info("Node after reduce {}: {}", (*itr)->id(), getter(*itr));
-    }
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    prop_get.at((*itr)->id()) = getter(*itr);
+    console_->info("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
   }
+
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    setter(*itr, prop_set.at((*itr)->id()));
+    console_->info("Node after reduce {}: {}", (*itr)->id(), getter(*itr));
+  }
+}
+#endif
+
+#ifdef USE_MPI
+//! All reduce over nodal vector property
+template <unsigned Tdim>
+template <typename Tgetfunctor, typename Tsetfunctor>
+void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
+                                                      Tsetfunctor setter) {
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  // Run only if more than a single MPI Rank is found
+  mpm::Index nnodes = this->nodes_.size();
+  std::vector<std::array<double, Tdim>> prop_get(nnodes), prop_set(nnodes);
+
+  /*
+  MPI_Type arr_t;
+  MPI_Type_vector(N, 1, 1, MPI_DOUBLE, &arr_t);
+  MPI_Type_commit(&arr_t);
+
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    prop_get.at((*itr)->id()) = getter(*itr);
+    console_->info("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
+  }
+
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, arr_t, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+    setter(*itr, prop_set.at((*itr)->id()));
+    console_->info("Node after reduce {}: {}", (*itr)->id(), getter(*itr));
+  }
+  MPI_Type_free(&arr_t);
+  */
 }
 #endif
 
