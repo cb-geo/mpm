@@ -91,18 +91,14 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
   mpm::Index nnodes = this->nodes_.size();
   std::vector<double> prop_get(nnodes), prop_set(nnodes);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
     prop_get.at((*itr)->id()) = getter(*itr);
-    console_->info("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
-  }
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
                 MPI_COMM_WORLD);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
     setter(*itr, prop_set.at((*itr)->id()));
-    console_->info("Node after reduce {}: {}", (*itr)->id(), getter(*itr));
-  }
 }
 #endif
 
@@ -118,27 +114,17 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
 
   // Run only if more than a single MPI Rank is found
   mpm::Index nnodes = this->nodes_.size();
-  std::vector<std::array<double, Tdim>> prop_get(nnodes), prop_set(nnodes);
+  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
+      prop_set(nnodes);
 
-  /*
-  MPI_Type arr_t;
-  MPI_Type_vector(N, 1, 1, MPI_DOUBLE, &arr_t);
-  MPI_Type_commit(&arr_t);
-
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
     prop_get.at((*itr)->id()) = getter(*itr);
-    console_->info("Node {}: {}", (*itr)->id(), prop_get.at((*itr)->id()));
-  }
 
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, arr_t, MPI_SUM,
-                MPI_COMM_WORLD);
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
+                MPI_SUM, MPI_COMM_WORLD);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
+  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
     setter(*itr, prop_set.at((*itr)->id()));
-    console_->info("Node after reduce {}: {}", (*itr)->id(), getter(*itr));
-  }
-  MPI_Type_free(&arr_t);
-  */
 }
 #endif
 
