@@ -142,9 +142,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     MPI_Scatter(all_particles.data(), chunk_size, array_t, particles.data(),
                 particles.size(), array_t, 0, MPI_COMM_WORLD);
 
-    // Calculate the remaining chunk of od_pairs and add to rank 0
+    // Calculate the remaining chunk of particles to the last rank
     int chunk_remainder = all_particles.size() % mpi_size;
-    if (mpi_rank == 0) {
+    if (mpi_rank == (mpi_size - 1)) {
       particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
                        all_particles.end());
     }
@@ -154,9 +154,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
         mesh_props["particle_type"].template get<std::string>();
     // Create particles from file
     bool particle_status =
-        meshes_.at(0)->create_particles(gid,            // global id
-                                        particle_type,  // particle type
-                                        particles);     // coordinates
+        meshes_.at(0)->create_particles(mpi_rank * chunk_size,  // global id
+                                        particle_type,          // particle type
+                                        particles);             // coordinates
 
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
