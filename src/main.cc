@@ -4,7 +4,6 @@
 
 #include "io.h"
 #include "mpm.h"
-#include "vtk_writer.h"
 
 int main(int argc, char** argv) {
   // Logger level (trace, debug, info, warn, error, critical, off)
@@ -17,7 +16,7 @@ int main(int argc, char** argv) {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
-    // Get analysis
+    // Get analysis type
     const std::string analysis = io->analysis_type();
 
     // Create an MPM analysis

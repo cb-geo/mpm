@@ -84,13 +84,16 @@ class ParticleBase {
   virtual bool compute_shapefn() = 0;
 
   //! Assign volume
-  virtual void assign_volume(double volume) = 0;
+  virtual void assign_volume(unsigned phase, double volume) = 0;
 
   //! Return volume
-  virtual double volume() const = 0;
+  virtual double volume(unsigned phase) const = 0;
 
   //! Compute volume of particle
-  virtual bool compute_volume() = 0;
+  virtual bool compute_volume(unsigned phase) = 0;
+
+  //! Update volume based on centre volumetric strain rate
+  virtual bool update_volume_strainrate(unsigned phase, double dt) = 0;
 
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
@@ -117,6 +120,9 @@ class ParticleBase {
   //! Return mass
   virtual double mass(unsigned phase) const = 0;
 
+  //! Return pressure
+  virtual double pressure(unsigned phase) const = 0;
+
   //! Compute strain
   virtual void compute_strain(unsigned phase, double dt) = 0;
 
@@ -128,6 +134,10 @@ class ParticleBase {
 
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid(unsigned phase) const = 0;
+
+  //! Initial stress
+  virtual void initial_stress(unsigned phase,
+                              const Eigen::Matrix<double, 6, 1>&) = 0;
 
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
@@ -148,8 +158,21 @@ class ParticleBase {
   //! Return velocity
   virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
 
+  //! Assign traction
+  virtual bool assign_traction(unsigned phase, unsigned direction,
+                               double traction) = 0;
+
+  //! Return traction
+  virtual Eigen::VectorXd traction(unsigned phase) const = 0;
+
+  //! Map traction force
+  virtual void map_traction_force(unsigned phase) = 0;
+
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
+
+  //! Compute updated position based on nodal velocity
+  virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
 
  protected:
   //! particleBase id
@@ -160,8 +183,6 @@ class ParticleBase {
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status
   bool status_{true};
-  //! Volume
-  double volume_{std::numeric_limits<double>::max()};
   //! Reference coordinates (in a cell)
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell

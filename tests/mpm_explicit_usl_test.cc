@@ -15,8 +15,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
+  const std::string analysis = "MPMExplicitUSL2D";
   const bool resume = false;
-  bool status = mpm_test::write_json(2, resume, fname);
+  bool status = mpm_test::write_json(2, resume, analysis, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -28,10 +29,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 7;
+  int argc = 5;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicitUSL2D",
                   (char*)"-f",  (char*)"./",
                   (char*)"-i",  (char*)"mpm-explicit-usl-2d.json"};
   // clang-format on
@@ -69,8 +69,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
   SECTION("Check resume") {
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
+    const std::string analysis = "MPMExplicitUSL2D";
     bool resume = true;
-    bool status = mpm_test::write_json(2, resume, fname);
+    REQUIRE(mpm_test::write_json(2, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
@@ -92,8 +93,9 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
+  const std::string analysis = "MPMExplicitUSL3D";
   const bool resume = false;
-  bool status = mpm_test::write_json(3, resume, fname);
+  bool status = mpm_test::write_json(3, resume, analysis, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -105,10 +107,9 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 7;
+  int argc = 5;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicitUSL3D",
                   (char*)"-f",  (char*)"./",
                   (char*)"-i",  (char*)"mpm-explicit-usl-3d.json"};
   // clang-format on
@@ -146,8 +147,9 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
   SECTION("Check resume") {
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
+    const std::string analysis = "MPMExplicitUSL3D";
     bool resume = true;
-    bool status = mpm_test::write_json(3, resume, fname);
+    REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);

@@ -64,16 +64,14 @@ class Material {
   //! \retval result Value of material property
   double property(const std::string& key);
 
+  //! Compute thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Thermodynamic pressure for volumetric strain
+  virtual double thermodynamic_pressure(double volumetric_strain) = 0;
+
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   virtual Matrix6x6 elastic_tensor() = 0;
-
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& dstrain) = 0;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -83,11 +81,6 @@ class Material {
   virtual Vector6d compute_stress(const Vector6d& stress,
                                   const Vector6d& dstrain,
                                   const ParticleBase<Tdim>* ptr) = 0;
-
-  //! Check if this material needs a particle handle
-  //! Set true, if material needs other parameters from the particle
-  //! For eg, dstrain_rate. These function calls can only to const functions
-  virtual bool property_handle() const = 0;
 
  protected:
   //! material id

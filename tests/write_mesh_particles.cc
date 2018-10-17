@@ -3,7 +3,8 @@
 namespace mpm_test {
 
 // Write JSON Configuration file
-bool write_json(unsigned dim, bool resume, const std::string& file_name) {
+bool write_json(unsigned dim, bool resume, const std::string& analysis,
+                const std::string& file_name) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -50,7 +51,8 @@ bool write_json(unsigned dim, bool resume, const std::string& file_name) {
          {"youngs_modulus", 1.5E+6},
          {"poisson_ratio", 0.25}}}},
       {"analysis",
-       {{"dt", 0.001},
+       {{"type", analysis},
+        {"dt", 0.001},
         {"uuid", file_name + "-" + dimension},
         {"nsteps", 10},
         {"gravity", gravity},
@@ -61,7 +63,10 @@ bool write_json(unsigned dim, bool resume, const std::string& file_name) {
           {"step", 5}}},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
-      {"post_processing", {{"path", "results/"}, {"output_steps", 5}}}};
+      {"post_processing",
+       {{"path", "results/"},
+        {"vtk", {{"stresses", "strains", "velocity"}}},
+        {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read
   std::ofstream file;
@@ -181,6 +186,7 @@ bool write_particles_2d() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-2d.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -347,6 +353,7 @@ bool write_particles_3d() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-3d.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {

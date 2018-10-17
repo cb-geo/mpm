@@ -1,7 +1,6 @@
 #ifndef MPM_MATERIAL_BINGHAM_H_
 #define MPM_MATERIAL_BINGHAM_H_
 
-#include <iostream>
 #include <limits>
 
 #include "Eigen/Dense"
@@ -26,7 +25,7 @@ class Bingham : public Material<Tdim> {
   Bingham(unsigned id) : Material<Tdim>(id){};
 
   //! Destructor
-  virtual ~Bingham() override{};
+  ~Bingham() override{};
 
   //! Delete copy constructor
   Bingham(const Bingham&) = delete;
@@ -38,6 +37,11 @@ class Bingham : public Material<Tdim> {
   //! \param[in] material_properties Material properties
   void properties(const Json& material_properties) override;
 
+  //! Thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Pressure for volumetric strain
+  double thermodynamic_pressure(double volumetric_strain) override;
+
   //! Compute elastic tensor
   //! \retval de_ Elastic tensor
   Matrix6x6 elastic_tensor() override;
@@ -45,19 +49,10 @@ class Bingham : public Material<Tdim> {
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress,
-                          const Vector6d& dstrain) override;
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
                           const ParticleBase<Tdim>* ptr) override;
-
-  //! Check if this material needs a particle handle
-  bool property_handle() const override { return true; }
 
  protected:
   //! material id

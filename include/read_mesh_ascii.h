@@ -48,11 +48,22 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   std::vector<VectorDim> read_particles(
       const std::string& particles_file) override;
 
+  //! Read particle stresses
+  //! \param[in] particles_stresses file name with particle stresses
+  //! \retval stresses Vector of particle stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
+      const std::string& particles_stresses) override;
+
   //! Read constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
+
+  //! Read traction file
+  //! \param[in] traction_files file name with particle tractions
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_particles_tractions(const std::string& traction_file) override;
 
  private:
   //! Logger

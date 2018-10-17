@@ -15,16 +15,15 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j4
-            ctest -VV
-      # Clang-6.0
+      # Clang-6.0 and Static Analysis
       - run:
-          name: Clang-6.0 build
+          name: Clang-6.0 + Static analysis
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4 
+            scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
+            scan-build make -j4 
             ctest -VV
       # cppcheck
       - run:
@@ -45,9 +44,8 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
-            make -j4
-            ctest -VV
+            make mpmtest_coverage -j4
+            ./mpmtest_coverage
             make gcov
             make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov
-

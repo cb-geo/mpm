@@ -26,6 +26,8 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 * [Eigen](http://eigen.tuxfamily.org/)
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
 * [HDF5](https://support.hdfgroup.org/HDF5/)
+
+#### Optional
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -42,9 +44,18 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release /path/to/CMakeLists.txt`.
+0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ /path/to/CMakeLists.txt`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
+
+### Compile mpm or mpmtest
+
+* To compile either `mpm` or `mpmtest` alone, run `make mpm -jN` or `make mpmtest -jN` (where N is the number of cores).
+
+### Compile without tests [Editing CMake options]
+
+To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
+
 
 ### Run tests
 
@@ -56,16 +67,19 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
 ```
-./mpm  -a <analysis> [-i <input_file>] -f <working_dir> [--] [--version]
+./mpm  -f <working_dir> [-i <input_file>] [--] [--version]
        [-h]
+```
+
+For example:
+
+```
+./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json
 ```
 
 Where:
 
 ```
-   -a <analysis>,  --analysis <analysis>
-     (required)  MPM analysis 
-     (MPMExplicitUSF3D / MPMExplicitUSF2D / MPMExplicitUSL3D / MPMExplicitUSL2D)
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]
@@ -86,6 +100,3 @@ Where:
 ## References
 * [Aspect](https://github.com/geodynamics/aspect)
 * [Dealii](https://github.com/dealii/dealii)
-
-
-

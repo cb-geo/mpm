@@ -37,15 +37,39 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     output_steps_ = post_process_["output_steps"].template get<mpm::Index>();
 
   } catch (std::domain_error& domain_error) {
-    console_->error(" {} {} Get analysis object: {}", __FILE__, __LINE__,
+    console_->error("{} {} Get analysis object: {}", __FILE__, __LINE__,
                     domain_error.what());
     abort();
+  }
+
+  // Default VTK attributes
+  std::vector<std::string> vtk = {"velocities", "stresses", "strains"};
+  try {
+    if (post_process_.at("vtk").is_array() &&
+        post_process_.at("vtk").size() > 0) {
+      for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
+        std::string attribute =
+            post_process_["vtk"][i].template get<std::string>();
+        if (std::find(vtk.begin(), vtk.end(), attribute) != vtk.end())
+          vtk_attributes_.emplace_back(attribute);
+        else
+          throw std::runtime_error("Specificed VTK argument is incorrect");
+      }
+    } else {
+      throw std::runtime_error(
+          "Specificed VTK arguments are incorrect, using defaults");
+    }
+  } catch (std::exception& exception) {
+    vtk_attributes_ = vtk;
+    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
 }
 
 // Initialise mesh and particles
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
+  // TODO: Fix phase
+  const unsigned phase = 0;
   bool status = true;
   try {
     // Get mesh properties
@@ -70,12 +94,14 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
       throw std::runtime_error("Addition of nodes to mesh failed");
 
     // Read and assign velocity constraints
-    bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
-        mesh_reader->read_velocity_constraints(
-            io_->file_name("velocity_constraints")));
-    if (!velocity_constraints)
-      throw std::runtime_error(
-          "Velocity constraints are not properly assigned");
+    if (!io_->file_name("velocity_constraints").empty()) {
+      bool velocity_constraints = meshes_.at(0)->assign_velocity_constraints(
+          mesh_reader->read_velocity_constraints(
+              io_->file_name("velocity_constraints")));
+      if (!velocity_constraints)
+        throw std::runtime_error(
+            "Velocity constraints are not properly assigned");
+    }
 
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -110,6 +136,31 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
+
+    // Compute volume
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
+                  std::placeholders::_1, phase));
+
+    // Read and assign particles tractions
+    if (!io_->file_name("particles_tractions").empty()) {
+      bool particles_tractions = meshes_.at(0)->assign_particles_tractions(
+          mesh_reader->read_particles_tractions(
+              io_->file_name("particles_tractions")));
+      if (!particles_tractions)
+        throw std::runtime_error(
+            "Particles tractions are not properly assigned");
+    }
+
+    // Read and assign particles stresses
+    if (!io_->file_name("particles_stresses").empty()) {
+      bool particles_stresses = meshes_.at(0)->assign_particles_stresses(
+          mesh_reader->read_particles_stresses(
+              io_->file_name("particles_stresses")));
+      if (!particles_stresses)
+        throw std::runtime_error(
+            "Particles stresses are not properly assigned");
+    }
 
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
@@ -197,36 +248,12 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
                    this->nsteps_);
 
   } catch (std::exception& exception) {
-    console_->info(" {} {} Resume failed, restarting analysis: {}", __FILE__,
+    console_->info("{} {} Resume failed, restarting analysis: {}", __FILE__,
                    __LINE__, exception.what());
     this->step_ = 0;
     checkpoint = false;
   }
   return checkpoint;
-}
-
-//! Write VTK files
-template <unsigned Tdim>
-void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
-  const auto coordinates = meshes_.at(0)->particle_coordinates();
-  // VTK PolyData writer
-  auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
-
-  // Write input geometry to vtk file
-  std::string attribute = "geometry";
-  std::string extension = ".vtp";
-
-  auto meshfile =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_geometry(meshfile);
-
-  unsigned phase = 0;
-  // Write stress vector
-  attribute = "stresses";
-  auto stress_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
-  vtk_writer->write_vector_point_data(
-      stress_file, meshes_.at(0)->particle_stresses(phase), attribute);
 }
 
 //! Write HDF5 files
@@ -242,3 +269,32 @@ void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
   const unsigned phase = 0;
   meshes_.at(0)->write_particles_hdf5(phase, particles_file);
 }
+
+#ifdef USE_VTK
+//! Write VTK files
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
+  const auto coordinates = meshes_.at(0)->particle_coordinates();
+  // VTK PolyData writer
+  auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
+
+  // Write input geometry to vtk file
+  std::string extension = ".vtp";
+  std::string attribute = "geometry";
+  auto meshfile =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  vtk_writer->write_geometry(meshfile);
+
+  // TODO fix phase
+  unsigned phase = 0;
+
+  for (const auto& attribute : vtk_attributes_) {
+    // Write vector
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_vector_point_data(
+        file, meshes_.at(0)->particles_vector_data(attribute, phase),
+        attribute);
+  }
+}
+#endif

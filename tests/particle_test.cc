@@ -91,6 +91,23 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
   }
 
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -127,6 +144,43 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Assign volume
+    particle->assign_volume(Phase, 2.0);
+    // Check volume
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 0;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   SECTION("Check initialise particle HDF5") {
@@ -369,6 +423,23 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_cell(cell) == true);
   }
 
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
   //! Test particle, cell and node functions
   SECTION("Test particle, cell and node functions") {
     // Add particle
@@ -431,8 +502,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_reference_location() == false);
     // Compute updated particle location should fail
     REQUIRE(particle->compute_updated_position(phase, dt) == false);
+    // Compute updated particle location from nodal velocity should fail
+    REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume() == false);
+    REQUIRE(particle->compute_volume(phase) == false);
+    // Update volume should fail
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -445,13 +520,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(1.0).epsilon(Tolerance));
 
     // Check reference location
     coords << -0.5, -0.5;
@@ -485,7 +560,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
 
     // Compute mass
     REQUIRE(particle->compute_mass(phase) == true);
@@ -574,6 +649,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    // Check pressure
+    REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
+
     // Compute strain
     particle->compute_strain(phase, dt);
     // Strain
@@ -585,9 +663,19 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
               Approx(strain(i)).epsilon(Tolerance));
 
     // Check volumetric strain at centroid
-    const double volumetric_strain = 0.8;
+    const double volumetric_strain = 0.2;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Check updated pressure
+    const double K = 8333333.333333333;
+    REQUIRE(particle->pressure(phase) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Update volume strain rate
+    REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->volume(phase) == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -627,6 +715,44 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
+    // Check traction force
+    double traction = 7.68;
+    const unsigned direction = 1;
+    // TODO: Remove this and compute the forces properly
+    // Assign volume
+    particle->assign_volume(Phase, 2.0);
+    // Assign traction to particle
+    particle->assign_traction(phase, direction, traction);
+    // Map traction force
+    particle->map_traction_force(phase);
+
+    // Traction force
+    Eigen::Matrix<double, 4, 2> traction_force;
+    // shapefn * volume / size_(dir) * traction
+    // clang-format off
+    traction_force << 0., 0.5625 * 1.414213562 * 7.68,
+                      0., 0.1875 * 1.414213562 * 7.68,
+                      0., 0.0625 * 1.414213562 * 7.68,
+                      0., 0.1875 * 1.414213562 * 7.68;
+    // clang-format on
+    // Add previous external body force
+    traction_force += body_force;
+
+    // Check nodal traction force
+    for (unsigned i = 0; i < traction_force.rows(); ++i)
+      for (unsigned j = 0; j < traction_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(traction_force(i, j)).epsilon(Tolerance));
+    // Reset traction
+    particle->assign_traction(phase, direction, -traction);
+    // Map traction force
+    particle->map_traction_force(phase);
+    // Check nodal external force
+    for (unsigned i = 0; i < traction_force.rows(); ++i)
+      for (unsigned j = 0; j < traction_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(body_force(i, j)).epsilon(Tolerance));
+
     // Internal force
     Eigen::Matrix<double, 4, 2> internal_force;
     // clang-format off
@@ -637,6 +763,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // clang-format on
 
     // Map particle internal force
+    // TODO: Remove this and compute the forces properly
+    particle->assign_volume(Phase, 1.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
@@ -689,15 +817,30 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle velocity
     // TODO: Check velocity
     velocity << 0., 0.019;
-    //  velocity << 0., -0.981;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     // TODO: Check coords
-    coords << 0.75, .7519;
-    // coords << 0.75, .6519;  // (0.75 - 0.0981)
+    coords << 0.75, .8394;
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location from nodal velocity
+    REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
+    // Check particle velocity
+    // TODO: Check velocity
+    velocity << 0., 0.894;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // Updated particle coordinate
+    // TODO: Check coords
+    coords << 0.75, .9288;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -770,6 +913,46 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 19.745;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Assign volume
+    particle->assign_volume(Phase, 2.0);
+    // Check volume
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 1;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    // Calculate traction force = traction * volume / spacing
+    traction *= 2.0 / (std::pow(2.0, 1. / Dim));
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   // Check initialise particle from HDF5 file
@@ -1065,6 +1248,23 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_cell(cell) == true);
   }
 
+  //! Test initialise particle stresses
+  SECTION("Particle with initial stress") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    Eigen::Matrix<double, 6, 1> stress =
+        Eigen::Matrix<double, 6, 1>::Constant(5.7);
+    const unsigned phase = 0;
+    particle->initial_stress(phase, stress);
+    REQUIRE(particle->stress(phase).size() == stress.size());
+    auto pstress = particle->stress(phase);
+    for (unsigned i = 0; i < pstress.size(); ++i)
+      REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
   //! Test particle, cell and node functions
   SECTION("Test particle, cell and node functions") {
     // Add particle
@@ -1156,8 +1356,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_reference_location() == false);
     // Compute updated particle location should fail
     REQUIRE(particle->compute_updated_position(phase, dt) == false);
+    // Compute updated particle location from nodal velocity should fail
+    REQUIRE(particle->compute_updated_position_velocity(phase, dt) == false);
     // Compute volume
-    REQUIRE(particle->compute_volume() == false);
+    REQUIRE(particle->compute_volume(phase) == false);
+    // Update volume should fail
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1170,13 +1374,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(2.0);
+    particle->assign_volume(Phase, 2.0);
     // Check volume
-    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->volume(Phase) == Approx(8.0).epsilon(Tolerance));
 
     // Check reference location
     coords << 0.5, 0.5, 0.5;
@@ -1210,7 +1414,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
-    REQUIRE(particle->compute_volume() == true);
+    REQUIRE(particle->compute_volume(Phase) == true);
 
     // Compute mass
     REQUIRE(particle->compute_mass(phase) == true);
@@ -1318,6 +1522,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    // Check pressure
+    REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
+
     // Compute strain
     particle->compute_strain(phase, dt);
     // Strain
@@ -1330,9 +1537,19 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
               Approx(strain(i)).epsilon(Tolerance));
 
     // Check volumetric strain at centroid
-    const double volumetric_strain = 4.;
+    const double volumetric_strain = 0.5;
     REQUIRE(particle->volumetric_strain_centroid(phase) ==
             Approx(volumetric_strain).epsilon(Tolerance));
+
+    // Check updated pressure
+    const double K = 8333333.333333333;
+    REQUIRE(particle->pressure(phase) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Update volume strain rate
+    REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->volume(phase) == Approx(12.0).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -1376,6 +1593,48 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(body_force(i, j)).epsilon(Tolerance));
 
+    // Check traction force
+    double traction = 7.68;
+    const unsigned direction = 2;
+    // Assign volume
+    // TODO: Remove this and compute the forces properly
+    particle->assign_volume(Phase, 2.0);
+    // Assign traction to particle
+    particle->assign_traction(phase, direction, traction);
+    // Map traction force
+    particle->map_traction_force(phase);
+
+    // Traction force
+    Eigen::Matrix<double, 8, 3> traction_force;
+    // shapefn * volume / size_(dir) * traction
+    // clang-format off
+    traction_force << 0., 0., 0.015625 * 1.587401052 * 7.68,
+                      0., 0., 0.046875 * 1.587401052 * 7.68,
+                      0., 0., 0.140625 * 1.587401052 * 7.68,
+                      0., 0., 0.046875 * 1.587401052 * 7.68,
+                      0., 0., 0.046875 * 1.587401052 * 7.68,
+                      0., 0., 0.140625 * 1.587401052 * 7.68,
+                      0., 0., 0.421875 * 1.587401052 * 7.68,
+                      0., 0., 0.140625 * 1.587401052 * 7.68;
+    // clang-format on
+    // Add previous external body force
+    traction_force += body_force;
+
+    // Check nodal traction force
+    for (unsigned i = 0; i < traction_force.rows(); ++i)
+      for (unsigned j = 0; j < traction_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(traction_force(i, j)).epsilon(Tolerance));
+    // Reset traction
+    particle->assign_traction(phase, direction, -traction);
+    // Map traction force
+    particle->map_traction_force(phase);
+    // Check nodal external force
+    for (unsigned i = 0; i < traction_force.rows(); ++i)
+      for (unsigned j = 0; j < traction_force.cols(); ++j)
+        REQUIRE(nodes[i]->external_force(phase)[j] ==
+                Approx(body_force(i, j)).epsilon(Tolerance));
+
     // Internal force
     Eigen::Matrix<double, 8, 3> internal_force;
     // clang-format off
@@ -1390,6 +1649,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // clang-format on
 
     // Map particle internal force
+    // TODO: Remove this and compute the forces properly
+    particle->assign_volume(Phase, 8.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
     // Check nodal internal force
@@ -1456,7 +1717,24 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // TODO: Check particle position
     // Updated particle coordinate
-    coords << 1.5, 1.6, 1.6019;
+    coords << 1.5, 2.0875, 2.5769;
+    // Check particle coordinates
+    coordinates = particle->coordinates();
+    for (unsigned i = 0; i < coordinates.size(); ++i)
+      REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Compute updated particle location based on nodal velocity
+    REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
+    // TODO: Check particle velocity
+    // Check particle velocity
+    velocity << 0., 5.875, 10.769;
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->velocity(Phase)(i) ==
+              Approx(velocity(i)).epsilon(Tolerance));
+
+    // TODO: Check particle position
+    // Updated particle coordinate
+    coords << 1.5, 2.675, 3.6538;
     // Check particle coordinates
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
@@ -1528,6 +1806,46 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
     status = particle->assign_velocity(Phase, velocity);
     REQUIRE(status == false);
+
+    // Assign volume
+    particle->assign_volume(Phase, 2.0);
+    // Check volume
+    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Traction
+    double traction = 65.32;
+    const unsigned Direction = 1;
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+
+    bool traction_status =
+        particle->assign_traction(Phase, Direction, traction);
+    REQUIRE(traction_status == true);
+
+    // Calculate traction force = traction * volume / spacing
+    traction *= 2.0 / (std::pow(2.0, 1. / Dim));
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
+    REQUIRE(traction_status == false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction)
+        REQUIRE(particle->traction(Phase)(i) ==
+                Approx(traction).epsilon(Tolerance));
+      else
+        REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
+    }
   }
 
   // Check initialise particle from HDF5 file

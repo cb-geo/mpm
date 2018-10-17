@@ -1,10 +1,6 @@
 #ifndef MPM_HEXAHEDRON_ELEMENT_H_
 #define MPM_HEXAHEDRON_ELEMENT_H_
 
-#include <exception>
-
-#include <Eigen/Dense>
-
 #include "element.h"
 #include "logger.h"
 
@@ -54,19 +50,19 @@ namespace mpm {
 //! 27-node (Triquadratic) Hexahedron Element \n
 //! Check with GMSH \n
 //! <pre>
-//!          7           18             6
+//!          3           13             2
 //!            0_ _ _ _ _ 0 _ _ _ _ _ 0
 //!            /|                     /|
 //!           / |                    / |
-//!          /  |    25             /  |
-//!      19 0   |     0         17 0   |
-//!        /    |      23 0       /    |
-//!       /  15 0                /     0 14
+//!          /  |    24             /  |
+//!      15 0   |     0         14 0   |
+//!        /    |      20 0       /    |
+//!       /   9 0                /     0 11
 //!      /      |               /      |
-//!  4  0_ _ _ _|_ 0 _ _ _ _ _ 0 5     |
-//!     |       | 16           |       |
-//!     |  0 24 |              |   0 22|
-//!     |       |          8   |       |
+//!  7  0_ _ _ _|_ 0 _ _ _ _ _ 0 6     |
+//!     |       | 19           |       |
+//!     |  0 22 |              |   0 23|
+//!     |       |    0 26  8   |       |
 //!     |     0 0_ _ _ _ _ 0_ _|_ _ _  0  1
 //!     |      /               |      /
 //!  17 0     /    0 25        0 18  /
@@ -80,6 +76,30 @@ namespace mpm {
 //!
 //!
 //! </pre>
+//!
+//! Face numbering for 8-node, 20-node and 27-node Hexaheron Element \n
+//!
+//! <pre>
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
+//!         Front: F5
+//!
+//!
+//! Bottom face: F0, Right face: F1, Top face: F2,
+//! Left face: F3, Rear face: F4, Front face: F5
+//! </pre>
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -105,34 +125,64 @@ class HexahedronElement : public Element<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
+  Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
+                          const VectorDim& deformation_gradient) const override;
+
+  //! Evaluate local shape functions at given local coordinates
+  //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval shapefn Shape function of a given cell
+  Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
+  Eigen::MatrixXd grad_shapefn(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian(
       const Eigen::Matrix<double, 3, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
+      const Eigen::MatrixXd& nodal_coordinates,
+      const Eigen::Matrix<double, 3, 1>& particle_size,
+      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
-  //! Evaluate B matrix at given local coordinates
+  //! Compute Jacobian local
   //! \param[in] xi given local coordinates
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
+      const Eigen::Matrix<double, 3, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates,
+      const Eigen::Matrix<double, 3, 1>& particle_size,
+      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval bmatrix B matrix
   std::vector<Eigen::MatrixXd> bmatrix(
-      const VectorDim& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate the mass matrix
   //! \param[in] xi_s Vector of local coordinates
@@ -159,6 +209,11 @@ class HexahedronElement : public Element<Tdim> {
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;
 
+  //! Return the type of shape function
+  mpm::ShapefnType shapefn_type() const override {
+    return mpm::ShapefnType::NORMAL_MPM;
+  }
+
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
 
@@ -174,6 +229,16 @@ class HexahedronElement : public Element<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+  //! Return indices of a face of an element
+  //! \param[in] face_id given id of the face
+  //! \retval indices Indices that make the face
+  Eigen::VectorXi face_indices(unsigned face_id) const override;
+
+  //! Return the number of faces in a hexahedron
+  unsigned nfaces() const override { return 6; }
+  //! Return unit element volume 3D 2*2*2
+  double unit_element_volume() const override { return 8.; }
 
  private:
   //! Logger

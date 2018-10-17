@@ -78,13 +78,22 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
-  void assign_volume(double volume) override { volume_ = volume; }
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] volume Volume of particle for the phase
+  void assign_volume(unsigned phase, double volume) override;
 
   //! Return volume
-  double volume() const override { return volume_; }
+  //! \param[in] phase Index corresponding to the phase
+  double volume(unsigned phase) const override { return volume_(phase); }
 
   //! Compute volume as cell volume / nparticles
-  bool compute_volume() override;
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_volume(unsigned phase) override;
+
+  //! Update volume based on centre volumetric strain rate
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_volume_strainrate(unsigned phase, double dt) override;
 
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
@@ -99,17 +108,21 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
   void assign_mass(unsigned phase, double mass) override {
-    mass_(0, phase) = mass;
+    mass_(phase) = mass;
   }
 
-  //! Return mass of the particlesx
+  //! Return mass of the particles
   //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const override { return mass_(0, phase); }
+  double mass(unsigned phase) const override { return mass_(phase); }
 
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
+
+  //! Return pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -133,6 +146,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval volumetric strain at centroid
   double volumetric_strain_centroid(unsigned phase) const override {
     return volumetric_strain_centroid_(phase);
+  }
+
+  //! Initial stress
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] stress Initial sress corresponding to the phase
+  void initial_stress(unsigned phase,
+                      const Eigen::Matrix<double, 6, 1>& stress) override {
+    this->stress_.col(phase) = stress;
   }
 
   //! Compute stress
@@ -166,10 +187,39 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Assign traction to the particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction(unsigned phase, unsigned direction,
+                       double traction) override;
+
+  //! Return traction of the particle
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::VectorXd traction(unsigned phase) const override {
+    return traction_.col(phase);
+  }
+
+  //! Map traction force
+  //! \param[in] phase Index corresponding to the phase
+  void map_traction_force(unsigned phase) override;
+
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position(unsigned phase, double dt) override;
+
+  //! Compute updated position of the particle based on nodal velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
+ private:
+  //! Update pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
+  bool update_pressure(unsigned phase, double dvolumetric_strain);
 
  private:
   //! particle id
@@ -184,12 +234,16 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Volume
-  using ParticleBase<Tdim>::volume_;
   //! Material
   using ParticleBase<Tdim>::material_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
+  //! Volume
+  Eigen::Matrix<double, 1, Tnphases> volume_;
+  //! Size of particle
+  Eigen::Matrix<double, 1, Tdim> size_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
@@ -202,6 +256,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Set traction
+  bool set_traction_{false};
+  //! Traction
+  Eigen::Matrix<double, Tdim, Tnphases> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix

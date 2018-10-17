@@ -85,22 +85,10 @@ bool mpm::Cell<Tdim>::add_node(
 
 //! Activate nodes if particle is present
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::activate_nodes() {
-  bool status = true;
-  try {
-    // If number of particles are present, set node status to active
-    if (particles_.size() > 0) {
-      // Activate all nodes
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-        nodes_[i]->assign_status(true);
-    } else {
-      throw std::runtime_error("No particles in cell, can't activate nodes");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Cell<Tdim>::activate_nodes() {
+  // If number of particles are present, set all associated nodes as active
+  if (particles_.size() > 0)
+    for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
 }
 
 //! Add a neighbour cell and return the status of addition of a node
@@ -125,6 +113,7 @@ bool mpm::Cell<Tdim>::add_neighbour(
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_particle_id(Index id) {
   bool status = false;
+  std::lock_guard<std::mutex> guard(cell_mutex_);
   // Check if it is found in the container
   auto itr = std::find(particles_.begin(), particles_.end(), id);
   if (itr == particles_.end()) {
@@ -579,7 +568,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
-      xi(2) = 2. * (point(2) - centre(2)) / ylength;
+      xi(2) = 2. * (point(2) - centre(2)) / zlength;
 
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
@@ -649,8 +638,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                Eigen::Matrix<double, 2, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
@@ -666,11 +657,15 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
-    // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian(xi, unit_cell);
+    // Calculate local Jacobian
+    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian_local(
+        xi, unit_cell, Eigen::Matrix<double, 2, 1>::Zero(),
+        Eigen::Matrix<double, 2, 1>::Zero());
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
+                                Eigen::Matrix<double, 2, 1>::Zero());
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
@@ -737,8 +732,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     // Set xi to affine guess
     if (!guess_nan) xi = affine_guess;
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                Eigen::Matrix<double, 3, 1>::Zero());
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
@@ -753,11 +750,15 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
-    // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian(xi, unit_cell);
+    // Calculate local Jacobian
+    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian_local(
+        xi, unit_cell, Eigen::Matrix<double, 3, 1>::Zero(),
+        Eigen::Matrix<double, 3, 1>::Zero());
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf =
+        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
+                                Eigen::Matrix<double, 3, 1>::Zero());
 
     // Residual f(x)
     Eigen::Matrix<double, 3, 1> residual;
@@ -784,12 +785,10 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
 
 //! Map particle volume to nodes
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_particle_volume_to_nodes(const VectorDim& xi,
-                                                   unsigned phase,
-                                                   double pvolume) {
-  const auto shapefns = element_->shapefn(xi);
-  for (unsigned i = 0; i < shapefns.size(); ++i) {
-    nodes_[i]->update_volume(true, phase, shapefns(i) * pvolume);
+void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pvolume) {
+  for (unsigned i = 0; i < shapefn.size(); ++i) {
+    nodes_[i]->update_volume(true, phase, shapefn(i) * pvolume);
   }
 }
 
@@ -864,7 +863,9 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   xi_centroid.setZero();
 
   // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
+  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates(),
+                                   Eigen::Matrix<double, Tdim, 1>::Zero(),
+                                   Eigen::Matrix<double, Tdim, 1>::Zero());
 
   // Define strain rate at centroid
   Eigen::VectorXd strain_rate_centroid;
@@ -872,11 +873,9 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   strain_rate_centroid.setZero();
 
   // Compute strain rate
-  for (unsigned i = 0; i < bmatrix.size(); ++i) {
-    for (unsigned i = 0; i < this->nnodes(); ++i) {
-      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
-      strain_rate_centroid += bmatrix.at(i) * node_velocity;
-    }
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
+    strain_rate_centroid += bmatrix.at(i) * node_velocity;
   }
   return strain_rate_centroid;
 }
@@ -890,6 +889,15 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, phase,
                                      (shapefn(i) * pgravity * pmass));
+}
+
+//! Compute the nodal traction force of a cell from particle
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_traction_force(
+    const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction) {
+  // Map external forces from particle to nodes
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_external_force(true, phase, (shapefn(i) * traction));
 }
 
 //! Compute the nodal internal force  of a cell from particle stress and
@@ -950,4 +958,81 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 
   return acceleration;
+}
+
+//! Assign velocity constraint
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
+                                                 double velocity) {
+  bool status = true;
+  try {
+    //! Constraint directions can take values between 0 and Dim * Nphases - 1
+    if (dir >= 0 && face_id < element_->nfaces()) {
+      this->velocity_constraints_[face_id].emplace_back(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
+    } else
+      throw std::runtime_error("Constraint direction is out of bounds");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute all face normals 2d
+template <>
+inline void mpm::Cell<2>::compute_normals() {
+
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute the vector to calculate normal (perpendicular)
+    // a = node(0) - node(1)
+    Eigen::Matrix<double, 2, 1> a = (this->nodes_[indices(0)])->coordinates() -
+                                    (this->nodes_[indices(1)])->coordinates();
+
+    // Compute normal and make unit vector
+    // The normal vector n to vector a is defined such that the dot product
+    // between a and n is always 0 In 2D, n(0) = -a(1), n(1) = a(0) Note that
+    // the reverse does not work to produce normal that is positive pointing out
+    // of the element
+    Eigen::Matrix<double, 2, 1> normal_vector;
+    normal_vector << -a(1), a(0);
+    normal_vector = normal_vector.normalized();
+
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
+  }
+}
+
+//! Compute all face normals 3d
+template <>
+inline void mpm::Cell<3>::compute_normals() {
+
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+
+    // Compute two vectors to calculate normal
+    // a = node(1) - node(0)
+    // b = node(3) - node(0)
+    Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+    Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
+                                    (this->nodes_[indices(0)])->coordinates();
+
+    // Compute normal and make unit vector
+    // normal = a x b
+    // Note that definition of a and b are such that normal is always out of
+    // page
+    Eigen::Matrix<double, 3, 1> normal_vector = a.cross(b);
+    normal_vector = normal_vector.normalized();
+
+    face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
+        static_cast<unsigned>(face_id), normal_vector));
+  }
 }

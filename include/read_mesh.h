@@ -58,11 +58,22 @@ class ReadMesh {
   virtual std::vector<VectorDim> read_particles(
       const std::string& particles_file) = 0;
 
+  //! Read particle stresses
+  //! \param[in] particles_stresses file name with particle stresses
+  //! \retval stresses Vector of particle stresses
+  virtual std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
+      const std::string& particles_stresses) = 0;
+
   //! Read velocity constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
+
+  //! Read particles traction file
+  //! \param[in] traction_files file name with particle tractions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_particles_tractions(const std::string& traction_file) = 0;
 
 };  // ReadMesh class
 }  // namespace mpm

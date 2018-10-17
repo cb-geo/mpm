@@ -1,10 +1,6 @@
 #ifndef MPM_QUADRILATERAL_ELEMENT_H_
 #define MPM_QUADRILATERAL_ELEMENT_H_
 
-#include <exception>
-
-#include <Eigen/Dense>
-
 #include "element.h"
 #include "logger.h"
 
@@ -53,6 +49,20 @@ namespace mpm {
 //!  0      4       1
 //!
 //! </pre>
+//! Face numbering for 4-node, 8-node and 9-node Quadrilateral Element \n
+//! <pre>
+//!
+//!          F2
+//!   3 0----------0 2
+//!     |          |
+//!  F3 |          | F1
+//!     |          |
+//!     |          |
+//!   0 0----------0 1
+//!          F0
+//! </pre>
+//!
+//!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -79,34 +89,62 @@ class QuadrilateralElement : public Element<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
+  Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
+                          const VectorDim& deformation_gradient) const override;
+
+  //! Evaluate local shape functions at given coordinates
+  //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval shapefn Shape function of a given cell
+  Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
+  Eigen::MatrixXd grad_shapefn(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const Eigen::Matrix<double, 2, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
-  //! Evaluate the B matrix at given local coordinates
+  //! Compute Jacobian local
   //! \param[in] xi given local coordinates
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
   //! \retval bmatrix B matrix
   std::vector<Eigen::MatrixXd> bmatrix(
-      const VectorDim& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate the mass matrix
   //! \param[in] xi_s Vector of local coordinates
@@ -133,6 +171,11 @@ class QuadrilateralElement : public Element<Tdim> {
   //! Return the degree of shape function
   mpm::ElementDegree degree() const override;
 
+  //! Return the type of shape function
+  mpm::ShapefnType shapefn_type() const override {
+    return mpm::ShapefnType::NORMAL_MPM;
+  }
+
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
 
@@ -148,6 +191,16 @@ class QuadrilateralElement : public Element<Tdim> {
   //! to check if a point is inside /outside of a hedron
   //! \retval indices Indices that form sub-tetrahedrons
   Eigen::MatrixXi inhedron_indices() const override;
+
+  //! Return indices of a face of an element
+  //! \param[in] face_id given id of the face
+  //! \retval indices Indices that make the face
+  Eigen::VectorXi face_indices(unsigned face_id) const override;
+
+  //! Return the number of faces in a quadrilateral
+  unsigned nfaces() const override { return 4; }
+  //! Return unit element volume 2D 2*2
+  double unit_element_volume() const override { return 4.; }
 
  private:
   //! Logger

@@ -15,7 +15,8 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  bool status = mpm_test::write_json_unitcell(2, fname);
+  const std::string analysis = "MPMExplicitUSF2D";
+  bool status = mpm_test::write_json_unitcell(2, analysis, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -27,10 +28,9 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 7;
+  int argc = 5;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicitUSF2D",
                   (char*)"-f",  (char*)"./",
                   (char*)"-i",  (char*)"mpm-explicit-usf-2d-unitcell.json"};
   // clang-format on
@@ -72,7 +72,8 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  bool status = mpm_test::write_json_unitcell(3, fname);
+  const std::string analysis = "MPMExplicitUSF3D";
+  bool status = mpm_test::write_json_unitcell(3, analysis, fname);
   REQUIRE(status == true);
 
   // Write Mesh
@@ -84,10 +85,9 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
   REQUIRE(particle_status == true);
 
   // Assign argc and argv to input arguments of MPM
-  int argc = 7;
+  int argc = 5;
   // clang-format off
   char* argv[] = {(char*)"./mpm",
-                  (char*)"-a",  (char*)"MPMExplicitUSF3D",
                   (char*)"-f",  (char*)"./",
                   (char*)"-i",  (char*)"mpm-explicit-usf-3d-unitcell.json"};
   // clang-format on

@@ -155,6 +155,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     // Dump particles coordinates as an input file to be read
     std::ofstream file;
     file.open("particles-2d.txt");
+    file << coordinates.size() << "\n";
     // Write particle coordinates
     for (const auto& coord : coordinates) {
       for (unsigned i = 0; i < coord.size(); ++i) {
@@ -190,7 +191,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     }
   }
   SECTION("Check velocity constraints file") {
-    // Vector of particle coordinates
+    // Vector of velocity constraints
     std::vector<std::tuple<mpm::Index, unsigned, double>> velocity_constraints;
 
     // Constraint
@@ -199,7 +200,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
     velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
 
-    // Dump constratints as an input file to be read
+    // Dump constraints as an input file to be read
     std::ofstream file;
     file.open("velocity-constraints-2d.txt");
     // Write particle coordinates
@@ -218,7 +219,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       // Create a read_mesh object
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
-      // Try to read constrtaints from a non-existant file
+      // Try to read constraints from a non-existant file
       auto constraints = read_mesh->read_velocity_constraints(
           "velocity-constraints-missing.txt");
       // Check number of constraints
@@ -241,6 +242,109 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check tractions file") {
+    // Vector of particle tractions
+    std::vector<std::tuple<mpm::Index, unsigned, double>> particles_tractions;
+
+    // Constraint
+    particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+    particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+    particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+    particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("tractions-2d.txt");
+    // Write particle coordinates
+    for (const auto& traction : particles_tractions) {
+      file << std::get<0>(traction) << "\t";
+      file << std::get<1>(traction) << "\t";
+      file << std::get<2>(traction) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read tractions
+    SECTION("Check tractions") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read constrtaints from a non-existant file
+      auto tractions =
+          read_mesh->read_particles_tractions("tractions-missing.txt");
+      // Check number of tractions
+      REQUIRE(tractions.size() == 0);
+
+      // Check tractions
+      tractions = read_mesh->read_particles_tractions("tractions-2d.txt");
+      // Check number of particles
+      REQUIRE(tractions.size() == particles_tractions.size());
+
+      // Check tractions
+      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
+        REQUIRE(
+            std::get<0>(tractions.at(i)) ==
+            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(tractions.at(i)) ==
+            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<2>(tractions.at(i)) ==
+            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check stresses file") {
+    // Vector of particle stresses
+    std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+    // Stresses
+    particles_stresses.emplace_back(
+        Eigen::Matrix<double, 6, 1>::Constant(10.5));
+    particles_stresses.emplace_back(
+        Eigen::Matrix<double, 6, 1>::Constant(-12.5));
+    particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(0.4));
+
+    // Dump initial stresses as an input file to be read
+    std::ofstream file;
+    file.open("particle-stresses-2d.txt");
+    file << particles_stresses.size() << "\n";
+    // Write particle coordinates
+    for (const auto& stress : particles_stresses) {
+      for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read stresses
+    SECTION("Check stresses") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read stresses from a non-existant file
+      auto stresses =
+          read_mesh->read_particles_stresses("stresses-missing.txt");
+      // Check number of stresses
+      REQUIRE(stresses.size() == 0);
+
+      // Check stresses
+      stresses = read_mesh->read_particles_stresses("particle-stresses-2d.txt");
+      // Check number of particles
+      REQUIRE(stresses.size() == particles_stresses.size());
+
+      // Check stresses
+      for (unsigned i = 0; i < particles_stresses.size(); ++i) {
+        for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
+          REQUIRE(stresses.at(i)[j] ==
+                  Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
       }
     }
   }
@@ -437,6 +541,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
     // Dump particles coordinates as an input file to be read
     std::ofstream file;
     file.open("particles-3d.txt");
+    file << coordinates.size() << "\n";
     // Write particle coordinates
     for (const auto& coord : coordinates) {
       for (unsigned i = 0; i < coord.size(); ++i) {
@@ -524,6 +629,110 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check tractions file") {
+    // Vector of particle tractions
+    std::vector<std::tuple<mpm::Index, unsigned, double>> particles_tractions;
+
+    // Constraint
+    particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+    particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+    particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+    particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("tractions-3d.txt");
+    // Write particle coordinates
+    for (const auto& traction : particles_tractions) {
+      file << std::get<0>(traction) << "\t";
+      file << std::get<1>(traction) << "\t";
+      file << std::get<2>(traction) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read tractions
+    SECTION("Check tractions") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read constraints from a non-existant file
+      auto tractions =
+          read_mesh->read_particles_tractions("tractions-missing.txt");
+      // Check number of tractions
+      REQUIRE(tractions.size() == 0);
+
+      // Check tractions
+      tractions = read_mesh->read_particles_tractions("tractions-3d.txt");
+      // Check number of particles
+      REQUIRE(tractions.size() == particles_tractions.size());
+
+      // Check tractions
+      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
+        REQUIRE(
+            std::get<0>(tractions.at(i)) ==
+            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(tractions.at(i)) ==
+            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<2>(tractions.at(i)) ==
+            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check stresses file") {
+    // Vector of particle stresses
+    std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+    // Stresses
+    particles_stresses.emplace_back(
+        Eigen::Matrix<double, 6, 1>::Constant(100.5));
+    particles_stresses.emplace_back(
+        Eigen::Matrix<double, 6, 1>::Constant(-112.5));
+    particles_stresses.emplace_back(
+        Eigen::Matrix<double, 6, 1>::Constant(0.46));
+
+    // Dump initial stresses as an input file to be read
+    std::ofstream file;
+    file.open("particle-stresses-3d.txt");
+    file << particles_stresses.size() << "\n";
+    // Write particle coordinates
+    for (const auto& stress : particles_stresses) {
+      for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read stresses
+    SECTION("Check stresses") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read stresses from a non-existant file
+      auto stresses =
+          read_mesh->read_particles_stresses("stresses-missing.txt");
+      // Check number of stresses
+      REQUIRE(stresses.size() == 0);
+
+      // Check stresses
+      stresses = read_mesh->read_particles_stresses("particle-stresses-3d.txt");
+      // Check number of particles
+      REQUIRE(stresses.size() == particles_stresses.size());
+
+      // Check stresses
+      for (unsigned i = 0; i < particles_stresses.size(); ++i) {
+        for (unsigned j = 0; j < particles_stresses.at(0).size(); ++j)
+          REQUIRE(stresses.at(i)[j] ==
+                  Approx(particles_stresses.at(i)[j]).epsilon(Tolerance));
       }
     }
   }

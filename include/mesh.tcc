@@ -17,26 +17,25 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
                                    const std::vector<VectorDim>& coordinates) {
   bool status = true;
   try {
-    // Check if nodal coordinates is not empty
-    if (!coordinates.empty()) {
-      for (const auto& node_coordinates : coordinates) {
-        // Add node to mesh and check
-        bool insert_status = this->add_node(
-            // Create a node of particular
-            Factory<mpm::NodeBase<Tdim>, mpm::Index,
-                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(node_type, static_cast<mpm::Index>(gnid),
-                         node_coordinates));
-
-        // Increament node id
-        if (insert_status) ++gnid;
-        // When addition of node fails
-        else
-          throw std::runtime_error("Addition of node to mesh failed!");
-      }
-    } else
-      // If the coordinates vector is empty
+    // Check if nodal coordinates is empty
+    if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
+    // Iterate over all coordinates
+    for (const auto& node_coordinates : coordinates) {
+      // Add node to mesh and check
+      bool insert_status = this->add_node(
+          // Create a node of particular
+          Factory<mpm::NodeBase<Tdim>, mpm::Index,
+                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
+              ->create(node_type, static_cast<mpm::Index>(gnid),
+                       node_coordinates));
+
+      // Increment node id
+      if (insert_status) ++gnid;
+      // When addition of node fails
+      else
+        throw std::runtime_error("Addition of node to mesh failed!");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -86,41 +85,39 @@ bool mpm::Mesh<Tdim>::create_cells(
     const std::vector<std::vector<mpm::Index>>& cells) {
   bool status = true;
   try {
-    // Check if node id list is not empty
-    if (!cells.empty()) {
-      for (const auto& nodes : cells) {
-        // Create cell with element
-        auto cell =
-            std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
-
-        // Cell local node id
-        unsigned local_nid = 0;
-        // For nodeids in a given cell
-        for (auto nid : nodes) {
-          cell->add_node(local_nid, map_nodes_[nid]);
-          ++local_nid;
-        }
-
-        // Add cell to mesh
-        bool insert_cell = false;
-        // Check if cell has all nodes before inserting to mesh
-        if (cell->nnodes() == nodes.size()) {
-          // Initialise cell before insertion
-          cell->initialise();
-          // If cell is initialised insert to mesh
-          if (cell->is_initialised()) insert_cell = this->add_cell(cell);
-        } else
-          throw std::runtime_error("Invalid node ids for cell!");
-
-        // Increament global cell id
-        if (insert_cell) ++gcid;
-        // When addition of cell fails
-        else
-          throw std::runtime_error("Addition of cell to mesh failed!");
-      }
-    } else {
-      // If the coordinates vector is empty
+    // Check if nodes in cell list is not empty
+    if (cells.empty())
       throw std::runtime_error("List of nodes of cells is empty");
+
+    for (const auto& nodes : cells) {
+      // Create cell with element
+      auto cell =
+          std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
+
+      // Cell local node id
+      unsigned local_nid = 0;
+      // For nodeids in a given cell
+      for (auto nid : nodes) {
+        cell->add_node(local_nid, map_nodes_[nid]);
+        ++local_nid;
+      }
+
+      // Add cell to mesh
+      bool insert_cell = false;
+      // Check if cell has all nodes before inserting to mesh
+      if (cell->nnodes() == nodes.size()) {
+        // Initialise cell before insertion
+        cell->initialise();
+        // If cell is initialised insert to mesh
+        if (cell->is_initialised()) insert_cell = this->add_cell(cell);
+      } else
+        throw std::runtime_error("Invalid node ids for cell!");
+
+      // Increment global cell id
+      if (insert_cell) ++gcid;
+      // When addition of cell fails
+      else
+        throw std::runtime_error("Addition of cell to mesh failed!");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -159,25 +156,23 @@ bool mpm::Mesh<Tdim>::create_particles(
     const std::vector<VectorDim>& coordinates) {
   bool status = true;
   try {
-    // Check if particle coordinates is not empty
-    if (!coordinates.empty()) {
-      for (const auto& particle_coordinates : coordinates) {
-        // Add particle to mesh and check
-        bool insert_status = this->add_particle(
-            Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                ->create(particle_type, static_cast<mpm::Index>(gpid),
-                         particle_coordinates));
-
-        // Increament particle id
-        if (insert_status) ++gpid;
-        // When addition of particle fails
-        else
-          throw std::runtime_error("Addition of particle to mesh failed!");
-      }
-    } else {
-      // If the coordinates vector is empty
+    // Check if particle coordinates is empty
+    if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
+    // Iterate over particle coordinates
+    for (const auto& particle_coordinates : coordinates) {
+      // Add particle to mesh and check
+      bool insert_status = this->add_particle(
+          Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
+              ->create(particle_type, static_cast<mpm::Index>(gpid),
+                       particle_coordinates));
+
+      // Increment particle id
+      if (insert_status) ++gpid;
+      // When addition of particle fails
+      else
+        throw std::runtime_error("Addition of particle to mesh failed!");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -224,8 +219,8 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
       particles_.cbegin(), particles_.cend(),
       [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
         // If particle is not found in mesh add to a list of particles
+        std::lock_guard<std::mutex> guard(mesh_mutex_);
         if (!this->locate_particle_cells(particle))
-          // Needs a lock guard here
           particles.emplace_back(particle);
       });
 
@@ -297,48 +292,183 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
-//! Return particle stresses
+//! Return particle vector data
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particle_stresses(
-    unsigned phase) {
-  std::vector<Eigen::Matrix<double, 3, 1>> particle_stresses;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    Eigen::Vector3d stresses;
-    stresses.setZero();
-    auto pstress = (*pitr)->stress(phase);
-    // Fill stresses to the size of dimensions
-    for (unsigned i = 0; i < Tdim; ++i) stresses(i) = pstress(i);
-    particle_stresses.emplace_back(stresses);
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
+    const std::string& attribute, unsigned phase) {
+  std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
+  try {
+    // Iterate over particles
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      Eigen::Vector3d data;
+      data.setZero();
+      // Stresses
+      if (attribute == "stresses") {
+        auto pdata = (*pitr)->stress(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Strains
+      else if (attribute == "strains") {
+        auto pdata = (*pitr)->strain(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Velocities
+      else if (attribute == "velocities") {
+        auto pdata = (*pitr)->velocity(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }
+      // Error
+      else
+        throw std::runtime_error("Invalid particle vector data attribute: !");
+      // Add to a vector of data
+      vector_data.emplace_back(data);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
+                    attribute);
+    vector_data.clear();
   }
-  return particle_stresses;
+  return vector_data;
 }
 
-//! Assign velocity constraints
+//! Assign velocity constraints to nodes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_velocity_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         velocity_constraints) {
   bool status = false;
   try {
-    if (nodes_.size()) {
-      for (const auto& velocity_constraint : velocity_constraints) {
-        // Node id
-        mpm::Index nid = std::get<0>(velocity_constraint);
-        // Direction
-        unsigned dir = std::get<1>(velocity_constraint);
-        // Velocity
-        double velocity = std::get<2>(velocity_constraint);
-
-        // Apply constraint
-        status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
-
-        if (!status)
-          throw std::runtime_error("Node or velocity constraint is invalid");
-      }
-    } else {
+    if (!nodes_.size())
       throw std::runtime_error(
           "No nodes have been assigned in mesh, cannot assign velocity "
           "constraints");
+
+    for (const auto& velocity_constraint : velocity_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(velocity_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
+
+      if (!status)
+        throw std::runtime_error("Node or velocity constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_tractions) {
+  bool status = false;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_traction : particle_tractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_traction);
+      // Direction
+      unsigned dir = std::get<1>(particle_traction);
+      // Traction
+      double traction = std::get<2>(particle_traction);
+
+      // Apply traction
+      for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+        if ((*pitr)->id() == pid) {
+          status = (*pitr)->assign_traction(phase, dir, traction);
+          break;
+        }
+      }
+      if (!status)
+        throw std::runtime_error("Particle not found / traction is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle stresses
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_stresses(
+    const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign stresses");
+
+    if (particles_.size() != particle_stresses.size())
+      throw std::runtime_error(
+          "Number of particles in mesh and initial stresses don't match");
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      (*pitr)->initial_stress(phase, particle_stresses.at(i));
+      ++i;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign velocity constraints to cells
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
+        velocity_constraints) {
+  bool status = false;
+  try {
+    // Check the number of nodes
+    if (!nodes_.size()) {
+      throw std::runtime_error(
+          "No cells have been assigned in mesh, cannot assign velocity "
+          "constraints");
+    }
+    // Loop through all the velocity constraints
+    for (const auto& velocity_constraint : velocity_constraints) {
+      // Cell id
+      const mpm::Index cell_id = std::get<0>(velocity_constraint);
+      // Face id
+      const unsigned face_id = std::get<1>(velocity_constraint);
+      // Direction of the local coordinate system of the face
+      // Tdim = 2, Normal is y local axis, dir = 1
+      // Tdim = 3, Normal is z local axis, dir = 2
+      const unsigned dir = std::get<2>(velocity_constraint);
+      // Velocity
+      const double velocity = std::get<3>(velocity_constraint);
+
+      // Apply constraint
+      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+        if ((*citr)->id() == cell_id) {
+          status = (*citr)->assign_velocity_constraint(face_id, dir, velocity);
+          break;
+        }
+      }
+
+      if (!status)
+        throw std::runtime_error(
+            "Cell or face or velocity constraint is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -375,6 +505,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
     particle_data[i].id = (*pitr)->id();
     particle_data[i].mass = (*pitr)->mass(phase);
+    particle_data[i].volume = (*pitr)->volume(phase);
+    particle_data[i].pressure = (*pitr)->pressure(phase);
 
     particle_data[i].coord_x = coordinates[0];
     particle_data[i].coord_y = coordinates[1];
@@ -408,11 +540,12 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 22;
+  const hsize_t NFIELDS = 24;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
+      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
       HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
       HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, velocity_x),
       HOFFSET(HDF5Particle, velocity_y), HOFFSET(HDF5Particle, velocity_z),
@@ -427,6 +560,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
   size_t dst_sizes[NFIELDS] = {
       sizeof(particle_data[0].id),         sizeof(particle_data[0].mass),
+      sizeof(particle_data[0].volume),     sizeof(particle_data[0].pressure),
       sizeof(particle_data[0].coord_x),    sizeof(particle_data[0].coord_y),
       sizeof(particle_data[0].coord_z),    sizeof(particle_data[0].velocity_x),
       sizeof(particle_data[0].velocity_y), sizeof(particle_data[0].velocity_z),
@@ -441,11 +575,11 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
   // Define particle field information
   const char* field_names[NFIELDS] = {
-      "id",         "mass",       "coord_x",    "coord_y",   "coord_z",
-      "velocity_x", "velocity_y", "velocity_z", "stress_xx", "stress_yy",
-      "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx",
-      "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",
-      "epsilon_v",  "status"};
+      "id",        "mass",      "volume",     "pressure",   "coord_x",
+      "coord_y",   "coord_z",   "velocity_x", "velocity_y", "velocity_z",
+      "stress_xx", "stress_yy", "stress_zz",  "tau_xy",     "tau_yz",
+      "tau_xz",    "strain_xx", "strain_yy",  "strain_zz",  "gamma_xy",
+      "gamma_yz",  "gamma_xz",  "epsilon_v",  "status"};
 
   hid_t field_type[NFIELDS];
   hid_t string_type;
@@ -476,7 +610,9 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   field_type[18] = H5T_NATIVE_DOUBLE;
   field_type[19] = H5T_NATIVE_DOUBLE;
   field_type[20] = H5T_NATIVE_DOUBLE;
-  field_type[21] = H5T_NATIVE_HBOOL;
+  field_type[21] = H5T_NATIVE_DOUBLE;
+  field_type[22] = H5T_NATIVE_DOUBLE;
+  field_type[23] = H5T_NATIVE_HBOOL;
 
   // Create a new file using default properties.
   file_id =
@@ -505,11 +641,12 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   const unsigned nparticles = this->nparticles();
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 22;
+  const hsize_t NFIELDS = 24;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
+      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
       HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
       HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, velocity_x),
       HOFFSET(HDF5Particle, velocity_y), HOFFSET(HDF5Particle, velocity_z),
@@ -527,6 +664,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
   size_t dst_sizes[NFIELDS] = {
       sizeof(particle.id),         sizeof(particle.mass),
+      sizeof(particle.volume),     sizeof(particle.pressure),
       sizeof(particle.coord_x),    sizeof(particle.coord_y),
       sizeof(particle.coord_z),    sizeof(particle.velocity_x),
       sizeof(particle.velocity_y), sizeof(particle.velocity_z),

@@ -472,8 +472,21 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     pgravity << 0., 9.814;
     // Phase
     unsigned phase = 0;
-    const auto shapefns_xi = element->shapefn(xi);
-    const auto bmatrix = element->bmatrix(xi);
+    // Nodal coordinates
+    Eigen::Matrix<double, 4, Dim> coords;
+    // clang-format off
+      coords << 0., 0.,
+                2., 0.,
+                2., 2.,
+                0., 2.;
+    // clang-format on
+
+    const auto shapefns_xi =
+        element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto bmatrix =
+        element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -482,7 +495,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
       for (const auto& node : nodes)
         REQUIRE(node->volume(phase) == Approx(2.0).epsilon(Tolerance));
     }
@@ -573,6 +586,27 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       }
     }
 
+    SECTION("Check particle traction force mapping") {
+      // Check external force at nodes
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+      // Apply traction force
+      Eigen::Vector2d tractionforce;
+      tractionforce << 1.5, 2.5;
+      // Calculate traction force at nodes
+      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+
+      // Check traction force
+      tractionforce *= 0.25;  // traction force * shapefn value (0.25)
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < tractionforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(tractionforce(i)).epsilon(Tolerance));
+    }
+
     SECTION("Check particle internal force mapping") {
       // Assign internal force to nodes
       const double pvolume = 0.5;
@@ -653,7 +687,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875;
@@ -663,7 +699,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.1875, 0.1875;
@@ -702,7 +739,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (0.5, 0.5)
       xi << 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -713,7 +752,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Check interpolate acceleration (-0.5, -0.5)
       xi << -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -1538,8 +1578,25 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Phase
     unsigned phase = 0;
 
-    const auto shapefns_xi = element->shapefn(xi);
-    const auto bmatrix = element->bmatrix(xi);
+    // Nodal coords
+    Eigen::Matrix<double, 8, Dim> coords;
+    // clang-format off
+      coords << 0., 0., 0.,
+                2., 0., 0.,
+                2., 2., 0.,
+                0., 2., 0.,
+                0., 0., 2.,
+                2., 0., 2.,
+                2., 2., 2.,
+                0., 2., 2.;
+    // clang-format on
+
+    const auto shapefns_xi =
+        element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto bmatrix =
+        element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                         Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -1548,7 +1605,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
       REQUIRE(nodes.size() == 8);
       for (const auto& node : nodes)
         REQUIRE(node->volume(phase) == Approx(1.0).epsilon(Tolerance));
@@ -1638,6 +1695,27 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
           REQUIRE(node->external_force(phase)(i) ==
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check particle traction force mapping") {
+      // Check external force at nodes
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+      // Apply traction force
+      Eigen::Vector3d tractionforce;
+      tractionforce << 1.5, 2.5, 3.7;
+      // Calculate traction force at nodes
+      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+
+      // Check traction force
+      tractionforce *= 0.125;  // traction force * shapefn value (0.25)
+      for (const auto& node : nodes)
+        for (unsigned i = 0; i < tractionforce.size(); ++i)
+          REQUIRE(node->external_force(phase)(i) ==
+                  Approx(tractionforce(i)).epsilon(Tolerance));
     }
 
     SECTION("Check particle internal force mapping") {
@@ -1733,7 +1811,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.5875, 0.5875, 0.5875;
@@ -1743,7 +1823,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate velocity (-0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
 
       interpolated_velocity << 0.2875, 0.2875, 0.2875;
@@ -1784,7 +1865,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (0.5, 0.5, 0.5)
       xi << 0.5, 0.5, 0.5;
-      auto shapefn_xi = element->shapefn(xi);
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 
@@ -1795,7 +1878,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       // Check interpolate acceleration (-0.5, -0.5, -0.5)
       xi << -0.5, -0.5, -0.5;
-      shapefn_xi = element->shapefn(xi);
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
       check_acceleration =
           cell->interpolate_nodal_acceleration(shapefn_xi, phase);
 

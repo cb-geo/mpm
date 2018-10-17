@@ -35,6 +35,10 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
+  // Compute mass
+  meshes_.at(0)->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
   // Test if checkpoint resume is needed
   bool resume = false;
   if (analysis_.find("resume") != analysis_.end())
@@ -55,13 +59,6 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     meshes_.at(0)->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
 
-    // Compute volume
-    meshes_.at(0)->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
-
-    // Compute mass
-    meshes_.at(0)->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
     // Assign mass and momentum to nodes
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -88,6 +85,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                   std::placeholders::_1, phase, this->gravity_));
 
+    // Iterate over each particle to map traction force to nodes
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
+                  std::placeholders::_1, phase));
+
     // Iterate over each particle to compute nodal internal force
     meshes_.at(0)->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
@@ -104,6 +106,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, phase, this->dt_));
 
+    // Iterate over each particle to update particle volume
+    meshes_.at(0)->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                  std::placeholders::_1, phase, this->dt_));
+
     // Locate particles
     auto unlocatable_particles = meshes_.at(0)->locate_particles_mesh();
 
@@ -111,10 +118,12 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
       throw std::runtime_error("Particle outside the mesh domain");
 
     if (step_ % output_steps_ == 0) {
-      // VTK outputs
-      this->write_vtk(this->step_, this->nsteps_);
       // HDF5 outputs
       this->write_hdf5(this->step_, this->nsteps_);
+#ifdef USE_VTK
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
+#endif
     }
   }
   return status;

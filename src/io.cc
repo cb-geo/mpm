@@ -19,12 +19,6 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
-    // Analysis
-    TCLAP::ValueArg<std::string> analysis_arg(
-        "a", "analysis", "MPM analysis", true, "MPMExplicit3D", "analysis");
-
-    cmd.add(analysis_arg);
-
     // Parse arguments
     cmd.parse(argc, argv);
 
@@ -34,8 +28,6 @@ mpm::IO::IO(int argc, char** argv) {
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
 
-    // Set Analysis Type
-    analysis_ = analysis_arg.getValue();
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
   }
@@ -66,7 +58,10 @@ std::string mpm::IO::file_name(const std::string& filename) {
     file_name = working_dir_ +
                 json_["input_files"][filename].template get<std::string>();
   } catch (const std::exception& except) {
-    console_->warn("Invalid JSON argument: {}", except.what());
+    console_->warn("Invalid JSON argument: {}; error: {}", filename,
+                   except.what());
+    file_name.clear();
+    return file_name;
   }
 
   // Check if a file is present, if not set file_name to empty
@@ -88,7 +83,7 @@ bool mpm::IO::check_file(const std::string& filename) {
     file.close();
   } catch (std::ifstream::failure& exception) {
     status = false;
-    console_->error("Failed to find file: {}", exception.what());
+    console_->error("Failed to find file {}: {}", filename, exception.what());
   }
   return status;
 }
