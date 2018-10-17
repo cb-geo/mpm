@@ -6,6 +6,11 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include "container.h"
 #include "mpm.h"
 #include "particle.h"
