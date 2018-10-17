@@ -82,6 +82,12 @@ class Mesh {
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
 
+  //! All reduce over nodal vector property
+  //! \tparam Tgetfunctor Functor for getter
+  //! \param[in] getter Getter function
+  template <typename Tgetfunctor>
+  void allreduce_node_scalar_property(Tgetfunctor getter);
+
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
   //! \param[in] element Element type

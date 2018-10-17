@@ -64,6 +64,10 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
 
+    // MPI all reduce nodal mass
+    meshes_.at(0)->allreduce_node_scalar_property(
+        std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase));
+
     // Compute nodal velocity
     meshes_.at(0)->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
