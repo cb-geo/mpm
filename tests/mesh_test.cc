@@ -3,6 +3,10 @@
 
 #include "Eigen/Dense"
 #include "catch.hpp"
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
 
 #include "element.h"
 #include "hexahedron_element.h"
@@ -895,6 +899,48 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     }
     // Node 2
     {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
+
+    mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::update_mass,
+                                       std::placeholders::_1, false, 0, 10.0));
+
+#ifdef USE_MPI
+    // Get number of MPI ranks
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) {
+      // Run if there is more than a single MPI task
+      // MPI all reduce nodal mass
+      mesh->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Dim>::mass, std::placeholders::_1, 0),
+          std::bind(&mpm::NodeBase<Dim>::update_mass, std::placeholders::_1,
+                    false, 0, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      mesh->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Dim>::coordinates, std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                    std::placeholders::_1, std::placeholders::_2));
+    }
+#endif
+    // Node 1
+    {
+      // Check mass
+      REQUIRE(node1->mass(0) == Approx(10.).epsilon(Tolerance));
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check mass
+      REQUIRE(node2->mass(0) == Approx(10.).epsilon(Tolerance));
       // Check if nodal coordinate update has gone through
       auto check_coords = node2->coordinates();
       // Check if coordinates for each node is zero

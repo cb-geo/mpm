@@ -8,13 +8,18 @@ jobs:
       - checkout
       # GCC-8
       - run:
-          name: GCC-8 build
+          name: GCC-8 build + MPI
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            source /etc/profile.d/modules.sh
+            export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+            module load mpi/openmpi-x86_64
+            export CXX_COMPILER=mpicxx
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j4
+            ctest -VV
       # Clang-6.0 and Static Analysis
       - run:
           name: Clang-6.0 + Static analysis
@@ -22,7 +27,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
+            scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang  -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             scan-build make -j4 
             ctest -VV
       # cppcheck
