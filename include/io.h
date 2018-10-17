@@ -14,6 +14,10 @@ using Json = nlohmann::json;
 // Speed log
 #include "spdlog/spdlog.h"
 
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 namespace mpm {
 //! \brief Input/Output handler
 class IO {
