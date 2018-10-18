@@ -78,6 +78,35 @@ void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
   }
 }
 
+//! Create a list of active nodes in mesh
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_active_nodes() {
+  // Clear existing list of active nodes
+  this->active_nodes_.clear();
+
+  // Create a local variable to pass as lambda
+  Container<NodeBase<Tdim>> active_nodes;
+
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &active_nodes](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        // If node is active add to a list of active nodes
+        std::lock_guard<std::mutex> guard(mesh_mutex_);
+        if (node->status()) {
+          active_nodes.add(node);
+        }
+      });
+
+  this->active_nodes_ = active_nodes;
+}
+
+//! Iterate over active nodes
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
+  tbb::parallel_for_each(active_nodes_.cbegin(), active_nodes_.cend(), oper);
+}
+
 #ifdef USE_MPI
 //! All reduce over nodal scalar property
 template <unsigned Tdim>
