@@ -713,7 +713,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check traction force
     double traction = 7.68;
     const unsigned direction = 1;
-    // TODO: Remove this and compute the forces properly
     // Assign volume
     particle->assign_volume(Phase, 2.0);
     // Assign traction to particle
@@ -758,7 +757,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // clang-format on
 
     // Map particle internal force
-    // TODO: Remove this and compute the forces properly
     particle->assign_volume(Phase, 1.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
@@ -773,7 +771,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       node->compute_acceleration_velocity(phase, dt);
 
     // Check nodal velocity
-    // TODO: Check nodal velocities
     // clang-format off
     nodal_velocity <<  217.9487179487179,  474.3779743589742,
                       -551.2820512820512,  372.8138717948718,
@@ -786,7 +783,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes[i]->velocity(phase)[j] ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
-    // TODO: Check nodal acceleration
+    // Check nodal acceleration
     Eigen::Matrix<double, 4, 2> nodal_acceleration;
     // clang-format off
     nodal_acceleration <<  2179.487179487179, 4733.779743589742, 
@@ -810,14 +807,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute updated particle location
     REQUIRE(particle->compute_updated_position(phase, dt) == true);
     // Check particle velocity
-    // TODO: Check velocity
     velocity << 0., 0.019;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
-    // TODO: Check coords
     coords << 0.75, .8394;
     // Check particle coordinates
     coordinates = particle->coordinates();
@@ -827,14 +822,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute updated particle location from nodal velocity
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
     // Check particle velocity
-    // TODO: Check velocity
     velocity << 0., 0.894;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
-    // TODO: Check coords
     coords << 0.75, .9288;
     // Check particle coordinates
     coordinates = particle->coordinates();
@@ -1587,7 +1580,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     double traction = 7.68;
     const unsigned direction = 2;
     // Assign volume
-    // TODO: Remove this and compute the forces properly
     particle->assign_volume(Phase, 2.0);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
@@ -1639,7 +1631,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // clang-format on
 
     // Map particle internal force
-    // TODO: Remove this and compute the forces properly
     particle->assign_volume(Phase, 8.0);
     REQUIRE(particle->map_internal_force(phase) == true);
 
@@ -1670,7 +1661,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes[i]->velocity(phase)[j] ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
-    // TODO: Check acceleration
     // Check nodal acceleration
     Eigen::Matrix<double, 8, 3> nodal_acceleration;
     // clang-format off
@@ -1698,14 +1688,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Compute updated particle location
     REQUIRE(particle->compute_updated_position(phase, dt) == true);
-    // TODO: Check particle velocity
     // Check particle velocity
     velocity << 0., 1., 1.019;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
-    // TODO: Check particle position
     // Updated particle coordinate
     coords << 1.5, 2.0875, 2.5769;
     // Check particle coordinates
@@ -1715,14 +1703,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Compute updated particle location based on nodal velocity
     REQUIRE(particle->compute_updated_position_velocity(phase, dt) == true);
-    // TODO: Check particle velocity
     // Check particle velocity
     velocity << 0., 5.875, 10.769;
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
-    // TODO: Check particle position
     // Updated particle coordinate
     coords << 1.5, 2.675, 3.6538;
     // Check particle coordinates

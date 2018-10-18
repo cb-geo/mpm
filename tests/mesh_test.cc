@@ -80,33 +80,29 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    // Add node 0 and check status
-    bool node_status0 = mesh->add_node(node0);
-    REQUIRE(node_status0 == true);
+    // Add node 0 and check
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    // Add node 1 and check status
-    bool node_status1 = mesh->add_node(node1);
-    REQUIRE(node_status1 == true);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    // Add node 2 and check status
-    bool node_status2 = mesh->add_node(node2);
-    REQUIRE(node_status2 == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    // Add node 3 and check status
-    bool node_status3 = mesh->add_node(node3);
-    REQUIRE(node_status3 == true);
+    // Add node 3 and check
+    REQUIRE(mesh->add_node(node3) == true);
 
     // Create cell1
     coords.setZero();
@@ -118,18 +114,15 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Add cell 1 and check status
+    // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Add particle 1 and check status
-    bool status1 = mesh->add_particle(particle1);
-    REQUIRE(status1 == true);
-    // Add particle 2 and check status
-    bool status2 = mesh->add_particle(particle2);
-    REQUIRE(status2 == true);
-    // Add particle 2 again and check status
-    bool status3 = mesh->add_particle(particle2);
-    REQUIRE(status3 == false);
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
+    // Add particle 2 again and check
+    REQUIRE(mesh->add_particle(particle2) == false);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -161,9 +154,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
-    // Remove particle 2 and check status
-    bool remove_status = mesh->remove_particle(particle2);
-    REQUIRE(remove_status == true);
+    // Remove particle 2 and check
+    REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
   }
@@ -187,15 +179,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add node 1 and check status
-    bool status1 = mesh->add_node(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = mesh->add_node(node2);
-    REQUIRE(status2 == true);
-    // Add node 2 again and check status
-    bool status3 = mesh->add_node(node2);
-    REQUIRE(status3 == false);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
+    // Add node 2 again and check
+    REQUIRE(mesh->add_node(node2) == false);
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
@@ -287,9 +276,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
-    // Remove node 2 and check status
-    bool remove_status = mesh->remove_node(node2);
-    REQUIRE(remove_status == true);
+    // Remove node 2 and check
+    REQUIRE(mesh->remove_node(node2) == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
   }
@@ -311,15 +299,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add cell 1 and check status
-    bool status1 = mesh->add_cell(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = mesh->add_cell(cell2);
-    REQUIRE(status2 == true);
-    // Add cell 2 again and check status
-    bool status3 = mesh->add_cell(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+    // Add cell 2 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
+    // Add cell 2 again and check
+    REQUIRE(mesh->add_cell(cell2) == false);
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
@@ -328,9 +313,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mesh->iterate_over_cells(
         std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
 
-    // Remove cell 2 and check status
-    bool remove_status = mesh->remove_cell(cell2);
-    REQUIRE(remove_status == true);
+    // Remove cell 2 and check
+    REQUIRE(mesh->remove_cell(cell2) == true);
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 1);
   }
@@ -350,33 +334,29 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    // Add node 0 and check status
-    bool node_status0 = mesh->add_node(node0);
-    REQUIRE(node_status0 == true);
+    // Add node 0 and check
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    // Add node 1 and check status
-    bool node_status1 = mesh->add_node(node1);
-    REQUIRE(node_status1 == true);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    // Add node 2 and check status
-    bool node_status2 = mesh->add_node(node2);
-    REQUIRE(node_status2 == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    // Add node 3 and check status
-    bool node_status3 = mesh->add_node(node3);
-    REQUIRE(node_status3 == true);
+    // Add node 3 and check
+    REQUIRE(mesh->add_node(node3) == true);
 
     // Create cell1
     coords.setZero();
@@ -391,9 +371,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Compute cell volume
     cell1->compute_volume();
 
-    // Add cell 1 and check status
-    bool cell_status1 = mesh->add_cell(cell1);
-    REQUIRE(cell_status1 == true);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
 
     // Particle 1
     coords << 1.0, 1.0;
@@ -405,12 +384,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
 
-    // Add particle 1 and check status
-    bool particle_status1 = mesh->add_particle(particle1);
-    REQUIRE(particle_status1 == true);
-    // Add particle 2 and check status
-    bool particle_status2 = mesh->add_particle(particle2);
-    REQUIRE(particle_status2 == true);
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -607,9 +584,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
                   std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
 
-              // Add particle100 and check status
-              bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == false);
+              // Add particle100 and check
+              REQUIRE(mesh->add_particle(particle100) == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
@@ -845,7 +821,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->add_particle(particle1) == true);
     // Add particle 2 and check
     REQUIRE(mesh->add_particle(particle2) == true);
-    // Add particle 2 again and check status
+    // Add particle 2 again and check
     REQUIRE(mesh->add_particle(particle2) == false);
 
     // Check mesh is active
@@ -853,9 +829,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
 
-    // Remove particle 2 and check status
-    bool remove_status = mesh->remove_particle(particle2);
-    REQUIRE(remove_status == true);
+    // Remove particle 2 and check
+    REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
   }
@@ -878,15 +853,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add node 1 and check status
-    bool status1 = mesh->add_node(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = mesh->add_node(node2);
-    REQUIRE(status2 == true);
-    // Add node 2 again and check status
-    bool status3 = mesh->add_node(node2);
-    REQUIRE(status3 == false);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
+    // Add node 2 again and check
+    REQUIRE(mesh->add_node(node2) == false);
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
@@ -1021,9 +993,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
     }
 
-    // Remove node 2 and check status
-    bool remove_status = mesh->remove_node(node2);
-    REQUIRE(remove_status == true);
+    // Remove node 2 and check
+    REQUIRE(mesh->remove_node(node2) == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
   }
@@ -1044,15 +1015,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add cell 1 and check status
-    bool status1 = mesh->add_cell(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = mesh->add_cell(cell2);
-    REQUIRE(status2 == true);
-    // Add cell 2 again and check status
-    bool status3 = mesh->add_cell(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+    // Add cell 2 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
+    // Add cell 2 again and check
+    REQUIRE(mesh->add_cell(cell2) == false);
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
@@ -1061,9 +1029,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->iterate_over_cells(
         std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
 
-    // Remove cell 2 and check status
-    bool remove_status = mesh->remove_cell(cell2);
-    REQUIRE(remove_status == true);
+    // Remove cell 2 and check
+    REQUIRE(mesh->remove_cell(cell2) == true);
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 1);
   }
@@ -1133,9 +1100,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Compute cell volume
     cell1->compute_volume();
 
-    // Add cell 1 and check status
-    bool cell_status1 = mesh->add_cell(cell1);
-    REQUIRE(cell_status1 == true);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
@@ -1147,12 +1113,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
 
-    // Add particle 1 and check status
-    bool particle_status1 = mesh->add_particle(particle1);
-    REQUIRE(particle_status1 == true);
-    // Add particle 2 and check status
-    bool particle_status2 = mesh->add_particle(particle2);
-    REQUIRE(particle_status2 == true);
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -1386,9 +1350,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
                   std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
 
-              // Add particle100 and check status
-              bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == false);
+              // Add particle100 and check
+              REQUIRE(mesh->add_particle(particle100) == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
