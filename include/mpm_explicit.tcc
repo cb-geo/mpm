@@ -128,8 +128,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Get all particles
     const auto all_particles =
         mesh_reader->read_particles(io_->file_name("particles"));
-
-    const auto particles = chunk_quantities(all_particles);
+    std::vector<Eigen::Matrix<double, Tdim, 1>> particles;
+    chunk_quantities(all_particles, particles);
 
     // Particle type
     const auto particle_type =
@@ -173,7 +173,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
       const auto all_particles_stresses = mesh_reader->read_particles_stresses(
           io_->file_name("particles_stresses"));
       // Chunked stresses
-      const auto particles_stresses = chunk_quantities(all_particles_stresses);
+      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+      chunk_quantities(all_particles_stresses, particles_stresses);
 
       // Read and assign particles stresses
       if (!mesh_->assign_particles_stresses(particles_stresses))

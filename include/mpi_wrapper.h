@@ -16,8 +16,9 @@ namespace mpm {
 //! \param[in] all_quantities Quantities to be chunked
 //! \retval quantities Chunked quantities
 template <int Tnsize>
-std::vector<Eigen::Matrix<double, Tnsize, 1>> chunk_quantities(
-    const std::vector<Eigen::Matrix<double, Tnsize, 1>>& all_quantities) {
+void chunk_quantities(
+    const std::vector<Eigen::Matrix<double, Tnsize, 1>>& all_quantities,
+    std::vector<Eigen::Matrix<double, Tnsize, 1>>& quantities) {
 
 #ifdef USE_MPI
   // Initialise MPI ranks and size
@@ -35,7 +36,7 @@ std::vector<Eigen::Matrix<double, Tnsize, 1>> chunk_quantities(
   // Calculate chunk size to split
   int chunk_size = all_quantities.size() / mpi_size;
   MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  std::vector<Eigen::Matrix<double, Tnsize, 1>> quantities(chunk_size);
+  quantities.resize(chunk_size);
 
   // Send chunked quantities to different compute nodes
   MPI_Scatter(all_quantities.data(), chunk_size, array_t, quantities.data(),
@@ -49,9 +50,8 @@ std::vector<Eigen::Matrix<double, Tnsize, 1>> chunk_quantities(
                       all_quantities.end());
 
   MPI_Type_free(&array_t);
-  return quantities;
 #else
-  return all_quantities;
+  quantities = all_quantities;
 #endif
 }
 
