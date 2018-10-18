@@ -97,10 +97,8 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 #endif
 
     // Compute nodal velocity
-    mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
-                  std::placeholders::_1),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    mesh_->iterate_over_active_nodes(std::bind(
+        &mpm::NodeBase<Tdim>::compute_velocity, std::placeholders::_1));
 
     // Iterate over each particle to calculate strain
     mesh_->iterate_over_particles(
@@ -148,10 +146,9 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 #endif
 
     // Iterate over active nodes to compute acceleratation and velocity
-    mesh_->iterate_over_nodes_predicate(
+    mesh_->iterate_over_active_nodes(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, phase, this->dt_),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+                  std::placeholders::_1, phase, this->dt_));
 
     // Iterate over each particle to compute updated position
     mesh_->iterate_over_particles(
