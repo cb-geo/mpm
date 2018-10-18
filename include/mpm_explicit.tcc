@@ -119,53 +119,17 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Get all particles
     const auto all_particles =
         mesh_reader->read_particles(io_->file_name("particles"));
-
-    // All particle ids
+    // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
 
-#ifdef USE_MPI
-    // Initialise MPI ranks and size
-    int mpi_rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    int mpi_size = 1;
-    // Get number of MPI ranks
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    // Get local particles chunk
+    std::vector<Eigen::Matrix<double, Tdim, 1>> particles;
+    chunk_vector_quantities(all_particles, particles);
 
-    // Create MPI array type
-    MPI_Datatype array_t;
-    MPI_Type_vector(Tdim, 1, 1, MPI_DOUBLE, &array_t);
-    MPI_Type_commit(&array_t);
-
-    // Calculate chunk size to split router
-    int chunk_size = all_particles.size() / mpi_size;
-    MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    std::vector<Eigen::Matrix<double, Tdim, 1>> particles(chunk_size);
-    std::vector<mpm::Index> particles_ids(chunk_size);
-
-    // Send particle chunks and id chunks to different compute nodes
-    MPI_Scatter(all_particles.data(), chunk_size, array_t, particles.data(),
-                particles.size(), array_t, 0, MPI_COMM_WORLD);
-
-    MPI_Scatter(all_particles_ids.data(), chunk_size, MPI_UNSIGNED_LONG,
-                particles_ids.data(), particles_ids.size(), MPI_UNSIGNED_LONG,
-                0, MPI_COMM_WORLD);
-
-    // Calculate the remaining chunk of particles to the rank 0
-    int chunk_remainder = all_particles.size() % mpi_size;
-    if (mpi_rank == 0) {
-      particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
-                       all_particles.end());
-      particles_ids.insert(particles_ids.begin(),
-                           all_particles_ids.end() - chunk_remainder,
-                           all_particles_ids.end());
-    }
-#else
-    // If not-MPI then copy all_particles to particles
-    const auto particles = all_particles;
-    const auto particles_ids = all_particles_ids;
-#endif
+    // Get local particles ids chunks
+    std::vector<mpm::Index> particles_ids;
+    chunk_scalar_quantities(all_particles_ids, particles_ids);
 
     // Particle type
     const auto particle_type =
@@ -204,54 +168,17 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Read and assign particles stresses
     if (!io_->file_name("particles_stresses").empty()) {
 
-#ifdef USE_MPI
-      // Initialise MPI ranks and size
-      int mpi_rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-      int mpi_size = 1;
-      // Get number of MPI ranks
-      MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-      // Create MPI array type
-      MPI_Datatype array_t;
-      MPI_Type_vector(6, 1, 1, MPI_DOUBLE, &array_t);
-      MPI_Type_commit(&array_t);
-
+      // Get stresses of all particles
       const auto all_particles_stresses = mesh_reader->read_particles_stresses(
           io_->file_name("particles_stresses"));
+      // Chunked stresses
+      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+      chunk_vector_quantities(all_particles_stresses, particles_stresses);
 
-      // Calculate chunk size to split router
-      chunk_size = all_particles_stresses.size() / mpi_size;
-      MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses(chunk_size);
-
-      // Send particle chunks to different compute nodes
-      MPI_Scatter(all_particles_stresses.data(), chunk_size, array_t,
-                  particles_stresses.data(), particles_stresses.size(), array_t,
-                  0, MPI_COMM_WORLD);
-
-      // Calculate the remaining chunk of particles_stresses to rank 0
-      int chunk_remainder = all_particles_stresses.size() % mpi_size;
-      if (mpi_rank == 0)
-        particles_stresses.insert(
-            particles_stresses.begin(),
-            all_particles_stresses.end() - chunk_remainder,
-            all_particles_stresses.end());
-
-      bool status = mesh_->assign_particles_stresses(particles_stresses);
-      if (!status)
+      // Read and assign particles stresses
+      if (!mesh_->assign_particles_stresses(particles_stresses))
         throw std::runtime_error(
             "Particles stresses are not properly assigned");
-
-#else
-      // If not-MPI
-      bool particles_stresses =
-          mesh_->assign_particles_stresses(mesh_reader->read_particles_stresses(
-              io_->file_name("particles_stresses")));
-      if (!particles_stresses)
-        throw std::runtime_error(
-            "Particles stresses are not properly assigned");
-#endif
     }
 
   } catch (std::exception& exception) {
