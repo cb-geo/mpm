@@ -230,6 +230,42 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
+    coordinates.setZero();
+    node1->assign_coordinates(coordinates);
+    node2->assign_coordinates(coordinates);
+    for (unsigned i = 0; i < coordinates.size(); ++i) {
+      REQUIRE(node1->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node2->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(node1->status() == false);
+    REQUIRE(node2->status() == true);
+
+    mesh->find_active_nodes();
+
+    // Check iterate over functionality if nodes are active
+    coordinates.fill(5.3);
+
+    mesh->iterate_over_active_nodes(
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                  std::placeholders::_1, coordinates));
+
+    // Node 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(5.3).epsilon(Tolerance));
+    }
+
+    coordinates.fill(1.0);
     // Check iterate over functionality
     mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                                        std::placeholders::_1, coordinates));
@@ -884,6 +920,43 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       for (unsigned i = 0; i < check_coords.size(); ++i)
         REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
     }
+
+    coordinates.setZero();
+    node1->assign_coordinates(coordinates);
+    node2->assign_coordinates(coordinates);
+    for (unsigned i = 0; i < coordinates.size(); ++i) {
+      REQUIRE(node1->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node2->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(node1->status() == false);
+    REQUIRE(node2->status() == true);
+
+    mesh->find_active_nodes();
+
+    // Check iterate over functionality if nodes are active
+    coordinates.fill(5.3);
+
+    mesh->iterate_over_active_nodes(
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                  std::placeholders::_1, coordinates));
+
+    // Node 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(5.3).epsilon(Tolerance));
+    }
+
+    coordinates.fill(7.0);
 
     // Check iterate over functionality
     mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
