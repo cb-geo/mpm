@@ -67,6 +67,8 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     mesh_->iterate_over_cells(
         std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
 
+    mesh_->find_active_nodes();
+
     // Iterate over each particle to compute shapefn
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
