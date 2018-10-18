@@ -83,11 +83,11 @@ class NodeBase {
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
   virtual bool update_external_force(bool update, unsigned phase,
-                                     const Eigen::VectorXd& force) = 0;
+                                     const VectorDim& force) = 0;
 
   //! Return external force
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd external_force(unsigned phase) const = 0;
+  virtual VectorDim external_force(unsigned phase) const = 0;
 
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -95,11 +95,11 @@ class NodeBase {
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   virtual bool update_internal_force(bool update, unsigned phase,
-                                     const Eigen::VectorXd& force) = 0;
+                                     const VectorDim& force) = 0;
 
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd internal_force(unsigned phase) const = 0;
+  virtual VectorDim internal_force(unsigned phase) const = 0;
 
   //! Update nodal momentum
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -107,18 +107,18 @@ class NodeBase {
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
   virtual bool update_momentum(bool update, unsigned phase,
-                               const Eigen::VectorXd& momentum) = 0;
+                               const VectorDim& momentum) = 0;
 
   //! Return momentum
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd momentum(unsigned phase) const = 0;
+  virtual VectorDim momentum(unsigned phase) const = 0;
 
   //! Compute velocity from the momentum
   virtual void compute_velocity() = 0;
 
   //! Return velocity
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
+  virtual VectorDim velocity(unsigned phase) const = 0;
 
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -126,11 +126,11 @@ class NodeBase {
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
   virtual bool update_acceleration(bool update, unsigned phase,
-                                   const Eigen::VectorXd& acceleration) = 0;
+                                   const VectorDim& acceleration) = 0;
 
   //! Return acceleration
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
+  virtual VectorDim acceleration(unsigned phase) const = 0;
 
   //! Compute acceleration
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
