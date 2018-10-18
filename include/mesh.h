@@ -86,6 +86,14 @@ class Mesh {
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
 
+  //! Create a list of active nodes in mesh
+  void find_active_nodes();
+
+  //! Iterate over active nodes
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_active_nodes(Toper oper);
+
 #ifdef USE_MPI
   //! All reduce over nodal scalar property
   //! \tparam Tgetfunctor Functor for getter
@@ -237,6 +245,8 @@ class Mesh {
   Container<ParticleBase<Tdim>> particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Container of active nodes
+  Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Container of cells
