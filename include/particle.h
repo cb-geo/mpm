@@ -178,12 +178,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(unsigned phase,
-                       const Eigen::VectorXd& velocity) override;
+  bool assign_velocity(unsigned phase, const VectorDim& velocity) override;
 
   //! Return velocity of the particle
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned phase) const override {
+  VectorDim velocity(unsigned phase) const override {
     return velocity_.col(phase);
   }
 
@@ -197,7 +196,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return traction of the particle
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd traction(unsigned phase) const override {
+  VectorDim traction(unsigned phase) const override {
     return traction_.col(phase);
   }
 
