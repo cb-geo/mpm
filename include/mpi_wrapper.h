@@ -16,7 +16,7 @@ namespace mpm {
 //! \param[in] all_quantities Quantities to be chunked
 //! \retval quantities Chunked quantities
 template <int Tnsize>
-void chunk_quantities(
+void chunk_vector_quantities(
     const std::vector<Eigen::Matrix<double, Tnsize, 1>>& all_quantities,
     std::vector<Eigen::Matrix<double, Tnsize, 1>>& quantities) {
 
@@ -50,6 +50,43 @@ void chunk_quantities(
                       all_quantities.end());
 
   MPI_Type_free(&array_t);
+#else
+  quantities = all_quantities;
+#endif
+}
+
+//! Chunk scalar quantities based on MPI ranks
+//! \tparam Tdatatype Datatype of quantity
+//! \param[in] all_quantities Quantities to be chunked
+//! \retval quantities Chunked quantities
+template <typename Tdatatype>
+void chunk_scalar_quantities(const std::vector<Tdatatype>& all_quantities,
+                             std::vector<Tdatatype>& quantities) {
+
+#ifdef USE_MPI
+  // Initialise MPI ranks and size
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  int mpi_size;
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  // Calculate chunk size to split
+  int chunk_size = all_quantities.size() / mpi_size;
+  MPI_Bcast(&chunk_size, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+  quantities.resize(chunk_size);
+
+  // Send chunked quantities to different compute nodes
+  MPI_Scatter(all_quantities.data(), chunk_size, MPI_UNSIGNED_LONG,
+              quantities.data(), quantities.size(), MPI_UNSIGNED_LONG, 0,
+              MPI_COMM_WORLD);
+
+  // Calculate the remaining chunk of all_quantities to the last rank
+  int chunk_remainder = all_quantities.size() % mpi_size;
+  if (mpi_rank == (mpi_size - 1))
+    quantities.insert(quantities.begin(),
+                      all_quantities.end() - chunk_remainder,
+                      all_quantities.end());
 #else
   quantities = all_quantities;
 #endif

@@ -1,9 +1,11 @@
 #ifndef MPM_MESH_H_
 #define MPM_MESH_H_
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <numeric>
 #include <vector>
 
 // Eigen
@@ -140,11 +142,12 @@ class Mesh {
   void iterate_over_cells(Toper oper);
 
   //! Create particles from coordinates
-  //! \param[in] gpid Global particle id
+  //! \param[in] gpids Global particle ids
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
   //! \retval status Create particle status
-  bool create_particles(mpm::Index gpid, const std::string& particle_type,
+  bool create_particles(const std::vector<mpm::Index>& gpids,
+                        const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates);
 
   //! Add a particle to the mesh

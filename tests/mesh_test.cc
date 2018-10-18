@@ -533,7 +533,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particle type 2D
             const std::string particle_type = "P2D";
             // Global particle index
-            mpm::Index gpid = 0;
+            std::vector<mpm::Index> gpid(coordinates.size());
+            std::iota(gpid.begin(), gpid.end(), 0);
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
@@ -1301,7 +1302,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particle type 3D
             const std::string particle_type = "P3D";
             // Global particle index
-            mpm::Index gpid = 0;
+            std::vector<mpm::Index> gpid(coordinates.size());
+            std::iota(gpid.begin(), gpid.end(), 0);
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
