@@ -106,8 +106,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
     SECTION("Check external force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current external force is zero
@@ -116,42 +115,34 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      bool status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      status = node->update_external_force(false, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(false, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Check if exception is handled
-      force.resize(Dim * 2);
-      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
-
+      unsigned bad_phase = 4;
       // Exception handling invalid force dimension
-      status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_external_force(true, bad_phase, force) == false);
       // Exception handling invalid force dimension
-      status = node->update_external_force(false, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_external_force(false, bad_phase, force) == false);
     }
 
     SECTION("Check internal force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current internal force is zero
@@ -160,36 +151,29 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      bool status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      status = node->update_internal_force(false, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(false, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Check if exception is handled
-      force.resize(Dim * 2);
-      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
-
+      unsigned bad_phase = 4;
       // Exception handling invalid force dimension
-      status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
       // Exception handling invalid force dimension
-      status = node->update_internal_force(false, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -263,8 +247,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
     SECTION("Check momentum and velocity") {
       // Check momentum
-      Eigen::VectorXd momentum;
-      momentum.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
 
       // Check initial momentum
@@ -272,20 +255,17 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
       // Check update momentum to 10
-      bool status = node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check update momentum to 20
-      status = node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
 
       // Check assign momentum to 10
-      status = node->update_momentum(false, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(false, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
@@ -311,15 +291,11 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
       // Check if exception is handled
-      momentum.resize(Dim * 2);
-      for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
-
+      unsigned bad_phase = 1;
       // Exception handling invalid momentum dimension
-      status = node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == false);
+      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
       // Exception handling invalid momentum dimension
-      status = node->update_momentum(false, Nphase, momentum);
-      REQUIRE(status == false);
+      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -345,29 +321,25 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
     SECTION("Check acceleration") {
       // Check acceleration
-      Eigen::VectorXd acceleration;
-      acceleration.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> acceleration;
       for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      bool status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == true);
+      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
       // Check if exception is handled
-      acceleration.resize(Dim * 2);
-      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 10.;
+      unsigned bad_phase = 1;
+      // Exception handling invalid acceleration dimension
+      REQUIRE(node->update_acceleration(true, bad_phase, acceleration) ==
+              false);
 
       // Exception handling invalid acceleration dimension
-      status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == false);
-
-      // Exception handling invalid acceleration dimension
-      status = node->update_acceleration(false, Nphase, acceleration);
-      REQUIRE(status == false);
+      REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
+              false);
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -509,8 +481,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
     SECTION("Check external force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dof);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current external force is zero
@@ -519,42 +490,36 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      bool status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      status = node->update_external_force(false, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_external_force(false, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Check if exception is handled
-      force.resize(Dim * 2);
-      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
+      Eigen::Matrix<double, Dim, 1> force_bad;
+      for (unsigned i = 0; i < force_bad.size(); ++i) force_bad(i) = 10.;
 
       // Exception handling invalid force dimension
-      status = node->update_external_force(true, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_external_force(true, 1, force_bad) == false);
       // Exception handling invalid force dimension
-      status = node->update_external_force(false, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_external_force(false, 1, force_bad) == false);
     }
 
     SECTION("Check internal force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dof);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current internal force is zero
@@ -563,36 +528,29 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      bool status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      status = node->update_internal_force(false, Nphase, force);
-      REQUIRE(status == true);
+      REQUIRE(node->update_internal_force(false, Nphase, force) == true);
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Check if exception is handled
-      force.resize(Dim * 2);
-      for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
-
+      unsigned bad_phase = 1;
       // Exception handling invalid force dimension
-      status = node->update_internal_force(true, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
       // Exception handling invalid force dimension
-      status = node->update_internal_force(false, Nphase, force);
-      REQUIRE(status == false);
+      REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -667,8 +625,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
     SECTION("Check momentum and velocity") {
       // Check momentum
-      Eigen::VectorXd momentum;
-      momentum.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
 
       // Check initial momentum
@@ -676,20 +633,17 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
       // Check update momentum to 10
-      bool status = node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check update momentum to 20
-      node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
 
       // Check assign momentum to 10
-      node->update_momentum(false, Nphase, momentum);
-      REQUIRE(status == true);
+      REQUIRE(node->update_momentum(false, Nphase, momentum) == true);
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
@@ -715,15 +669,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
       // Check if exception is handled
-      momentum.resize(Dim * 2);
-      for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
-
+      unsigned bad_phase = 1;
       // Exception handling invalid momentum dimension
-      status = node->update_momentum(true, Nphase, momentum);
-      REQUIRE(status == false);
+      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
       // Exception handling invalid momentum dimension
-      status = node->update_momentum(false, Nphase, momentum);
-      REQUIRE(status == false);
+      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
@@ -749,25 +699,25 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
     SECTION("Check acceleration") {
       // Check acceleration
-      Eigen::VectorXd acceleration;
-      acceleration.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> acceleration;
       for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      bool status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == true);
+      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
       // Check if exception is handled
-      acceleration.resize(Dim * 2);
-      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 10.;
+      Eigen::Matrix<double, Dim, 1> acceleration_bad;
+      for (unsigned i = 0; i < acceleration_bad.size(); ++i)
+        acceleration_bad(i) = 10.;
 
+      unsigned bad_phase = 3;
       // Exception handling invalid acceleration dimension
-      status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == false);
+      REQUIRE(node->update_acceleration(true, bad_phase, acceleration_bad) ==
+              false);
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
@@ -775,7 +725,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->assign_velocity_constraint(2, 0.) == false);
 
       // Check acceleration before constraints
-      acceleration.resize(Dim);
       acceleration << 5., 5.;
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
@@ -894,8 +843,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
     SECTION("Check external force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dof);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current external force
@@ -924,8 +872,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
     SECTION("Check internal force") {
       // Create a force vector
-      Eigen::VectorXd force;
-      force.resize(Dof);
+      Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10.;
 
       // Check current internal force is zero
@@ -1024,8 +971,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
     SECTION("Check momentum and velocity") {
       // Check momentum
-      Eigen::VectorXd momentum;
-      momentum.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
 
       // Check initial momentum
@@ -1093,29 +1039,24 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
     SECTION("Check acceleration") {
       // Check acceleration
-      Eigen::VectorXd acceleration;
-      acceleration.resize(Dim);
+      Eigen::Matrix<double, Dim, 1> acceleration;
       for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
 
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      bool status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == true);
+      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
       // Check if exception is handled
-      acceleration.resize(Dim * 2);
-      for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 10.;
-
+      unsigned bad_phase = 1;
       // Exception handling invalid acceleration dimension
-      status = node->update_acceleration(true, Nphase, acceleration);
-      REQUIRE(status == false);
-
+      REQUIRE(node->update_acceleration(true, bad_phase, acceleration) ==
+              false);
       // Exception handling invalid acceleration dimension
-      status = node->update_acceleration(false, Nphase, acceleration);
-      REQUIRE(status == false);
+      REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
+              false);
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);

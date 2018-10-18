@@ -91,11 +91,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
   bool update_external_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force) override;
+                             const VectorDim& force) override;
 
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd external_force(unsigned phase) const override {
+  VectorDim external_force(unsigned phase) const override {
     return external_force_.col(phase);
   }
 
@@ -105,11 +105,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   bool update_internal_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force) override;
+                             const VectorDim& force) override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd internal_force(unsigned phase) const override {
+  VectorDim internal_force(unsigned phase) const override {
     return internal_force_.col(phase);
   }
 
@@ -119,11 +119,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
   bool update_momentum(bool update, unsigned phase,
-                       const Eigen::VectorXd& momentum) override;
+                       const VectorDim& momentum) override;
 
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd momentum(unsigned phase) const override {
+  VectorDim momentum(unsigned phase) const override {
     return momentum_.col(phase);
   }
 
@@ -132,7 +132,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return velocity at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned phase) const override {
+  VectorDim velocity(unsigned phase) const override {
     return velocity_.col(phase);
   }
 
@@ -142,11 +142,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
   bool update_acceleration(bool update, unsigned phase,
-                           const Eigen::VectorXd& acceleration) override;
+                           const VectorDim& acceleration) override;
 
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd acceleration(unsigned phase) const override {
+  VectorDim acceleration(unsigned phase) const override {
     return acceleration_.col(phase);
   }
 

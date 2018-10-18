@@ -135,15 +135,13 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == true);
+    REQUIRE(particle->assign_velocity(Phase, velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(17.51).epsilon(Tolerance));
-    // Check for incorrect dimension of velocity
-    velocity.resize(Dim * 2);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
-    status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == false);
+
+    // Check for incorrect phase of velocity
+    unsigned bad_phase = 1;
+    REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
     particle->assign_volume(Phase, 2.0);
@@ -156,9 +154,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool traction_status =
-        particle->assign_traction(Phase, Direction, traction);
-    REQUIRE(traction_status == true);
+    REQUIRE(particle->assign_traction(Phase, Direction, traction) == true);
 
     for (unsigned i = 0; i < Dim; ++i) {
       if (i == Direction)
@@ -170,8 +166,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     // Check for incorrect direction / phase
     const unsigned wrong_dir = 4;
-    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
-    REQUIRE(traction_status == false);
+    REQUIRE(particle->assign_traction(Phase, wrong_dir, traction) == false);
 
     // Check again to ensure value hasn't been updated
     for (unsigned i = 0; i < Dim; ++i) {
@@ -903,16 +898,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == true);
+    REQUIRE(particle->assign_velocity(Phase, velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(19.745).epsilon(Tolerance));
-    // Check for incorrect dimension of velocity
-    velocity.resize(Dim * 2);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 19.745;
-    status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == false);
+
+    // Check for incorrect phase in velocity
+    unsigned bad_phase = 1;
+    REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
     particle->assign_volume(Phase, 2.0);
@@ -925,9 +918,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool traction_status =
-        particle->assign_traction(Phase, Direction, traction);
-    REQUIRE(traction_status == true);
+    REQUIRE(particle->assign_traction(Phase, Direction, traction) == true);
 
     // Calculate traction force = traction * volume / spacing
     traction *= 2.0 / (std::pow(2.0, 1. / Dim));
@@ -942,8 +933,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check for incorrect direction / phase
     const unsigned wrong_dir = 4;
-    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
-    REQUIRE(traction_status == false);
+    REQUIRE(particle->assign_traction(Phase, wrong_dir, traction) == false);
 
     // Check again to ensure value hasn't been updated
     for (unsigned i = 0; i < Dim; ++i) {
@@ -1797,15 +1787,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == true);
+    REQUIRE(particle->assign_velocity(Phase, velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) == Approx(17.51).epsilon(Tolerance));
-    // Check for incorrect dimension of velocity
-    velocity.resize(Dim * 2);
-    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
-    status = particle->assign_velocity(Phase, velocity);
-    REQUIRE(status == false);
+
+    // Check for exception
+    unsigned bad_phase = 1;
+    REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
     particle->assign_volume(Phase, 2.0);
@@ -1818,9 +1806,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    bool traction_status =
-        particle->assign_traction(Phase, Direction, traction);
-    REQUIRE(traction_status == true);
+    REQUIRE(particle->assign_traction(Phase, Direction, traction) == true);
 
     // Calculate traction force = traction * volume / spacing
     traction *= 2.0 / (std::pow(2.0, 1. / Dim));
@@ -1835,8 +1821,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check for incorrect direction / phase
     const unsigned wrong_dir = 4;
-    traction_status = particle->assign_traction(Phase, wrong_dir, traction);
-    REQUIRE(traction_status == false);
+    REQUIRE(particle->assign_traction(Phase, wrong_dir, traction) == false);
 
     // Check again to ensure value hasn't been updated
     for (unsigned i = 0; i < Dim; ++i) {
