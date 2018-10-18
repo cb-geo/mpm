@@ -154,7 +154,6 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Calculate the remaining chunk of particles to the rank 0
     int chunk_remainder = all_particles.size() % mpi_size;
-    MPI_Bcast(&chunk_remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (mpi_rank == 0) {
       particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
                        all_particles.end());
