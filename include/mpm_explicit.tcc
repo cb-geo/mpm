@@ -120,6 +120,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     int mpi_rank = 0;
     int mpi_size = 1;
     int chunk_size = 0;
+    int chunk_remainder = 0;
 
     // Get all particles
     const auto all_particles =
@@ -145,7 +146,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
                 particles.size(), array_t, 0, MPI_COMM_WORLD);
 
     // Calculate the remaining chunk of particles to the rank 0
-    int chunk_remainder = all_particles.size() % mpi_size;
+    chunk_remainder = all_particles.size() % mpi_size;
+    MPI_Bcast(&chunk_remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (mpi_rank == 0)
       particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
                        all_particles.end());
@@ -158,11 +160,13 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     const auto particle_type =
         mesh_props["particle_type"].template get<std::string>();
 
+    if (mpi_rank == 0) chunk_remainder = 0;
+
     // Create particles from file
-    bool particle_status =
-        mesh_->create_particles(mpi_rank * chunk_size,  // global id
-                                particle_type,          // particle type
-                                particles);             // coordinates
+    bool particle_status = mesh_->create_particles(
+        chunk_remainder + mpi_rank * chunk_size,  // global id
+        particle_type,                            // particle type
+        particles);                               // coordinates
 
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
