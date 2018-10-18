@@ -36,25 +36,20 @@ TEST_CASE("Particle container is checked for 2D case",
 
   // Check add particle
   SECTION("Check add particle functionality") {
-    // Add particle 1 and check status
-    bool status1 = particlecontainer->add(particle1);
-    REQUIRE(status1 == true);
-    // Add particle 2 and check status
-    bool status2 = particlecontainer->add(particle2);
-    REQUIRE(status2 == true);
-    // Try and particle 2 again and check status
-    bool status3 = particlecontainer->add(particle2);
-    REQUIRE(status3 == false);
+    // Add particle 1 and check
+    REQUIRE(particlecontainer->add(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(particlecontainer->add(particle2) == true);
+    // Try and particle 2 again and check
+    REQUIRE(particlecontainer->add(particle2) == false);
 
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
 
-    // Remove particle 2 and check status
-    bool remove_status = particlecontainer->remove(particle2);
-    REQUIRE(remove_status == true);
-    // Try and remove particle 2 again and check status
-    bool remove_status1 = particlecontainer->remove(particle2);
-    REQUIRE(remove_status1 == false);
+    // Remove particle 2 and check
+    REQUIRE(particlecontainer->remove(particle2) == true);
+    // Try and remove particle 2 again and check
+    REQUIRE(particlecontainer->remove(particle2) == false);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 1);
 
@@ -150,25 +145,20 @@ TEST_CASE("Particle container is checked for 3D case",
 
   // Check add particle
   SECTION("Check add particle functionality") {
-    // Add particle 1 and check status
-    bool status1 = particlecontainer->add(particle1);
-    REQUIRE(status1 == true);
-    // Add particle 2 and check status
-    bool status2 = particlecontainer->add(particle2);
-    REQUIRE(status2 == true);
-    // Try and particle 2 again and check status
-    bool status3 = particlecontainer->add(particle2);
-    REQUIRE(status3 == false);
+    // Add particle 1 and check
+    REQUIRE(particlecontainer->add(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(particlecontainer->add(particle2) == true);
+    // Try and particle 2 again and check
+    REQUIRE(particlecontainer->add(particle2) == false);
 
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);
 
-    // Remove particle 2 and check status
-    bool remove_status = particlecontainer->remove(particle2);
-    REQUIRE(remove_status == true);
-    // Try and remove particle 2 again and check status
-    bool remove_status1 = particlecontainer->remove(particle2);
-    REQUIRE(remove_status1 == false);
+    // Remove particle 2 and check
+    REQUIRE(particlecontainer->remove(particle2) == true);
+    // Try and remove particle 2 again and check
+    REQUIRE(particlecontainer->remove(particle2) == false);
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 1);
 

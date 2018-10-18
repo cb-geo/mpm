@@ -42,15 +42,15 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
 
   // Check insert and remove node
   SECTION("Check insert and remove node functionality") {
-    // Insert node 1 and check status
+    // Insert node 1 and check
     REQUIRE(nodemap->insert(node1) == true);
-    // Insert node 2 and check status
+    // Insert node 2 and check
     REQUIRE(nodemap->insert(node2->id(), node2) == true);
-    // Insert node 3 and check status
+    // Insert node 3 and check
     REQUIRE(nodemap->insert(node3->id(), node3) == true);
     // Check size of node hanlder
     REQUIRE(nodemap->size() == 3);
-    // Remove node 3 and check status
+    // Remove node 3 and check
     REQUIRE(nodemap->remove(node3->id()) == true);
     // Try to remove node 3 again
     REQUIRE(nodemap->remove(node3->id()) == false);
@@ -157,15 +157,15 @@ TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
 
   // Check insert node
   SECTION("Check insert node functionality") {
-    // Insert node 1 and check status
+    // Insert node 1 and check
     REQUIRE(nodemap->insert(node1) == true);
-    // Insert node 2 and check status
+    // Insert node 2 and check
     REQUIRE(nodemap->insert(node2->id(), node2) == true);
-    // Insert node 3 and check status
+    // Insert node 3 and check
     REQUIRE(nodemap->insert(node3->id(), node3) == true);
     // Check size of node hanlder
     REQUIRE(nodemap->size() == 3);
-    // Remove node 3 and check status
+    // Remove node 3 and check
     REQUIRE(nodemap->remove(node3->id()) == true);
     // Try to remove node 3 again
     REQUIRE(nodemap->remove(node3->id()) == false);

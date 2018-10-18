@@ -603,7 +603,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Test velocity with constraints
-      // TODO: Check this velocity
       velocity << 10.5, 0.03;
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
@@ -949,7 +948,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Test velocity with constraints
-      // TODO: Check velocity
       velocity << 10.5, 0.03, 0.06;
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
