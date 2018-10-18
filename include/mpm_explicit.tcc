@@ -116,31 +116,30 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
-    // Initialise MPI ranks and size
-    int mpi_rank = 0;
-    int mpi_size = 1;
-#ifdef USE_MPI
-    // Initialise MPI ranks and size
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
-
     // Get all particles
     const auto all_particles =
         mesh_reader->read_particles(io_->file_name("particles"));
+    // Get all particle ids
+    std::vector<mpm::Index> all_particles_ids(all_particles.size());
+    std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
+
+    // Get local particles chunk
     std::vector<Eigen::Matrix<double, Tdim, 1>> particles;
-    chunk_quantities(all_particles, particles);
+    chunk_vector_quantities(all_particles, particles);
+
+    // Get local particles ids chunks
+    std::vector<mpm::Index> particles_ids;
+    chunk_scalar_quantities(all_particles_ids, particles_ids);
 
     // Particle type
     const auto particle_type =
         mesh_props["particle_type"].template get<std::string>();
 
-    int chunk_size = all_particles.size() / mpi_size;
     // Create particles from file
     bool particle_status =
-        mesh_->create_particles(mpi_rank * chunk_size,  // global id
-                                particle_type,          // particle type
-                                particles);             // coordinates
+        mesh_->create_particles(particles_ids,  // global id
+                                particle_type,  // particle type
+                                particles);     // coordinates
 
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
@@ -174,7 +173,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
           io_->file_name("particles_stresses"));
       // Chunked stresses
       std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
-      chunk_quantities(all_particles_stresses, particles_stresses);
+      chunk_vector_quantities(all_particles_stresses, particles_stresses);
 
       // Read and assign particles stresses
       if (!mesh_->assign_particles_stresses(particles_stresses))
