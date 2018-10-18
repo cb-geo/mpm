@@ -116,18 +116,19 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
-    // Initialise MPI ranks and size
-    int mpi_rank = 0;
-    int mpi_size = 1;
-    int chunk_size = 0;
-    int chunk_remainder = 0;
-
     // Get all particles
     const auto all_particles =
         mesh_reader->read_particles(io_->file_name("particles"));
 
+    // All particle ids
+    std::vector<mpm::Index> all_particles_ids(all_particles.size());
+    std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
+
 #ifdef USE_MPI
+    // Initialise MPI ranks and size
+    int mpi_rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    int mpi_size = 1;
     // Get number of MPI ranks
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
@@ -137,36 +138,45 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     MPI_Type_commit(&array_t);
 
     // Calculate chunk size to split router
-    chunk_size = all_particles.size() / mpi_size;
+    int chunk_size = all_particles.size() / mpi_size;
     MPI_Bcast(&chunk_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    std::vector<Eigen::Matrix<double, Tdim, 1>> particles(chunk_size);
 
-    // Send particle chunks to different compute nodes
+    std::vector<Eigen::Matrix<double, Tdim, 1>> particles(chunk_size);
+    std::vector<mpm::Index> particles_ids(chunk_size);
+
+    // Send particle chunks and id chunks to different compute nodes
     MPI_Scatter(all_particles.data(), chunk_size, array_t, particles.data(),
                 particles.size(), array_t, 0, MPI_COMM_WORLD);
 
+    MPI_Scatter(all_particles_ids.data(), chunk_size, MPI_UNSIGNED_LONG,
+                particles_ids.data(), particles_ids.size(), MPI_UNSIGNED_LONG,
+                0, MPI_COMM_WORLD);
+
     // Calculate the remaining chunk of particles to the rank 0
-    chunk_remainder = all_particles.size() % mpi_size;
+    int chunk_remainder = all_particles.size() % mpi_size;
     MPI_Bcast(&chunk_remainder, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    if (mpi_rank == 0)
+    if (mpi_rank == 0) {
       particles.insert(particles.begin(), all_particles.end() - chunk_remainder,
                        all_particles.end());
+      particles_ids.insert(particles_ids.begin(),
+                           all_particles_ids.end() - chunk_remainder,
+                           all_particles_ids.end());
+    }
 #else
     // If not-MPI then copy all_particles to particles
     const auto particles = all_particles;
+    const auto particles_ids = all_particles_ids;
 #endif
 
     // Particle type
     const auto particle_type =
         mesh_props["particle_type"].template get<std::string>();
 
-    if (mpi_rank == 0) chunk_remainder = 0;
-
     // Create particles from file
-    bool particle_status = mesh_->create_particles(
-        chunk_remainder + mpi_rank * chunk_size,  // global id
-        particle_type,                            // particle type
-        particles);                               // coordinates
+    bool particle_status =
+        mesh_->create_particles(particles_ids,  // global id
+                                particle_type,  // particle type
+                                particles);     // coordinates
 
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
@@ -194,7 +204,15 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Read and assign particles stresses
     if (!io_->file_name("particles_stresses").empty()) {
+
 #ifdef USE_MPI
+      // Initialise MPI ranks and size
+      int mpi_rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+      int mpi_size = 1;
+      // Get number of MPI ranks
+      MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
       // Create MPI array type
       MPI_Datatype array_t;
       MPI_Type_vector(6, 1, 1, MPI_DOUBLE, &array_t);
