@@ -16,16 +16,13 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
   const std::string analysis = "MPMExplicitUSF2D";
-  bool status = mpm_test::write_json_unitcell(2, analysis, fname);
-  REQUIRE(status == true);
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, fname) == true);
 
   // Write Mesh
-  bool mesh_status = mpm_test::write_mesh_2d_unitcell();
-  REQUIRE(mesh_status == true);
+  REQUIRE(mpm_test::write_mesh_2d_unitcell() == true);
 
   // Write Particles
-  bool particle_status = mpm_test::write_particles_2d_unitcell();
-  REQUIRE(particle_status == true);
+  REQUIRE(mpm_test::write_particles_2d_unitcell() == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
@@ -73,16 +70,13 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
   const std::string analysis = "MPMExplicitUSF3D";
-  bool status = mpm_test::write_json_unitcell(3, analysis, fname);
-  REQUIRE(status == true);
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, fname) == true);
 
   // Write Mesh
-  bool mesh_status = mpm_test::write_mesh_3d_unitcell();
-  REQUIRE(mesh_status == true);
+  REQUIRE(mpm_test::write_mesh_3d_unitcell() == true);
 
   // Write Particles
-  bool particle_status = mpm_test::write_particles_3d_unitcell();
-  REQUIRE(particle_status == true);
+  REQUIRE(mpm_test::write_particles_3d_unitcell() == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
