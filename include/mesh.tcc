@@ -73,9 +73,10 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
-    if (pred(*itr)) oper(*itr);
-  }
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
+                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+                           if (pred(node)) oper(node);
+                         });
 }
 
 //! Create a list of active nodes in mesh
@@ -117,14 +118,20 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
   mpm::Index nnodes = this->nodes_.size();
   std::vector<double> prop_get(nnodes), prop_set(nnodes);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
-    prop_get.at((*itr)->id()) = getter(*itr);
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        prop_get.at(node->id()) = getter(node);
+      });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
                 MPI_COMM_WORLD);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
-    setter(*itr, prop_set.at((*itr)->id()));
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        setter(node, prop_set.at(node->id()));
+      });
 }
 #endif
 
@@ -139,14 +146,20 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
   std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
       prop_set(nnodes);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
-    prop_get.at((*itr)->id()) = getter(*itr);
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        prop_get.at(node->id()) = getter(node);
+      });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
                 MPI_SUM, MPI_COMM_WORLD);
 
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr)
-    setter(*itr, prop_set.at((*itr)->id()));
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        setter(node, prop_set.at(node->id()));
+      });
 }
 #endif
 
