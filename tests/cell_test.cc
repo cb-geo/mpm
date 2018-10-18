@@ -393,8 +393,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
     REQUIRE(cell->nparticles() == 0);
     REQUIRE(cell->status() == false);
-    bool status = cell->add_particle_id(pid);
-    REQUIRE(status == true);
+    REQUIRE(cell->add_particle_id(pid) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(cell->nparticles() == 1);
     cell->remove_particle_id(pid);
@@ -1288,8 +1287,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
     REQUIRE(cell->status() == false);
     REQUIRE(cell->nparticles() == 0);
-    bool status = cell->add_particle_id(pid);
-    REQUIRE(status == true);
+    REQUIRE(cell->add_particle_id(pid) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(cell->nparticles() == 1);
     cell->remove_particle_id(pid);
