@@ -152,18 +152,17 @@ class ParticleBase {
   virtual bool map_internal_force(unsigned phase) = 0;
 
   //! Assign velocity
-  virtual bool assign_velocity(unsigned phase,
-                               const Eigen::VectorXd& velocity) = 0;
+  virtual bool assign_velocity(unsigned phase, const VectorDim& velocity) = 0;
 
   //! Return velocity
-  virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
+  virtual VectorDim velocity(unsigned phase) const = 0;
 
   //! Assign traction
   virtual bool assign_traction(unsigned phase, unsigned direction,
                                double traction) = 0;
 
   //! Return traction
-  virtual Eigen::VectorXd traction(unsigned phase) const = 0;
+  virtual VectorDim traction(unsigned phase) const = 0;
 
   //! Map traction force
   virtual void map_traction_force(unsigned phase) = 0;

@@ -415,13 +415,12 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
 // Assign velocity to the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
-    unsigned phase, const Eigen::VectorXd& velocity) {
+    unsigned phase, const Eigen::Matrix<double, Tdim, 1>& velocity) {
   bool status = false;
   try {
-    if (velocity.size() != velocity_.size()) {
-      throw std::runtime_error(
-          "Particle velocity degrees of freedom don't match");
-    }
+    if (phase >= Tnphases)
+      throw std::runtime_error("Particle velocity: Invalid phase");
+
     // Assign velocity
     velocity_.col(phase) = velocity;
     status = true;

@@ -61,11 +61,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
 //! Update external force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
-    bool update, unsigned phase, const Eigen::VectorXd& force) {
+    bool update, unsigned phase, const Eigen::Matrix<double, Tdim, 1>& force) {
   bool status = false;
   try {
-    if (force.size() != external_force_.size())
-      throw std::runtime_error("Nodal force degrees of freedom don't match");
+    if (phase >= Tnphases)
+      throw std::runtime_error("Nodal external force: Invalid phase");
 
     // Decide to update or assign
     double factor = 1.0;
@@ -85,11 +85,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
 //! Update internal force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
-    bool update, unsigned phase, const Eigen::VectorXd& force) {
+    bool update, unsigned phase, const Eigen::Matrix<double, Tdim, 1>& force) {
   bool status = false;
   try {
-    if (force.size() != internal_force_.size())
-      throw std::runtime_error("Nodal force degrees of freedom don't match");
+    if (phase >= Tnphases)
+      throw std::runtime_error("Nodal internal force: Invalid phase");
 
     // Decide to update or assign
     double factor = 1.0;
@@ -109,12 +109,12 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
 //! Assign nodal momentum
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
-    bool update, unsigned phase, const Eigen::VectorXd& momentum) {
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& momentum) {
   bool status = false;
   try {
-    if (momentum.size() != momentum_.size()) {
-      throw std::runtime_error("Nodal momentum degrees of freedom don't match");
-    }
+    if (phase >= Tnphases)
+      throw std::runtime_error("Nodal momentum: Invalid phase");
 
     // Decide to update or assign
     double factor = 1.0;
@@ -161,13 +161,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
 //! Update nodal acceleration
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
-    bool update, unsigned phase, const Eigen::VectorXd& acceleration) {
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& acceleration) {
   bool status = false;
   try {
-    if (acceleration.size() != acceleration_.size()) {
-      throw std::runtime_error(
-          "Nodal acceleration degrees of freedom don't match");
-    }
+    if (phase >= Tnphases)
+      throw std::runtime_error("Nodal acceleration: Invalid phase");
 
     // Decide to update or assign
     double factor = 1.0;
