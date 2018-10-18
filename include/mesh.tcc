@@ -237,10 +237,11 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
-    mpm::Index gpid, const std::string& particle_type,
+    const std::vector<mpm::Index>& gp_ids, const std::string& particle_type,
     const std::vector<VectorDim>& coordinates) {
   bool status = true;
   try {
+    unsigned gpid = 0;
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
@@ -250,7 +251,7 @@ bool mpm::Mesh<Tdim>::create_particles(
       bool insert_status = this->add_particle(
           Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                   const Eigen::Matrix<double, Tdim, 1>&>::instance()
-              ->create(particle_type, static_cast<mpm::Index>(gpid),
+              ->create(particle_type, static_cast<mpm::Index>(gp_ids.at(gpid)),
                        particle_coordinates));
 
       // Increment particle id
