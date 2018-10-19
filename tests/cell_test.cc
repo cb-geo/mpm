@@ -33,19 +33,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   coords.setZero();
 
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
 
   coords << 2., 0.;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
 
   coords << 2., 2.;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(12, coords);
 
   coords << 0., 2.;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(13, coords);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -129,6 +129,11 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                   Approx(nodal_coords(i, j)).epsilon(Tolerance));
     }
 
+    // Check side indices
+    SECTION("Check side indices") {
+      const auto side_indices = cell->side_node_pairs();
+      REQUIRE(side_indices.size() == 4);
+    }
     // Check shape functions
     SECTION("Check shape functions") {
       const auto sf_ptr = cell->element_ptr();
