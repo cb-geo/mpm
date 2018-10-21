@@ -293,9 +293,8 @@ void mpm::MPMExplicit<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
 //! Write VTK files
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
-  const auto coordinates = mesh_->particle_coordinates();
   // VTK PolyData writer
-  auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
+  auto vtk_writer = std::make_unique<VtkWriter>(mesh_->particle_coordinates());
 
   // Write input geometry to vtk file
   std::string extension = ".vtp";

@@ -780,3 +780,57 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   H5Fclose(file_id);
   return true;
 }
+
+//! Nodal coordinates
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()
+    const {
+
+  // Nodal coordinates
+  std::vector<Eigen::Matrix<double, 3, 1>> coordinates;
+  coordinates.reserve(nodes_.size());
+
+  try {
+    if (nodes_.size() == 0)
+      throw std::runtime_error("No nodes have been initialised!");
+
+    // Fill nodal coordinates
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+      // initialise coordinates
+      Eigen::Matrix<double, 3, 1> node;
+      node.setZero();
+      auto coords = (*nitr)->coordinates();
+
+      for (unsigned i = 0; i < coords.size(); ++i) node(i) = coords(i);
+
+      coordinates.emplace_back(node);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    coordinates.clear();
+  }
+  return coordinates;
+}
+
+//! Cell node pairs
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
+  // Vector of node_pairs
+  std::vector<std::array<mpm::Index, 2>> node_pairs;
+
+  try {
+    if (cells_.size() == 0)
+      throw std::runtime_error("No cells have been initialised!");
+
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      const auto pairs = (*citr)->side_node_pairs();
+      node_pairs.insert(std::end(node_pairs), std::begin(pairs),
+                        std::end(pairs));
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    node_pairs.clear();
+  }
+  return node_pairs;
+}
