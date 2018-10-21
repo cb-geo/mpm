@@ -97,7 +97,12 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   std::stringstream file_name;
   std::string path = this->output_folder();
 
-  std::string attribute_name = attribute;
+  file_name.str(std::string());
+  file_name << attribute;
+  file_name.fill('0');
+  int digits = log10(max_steps) + 1;
+  file_name.width(digits);
+  file_name << step;
 
 #ifdef USE_MPI
   int mpi_rank;
@@ -106,17 +111,11 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  if (mpi_size > 1)
-    attribute_name +=
-        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size) + "-";
+  const std::string rank_size =
+      "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size);
+  if (mpi_size > 1) file_name << rank_size;
 #endif
 
-  file_name.str(std::string());
-  file_name << attribute_name;
-  file_name.fill('0');
-  int digits = log10(max_steps) + 1;
-  file_name.width(digits);
-  file_name << step;
   file_name << file_extension;
 
   // Include path
