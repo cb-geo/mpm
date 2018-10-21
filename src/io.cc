@@ -111,9 +111,11 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  const std::string rank_size =
-      "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size);
-  if (mpi_size > 1) file_name << rank_size;
+  if (mpi_size > 1) {
+    const std::string rank_size =
+        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size);
+    file_name << rank_size;
+  }
 #endif
 
   file_name << file_extension;
