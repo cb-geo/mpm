@@ -235,6 +235,12 @@ class Mesh {
   //! \retval status Status of reading HDF5 output
   bool read_particles_hdf5(unsigned phase, const std::string& filename);
 
+  //! Return nodal coordinates
+  std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
+
+  //! Return node pairs
+  std::vector<std::array<mpm::Index, 2>> node_pairs() const;
+
  private:
   //! Mutex
   std::mutex mesh_mutex_;

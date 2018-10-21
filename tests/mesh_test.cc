@@ -75,6 +75,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Define nodes
     coords << 0., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -116,6 +121,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 4);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 4);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -179,6 +189,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Add node 1 and check
     REQUIRE(mesh->add_node(node1) == true);
     // Add node 2 and check
@@ -188,6 +203,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 2);
 
     // Update coordinates
     Eigen::Vector2d coordinates;
@@ -768,38 +786,51 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Define nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+    REQUIRE(mesh->add_node(node3) == true);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+    REQUIRE(mesh->add_node(node4) == true);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+    REQUIRE(mesh->add_node(node5) == true);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+    REQUIRE(mesh->add_node(node6) == true);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+    REQUIRE(mesh->add_node(node7) == true);
 
     // Create cell1
     auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
@@ -817,6 +848,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(cell1->nnodes() == 8);
 
     REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 8);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 12);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -854,12 +890,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Add node 1 and check
     REQUIRE(mesh->add_node(node1) == true);
     // Add node 2 and check
     REQUIRE(mesh->add_node(node2) == true);
     // Add node 2 again and check
     REQUIRE(mesh->add_node(node2) == false);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 2);
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
