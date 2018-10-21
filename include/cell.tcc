@@ -91,6 +91,22 @@ void mpm::Cell<Tdim>::activate_nodes() {
     for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
 }
 
+//! Return a vector of side node id pairs
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Cell<Tdim>::side_node_pairs()
+    const {
+  // Create a vector of node_pairs
+  std::vector<std::array<mpm::Index, 2>> node_pairs;
+  // Get the indices of sides
+  Eigen::MatrixXi indices = element_->sides_indices();
+  // Iterate over indices and get node ids
+  for (unsigned i = 0; i < indices.rows(); ++i)
+    node_pairs.emplace_back(std::array<mpm::Index, 2>(
+        {nodes_[indices(i, 0)]->id(), nodes_[indices(i, 1)]->id()}));
+
+  return node_pairs;
+}
+
 //! Add a neighbour cell and return the status of addition of a node
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_neighbour(

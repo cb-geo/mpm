@@ -69,6 +69,9 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Side node pair ids
+  std::vector<std::array<mpm::Index, 2>> side_node_pairs() const;
+
   //! Activate nodes if particle is present
   void activate_nodes();
 
