@@ -1,10 +1,10 @@
 #include <memory>
 
-#include "spdlog/spdlog.h"
-
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
+#include "spdlog/spdlog.h"
+#include "tbb/task_scheduler_init.h"
 
 #include "io.h"
 #include "mpm.h"
@@ -30,6 +30,12 @@ int main(int argc, char** argv) {
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
+    // Set TBB threads
+    unsigned nthreads = tbb::task_scheduler_init::default_num_threads();
+    // If number of TBB threads are positive set to nthreads
+    if (io->nthreads() > 0) nthreads = io->nthreads();
+    tbb::task_scheduler_init init(nthreads);
+
     // Get analysis type
     const std::string analysis = io->analysis_type();
 
@@ -37,7 +43,6 @@ int main(int argc, char** argv) {
     auto mpm =
         Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
             analysis, std::move(io));
-
     // Solve
     mpm->solve();
 

@@ -301,14 +301,13 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  tbb::parallel_for_each(
-      particles_.cbegin(), particles_.cend(),
-      [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
-        // If particle is not found in mesh add to a list of particles
-        std::lock_guard<std::mutex> guard(mesh_mutex_);
-        if (!this->locate_particle_cells(particle))
-          particles.emplace_back(particle);
-      });
+  std::for_each(particles_.cbegin(), particles_.cend(),
+                [=, &particles](
+                    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+                  // If particle is not found in mesh add to a list of particles
+                  if (!this->locate_particle_cells(particle))
+                    particles.emplace_back(particle);
+                });
 
   return particles;
 }
@@ -316,7 +315,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   // Check the current cell if it is not invalid
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
     if (particle->compute_reference_location()) return true;
@@ -324,7 +323,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   bool status = false;
   tbb::parallel_for_each(
       cells_.cbegin(), cells_.cend(),
-      [=, &status](std::shared_ptr<mpm::Cell<Tdim>> cell) {
+      [=, &status](const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell

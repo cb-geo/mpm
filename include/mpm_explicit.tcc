@@ -69,7 +69,18 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
   // TODO: Fix phase
   const unsigned phase = 0;
   bool status = true;
+
   try {
+    // Initialise MPI rank and size
+    int mpi_rank = 0;
+    int mpi_size = 1;
+
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
@@ -78,6 +89,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Create a mesh reader
     auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
+    auto nodes_begin = std::chrono::steady_clock::now();
     // Global Index
     mpm::Index gid = 0;
     // Node type
@@ -91,6 +103,12 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
 
+    auto nodes_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read nodes: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       nodes_end - nodes_begin)
+                       .count());
+
     // Read and assign velocity constraints
     if (!io_->file_name("velocity_constraints").empty()) {
       bool velocity_constraints = mesh_->assign_velocity_constraints(
@@ -101,6 +119,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
             "Velocity constraints are not properly assigned");
     }
 
+    auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
     // Shape function
@@ -116,6 +135,13 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
+    auto cells_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read cells: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       cells_end - cells_begin)
+                       .count());
+
+    auto particles_begin = std::chrono::steady_clock::now();
     // Get all particles
     const auto all_particles =
         mesh_reader->read_particles(io_->file_name("particles"));
@@ -144,12 +170,26 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
 
+    auto particles_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read particles: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_end - particles_begin)
+                       .count());
+
+    auto particles_locate_begin = std::chrono::steady_clock::now();
     // Locate particles in cell
     auto unlocatable_particles = mesh_->locate_particles_mesh();
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
+    auto particles_locate_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Locate particles: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_locate_end - particles_locate_begin)
+                       .count());
+
+    auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
@@ -180,6 +220,12 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
         throw std::runtime_error(
             "Particles stresses are not properly assigned");
     }
+
+    auto particles_traction_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read particle traction: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_traction_end - particles_traction_begin)
+                       .count());
 
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
