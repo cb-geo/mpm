@@ -54,15 +54,19 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     file.close();
 
     // Assign argc and argv to nput arguments of MPM
-    int argc = 5;
+    int argc = 7;
     // clang-format off
     char* argv[] = {(char*)"./mpm",
                     (char*)"-f",  (char*)"./",
+                    (char*)"-p",  (char*)"8",
                     (char*)"-i",  (char*)"mpm.json"};
     // clang-format on
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
+
+    // Check number of threads
+    REQUIRE(io->nthreads() == 8);
 
     // Check analysis type
     REQUIRE(io->analysis_type() == "MPMExplicitUSF3D");
