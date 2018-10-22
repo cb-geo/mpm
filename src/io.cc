@@ -19,6 +19,12 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
+    // Define # TBB parallel threads
+    TCLAP::ValueArg<unsigned int> tbb_arg("p", "tbb_parallel",
+                                          "Number of parallel TBB threads",
+                                          false, 0, "tbb_parallel");
+    cmd.add(tbb_arg);
+
     // Parse arguments
     cmd.parse(argc, argv);
 
@@ -27,6 +33,9 @@ mpm::IO::IO(int argc, char** argv) {
 
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
+
+    // Set number of threads
+    nthreads_ = tbb_arg.getValue();
 
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());

@@ -27,6 +27,9 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
+  //! Return number of tbb threads
+  unsigned nthreads() const { return nthreads_; }
+
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
   //! \param[in] key Input key in JSON for the filename of
@@ -67,6 +70,8 @@ class IO {
                                       unsigned step, unsigned max_steps);
 
  private:
+  //! Number of parallel threads
+  unsigned nthreads_{0};
   //! Working directory
   std::string working_dir_;
   //! Input file name
