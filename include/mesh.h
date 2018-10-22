@@ -245,7 +245,8 @@ class Mesh {
   //! Mutex
   std::mutex mesh_mutex_;
   // Locate a particle in mesh cells
-  bool locate_particle_cells(std::shared_ptr<mpm::ParticleBase<Tdim>> particle);
+  bool locate_particle_cells(
+      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Container of mesh neighbours
