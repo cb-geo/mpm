@@ -55,6 +55,7 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     resume = analysis_["resume"]["resume"].template get<bool>();
   if (resume) this->checkpoint_resume();
 
+  auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
   for (; step_ < nsteps_; ++step_) {
 
@@ -175,5 +176,11 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 #endif
     }
   }
+  auto solver_end = std::chrono::steady_clock::now();
+  console_->info("Rank {}, USF solver duration: {} ms", mpi_rank,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     solver_end - solver_begin)
+                     .count());
+
   return status;
 }
