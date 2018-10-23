@@ -9,7 +9,22 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   const mpm::Index id = 0;
   // Set analysis step to start at 0
   step_ = 0;
-  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id);
+
+  // Set mesh as isoparametric
+  bool isoparametric = true;
+
+  try {
+    const auto mesh_props = io_->json_object("mesh");
+    isoparametric = mesh_props["isoparametric"].template get<bool>();
+  } catch (std::exception& exception) {
+    console_->warn(
+        "{} {} Isoparametric status of mesh: {}\n Setting mesh as "
+        "isoparametric.",
+        __FILE__, __LINE__, exception.what());
+    isoparametric = true;
+  }
+
+  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id, isoparametric);
 
   // Empty all materials
   materials_.clear();

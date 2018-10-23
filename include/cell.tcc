@@ -1,8 +1,9 @@
 //! Constructor with cell id, number of nodes and element
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
-                      const std::shared_ptr<const Element<Tdim>>& elementptr)
-    : id_{id}, nnodes_{nnodes} {
+                      const std::shared_ptr<const Element<Tdim>>& elementptr,
+                      bool isoparametric)
+    : id_{id}, nnodes_{nnodes}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
@@ -315,7 +316,7 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
 
 //! Check if a point is in a 1D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<1>::point_in_cell(
+inline bool mpm::Cell<1>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
 
   bool status = false;
@@ -338,7 +339,7 @@ inline bool mpm::Cell<1>::point_in_cell(
 
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<2>::point_in_cell(
+inline bool mpm::Cell<2>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -393,7 +394,7 @@ inline bool mpm::Cell<2>::point_in_cell(
 
 //! Check if a point is in a 3D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<3>::point_in_cell(
+inline bool mpm::Cell<3>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -445,6 +446,10 @@ inline bool mpm::Cell<3>::point_in_cell(
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
     const Eigen::Matrix<double, Tdim, 1>& point) {
+
+  // Check if cell is cartesian, if so use cartesian checker
+  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
+
   bool status = true;
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
@@ -607,6 +612,10 @@ template <>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<2>::local_coordinates_point(point);
+
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
@@ -700,6 +709,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 template <>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
+
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<3>::local_coordinates_point(point);
 
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 3, 1> xi;
