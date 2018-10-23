@@ -48,6 +48,9 @@ int main(int argc, char** argv) {
 
   } catch (std::exception& exception) {
     console->error("MPM main: {}", exception.what());
+#ifdef USE_MPI
+    MPI_Abort(MPI_COMM_WORLD, 1);
+#endif
   }
 
 #ifdef USE_MPI
