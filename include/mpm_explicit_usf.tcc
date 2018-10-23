@@ -61,18 +61,29 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
-    // Initialise nodes
-    mesh_->iterate_over_nodes(
-        std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+    // Create a TBB task group
+    tbb::task_group task_group;
 
-    mesh_->iterate_over_cells(
-        std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+    // Spawn a task for initialising nodes and cells
+    task_group.run([&] {
+      // Initialise nodes
+      mesh_->iterate_over_nodes(
+          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
-    mesh_->find_active_nodes();
+      mesh_->iterate_over_cells(
+          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
 
-    // Iterate over each particle to compute shapefn
-    mesh_->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+      mesh_->find_active_nodes();
+    });
+
+    // Spawn a task for particles
+    task_group.run([&] {
+      // Iterate over each particle to compute shapefn
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+    });
+
+    task_group.wait();
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
@@ -111,20 +122,27 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                   std::placeholders::_1, phase));
 
-    // Iterate over each particle to compute nodal body force
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                  std::placeholders::_1, phase, this->gravity_));
+    // Spawn a task for external force
+    task_group.run([&] {
+      // Iterate over each particle to compute nodal body force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                    std::placeholders::_1, phase, this->gravity_));
 
-    // Iterate over each particle to map traction force to nodes
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                  std::placeholders::_1, phase));
+      // Iterate over each particle to map traction force to nodes
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
+                    std::placeholders::_1, phase));
+    });
 
-    // Iterate over each particle to compute nodal internal force
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                  std::placeholders::_1, phase));
+    // Spawn a task for internal force
+    task_group.run([&] {
+      // Iterate over each particle to compute nodal internal force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                    std::placeholders::_1, phase));
+    });
+    task_group.wait();
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
