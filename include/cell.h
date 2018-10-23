@@ -38,8 +38,10 @@ class Cell {
   //! \param[in] id Global cell id
   //! \param[in] nnodes Number of nodes per cell
   //! \param[in] elementptr Pointer to an element type
+  //! \param[in] isoparametric Cell type is isoparametric
   Cell(Index id, unsigned nnodes,
-       const std::shared_ptr<const Element<Tdim>>& elementptr);
+       const std::shared_ptr<const Element<Tdim>>& elementptr,
+       bool isoparametric = true);
 
   //! Default destructor
   ~Cell() = default;
@@ -130,17 +132,18 @@ class Cell {
   //! Return nodal coordinates
   Eigen::MatrixXd nodal_coordinates();
 
-  //! Check if a point is in a cell
+  //! Check if a point is in a cartesian cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
   //! for a point to be in the cell
-  bool point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
-  //! Check if a point is in a cell
+  //! Check if a point is in a isoparametric cell
   //! Use an affine transformation and NR to check if a transformed point is in
   //! a unit cell. This is useful for points on the surface, where
   //! volume calculations are tricky. The transformed point should be between -1
   //! and 1 in a unit cell
+  //! \param[in] point Coordinates of point
   bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a cell
@@ -250,40 +253,31 @@ class Cell {
   std::mutex cell_mutex_;
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
-
+  //! Isoparametric
+  bool isoparametric_{true};
   //! Number of nodes
   unsigned nnodes_{0};
-
   //! Volume
   double volume_{std::numeric_limits<double>::max()};
-
   //! Centroid
   VectorDim centroid_;
-
   //! mean_length of cell
   double mean_length_{std::numeric_limits<double>::max()};
-
   //! particles ids in cell
   std::vector<Index> particles_;
-
   //! Container of node pointers (local id, node pointer)
   Map<NodeBase<Tdim>> nodes_;
-
   //! Container of cell neighbours
   Map<Cell<Tdim>> neighbour_cells_;
-
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
-
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
       velocity_constraints_;
-
   //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
-
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class

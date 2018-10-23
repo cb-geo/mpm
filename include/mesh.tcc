@@ -1,6 +1,7 @@
 // Constructor with id
 template <unsigned Tdim>
-mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
+mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
+    : id_{id}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   //! Logger
@@ -176,8 +177,8 @@ bool mpm::Mesh<Tdim>::create_cells(
 
     for (const auto& nodes : cells) {
       // Create cell with element
-      auto cell =
-          std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
+      auto cell = std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element,
+                                                    this->isoparametric_);
 
       // Cell local node id
       unsigned local_nid = 0;

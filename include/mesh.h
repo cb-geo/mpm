@@ -42,7 +42,8 @@ class Mesh {
 
   // Construct a mesh with a global unique id
   //! \param[in] id Global mesh id
-  Mesh(unsigned id);
+  //! \param[in] isoparametric Mesh is isoparametric
+  Mesh(unsigned id, bool isoparametric = true);
 
   //! Default destructor
   ~Mesh() = default;
@@ -55,6 +56,9 @@ class Mesh {
 
   //! Return id of the mesh
   unsigned id() const { return id_; }
+
+  //! Return if a mesh is isoparametric
+  bool is_isoparametric() const { return isoparametric_; }
 
   //! Create nodes from coordinates
   //! \param[in] gnid Global node id
@@ -242,13 +246,17 @@ class Mesh {
   std::vector<std::array<mpm::Index, 2>> node_pairs() const;
 
  private:
-  //! Mutex
-  std::mutex mesh_mutex_;
   // Locate a particle in mesh cells
   bool locate_particle_cells(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+
+ private:
+  //! Mutex
+  std::mutex mesh_mutex_;
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
+  //! Isoparametric mesh
+  bool isoparametric_{true};
   //! Container of mesh neighbours
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
