@@ -66,7 +66,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
   SECTION("Add nodes") {
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element, false);
     // Test initialisation for failure
     REQUIRE(cell->initialise() == false);
 
