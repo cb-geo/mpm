@@ -328,8 +328,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (!status && cell->is_point_in_cell(particle->coordinates(),
-                                              this->isoparametric_)) {
+        if (!status && cell->is_point_in_cell(particle->coordinates())) {
           particle->assign_cell(cell);
           status = true;
         }

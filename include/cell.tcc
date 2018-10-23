@@ -1,8 +1,9 @@
 //! Constructor with cell id, number of nodes and element
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
-                      const std::shared_ptr<const Element<Tdim>>& elementptr)
-    : id_{id}, nnodes_{nnodes} {
+                      const std::shared_ptr<const Element<Tdim>>& elementptr,
+                      bool isoparametric)
+    : id_{id}, nnodes_{nnodes}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
@@ -444,10 +445,10 @@ inline bool mpm::Cell<3>::point_in_cartesian_cell(
 //! Check if a point is in a 3D cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point, bool isoparametric) {
+    const Eigen::Matrix<double, Tdim, 1>& point) {
 
   // Check if cell is cartesian, if so use cartesian checker
-  if (!isoparametric) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
+  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
 
   bool status = true;
   // Get local coordinates
@@ -611,6 +612,10 @@ template <>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<2>::local_coordinates_point(point);
+
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
@@ -704,6 +709,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 template <>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
+
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<3>::local_coordinates_point(point);
 
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 3, 1> xi;
