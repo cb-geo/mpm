@@ -967,7 +967,7 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
 
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(
+Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
     const Eigen::VectorXd& shapefn, unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
@@ -979,7 +979,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(
 
 //! Return acceleration at a point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
+Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     const Eigen::VectorXd& shapefn, unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> acceleration =
       Eigen::Matrix<double, Tdim, 1>::Zero();

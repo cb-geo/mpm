@@ -194,15 +194,15 @@ class Cell {
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval velocity Interpolated velocity at xi
-  Eigen::VectorXd interpolate_nodal_velocity(const Eigen::VectorXd& shapefn,
-                                             unsigned phase);
+  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity(
+      const Eigen::VectorXd& shapefn, unsigned phase);
 
   //! Return acceleration at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval acceleration Interpolated acceleration at xi
-  Eigen::VectorXd interpolate_nodal_acceleration(const Eigen::VectorXd& shapefn,
-                                                 unsigned phase);
+  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
+      const Eigen::VectorXd& shapefn, unsigned phase);
 
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
