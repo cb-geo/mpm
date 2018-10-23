@@ -177,8 +177,8 @@ bool mpm::Mesh<Tdim>::create_cells(
 
     for (const auto& nodes : cells) {
       // Create cell with element
-      auto cell =
-          std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
+      auto cell = std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element,
+                                                    this->isoparametric_);
 
       // Cell local node id
       unsigned local_nid = 0;
