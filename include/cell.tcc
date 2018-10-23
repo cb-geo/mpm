@@ -315,7 +315,7 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
 
 //! Check if a point is in a 1D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<1>::point_in_cell(
+inline bool mpm::Cell<1>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
 
   bool status = false;
@@ -338,7 +338,7 @@ inline bool mpm::Cell<1>::point_in_cell(
 
 //! Check if a point is in a 2D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<2>::point_in_cell(
+inline bool mpm::Cell<2>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -393,7 +393,7 @@ inline bool mpm::Cell<2>::point_in_cell(
 
 //! Check if a point is in a 3D cell by breaking the cell into sub-volumes
 template <>
-inline bool mpm::Cell<3>::point_in_cell(
+inline bool mpm::Cell<3>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
   // Tolerance for volume / area comparison
@@ -444,7 +444,11 @@ inline bool mpm::Cell<3>::point_in_cell(
 //! Check if a point is in a 3D cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point, bool isoparametric) {
+
+  // Check if cell is cartesian, if so use cartesian checker
+  if (!isoparametric) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
+
   bool status = true;
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
