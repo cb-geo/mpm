@@ -130,18 +130,22 @@ class Cell {
   //! Return nodal coordinates
   Eigen::MatrixXd nodal_coordinates();
 
-  //! Check if a point is in a cell
+  //! Check if a point is in a cartesian cell
   //! Cell is broken into sub-triangles with point as one of the
   //! vertex The sum of the sub-volume should be equal to the volume of the cell
   //! for a point to be in the cell
-  bool point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
-  //! Check if a point is in a cell
+  //! Check if a point is in a isoparametric cell
   //! Use an affine transformation and NR to check if a transformed point is in
   //! a unit cell. This is useful for points on the surface, where
   //! volume calculations are tricky. The transformed point should be between -1
   //! and 1 in a unit cell
-  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  //! \param[in] point Coordinates of point
+  //! \param[in] isoparametric Set if check is done on isoparametric or
+  //! cartesian
+  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point,
+                        bool isoparametric = true);
 
   //! Return the local coordinates of a point in a cell
   //! \param[in] point Coordinates of a point

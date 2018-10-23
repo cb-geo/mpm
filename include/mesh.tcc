@@ -297,7 +297,7 @@ bool mpm::Mesh<Tdim>::remove_particle(
 //! Locate particles in a cell
 template <unsigned Tdim>
 std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
-    mpm::Mesh<Tdim>::locate_particles_mesh() {
+    mpm::Mesh<Tdim>::locate_particles_mesh(bool isoparametric) {
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
@@ -305,7 +305,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
                 [=, &particles](
                     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
                   // If particle is not found in mesh add to a list of particles
-                  if (!this->locate_particle_cells(particle))
+                  if (!this->locate_particle_cells(particle, isoparametric))
                     particles.emplace_back(particle);
                 });
 
@@ -315,7 +315,8 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
+    bool isoparametric) {
   // Check the current cell if it is not invalid
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
     if (particle->compute_reference_location()) return true;
@@ -327,7 +328,8 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (!status && cell->is_point_in_cell(particle->coordinates())) {
+        if (!status &&
+            cell->is_point_in_cell(particle->coordinates(), isoparametric)) {
           particle->assign_cell(cell);
           status = true;
         }

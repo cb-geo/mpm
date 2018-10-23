@@ -167,8 +167,10 @@ class Mesh {
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
+  //! \param[in] isoparametric Mesh is set as isoparametric by default
   //! \retval particles Particles which cannot be located in the mesh
-  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> locate_particles_mesh();
+  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> locate_particles_mesh(
+      bool isoparametric = true);
 
   //! Iterate over particles
   //! \tparam Toper Callable object typically a baseclass functor
@@ -246,7 +248,8 @@ class Mesh {
   std::mutex mesh_mutex_;
   // Locate a particle in mesh cells
   bool locate_particle_cells(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
+      bool isoparametric = true);
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Container of mesh neighbours
