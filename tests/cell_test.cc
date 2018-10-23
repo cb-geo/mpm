@@ -185,22 +185,22 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         Eigen::Vector2d point;
         point << 0.5, 0.5;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point on vertex
         point << 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point on edge
         point << 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point outside
         point << -2, 2.;
         REQUIRE(cell->point_in_cartesian_cell(point) == false);
-        REQUIRE(cell->is_point_in_cell(point, false) == false);
+        REQUIRE(cell->is_point_in_cell(point) == false);
       }
 
       // Find local coordinates of a point in a cell
@@ -968,27 +968,27 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         Eigen::Vector3d point;
         point << 0.5, 0.5, 0.5;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point on vertex
         point << 0., 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point on edge
         point << 0.5, 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point on surface
         point << 0.5, 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point, false) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Check point outside
         point << 2.5, 2.5, 2.5;
         REQUIRE(cell->point_in_cartesian_cell(point) == false);
-        REQUIRE(cell->is_point_in_cell(point, false) == false);
+        REQUIRE(cell->is_point_in_cell(point) == false);
       }
 
       // Find local coordinates of a point in a cell
