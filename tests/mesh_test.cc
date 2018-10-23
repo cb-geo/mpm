@@ -38,6 +38,14 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       unsigned id = 0;
       auto mesh = std::make_shared<mpm::Mesh<Dim>>(id);
       REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == true);
+    }
+
+    SECTION("Mesh id is zero and cartesian") {
+      unsigned id = 0;
+      auto mesh = std::make_shared<mpm::Mesh<Dim>>(id, false);
+      REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == false);
     }
 
     SECTION("Mesh id is positive") {
@@ -749,6 +757,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       unsigned id = 0;
       auto mesh = std::make_shared<mpm::Mesh<Dim>>(id);
       REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == true);
+    }
+
+    SECTION("Mesh id is zero and cartesian") {
+      unsigned id = 0;
+      auto mesh = std::make_shared<mpm::Mesh<Dim>>(id, false);
+      REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == false);
     }
 
     SECTION("Mesh id is positive") {

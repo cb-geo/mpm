@@ -1,6 +1,7 @@
 // Constructor with id
 template <unsigned Tdim>
-mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
+mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
+    : id_{id}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   //! Logger
@@ -297,7 +298,7 @@ bool mpm::Mesh<Tdim>::remove_particle(
 //! Locate particles in a cell
 template <unsigned Tdim>
 std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
-    mpm::Mesh<Tdim>::locate_particles_mesh(bool isoparametric) {
+    mpm::Mesh<Tdim>::locate_particles_mesh() {
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
@@ -305,7 +306,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
                 [=, &particles](
                     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
                   // If particle is not found in mesh add to a list of particles
-                  if (!this->locate_particle_cells(particle, isoparametric))
+                  if (!this->locate_particle_cells(particle))
                     particles.emplace_back(particle);
                 });
 
@@ -315,8 +316,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
-    bool isoparametric) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   // Check the current cell if it is not invalid
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
     if (particle->compute_reference_location()) return true;
@@ -328,8 +328,8 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (!status &&
-            cell->is_point_in_cell(particle->coordinates(), isoparametric)) {
+        if (!status && cell->is_point_in_cell(particle->coordinates(),
+                                              this->isoparametric_)) {
           particle->assign_cell(cell);
           status = true;
         }
