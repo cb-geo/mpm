@@ -86,8 +86,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
-  //! Return local size
-  VectorDim local_size() const override { return lsize_; }
+  //! Return size of particle in natural coordinates
+  VectorDim natural_size() const override { return natural_size_; }
 
   //! Compute volume as cell volume / nparticles
   //! \param[in] phase Index corresponding to the phase
@@ -244,8 +244,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
-  //! Local size of particle
-  Eigen::Matrix<double, 1, Tdim> lsize_;
+  //! Size of particle in natural coordinates
+  Eigen::Matrix<double, 1, Tdim> natural_size_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Stresses

@@ -196,9 +196,9 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
-    h5_particle.lsize_x = lsize[0];
-    h5_particle.lsize_y = lsize[1];
-    h5_particle.lsize_z = lsize[2];
+    h5_particle.nsize_x = lsize[0];
+    h5_particle.nsize_y = lsize[1];
+    h5_particle.nsize_z = lsize[2];
 
     Eigen::Vector3d velocity;
     velocity << 1.5, 2.5, 3.5;
@@ -245,7 +245,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Check for size
-    auto size = particle->local_size();
+    auto size = particle->natural_size();
     REQUIRE(size.size() == Dim);
     for (unsigned i = 0; i < size.size(); ++i)
       REQUIRE(size(i) == Approx(lsize(i)).epsilon(Tolerance));
@@ -964,9 +964,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
-    h5_particle.lsize_x = lsize[0];
-    h5_particle.lsize_y = lsize[1];
-    h5_particle.lsize_z = lsize[2];
+    h5_particle.nsize_x = lsize[0];
+    h5_particle.nsize_y = lsize[1];
+    h5_particle.nsize_z = lsize[2];
 
     Eigen::Vector3d velocity;
     velocity << 1.5, 2.5, 3.5;
@@ -1013,7 +1013,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Check for size
-    auto size = particle->local_size();
+    auto size = particle->natural_size();
     REQUIRE(size.size() == Dim);
     for (unsigned i = 0; i < size.size(); ++i)
       REQUIRE(size(i) == Approx(lsize(i)).epsilon(Tolerance));
@@ -1851,9 +1851,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
-    h5_particle.lsize_x = lsize[0];
-    h5_particle.lsize_y = lsize[1];
-    h5_particle.lsize_z = lsize[2];
+    h5_particle.nsize_x = lsize[0];
+    h5_particle.nsize_y = lsize[1];
+    h5_particle.nsize_z = lsize[2];
 
     Eigen::Vector3d velocity;
     velocity << 1.5, 2.5, 3.5;
@@ -1901,7 +1901,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(coordinates.size() == Dim);
 
     // Check for size
-    auto size = particle->local_size();
+    auto size = particle->natural_size();
     REQUIRE(size.size() == Dim);
     for (unsigned i = 0; i < size.size(); ++i)
       REQUIRE(size(i) == Approx(lsize(i)).epsilon(Tolerance));

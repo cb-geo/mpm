@@ -41,9 +41,9 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->assign_volume(phase, particle.volume);
   // Set local size of particle
   Eigen::Vector3d psize;
-  psize << particle.lsize_x, particle.lsize_y, particle.lsize_z;
+  psize << particle.nsize_x, particle.nsize_y, particle.nsize_z;
   // Initialise particle size
-  for (unsigned i = 0; i < Tdim; ++i) this->lsize_(i) = psize(i);
+  for (unsigned i = 0; i < Tdim; ++i) this->natural_size_(i) = psize(i);
 
   // Coordinates
   Eigen::Vector3d coordinates;
@@ -83,7 +83,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   pressure_.setZero();
   set_traction_ = false;
   size_.setZero();
-  lsize_.setZero();
+  natural_size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
@@ -183,13 +183,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       const auto element = cell_->element_ptr();
 
       // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_, this->lsize_,
+      shapefn_ = element->shapefn(this->xi_, this->natural_size_,
                                   Eigen::Matrix<double, Tdim, 1>::Zero());
 
       // Compute bmatrix of the particle for reference cell
-      bmatrix_ =
-          element->bmatrix(this->xi_, cell_->nodal_coordinates(), this->lsize_,
-                           Eigen::Matrix<double, Tdim, 1>::Zero());
+      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
+                                  this->natural_size_,
+                                  Eigen::Matrix<double, Tdim, 1>::Zero());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -218,7 +218,8 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
     const auto element = cell_->element_ptr();
 
     // Set local particle size based on volume of element in natural coordinates
-    this->lsize_.fill(element->unit_element_volume() / cell_->nparticles());
+    this->natural_size_.fill(element->unit_element_volume() /
+                             cell_->nparticles());
   }
 }
 
