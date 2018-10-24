@@ -27,7 +27,7 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::LinearElastic<Tdim>::thermodynamic_pressure(
-    double volumetric_strain) {
+    double volumetric_strain) const {
   // Bulk modulus
   return (-bulk_modulus_ * volumetric_strain);
 }

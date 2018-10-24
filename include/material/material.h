@@ -56,7 +56,7 @@ class Material {
   //! Compute thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Thermodynamic pressure for volumetric strain
-  virtual double thermodynamic_pressure(double volumetric_strain) = 0;
+  virtual double thermodynamic_pressure(double volumetric_strain) const = 0;
 
   //! Compute stress
   //! \param[in] stress Stress
