@@ -37,7 +37,7 @@ class LinearElastic : public Material<Tdim> {
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) override;
+  double thermodynamic_pressure(double volumetric_strain) const override;
 
   //! Compute stress
   //! \param[in] stress Stress

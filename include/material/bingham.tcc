@@ -23,7 +23,8 @@ mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
 
 //! Compute pressure
 template <unsigned Tdim>
-double mpm::Bingham<Tdim>::thermodynamic_pressure(double volumetric_strain) {
+double mpm::Bingham<Tdim>::thermodynamic_pressure(
+    double volumetric_strain) const {
   // Bulk modulus
   return (-bulk_modulus_ * volumetric_strain);
 }
