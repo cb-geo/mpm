@@ -267,11 +267,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
       auto material_id = material_props["id"].template get<unsigned>();
 
       // Create a new material from JSON object
-      auto mat = Factory<mpm::Material<Tdim>, unsigned>::instance()->create(
-          material_type, std::move(material_id));
-
-      // Initialise material properties
-      mat->properties(material_props);
+      auto mat =
+          Factory<mpm::Material<Tdim>, unsigned, const Json&>::instance()
+              ->create(material_type, std::move(material_id), material_props);
 
       // Add material to list
       auto result = materials_.insert(std::make_pair(mat->id(), mat));

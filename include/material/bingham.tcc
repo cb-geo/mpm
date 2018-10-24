@@ -1,6 +1,7 @@
-//! Read material properties
+//! Constructor with material properties
 template <unsigned Tdim>
-void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
+mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
+    : Material<Tdim>(id, material_properties) {
   try {
     density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
@@ -11,8 +12,10 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
     mu_ = material_properties["mu"].template get<double>();
     critical_shear_rate_ =
         material_properties["critical_shear_rate"].template get<double>();
+    // Calculate bulk modulus
+    bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
     properties_ = material_properties;
-    status_ = true;
   } catch (std::exception& except) {
     console_->error("Material parameter not set: {}\n", except.what());
   }
@@ -22,17 +25,7 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
 template <unsigned Tdim>
 double mpm::Bingham<Tdim>::thermodynamic_pressure(double volumetric_strain) {
   // Bulk modulus
-  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-  return (-K * volumetric_strain);
-}
-
-//! Elastic tensor is not defined in Bingham model, throws an error
-template <unsigned Tdim>
-Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {
-
-  throw std::runtime_error("Elastic tensor is not used for this material");
-
-  return Eigen::Matrix<double, 6, 6>::Zero();
+  return (-bulk_modulus_ * volumetric_strain);
 }
 
 //! Compute stress

@@ -145,16 +145,15 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
 
   // Assign material
   unsigned mid = 0;
-  auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-      "LinearElastic2D", std::move(mid));
-
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
   jmaterial["youngs_modulus"] = 1.0E+7;
   jmaterial["poisson_ratio"] = 0.3;
-  // Assign material properties
-  material->properties(jmaterial);
+
+  auto material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic2D", std::move(mid), jmaterial);
 
   // Iterate over each particle to initialise
   mesh->iterate_over_particles(
@@ -403,16 +402,14 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
 
   // Assign material
   unsigned mid = 0;
-  auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-      "LinearElastic3D", std::move(mid));
-
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
   jmaterial["youngs_modulus"] = 1.0E+7;
   jmaterial["poisson_ratio"] = 0.3;
-  // Assign material properties
-  material->properties(jmaterial);
+  auto material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic3D", std::move(mid), jmaterial);
 
   // Iterate over each particle to initialise
   mesh->iterate_over_particles(

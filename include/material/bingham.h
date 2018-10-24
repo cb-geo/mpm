@@ -21,8 +21,10 @@ class Bingham : public Material<Tdim> {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
-  //! Constructor with id
-  Bingham(unsigned id) : Material<Tdim>(id){};
+  //! Constructor with id and material properties
+  //! \param[in] id Material ID
+  //! \param[in] material_properties Material properties
+  Bingham(unsigned id, const Json& material_properties);
 
   //! Destructor
   ~Bingham() override{};
@@ -33,18 +35,10 @@ class Bingham : public Material<Tdim> {
   //! Delete assignement operator
   Bingham& operator=(const Bingham&) = delete;
 
-  //! Read material properties
-  //! \param[in] material_properties Material properties
-  void properties(const Json& material_properties) override;
-
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
   double thermodynamic_pressure(double volumetric_strain) override;
-
-  //! Compute elastic tensor
-  //! \retval de_ Elastic tensor
-  Matrix6x6 elastic_tensor() override;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -57,8 +51,6 @@ class Bingham : public Material<Tdim> {
  protected:
   //! material id
   using Material<Tdim>::id_;
-  //! material status
-  using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
   //! Logger
@@ -72,6 +64,8 @@ class Bingham : public Material<Tdim> {
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
+  //! Bulk modulus
+  double bulk_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Tau0 - shear yield stress in unit of [Pa]
