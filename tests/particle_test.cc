@@ -532,14 +532,15 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Assign material
     unsigned mid = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(mid));
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid), jmaterial);
 
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
@@ -551,7 +552,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->map_internal_force(phase) == false);
 
     // Assign material properties
-    material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
@@ -842,23 +842,19 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     unsigned mid = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(mid));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid), jmaterial);
+    REQUIRE(material->id() == 0);
 
-    // Check if particle can be assigned a material without properties
-    REQUIRE(particle->assign_material(material) == false);
-    // Assign material properties
-    material->properties(jmaterial);
+    // Check if particle can be assigned a material is null
+    REQUIRE(particle->assign_material(nullptr) == false);
 
     // Assign material to particle
     REQUIRE(particle->assign_material(material) == true);
@@ -1374,14 +1370,15 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Assign material
     unsigned mid = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(mid));
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid), jmaterial);
 
     // Check compute mass before material and volume
     REQUIRE(particle->compute_mass(phase) == false);
@@ -1393,7 +1390,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->map_internal_force(phase) == false);
 
     // Assign material properties
-    material->properties(jmaterial);
     REQUIRE(particle->assign_material(material) == true);
 
     // Compute volume
@@ -1724,24 +1720,19 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto particle = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
 
     unsigned mid = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(mid));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
     jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
 
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid), jmaterial);
+    REQUIRE(material->id() == 0);
 
-    // Check if particle can be assigned a material without properties
-    REQUIRE(particle->assign_material(material) == false);
-    // Assign material properties
-    material->properties(jmaterial);
-
+    // Check if particle can be assigned a null material
+    REQUIRE(particle->assign_material(nullptr) == false);
     // Assign material to particle
     REQUIRE(particle->assign_material(material) == true);
   }

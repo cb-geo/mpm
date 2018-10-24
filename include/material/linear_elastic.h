@@ -22,11 +22,8 @@ class LinearElastic : public Material<Tdim> {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Constructor with id
-  LinearElastic(unsigned id) : Material<Tdim>(id) {
-    //! Logger
-    std::string logger = "material::" + std::to_string(id);
-    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
-  };
+  //! \param[in] material_properties Material properties
+  LinearElastic(unsigned id, const Json& material_properties);
 
   //! Destructor
   ~LinearElastic() override{};
@@ -37,18 +34,10 @@ class LinearElastic : public Material<Tdim> {
   //! Delete assignement operator
   LinearElastic& operator=(const LinearElastic&) = delete;
 
-  //! Read material properties
-  //! \param[in] material_properties Material properties
-  void properties(const Json& material_properties) override;
-
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) override;
-
-  //! Compute elastic tensor
-  //! \retval de_ Elastic tensor
-  Matrix6x6 elastic_tensor() override;
+  double thermodynamic_pressure(double volumetric_strain) const override;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -61,12 +50,14 @@ class LinearElastic : public Material<Tdim> {
  protected:
   //! material id
   using Material<Tdim>::id_;
-  //! material status
-  using Material<Tdim>::status_;
   //! Material properties
   using Material<Tdim>::properties_;
   //! Logger
   using Material<Tdim>::console_;
+
+ private:
+  //! Compute elastic tensor
+  bool compute_elastic_tensor();
 
  private:
   //! Elastic stiffness matrix
@@ -77,6 +68,8 @@ class LinearElastic : public Material<Tdim> {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
+  //! Bulk modulus
+  double bulk_modulus_{std::numeric_limits<double>::max()};
 };  // LinearElastic class
 }  // namespace mpm
 

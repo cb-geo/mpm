@@ -22,50 +22,49 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   coords.setZero();
   auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("LinearElastic id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
-  //! Read material properties
-  SECTION("LinearElastic check stiffness matrix") {
+  //! Check failed initialisation
+  SECTION("LinearElastic failed initialisation") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
     jmaterial["poisson_ratio"] = 0.3;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
+  }
 
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
+  //! Read material properties
+  SECTION("LinearElastic check thermodynamic pressure") {
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Get material properties
     REQUIRE(material->property("density") ==
@@ -81,66 +80,14 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
-
-    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
-    REQUIRE(de(0, 0) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(0, 1) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(0, 2) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(0, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(0, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(0, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(1, 0) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(1, 1) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(1, 2) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(1, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(1, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(1, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(2, 0) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(2, 1) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(2, 2) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(2, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(2, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(2, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(3, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 3) == Approx(G).epsilon(Tolerance));
-    REQUIRE(de(3, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(4, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 4) == Approx(G).epsilon(Tolerance));
-    REQUIRE(de(4, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(5, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 5) == Approx(G).epsilon(Tolerance));
   }
 
   SECTION("LinearElastic check stresses") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-
-    material->properties(jmaterial);
-
-    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
 
     // Initialise stress
     mpm::Material<Dim>::Vector6d stress;
@@ -210,50 +157,37 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
   coords.setZero();
   auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
   //! Check for id = 0
   SECTION("LinearElastic id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("LinearElastic id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
   //! Read material properties
-  SECTION("LinearElastic check stiffness matrix") {
+  SECTION("LinearElastic check thermodynamic pressure") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
 
     // Get material properties
     REQUIRE(material->property("density") ==
@@ -269,66 +203,16 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
-
-    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
-    REQUIRE(de(0, 0) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(0, 1) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(0, 2) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(0, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(0, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(0, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(1, 0) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(1, 1) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(1, 2) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(1, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(1, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(1, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(2, 0) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(2, 1) == Approx(a2).epsilon(Tolerance));
-    REQUIRE(de(2, 2) == Approx(a1).epsilon(Tolerance));
-    REQUIRE(de(2, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(2, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(2, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(3, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 3) == Approx(G).epsilon(Tolerance));
-    REQUIRE(de(3, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(3, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(4, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(4, 4) == Approx(G).epsilon(Tolerance));
-    REQUIRE(de(4, 5) == Approx(0.).epsilon(Tolerance));
-
-    REQUIRE(de(5, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(de(5, 5) == Approx(G).epsilon(Tolerance));
   }
 
   SECTION("LinearElastic check stresses") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "LinearElastic3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
 
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-
-    material->properties(jmaterial);
-
-    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
+    //    mpm::Material<Dim>::Matrix6x6 de = material->elastic_tensor();
 
     // Initialise stress
     mpm::Material<Dim>::Vector6d stress;
