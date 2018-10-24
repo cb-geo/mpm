@@ -34,7 +34,11 @@ class Material {
 
   // Constructor with id
   //! \param[in] id Material id
-  Material(unsigned id, const Json& material_properties) : id_{id} {}
+  Material(unsigned id, const Json& material_properties) : id_{id} {
+    //! Logger
+    std::string logger = "material::" + std::to_string(id);
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  }
 
   //! Destructor
   virtual ~Material(){};

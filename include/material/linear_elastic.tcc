@@ -3,10 +3,6 @@ template <unsigned Tdim>
 mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
                                         const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
-  //! Logger
-  std::string logger = "material::" + std::to_string(id);
-  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
-
   try {
     density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
