@@ -46,6 +46,18 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
+  //! Check failed initialisation
+  SECTION("LinearElastic failed initialisation") {
+    unsigned id = 0;
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["poisson_ratio"] = 0.3;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(id), jmaterial);
+  }
+
   //! Read material properties
   SECTION("LinearElastic check thermodynamic pressure") {
     unsigned id = 0;

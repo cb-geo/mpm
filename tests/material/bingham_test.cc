@@ -46,6 +46,20 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
+  // Failed initialisation material
+  SECTION("Bingham failed initialisation") {
+    unsigned id = 0;
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["tau0"] = 771.8;
+    jmaterial["mu"] = 0.0451;
+    jmaterial["critical_shear_rate"] = 0.2;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
+  }
+
   //! Read material properties
   SECTION("Bingham check properties") {
     unsigned id = 0;
