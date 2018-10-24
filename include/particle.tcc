@@ -176,13 +176,18 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
+      const double plocal_size =
+          element->unit_element_volume() / cell_->nparticles();
+      Eigen::Matrix<double, Tdim, 1> psize;
+      psize.fill(plocal_size);
+
       // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_, this->size_,
+      shapefn_ = element->shapefn(this->xi_, psize,
                                   Eigen::Matrix<double, Tdim, 1>::Zero());
+
       // Compute bmatrix of the particle for reference cell
-      bmatrix_ =
-          element->bmatrix(this->xi_, cell_->nodal_coordinates(), this->size_,
-                           Eigen::Matrix<double, Tdim, 1>::Zero());
+      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(), psize,
+                                  Eigen::Matrix<double, Tdim, 1>::Zero());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -204,7 +209,7 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   const double length =
       std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
   // Set particle size as length on each side
-  this->size_ = Eigen::Matrix<double, Tdim, 1>::Constant(length);
+  this->size_.fill(length);
 }
 
 // Compute volume of the particle
