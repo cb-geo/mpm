@@ -890,7 +890,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < stress.size(); ++i)
       REQUIRE(particle->stress(Phase)(i) == Approx(0.).epsilon(Tolerance));
 
-    /*
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
@@ -944,7 +943,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       else
         REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));
     }
-    */
   }
 
   // Check initialise particle from HDF5 file
