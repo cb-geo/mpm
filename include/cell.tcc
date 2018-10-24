@@ -88,8 +88,10 @@ bool mpm::Cell<Tdim>::add_node(
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::activate_nodes() {
   // If number of particles are present, set all associated nodes as active
-  if (particles_.size() > 0)
+  if (particles_.size() > 0) {
+    std::lock_guard<std::mutex> guard(cell_mutex_);
     for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
+  }
 }
 
 //! Return a vector of side node id pairs
@@ -143,6 +145,7 @@ bool mpm::Cell<Tdim>::add_particle_id(Index id) {
 //! Remove a particle id
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::remove_particle_id(Index id) {
+  std::lock_guard<std::mutex> guard(cell_mutex_);
   particles_.erase(std::remove(particles_.begin(), particles_.end(), id),
                    particles_.end());
 }
