@@ -89,6 +89,9 @@ class ParticleBase {
   //! Return volume
   virtual double volume(unsigned phase) const = 0;
 
+  //! Return size of particle in natural coordinates
+  virtual VectorDim natural_size() const = 0;
+
   //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
 
