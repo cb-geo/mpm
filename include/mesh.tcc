@@ -586,10 +586,10 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       velocity[j] = (*pitr)->velocity(phase)[j];
 
     // Particle local size
-    Eigen::Vector3d lsize;
-    lsize.setZero();
-    Eigen::VectorXd size = (*pitr)->local_size();
-    for (unsigned j = 0; j < Tdim; ++j) lsize[j] = size[j];
+    Eigen::Vector3d nsize;
+    nsize.setZero();
+    Eigen::VectorXd size = (*pitr)->natural_size();
+    for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
 
     Eigen::Matrix<double, 6, 1> stress = (*pitr)->stress(phase);
 
@@ -604,9 +604,9 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     particle_data[i].coord_y = coordinates[1];
     particle_data[i].coord_z = coordinates[2];
 
-    particle_data[i].lsize_x = lsize[0];
-    particle_data[i].lsize_y = lsize[1];
-    particle_data[i].lsize_z = lsize[2];
+    particle_data[i].nsize_x = nsize[0];
+    particle_data[i].nsize_y = nsize[1];
+    particle_data[i].nsize_z = nsize[2];
 
     particle_data[i].velocity_x = velocity[0];
     particle_data[i].velocity_y = velocity[1];
@@ -643,8 +643,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
       HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
       HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
-      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, lsize_x),
-      HOFFSET(HDF5Particle, lsize_y),    HOFFSET(HDF5Particle, lsize_z),
+      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, nsize_x),
+      HOFFSET(HDF5Particle, nsize_y),    HOFFSET(HDF5Particle, nsize_z),
       HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
       HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
       HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
@@ -660,8 +660,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       sizeof(particle_data[0].id),         sizeof(particle_data[0].mass),
       sizeof(particle_data[0].volume),     sizeof(particle_data[0].pressure),
       sizeof(particle_data[0].coord_x),    sizeof(particle_data[0].coord_y),
-      sizeof(particle_data[0].coord_z),    sizeof(particle_data[0].lsize_x),
-      sizeof(particle_data[0].lsize_y),    sizeof(particle_data[0].lsize_z),
+      sizeof(particle_data[0].coord_z),    sizeof(particle_data[0].nsize_x),
+      sizeof(particle_data[0].nsize_y),    sizeof(particle_data[0].nsize_z),
       sizeof(particle_data[0].velocity_x), sizeof(particle_data[0].velocity_y),
       sizeof(particle_data[0].velocity_z), sizeof(particle_data[0].stress_xx),
       sizeof(particle_data[0].stress_yy),  sizeof(particle_data[0].stress_zz),
@@ -676,7 +676,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   // Define particle field information
   const char* field_names[NFIELDS] = {
       "id",         "mass",       "volume",     "pressure",  "coord_x",
-      "coord_y",    "coord_z",    "lsize_x",    "lsize_y",   "lsize_z",
+      "coord_y",    "coord_z",    "nsize_x",    "nsize_y",   "nsize_z",
       "velocity_x", "velocity_y", "velocity_z", "stress_xx", "stress_yy",
       "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx",
       "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",
@@ -752,8 +752,8 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
       HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
       HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
-      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, lsize_x),
-      HOFFSET(HDF5Particle, lsize_y),    HOFFSET(HDF5Particle, lsize_z),
+      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, nsize_x),
+      HOFFSET(HDF5Particle, nsize_y),    HOFFSET(HDF5Particle, nsize_z),
       HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
       HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
       HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
@@ -772,8 +772,8 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       sizeof(particle.id),         sizeof(particle.mass),
       sizeof(particle.volume),     sizeof(particle.pressure),
       sizeof(particle.coord_x),    sizeof(particle.coord_y),
-      sizeof(particle.coord_z),    sizeof(particle.lsize_x),
-      sizeof(particle.lsize_y),    sizeof(particle.lsize_z),
+      sizeof(particle.coord_z),    sizeof(particle.nsize_x),
+      sizeof(particle.nsize_y),    sizeof(particle.nsize_z),
       sizeof(particle.velocity_x), sizeof(particle.velocity_y),
       sizeof(particle.velocity_z), sizeof(particle.stress_xx),
       sizeof(particle.stress_yy),  sizeof(particle.stress_zz),
