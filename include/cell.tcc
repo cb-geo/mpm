@@ -826,7 +826,6 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
     const Eigen::VectorXd& pvelocity) {
-
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
     nodes_[i]->update_mass(true, phase, shapefn(i) * pmass);
     nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);
