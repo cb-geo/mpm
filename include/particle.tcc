@@ -39,6 +39,11 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->mass_(phase) = particle.mass;
   // Volume
   this->assign_volume(phase, particle.volume);
+  // Set local size of particle
+  Eigen::Vector3d psize;
+  psize << particle.lsize_x, particle.lsize_y, particle.lsize_z;
+  // Initialise particle size
+  for (unsigned i = 0; i < Tdim; ++i) this->lsize_(i) = psize(i);
 
   // Coordinates
   Eigen::Vector3d coordinates;
@@ -78,6 +83,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   pressure_.setZero();
   set_traction_ = false;
   size_.setZero();
+  lsize_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
@@ -176,18 +182,14 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
-      const double plocal_size =
-          element->unit_element_volume() / cell_->nparticles();
-      Eigen::Matrix<double, Tdim, 1> psize;
-      psize.fill(plocal_size);
-
       // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_, psize,
+      shapefn_ = element->shapefn(this->xi_, this->lsize_,
                                   Eigen::Matrix<double, Tdim, 1>::Zero());
 
       // Compute bmatrix of the particle for reference cell
-      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(), psize,
-                                  Eigen::Matrix<double, Tdim, 1>::Zero());
+      bmatrix_ =
+          element->bmatrix(this->xi_, cell_->nodal_coordinates(), this->lsize_,
+                           Eigen::Matrix<double, Tdim, 1>::Zero());
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -210,6 +212,14 @@ void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
       std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
   // Set particle size as length on each side
   this->size_.fill(length);
+
+  if (cell_ != nullptr) {
+    // Get element ptr of a cell
+    const auto element = cell_->element_ptr();
+
+    // Set local particle size based on volume of element in natural coordinates
+    this->lsize_.fill(element->unit_element_volume() / cell_->nparticles());
+  }
 }
 
 // Compute volume of the particle
