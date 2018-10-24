@@ -34,9 +34,9 @@ class Material {
 
   // Constructor with id
   //! \param[in] id Material id
-  Material(unsigned id) : id_{id} {
+  Material(unsigned id, const Json& material_properties) : id_{id} {
     //! Logger
-    std::string logger = "material_base";
+    std::string logger = "material::" + std::to_string(id);
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
@@ -52,13 +52,6 @@ class Material {
   //! Return id of the material
   unsigned id() const { return id_; }
 
-  //! Return status as true, when properties are assigned
-  bool status() const { return status_; }
-
-  //! Read material properties
-  //! \param[in] material_properties Material properties
-  virtual void properties(const Json&) = 0;
-
   //! Get material property
   //! \param[in] key Material properties key
   //! \retval result Value of material property
@@ -67,11 +60,7 @@ class Material {
   //! Compute thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Thermodynamic pressure for volumetric strain
-  virtual double thermodynamic_pressure(double volumetric_strain) = 0;
-
-  //! Compute elastic tensor
-  //! \retval de_ Elastic tensor
-  virtual Matrix6x6 elastic_tensor() = 0;
+  virtual double thermodynamic_pressure(double volumetric_strain) const = 0;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -85,8 +74,6 @@ class Material {
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
-  //! status
-  bool status_{false};
   //! Material properties
   Json properties_;
   //! Logger

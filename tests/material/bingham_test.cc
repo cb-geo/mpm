@@ -19,53 +19,54 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   const unsigned Dim = 2;
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+  jmaterial["tau0"] = 771.8;
+  jmaterial["mu"] = 0.0451;
+  jmaterial["critical_shear_rate"] = 0.2;
+
   //! Check for id = 0
   SECTION("Bingham id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("Bingham id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
+  }
+
+  // Failed initialisation material
+  SECTION("Bingham failed initialisation") {
+    unsigned id = 0;
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["tau0"] = 771.8;
+    jmaterial["mu"] = 0.0451;
+    jmaterial["critical_shear_rate"] = 0.2;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
   }
 
   //! Read material properties
   SECTION("Bingham check properties") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
 
     // Get material properties
     REQUIRE(material->property("density") ==
@@ -81,20 +82,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   SECTION("Bingham check stresses with no strain rate") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
 
     // Add particle
     mpm::Index pid = 0;
@@ -171,20 +162,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   SECTION("Bingham check stresses with strain rate, no yield") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
 
     // Add particle
     mpm::Index pid = 0;
@@ -266,10 +247,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   SECTION("Bingham check stresses with strain rate, yielded") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -279,7 +256,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
-    material->properties(jmaterial);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -366,53 +346,40 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   const unsigned Dim = 3;
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+  jmaterial["tau0"] = 771.8;
+  jmaterial["mu"] = 0.0451;
+  jmaterial["critical_shear_rate"] = 0.2;
+
   //! Check for id = 0
   SECTION("Bingham id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("Bingham id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
   }
 
   //! Read material properties
   SECTION("Bingham check properties") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
 
     // Get material properties
     REQUIRE(material->property("density") ==
@@ -428,20 +395,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   SECTION("Bingham check stresses with no strain rate") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -534,20 +492,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   SECTION("Bingham check stresses with strain rate, no yield") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -645,10 +594,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   SECTION("Bingham check stresses with strain rate, yielded") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -658,7 +603,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
-    material->properties(jmaterial);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;

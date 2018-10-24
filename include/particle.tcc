@@ -128,7 +128,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
   bool status = false;
   try {
     // Check if material is valid and properties are set
-    if (material != nullptr && material->status()) {
+    if (material != nullptr) {
       material_ = material;
       status = true;
     } else {
