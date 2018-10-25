@@ -132,10 +132,8 @@ class Cell {
   //! Return nodal coordinates
   Eigen::MatrixXd nodal_coordinates();
 
-  //! Check if a point is in a cartesian cell
-  //! Cell is broken into sub-triangles with point as one of the
-  //! vertex The sum of the sub-volume should be equal to the volume of the cell
-  //! for a point to be in the cell
+  //! Check if a point is in a cartesian cell by checking the domain ranges
+  //! \param[in] point Coordinates of point
   bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Check if a point is in a isoparametric cell
