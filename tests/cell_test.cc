@@ -270,7 +270,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << 2.1875, 3.25;
 
         // Test if point is in cell
-        REQUIRE(cell->point_in_cartesian_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point) == true);
 
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell;
@@ -287,7 +287,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point1 << 2., 1.;
 
         // Test if point is in cell
-        REQUIRE(cell->point_in_cartesian_cell(point1) == true);
+        REQUIRE(cell->is_point_in_cell(point1) == true);
 
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell1;
@@ -1192,8 +1192,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell1 << 0.5, 0.5, 0.5;
 
         // Check if point is in cell
-        REQUIRE(cell1->point_in_cartesian_cell(point1) == true);
-        REQUIRE(cell2->point_in_cartesian_cell(point1) == false);
+        REQUIRE(cell1->is_point_in_cell(point1) == true);
+        REQUIRE(cell2->is_point_in_cell(point1) == false);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point1 = cell1->transform_real_to_unit_cell(point1);
@@ -1211,8 +1211,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell2 << -0.5, -0.5, -0.5;
 
         // Check if point is in cell
-        REQUIRE(cell1->point_in_cartesian_cell(point2) == false);
-        REQUIRE(cell2->point_in_cartesian_cell(point2) == true);
+        REQUIRE(cell1->is_point_in_cell(point2) == false);
+        REQUIRE(cell2->is_point_in_cell(point2) == true);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point2 = cell2->transform_real_to_unit_cell(point2);
@@ -1230,8 +1230,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell3 << -1., -1., -1.;
 
         // Check if point is in cell
-        REQUIRE(cell1->point_in_cartesian_cell(point3) == true);
-        REQUIRE(cell2->point_in_cartesian_cell(point3) == false);
+        REQUIRE(cell1->is_point_in_cell(point3) == true);
+        REQUIRE(cell2->is_point_in_cell(point3) == false);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point3 = cell1->transform_real_to_unit_cell(point3);
@@ -1249,8 +1249,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell4 << 1., 1., 1.;
 
         // Check if point is in cell
-        REQUIRE(cell1->point_in_cartesian_cell(point4) == false);
-        REQUIRE(cell2->point_in_cartesian_cell(point4) == true);
+        REQUIRE(cell1->is_point_in_cell(point4) == false);
+        REQUIRE(cell2->is_point_in_cell(point4) == true);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point4 = cell2->transform_real_to_unit_cell(point4);
@@ -1416,7 +1416,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check point in cell
     Eigen::Vector3d point;
     point << 812482.5000000000, 815878.5000000000, 160.0825000000;
-    REQUIRE(cell->point_in_cartesian_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point) == true);
   }
 
   // Check if a point is in an oblique cell
@@ -1483,9 +1483,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell1->nnodes() == 8);
 
     REQUIRE(cell1->nfunctions() == 8);
-
-    // Point in cell1 fails to capture
-    REQUIRE(cell1->point_in_cartesian_cell(point) == false);
 
     Eigen::Vector3d xi;
     xi = cell1->transform_real_to_unit_cell(point);
