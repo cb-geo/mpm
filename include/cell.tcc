@@ -317,132 +317,45 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
   return coordinates;
 }
 
-//! Check if a point is in a 1D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 1D cell by checking bounding box range
 template <>
 inline bool mpm::Cell<1>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
-
-  bool status = false;
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Distance of point from 2 vertices
-  const double length = (nodes_[0]->coordinates() - point).norm() +
-                        (nodes_[1]->coordinates() - point).norm();
-
-  // Check if the point is inside the hedron
-  if (std::fabs(length - this->volume_) < tolerance) status = true;
-
-  return status;
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0))
+    return true;
+  else
+    return false;
 }
 
-//! Check if a point is in a 2D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 2D cell by checking bounding box range
 template <>
 inline bool mpm::Cell<2>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Get the indices of sub-triangles
-  Eigen::MatrixXi indices = element_->inhedron_indices();
-
-  // Initialise sub-triangle areas to 0
-  double triareas = 0.;
-
-  // Return status
-  bool status = false;
-
-  // Iterate over each sub-triangles to calculate the area
-  // of each sub-triangle. If the sum of area of all
-  // sub-triangle is equal to the area of hexahedron then
-  // the point is inside the Hexahedron, if not the point is outside
-  for (unsigned i = 0; i < indices.rows(); ++i) {
-
-    // Get the 2 vertices of the sub-triangle
-    const Eigen::Matrix<double, 2, 1> a = nodes_[indices(i, 0)]->coordinates();
-    const Eigen::Matrix<double, 2, 1> b = nodes_[indices(i, 1)]->coordinates();
-
-    // Compute the area of a triangle
-    // Area = |1/2(x1(y2−y3)+x2(y3−y1)+x3(y1−y2))|
-    Eigen::Matrix<double, 3, 3> area;
-    // clang-format off
-    area << 1.  , 1.  , 1.,
-            a(0), b(0), point(0),
-            a(1), b(1), point(1);
-    // clang-format on
-    const double triarea = 0.5 * std::fabs(area.determinant());
-
-    triareas += triarea;
-
-    // Optimisation check, if the sub-tetrahedra area exceeds the area of
-    // hexahedron, abort and return false (point is outside).
-    if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
-      return false;
-    }
-  }
-
-  // Check if the point is inside the hedron
-  if (std::fabs(triareas - volume_) < tolerance) status = true;
-
-  return status;
+  // Check if a point is within x and y ranges
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0) &&
+      nodes_[1]->coordinates()(1) <= point(1) &&
+      nodes_[2]->coordinates()(1) >= point(1))
+    return true;
+  else
+    return false;
 }
 
-//! Check if a point is in a 3D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 3D cell by checking bounding box range
 template <>
 inline bool mpm::Cell<3>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Get the indices of sub-tetrahedron
-  Eigen::MatrixXi indices = element_->inhedron_indices();
-
-  // Initialise sub-tetrahedra volumes to 0
-  double tetvolumes = 0.;
-
-  // Return status
-  bool status = false;
-
-  // Iterate over each sub-tetrahedrons to calculate the volume
-  // of each sub-tetrahedron. If the sum of volume of all
-  // sub-tetrahedron is equal to the volume of hexahedron then
-  // the point is inside the Hexahedron, if not the point is outside
-  for (unsigned i = 0; i < indices.rows(); ++i) {
-
-    // Get the 3 vertices of the sub-tetrahedron
-    const Eigen::Matrix<double, 3, 1> a = nodes_[indices(i, 0)]->coordinates();
-    const Eigen::Matrix<double, 3, 1> b = nodes_[indices(i, 1)]->coordinates();
-    const Eigen::Matrix<double, 3, 1> c = nodes_[indices(i, 2)]->coordinates();
-
-    // Compute the volume of a tetrahedron
-    // Volume = 1/6 | (a - d).((b - d) x (c - d)) |
-    const double tetvolume =
-        (1. / 6.) * std::fabs((a - point).dot((b - point).cross(c - point)));
-
-    tetvolumes += tetvolume;
-    // Optimisation check, if the sub-tetrahedra volume exceeds the volume of
-    // hexahedron, abort and return false (point is outside).
-    if ((tetvolumes > volume_) &&
-        (std::fabs(tetvolumes - volume_) > tolerance)) {
-      return false;
-    }
-  }
-  // Check if the point is inside the hedron
-  if (std::fabs(tetvolumes - volume_) < tolerance) status = true;
-
-  return status;
+  // Check if a point is within x, y and z ranges
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0) &&
+      nodes_[1]->coordinates()(1) <= point(1) &&
+      nodes_[2]->coordinates()(1) >= point(1) &&
+      nodes_[0]->coordinates()(2) <= point(2) &&
+      nodes_[4]->coordinates()(2) >= point(2))
+    return true;
+  else
+    return false;
 }
 
 //! Check if a point is in a 3D cell by affine transformation and newton-raphson
