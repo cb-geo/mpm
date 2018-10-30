@@ -101,6 +101,17 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Get Mesh reader from JSON object
     const std::string reader =
         mesh_props["mesh_reader"].template get<std::string>();
+
+    bool check_duplicates = true;
+    try {
+      check_duplicates = mesh_props["check_duplicates"].template get<bool>();
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Check duplicates, not specified setting default as true",
+          __FILE__, __LINE__, exception.what());
+      check_duplicates = true;
+    }
+
     // Create a mesh reader
     auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
@@ -111,9 +122,10 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     const auto node_type = mesh_props["node_type"].template get<std::string>();
     // Create nodes from file
     bool node_status = mesh_->create_nodes(
-        gid,                                                    // global id
-        node_type,                                              // node type
-        mesh_reader->read_mesh_nodes(io_->file_name("mesh")));  // coordinates
+        gid,                                                   // global id
+        node_type,                                             // node type
+        mesh_reader->read_mesh_nodes(io_->file_name("mesh")),  // coordinates
+        check_duplicates);  // check duplicates
 
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
@@ -143,9 +155,10 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Create cells from file
     bool cell_status = mesh_->create_cells(
-        gid,                                                    // global id
-        element,                                                // element tyep
-        mesh_reader->read_mesh_cells(io_->file_name("mesh")));  // Node ids
+        gid,                                                   // global id
+        element,                                               // element tyep
+        mesh_reader->read_mesh_cells(io_->file_name("mesh")),  // Node ids
+        check_duplicates);  // Check duplicates
 
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
@@ -178,9 +191,10 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
 
     // Create particles from file
     bool particle_status =
-        mesh_->create_particles(particles_ids,  // global id
-                                particle_type,  // particle type
-                                particles);     // coordinates
+        mesh_->create_particles(particles_ids,      // global id
+                                particle_type,      // particle type
+                                particles,          // coordinates
+                                check_duplicates);  // Check duplicates
 
     if (!particle_status)
       throw std::runtime_error("Addition of particles to mesh failed");
