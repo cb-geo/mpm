@@ -44,9 +44,9 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Check add cell
   SECTION("Check add cell functionality") {
     // Add cell 1 and check
-    REQUIRE(cellcontainer->add(cell1) == true);
+    REQUIRE(cellcontainer->add(cell1, false) == true);
     // Add cell 2 and check
-    REQUIRE(cellcontainer->add(cell2) == true);
+    REQUIRE(cellcontainer->add(cell2, false) == true);
     // Try and cell 2 again and check
     REQUIRE(cellcontainer->add(cell2) == false);
 
@@ -184,9 +184,9 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Check add cell
   SECTION("Check add cell functionality") {
     // Add cell 1 and check
-    REQUIRE(cellcontainer->add(cell1) == true);
+    REQUIRE(cellcontainer->add(cell1, false) == true);
     // Add cell 2 and check
-    REQUIRE(cellcontainer->add(cell2) == true);
+    REQUIRE(cellcontainer->add(cell2, false) == true);
     // Try and cell 2 again and check
     REQUIRE(cellcontainer->add(cell2) == false);
 
