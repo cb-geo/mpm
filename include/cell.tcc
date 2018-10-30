@@ -1016,7 +1016,8 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
                                             double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
-    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass,
+                               shapefn(i) * ppressure);
   }
 }
 
@@ -1151,9 +1152,9 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 
 //! Return pressure at a point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::Matrix<double, 1, 1> mpm::Cell<Tdim>::interpolate_nodal_pressure(
+double mpm::Cell<Tdim>::interpolate_nodal_pressure(
     const Eigen::VectorXd& shapefn, unsigned phase) {
-  Eigen::Matrix<double, 1, 1> pressure = Eigen::Matrix<double, 1, 1>::Zero();
+  double pressure = 0;
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     pressure += shapefn(i) * nodes_[i]->pressure(phase);
 

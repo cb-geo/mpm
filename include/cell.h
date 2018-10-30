@@ -224,8 +224,8 @@ class Cell {
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval pressure Interpolated pressure at xi
-  Eigen::Matrix<double, 1, 1> interpolate_nodal_pressure(
-      const Eigen::VectorXd& shapefn, unsigned phase);
+  double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
+                                    unsigned phase);
 
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle

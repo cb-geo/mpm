@@ -621,11 +621,11 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure_smoothing(unsigned phase) {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal pressure
-      Eigen::Matrix<double, 1, 1> pressure =
+      double pressure =
           cell_->interpolate_nodal_pressure(this->shapefn_, phase);
 
       // Update particle pressure to interpolated nodal pressure
-      this->pressure_.col(phase) = pressure;
+      this->pressure_(phase) = pressure;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

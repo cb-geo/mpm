@@ -23,6 +23,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   mass_.setZero();
+  pressure_.setZero();
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
@@ -281,12 +282,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
                                                       unsigned phase,
-                                                      double pressure_mass) {
+                                                      double mass,
+                                                      double pressure) {
   // Decide to update or assign
   double factor = 1.0;
   if (!update) factor = 0.;
 
   // Update/assign pressure
   std::lock_guard<std::mutex> guard(node_mutex_);
-  pressure_(phase) = (pressure_(phase) * factor) + pressure_mass / mass_(phase);
+  pressure_(phase) =
+      (pressure_(phase) * factor) + (mass * pressure) / mass_(phase);
 }

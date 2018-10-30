@@ -175,15 +175,14 @@ class Node : public NodeBase<Tdim> {
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure_mass pressure times mass from the particles in a cell
-  void update_pressure(bool update, unsigned phase,
-                       double pressure_mass) override;
+  //! \param[in] mass Mass from the particles in a cell
+  //! \param[in] pressure Pressure from the particles in a cell
+  void update_pressure(bool update, unsigned phase, double mass,
+                       double pressure) override;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 1, 1> pressure(unsigned phase) const override {
-    return pressure_.col(phase);
-  }
+  double pressure(unsigned phase) const override { return pressure_(phase); }
 
  private:
   //! Mutex
