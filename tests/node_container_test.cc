@@ -37,9 +37,9 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   // Check add node
   SECTION("Check add node functionality") {
     // Add node 1 and check
-    REQUIRE(nodecontainer->add(node1) == true);
+    REQUIRE(nodecontainer->add(node1, true) == true);
     // Add node 2 and check
-    REQUIRE(nodecontainer->add(node2) == true);
+    REQUIRE(nodecontainer->add(node2, false) == true);
     // Try and node 2 again and check
     REQUIRE(nodecontainer->add(node2) == false);
 

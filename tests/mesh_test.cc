@@ -469,7 +469,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       const std::string node_type = "N2D";
       // Global node index
       mpm::Index gnid = 0;
-      mesh->create_nodes(gnid, node_type, coordinates);
+      mesh->create_nodes(gnid, node_type, coordinates, false);
       // Check if mesh has added nodes
       REQUIRE(mesh->nnodes() == coordinates.size());
       // Try again this shouldn't add more coordinates
@@ -495,7 +495,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, element, cells);
+        mesh->create_cells(gcid, element, cells, false);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
@@ -561,7 +561,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Global particle index
             std::vector<mpm::Index> gpid(coordinates.size());
             std::iota(gpid.begin(), gpid.end(), 0);
-            mesh->create_particles(gpid, particle_type, coordinates);
+            mesh->create_particles(gpid, particle_type, coordinates, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
             // Try again this shouldn't add more coordinates
