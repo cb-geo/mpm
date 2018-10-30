@@ -172,6 +172,19 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
+  //! Update mass at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure_mass pressure times mass from the particles in a cell
+  void update_pressure(bool update, unsigned phase,
+                       double pressure_mass) override;
+
+  //! Return pressure at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, 1, 1> pressure(unsigned phase) const override {
+    return pressure_.col(phase);
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -187,6 +200,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
   Eigen::Matrix<double, 1, Tnphases> volume_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! External force
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force

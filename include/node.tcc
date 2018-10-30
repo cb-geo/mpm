@@ -276,3 +276,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     this->acceleration_(direction, phase) = 0.;
   }
 }
+
+//! Update pressure at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
+                                                      unsigned phase,
+                                                      double pressure_mass) {
+  // Decide to update or assign
+  double factor = 1.0;
+  if (!update) factor = 0.;
+
+  // Update/assign pressure
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  pressure_(phase) = (pressure_(phase) * factor) + pressure_mass / mass_(phase);
+}

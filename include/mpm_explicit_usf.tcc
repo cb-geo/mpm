@@ -126,6 +126,16 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                   std::placeholders::_1, phase, dt_));
 
+    // Assign pressure to nodes
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                  std::placeholders::_1, phase));
+
+    // Iterate over each particle to compute pressure smoothing
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                  std::placeholders::_1, phase));
+
     // Iterate over each particle to compute stress
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_stress,

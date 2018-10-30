@@ -182,6 +182,15 @@ class ParticleBase {
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
 
+  //! Update pressure of the particles
+  virtual bool update_pressure(unsigned phase, double dvolumetric_strain) = 0;
+
+  //! Map particle pressure to nodes
+  virtual bool map_pressure_to_nodes(unsigned phase) = 0;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  virtual bool compute_pressure_smoothing(unsigned phase) = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};

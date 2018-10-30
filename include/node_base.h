@@ -152,6 +152,17 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Update mass at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure_mass pressure times mass from the particles in a cell
+  virtual void update_pressure(bool update, unsigned phase,
+                               double pressure_mass) = 0;
+
+  //! Return pressure at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual Eigen::Matrix<double, 1, 1> pressure(unsigned phase) const = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
