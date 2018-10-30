@@ -1,18 +1,23 @@
 //! Add an element pointer
 template <class T>
-bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr) {
+bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr,
+                            bool check_duplicates) {
   bool insertion_status = false;
-  // Check if it is found in the container
-  auto itr = std::find_if(this->cbegin(), this->cend(),
-                          [ptr](std::shared_ptr<T> const& element) {
-                            return element->id() == ptr->id();
-                          });
+  if (check_duplicates) {
+    // Check if it is found in the container
+    auto itr = std::find_if(this->cbegin(), this->cend(),
+                            [ptr](std::shared_ptr<T> const& element) {
+                              return element->id() == ptr->id();
+                            });
 
-  if (itr == this->cend()) {
+    if (itr == this->cend()) {
+      elements_.push_back(ptr);
+      insertion_status = true;
+    }
+  } else {
     elements_.push_back(ptr);
     insertion_status = true;
   }
-
   return insertion_status;
 }
 
