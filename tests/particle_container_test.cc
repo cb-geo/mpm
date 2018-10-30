@@ -37,9 +37,9 @@ TEST_CASE("Particle container is checked for 2D case",
   // Check add particle
   SECTION("Check add particle functionality") {
     // Add particle 1 and check
-    REQUIRE(particlecontainer->add(particle1) == true);
+    REQUIRE(particlecontainer->add(particle1, false) == true);
     // Add particle 2 and check
-    REQUIRE(particlecontainer->add(particle2) == true);
+    REQUIRE(particlecontainer->add(particle2, false) == true);
     // Try and particle 2 again and check
     REQUIRE(particlecontainer->add(particle2) == false);
 
@@ -146,11 +146,11 @@ TEST_CASE("Particle container is checked for 3D case",
   // Check add particle
   SECTION("Check add particle functionality") {
     // Add particle 1 and check
-    REQUIRE(particlecontainer->add(particle1) == true);
+    REQUIRE(particlecontainer->add(particle1, false) == true);
     // Add particle 2 and check
-    REQUIRE(particlecontainer->add(particle2) == true);
+    REQUIRE(particlecontainer->add(particle2, false) == true);
     // Try and particle 2 again and check
-    REQUIRE(particlecontainer->add(particle2) == false);
+    REQUIRE(particlecontainer->add(particle2, true) == false);
 
     // Check size of particle hanlder
     REQUIRE(particlecontainer->size() == 2);

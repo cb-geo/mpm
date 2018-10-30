@@ -64,14 +64,18 @@ class Mesh {
   //! \param[in] gnid Global node id
   //! \param[in] node_type Node type
   //! \param[in] coordinates Nodal coordinates
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create node status
   bool create_nodes(mpm::Index gnid, const std::string& node_type,
-                    const std::vector<VectorDim>& coordinates);
+                    const std::vector<VectorDim>& coordinates,
+                    bool check_duplicates = true);
 
   //! Add a node to the mesh
   //! \param[in] node A shared pointer to node
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval insertion_status Return the successful addition of a node
-  bool add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node);
+  bool add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node,
+                bool check_duplicates = true);
 
   //! Remove a node from the mesh
   //! \param[in] node A shared pointer to node
@@ -122,15 +126,19 @@ class Mesh {
   //! \param[in] gcid Global cell id
   //! \param[in] element Element type
   //! \param[in] cells Node ids of cells
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create cells status
   bool create_cells(mpm::Index gnid,
                     const std::shared_ptr<mpm::Element<Tdim>>& element,
-                    const std::vector<std::vector<mpm::Index>>& cells);
+                    const std::vector<std::vector<mpm::Index>>& cells,
+                    bool check_duplicates = true);
 
   //! Add a cell from the mesh
   //! \param[in] cell A shared pointer to cell
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval insertion_status Return the successful addition of a cell
-  bool add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
+  bool add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
+                bool check_duplicates = true);
 
   //! Remove a cell from the mesh
   //! \param[in] cell A shared pointer to cell
@@ -149,15 +157,19 @@ class Mesh {
   //! \param[in] gpids Global particle ids
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create particle status
   bool create_particles(const std::vector<mpm::Index>& gpids,
                         const std::string& particle_type,
-                        const std::vector<VectorDim>& coordinates);
+                        const std::vector<VectorDim>& coordinates,
+                        bool check_duplicates = true);
 
   //! Add a particle to the mesh
   //! \param[in] particle A shared pointer to particle
+  //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval insertion_status Return the successful addition of a particle
-  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
+                    bool check_duplicates = true);
 
   //! Remove a particle from the mesh
   //! \param[in] particle A shared pointer to particle

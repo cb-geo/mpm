@@ -15,7 +15,8 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
                                    const std::string& node_type,
-                                   const std::vector<VectorDim>& coordinates) {
+                                   const std::vector<VectorDim>& coordinates,
+                                   bool check_duplicates) {
   bool status = true;
   try {
     // Check if nodal coordinates is empty
@@ -29,7 +30,8 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
           Factory<mpm::NodeBase<Tdim>, mpm::Index,
                   const Eigen::Matrix<double, Tdim, 1>&>::instance()
               ->create(node_type, static_cast<mpm::Index>(gnid),
-                       node_coordinates));
+                       node_coordinates),
+          check_duplicates);
 
       // Increment node id
       if (insert_status) ++gnid;
@@ -46,9 +48,9 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
 
 //! Add a node to the mesh
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_node(
-    const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
-  bool insertion_status = nodes_.add(node);
+bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node,
+                               bool check_duplicates) {
+  bool insertion_status = nodes_.add(node, check_duplicates);
   // Add node to map
   if (insertion_status) map_nodes_.insert(node->id(), node);
   return insertion_status;
@@ -168,7 +170,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
     mpm::Index gcid, const std::shared_ptr<mpm::Element<Tdim>>& element,
-    const std::vector<std::vector<mpm::Index>>& cells) {
+    const std::vector<std::vector<mpm::Index>>& cells, bool check_duplicates) {
   bool status = true;
   try {
     // Check if nodes in cell list is not empty
@@ -195,7 +197,8 @@ bool mpm::Mesh<Tdim>::create_cells(
         // Initialise cell before insertion
         cell->initialise();
         // If cell is initialised insert to mesh
-        if (cell->is_initialised()) insert_cell = this->add_cell(cell);
+        if (cell->is_initialised())
+          insert_cell = this->add_cell(cell, check_duplicates);
       } else
         throw std::runtime_error("Invalid node ids for cell!");
 
@@ -214,8 +217,9 @@ bool mpm::Mesh<Tdim>::create_cells(
 
 //! Add a cell to the mesh
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
-  bool insertion_status = cells_.add(cell);
+bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
+                               bool check_duplicates) {
+  bool insertion_status = cells_.add(cell, check_duplicates);
   return insertion_status;
 }
 
@@ -239,7 +243,7 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
     const std::vector<mpm::Index>& gp_ids, const std::string& particle_type,
-    const std::vector<VectorDim>& coordinates) {
+    const std::vector<VectorDim>& coordinates, bool check_duplicates) {
   bool status = true;
   try {
     unsigned gpid = 0;
@@ -253,7 +257,8 @@ bool mpm::Mesh<Tdim>::create_particles(
           Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                   const Eigen::Matrix<double, Tdim, 1>&>::instance()
               ->create(particle_type, static_cast<mpm::Index>(gp_ids.at(gpid)),
-                       particle_coordinates));
+                       particle_coordinates),
+          check_duplicates);
 
       // Increment particle id
       if (insert_status) ++gpid;
@@ -271,12 +276,13 @@ bool mpm::Mesh<Tdim>::create_particles(
 //! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
+    bool check_duplicates) {
   bool status = false;
   try {
     // Add only if particle can be located in any cell of the mesh
     if (this->locate_particle_cells(particle))
-      status = particles_.add(particle);
+      status = particles_.add(particle, check_duplicates);
     else
       throw std::runtime_error("Particle not found in mesh");
   } catch (std::exception& exception) {
