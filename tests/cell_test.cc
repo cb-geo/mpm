@@ -558,6 +558,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     Eigen::Vector2d xi = Eigen::Vector2d::Zero();
     // Particle mass
     double pmass = 4.;
+    // Particle pressure
+    double ppressure = 12.;
     // Particle volume
     double pvolume = 8.;
     // Particle velocity
@@ -596,7 +598,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         REQUIRE(node->volume(phase) == Approx(2.0).epsilon(Tolerance));
     }
 
-    SECTION("Check particle momentum mapping") {
+    SECTION("Check particle momentum and pressure mapping") {
       // Map particle mass to nodes
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
       for (const auto& node : nodes)
@@ -617,6 +619,11 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(2.0).epsilon(Tolerance));
       }
+
+      // Map particle pressure to nodes
+      cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
+      for (const auto& node : nodes)
+        REQUIRE(node->pressure(phase) == Approx(1.5).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
@@ -857,6 +864,58 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
         REQUIRE(check_acceleration(i) ==
                 Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+    }
+
+    SECTION("Check interpolate pressure") {
+      // Assign mass to 100
+      const double mass = 100.;
+
+      // Apply pressure
+      double pressure;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply pressure
+        pressure = 10. * static_cast<double>(j);
+
+        // Nodal mass
+        node->update_mass(false, phase, mass);
+        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+
+        // Nodal pressure
+        node->update_pressure(false, phase, mass, pressure);
+        REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate pressure (0, 0)
+      double check_pressure =
+          cell->interpolate_nodal_pressure(shapefns_xi, phase);
+
+      double interpolated_pressure;
+      interpolated_pressure = 25.;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
+
+      // Check interpolate pressure (0.5, 0.5)
+      xi << 0.5, 0.5;
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+
+      interpolated_pressure = 28.75;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
+
+      // Check interpolate pressure (-0.5, -0.5)
+      xi << -0.5, -0.5;
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+
+      interpolated_pressure = 18.75;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
     }
   }
 }
@@ -1770,6 +1829,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Particle mass
     double pmass = 4.;
+    // Particle pressure
+    double ppressure = 12.;
     // Particle volume
     double pvolume = 8.;
     // Particle velocity
@@ -1814,7 +1875,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         REQUIRE(node->volume(phase) == Approx(1.0).epsilon(Tolerance));
     }
 
-    SECTION("Check particle momentum mapping") {
+    SECTION("Check particle momentum and pressure mapping") {
       // Map particle mass to nodes
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
       for (const auto& node : nodes)
@@ -1835,6 +1896,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
           REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
       }
+
+      // Map particle pressure to nodes
+      cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
+      for (const auto& node : nodes)
+        REQUIRE(node->pressure(phase) == Approx(0.75).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
@@ -2090,6 +2156,58 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
         REQUIRE(check_acceleration(i) ==
                 Approx(interpolated_acceleration(i)).epsilon(Tolerance));
+    }
+
+    SECTION("Check interpolate pressure") {
+      // Assign mass to 100
+      const double mass = 100.;
+
+      // Apply pressure
+      double pressure;
+      unsigned j = 1;
+      for (const auto& node : nodes) {
+        // Apply pressure
+        pressure = 10. * static_cast<double>(j);
+
+        // Nodal mass
+        node->update_mass(false, phase, mass);
+        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+
+        // Nodal pressure
+        node->update_pressure(false, phase, mass, pressure);
+        REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
+        // Increment j
+        ++j;
+      }
+      // Check interpolate acceleration (0, 0, 0)
+      double check_pressure =
+          cell->interpolate_nodal_pressure(shapefns_xi, phase);
+
+      double interpolated_pressure;
+      interpolated_pressure = 45.;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
+
+      // Check interpolate acceleration (0.5, 0.5, 0.5)
+      xi << 0.5, 0.5, 0.5;
+      auto shapefn_xi =
+          element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                           Eigen::Matrix<double, Dim, 1>::Zero());
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+
+      interpolated_pressure = 58.75;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
+
+      // Check interpolate acceleration (-0.5, -0.5, -0.5)
+      xi << -0.5, -0.5, -0.5;
+      shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
+                                    Eigen::Matrix<double, Dim, 1>::Zero());
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+
+      interpolated_pressure = 28.75;
+      REQUIRE(check_pressure ==
+              Approx(interpolated_pressure).epsilon(Tolerance));
     }
   }
 }
