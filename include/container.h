@@ -23,7 +23,7 @@ class Container {
 
   //! Add a pointer to an element
   //! \param[in] ptr A shared pointer
-  //! \param[in[ check_duplicates Parameter to check duplicates
+  //! \param[in] check_duplicates Parameter to check duplicates
   bool add(const std::shared_ptr<T>&, bool check_duplicates = true);
 
   //! Remove an element pointer
