@@ -568,6 +568,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
+            // Locate particles
+            auto missing_particles = mesh->locate_particles_mesh();
+            REQUIRE(missing_particles.size() == 0);
+
             // Clear coordinates and try creating a list of particles with
             // an empty list
             unsigned nparticles = coordinates.size();
@@ -635,6 +639,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
               particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nparticles() == 8);
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
