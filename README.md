@@ -44,7 +44,7 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 
 ### Ubuntu installation
 
-Please run the following commands for the dependencies of the code:
+Please run the following commands to install dependencies:
 
 ```
 sudo apt-get update
