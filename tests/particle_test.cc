@@ -614,6 +614,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_mass(phase) == true);
     REQUIRE(particle->map_mass_momentum_to_nodes(phase) == true);
     REQUIRE(particle->map_pressure_to_nodes(phase) == true);
+    REQUIRE(particle->compute_pressure_smoothing(phase) == true);
 
     // Values of nodal mass
     std::array<double, 4> nodal_mass{562.5, 187.5, 62.5, 187.5};
@@ -1488,6 +1489,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_mass(phase) == true);
     REQUIRE(particle->map_mass_momentum_to_nodes(phase) == true);
     REQUIRE(particle->map_pressure_to_nodes(phase) == true);
+    REQUIRE(particle->compute_pressure_smoothing(phase) == true);
 
     // Values of nodal mass
     std::array<double, 8> nodal_mass{125., 375.,  1125., 375.,
