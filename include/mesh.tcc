@@ -276,15 +276,19 @@ bool mpm::Mesh<Tdim>::create_particles(
 //! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
-    bool check_duplicates) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle, bool checks) {
   bool status = false;
   try {
-    // Add only if particle can be located in any cell of the mesh
-    if (this->locate_particle_cells(particle))
-      status = particles_.add(particle, check_duplicates);
-    else
-      throw std::runtime_error("Particle not found in mesh");
+    if (checks) {
+      // Add only if particle can be located in any cell of the mesh
+      if (this->locate_particle_cells(particle))
+        status = particles_.add(particle, checks);
+      else
+        throw std::runtime_error("Particle not found in mesh");
+    } else {
+      status = particles_.add(particle, checks);
+    }
+    if (!status) throw std::runtime_error("Particle addition failed");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
