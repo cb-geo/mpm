@@ -166,10 +166,10 @@ class Mesh {
 
   //! Add a particle to the mesh
   //! \param[in] particle A shared pointer to particle
-  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \param[in] checks Parameter to check duplicates and addition
   //! \retval insertion_status Return the successful addition of a particle
   bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
-                    bool check_duplicates = true);
+                    bool checks = true);
 
   //! Remove a particle from the mesh
   //! \param[in] particle A shared pointer to particle
