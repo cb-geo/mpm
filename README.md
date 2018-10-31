@@ -42,6 +42,16 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
                    voro++ voro++-devel vtk vtk-devel wget
 ```
 
+### Ubuntu installation
+
+Please run the following commands to install dependencies:
+
+```
+sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
+                        libtbb-dev libvtk7-dev
+
+```
+
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
