@@ -571,7 +571,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Locate particles
             auto missing_particles = mesh->locate_particles_mesh();
             REQUIRE(missing_particles.size() == 0);
-            
+
             // Clear coordinates and try creating a list of particles with
             // an empty list
             unsigned nparticles = coordinates.size();
@@ -641,7 +641,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
 
               REQUIRE(mesh->nparticles() == 8);
-              
+
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
               // Compute volume
