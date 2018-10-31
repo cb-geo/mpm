@@ -47,12 +47,8 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 Please run the following commands to install dependencies:
 
 ```
-sudo apt-get update
-sudo apt-get upgrade
-
-sudo apt-get install libboost-all-dev libeigen3-dev libtbb-dev libhdf5-serial-dev libvtk7-dev libopenmpi-dev
-
-sudo apt-get autoremove
+sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
+                        libtbb-dev libvtk7-dev
 
 ```
 
