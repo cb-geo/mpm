@@ -51,6 +51,6 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
-            make gcov
-            make lcov
-            bash <(curl -s https://codecov.io/bash) -X gcov
+            # make gcov -j2
+            # make lcov
+            # bash <(curl -s https://codecov.io/bash) -X gcov
