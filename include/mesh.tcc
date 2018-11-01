@@ -312,7 +312,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  std::for_each(particles_.cbegin(), particles_.cend(),
+  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(),
                 [=, &particles](
                     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
                   // If particle is not found in mesh add to a list of particles
@@ -332,7 +332,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
     if (particle->compute_reference_location()) return true;
 
   bool status = false;
-  tbb::parallel_for_each(
+  std::for_each(
       cells_.cbegin(), cells_.cend(),
       [=, &status](const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
         // Check if particle is already found, if so don't run for other cells
