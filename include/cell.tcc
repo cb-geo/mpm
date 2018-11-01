@@ -57,7 +57,7 @@ bool mpm::Cell<Tdim>::is_initialised() const {
           // Check if volume of a cell is initialised
           (std::fabs(this->volume_ - std::numeric_limits<double>::max()) >
            1.0E-10) &&
-          // Check if mean lenght of a cell is initialised
+          // Check if mean length of a cell is initialised
           (std::fabs(this->mean_length_ - std::numeric_limits<double>::max()) >
            1.0E-10));
 }
@@ -358,10 +358,24 @@ inline bool mpm::Cell<3>::point_in_cartesian_cell(
     return false;
 }
 
-//! Check if a point is in a 3D cell by affine transformation and newton-raphson
+//! Check approximately if a point is in a cell by using cell length
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::approx_point_in_cell(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+  const double length = (point - this->centroid_).norm();
+  if (length < (this->mean_length_ * 2.))
+    return true;
+  else
+    return false;
+}
+
+//! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
     const Eigen::Matrix<double, Tdim, 1>& point) {
+
+  // Check if point is approximately in the cell
+  if (!this->approx_point_in_cell(point)) return false;
 
   // Check if cell is cartesian, if so use cartesian checker
   if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
