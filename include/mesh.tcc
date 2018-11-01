@@ -312,13 +312,14 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(),
-                [=, &particles](
-                    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-                  // If particle is not found in mesh add to a list of particles
-                  if (!this->locate_particle_cells(particle))
-                    particles.emplace_back(particle);
-                });
+  tbb::parallel_for_each(
+      particles_.cbegin(), particles_.cend(),
+      [=,
+       &particles](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+        // If particle is not found in mesh add to a list of particles
+        if (!this->locate_particle_cells(particle))
+          particles.emplace_back(particle);
+      });
 
   return particles;
 }
