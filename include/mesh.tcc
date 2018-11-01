@@ -312,14 +312,13 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  tbb::parallel_for_each(
-      particles_.cbegin(), particles_.cend(),
-      [=,
-       &particles](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-        // If particle is not found in mesh add to a list of particles
-        if (!this->locate_particle_cells(particle))
-          particles.emplace_back(particle);
-      });
+  std::for_each(particles_.cbegin(), particles_.cend(),
+                [=, &particles](
+                    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+                  // If particle is not found in mesh add to a list of particles
+                  if (!this->locate_particle_cells(particle))
+                    particles.emplace_back(particle);
+                });
 
   return particles;
 }
@@ -333,7 +332,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
     if (particle->compute_reference_location()) return true;
 
   bool status = false;
-  std::for_each(
+  tbb::parallel_for_each(
       cells_.cbegin(), cells_.cend(),
       [=, &status](const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
         // Check if particle is already found, if so don't run for other cells
@@ -485,12 +484,14 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       double traction = std::get<2>(particle_traction);
 
       // Apply traction
-      for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-        if ((*pitr)->id() == pid) {
-          status = (*pitr)->assign_traction(phase, dir, traction);
-          break;
-        }
-      }
+      tbb::parallel_for_each(
+          particles_.cbegin(), particles_.cend(),
+          [=,
+           &status](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+            if (particle->id() == pid) {
+              status = particle->assign_traction(phase, dir, traction);
+            }
+          });
       if (!status)
         throw std::runtime_error("Particle not found / traction is invalid");
     }
