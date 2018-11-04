@@ -71,6 +71,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Return cell id
   Index cell_id() const override { return cell_id_; }
 
+  //! Return cell ptr status
+  bool cell_ptr() const override { return cell_ != nullptr; }
+
   //! Remove cell associated with the particle
   void remove_cell() override;
 

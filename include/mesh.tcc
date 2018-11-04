@@ -330,8 +330,9 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   // Check the current cell if it is not invalid
-  if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
+  if (particle->cell_id() != std::numeric_limits<mpm::Index>::max()) {
     if (particle->compute_reference_location()) return true;
+  }
 
   bool status = false;
   tbb::parallel_for_each(
