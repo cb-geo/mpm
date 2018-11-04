@@ -24,6 +24,12 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
 
   // Phase
   const unsigned phase = 0;
+
+  // Test if checkpoint resume is needed
+  bool resume = false;
+  if (analysis_.find("resume") != analysis_.end())
+    resume = analysis_["resume"]["resume"].template get<bool>();
+
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
@@ -46,15 +52,12 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
+  // Test if checkpoint resume is needed
+  if (resume) this->checkpoint_resume();
+
   // Compute mass
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
-
-  // Test if checkpoint resume is needed
-  bool resume = false;
-  if (analysis_.find("resume") != analysis_.end())
-    resume = analysis_["resume"]["resume"].template get<bool>();
-  if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
 
