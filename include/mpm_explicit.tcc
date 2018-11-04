@@ -78,9 +78,9 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   }
 }
 
-// Initialise mesh and particles
+// Initialise mesh
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
+bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
   // TODO: Fix phase
   const unsigned phase = 0;
   bool status = true;
@@ -169,10 +169,56 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
                        cells_end - cells_begin)
                        .count());
 
+  } catch (std::exception& exception) {
+    console_->error("#{}: Reading mesh and particles: {}", __LINE__,
+                    exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Initialise particles
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::initialise_particles() {
+  // TODO: Fix phase
+  const unsigned phase = 0;
+  bool status = true;
+
+  try {
+    // Initialise MPI rank and size
+    int mpi_rank = 0;
+    int mpi_size = 1;
+
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+    // Get mesh properties
+    auto mesh_props = io_->json_object("mesh");
+    // Get Mesh reader from JSON object
+    const std::string reader =
+        mesh_props["mesh_reader"].template get<std::string>();
+
+    bool check_duplicates = true;
+    try {
+      check_duplicates = mesh_props["check_duplicates"].template get<bool>();
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Check duplicates, not specified setting default as true",
+          __FILE__, __LINE__, exception.what());
+      check_duplicates = true;
+    }
+
+    // Create a mesh reader
+    auto particle_reader =
+        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
     auto particles_begin = std::chrono::steady_clock::now();
     // Get all particles
     const auto all_particles =
-        mesh_reader->read_particles(io_->file_name("particles"));
+        particle_reader->read_particles(io_->file_name("particles"));
     // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
@@ -227,7 +273,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
       bool particles_tractions = mesh_->assign_particles_tractions(
-          mesh_reader->read_particles_tractions(
+          particle_reader->read_particles_tractions(
               io_->file_name("particles_tractions")));
       if (!particles_tractions)
         throw std::runtime_error(
@@ -238,8 +284,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh_particles() {
     if (!io_->file_name("particles_stresses").empty()) {
 
       // Get stresses of all particles
-      const auto all_particles_stresses = mesh_reader->read_particles_stresses(
-          io_->file_name("particles_stresses"));
+      const auto all_particles_stresses =
+          particle_reader->read_particles_stresses(
+              io_->file_name("particles_stresses"));
       // Chunked stresses
       std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
       chunk_vector_quantities(all_particles_stresses, particles_stresses);

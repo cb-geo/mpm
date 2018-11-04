@@ -34,9 +34,13 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
 
-  // Initialise mesh and materials
-  bool mesh_status = this->initialise_mesh_particles();
+  // Initialise mesh
+  bool mesh_status = this->initialise_mesh();
   if (!mesh_status) status = false;
+
+  // Initialise particles
+  bool particle_status = this->initialise_particles();
+  if (!particle_status) status = false;
 
   // Assign material to particles
   // Get mesh properties
