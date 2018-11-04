@@ -279,6 +279,8 @@ class Mesh {
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
+  //! Map of cells for fast retrieval
+  Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
   //! Logger

@@ -72,6 +72,9 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
   // Status
   this->status_ = particle.status;
+
+  // Cell id
+  this->cell_id_ = particle.cell_id;
   return true;
 }
 

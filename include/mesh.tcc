@@ -220,6 +220,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
                                bool check_duplicates) {
   bool insertion_status = cells_.add(cell, check_duplicates);
+  // Add cell to map
+  if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
 }
 
@@ -227,9 +229,9 @@ bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
+  const mpm::Index id = cell->id();
   // Remove a cell if found in the container
-  bool status = cells_.remove(cell);
-  return status;
+  return (cells_.remove(cell) && map_cells_.remove(id));
 }
 
 //! Iterate over cells
