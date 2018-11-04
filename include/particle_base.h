@@ -77,6 +77,9 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
+  //! Return cell ptr status
+  virtual bool cell_ptr() const = 0;
+
   //! Remove cell
   virtual void remove_cell() = 0;
 

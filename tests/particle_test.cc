@@ -395,8 +395,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Add cell to particle
     REQUIRE(cell->status() == false);
+    // Check particle cell status
+    REQUIRE(particle->cell_ptr() == false);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Check particle cell status
+    REQUIRE(particle->cell_ptr() == true);
     // Check cell status on addition of particle
     REQUIRE(cell->status() == true);
 
@@ -1211,8 +1215,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Add cell to particle
     REQUIRE(cell->status() == false);
+    // Check particle cell status
+    REQUIRE(particle->cell_ptr() == false);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Check particle cell status
+    REQUIRE(particle->cell_ptr() == true);
     // Check cell status on addition of particle
     REQUIRE(cell->status() == true);
 
