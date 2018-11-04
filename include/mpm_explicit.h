@@ -31,8 +31,11 @@ class MPMExplicit : public MPM {
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
 
-  //! Initialise mesh and particles
-  bool initialise_mesh_particles() override;
+  //! Initialise mesh
+  bool initialise_mesh() override;
+
+  //! Initialise particles
+  bool initialise_particles() override;
 
   //! Initialise materials
   bool initialise_materials() override;
