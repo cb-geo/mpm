@@ -2,7 +2,8 @@
 #define MPM_MAP_H_
 
 #include <algorithm>
-#include <unordered_map>
+
+#include <tsl/robin_map.h>
 
 namespace mpm {
 
@@ -38,13 +39,13 @@ class Map {
   std::shared_ptr<T> operator[](Index id) const { return elements_.at(id); }
 
   //! Return begin iterator of nodes
-  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator begin()
+  typename tsl::robin_map<Index, std::shared_ptr<T>>::const_iterator begin()
       const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename std::unordered_map<Index, std::shared_ptr<T>>::const_iterator end()
+  typename tsl::robin_map<Index, std::shared_ptr<T>>::const_iterator end()
       const {
     return elements_.cend();
   }
@@ -56,7 +57,7 @@ class Map {
 
  private:
   // Unordered map of index and pointer
-  std::unordered_map<Index, std::shared_ptr<T>> elements_;
+  tsl::robin_map<Index, std::shared_ptr<T>> elements_;
 };  // Map class
 
 #include "map.tcc"

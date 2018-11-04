@@ -12,4 +12,5 @@ ignore: # files and folders for processing
   - external/json.hpp
   - external/spdlog/*
   - external/tclap/*
+  - external/tsl/*
   - src/main.cc
