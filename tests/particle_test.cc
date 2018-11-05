@@ -397,8 +397,19 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->status() == false);
     // Check particle cell status
     REQUIRE(particle->cell_ptr() == false);
+    // Assign cell id
+    REQUIRE(particle->assign_cell_id(10) == true);
+    // Require cell id
+    REQUIRE(particle->cell_id() == 10);
+    // Assign a very large cell id
+    REQUIRE(particle->assign_cell_id(std::numeric_limits<mpm::Index>::max()) ==
+            false);
+    // Require cell id
+    REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Assign cell id again
+    REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status
     REQUIRE(particle->cell_ptr() == true);
     // Check cell status on addition of particle
@@ -1217,8 +1228,19 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->status() == false);
     // Check particle cell status
     REQUIRE(particle->cell_ptr() == false);
+    // Assign cell id
+    REQUIRE(particle->assign_cell_id(10) == true);
+    // Require cell id
+    REQUIRE(particle->cell_id() == 10);
+    // Assign a very large cell id
+    REQUIRE(particle->assign_cell_id(std::numeric_limits<mpm::Index>::max()) ==
+            false);
+    // Require cell id
+    REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Assign cell id again
+    REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status
     REQUIRE(particle->cell_ptr() == true);
     // Check cell status on addition of particle
