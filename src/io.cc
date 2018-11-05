@@ -90,7 +90,7 @@ bool mpm::IO::check_file(const std::string& filename) {
     file.open(filename);
     status = true;
     file.close();
-  } catch (std::ifstream::failure& exception) {
+  } catch (std::exception& exception) {
     status = false;
     console_->error("Failed to find file {}: {}", filename, exception.what());
   }
