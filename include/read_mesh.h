@@ -1,6 +1,7 @@
 #ifndef MPM_READ_MESH_H_
 #define MPM_READ_MESH_H_
 
+#include <array>
 #include <exception>
 #include <fstream>
 #include <memory>
@@ -74,6 +75,11 @@ class ReadMesh {
   //! \param[in] traction_files file name with particle tractions
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_particles_tractions(const std::string& traction_file) = 0;
+
+  //! Read particles cells file
+  //! \param[in] particles_cells_file file name with particle cell ids
+  virtual std::vector<std::array<mpm::Index, 2>> read_particles_cells(
+      const std::string& particles_cells_file) = 0;
 
 };  // ReadMesh class
 }  // namespace mpm

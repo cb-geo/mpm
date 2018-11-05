@@ -65,6 +65,11 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_particles_tractions(const std::string& traction_file) override;
 
+  //! Read particles cells file
+  //! \param[in] particles_cells_file file name with particle cell ids
+  std::vector<std::array<mpm::Index, 2>> read_particles_cells(
+      const std::string& particles_cells_file) override;
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
