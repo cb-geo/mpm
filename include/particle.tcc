@@ -126,7 +126,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
 // Assign a cell id to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_cell_id(mpm::Index id) {
-  bool status = true;
+  bool status = false;
   try {
     // if a cell ptr is null
     if (cell_ == nullptr && id != std::numeric_limits<Index>::max()) {

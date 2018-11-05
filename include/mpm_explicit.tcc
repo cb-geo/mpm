@@ -250,6 +250,20 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_end - particles_begin)
                        .count());
+    try {
+      // Read and assign particles cells
+      if (!io_->file_name("particles_cells").empty()) {
+        bool particles_cells =
+            mesh_->assign_particles_cells(particle_reader->read_particles_cells(
+                io_->file_name("particles_cells")));
+        if (!particles_cells)
+          throw std::runtime_error(
+              "Cell ids are not properly assigned to particles");
+      }
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: Reading particles cells: {}", __FILE__, __LINE__,
+                      exception.what());
+    }
 
     auto particles_locate_begin = std::chrono::steady_clock::now();
     // Locate particles in cell
@@ -304,8 +318,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
                        .count());
 
   } catch (std::exception& exception) {
-    console_->error("#{}: Reading mesh and particles: {}", __LINE__,
-                    exception.what());
+    console_->error("#{}: Reading particles: {}", __LINE__, exception.what());
     status = false;
   }
   return status;
