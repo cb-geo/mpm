@@ -68,8 +68,15 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) override;
 
+  //! Assign cell id
+  //! \param[in] id Cell id
+  bool assign_cell_id(Index id) override;
+
   //! Return cell id
   Index cell_id() const override { return cell_id_; }
+
+  //! Return cell ptr status
+  bool cell_ptr() const override { return cell_ != nullptr; }
 
   //! Remove cell associated with the particle
   void remove_cell() override;

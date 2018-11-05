@@ -72,6 +72,10 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
   // Status
   this->status_ = particle.status;
+
+  // Cell id
+  this->cell_id_ = particle.cell_id;
+  this->cell_ = nullptr;
   return true;
 }
 
@@ -111,6 +115,25 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Assign a cell id to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell_id(mpm::Index id) {
+  bool status = false;
+  try {
+    // if a cell ptr is null
+    if (cell_ == nullptr && id != std::numeric_limits<Index>::max()) {
+      cell_id_ = id;
+      status = true;
+    } else {
+      throw std::runtime_error("Invalid cell id or cell is already assigned!");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

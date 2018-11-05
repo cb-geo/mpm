@@ -18,7 +18,7 @@ jobs:
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4
+            make -j2
             ctest -VV
       # Clang-6.0
       - run:
@@ -28,7 +28,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            scan-build make -j4 
+            scan-build make -j2 
             ctest -VV
       # cppcheck
       - run:

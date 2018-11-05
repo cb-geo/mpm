@@ -2,6 +2,7 @@
 #define MPM_MESH_H_
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <memory>
 #include <mutex>
@@ -224,6 +225,15 @@ class Mesh {
   bool assign_particles_stresses(
       const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses);
 
+  //! Assign particles cells
+  //! \param[in] particles_cells Particles and cells
+  bool assign_particles_cells(
+      const std::vector<std::array<mpm::Index, 2>>& particles_cells);
+
+  //! Return particles cells
+  //! \retval particles_cells Particles and cells
+  std::vector<std::array<mpm::Index, 2>> particles_cells() const;
+
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }
@@ -273,12 +283,16 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Map of particles for fast retrieval
+  Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
+  //! Map of cells for fast retrieval
+  Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
   //! Logger
