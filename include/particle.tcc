@@ -122,6 +122,25 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
   return status;
 }
 
+// Assign a cell id to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell_id(mpm::Index id) {
+  bool status = true;
+  try {
+    // if a cell ptr is null
+    if (cell_ == nullptr && id != std::numeric_limits<Index>::max()) {
+      cell_id_ = id;
+      status = true;
+    } else {
+      throw std::runtime_error("Invalid cell id or cell is already assigned!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Remove cell for the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::remove_cell() {
