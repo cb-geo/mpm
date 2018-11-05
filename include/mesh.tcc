@@ -536,6 +536,40 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
   return status;
 }
 
+//! Assign particle cells
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_cells(
+    const std::vector<std::array<mpm::Index, 2>>& particles_cells) {
+  bool status = false;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign cells");
+    for (const auto& particle_cell : particles_cells) {
+      // Particle id
+      mpm::Index pid = particle_cell[0];
+      // Cell id
+      mpm::Index cid = particle_cell[1];
+
+      // Apply traction
+      tbb::parallel_for_each(
+          particles_.cbegin(), particles_.cend(),
+          [=,
+           &status](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+            if (particle->id() == pid) {
+              status = particle->assign_cell_id(cid);
+            }
+          });
+      if (!status)
+        throw std::runtime_error("Particle not found / cell id is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign velocity constraints to cells
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
