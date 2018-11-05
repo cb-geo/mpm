@@ -2,6 +2,7 @@
 #define MPM_MESH_H_
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <memory>
 #include <mutex>
@@ -228,6 +229,10 @@ class Mesh {
   //! \param[in] particles_cells Particles and cells
   bool assign_particles_cells(
       const std::vector<std::array<mpm::Index, 2>>& particles_cells);
+
+  //! Return particles cells
+  //! \retval particles_cells Particles and cells
+  std::vector<std::array<mpm::Index, 2>> particles_cells() const;
 
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
