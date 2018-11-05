@@ -305,9 +305,9 @@ bool mpm::Mesh<Tdim>::add_particle(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-  // Remove a particle if found in the container
-  bool status = particles_.remove(particle);
-  return status;
+  const mpm::Index id = particle->id();
+  // Remove a particle if found in the container and map
+  return (particles_.remove(particle) && map_particles_.remove(id));
 }
 
 //! Locate particles in a cell
