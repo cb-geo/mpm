@@ -70,6 +70,13 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   std::vector<std::array<mpm::Index, 2>> read_particles_cells(
       const std::string& particles_cells_file) override;
 
+  //! Write particles cells file
+  //! \param[in] particle_cells List of particles and cells
+  //! \param[in] particles_cells_file file name with particle cell ids
+  void write_particles_cells(
+      const std::string& particles_cells_file,
+      const std::vector<std::array<mpm::Index, 2>>& particles_cells) override;
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
