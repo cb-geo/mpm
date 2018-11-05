@@ -570,6 +570,27 @@ bool mpm::Mesh<Tdim>::assign_particles_cells(
   return status;
 }
 
+//! Return particle cells
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
+    const {
+  std::vector<std::array<mpm::Index, 2>> particles_cells;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot write cells");
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      if ((*pitr)->cell_id() != std::numeric_limits<mpm::Index>::max())
+        particles_cells.emplace_back(
+            std::array<mpm::Index, 2>({(*pitr)->id(), (*pitr)->cell_id()}));
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    particles_cells.clear();
+  }
+  return particles_cells;
+}
+
 //! Assign velocity constraints to cells
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
