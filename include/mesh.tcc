@@ -283,12 +283,15 @@ bool mpm::Mesh<Tdim>::add_particle(
   try {
     if (checks) {
       // Add only if particle can be located in any cell of the mesh
-      if (this->locate_particle_cells(particle))
+      if (this->locate_particle_cells(particle)) {
         status = particles_.add(particle, checks);
-      else
+        map_particles_.insert(particle->id(), particle);
+      } else {
         throw std::runtime_error("Particle not found in mesh");
+      }
     } else {
       status = particles_.add(particle, checks);
+      map_particles_.insert(particle->id(), particle);
     }
     if (!status) throw std::runtime_error("Particle addition failed");
   } catch (std::exception& exception) {
@@ -540,7 +543,7 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_cells(
     const std::vector<std::array<mpm::Index, 2>>& particles_cells) {
-  bool status = false;
+  bool status = true;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -551,17 +554,7 @@ bool mpm::Mesh<Tdim>::assign_particles_cells(
       // Cell id
       mpm::Index cid = particle_cell[1];
 
-      // Apply traction
-      tbb::parallel_for_each(
-          particles_.cbegin(), particles_.cend(),
-          [=,
-           &status](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-            if (particle->id() == pid) {
-              status = particle->assign_cell_id(cid);
-            }
-          });
-      if (!status)
-        throw std::runtime_error("Particle not found / cell id is invalid");
+      map_particles_[pid]->assign_cell_id(cid);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

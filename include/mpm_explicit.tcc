@@ -278,6 +278,11 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
                        particles_locate_end - particles_locate_begin)
                        .count());
 
+    // Write particles and cells to file
+    particle_reader->write_particles_cells(
+        io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
+        mesh_->particles_cells());
+
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
     mesh_->iterate_over_particles(

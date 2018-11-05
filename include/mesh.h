@@ -283,6 +283,8 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Map of particles for fast retrieval
+  Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
   //! Container of active nodes

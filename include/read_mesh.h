@@ -81,6 +81,13 @@ class ReadMesh {
   virtual std::vector<std::array<mpm::Index, 2>> read_particles_cells(
       const std::string& particles_cells_file) = 0;
 
+  //! Write particles cells file
+  //! \param[in] particle_cells List of particles and cells
+  //! \param[in] particles_cells_file file name with particle cell ids
+  virtual void write_particles_cells(
+      const std::string& particles_cells_file,
+      const std::vector<std::array<mpm::Index, 2>>& particles_cells) = 0;
+
 };  // ReadMesh class
 }  // namespace mpm
 

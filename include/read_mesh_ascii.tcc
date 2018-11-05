@@ -380,3 +380,19 @@ std::vector<std::array<mpm::Index, 2>>
   }
   return particles_cells;
 }
+
+//! Write particles and their cells
+template <unsigned Tdim>
+void mpm::ReadMeshAscii<Tdim>::write_particles_cells(
+    const std::string& particles_cells_file,
+    const std::vector<std::array<mpm::Index, 2>>& particles_cells) {
+
+  // output file stream
+  std::fstream file;
+  file.open(particles_cells_file.c_str(), std::ios::out);
+
+  for (const auto& particle_cell : particles_cells)
+    file << particle_cell[0] << "\t" << particle_cell[1] << "\n";
+
+  file.close();
+}
