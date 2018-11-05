@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <tsl/robin_map.h>
-#include <unordered_map>
 
 namespace mpm {
 
