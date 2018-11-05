@@ -2,6 +2,7 @@
 #define MPM_MAP_H_
 
 #include <algorithm>
+
 #include <tsl/robin_map.h>
 
 namespace mpm {
