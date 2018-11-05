@@ -75,6 +75,7 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
   // Cell id
   this->cell_id_ = particle.cell_id;
+  this->cell_ = nullptr;
   return true;
 }
 
