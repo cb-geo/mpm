@@ -74,8 +74,14 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Assign cell id
+  virtual bool assign_cell_id(Index id) = 0;
+
   //! Return cell id
   virtual Index cell_id() const = 0;
+
+  //! Return cell ptr status
+  virtual bool cell_ptr() const = 0;
 
   //! Remove cell
   virtual void remove_cell() = 0;

@@ -38,14 +38,16 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
 
-    // Initialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh and particles
+    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == false);
+    REQUIRE(mpm->initialise_mesh() == false);
+    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -92,14 +94,16 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
 
-    // Initialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh and particles
+    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == false);
+    REQUIRE(mpm->initialise_mesh() == false);
+    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);

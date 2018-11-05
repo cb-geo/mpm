@@ -568,9 +568,56 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
+
+            // Test assign particles cells
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({3, 0}));
+
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({4, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({5, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({6, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({7, 1}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == true);
+
+              // Locate particles
+              auto missing_particles = mesh->locate_particles_mesh();
+              REQUIRE(missing_particles.size() == 0);
+
+              auto check_particles_cells = mesh->particles_cells();
+
+              REQUIRE(check_particles_cells.size() == mesh->nparticles());
+
+              for (unsigned i = 0; i < particles_cells.size(); ++i)
+                for (unsigned j = 0; j < 2; ++j)
+                  REQUIRE(check_particles_cells.at(i).at(j) ==
+                          particles_cells.at(i).at(j));
+            }
+
             // Locate particles
             auto missing_particles = mesh->locate_particles_mesh();
             REQUIRE(missing_particles.size() == 0);
+
+            // Test assign particles cells again should fail
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>(
+                  {3, std::numeric_limits<mpm::Index>::max()}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({50, 0}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == false);
+            }
 
             // Clear coordinates and try creating a list of particles with
             // an empty list
@@ -1385,6 +1432,21 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
 
+            // Test assign particles cells again should fail
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>(
+                  {3, std::numeric_limits<mpm::Index>::max()}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({50, 0}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == false);
+            }
+
             const unsigned phase = 0;
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
@@ -1425,6 +1487,44 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles = mesh->locate_particles_mesh();
               // Should miss particle100
               REQUIRE(particles.size() == 0);
+
+              SECTION("Check return particles cells") {
+                // Vector of particle cells
+                std::vector<std::array<mpm::Index, 2>> particles_cells;
+                // Particle cells
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({3, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({4, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({5, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({6, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({7, 0}));
+
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({8, 1}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({9, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({10, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({11, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({12, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({13, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({14, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({15, 1}));
+
+                auto check_particles_cells = mesh->particles_cells();
+
+                REQUIRE(check_particles_cells.size() == mesh->nparticles());
+
+                for (unsigned i = 0; i < particles_cells.size(); ++i)
+                  for (unsigned j = 0; j < 2; ++j)
+                    REQUIRE(check_particles_cells.at(i).at(j) ==
+                            particles_cells.at(i).at(j));
+              }
             }
             // Test HDF5
             SECTION("Write particles HDF5") {

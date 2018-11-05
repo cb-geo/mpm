@@ -33,6 +33,8 @@ typedef struct HDF5Particle {
   double epsilon_v;
   // Status
   bool status;
+  // Index
+  mpm::Index cell_id;
 } HDF5Particle;
 
 }  // namespace mpm
