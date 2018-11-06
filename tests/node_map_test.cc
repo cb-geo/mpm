@@ -80,7 +80,7 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
     REQUIRE(nodemap->find(id1) != nodemap->end());
     REQUIRE(nodemap->find(id2) != nodemap->end());
     REQUIRE(nodemap->find(501) == nodemap->end());
-    
+
     // Check size of node hanlder
     std::size_t counter = 0;
     for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
