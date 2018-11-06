@@ -75,6 +75,12 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
     nodemap->insert(node1);
     // Insert node 2
     nodemap->insert(node2);
+
+    // Check find iterator
+    REQUIRE(nodemap->find(id1) != nodemap->end());
+    REQUIRE(nodemap->find(id2) != nodemap->end());
+    REQUIRE(nodemap->find(501) == nodemap->end());
+    
     // Check size of node hanlder
     std::size_t counter = 0;
     for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
@@ -190,6 +196,12 @@ TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
     nodemap->insert(node1);
     // Insert node 2
     nodemap->insert(node2);
+
+    // Check find iterator
+    REQUIRE(nodemap->find(id1) != nodemap->end());
+    REQUIRE(nodemap->find(id2) != nodemap->end());
+    REQUIRE(nodemap->find(501) == nodemap->end());
+
     // Check size of node hanlder
     std::size_t counter = 0;
     for (auto itr = nodemap->begin(); itr != nodemap->end(); ++itr) {
