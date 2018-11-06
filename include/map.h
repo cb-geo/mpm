@@ -7,7 +7,7 @@
 
 namespace mpm {
 
-// Global index type for the node
+// Global index type for the map
 using Index = unsigned long long;
 
 // Map class
@@ -38,17 +38,20 @@ class Map {
   //! Return value at a given index
   std::shared_ptr<T> operator[](Index id) const { return elements_.at(id); }
 
-  //! Return begin iterator of nodes
+  //! Return begin iterator of map
   typename tsl::robin_map<Index, std::shared_ptr<T>>::const_iterator begin()
       const {
     return elements_.cbegin();
   }
 
-  //! Return end iterator of nodes
+  //! Return end iterator of map
   typename tsl::robin_map<Index, std::shared_ptr<T>>::const_iterator end()
       const {
     return elements_.cend();
   }
+
+  //! Return iterator of find
+  auto find(Index id) const { return elements_.find(id); }
 
   //! Iterate over elements in the container
   //! \tparam Tunaryfn A unary function
