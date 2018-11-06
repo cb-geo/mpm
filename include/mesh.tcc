@@ -492,15 +492,9 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       // Traction
       double traction = std::get<2>(particle_traction);
 
-      // Apply traction
-      tbb::parallel_for_each(
-          particles_.cbegin(), particles_.cend(),
-          [=,
-           &status](const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-            if (particle->id() == pid) {
-              status = particle->assign_traction(phase, dir, traction);
-            }
-          });
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_traction(phase, dir, traction);
+
       if (!status)
         throw std::runtime_error("Particle not found / traction is invalid");
     }
