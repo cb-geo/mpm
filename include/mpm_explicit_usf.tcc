@@ -131,6 +131,19 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
                   std::placeholders::_1, phase));
 
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce nodal pressure
+      mesh_->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_pressure,
+                    std::placeholders::_1, false, phase, std::placeholders::_2,
+                    std::placeholders::_2));
+    }
+#endif
+
     // Iterate over each particle to compute pressure smoothing
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
