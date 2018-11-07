@@ -144,10 +144,15 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
     }
 #endif
 
-    // Iterate over each particle to compute pressure smoothing
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                  std::placeholders::_1, phase));
+    // Iterate over each particle to compute pressure smoothing when specified
+    bool pressure_smoothing = false;
+    if (analysis_.find("pressure_smoothing") != analysis_.end()) {
+      pressure_smoothing = analysis_["pressure_smoothing"].template get<bool>();
+      if (pressure_smoothing)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                      std::placeholders::_1, phase));
+    }
 
     // Iterate over each particle to compute stress
     mesh_->iterate_over_particles(
