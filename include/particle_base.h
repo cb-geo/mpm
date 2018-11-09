@@ -90,7 +90,7 @@ class ParticleBase {
   virtual bool compute_shapefn() = 0;
 
   //! Assign volume
-  virtual void assign_volume(unsigned phase, double volume) = 0;
+  virtual bool assign_volume(unsigned phase, double volume) = 0;
 
   //! Return volume
   virtual double volume(unsigned phase) const = 0;

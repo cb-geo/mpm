@@ -289,6 +289,15 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
                   std::placeholders::_1, phase));
 
+    // Read and assign particles volumes
+    if (!io_->file_name("particles_volumes").empty()) {
+      bool particles_volumes = mesh_->assign_particles_volumes(
+          particle_reader->read_particles_volumes(
+              io_->file_name("particles_volumes")));
+      if (!particles_volumes)
+        throw std::runtime_error("Particles volumes are not properly assigned");
+    }
+
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
       bool particles_tractions = mesh_->assign_particles_tractions(

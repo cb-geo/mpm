@@ -472,6 +472,36 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
   return status;
 }
 
+//! Assign particles volumes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_volumes(
+    const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
+  bool status = true;
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign volume");
+
+    for (const auto& particle_volume : particle_volumes) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_volume);
+      // Volume
+      double volume = std::get<1>(particle_volume);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_volume(phase, volume);
+
+      if (!status)
+        throw std::runtime_error("Cannot assign invalid particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particle tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_tractions(

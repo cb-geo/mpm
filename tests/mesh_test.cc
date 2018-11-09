@@ -676,6 +676,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
             }
 
+            // Test assign particles volumes
+            SECTION("Check assign particles volumes") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, double>> particles_volumes;
+              // Volumes
+              particles_volumes.emplace_back(std::make_tuple(0, 10.5));
+              particles_volumes.emplace_back(std::make_tuple(1, 10.5));
+
+              REQUIRE(mesh->nparticles() == 8);
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      true);
+
+              // When volume assignment fails
+              particles_volumes.emplace_back(std::make_tuple(2, 0.0));
+              particles_volumes.emplace_back(std::make_tuple(3, -10.0));
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      false);
+            }
+
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
@@ -1529,6 +1550,27 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+            }
+
+            // Test assign particles volumes
+            SECTION("Check assign particles volumes") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, double>> particles_volumes;
+              // Volumes
+              particles_volumes.emplace_back(std::make_tuple(0, 10.5));
+              particles_volumes.emplace_back(std::make_tuple(1, 10.5));
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      true);
+
+              // When volume assignment fails
+              particles_volumes.emplace_back(std::make_tuple(2, 0.0));
+              particles_volumes.emplace_back(std::make_tuple(3, -10.0));
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      false);
             }
 
             // Test assign particles tractions

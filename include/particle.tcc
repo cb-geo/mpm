@@ -227,23 +227,34 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 
 // Assign volume to the particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
+bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
                                                   double volume) {
-  this->volume_(phase) = volume;
-  // Compute size of particle in each direction
-  const double length =
-      std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
-  // Set particle size as length on each side
-  this->size_.fill(length);
+  bool status = true;
+  try {
+    if (volume <= 0.)
+      throw std::runtime_error("Particle volume cannot be negative");
 
-  if (cell_ != nullptr) {
-    // Get element ptr of a cell
-    const auto element = cell_->element_ptr();
+    this->volume_(phase) = volume;
+    // Compute size of particle in each direction
+    const double length =
+        std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
+    // Set particle size as length on each side
+    this->size_.fill(length);
 
-    // Set local particle size based on volume of element in natural coordinates
-    this->natural_size_.fill(element->unit_element_volume() /
-                             cell_->nparticles());
+    if (cell_ != nullptr) {
+      // Get element ptr of a cell
+      const auto element = cell_->element_ptr();
+
+      // Set local particle size based on volume of element in natural
+      // coordinates
+      this->natural_size_.fill(element->unit_element_volume() /
+                               cell_->nparticles());
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
   }
+  return status;
 }
 
 // Compute volume of the particle
