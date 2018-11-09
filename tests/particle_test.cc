@@ -144,7 +144,9 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
     REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
@@ -541,7 +543,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
     REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
@@ -740,7 +744,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     double traction = 7.68;
     const unsigned direction = 1;
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
     // Map traction force
@@ -923,7 +929,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
     REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
@@ -1405,7 +1413,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_shapefn() == true);
 
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
     REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Compute volume
@@ -1628,7 +1638,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     double traction = 7.68;
     const unsigned direction = 2;
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Assign traction to particle
     particle->assign_traction(phase, direction, traction);
     // Map traction force
@@ -1825,7 +1837,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_velocity(bad_phase, velocity) == false);
 
     // Assign volume
-    particle->assign_volume(Phase, 2.0);
+    REQUIRE(particle->assign_volume(Phase, 0.0) == false);
+    REQUIRE(particle->assign_volume(Phase, -5.0) == false);
+    REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
     REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
     // Traction
