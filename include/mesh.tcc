@@ -477,7 +477,7 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
-  bool status = false;
+  bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
@@ -495,8 +495,7 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       if (map_particles_.find(pid) != map_particles_.end())
         status = map_particles_[pid]->assign_traction(phase, dir, traction);
 
-      if (!status)
-        throw std::runtime_error("Particle not found / traction is invalid");
+      if (!status) throw std::runtime_error("Traction is invalid for particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
