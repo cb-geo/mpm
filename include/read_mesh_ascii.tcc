@@ -293,6 +293,50 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
   return constraints;
 }
 
+//! Return particles volume
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::ReadMeshAscii<Tdim>::read_particles_volumes(
+        const std::string& volume_file) {
+
+  // particle volumes
+  std::vector<std::tuple<mpm::Index, double>> volumes;
+  volumes.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(volume_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Volume
+            double volume;
+            // Read stream
+            istream >> id >> volume;
+            volumes.emplace_back(std::make_tuple(id, volume));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read volume : {}", exception.what());
+    file.close();
+  }
+  return volumes;
+}
+
 //! Return particles traction
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>

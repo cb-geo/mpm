@@ -87,7 +87,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign volume
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume of particle for the phase
-  void assign_volume(unsigned phase, double volume) override;
+  bool assign_volume(unsigned phase, double volume) override;
 
   //! Return volume
   //! \param[in] phase Index corresponding to the phase
