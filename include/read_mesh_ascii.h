@@ -60,6 +60,11 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
 
+  //! Read volume file
+  //! \param[in] volume_files file name with particle volumes
+  std::vector<std::tuple<mpm::Index, double>> read_particles_volumes(
+      const std::string& volume_file) override;
+
   //! Read traction file
   //! \param[in] traction_files file name with particle tractions
   std::vector<std::tuple<mpm::Index, unsigned, double>>
