@@ -490,7 +490,10 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
       double volume = std::get<1>(particle_volume);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        map_particles_[pid]->assign_volume(phase, volume);
+        status = map_particles_[pid]->assign_volume(phase, volume);
+
+      if (!status)
+        throw std::runtime_error("Cannot assign invalid particle volume");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
