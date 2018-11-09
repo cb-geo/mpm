@@ -317,7 +317,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
     }
 
     auto particles_traction_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read particle traction: {} ms", mpi_rank,
+    console_->info("Rank {} Read particle traction and stresses: {} ms",
+                   mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_traction_end - particles_traction_begin)
                        .count());
