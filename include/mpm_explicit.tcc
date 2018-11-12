@@ -45,6 +45,17 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
+    // Velocity update
+    try {
+      velocity_update_ = analysis_["velocity_update"].template get<bool>();
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Velocity update parameter is not specified, using default "
+          "as false",
+          __FILE__, __LINE__, exception.what());
+      velocity_update_ = false;
+    }
+
     post_process_ = io_->post_processing();
     // Output steps
     output_steps_ = post_process_["output_steps"].template get<mpm::Index>();

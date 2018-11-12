@@ -46,6 +46,8 @@ class MPMExplicitUSF : public MPMExplicit<Tdim> {
   //! Logger
   using mpm::MPMExplicit<Tdim>::console_;
 
+  //! Velocity update
+  using mpm::MPMExplicit<Tdim>::velocity_update_;
   //! Gravity
   using mpm::MPMExplicit<Tdim>::gravity_;
   //! Mesh object
