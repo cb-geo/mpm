@@ -170,10 +170,17 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
                   std::placeholders::_1, phase, this->dt_));
 
-    // Iterate over each particle to compute updated position
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                  std::placeholders::_1, phase, this->dt_));
+    // Use nodal velocity to update position
+    if (velocity_update_)
+      // Iterate over each particle to compute updated position
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
+                    std::placeholders::_1, phase, this->dt_));
+    else
+      // Iterate over each particle to compute updated position
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                    std::placeholders::_1, phase, this->dt_));
 
     // Iterate over each particle to calculate strain
     mesh_->iterate_over_particles(

@@ -74,6 +74,8 @@ class MPMExplicit : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
+  //! velocity update
+  bool velocity_update_{false};
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
