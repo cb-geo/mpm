@@ -36,6 +36,18 @@ bool mpm::Cell<Tdim>::initialise() {
       this->compute_centroid();
       this->compute_mean_length();
       this->compute_nodal_coordinates();
+
+      // Get centroid of a cell in natural coordinates which are zeros
+      Eigen::Matrix<double, Tdim, 1> xi_centroid;
+      xi_centroid.setZero();
+
+      Eigen::Matrix<double, Tdim, 1> zero;
+      zero.setZero();
+
+      // Get B-Matrix at the centroid
+      bmatrix_centroid_ =
+          element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
+
       status = true;
     } else {
       throw std::runtime_error(
@@ -810,25 +822,15 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
-  // Get centroid of a cell in natural coordinates which are zeros
-  Eigen::Matrix<double, Tdim, 1> xi_centroid;
-  xi_centroid.setZero();
-
-  Eigen::Matrix<double, Tdim, 1> zero;
-  zero.setZero();
-
-  // Get B-Matrix at the centroid
-  auto bmatrix =
-      element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
 
   // Define strain rate at centroid
   Eigen::VectorXd strain_rate_centroid;
-  strain_rate_centroid.resize(bmatrix.at(0).rows());
+  strain_rate_centroid.resize(bmatrix_centroid_.at(0).rows());
   strain_rate_centroid.setZero();
 
   // Compute strain rate
   for (unsigned i = 0; i < this->nnodes(); ++i)
-    strain_rate_centroid += bmatrix.at(i) * nodes_[i]->velocity(phase);
+    strain_rate_centroid += bmatrix_centroid_.at(i) * nodes_[i]->velocity(phase);
   return strain_rate_centroid;
 }
 
