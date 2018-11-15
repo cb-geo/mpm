@@ -830,7 +830,8 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
 
   // Compute strain rate
   for (unsigned i = 0; i < this->nnodes(); ++i)
-    strain_rate_centroid += bmatrix_centroid_.at(i) * nodes_[i]->velocity(phase);
+    strain_rate_centroid +=
+        bmatrix_centroid_.at(i) * nodes_[i]->velocity(phase);
   return strain_rate_centroid;
 }
 
