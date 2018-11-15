@@ -97,7 +97,7 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     task_group.wait();
 
     // Assign mass and momentum to nodes
-    mesh_->iterate_over_particles(
+    mesh_->iterate_over_particles_serial(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
 
@@ -128,12 +128,12 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     // Spawn a task for external force
     task_group.run([&] {
       // Iterate over each particle to compute nodal body force
-      mesh_->iterate_over_particles(
+      mesh_->iterate_over_particles_serial(
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                     std::placeholders::_1, phase, this->gravity_));
 
       // Iterate over each particle to map traction force to nodes
-      mesh_->iterate_over_particles(
+      mesh_->iterate_over_particles_serial(
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
                     std::placeholders::_1, phase));
     });
@@ -141,7 +141,7 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
     // Spawn a task for internal force
     task_group.run([&] {
       // Iterate over each particle to compute nodal internal force
-      mesh_->iterate_over_particles(
+      mesh_->iterate_over_particles_serial(
           std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
                     std::placeholders::_1, phase));
     });

@@ -5,7 +5,6 @@
 #include <array>
 #include <limits>
 #include <memory>
-#include <mutex>
 #include <numeric>
 #include <vector>
 
@@ -192,6 +191,11 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Iterate over particles serial
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_particles_serial(Toper oper);
+
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
@@ -278,8 +282,6 @@ class Mesh {
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
  private:
-  //! Mutex
-  std::mutex mesh_mutex_;
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Isoparametric mesh

@@ -270,6 +270,8 @@ class Cell {
   std::vector<Index> particles_;
   //! Container of node pointers (local id, node pointer)
   Map<NodeBase<Tdim>> nodes_;
+  //! Nodal coordinates
+  Eigen::MatrixXd nodal_coordinates_;
   //! Container of cell neighbours
   Map<Cell<Tdim>> neighbour_cells_;
   //! Shape function

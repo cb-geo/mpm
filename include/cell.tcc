@@ -35,6 +35,7 @@ bool mpm::Cell<Tdim>::initialise() {
       this->compute_volume();
       this->compute_centroid();
       this->compute_mean_length();
+      this->nodal_coordinates_ = nodal_coordinates();
       status = true;
     } else {
       throw std::runtime_error(
@@ -89,7 +90,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::activate_nodes() {
   // If number of particles are present, set all associated nodes as active
   if (particles_.size() > 0) {
-    std::lock_guard<std::mutex> guard(cell_mutex_);
+    // std::lock_guard<std::mutex> guard(cell_mutex_);
     for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
   }
 }
@@ -804,10 +805,8 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
       throw std::runtime_error(
           "Number of nodes / shapefn doesn't match BMatrix");
 
-    for (unsigned i = 0; i < this->nnodes(); ++i) {
-      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
-      strain_rate += bmatrix.at(i) * node_velocity;
-    }
+    for (unsigned i = 0; i < this->nnodes(); ++i)
+      strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -822,7 +821,7 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   xi_centroid.setZero();
 
   // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates(),
+  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates_,
                                    Eigen::Matrix<double, Tdim, 1>::Zero(),
                                    Eigen::Matrix<double, Tdim, 1>::Zero());
 
@@ -832,10 +831,8 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   strain_rate_centroid.setZero();
 
   // Compute strain rate
-  for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
-    strain_rate_centroid += bmatrix.at(i) * node_velocity;
-  }
+  for (unsigned i = 0; i < this->nnodes(); ++i)
+    strain_rate_centroid += bmatrix.at(i) * nodes_[i]->velocity(phase);
   return strain_rate_centroid;
 }
 
