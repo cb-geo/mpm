@@ -35,7 +35,7 @@ bool mpm::Cell<Tdim>::initialise() {
       this->compute_volume();
       this->compute_centroid();
       this->compute_mean_length();
-      this->nodal_coordinates_ = nodal_coordinates();
+      this->compute_nodal_coordinates();
       status = true;
     } else {
       throw std::runtime_error(
@@ -300,15 +300,13 @@ void mpm::Cell<Tdim>::compute_mean_length() {
 
 //! Return nodal coordinates
 template <unsigned Tdim>
-Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
-  Eigen::MatrixXd coordinates;
-  coordinates.resize(this->nnodes_, Tdim);
-  coordinates.setZero();
+void mpm::Cell<Tdim>::compute_nodal_coordinates() {
+  nodal_coordinates_.resize(this->nnodes_, Tdim);
   try {
     // If cell is initialised
     if (this->is_initialised()) {
       for (unsigned i = 0; i < nodes_.size(); ++i)
-        coordinates.row(i) = nodes_[i]->coordinates().transpose();
+        nodal_coordinates_.row(i) = nodes_[i]->coordinates().transpose();
     } else {
       throw std::runtime_error(
           "Cell is not initialised to return nodal coordinates!");
@@ -316,7 +314,6 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
-  return coordinates;
 }
 
 //! Check if a point is in a 1D cell by checking bounding box range
