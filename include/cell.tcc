@@ -552,6 +552,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
+  Eigen::Matrix<double, 2, 1> zero;
+  zero.setZero();
+
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 500;
   // Tolerance for newton raphson
@@ -596,9 +599,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Local shape function
-    const auto sf =
-        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
-                                Eigen::Matrix<double, 2, 1>::Zero());
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
@@ -615,14 +616,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
 
     // Calculate local Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian_local(
-        xi, unit_cell, Eigen::Matrix<double, 2, 1>::Zero(),
-        Eigen::Matrix<double, 2, 1>::Zero());
+    Eigen::Matrix<double, 2, 2> jacobian =
+        element_->jacobian_local(xi, unit_cell, zero, zero);
 
     // Local shape function
-    const auto sf =
-        element_->shapefn_local(xi, Eigen::Matrix<double, 2, 1>::Zero(),
-                                Eigen::Matrix<double, 2, 1>::Zero());
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
@@ -649,6 +647,9 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 3, 1> xi;
   xi.setZero();
+
+  Eigen::Matrix<double, 3, 1> zero;
+  zero.setZero();
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 100;
@@ -694,9 +695,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     if (!guess_nan) xi = affine_guess;
 
     // Local shape function
-    const auto sf =
-        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
-                                Eigen::Matrix<double, 3, 1>::Zero());
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
@@ -712,14 +711,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian_local(
-        xi, unit_cell, Eigen::Matrix<double, 3, 1>::Zero(),
-        Eigen::Matrix<double, 3, 1>::Zero());
+    Eigen::Matrix<double, 3, 3> jacobian =
+        element_->jacobian_local(xi, unit_cell, zero, zero);
 
     // Local shape function
-    const auto sf =
-        element_->shapefn_local(xi, Eigen::Matrix<double, 3, 1>::Zero(),
-                                Eigen::Matrix<double, 3, 1>::Zero());
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // Residual f(x)
     Eigen::Matrix<double, 3, 1> residual;
@@ -821,10 +817,12 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> xi_centroid;
   xi_centroid.setZero();
 
+  Eigen::Matrix<double, Tdim, 1> zero;
+  zero.setZero();
+
   // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates_,
-                                   Eigen::Matrix<double, Tdim, 1>::Zero(),
-                                   Eigen::Matrix<double, Tdim, 1>::Zero());
+  auto bmatrix =
+      element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
 
   // Define strain rate at centroid
   Eigen::VectorXd strain_rate_centroid;
@@ -897,8 +895,9 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
     const Eigen::VectorXd& shapefn, unsigned phase) {
-  Eigen::Matrix<double, Tdim, 1> velocity =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::Matrix<double, Tdim, 1> velocity;
+  velocity.setZero();
+
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     velocity += shapefn(i) * nodes_[i]->velocity(phase);
 
@@ -909,8 +908,8 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     const Eigen::VectorXd& shapefn, unsigned phase) {
-  Eigen::Matrix<double, Tdim, 1> acceleration =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::Matrix<double, Tdim, 1> acceleration;
+  acceleration.setZero();
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 
