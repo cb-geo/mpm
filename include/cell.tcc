@@ -74,7 +74,8 @@ bool mpm::Cell<Tdim>::add_node(
     // The local id should be between 0 and maximum number of nodes
     if (nodes_.size() < this->nnodes_ &&
         (local_id >= 0 && local_id < this->nnodes_)) {
-      insertion_status = nodes_.insert(local_id, node_ptr);
+      nodes_.emplace_back(node_ptr);
+      insertion_status = true;
     } else {
       throw std::runtime_error(
           "Number nodes in a cell exceeds the maximum allowed per cell");
