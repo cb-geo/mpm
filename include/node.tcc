@@ -41,7 +41,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
   if (!update) factor = 0.;
 
   // Update/assign mass
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  // std::lock_guard<std::mutex> guard(node_mutex_);
   mass_(phase) = (mass_(phase) * factor) + mass;
 }
 
@@ -54,7 +54,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
   if (!update) factor = 0.;
 
   // Update/assign volume
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  // std::lock_guard<std::mutex> guard(node_mutex_);
   volume_(phase) = volume_(phase) * factor + volume;
 }
 
@@ -72,7 +72,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     if (!update) factor = 0.;
 
     // Update/assign external force
-    std::lock_guard<std::mutex> guard(node_mutex_);
+    // std::lock_guard<std::mutex> guard(node_mutex_);
     external_force_.col(phase) = external_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
@@ -96,7 +96,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     if (!update) factor = 0.;
 
     // Update/assign internal force
-    std::lock_guard<std::mutex> guard(node_mutex_);
+    // std::lock_guard<std::mutex> guard(node_mutex_);
     internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
     status = true;
   } catch (std::exception& exception) {
@@ -121,7 +121,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     if (!update) factor = 0.;
 
     // Update/assign momentum
-    std::lock_guard<std::mutex> guard(node_mutex_);
+    // std::lock_guard<std::mutex> guard(node_mutex_);
     momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
     status = true;
   } catch (std::exception& exception) {
@@ -173,7 +173,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     if (!update) factor = 0.;
 
     //! Update/assign acceleration
-    std::lock_guard<std::mutex> guard(node_mutex_);
+    // std::lock_guard<std::mutex> guard(node_mutex_);
     acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
     status = true;
   } catch (std::exception& exception) {
