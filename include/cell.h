@@ -279,6 +279,8 @@ class Cell {
   Map<Cell<Tdim>> neighbour_cells_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+  //! BMatrix centroid
+  std::vector<Eigen::MatrixXd> bmatrix_centroid_;
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
