@@ -129,8 +129,11 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
+  //! Compute nodal coordinates
+  void compute_nodal_coordinates();
+
   //! Return nodal coordinates
-  Eigen::MatrixXd nodal_coordinates();
+  Eigen::MatrixXd nodal_coordinates() const { return nodal_coordinates_; }
 
   //! Check if a point is in a cartesian cell by checking the domain ranges
   //! \param[in] point Coordinates of point
