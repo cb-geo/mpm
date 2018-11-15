@@ -191,11 +191,6 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
-  //! Iterate over particles serial
-  //! \tparam Toper Callable object typically a baseclass functor
-  template <typename Toper>
-  void iterate_over_particles_serial(Toper oper);
-
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 

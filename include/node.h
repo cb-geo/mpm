@@ -3,7 +3,7 @@
 
 #include <array>
 #include <limits>
-// #include <mutex>
+#include <mutex>
 #include <vector>
 
 #include "logger.h"
@@ -166,7 +166,7 @@ class Node : public NodeBase<Tdim> {
 
  private:
   //! Mutex
-  // std::mutex node_mutex_;
+  std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates

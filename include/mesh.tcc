@@ -351,13 +351,6 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
   tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
 }
 
-//! Iterate over particles
-template <unsigned Tdim>
-template <typename Toper>
-void mpm::Mesh<Tdim>::iterate_over_particles_serial(Toper oper) {
-  std::for_each(particles_.cbegin(), particles_.cend(), oper);
-}
-
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_neighbour(
