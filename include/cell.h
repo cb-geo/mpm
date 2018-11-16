@@ -31,8 +31,8 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Define DOF for stresses
-  static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
+  //! Define DOFs
+  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
 
   //! Constructor with id, number of nodes and element
   //! \param[in] id Global cell id
