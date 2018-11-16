@@ -85,7 +85,7 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
 
-      mesh_->find_active_nodes();
+      // mesh_->find_active_nodes();
     });
 
     // Spawn a task for particles
@@ -120,8 +120,10 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
 #endif
 
     // Compute nodal velocity
-    mesh_->iterate_over_active_nodes(std::bind(
-        &mpm::NodeBase<Tdim>::compute_velocity, std::placeholders::_1));
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
+                  std::placeholders::_1),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Spawn a task for external force
     task_group.run([&] {
@@ -166,9 +168,10 @@ bool mpm::MPMExplicitUSL<Tdim>::solve() {
 #endif
 
     // Iterate over active nodes to compute acceleratation and velocity
-    mesh_->iterate_over_active_nodes(
+    mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, phase, this->dt_));
+                  std::placeholders::_1, phase, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Use nodal velocity to update position
     if (velocity_update_)

@@ -129,8 +129,11 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
+  //! Compute nodal coordinates
+  void compute_nodal_coordinates();
+
   //! Return nodal coordinates
-  Eigen::MatrixXd nodal_coordinates();
+  Eigen::MatrixXd nodal_coordinates() const { return nodal_coordinates_; }
 
   //! Check if a point is in a cartesian cell by checking the domain ranges
   //! \param[in] point Coordinates of point
@@ -269,11 +272,15 @@ class Cell {
   //! particles ids in cell
   std::vector<Index> particles_;
   //! Container of node pointers (local id, node pointer)
-  Map<NodeBase<Tdim>> nodes_;
+  std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
+  //! Nodal coordinates
+  Eigen::MatrixXd nodal_coordinates_;
   //! Container of cell neighbours
   Map<Cell<Tdim>> neighbour_cells_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+  //! BMatrix centroid
+  std::vector<Eigen::MatrixXd> bmatrix_centroid_;
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
