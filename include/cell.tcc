@@ -785,7 +785,8 @@ template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
     const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
   // Define strain rate
-  Eigen::VectorXd strain_rate = Eigen::VectorXd::Zero(bmatrix.at(0).rows());
+  Eigen::Matrix<double, Tdof, 1> strain_rate =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
 
   try {
     // Check if B-Matrix size and number of nodes match
@@ -807,8 +808,8 @@ template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
 
   // Define strain rate at centroid
-  Eigen::VectorXd strain_rate_centroid =
-      Eigen::VectorXd::Zero(bmatrix_centroid_.at(0).rows());
+  Eigen::Matrix<double, Tdof, 1> strain_rate_centroid =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix_centroid_.at(0).rows());
 
   // Compute strain rate
   for (unsigned i = 0; i < this->nnodes(); ++i)
