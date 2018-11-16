@@ -88,20 +88,8 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
   // Clear existing list of active nodes
   this->active_nodes_.clear();
 
-  // Create a local variable to pass as lambda
-  Container<NodeBase<Tdim>> active_nodes;
-
-  tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
-      [=, &active_nodes](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        // If node is active add to a list of active nodes
-        std::lock_guard<std::mutex> guard(mesh_mutex_);
-        if (node->status()) {
-          active_nodes.add(node);
-        }
-      });
-
-  this->active_nodes_ = active_nodes;
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
 //! Iterate over active nodes
