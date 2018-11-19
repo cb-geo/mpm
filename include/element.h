@@ -3,9 +3,13 @@
 
 #include <exception>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <Eigen/Dense>
+
+#include "factory.h"
+#include "quadrature.h"
 
 namespace mpm {
 
@@ -136,6 +140,10 @@ class Element {
   virtual unsigned nfaces() const = 0;
   //! Return unit element volume
   virtual double unit_element_volume() const = 0;
+
+  //! Return quadrature of the element
+  virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
+      unsigned nquadratures) = 0;
 };
 
 }  // namespace mpm

@@ -481,3 +481,25 @@ inline Eigen::VectorXi
 
   return face_indices_quadrilateral.at(face_id);
 }
+
+
+//! Return quadrature
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::shared_ptr<mpm::Quadrature<Tdim>>
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::quadrature(
+        unsigned nquadratures) {
+  switch (nquadratures) {
+    case 1:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
+      break;
+    case 2:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ2");
+      break;
+    case 3:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ3");
+      break;
+    default:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
+      break;
+  }
+}
