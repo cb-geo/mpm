@@ -1,6 +1,6 @@
 // Getting the quadratures for Tnquadratures = 1
 template <>
-inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 1>::quadratures() {
+inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 1>::quadratures() const {
   Eigen::Matrix<double, 1, 3> quadratures;
   quadratures(0, 0) = 0.;
   quadratures(0, 1) = 0.;
@@ -11,7 +11,7 @@ inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 1>::quadratures() {
 
 // Getting the weights for Tnquadratures = 1
 template <>
-inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 1>::weights() {
+inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 1>::weights() const {
   Eigen::VectorXd weights(1);
   weights(0) = 8.;
 
@@ -20,7 +20,7 @@ inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 1>::weights() {
 
 // Getting the quadratures for Tnquadratures = 8
 template <>
-inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 8>::quadratures() {
+inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 8>::quadratures() const {
   Eigen::Matrix<double, 8, 3> quadratures;
   quadratures(0, 0) = -1. / std::sqrt(3.);
   quadratures(0, 1) = -1. / std::sqrt(3.);
@@ -59,7 +59,7 @@ inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 8>::quadratures() {
 
 // Getting the weights for Tnquadratures = 8
 template <>
-inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 8>::weights() {
+inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 8>::weights() const {
   Eigen::VectorXd weights(8);
   weights(0) = 1.;
   weights(1) = 1.;
@@ -75,7 +75,7 @@ inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 8>::weights() {
 
 // Getting the quadratures for Tnquadratures = 27
 template <>
-inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 27>::quadratures() {
+inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 27>::quadratures() const {
   Eigen::Matrix<double, 27, 3> quadratures;
   const double qpoint_a = std::sqrt(3. / 5.);
 
@@ -204,7 +204,7 @@ inline Eigen::MatrixXd mpm::HexahedronQuadrature<3, 27>::quadratures() {
 
 // Getting the weights for Tnquadratures = 27
 template <>
-inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 27>::weights() {
+inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 27>::weights() const {
   Eigen::VectorXd weights(27);
   const double weight_b = 5. / 9.;
   const double weight_c = 8. / 9.;

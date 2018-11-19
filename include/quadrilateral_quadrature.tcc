@@ -1,6 +1,6 @@
 // Getting the quadratures for Tnquadratures = 1
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 1>::quadratures() {
+inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 1>::quadratures() const {
   Eigen::Matrix<double, 1, 2> quadratures;
   quadratures(0, 0) = 0.;
   quadratures(0, 1) = 0.;
@@ -10,7 +10,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 1>::quadratures() {
 
 // Getting the weights for Tnquadratures = 1
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 1>::weights() {
+inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 1>::weights() const {
   Eigen::VectorXd weights(1);
   weights(0) = 4.;
 
@@ -19,7 +19,7 @@ inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 1>::weights() {
 
 // Getting the quadratures for Tnquadratures = 4
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 4>::quadratures() {
+inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 4>::quadratures() const {
   Eigen::Matrix<double, 4, 2> quadratures;
   const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
 
@@ -37,7 +37,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 4>::quadratures() {
 
 // Getting the weights for Tnquadratures = 4
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 4>::weights() {
+inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 4>::weights() const {
   Eigen::VectorXd weights(4);
   weights(0) = 1.;
   weights(1) = 1.;
@@ -49,7 +49,7 @@ inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 4>::weights() {
 
 // Getting the quadratures for Tnquadratures = 9
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 9>::quadratures() {
+inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 9>::quadratures() const {
   Eigen::Matrix<double, 9, 2> quadratures;
   const double val_sqrt_3by5 = std::sqrt(3. / 5.);
 
@@ -85,7 +85,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 9>::quadratures() {
 
 // Getting the weights for Tnquadratures = 9
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 9>::weights() {
+inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 9>::weights() const {
   Eigen::VectorXd weights(9);
   const double val_25_by_81 = 25. / 81.;
   const double val_40_by_81 = 40. / 81.;
