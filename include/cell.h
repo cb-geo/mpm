@@ -15,6 +15,7 @@
 #include "geometry.h"
 #include "logger.h"
 #include "map.h"
+#include "quadrature.h"
 #include "node_base.h"
 
 namespace mpm {
@@ -62,6 +63,12 @@ class Cell {
   //! \retval initialisation_status Cell has nodes, element type and volumes
   bool is_initialised() const;
 
+  //! Assign quadrature
+  void assign_quadrature(unsigned nquadratures);
+
+  //! Generate points
+  std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points();
+  
   //! Return the number of particles
   unsigned nparticles() const { return particles_.size(); }
 
@@ -279,6 +286,8 @@ class Cell {
   Map<Cell<Tdim>> neighbour_cells_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+  //! Quadrature
+  std::shared_ptr<Quadrature<Tdim>> quadrature_{nullptr};
   //! BMatrix centroid
   std::vector<Eigen::MatrixXd> bmatrix_centroid_;
   //! Velocity constraints

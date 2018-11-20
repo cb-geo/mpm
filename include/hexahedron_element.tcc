@@ -580,7 +580,7 @@ inline Eigen::VectorXi
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::shared_ptr<mpm::Quadrature<Tdim>>
     mpm::HexahedronElement<Tdim, Tnfunctions>::quadrature(
-        unsigned nquadratures) {
+        unsigned nquadratures) const {
   switch (nquadratures) {
     case 1:
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH1");

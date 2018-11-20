@@ -235,7 +235,7 @@ class HexahedronElement : public Element<Tdim> {
 
   //! Return quadrature of the element
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
-      unsigned nquadratures) override;
+      unsigned nquadratures = 1) const override;
 
  private:
   //! Logger
