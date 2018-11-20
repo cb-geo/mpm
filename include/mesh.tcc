@@ -229,6 +229,30 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
   tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
 }
 
+//! Create cells from node lists
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>>
+    mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
+  std::vector<VectorDim> points;
+  try {
+    if (cells_.size() > 0) {
+      points.reserve(cells_.size() * std::pow(nquadratures, Tdim));
+
+      // Generate points
+      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+        (*citr)->assign_quadrature(nquadratures);
+        const auto cpoints = (*citr)->generate_points();
+        points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
+      }
+    } else
+      throw std::runtime_error("No cells are found in the mesh!");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    points.clear();
+  }
+  return points;
+}
+
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
