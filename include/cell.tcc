@@ -85,8 +85,7 @@ void mpm::Cell<Tdim>::assign_quadrature(unsigned nquadratures) {
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
   // Assign a default quadrature of 1
-  if (this->quadrature_ == nullptr)
-    this->assign_quadrature(1);
+  if (this->quadrature_ == nullptr) this->assign_quadrature(1);
 
   const auto quadratures = quadrature_->quadratures();
 
@@ -1018,4 +1017,3 @@ inline void mpm::Cell<3>::compute_normals() {
         static_cast<unsigned>(face_id), normal_vector));
   }
 }
-

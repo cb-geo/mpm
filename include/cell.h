@@ -15,8 +15,8 @@
 #include "geometry.h"
 #include "logger.h"
 #include "map.h"
-#include "quadrature.h"
 #include "node_base.h"
+#include "quadrature.h"
 
 namespace mpm {
 
@@ -68,7 +68,7 @@ class Cell {
 
   //! Generate points
   std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points();
-  
+
   //! Return the number of particles
   unsigned nparticles() const { return particles_.size(); }
 
