@@ -242,6 +242,11 @@ class Mesh {
   //! present
   bool status() const { return particles_.size(); }
 
+  //! Generate points
+  //! \param[in] nquadratures Number of points per direction in cell
+  //! \retval point Material point coordinates
+  std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
