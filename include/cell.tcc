@@ -91,7 +91,6 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
 
   // Vector of gauss points
   std::vector<Eigen::Matrix<double, Tdim, 1>> points;
-  points.resize(quadratures.ncols());
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
@@ -103,12 +102,11 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
     nodal_coords.col(j) = nodes_[indices(j)]->coordinates();
 
   // Zeros
-  Eigen::Matrix<double, Tdim, 1> zeros =
-      Eigen::Matrix<double, Tdim, 1>::Zeros();
+  Eigen::Matrix<double, Tdim, 1> zeros = Eigen::Matrix<double, Tdim, 1>::Zero();
 
   // Get local coordinates of gauss points and transform to global
-  for (unsigned i = 0; i < quadratures.ncols(); ++i) {
-    const auto lpoint = quadratures.col(1);
+  for (unsigned i = 0; i < quadratures.cols(); ++i) {
+    const auto lpoint = quadratures.col(i);
     // Get shape functions
     const auto sf = element_->shapefn(lpoint, zeros, zeros);
     points.emplace_back(nodal_coords * sf);
