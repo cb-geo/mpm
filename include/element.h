@@ -143,7 +143,7 @@ class Element {
 
   //! Return quadrature of the element
   virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
-      unsigned nquadratures) = 0;
+      unsigned nquadratures) const = 0;
 };
 
 }  // namespace mpm
