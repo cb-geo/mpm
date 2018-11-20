@@ -436,7 +436,7 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1.) status = false;
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
   return status;
 }
