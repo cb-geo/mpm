@@ -157,6 +157,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
             "Velocity constraints are not properly assigned");
     }
 
+    // Set nodal traction as false if file is empty
+    if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
+
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -406,6 +409,37 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
+  }
+  return status;
+}
+
+//! Apply nodal tractions
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
+  bool status = true;
+  try {
+    // Read and assign nodes tractions
+    if (!io_->file_name("nodal_tractions").empty()) {
+      // Get mesh properties
+      auto mesh_props = io_->json_object("mesh");
+      // Get Mesh reader from JSON object
+      const std::string reader =
+          mesh_props["mesh_reader"].template get<std::string>();
+      // Create a mesh reader
+      auto node_reader =
+          Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+      bool nodal_tractions =
+          mesh_->assign_nodal_tractions(node_reader->read_particles_tractions(
+              io_->file_name("nodal_tractions")));
+      if (!nodal_tractions)
+        throw std::runtime_error("Nodal tractions are not properly assigned");
+    } else
+      nodal_tractions_ = false;
+  } catch (std::exception& exception) {
+    console_->error("#{}: Nodal traction: {}", __LINE__, exception.what());
+    status = false;
+    nodal_tractions_ = false;
   }
   return status;
 }
