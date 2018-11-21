@@ -40,6 +40,9 @@ class MPMExplicit : public MPM {
   //! Initialise materials
   bool initialise_materials() override;
 
+  //! Apply nodal tractions
+  bool apply_nodal_tractions() override;
+
   //! Solve
   bool solve() override = 0;
 
@@ -84,6 +87,8 @@ class MPMExplicit : public MPM {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
+  //! Bool nodal tractions
+  bool nodal_tractions_{true};
 
 };  // MPMExplicit class
 }  // namespace mpm
