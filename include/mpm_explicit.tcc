@@ -410,6 +410,37 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
   return status;
 }
 
+//! Apply nodal tractions
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
+  bool status = true;
+  try {
+    // Read and assign nodes tractions
+    if (!io_->file_name("nodal_tractions").empty()) {
+      // Get mesh properties
+      auto mesh_props = io_->json_object("mesh");
+      // Get Mesh reader from JSON object
+      const std::string reader =
+          mesh_props["mesh_reader"].template get<std::string>();
+      // Create a mesh reader
+      auto node_reader =
+          Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+      bool nodal_tractions =
+          mesh_->assign_nodal_tractions(node_reader->read_particles_tractions(
+              io_->file_name("nodal_tractions")));
+      if (!nodal_tractions)
+        throw std::runtime_error("Nodal tractions are not properly assigned");
+    } else
+      nodal_tractions_ = false;
+  } catch (std::exception& exception) {
+    console_->error("#{}: Nodal traction: {}", __LINE__, exception.what());
+    status = false;
+    nodal_tractions_ = false;
+  }
+  return status;
+}
+
 //! Checkpoint resume
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
