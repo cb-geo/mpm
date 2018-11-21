@@ -575,3 +575,24 @@ inline Eigen::VectorXi
 
   return face_indices_hexahedron.at(face_id);
 }
+
+//! Return quadrature
+template <unsigned Tdim, unsigned Tnfunctions>
+inline std::shared_ptr<mpm::Quadrature<Tdim>>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::quadrature(
+        unsigned nquadratures) const {
+  switch (nquadratures) {
+    case 1:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH1");
+      break;
+    case 2:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH2");
+      break;
+    case 3:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH3");
+      break;
+    default:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH1");
+      break;
+  }
+}

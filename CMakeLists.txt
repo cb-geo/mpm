@@ -107,6 +107,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
 )

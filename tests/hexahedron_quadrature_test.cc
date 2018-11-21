@@ -24,13 +24,13 @@ TEST_CASE("Hexahedron quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 1);
-    REQUIRE(points.cols() == 3);
+    REQUIRE(points.rows() == 3);
+    REQUIRE(points.cols() == 1);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(0, 2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(2, 0) == Approx(0.).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
@@ -53,41 +53,41 @@ TEST_CASE("Hexahedron quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 8);
-    REQUIRE(points.cols() == 3);
+    REQUIRE(points.rows() == 3);
+    REQUIRE(points.cols() == 8);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(0, 2) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(1, 0) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 1) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
     REQUIRE(points(1, 1) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(1, 2) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 1) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(2, 0) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(2, 1) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
     REQUIRE(points(2, 2) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(3, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(3, 1) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(3, 2) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 3) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 3) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 3) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(4, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(4, 1) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(4, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 4) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 4) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 4) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(5, 0) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(5, 1) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(5, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 5) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 5) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 5) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(6, 0) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(6, 1) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(6, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 6) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 6) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 6) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
 
-    REQUIRE(points(7, 0) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(7, 1) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
-    REQUIRE(points(7, 2) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(0, 7) == Approx(-1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(1, 7) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
+    REQUIRE(points(2, 7) == Approx(+1. / std::sqrt(3.)).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
@@ -117,117 +117,117 @@ TEST_CASE("Hexahedron quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 27);
-    REQUIRE(points.cols() == 3);
+    REQUIRE(points.rows() == 3);
+    REQUIRE(points.cols() == 27);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-
     REQUIRE(points(1, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(1, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(1, 2) == Approx(+0.).epsilon(Tolerance));
-
     REQUIRE(points(2, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(2, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+
+    REQUIRE(points(0, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 1) == Approx(+0.).epsilon(Tolerance));
+
+    REQUIRE(points(0, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
     REQUIRE(points(2, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(3, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(3, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(3, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 3) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 3) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 3) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(4, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(4, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(4, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 4) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 4) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 4) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(5, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(5, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(5, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 5) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 5) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 5) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(6, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(6, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(6, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 6) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 6) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 6) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(7, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(7, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(7, 2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(0, 7) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 7) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 7) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(points(8, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(8, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(8, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 8) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 8) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 8) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(9, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(9, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(9, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 9) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 9) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 9) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(10, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(10, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(10, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 10) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 10) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 10) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(11, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(11, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(11, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 11) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 11) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 11) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(12, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(12, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(12, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 12) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 12) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 12) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(13, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(13, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(13, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 13) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 13) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 13) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(14, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(14, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(14, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 14) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 14) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 14) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(15, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(15, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(15, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 15) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 15) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 15) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(16, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(16, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(16, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 16) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 16) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 16) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(17, 0) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(17, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(17, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 17) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(1, 17) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 17) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(18, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(18, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(18, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 18) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 18) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 18) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(19, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(19, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(19, 2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(0, 19) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 19) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 19) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(points(20, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(20, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(20, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 20) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 20) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 20) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(21, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(21, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(21, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 21) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 21) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 21) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(22, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(22, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(22, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 22) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 22) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 22) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(23, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(23, 1) == Approx(+0.).epsilon(Tolerance));
-    REQUIRE(points(23, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 23) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 23) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(2, 23) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(24, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(24, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(24, 2) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 24) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 24) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 24) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(25, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(25, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(25, 2) == Approx(+0.).epsilon(Tolerance));
+    REQUIRE(points(0, 25) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 25) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 25) == Approx(+0.).epsilon(Tolerance));
 
-    REQUIRE(points(26, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(26, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(26, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 26) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 26) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(2, 26) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
