@@ -109,7 +109,17 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
     const auto lpoint = quadratures.col(i);
     // Get shape functions
     const auto sf = element_->shapefn(lpoint, zeros, zeros);
-    points.emplace_back(nodal_coords * sf);
+    const auto point = nodal_coords * sf;
+    const auto xi = this->transform_real_to_unit_cell(point);
+    bool status = true;
+    // Check if point is within the cell
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+    if (status) points.emplace_back(point);
+    else
+      console_->info("Xi ({}, {}), point({}, {})", xi(0), xi(1), lpoint(0),
+                     lpoint(1));
   }
 
   return points;
@@ -438,6 +448,9 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   for (unsigned i = 0; i < xi.size(); ++i)
     if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
+  if (!status)
+    console_->info("Point ({}, {}), xi ({}, {})", point(0), point(1), xi(0), xi(1));
+
   return status;
 }
 
@@ -605,7 +618,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   zero.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 500;
+  const unsigned max_iterations = 1000;
   // Tolerance for newton raphson
   const double tolerance = 1.e-10;
 
@@ -640,12 +653,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
+    bool xi_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) xi_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!xi_nan) xi = affine_guess;
+
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+
+    // If guess is nan set zero
+    if (xi_nan) xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -654,7 +673,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
+    if ((fx.squaredNorm() <
+         (1e-24 * this->mean_length_ * this->mean_length_)) &&
+        !xi_nan)
       return xi;
   }
 
@@ -663,7 +684,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
-
     // Calculate local Jacobian
     Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
@@ -736,12 +756,18 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
+    bool xi_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) xi_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!xi_nan) xi = affine_guess;
+
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+
+    // If guess is nan set zero
+    if (xi_nan) xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -750,7 +776,9 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
+    if ((fx.squaredNorm() <
+         (1e-24 * this->mean_length_ * this->mean_length_)) &&
+        !xi_nan)
       return xi;
   }
 
