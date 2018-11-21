@@ -58,6 +58,27 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
   volume_(phase) = volume_(phase) * factor + volume;
 }
 
+// Assign traction force to the node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_traction_force(unsigned phase,
+                                                            unsigned direction,
+                                                            double traction) {
+  bool status = false;
+  try {
+    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
+      throw std::runtime_error(
+          "Nodal traction property: Direction / phase is invalid");
+    }
+    // Assign traction
+    external_force_(direction, phase) = traction;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Update external force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(

@@ -77,6 +77,14 @@ class NodeBase {
   //! Return volume at a given node for a given phase
   virtual double volume(unsigned phase) const = 0;
 
+  //! Assign traction force to the node
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Nodal traction in specified direction
+  //! \retval status Assignment status
+  virtual bool assign_traction_force(unsigned phase, unsigned direction,
+                                     double traction) = 0;
+
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
