@@ -742,6 +742,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       false);
             }
 
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 6);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+            }
+
             // Test assign particles stresses
             SECTION("Check assign particles stresses") {
               // Vector of particle stresses
@@ -1628,6 +1649,27 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 12);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 4, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
             }
 
             // Test assign particles stresses
