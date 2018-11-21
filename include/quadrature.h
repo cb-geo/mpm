@@ -13,23 +13,22 @@ namespace mpm {
 // Quadrature base class
 //! \brief Base class for quadrature
 //! \tparam Tdim Dimension
-//! \tparam Tnquadratures number of quadratures
-template <unsigned Tdim, unsigned Tnquadratures>
-class QuadratureBase {
+template <unsigned Tdim>
+class Quadrature {
  public:
   //! Default constructor
-  QuadratureBase() = default;
+  Quadrature() = default;
 
   //! Destructor
-  virtual ~QuadratureBase() {}
+  virtual ~Quadrature() {}
 
   //! Return quadrature points
   //! \param[out] qpoints Quadrature points in local coordinates
-  virtual Eigen::MatrixXd quadratures() = 0;
+  virtual Eigen::MatrixXd quadratures() const = 0;
 
   //! Return weights
   //! \param[out] weights Weights for quadrature points
-  virtual Eigen::VectorXd weights() = 0;
+  virtual Eigen::VectorXd weights() const = 0;
 };
 
 }  // namespace mpm

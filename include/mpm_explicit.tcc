@@ -227,9 +227,31 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
         Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
     auto particles_begin = std::chrono::steady_clock::now();
+
     // Get all particles
-    const auto all_particles =
-        particle_reader->read_particles(io_->file_name("particles"));
+    std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
+
+    // Generate particles
+    bool read_particles_file = false;
+    try {
+      unsigned nparticles_cell =
+          mesh_props["generate_particles_cells"].template get<unsigned>();
+
+      if (nparticles_cell > 0)
+        all_particles = mesh_->generate_material_points(nparticles_cell);
+      else
+        throw std::runtime_error(
+            "Specified # of particles per cell for generation is invalid!");
+
+    } catch (std::exception& exception) {
+      console_->warn("Generate particles is not set, reading particles file");
+      read_particles_file = true;
+    }
+
+    // Read particles from file
+    if (read_particles_file)
+      all_particles =
+          particle_reader->read_particles(io_->file_name("particles"));
     // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);

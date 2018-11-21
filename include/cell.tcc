@@ -75,6 +75,46 @@ bool mpm::Cell<Tdim>::is_initialised() const {
            1.0E-10));
 }
 
+//! Assign quadrature
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_quadrature(unsigned nquadratures) {
+  this->quadrature_ = element_->quadrature(nquadratures);
+}
+
+//! Assign quadrature
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
+  // Assign a default quadrature of 1
+  if (this->quadrature_ == nullptr) this->assign_quadrature(1);
+
+  const auto quadratures = quadrature_->quadratures();
+
+  // Vector of gauss points
+  std::vector<Eigen::Matrix<double, Tdim, 1>> points;
+
+  // Get indices of corner nodes
+  Eigen::VectorXi indices = element_->corner_indices();
+  // Matrix of nodal coordinates
+  Eigen::MatrixXd nodal_coords;
+  nodal_coords.resize(Tdim, indices.size());
+
+  for (unsigned j = 0; j < indices.size(); ++j)
+    nodal_coords.col(j) = nodes_[indices(j)]->coordinates();
+
+  // Zeros
+  Eigen::Matrix<double, Tdim, 1> zeros = Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  // Get local coordinates of gauss points and transform to global
+  for (unsigned i = 0; i < quadratures.cols(); ++i) {
+    const auto lpoint = quadratures.col(i);
+    // Get shape functions
+    const auto sf = element_->shapefn(lpoint, zeros, zeros);
+    points.emplace_back(nodal_coords * sf);
+  }
+
+  return points;
+}
+
 //! Add a node pointer and return the status of addition of a node
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_node(
@@ -396,7 +436,7 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1.) status = false;
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
   return status;
 }
