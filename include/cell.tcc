@@ -614,13 +614,16 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
+  Eigen::Matrix<double, 2, 1> affine_guess;
+  affine_guess.setZero();
+
   Eigen::Matrix<double, 2, 1> zero;
   zero.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 1000;
+  const unsigned max_iterations = 2000;
   // Tolerance for newton raphson
-  const double tolerance = 1.e-10;
+  const double tolerance = 1.0E-10;
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
@@ -642,15 +645,16 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    Eigen::Matrix<double, 2, 2> A;
-    A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+    const Eigen::Matrix<double, 2, 2> A =
+        nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
 
     // b = vertex * Kb
-    Eigen::Matrix<double, 2, 1> b =
+    const Eigen::Matrix<double, 2, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
+    // const Eigen::Matrix<double, 2, 1>
+    affine_guess = A.inverse() * b;
 
     // Check for nan
     bool xi_nan = false;
@@ -659,9 +663,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // Set xi to affine guess
     if (!xi_nan) xi = affine_guess;
-
-    for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) xi_nan = true;
 
     // If guess is nan set zero
     if (xi_nan) xi.setZero();
@@ -678,7 +679,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
         !xi_nan)
       return xi;
   }
-
+  
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
@@ -699,7 +700,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     xi -= (jacobian.inverse() * residual);
 
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if (residual.norm() < tolerance) {
+      console_->info("Point ({}, {}), xi: ({}, {}), affine: ({}, {})", point(0),
+                     point(1), xi(0), xi(1), affine_guess(0), affine_guess(1));
+      break;
+    }
   }
   return xi;
 }
