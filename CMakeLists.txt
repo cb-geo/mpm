@@ -143,6 +143,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/point_in_cell.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    

@@ -117,9 +117,6 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
       if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
     if (status) points.emplace_back(point);
-    else
-      console_->info("Xi ({}, {}), point({}, {})", xi(0), xi(1), lpoint(0),
-                     lpoint(1));
   }
 
   return points;
@@ -448,9 +445,6 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   for (unsigned i = 0; i < xi.size(); ++i)
     if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
-  if (!status)
-    console_->info("Point ({}, {}), xi ({}, {})", point(0), point(1), xi(0), xi(1));
-
   return status;
 }
 
@@ -621,9 +615,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   zero.setZero();
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 2000;
+  const unsigned max_iterations = 5000;
   // Tolerance for newton raphson
-  const double tolerance = 1.0E-10;
+  const double tolerance = 1.0E-7;
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
@@ -679,7 +673,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
         !xi_nan)
       return xi;
   }
-  
+
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
@@ -699,12 +693,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
 
+    // Check for nan and set xi to zero
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi.setZero();
+
     // Convergence criteria
-    if (residual.norm() < tolerance) {
-      console_->info("Point ({}, {}), xi: ({}, {}), affine: ({}, {})", point(0),
-                     point(1), xi(0), xi(1), affine_guess(0), affine_guess(1));
-      break;
-    }
+    if (residual.norm() < tolerance) break;
   }
   return xi;
 }
