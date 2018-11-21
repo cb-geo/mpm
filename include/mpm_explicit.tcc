@@ -157,6 +157,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
             "Velocity constraints are not properly assigned");
     }
 
+    // Set nodal traction as false if file is empty
+    if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
+
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
