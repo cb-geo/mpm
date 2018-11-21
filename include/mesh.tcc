@@ -349,8 +349,6 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
     // If a cell id is present, but not a cell locate the cell from map
     if (!particle->cell_ptr())
       particle->assign_cell(map_cells_[particle->cell_id()]);
-    console_->info("Locating particle: {} in cell {}", particle->id(),
-                   particle->cell_id());
     if (particle->compute_reference_location()) return true;
   }
 
