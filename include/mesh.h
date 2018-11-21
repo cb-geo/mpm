@@ -224,6 +224,12 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
+  //! Assign nodal traction force
+  //! \param[in] nodal_tractions Traction at dir on nodes
+  bool assign_nodal_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          nodal_tractions);
+
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
   bool assign_particles_stresses(

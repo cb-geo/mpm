@@ -54,6 +54,8 @@ class MPMExplicitUSL : public MPMExplicit<Tdim> {
   using mpm::MPMExplicit<Tdim>::mesh_;
   //! Materials
   using mpm::MPMExplicit<Tdim>::materials_;
+  //! Nodal tractions
+  using mpm::MPMExplicit<Tdim>::nodal_tractions_;
 
 };  // MPMExplicitUSl class
 }  // namespace mpm

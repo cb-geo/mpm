@@ -142,6 +142,9 @@ bool mpm::MPMExplicitUSF<Tdim>::solve() {
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
                     std::placeholders::_1, phase));
+
+      //! Nodal tractions
+      if (nodal_tractions_) this->apply_nodal_tractions();
     });
 
     // Spawn a task for internal force
