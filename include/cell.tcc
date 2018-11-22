@@ -765,19 +765,20 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Trial xis
   unsigned trial = 0;
   std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
+  const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
 
   Eigen::Matrix<double, 2, 1> trial_xi;
   trial_xi << 0.0, 0.0;
   trial_xis.emplace_back(trial_xi);
-  const auto quadratures = quadrature_->quadratures();
-  // Trials as gauss points
-  for (unsigned i = 0; i < quadratures.cols(); ++i) {
-    for (unsigned j = 0; j < quadratures.rows(); ++j) {
-      trial_xi(j, i) = quadrature(j, i);
-    }
-    trial_xis.emplace_back(quadratures.col(i));
-  }
-
+  trial_xi << -val_1_by_sqrt3, -val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi <<  val_1_by_sqrt3, val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -val_1_by_sqrt3, val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi <<  val_1_by_sqrt3, -val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
