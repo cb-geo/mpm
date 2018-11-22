@@ -109,7 +109,18 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
     const auto lpoint = quadratures.col(i);
     // Get shape functions
     const auto sf = element_->shapefn(lpoint, zeros, zeros);
-    points.emplace_back(nodal_coords * sf);
+    const auto point = nodal_coords * sf;
+    const auto xi = this->transform_real_to_unit_cell(point);
+    bool status = true;
+    // Check if point is within the cell
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+    if (status)
+      points.emplace_back(point);
+    else
+      console_->warn("Cannot generate point: ({}, {}) in cell xi: ({}, {})",
+                     point(0), point(1), xi(0), xi(1));
   }
 
   return points;
@@ -437,7 +448,6 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
     if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-
   return status;
 }
 
@@ -601,14 +611,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
-  Eigen::Matrix<double, 2, 1> zero;
-  zero.setZero();
-
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 500;
-  // Tolerance for newton raphson
-  const double tolerance = 1.e-10;
-
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
@@ -623,49 +625,187 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     }
   }
 
+  // Check for an analytical solution
+  const long double x = point(0);
+  const long double y = point(1);
+
+  const double x0 = nodal_coords(0, 0);
+  const double x1 = nodal_coords(0, 1);
+  const double x2 = nodal_coords(0, 2);
+  const double x3 = nodal_coords(0, 3);
+
+  const double y0 = nodal_coords(1, 0);
+  const double y1 = nodal_coords(1, 1);
+  const double y2 = nodal_coords(1, 2);
+  const double y3 = nodal_coords(1, 3);
+
+  const long double a = (x1 - x3) * (y0 - y2) - (x0 - x2) * (y1 - y3);
+  const long double b = -(x0 - x1 - x2 + x3) * y + (x - 2 * x1 + x3) * y0 -
+                        (x - 2 * x0 + x2) * y1 - (x - x1) * y2 + (x - x0) * y3;
+  const long double c = (x0 - x1) * y - (x - x1) * y0 + (x - x0) * y1;
+
+  const long double discriminant = b * b - 4 * a * c;
+  // Discriminant is negative if the point is not in the cell
+  if (discriminant > 0.0) {
+    long double eta1;
+    long double eta2;
+    // Special case #1: if a is zero, then use the linear formula
+    if (a == 0.0 && b != 0.0) {
+      eta1 = -c / b;
+      eta2 = -c / b;
+    }
+    // Special case #2: a is zero for parallelograms and very small for
+    // near-parallelograms:
+    else if (std::abs(a) < 1e-8 * std::abs(b)) {
+      // if both a and c are very small then the root should be near
+      // zero: this first case will capture that
+      eta1 = 2 * c / (-b - std::sqrt(discriminant));
+      eta2 = 2 * c / (-b + std::sqrt(discriminant));
+    }
+    // finally, use the plain version:
+    else {
+      eta1 = (-b - std::sqrt(discriminant)) / (2 * a);
+      eta2 = (-b + std::sqrt(discriminant)) / (2 * a);
+    }
+
+    // pick the one closer to the center of the cell.
+    // eta
+    const long double eta =
+        (std::abs(eta1 - 0.5) < std::abs(eta2 - 0.5)) ? eta1 : eta2;
+    // Scale from 0 to 1 -> -1 to 1
+    xi(1) = (2. * eta) - 1.;
+
+    // There are two ways to compute xi from eta, but either one may have a
+    // zero denominator.
+    const long double subexpr0 = -eta * x2 + x0 * (eta - 1);
+    const long double xi_denominator0 = eta * x3 - x1 * (eta - 1) + subexpr0;
+    const double max_x = std::max(std::max(std::abs(x0), std::abs(x1)),
+                                  std::max(std::abs(x2), std::abs(x3)));
+
+    if (std::abs(xi_denominator0) > 1.0E-10 * max_x) {
+      const long double xi0 = (x + subexpr0) / xi_denominator0;
+      xi(0) = (2. * xi0) - 1.;
+      bool status = true;
+      // Check if xi is within the cell
+      for (unsigned i = 0; i < xi.size(); ++i)
+        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+      if (status) return xi;
+    } else {
+      const double max_y = std::max(std::max(std::abs(y0), std::abs(y1)),
+                                    std::max(std::abs(y2), std::abs(y3)));
+      const long double subexpr1 = -eta * y2 + y0 * (eta - 1);
+      const long double xi_denominator1 = eta * y3 - y1 * (eta - 1) + subexpr1;
+      if (std::abs(xi_denominator1) > 1.0E-10 * max_y) {
+        const long double xi0 = (subexpr1 + y) / xi_denominator1;
+        xi(0) = (2. * xi0) - 1.;
+        bool status = true;
+        // Check if xi is within the cell
+        for (unsigned i = 0; i < xi.size(); ++i)
+          if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+        if (status) return xi;
+      }
+    }
+  }
+
+  // Affine guess of xi
+  Eigen::Matrix<double, 2, 1> affine_guess;
+  // Boolean to check if affine is nan
+  bool affine_nan = false;
+  // Zeros
+  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+
+  // Affine tolerance
+  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
+
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
+
+  // Affine residual
+  Eigen::Matrix<double, 2, 1> affine_fx;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    Eigen::Matrix<double, 2, 2> A;
-    A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+    const Eigen::Matrix<double, 2, 2> A =
+        nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
 
     // b = vertex * Kb
-    Eigen::Matrix<double, 2, 1> b =
+    const Eigen::Matrix<double, 2, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
+    // const Eigen::Matrix<double, 2, 1>
+    affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) affine_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!affine_nan) xi = affine_guess;
+    // If guess is nan set xi to zero
+    else
+      xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
+    affine_fx = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
-      return xi;
+    if ((affine_fx.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
   }
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 1000;
+
+  // Tolerance for newton raphson
+  const double Tolerance =
+      (mean_length_ < 1.) ? (1.0E-5 * mean_length_ * mean_length_) : 1.0E-10;
+
+  // Trial xis
+  unsigned trial = 0;
+  std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
+  const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
+
+  Eigen::Matrix<double, 2, 1> trial_xi;
+  trial_xi << 0.0, 0.0;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -val_1_by_sqrt3, -val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << val_1_by_sqrt3, val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -val_1_by_sqrt3, val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << val_1_by_sqrt3, -val_1_by_sqrt3;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -0.5, -0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -0.5, 0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 0.5, -0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 0.5, 0.5;
+  trial_xis.emplace_back(trial_xi);
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+  unsigned iter = 0;
+  double previous_norm = std::numeric_limits<double>::max();
+  // Divergence counter
+  unsigned norm_counter = 0;
 
+  // Newton Raphson residual
+  Eigen::Matrix<double, 2, 1> nr_residual;
+
+  for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian =
+    const Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
 
     // Local shape function
@@ -673,14 +813,53 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
+    nr_residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * residual);
+    xi -= (jacobian.inverse() * nr_residual);
 
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if (nr_residual.norm() < Tolerance) break;
+
+    // Check to see if the solution keeps diverging
+    bool norm_flag = false;
+    if (nr_residual.norm() > previous_norm)
+      ++norm_counter;
+    else
+      norm_counter = 0;
+    // If NR diverges for 50 continuous iterations
+    if (norm_counter > 50) {
+      // Reset norm counter
+      norm_counter = 0;
+      // Set flag to use a different trial guess
+      norm_flag = true;
+    }
+
+    previous_norm = nr_residual.norm();
+
+    // Check for nan and set to a trial xi
+    bool xi_nan = false;
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+    if (xi_nan || norm_flag) {
+      // If all trial values have been tried, give up! and return xi / affine
+      // guess
+      if (trial == trial_xis.size()) {
+        if (!affine_nan)
+          return affine_guess;
+        else
+          return xi;
+      }
+      // Set xi to a trial guess value
+      xi = trial_xis.at(trial);
+      ++trial;
+      // Reset iteration to zero
+      iter = 0;
+    }
   }
+  // At end of iteration return affine or xi based on lowest norm
+  if ((iter == max_iterations) && !affine_nan)
+    return affine_fx.norm() < nr_residual.norm() ? affine_guess : xi;
   return xi;
 }
 
@@ -736,12 +915,18 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
+    bool xi_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) xi_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!xi_nan) xi = affine_guess;
+
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+
+    // If guess is nan set zero
+    if (xi_nan) xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -750,7 +935,9 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
+    if ((fx.squaredNorm() <
+         (1e-24 * this->mean_length_ * this->mean_length_)) &&
+        !xi_nan)
       return xi;
   }
 
