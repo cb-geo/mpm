@@ -82,7 +82,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates
     Eigen::Vector2d coords;
 
-    coords <<0.049340385470457, 0.546167667109886;
+    coords << 0.049340385470457, 0.546167667109886;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
