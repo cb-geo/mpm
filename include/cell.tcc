@@ -608,17 +608,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
-  Eigen::Matrix<double, 2, 1> affine_guess;
-  affine_guess.setZero();
-
-  Eigen::Matrix<double, 2, 1> zero;
-  zero.setZero();
-
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 5000;
-  // Tolerance for newton raphson
-  const double tolerance = 1.0E-7;
-
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
@@ -632,6 +621,101 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       nodal_coords(i, j) = node[i];
     }
   }
+
+  // Check for an analytical solution
+  const long double x = point(0);
+  const long double y = point(1);
+
+  const double x0 = nodal_coords(0, 0);
+  const double x1 = nodal_coords(0, 1);
+  const double x2 = nodal_coords(0, 2);
+  const double x3 = nodal_coords(0, 3);
+
+  const double y0 = nodal_coords(1, 0);
+  const double y1 = nodal_coords(1, 1);
+  const double y2 = nodal_coords(1, 2);
+  const double y3 = nodal_coords(1, 3);
+
+  const long double a = (x1 - x3) * (y0 - y2) - (x0 - x2) * (y1 - y3);
+  const long double b = -(x0 - x1 - x2 + x3) * y + (x - 2 * x1 + x3) * y0 -
+                        (x - 2 * x0 + x2) * y1 - (x - x1) * y2 + (x - x0) * y3;
+  const long double c = (x0 - x1) * y - (x - x1) * y0 + (x - x0) * y1;
+
+  const long double discriminant = b * b - 4 * a * c;
+  // Discriminant is negative if the point is not in the cell
+  if (discriminant > 0.0) {
+    long double eta1;
+    long double eta2;
+    // Special case #1: if a is zero, then use the linear formula
+    if (a == 0.0 && b != 0.0) {
+      eta1 = -c / b;
+      eta2 = -c / b;
+    }
+    // Special case #2: a is zero for parallelograms and very small for
+    // near-parallelograms:
+    else if (std::abs(a) < 1e-8 * std::abs(b)) {
+      // if both a and c are very small then the root should be near
+      // zero: this first case will capture that
+      eta1 = 2 * c / (-b - std::sqrt(discriminant));
+      eta2 = 2 * c / (-b + std::sqrt(discriminant));
+    }
+    // finally, use the plain version:
+    else {
+      eta1 = (-b - std::sqrt(discriminant)) / (2 * a);
+      eta2 = (-b + std::sqrt(discriminant)) / (2 * a);
+    }
+
+    // pick the one closer to the center of the cell.
+    // eta
+    const long double eta =
+        (std::abs(eta1 - 0.5) < std::abs(eta2 - 0.5)) ? eta1 : eta2;
+    // Scale from 0 to 1 -> -1 to 1
+    xi(1) = (2. * eta) - 1.;
+
+    // There are two ways to compute xi from eta, but either one may have a
+    // zero denominator.
+    const long double subexpr0 = -eta * x2 + x0 * (eta - 1);
+    const long double xi_denominator0 = eta * x3 - x1 * (eta - 1) + subexpr0;
+    const double max_x = std::max(std::max(std::abs(x0), std::abs(x1)),
+                                  std::max(std::abs(x2), std::abs(x3)));
+
+    if (std::abs(xi_denominator0) > 1.0E-10 * max_x) {
+      const long double xi0 = (x + subexpr0) / xi_denominator0;
+      xi(0) = (2. * xi0) - 1.;
+      bool status = true;
+      // Check if point is within the cell
+      for (unsigned i = 0; i < xi.size(); ++i)
+        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+      if (status) {
+        console_->info("Analytical xi: ({}, {})", xi(0), xi(1));
+        return xi;
+      }
+
+    } else {
+      const double max_y = std::max(std::max(std::abs(y0), std::abs(y1)),
+                                    std::max(std::abs(y2), std::abs(y3)));
+      const long double subexpr1 = -eta * y2 + y0 * (eta - 1);
+      const long double xi_denominator1 = eta * y3 - y1 * (eta - 1) + subexpr1;
+      if (std::abs(xi_denominator1) > 1.0E-10 * max_y) {
+        const long double xi0 = (subexpr1 + y) / xi_denominator1;
+        xi(0) = (2. * xi0) - 1.;
+        bool status = true;
+        // Check if point is within the cell
+        for (unsigned i = 0; i < xi.size(); ++i)
+          if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+        if (status) {
+          console_->info("Analytical xi: ({}, {})", xi(0), xi(1));
+          return xi;
+        }
+      }
+    }
+  }
+
+  Eigen::Matrix<double, 2, 1> affine_guess;
+  affine_guess.setZero();
+
+  Eigen::Matrix<double, 2, 1> zero;
+  zero.setZero();
 
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
@@ -669,10 +753,17 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // Early exit
     if ((fx.squaredNorm() <
-         (1e-24 * this->mean_length_ * this->mean_length_)) &&
-        !xi_nan)
+         (1.E-24 * this->mean_length_ * this->mean_length_)) &&
+        !xi_nan) {
+      console_->info("Affine xi: ({}, {})", xi(0), xi(1));
       return xi;
+    }
   }
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 5000;
+  // Tolerance for newton raphson
+  const double tolerance = 1.0E-10;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
@@ -700,6 +791,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
+  console_->info("NR xi: ({}, {})", xi(0), xi(1));
   return xi;
 }
 
