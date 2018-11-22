@@ -116,7 +116,11 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
     for (unsigned i = 0; i < xi.size(); ++i)
       if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
 
-    if (status) points.emplace_back(point);
+    if (status)
+      points.emplace_back(point);
+    else
+      console_->warn("Xi ({}, {}) point: ({}, {})", xi(0), xi(1), point(0),
+                     point(1));
   }
 
   return points;
@@ -706,11 +710,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     }
   }
 
+  // Affine guess of xi
   Eigen::Matrix<double, 2, 1> affine_guess;
-  affine_guess.setZero();
-
-  Eigen::Matrix<double, 2, 1> zero;
-  zero.setZero();
+  // Boolean to check if affine is nan
+  bool affine_nan = false;
+  // Zeros
+  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
 
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
@@ -730,15 +735,14 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool xi_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(affine_guess(i))) xi_nan = true;
+      if (std::isnan(affine_guess(i))) affine_nan = true;
 
     // Set xi to affine guess
-    if (!xi_nan) xi = affine_guess;
-
-    // If guess is nan set zero
-    if (xi_nan) xi.setZero();
+    if (!affine_nan) xi = affine_guess;
+    // If guess is nan set xi to zero
+    else
+      xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -749,7 +753,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Early exit
     if ((fx.squaredNorm() <
          (1.E-24 * this->mean_length_ * this->mean_length_)) &&
-        !xi_nan)
+        !affine_nan)
       return xi;
   }
 
@@ -761,13 +765,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Trial xis
   unsigned trial = 0;
   std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
+
   Eigen::Matrix<double, 2, 1> trial_xi;
   trial_xi << 0.0, 0.0;
   trial_xis.emplace_back(trial_xi);
   const auto quadratures = quadrature_->quadratures();
   // Trials as gauss points
-  for (unsigned i = 0; i < quadratures.cols(); ++i)
+  for (unsigned i = 0; i < quadratures.cols(); ++i) {
+    for (unsigned j = 0; j < quadratures.rows(); ++j) {
+      trial_xi(j, i) = quadrature(j, i);
+    }
     trial_xis.emplace_back(quadratures.col(i));
+  }
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
@@ -779,13 +788,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     for (unsigned i = 0; i < xi.size(); ++i)
       if (std::isnan(xi(i))) xi_nan = true;
     if (xi_nan) {
-      // If all trial values have been tried, give up, return affine guess and
-      // quit!
+      // If all trial values have been tried, give up! and return xi / affine
+      // guess
       if (trial == trial_xis.size()) {
-        bool affine_nan = false;
-        // Check for nan and return affine or xi
-        for (unsigned i = 0; i < affine_guess.size(); ++i)
-          if (std::isnan(affine_guess(i))) affine_nan = true;
         if (!affine_nan)
           return affine_guess;
         else
@@ -797,11 +802,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       // Reset iteration to zero
       iter = 0;
       // Increase tolerance
-      tolerance = 1.0E-07;
+      tolerance = 1.0E-06;
     }
 
     // Calculate local Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian =
+    const Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
 
     // Local shape function
@@ -809,7 +814,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
+    const Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
