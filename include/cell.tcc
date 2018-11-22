@@ -683,14 +683,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       const long double xi0 = (x + subexpr0) / xi_denominator0;
       xi(0) = (2. * xi0) - 1.;
       bool status = true;
-      // Check if point is within the cell
+      // Check if xi is within the cell
       for (unsigned i = 0; i < xi.size(); ++i)
         if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-      if (status) {
-        console_->info("Analytical xi: ({}, {})", xi(0), xi(1));
-        return xi;
-      }
 
+      if (status) return xi;
     } else {
       const double max_y = std::max(std::max(std::abs(y0), std::abs(y1)),
                                     std::max(std::abs(y2), std::abs(y3)));
@@ -700,13 +697,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
         const long double xi0 = (subexpr1 + y) / xi_denominator1;
         xi(0) = (2. * xi0) - 1.;
         bool status = true;
-        // Check if point is within the cell
+        // Check if xi is within the cell
         for (unsigned i = 0; i < xi.size(); ++i)
           if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-        if (status) {
-          console_->info("Analytical xi: ({}, {})", xi(0), xi(1));
-          return xi;
-        }
+
+        if (status) return xi;
       }
     }
   }
@@ -754,16 +749,30 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Early exit
     if ((fx.squaredNorm() <
          (1.E-24 * this->mean_length_ * this->mean_length_)) &&
-        !xi_nan) {
-      console_->info("Affine xi: ({}, {})", xi(0), xi(1));
+        !xi_nan)
       return xi;
-    }
   }
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 5000;
+  const unsigned max_iterations = 2000;
   // Tolerance for newton raphson
   const double tolerance = 1.0E-10;
+
+  // Trial xis
+  std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
+  Eigen::Matrix<double, 2, 1> trial_xi;
+  trial_xi << 0., 0.;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -1., -1.;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 1., 1.;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -0.5, 0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 0.5, -0.5;
+  trial_xis.emplace_back(trial_xi);
+
+  unsigned trial = 0;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
@@ -784,14 +793,22 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
 
-    // Check for nan and set xi to zero
-    for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) xi.setZero();
+    // Check for nan and set to a trial xi
+    for (unsigned i = 0; i < xi.size(); ++i) {
+      if (std::isnan(xi(i))) {
+        // If all trial values have been tried, give up and quit!
+        if (trial == trial_xis.size()) return xi;
+        // Set xi to a trial guess value
+        xi = trial_xis.at(trial);
+        ++trial;
+        // Reset iteration to zero
+        iter = 0;
+      }
+    }
 
     // Convergence criteria
     if (residual.norm() < tolerance) break;
   }
-  console_->info("NR xi: ({}, {})", xi(0), xi(1));
   return xi;
 }
 
