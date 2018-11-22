@@ -446,9 +446,12 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-
+  for (unsigned i = 0; i < xi.size(); ++i) {
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i)))
+      status = false;
+    else
+      console_->info("Xi: ({}, {})", xi(0), xi(1));
+  }
   return status;
 }
 
@@ -716,9 +719,16 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   bool affine_nan = false;
   // Zeros
   const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
-
+  // Affine tolerance
+  const double affine_tolerance =
+      (1.0E-5 * mean_length_ * mean_length_ < 1.0E-7)
+          ? 1.0E-5 * mean_length_ * mean_length_
+          : 1.0E-7;
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
+
+  // Affine residual
+  Eigen::Matrix<double, 2, 1> affine_fx;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
@@ -748,19 +758,22 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
+    affine_fx = (nodal_coords * sf) - point;
+
+    console_->info("Affine: ({}, {}) norm: {} tol: {}", affine_guess(0),
+                   affine_guess(1), affine_fx.squaredNorm(),
+                   (1.0E-5 * mean_length_ * mean_length_));
 
     // Early exit
-    if ((fx.squaredNorm() <
-         (1.E-24 * this->mean_length_ * this->mean_length_)) &&
-        !affine_nan)
-      return xi;
+    if ((affine_fx.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
   }
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 5000;
+  const unsigned max_iterations = 1000;
+
   // Tolerance for newton raphson
-  const double Tolerance = 1.0E-10;
+  const double Tolerance =
+      (mean_length_ < 1.) ? (1.0E-5 * mean_length_ * mean_length_) : 1.0E-10;
 
   // Trial xis
   unsigned trial = 0;
@@ -793,7 +806,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   unsigned iter = 0;
   double previous_norm = std::numeric_limits<double>::max();
+  // Divergence counter
   unsigned norm_counter = 0;
+
+  // Newton Raphson residual
+  Eigen::Matrix<double, 2, 1> nr_residual;
+
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
     const Eigen::Matrix<double, 2, 2> jacobian =
@@ -804,17 +822,17 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
-    const Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
+    nr_residual = (nodal_coords * sf) - point;
 
     // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * residual);
+    xi -= (jacobian.inverse() * nr_residual);
 
     // Convergence criteria
-    if (residual.norm() < Tolerance) break;
+    if (nr_residual.norm() < Tolerance) break;
 
     // Check to see if the solution keeps diverging
     bool norm_flag = false;
-    if (residual.norm() > previous_norm)
+    if (nr_residual.norm() > previous_norm)
       ++norm_counter;
     else
       norm_counter = 0;
@@ -826,7 +844,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       norm_flag = true;
     }
 
-    previous_norm = residual.norm();
+    previous_norm = nr_residual.norm();
 
     // Check for nan and set to a trial xi
     bool xi_nan = false;
@@ -847,11 +865,19 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       // Reset iteration to zero
       iter = 0;
     }
+    console_->info("Iter: {} Xi: ({}, {}) norm: {} tol: {} counter: {}", iter,
+                   xi(0), xi(1), nr_residual.norm(), Tolerance, norm_counter);
   }
+
+  console_->info("Final Affine: ({}, {}) Xi: ({}, {}) iter: {} tol: {}",
+                 affine_guess(0), affine_guess(1), xi(0), xi(1), iter,
+                 Tolerance);
   // At end of iteration return affine or xi based on closest to center of cell
-  if ((iter == max_iterations - 1) && !affine_nan)
-    return ((affine_guess - zero).norm() < (xi - zero).norm()) ? affine_guess
-                                                               : xi;
+  console_->info("Affine norm: {} Xi norm: {}", affine_fx.norm(),
+                 nr_residual.norm());
+
+  if ((iter == max_iterations) && !affine_nan)
+    return affine_fx.norm() < nr_residual.norm() ? affine_guess : xi;
   return xi;
 }
 
