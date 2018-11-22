@@ -119,8 +119,8 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
     if (status)
       points.emplace_back(point);
     else
-      console_->warn("Xi ({}, {}) point: ({}, {})", xi(0), xi(1), point(0),
-                     point(1));
+      console_->warn("Cannot generate point: ({}, {}) in cell xi: ({}, {})",
+                     point(0), point(1), xi(0), xi(1));
   }
 
   return points;
@@ -715,11 +715,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   bool affine_nan = false;
   // Zeros
   const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+
   // Affine tolerance
-  const double affine_tolerance =
-      (1.0E-5 * mean_length_ * mean_length_ < 1.0E-7)
-          ? 1.0E-5 * mean_length_ * mean_length_
-          : 1.0E-7;
+  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
+
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
 
