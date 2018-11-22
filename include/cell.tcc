@@ -760,7 +760,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 5000;
   // Tolerance for newton raphson
-  double tolerance = 1.0E-10;
+  const double Tolerance = 1.0E-10;
 
   // Trial xis
   unsigned trial = 0;
@@ -770,6 +770,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> trial_xi;
   trial_xi << 0.0, 0.0;
   trial_xis.emplace_back(trial_xi);
+  if (!affine_nan) {
+    trial_xis.emplace_back(affine_guess * 0.9);
+    trial_xis.emplace_back(affine_guess * 1.1);
+    trial_xis.emplace_back(affine_guess * -0.9);
+    trial_xis.emplace_back(affine_guess * -1.1);
+  }
   trial_xi << -val_1_by_sqrt3, -val_1_by_sqrt3;
   trial_xis.emplace_back(trial_xi);
   trial_xi <<  val_1_by_sqrt3, val_1_by_sqrt3;
@@ -778,34 +784,31 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   trial_xis.emplace_back(trial_xi);
   trial_xi <<  val_1_by_sqrt3, -val_1_by_sqrt3;
   trial_xis.emplace_back(trial_xi);
+  trial_xi << -0.5, -0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -0.5, 0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 0.5, -0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 0.5, 0.5;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -1.0, -1.0;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 1.0, -1.0;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << -1.0, 1.0;
+  trial_xis.emplace_back(trial_xi);
+  trial_xi << 1.0, 1.0;
+  trial_xis.emplace_back(trial_xi);
   
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
-    // Check for nan and set to a trial xi
-    bool xi_nan = false;
-    for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) xi_nan = true;
-    if (xi_nan) {
-      // If all trial values have been tried, give up! and return xi / affine
-      // guess
-      if (trial == trial_xis.size()) {
-        if (!affine_nan)
-          return affine_guess;
-        else
-          return xi;
-      }
-      // Set xi to a trial guess value
-      xi = trial_xis.at(trial);
-      ++trial;
-      // Reset iteration to zero
-      iter = 0;
-      // Increase tolerance
-      tolerance = 1.0E-06;
-    }
-
+  unsigned iter = 0;
+  double previous_norm = std::numeric_limits<double>::max();
+  unsigned norm_counter = 0;
+  for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
     const Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
@@ -821,8 +824,43 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     xi -= (jacobian.inverse() * residual);
 
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if (residual.norm() < Tolerance) break;
+
+    // Check to see if the solution keeps diverging
+    bool norm_flag = false;
+    if (residual.norm() > previous_norm) ++norm_counter;
+    else norm_counter = 0;
+    // Reset norm counter
+    if (norm_counter > 100) {
+      norm_counter = 0;
+      norm_flag = true;
+    }
+
+    previous_norm = residual.norm();
+
+    // Check for nan and set to a trial xi
+    bool xi_nan = false;
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+    if (xi_nan || norm_flag) {
+      // If all trial values have been tried, give up! and return xi / affine
+      // guess
+      if (trial == trial_xis.size()) {
+        if (!affine_nan)
+          return affine_guess;
+        else
+          return xi;
+      }
+      // Set xi to a trial guess value
+      xi = trial_xis.at(trial);
+      ++trial;
+      // Reset iteration to zero
+      iter = 0;
+    }
   }
+  // At end of iteration return affine or xi based on closest to center of cell
+  if ((iter == max_iterations - 1) && !affine_nan)
+    return ((affine_guess - zero).norm() < (xi - zero).norm()) ? affine_guess : xi;
   return xi;
 }
 

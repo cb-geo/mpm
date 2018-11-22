@@ -74,4 +74,50 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
   }
+
+  SECTION("Transform real to unit cell Newton-Raphson") {
+    // Number of nodes in cell
+    const unsigned Nnodes = 4;
+
+    // Coordinates
+    Eigen::Vector2d coords;
+
+    coords <<0.049340385470457, 0.546167667109886;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 0.049008570276153, 0.497592363325129;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 0.097545161257934, 0.490392640151913;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0.098928337700656, 0.541016130614386;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    // 4-noded quadrilateral shape functions
+    std::shared_ptr<mpm::Element<Dim>> element =
+        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+    REQUIRE(cell->add_node(0, node0) == true);
+    REQUIRE(cell->add_node(1, node1) == true);
+    REQUIRE(cell->add_node(2, node2) == true);
+    REQUIRE(cell->add_node(3, node3) == true);
+    REQUIRE(cell->nnodes() == 4);
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
+
+    // Coordinates of a point in real cell
+    Eigen::Vector2d point;
+    point << 0.0597025, 0.534722;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point) == true);
+  }
 }
