@@ -25,7 +25,6 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  /*
   SECTION("Transform real to unit cell analytical solution") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
@@ -122,8 +121,6 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     REQUIRE(cell->is_point_in_cell(point) == true);
   }
 
-  */
-
   SECTION("Transform real to unit cell analytical solution") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
@@ -171,14 +168,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
 
     point << 0.87903, 2.4815;
     // Test if point is in cell
-    // REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point) == true);
 
     point << 0.821834, 2.48175;
     // Test if point is in cell
-    // REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point) == true);
 
     point << 0.823751, 2.43189;
     // Test if point is in cell
-    // REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point) == true);
   }
 }
