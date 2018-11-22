@@ -446,12 +446,8 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i) {
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i)))
-      status = false;
-    else
-      console_->info("Xi: ({}, {})", xi(0), xi(1));
-  }
+  for (unsigned i = 0; i < xi.size(); ++i)
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
   return status;
 }
 
@@ -760,10 +756,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // f(x) = p(x) - p, where p is the real point
     affine_fx = (nodal_coords * sf) - point;
 
-    console_->info("Affine: ({}, {}) norm: {} tol: {}", affine_guess(0),
-                   affine_guess(1), affine_fx.squaredNorm(),
-                   (1.0E-5 * mean_length_ * mean_length_));
-
     // Early exit
     if ((affine_fx.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
   }
@@ -865,17 +857,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       // Reset iteration to zero
       iter = 0;
     }
-    console_->info("Iter: {} Xi: ({}, {}) norm: {} tol: {} counter: {}", iter,
-                   xi(0), xi(1), nr_residual.norm(), Tolerance, norm_counter);
   }
-
-  console_->info("Final Affine: ({}, {}) Xi: ({}, {}) iter: {} tol: {}",
-                 affine_guess(0), affine_guess(1), xi(0), xi(1), iter,
-                 Tolerance);
-  // At end of iteration return affine or xi based on closest to center of cell
-  console_->info("Affine norm: {} Xi norm: {}", affine_fx.norm(),
-                 nr_residual.norm());
-
+  // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan)
     return affine_fx.norm() < nr_residual.norm() ? affine_guess : xi;
   return xi;
