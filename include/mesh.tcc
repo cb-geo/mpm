@@ -244,6 +244,11 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
         const auto cpoints = (*citr)->generate_points();
         points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
       }
+      console_->info(
+          "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
+          "# of points generated: {}",
+          cells_.size(), cells_.size() * std::pow(nquadratures, Tdim),
+          points.size());
     } else
       throw std::runtime_error("No cells are found in the mesh!");
   } catch (std::exception& exception) {

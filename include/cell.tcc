@@ -754,31 +754,52 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 2000;
+  const unsigned max_iterations = 5000;
   // Tolerance for newton raphson
-  const double tolerance = 1.0E-10;
+  double tolerance = 1.0E-10;
 
   // Trial xis
+  unsigned trial = 0;
   std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
   Eigen::Matrix<double, 2, 1> trial_xi;
-  trial_xi << 0., 0.;
+  trial_xi << 0.0, 0.0;
   trial_xis.emplace_back(trial_xi);
-  trial_xi << -1., -1.;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << 1., 1.;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << -0.5, 0.5;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << 0.5, -0.5;
-  trial_xis.emplace_back(trial_xi);
-
-  unsigned trial = 0;
+  const auto quadratures = quadrature_->quadratures();
+  // Trials as gauss points
+  for (unsigned i = 0; i < quadratures.cols(); ++i)
+    trial_xis.emplace_back(quadratures.col(i));
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
   for (unsigned iter = 0; iter < max_iterations; ++iter) {
+    // Check for nan and set to a trial xi
+    bool xi_nan = false;
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (std::isnan(xi(i))) xi_nan = true;
+    if (xi_nan) {
+      // If all trial values have been tried, give up, return affine guess and
+      // quit!
+      if (trial == trial_xis.size()) {
+        bool affine_nan = false;
+        // Check for nan and return affine or xi
+        for (unsigned i = 0; i < affine_guess.size(); ++i)
+          if (std::isnan(affine_guess(i))) affine_nan = true;
+        if (!affine_nan)
+          return affine_guess;
+        else
+          return xi;
+      }
+      // Set xi to a trial guess value
+      xi = trial_xis.at(trial);
+      ++trial;
+      // Reset iteration to zero
+      iter = 0;
+      // Increase tolerance
+      tolerance = 1.0E-07;
+    }
+
     // Calculate local Jacobian
     Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
@@ -792,19 +813,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * residual);
-
-    // Check for nan and set to a trial xi
-    for (unsigned i = 0; i < xi.size(); ++i) {
-      if (std::isnan(xi(i))) {
-        // If all trial values have been tried, give up and quit!
-        if (trial == trial_xis.size()) return xi;
-        // Set xi to a trial guess value
-        xi = trial_xis.at(trial);
-        ++trial;
-        // Reset iteration to zero
-        iter = 0;
-      }
-    }
 
     // Convergence criteria
     if (residual.norm() < tolerance) break;
