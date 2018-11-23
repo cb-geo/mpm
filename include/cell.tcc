@@ -723,7 +723,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   const auto unit_cell = element_->unit_cell_coordinates();
 
   // Affine residual
-  Eigen::Matrix<double, 2, 1> affine_fx;
+  Eigen::Matrix<double, 2, 1> affine_residual;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
@@ -753,43 +753,17 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    affine_fx = (nodal_coords * sf) - point;
+    affine_residual = (nodal_coords * sf) - point;
 
     // Early exit
-    if ((affine_fx.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
+    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
   }
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 1000;
 
   // Tolerance for newton raphson
-  const double Tolerance =
-      (mean_length_ < 1.) ? (1.0E-5 * mean_length_ * mean_length_) : 1.0E-10;
-
-  // Trial xis
-  unsigned trial = 0;
-  std::vector<Eigen::Matrix<double, 2, 1>> trial_xis;
-  const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
-
-  Eigen::Matrix<double, 2, 1> trial_xi;
-  trial_xi << 0.0, 0.0;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << -val_1_by_sqrt3, -val_1_by_sqrt3;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << val_1_by_sqrt3, val_1_by_sqrt3;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << -val_1_by_sqrt3, val_1_by_sqrt3;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << val_1_by_sqrt3, -val_1_by_sqrt3;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << -0.5, -0.5;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << -0.5, 0.5;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << 0.5, -0.5;
-  trial_xis.emplace_back(trial_xi);
-  trial_xi << 0.5, 0.5;
-  trial_xis.emplace_back(trial_xi);
+  const double Tolerance = 1.0E-10;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
@@ -814,52 +788,30 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
     nr_residual = (nodal_coords * sf) - point;
+    const long double nr_residual_norm = nr_residual.norm();
 
     // x_{n+1} = x_n - f(x)/f'(x)
     xi -= (jacobian.inverse() * nr_residual);
 
     // Convergence criteria
-    if (nr_residual.norm() < Tolerance) break;
+    if (nr_residual_norm < Tolerance) break;
 
     // Check to see if the solution keeps diverging
-    bool norm_flag = false;
-    if (nr_residual.norm() > previous_norm)
+    if (nr_residual_norm > previous_norm)
       ++norm_counter;
     else
       norm_counter = 0;
-    // If NR diverges for 50 continuous iterations
-    if (norm_counter > 50) {
-      // Reset norm counter
-      norm_counter = 0;
-      // Set flag to use a different trial guess
-      norm_flag = true;
-    }
-
-    previous_norm = nr_residual.norm();
+    // If NR diverges for 25 continuous iterations
+    if (norm_counter > 25) break;
+    previous_norm = nr_residual_norm;
 
     // Check for nan and set to a trial xi
-    bool xi_nan = false;
     for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) xi_nan = true;
-    if (xi_nan || norm_flag) {
-      // If all trial values have been tried, give up! and return xi / affine
-      // guess
-      if (trial == trial_xis.size()) {
-        if (!affine_nan)
-          return affine_guess;
-        else
-          return xi;
-      }
-      // Set xi to a trial guess value
-      xi = trial_xis.at(trial);
-      ++trial;
-      // Reset iteration to zero
-      iter = 0;
-    }
+      if (std::isnan(xi(i))) break;
   }
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan)
-    return affine_fx.norm() < nr_residual.norm() ? affine_guess : xi;
+    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
   return xi;
 }
 
