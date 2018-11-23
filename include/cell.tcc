@@ -770,14 +770,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  unsigned iter = 0;
-  double previous_norm = std::numeric_limits<double>::max();
-  // Divergence counter
-  unsigned norm_counter = 0;
-
-  // Newton Raphson residual
   Eigen::Matrix<double, 2, 1> nr_residual;
-
+  unsigned iter = 0;
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
     const Eigen::Matrix<double, 2, 2> jacobian =
@@ -789,30 +783,24 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
     nr_residual = (nodal_coords * sf) - point;
-    const long double nr_residual_norm = nr_residual.norm();
 
     // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * nr_residual);
+    if (std::abs(jacobian.determinant()) < 1.0E-10)
+      xi.setZero();
+    else
+      xi -= (jacobian.inverse() * nr_residual);
 
     // Convergence criteria
-    if (nr_residual_norm < Tolerance) break;
-
-    // Check to see if the solution keeps diverging
-    if (nr_residual_norm > previous_norm)
-      ++norm_counter;
-    else
-      norm_counter = 0;
-    // If NR diverges for 25 continuous iterations
-    if (norm_counter > 25) break;
-    previous_norm = nr_residual_norm;
+    if (nr_residual.norm() < Tolerance) break;
 
     // Check for nan and set to a trial xi
-    for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) break;
+    if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
   // At end of iteration return affine or xi based on lowest norm
-  if ((iter == max_iterations) && !affine_nan)
+  if ((iter == max_iterations) && !affine_nan &&
+      (element_->degree() == mpm::ElementDegree::Linear))
     return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+
   return xi;
 }
 
