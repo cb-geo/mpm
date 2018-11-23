@@ -756,7 +756,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     affine_residual = (nodal_coords * sf) - point;
 
     // Early exit
-    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan) return xi;
+    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
+      return xi;
   }
 
   // Maximum iterations of newton raphson
