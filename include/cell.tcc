@@ -772,10 +772,15 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   Eigen::Matrix<double, 2, 1> nr_residual;
   unsigned iter = 0;
+
+  console_->info("Before NR xi ({}, {})", xi(0), xi(1));
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
     const Eigen::Matrix<double, 2, 2> jacobian =
-        element_->jacobian_local(xi, unit_cell, zero, zero);
+        element_->jacobian_local(xi, this->nodal_coordinates_, zero, zero);
+    // Set guess xi to zero
+    if (std::abs(jacobian.determinant()) < 1.0E-10)
+      xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -784,11 +789,36 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // f(x) = p(x) - p, where p is the real point
     nr_residual = (nodal_coords * sf) - point;
 
-    // x_{n+1} = x_n - f(x)/f'(x)
-    if (std::abs(jacobian.determinant()) < 1.0E-10)
-      xi.setZero();
-    else
-      xi -= (jacobian.inverse() * nr_residual);
+    // f(x)/f'(x)
+    const Eigen::Matrix<double, 2, 1> delta = jacobian.inverse() * nr_residual;
+
+    // Line search
+    double step_length = 1.;
+    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
+      // Trial xi
+      // x_{n+1} = x_n - f(x)/f'(x)
+      const Eigen::Matrix<double, 2, 1> xi_trial = xi - (step_length * delta);
+
+      // Trial shape function
+      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
+
+      // Trial residual: f(x) = p(x) - p, where p is the real point
+      const Eigen::Matrix<double, 2, 1> nr_residual_trial =
+          (nodal_coords * sf_trial) - point;
+
+      if (nr_residual_trial.norm() < nr_residual.norm()) {
+        xi = xi_trial;
+        nr_residual = nr_residual_trial;
+        break;
+      } else if (step_length > 0.05)
+        step_length /= 2.;
+      else
+        break;
+      console_->info("Line search NR {} trials: {} step: {} delta{} norm{}",
+                     iter, line_trials, step_length, step_length * delta.norm(),
+                     nr_residual_trial.norm());
+    }
+    console_->info("NR xi ({}, {}) tol {}", xi(0), xi(1), delta.norm());
 
     // Convergence criteria
     if (nr_residual.norm() < Tolerance) break;
@@ -796,6 +826,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
+  console_->info("Affine xi ({}, {})", affine_guess(0), affine_guess(1));
+
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
       (element_->degree() == mpm::ElementDegree::Linear))
