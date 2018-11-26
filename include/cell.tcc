@@ -773,6 +773,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> nr_residual;
   unsigned iter = 0;
 
+  console_->info("Affine NR xi ({}, {})", affine_guess(0), affine_guess(1));
+  console_->info("Affine xi ({}, {})", affine_guess(0), affine_guess(1));
   console_->info("Before NR xi ({}, {})", xi(0), xi(1));
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
@@ -819,6 +821,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
                      nr_residual_trial.norm());
     }
     console_->info("NR xi ({}, {}) tol {}", xi(0), xi(1), delta.norm());
+    console_->info("Affine ({}, {})", affine_guess(0), affine_guess(1));
 
     // Convergence criteria
     if (nr_residual.norm() < Tolerance) break;
@@ -827,7 +830,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
 
-  console_->info("Affine xi ({}, {})", affine_guess(0), affine_guess(1));
+  console_->info("Affine ({}, {})", affine_guess(0), affine_guess(1));
 
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
