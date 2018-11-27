@@ -24,7 +24,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
   const unsigned Nnodes = 4;
   // Tolerance
   const double Tolerance = 1.E-7;
-/*
+
   SECTION("Transform real to unit cell analytical solution") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
@@ -74,7 +74,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
   }
-*/
+
   SECTION("Transform real to unit cell Newton-Raphson") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
