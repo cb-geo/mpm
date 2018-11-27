@@ -645,10 +645,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   const long double c = (x0 - x1) * y - (x - x1) * y0 + (x - x0) * y1;
 
   const long double discriminant = b * b - 4 * a * c;
+
   // Discriminant is negative if the point is not in the cell
   if (discriminant > 0.0) {
-    long double eta1;
-    long double eta2;
+    long double eta1, eta2;
     // Special case #1: if a is zero, then use the linear formula
     if (a == 0.0 && b != 0.0) {
       eta1 = -c / b;
@@ -761,7 +761,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 1000;
+  const unsigned max_iterations = 100;
 
   // Tolerance for newton raphson
   const double Tolerance = 1.0E-10;
@@ -777,6 +777,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 2> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
 
+    // Set guess xi to zero
+    if (std::abs(jacobian.determinant()) < 1.0E-10) xi.setZero();
+
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
@@ -784,18 +787,41 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // f(x) = p(x) - p, where p is the real point
     nr_residual = (nodal_coords * sf) - point;
 
-    // x_{n+1} = x_n - f(x)/f'(x)
-    if (std::abs(jacobian.determinant()) < 1.0E-10)
-      xi.setZero();
-    else
-      xi -= (jacobian.inverse() * nr_residual);
+    // f(x)/f'(x)
+    const Eigen::Matrix<double, 2, 1> delta = jacobian.inverse() * nr_residual;
 
+    // Line search
+    double step_length = 1.;
+    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
+      // Trial xi
+      // x_{n+1} = x_n - f(x)/f'(x)
+      const Eigen::Matrix<double, 2, 1> xi_trial = xi - (step_length * delta);
+
+      // Trial shape function
+      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
+
+      // Trial residual: f(x) = p(x) - p, where p is the real point
+      const Eigen::Matrix<double, 2, 1> nr_residual_trial =
+          (nodal_coords * sf_trial) - point;
+
+      if (nr_residual_trial.norm() < nr_residual.norm()) {
+        xi = xi_trial;
+        nr_residual = nr_residual_trial;
+        break;
+      } else if (step_length > 0.05)
+        step_length /= 2.;
+      else {
+        // Line search failed
+        break;
+      }
+    }
     // Convergence criteria
-    if (nr_residual.norm() < Tolerance) break;
+    if ((step_length * delta).norm() < Tolerance) break;
 
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
       (element_->degree() == mpm::ElementDegree::Linear))
@@ -817,14 +843,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 3, 1> xi;
   xi.setZero();
 
-  Eigen::Matrix<double, 3, 1> zero;
-  zero.setZero();
-
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 100;
-  // Tolerance for newton raphson
-  const double tolerance = 1.e-11;
-
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
@@ -839,72 +857,125 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     }
   }
 
+  // Affine transformation, using linear interpolation for the initial guess
+  // Affine guess of xi
+  Eigen::Matrix<double, 3, 1> affine_guess;
+  // Boolean to check if affine is nan
+  bool affine_nan = false;
+  // Zeros
+  const Eigen::Matrix<double, 3, 1> zero = Eigen::Matrix<double, 3, 1>::Zero();
+
+  // Affine tolerance
+  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
+
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
+
+  // Affine residual
+  Eigen::Matrix<double, 3, 1> affine_residual;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    Eigen::Matrix<double, 3, 3> A;
-    A = nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
+    const Eigen::Matrix<double, 3, 3> A =
+        nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
 
     // b = vertex * Kb
-    Eigen::Matrix<double, 3, 1> b =
+    const Eigen::Matrix<double, 3, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
+    // const Eigen::Matrix<double, 3, 1>
+    affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool xi_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(affine_guess(i))) xi_nan = true;
+      if (std::isnan(affine_guess(i))) affine_nan = true;
 
     // Set xi to affine guess
-    if (!xi_nan) xi = affine_guess;
-
-    for (unsigned i = 0; i < xi.size(); ++i)
-      if (std::isnan(xi(i))) xi_nan = true;
-
-    // If guess is nan set zero
-    if (xi_nan) xi.setZero();
+    if (!affine_nan) xi = affine_guess;
+    // If guess is nan set xi to zero
+    else
+      xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
+    affine_residual = (nodal_coords * sf) - point;
 
     // Early exit
-    if ((fx.squaredNorm() <
-         (1e-24 * this->mean_length_ * this->mean_length_)) &&
-        !xi_nan)
+    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
       return xi;
   }
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 100;
+
+  // Tolerance for newton raphson
+  const double Tolerance = 1.0E-10;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+  Eigen::Matrix<double, 3, 1> nr_residual;
+  unsigned iter = 0;
+  for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian =
+    const Eigen::Matrix<double, 3, 3> jacobian =
         element_->jacobian_local(xi, unit_cell, zero, zero);
+
+    // Set guess xi to zero
+    if (std::abs(jacobian.determinant()) < 1.0E-10) xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
 
-    // Residual f(x)
-    Eigen::Matrix<double, 3, 1> residual;
-    // f(x) = p(x) - p
-    residual = (nodal_coords * sf) - point;
+    // Residual (f(x))
+    // f(x) = p(x) - p, where p is the real point
+    nr_residual = (nodal_coords * sf) - point;
 
-    // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * residual);
+    // f(x)/f'(x)
+    const Eigen::Matrix<double, 3, 1> delta = jacobian.inverse() * nr_residual;
 
+    // Line search
+    double step_length = 1.;
+    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
+      // Trial xi
+      // x_{n+1} = x_n - f(x)/f'(x)
+      const Eigen::Matrix<double, 3, 1> xi_trial = xi - (step_length * delta);
+
+      // Trial shape function
+      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
+
+      // Trial residual: f(x) = p(x) - p, where p is the real point
+      const Eigen::Matrix<double, 3, 1> nr_residual_trial =
+          (nodal_coords * sf_trial) - point;
+
+      if (nr_residual_trial.norm() < nr_residual.norm()) {
+        xi = xi_trial;
+        nr_residual = nr_residual_trial;
+        break;
+      } else if (step_length > 0.05)
+        step_length /= 2.;
+      else {
+        // Line search failed
+        break;
+      }
+    }
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if ((step_length * delta).norm() < Tolerance) break;
+
+    // Check for nan and set to a trial xi
+    if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
+  // At end of iteration return affine or xi based on lowest norm
+  if ((iter == max_iterations) && !affine_nan &&
+      (element_->degree() == mpm::ElementDegree::Linear))
+    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+
   return xi;
 }
 
