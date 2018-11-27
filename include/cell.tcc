@@ -761,7 +761,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 1000;
+  const unsigned max_iterations = 100;
 
   // Tolerance for newton raphson
   const double Tolerance = 1.0E-10;
@@ -772,17 +772,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // p(x) is the computed point.
   Eigen::Matrix<double, 2, 1> nr_residual;
   unsigned iter = 0;
-
-  console_->info("Affine NR xi ({}, {})", affine_guess(0), affine_guess(1));
-  console_->info("Affine xi ({}, {})", affine_guess(0), affine_guess(1));
-  console_->info("Before NR xi ({}, {})", xi(0), xi(1));
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
     const Eigen::Matrix<double, 2, 2> jacobian =
-        element_->jacobian_local(xi, this->nodal_coordinates_, zero, zero);
+        element_->jacobian_local(xi, unit_cell, zero, zero);
+
     // Set guess xi to zero
-    if (std::abs(jacobian.determinant()) < 1.0E-10)
-      xi.setZero();
+    if (std::abs(jacobian.determinant()) < 1.0E-10) xi.setZero();
 
     // Local shape function
     const auto sf = element_->shapefn_local(xi, zero, zero);
@@ -814,23 +810,19 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
         break;
       } else if (step_length > 0.05)
         step_length /= 2.;
-      else
+      else {
+        step_length = 1.;
+        xi -= delta;
         break;
-      console_->info("Line search NR {} trials: {} step: {} delta{} norm{}",
-                     iter, line_trials, step_length, step_length * delta.norm(),
-                     nr_residual_trial.norm());
+      }
     }
-    console_->info("NR xi ({}, {}) tol {}", xi(0), xi(1), delta.norm());
-    console_->info("Affine ({}, {})", affine_guess(0), affine_guess(1));
 
     // Convergence criteria
-    if (nr_residual.norm() < Tolerance) break;
+    if ((step_length * delta).norm() < Tolerance) break;
 
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
-
-  console_->info("Affine ({}, {})", affine_guess(0), affine_guess(1));
 
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
