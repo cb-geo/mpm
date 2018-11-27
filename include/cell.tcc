@@ -811,12 +811,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       } else if (step_length > 0.05)
         step_length /= 2.;
       else {
-        step_length = 1.;
-        xi -= delta;
+        // Line search failed
         break;
       }
     }
-
     // Convergence criteria
     if ((step_length * delta).norm() < Tolerance) break;
 
