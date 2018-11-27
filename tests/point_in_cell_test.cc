@@ -239,7 +239,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point1 << 2., 1.;
 
     // Test if point is in cell
-    // REQUIRE(cell->is_point_in_cell(point1) == true);
+    REQUIRE(cell->is_point_in_cell(point1) == true);
 
     // Coordinates of the point in an unit cell
     Eigen::Matrix<double, 2, 1> point_unit_cell1;
