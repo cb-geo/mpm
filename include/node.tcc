@@ -223,6 +223,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       // when velocity is set.
       this->apply_velocity_constraints();
 
+      // Apply friction constraints
+      this->apply_friction_constraints(dt);
+
       // Set a threshold
       for (unsigned i = 0; i < Tdim; ++i) {
         if (std::fabs(velocity_.col(phase)(i)) < tolerance)
@@ -274,5 +277,79 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
     this->acceleration_(direction, phase) = 0.;
+  }
+}
+
+//! Assign friction constraint
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_friction_constraint(
+    unsigned dir, int sign_n, double friction) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir >= 0 && dir < Tdim) {
+      this->friction_constraint_ =
+          std::make_tuple(static_cast<unsigned>(dir), static_cast<int>(sign_n),
+                          static_cast<double>(friction));
+      this->friction_ = true;
+    } else
+      throw std::runtime_error("Constraint direction is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Apply friction constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
+  if (friction_) {
+    auto sign = [](double value) { return (value > 0.) ? 1. : -1.; };
+
+    // Set friction constraint
+    // Direction value in the constraint (0, Dim)
+    const unsigned dir_n = std::get<0>(this->friction_constraint_);
+
+    // Normal direction of friction
+    const double sign_dir_n = sign(std::get<1>(this->friction_constraint_));
+
+    // Friction co-efficient
+    const double mu = std::get<2>(this->friction_constraint_);
+
+    const unsigned phase = 0;
+
+    // Acceleration and velocity
+    double acc_n, acc_t, vel_t;
+
+    if (Tdim == 2) {
+      const unsigned dir_t =
+          (Tdim - 1) - dir_n;  // tangential direction to boundary
+
+      // Normal and tangential acceleration
+      acc_n = this->acceleration_(dir_n, phase);
+      acc_t = this->acceleration_(dir_t, phase);
+      // Velocity tangential
+      vel_t = this->velocity_(dir_t, phase);
+
+      if ((acc_n * sign_dir_n) > 0.0) {
+        if (vel_t != 0.0) {  // kinetic friction
+          const double vel_net = dt * acc_t + vel_t;
+          const double vel_frictional = dt * mu * std::abs(acc_n);
+          if (fabs(vel_net) <= vel_frictional)
+            acc_t = -vel_t / dt;
+          else
+            acc_t -= sign(vel_net) * mu * std::abs(acc_n);
+        } else {  // static friction
+          if (fabs(acc_t) <= mu * std::abs(acc_n))
+            acc_t = 0.0;
+          else
+            acc_t -= sign(acc_t) * mu * std::abs(acc_n);
+        }
+        this->acceleration_(dir_t, phase) = acc_t;
+      }
+    }
   }
 }
