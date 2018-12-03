@@ -276,7 +276,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
-    this->acceleration_(direction, phase) = 0.;
+    // If friction is not set
+    if (!this->friction_) this->acceleration_(direction, phase) = 0.;
   }
 }
 
