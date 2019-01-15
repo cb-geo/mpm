@@ -9,19 +9,17 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["youngs_modulus"].template get<double>();
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
-    friction_angle_ =
-        material_properties["friction_angle"].template get<double>();
-    dilation_angle_ =
-        material_properties["dilation_angle"].template get<double>();
+    friction_ = material_properties["friction"].template get<double>();
+    dilation_ = material_properties["dilation"].template get<double>();
     cohesion_ = material_properties["cohesion"].template get<double>();
-    residual_friction_angle_ =
-        material_properties["residual_friction_angle"].template get<double>();
-    residual_dilation_angle_ =
-        material_properties["residual_dilation_angle"].template get<double>();
+    residual_friction_ =
+        material_properties["residual_friction"].template get<double>();
+    residual_dilation_ =
+        material_properties["residual_dilation"].template get<double>();
     residual_cohesion_ =
         material_properties["residual_cohesion"].template get<double>();
-    peak_EPDS_ = material_properties["peak_EPDS"].template get<double>();
-    crit_EPDS_ = material_properties["crit_EPDS"].template get<double>();
+    peak_epds_ = material_properties["peak_epds"].template get<double>();
+    crit_epds_ = material_properties["crit_epds"].template get<double>();
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
     porosity_ = material_properties["porosity"].template get<double>();
@@ -245,27 +243,27 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   const double ONETHIRDPI = PI / 3.;
 
   // Friction and dilation in radians
-  const double phi_max = friction_angle_ * PI / 180.;
-  const double psi_max = dilation_angle_ * PI / 180.;
+  const double phi_max = friction_ * PI / 180.;
+  const double psi_max = dilation_ * PI / 180.;
   const double c_max = cohesion_;
-  const double phi_min = residual_friction_angle_ * PI / 180.;
-  const double psi_min = residual_dilation_angle_ * PI / 180.;
+  const double phi_min = residual_friction_ * PI / 180.;
+  const double psi_min = residual_dilation_ * PI / 180.;
   const double c_min = residual_cohesion_;
 
   // Current MC parameters using a linear softening rule
   double epds = 0;
-  if ((peak_EPDS_ - epds) >= 0.) {
+  if ((peak_epds_ - epds) >= 0.) {
     phi_ = phi_max;
     psi_ = psi_max;
     c_ = c_max;
-  } else if ((epds - peak_EPDS_) > 0. && (crit_EPDS_ - epds) > 0.) {
-    phi_ = phi_min + ((phi_max - phi_min) * (epds - crit_EPDS_) /
-                      (peak_EPDS_ - crit_EPDS_));
-    psi_ = psi_min + ((psi_max - psi_min) * (epds - crit_EPDS_) /
-                      (peak_EPDS_ - crit_EPDS_));
+  } else if ((epds - peak_epds_) > 0. && (crit_epds_ - epds) > 0.) {
+    phi_ = phi_min + ((phi_max - phi_min) * (epds - crit_epds_) /
+                      (peak_epds_ - crit_epds_));
+    psi_ = psi_min + ((psi_max - psi_min) * (epds - crit_epds_) /
+                      (peak_epds_ - crit_epds_));
     c_ = c_min +
-         ((c_max - c_min) * (epds - crit_EPDS_) / (peak_EPDS_ - crit_EPDS_));
-  } else if ((epds - crit_EPDS_) >= 0.) {
+         ((c_max - c_min) * (epds - crit_epds_) / (peak_epds_ - crit_epds_));
+  } else if ((epds - crit_epds_) >= 0.) {
     phi_ = phi_max;
     psi_ = psi_max;
     c_ = c_max;
