@@ -61,10 +61,10 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute elastic tensor
   bool compute_elastic_tensor();
   //! Compute j2, j3, rho, theta
-  bool compute_rho_theta(const Vector6d& stress);
+  void compute_rho_theta(const Vector6d& stress);
   //! Compute dF/dSigma and dP/dSigma
-  bool compute_df_dp(const Vector6d& stress, Vector6d& _dF_dSigma,
-                     Vector6d& _dP_dSigma);
+  void compute_df_dp(const Vector6d& stress, Vector6d& df_dsigma_,
+                     Vector6d& dp_dsigma_);
 
  private:
   //! Elastic stiffness matrix
