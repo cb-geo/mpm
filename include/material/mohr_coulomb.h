@@ -61,8 +61,7 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute elastic tensor
   bool compute_elastic_tensor();
   //! Compute j2, j3, rho, theta
-  bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
-                         double& _rho, double& _theta);
+  bool compute_rho_theta(const Vector6d& stress);
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const double _j2, const double _j3, const double _rho,
                      const double _theta, const Vector6d stress,
@@ -108,8 +107,18 @@ class MohrCoulomb : public Material<Tdim> {
   double phi_{std::numeric_limits<double>::max()};
   //! Dilation angle psi
   double psi_{std::numeric_limits<double>::max()};
+
+  //! Internal parameters
   //! Cohesion
   double c_{std::numeric_limits<double>::max()};
+  //! J2
+  double j2_{std::numeric_limits<double>::max()};
+  //! J3
+  double j3_{std::numeric_limits<double>::max()};
+  //! Rho
+  double rho_{std::numeric_limits<double>::max()};
+  //! Theta
+  double theta_{std::numeric_limits<double>::max()};
 };  // MohrCoulomb class
 }  // namespace mpm
 
