@@ -64,7 +64,7 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_rho_theta(const Vector6d& stress);
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const Vector6d& stress, Vector6d& _dF_dSigma,
-                     Vector6d& _dP_dSigma, double& _softening);
+                     Vector6d& _dP_dSigma);
 
  private:
   //! Elastic stiffness matrix
@@ -117,6 +117,8 @@ class MohrCoulomb : public Material<Tdim> {
   double rho_{std::numeric_limits<double>::max()};
   //! Theta
   double theta_{std::numeric_limits<double>::max()};
+  //! Softening
+  double softening_{std::numeric_limits<double>::max()};
 };  // MohrCoulomb class
 }  // namespace mpm
 

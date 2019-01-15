@@ -105,8 +105,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d& stress) {
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_df_dp(const Vector6d& stress,
                                            Vector6d& _dF_dSigma,
-                                           Vector6d& _dP_dSigma,
-                                           double& _softening) {
+                                           Vector6d& _dP_dSigma) {
   const double ONETHIRDPI = 1.047197551;
   // Deviatoric stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
@@ -226,7 +225,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_df_dp(const Vector6d& stress,
   // (sqrt(3.)*cos(phi_)*cos(phi_)));
 
   // double dF_dC = -1.;
-  // _softening = (-1.) * ((dF_dPhi*dPhi_dPstrain) + (dF_dC*dC_dPstrain)) *
+  // softening_ = (-1.) * ((dF_dPhi*dPhi_dPstrain) + (dF_dC*dC_dPstrain)) *
   // dP_dRho;
 
   return true;
@@ -283,10 +282,10 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   // compute plastic multiplier from the current stress state
   Vector6d dF_dSigma, dP_dSigma;
-  double softening = 0;
-  this->compute_df_dp(stress, dF_dSigma, dP_dSigma, softening);
+  this->softening_ = 0;
+  this->compute_df_dp(stress, dF_dSigma, dP_dSigma);
   double lambda = dF_dSigma.dot(this->de_ * dstrain) /
-                  ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening);
+                  ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening_);
   if (!yield_state) lambda = 0.;
 
   // compute the trial stress
@@ -309,13 +308,12 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     yield_state_trial = false;
 
   Vector6d dF_dSigma_trial, dP_dSigma_trial;
-  double softening_trial = 0;
-  this->compute_df_dp(trial_stress, dF_dSigma_trial, dP_dSigma_trial,
-                      softening_trial);
+  softening_ = 0;
+  this->compute_df_dp(trial_stress, dF_dSigma_trial, dP_dSigma_trial);
   double lambda_trial =
       yield_func_trial /
       ((dF_dSigma_trial.transpose() * de_).dot(dP_dSigma_trial.transpose()) +
-       softening_trial);
+       softening_);
 
   double p_multiplier;
   if (yield_state)
