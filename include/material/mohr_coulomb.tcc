@@ -103,10 +103,10 @@ bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d& stress) {
 
 //! Return dF/dSigma and dP/dSigma
 template <unsigned Tdim>
-bool mpm::MohrCoulomb<Tdim>::compute_df_dp(
-    const double j2_, const double j3_, const double _rho, const double theta_,
-    const Vector6d stress, Vector6d& _dF_dSigma, Vector6d& _dP_dSigma,
-    double& _softening) {
+bool mpm::MohrCoulomb<Tdim>::compute_df_dp(const Vector6d& stress,
+                                           Vector6d& _dF_dSigma,
+                                           Vector6d& _dP_dSigma,
+                                           double& _softening) {
   const double ONETHIRDPI = 1.047197551;
   // Deviatoric stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
@@ -284,8 +284,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // compute plastic multiplier from the current stress state
   Vector6d dF_dSigma, dP_dSigma;
   double softening = 0;
-  this->compute_df_dp(j2_, j3_, rho_, theta_, stress, dF_dSigma, dP_dSigma,
-                      softening);
+  this->compute_df_dp(stress, dF_dSigma, dP_dSigma, softening);
   double lambda = dF_dSigma.dot(this->de_ * dstrain) /
                   ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening);
   if (!yield_state) lambda = 0.;
@@ -311,8 +310,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   Vector6d dF_dSigma_trial, dP_dSigma_trial;
   double softening_trial = 0;
-  this->compute_df_dp(j2_, j3_, rho_, theta_, trial_stress, dF_dSigma_trial,
-                      dP_dSigma_trial, softening_trial);
+  this->compute_df_dp(trial_stress, dF_dSigma_trial, dP_dSigma_trial,
+                      softening_trial);
   double lambda_trial =
       yield_func_trial /
       ((dF_dSigma_trial.transpose() * de_).dot(dP_dSigma_trial.transpose()) +
