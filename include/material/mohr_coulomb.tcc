@@ -107,9 +107,7 @@ void mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d& stress) {
 
 //! Compute dF/dSigma and dP/dSigma
 template <unsigned Tdim>
-void mpm::MohrCoulomb<Tdim>::compute_df_dp(const Vector6d& stress,
-                                           Vector6d& df_dsigma_,
-                                           Vector6d& dp_dsigma_) {
+void mpm::MohrCoulomb<Tdim>::compute_df_dp(const Vector6d& stress) {
   const double ONETHIRDPI = 1.047197551;
 
   // Mean stress
@@ -306,11 +304,10 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     yield_state = false;
 
   // compute plastic multiplier from the current stress state
-  Vector6d dF_dSigma, dP_dSigma;
   this->softening_ = 0;
-  this->compute_df_dp(stress, dF_dSigma, dP_dSigma);
-  double lambda = dF_dSigma.dot(this->de_ * dstrain) /
-                  ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening_);
+  this->compute_df_dp(stress);
+  double lambda = df_dsigma_.dot(this->de_ * dstrain) /
+                  ((df_dsigma_.dot(this->de_ * dp_dsigma_)) + softening_);
   if (!yield_state) lambda = 0.;
 
   // compute the trial stress
@@ -332,12 +329,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   else
     yield_state_trial = false;
 
-  Vector6d dF_dSigma_trial, dP_dSigma_trial;
   softening_ = 0;
-  this->compute_df_dp(trial_stress, dF_dSigma_trial, dP_dSigma_trial);
+  this->compute_df_dp(trial_stress);
   double lambda_trial =
       yield_func_trial /
-      ((dF_dSigma_trial.transpose() * de_).dot(dP_dSigma_trial.transpose()) +
+      ((df_dsigma_.transpose() * de_).dot(dp_dsigma_.transpose()) +
        softening_);
 
   double p_multiplier;
@@ -351,7 +347,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   }
 
   // update stress (plastic correction)
-  Vector6d stress_update = trial_stress - (p_multiplier * de_ * dP_dSigma);
+  Vector6d stress_update = trial_stress - (p_multiplier * de_ * dp_dsigma_);
   // compute plastic deviatoric strain
   Vector6d dstress = stress - stress_update;
   Vector6d dpstrain = dstrain - (de_.inverse()) * dstress;
