@@ -110,7 +110,10 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain, particle.get());
+    std::map<std::string, double> state_vars;
+    material->initialise_state_variables(&state_vars);
+    stress =
+        material->compute_stress(stress, strain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -132,7 +135,8 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     stress.setZero();
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain, particle.get());
+    stress =
+        material->compute_stress(stress, strain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -247,7 +251,10 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain, particle.get());
+    std::map<std::string, double> state_vars;
+    material->initialise_state_variables(&state_vars);
+    stress =
+        material->compute_stress(stress, strain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
@@ -269,7 +276,8 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     stress.setZero();
 
     // Compute updated stress
-    stress = material->compute_stress(stress, strain, particle.get());
+    stress =
+        material->compute_stress(stress, strain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(stress(0) == Approx(1.92307692307333e+04).epsilon(Tolerance));
