@@ -77,7 +77,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       std::map<std::string, double> state_variables;
-      REQUIRE(material->initialise_state_variables(state_variables) == true);
+      REQUIRE(material->initialise_state_variables(&state_variables) == true);
     }
   }
 
@@ -225,7 +225,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic2D", std::move(id), jmaterial);
+            "LinearElastic3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
 
     // Get material properties
@@ -239,7 +239,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       std::map<std::string, double> state_variables;
-      REQUIRE(material->initialise_state_variables(state_variables) == true);
+      REQUIRE(material->initialise_state_variables(&state_variables) == true);
     }
   }
 
