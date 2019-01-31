@@ -71,6 +71,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -78,6 +82,12 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      std::map<std::string, double> state_variables;
+      REQUIRE(material->initialise_state_variables(state_variables) == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -401,6 +411,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -408,6 +422,12 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      std::map<std::string, double> state_variables;
+      REQUIRE(material->initialise_state_variables(state_variables) == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
