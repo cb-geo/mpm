@@ -73,6 +73,12 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      std::map<std::string, double> state_variables;
+      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+    }
   }
 
   SECTION("Newtonian check stresses") {
@@ -222,6 +228,12 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      std::map<std::string, double> state_variables;
+      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+    }
   }
 
   SECTION("Newtonian check stresses") {
