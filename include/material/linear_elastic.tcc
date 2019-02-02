@@ -53,8 +53,7 @@ bool mpm::LinearElastic<Tdim>::compute_elastic_tensor() {
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr) {
-
+    const ParticleBase<Tdim>* ptr, std::map<std::string, double>* state_vars) {
   const Vector6d dstress = this->de_ * dstrain;
   return (stress + dstress);
 }
