@@ -119,7 +119,6 @@ private:
   double epds_last = 0.;
   //! value of PI
   const double PI = std::atan(1.0) * 4.;
-  const double ONETHIRDPI = PI / 3.;
 
 };  // MohrCoulomb class
 }  // namespace mpm
