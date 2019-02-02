@@ -63,8 +63,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute j2, j3, rho, theta
   bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
 			 double& _rho, double& _theta);
-  //! Check the yield or not and its type
-  int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function, const double _epsilon, const double _rho, const double _theta);
+  //! Check the yield type(tension/shear) and return the value of two yield functions
+  int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function,
+       const double _epsilon, const double _rho, const double _theta);
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
          const double _rho, const double _theta, const Vector6d stress,
@@ -114,7 +115,7 @@ class MohrCoulomb : public Material<Tdim> {
   //! Cohesion
   double c_{std::numeric_limits<double>::max()};
 private:
-  //! equivalent_plastic_deviatoric_strain
+  //! tracke the equivalent_plastic_deviatoric_strain
   double epds_last = 0.;
   //! value of PI
   const double PI = std::atan(1.0) * 4.;
