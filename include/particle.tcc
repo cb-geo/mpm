@@ -95,6 +95,7 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   velocity_.setZero();
   volume_.fill(std::numeric_limits<double>::max());
   volumetric_strain_centroid_.setZero();
+  PDS_.setZero();
 }
 
 // Assign a cell to particle
