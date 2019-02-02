@@ -123,6 +123,6 @@ private:
 };  // MohrCoulomb class
 }  // namespace mpm
 
-#include "MohrCoulomb.tcc"
+#include "mohr_coulomb.tcc"
 
 #endif  // MPM_MATERIAL_MOHR_COULOMB_H_
