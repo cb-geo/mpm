@@ -159,6 +159,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
     // Check if material is valid and properties are set
     if (material != nullptr) {
       material_ = material;
+      material_->initialise_state_variables(&state_variables_);
       status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
@@ -411,8 +412,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     if (material_ != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Calculate stress
-      this->stress_.col(phase) =
-          material_->compute_stress(this->stress_.col(phase), dstrain, this);
+      this->stress_.col(phase) = material_->compute_stress(
+          this->stress_.col(phase), dstrain, this, &state_variables_);
     } else {
       throw std::runtime_error("Material is invalid");
     }
