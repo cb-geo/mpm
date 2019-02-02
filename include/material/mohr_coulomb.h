@@ -61,9 +61,16 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute elastic tensor
   bool compute_elastic_tensor();
   //! Compute j2, j3, rho, theta
-  void compute_rho_theta(const Vector6d& stress);
+  bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
+			 double& _rho, double& _theta);
+  //! Check the yield or not and its type
+  int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function, const double _epsilon, const double _rho, const double _theta);
   //! Compute dF/dSigma and dP/dSigma
-  void compute_df_dp(const Vector6d& stress);
+  bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
+         const double _rho, const double _theta, const Vector6d stress,
+         Vector6d& _dF_dSigma, Vector6d& _dP_dSigma,
+         const double _epds, double& _softening,
+         const ParticleBase<Tdim>* ptr);
 
  private:
   //! Elastic stiffness matrix
@@ -79,21 +86,21 @@ class MohrCoulomb : public Material<Tdim> {
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Friction angle phi
-  double friction_{std::numeric_limits<double>::max()};
+  double friction_angle_{std::numeric_limits<double>::max()};
   //! Dilation angle psi
-  double dilation_{std::numeric_limits<double>::max()};
+  double dilation_angle_{std::numeric_limits<double>::max()};
   //! Cohesion
   double cohesion_{std::numeric_limits<double>::max()};
   //! Residual friction angle phi
-  double residual_friction_{std::numeric_limits<double>::max()};
+  double residual_friction_angle_{std::numeric_limits<double>::max()};
   //! Residual dilation angle psi
-  double residual_dilation_{std::numeric_limits<double>::max()};
+  double residual_dilation_angle_{std::numeric_limits<double>::max()};
   //! Residual cohesion
   double residual_cohesion_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
-  double peak_epds_{std::numeric_limits<double>::max()};
+  double peak_EPDS_{std::numeric_limits<double>::max()};
   //! Critical plastic deviatoric strain
-  double crit_epds_{std::numeric_limits<double>::max()};
+  double crit_EPDS_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
   //! Porosity
@@ -104,27 +111,18 @@ class MohrCoulomb : public Material<Tdim> {
   double phi_{std::numeric_limits<double>::max()};
   //! Dilation angle psi
   double psi_{std::numeric_limits<double>::max()};
-
-  //! Internal parameters
   //! Cohesion
   double c_{std::numeric_limits<double>::max()};
-  //! J2
-  double j2_{std::numeric_limits<double>::max()};
-  //! J3
-  double j3_{std::numeric_limits<double>::max()};
-  //! Rho
-  double rho_{std::numeric_limits<double>::max()};
-  //! Theta
-  double theta_{std::numeric_limits<double>::max()};
-  //! Softening
-  double softening_{std::numeric_limits<double>::max()};
-  //! dF / dSigma
-  Vector6d df_dsigma_;
-  //! dp / dSigma
-  Vector6d dp_dsigma_;
+private:
+  //! equivalent_plastic_deviatoric_strain
+  double epds_last = 0.;
+  //! value of PI
+  const double PI = std::atan(1.0) * 4.;
+  const double ONETHIRDPI = PI / 3.;
+
 };  // MohrCoulomb class
 }  // namespace mpm
 
-#include "mohr_coulomb.tcc"
+#include "MohrCoulomb.tcc"
 
 #endif  // MPM_MATERIAL_MOHR_COULOMB_H_
