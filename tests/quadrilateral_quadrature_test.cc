@@ -24,12 +24,12 @@ TEST_CASE("Quadrilateral quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 1);
-    REQUIRE(points.cols() == 2);
+    REQUIRE(points.rows() == 2);
+    REQUIRE(points.cols() == 1);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 0) == Approx(0.).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
@@ -52,18 +52,18 @@ TEST_CASE("Quadrilateral quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 4);
-    REQUIRE(points.cols() == 2);
+    REQUIRE(points.rows() == 2);
+    REQUIRE(points.cols() == 4);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(1, 0) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(1, 0) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(0, 1) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
     REQUIRE(points(1, 1) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(2, 0) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(2, 1) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(3, 0) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
-    REQUIRE(points(3, 1) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(0, 2) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(1, 2) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(0, 3) == Approx(-std::sqrt(3.) / 3.).epsilon(Tolerance));
+    REQUIRE(points(1, 3) == Approx(+std::sqrt(3.) / 3.).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
@@ -89,33 +89,33 @@ TEST_CASE("Quadrilateral quadratures are checked",
     auto points = quad->quadratures();
 
     // Check size
-    REQUIRE(points.rows() == 9);
-    REQUIRE(points.cols() == 2);
+    REQUIRE(points.rows() == 2);
+    REQUIRE(points.cols() == 9);
 
     // Check quadrature points
     REQUIRE(points(0, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(0, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(1, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
     REQUIRE(points(1, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(2, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(2, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(3, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(3, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 2) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 3) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 3) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(4, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(4, 1) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 4) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(5, 0) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(5, 1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(0, 5) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 5) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(points(6, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(6, 1) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(0, 6) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 6) == Approx(+std::sqrt(3. / 5.)).epsilon(Tolerance));
 
-    REQUIRE(points(7, 0) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
-    REQUIRE(points(7, 1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(0, 7) == Approx(-std::sqrt(3. / 5.)).epsilon(Tolerance));
+    REQUIRE(points(1, 7) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(points(8, 0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(points(8, 1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(0, 8) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(points(1, 8) == Approx(0.).epsilon(Tolerance));
 
     // Check weights
     auto weights = quad->weights();
