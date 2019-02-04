@@ -35,6 +35,12 @@ class Newtonian : public Material<Tdim> {
   //! Delete assignement operator
   Newtonian& operator=(const Newtonian&) = delete;
 
+  //! Initialise history variables
+  //! \param[in] state_vars State variables with history
+  bool initialise_state_variables(std::map<std::string, double>* state_vars) {
+    return true;
+  }
+
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
@@ -44,9 +50,11 @@ class Newtonian : public Material<Tdim> {
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
+  //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr) override;
+                          const ParticleBase<Tdim>* ptr,
+                          std::map<std::string, double>* state_vars) override;
 
  protected:
   //! material id

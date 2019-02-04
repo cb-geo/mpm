@@ -182,6 +182,9 @@ class ParticleBase {
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
 
+  //! Return a state variable
+  virtual double state_variable(const std::string& var) const = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
@@ -197,6 +200,8 @@ class ParticleBase {
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
+  //! Material state history variables
+  std::map<std::string, double> state_variables_;
 };  // ParticleBase class
 }  // namespace mpm
 
