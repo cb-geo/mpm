@@ -16,6 +16,7 @@
 #include "logger.h"
 #include "map.h"
 #include "node_base.h"
+#include "quadrature.h"
 
 namespace mpm {
 
@@ -31,8 +32,8 @@ class Cell {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  //! Define DOF for stresses
-  static const unsigned Tdof = (Tdim == 2) ? 3 : 6;
+  //! Define DOFs
+  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
 
   //! Constructor with id, number of nodes and element
   //! \param[in] id Global cell id
@@ -61,6 +62,12 @@ class Cell {
   //! Return the initialisation status of cells
   //! \retval initialisation_status Cell has nodes, element type and volumes
   bool is_initialised() const;
+
+  //! Assign quadrature
+  void assign_quadrature(unsigned nquadratures);
+
+  //! Generate points
+  std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points();
 
   //! Return the number of particles
   unsigned nparticles() const { return particles_.size(); }
@@ -129,8 +136,11 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
+  //! Compute nodal coordinates
+  void compute_nodal_coordinates();
+
   //! Return nodal coordinates
-  Eigen::MatrixXd nodal_coordinates();
+  Eigen::MatrixXd nodal_coordinates() const { return nodal_coordinates_; }
 
   //! Check if a point is in a cartesian cell by checking the domain ranges
   //! \param[in] point Coordinates of point
@@ -269,11 +279,17 @@ class Cell {
   //! particles ids in cell
   std::vector<Index> particles_;
   //! Container of node pointers (local id, node pointer)
-  Map<NodeBase<Tdim>> nodes_;
+  std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
+  //! Nodal coordinates
+  Eigen::MatrixXd nodal_coordinates_;
   //! Container of cell neighbours
   Map<Cell<Tdim>> neighbour_cells_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
+  //! Quadrature
+  std::shared_ptr<Quadrature<Tdim>> quadrature_{nullptr};
+  //! BMatrix centroid
+  std::vector<Eigen::MatrixXd> bmatrix_centroid_;
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>
