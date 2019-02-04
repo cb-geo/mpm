@@ -30,6 +30,9 @@ class MPMExplicit : public MPM {
  public:
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
+  
+  //USL or USF
+  bool USL;
 
   //! Initialise mesh
   bool initialise_mesh() override;
@@ -40,8 +43,11 @@ class MPMExplicit : public MPM {
   //! Initialise materials
   bool initialise_materials() override;
 
+  //! Apply nodal tractions
+  bool apply_nodal_tractions() override;
+
   //! Solve
-  bool solve() override = 0;
+  bool solve() override;
 
   //! Checkpoint resume
   bool checkpoint_resume() override;
@@ -84,6 +90,8 @@ class MPMExplicit : public MPM {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
+  //! Bool nodal tractions
+  bool nodal_tractions_{true};
 
 };  // MPMExplicit class
 }  // namespace mpm

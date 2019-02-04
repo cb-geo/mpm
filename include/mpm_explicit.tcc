@@ -157,6 +157,9 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
             "Velocity constraints are not properly assigned");
     }
 
+    // Set nodal traction as false if file is empty
+    if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
+
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -227,9 +230,31 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
         Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
     auto particles_begin = std::chrono::steady_clock::now();
+
     // Get all particles
-    const auto all_particles =
-        particle_reader->read_particles(io_->file_name("particles"));
+    std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
+
+    // Generate particles
+    bool read_particles_file = false;
+    try {
+      unsigned nparticles_cell =
+          mesh_props["generate_particles_cells"].template get<unsigned>();
+
+      if (nparticles_cell > 0)
+        all_particles = mesh_->generate_material_points(nparticles_cell);
+      else
+        throw std::runtime_error(
+            "Specified # of particles per cell for generation is invalid!");
+
+    } catch (std::exception& exception) {
+      console_->warn("Generate particles is not set, reading particles file");
+      read_particles_file = true;
+    }
+
+    // Read particles from file
+    if (read_particles_file)
+      all_particles =
+          particle_reader->read_particles(io_->file_name("particles"));
     // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
@@ -388,6 +413,37 @@ bool mpm::MPMExplicit<Tdim>::initialise_materials() {
   return status;
 }
 
+//! Apply nodal tractions
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
+  bool status = true;
+  try {
+    // Read and assign nodes tractions
+    if (!io_->file_name("nodal_tractions").empty()) {
+      // Get mesh properties
+      auto mesh_props = io_->json_object("mesh");
+      // Get Mesh reader from JSON object
+      const std::string reader =
+          mesh_props["mesh_reader"].template get<std::string>();
+      // Create a mesh reader
+      auto node_reader =
+          Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+      bool nodal_tractions =
+          mesh_->assign_nodal_tractions(node_reader->read_particles_tractions(
+              io_->file_name("nodal_tractions")));
+      if (!nodal_tractions)
+        throw std::runtime_error("Nodal tractions are not properly assigned");
+    } else
+      nodal_tractions_ = false;
+  } catch (std::exception& exception) {
+    console_->error("#{}: Nodal traction: {}", __LINE__, exception.what());
+    status = false;
+    nodal_tractions_ = false;
+  }
+  return status;
+}
+
 //! Checkpoint resume
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
@@ -481,3 +537,249 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   }
 }
 #endif
+
+//! MPM Explicit solver
+template <unsigned Tdim>
+bool mpm::MPMExplicit<Tdim>::solve() {
+  bool status = true;
+  
+  // Get anlysis type USL/USF
+  bool USL = false;
+  if (io_-> analysis_type() == "MPMExplicitUSL2D"|| io_-> analysis_type()  == "MPMExplicitUSL3D")
+    USL = true; 
+
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
+
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+  // Phase
+  const unsigned phase = 0;
+
+  // Test if checkpoint resume is needed
+  bool resume = false;
+  if (analysis_.find("resume") != analysis_.end())
+    resume = analysis_["resume"]["resume"].template get<bool>();
+
+  // Initialise material
+  bool mat_status = this->initialise_materials();
+  if (!mat_status) status = false;
+
+  // Initialise mesh
+  bool mesh_status = this->initialise_mesh();
+  if (!mesh_status) status = false;
+
+  // Initialise particles
+  bool particle_status = this->initialise_particles();
+  if (!particle_status) status = false;
+
+  // Assign material to particles
+  // Get mesh properties
+  auto mesh_props = io_->json_object("mesh");
+  // Material id
+  const auto material_id = mesh_props["material_id"].template get<unsigned>();
+
+  // Get material from list of materials
+  auto material = materials_.at(material_id);
+
+  // Iterate over each particle to assign material
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                std::placeholders::_1, material));
+
+  // Check point resume
+  if (resume) this->checkpoint_resume();
+
+  // Compute mass
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
+  auto solver_begin = std::chrono::steady_clock::now();
+  // Main loop
+  for (; step_ < nsteps_; ++step_) {
+
+#ifdef USE_MPI
+    if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
+#else
+    console_->info("Step: {} of {}.\n", step_, nsteps_);
+#endif
+
+    // Create a TBB task group
+    tbb::task_group task_group;
+
+    // Spawn a task for initialising nodes and cells
+    task_group.run([&] {
+      // Initialise nodes
+      mesh_->iterate_over_nodes(
+          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+
+      mesh_->iterate_over_cells(
+          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+
+      // mesh_->find_active_nodes();
+    });
+
+    // Spawn a task for particles
+    task_group.run([&] {
+      // Iterate over each particle to compute shapefn
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+    });
+
+    task_group.wait();
+
+    // Assign mass and momentum to nodes
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+                  std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce nodal mass
+      mesh_->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
+                    false, phase, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+    }
+#endif
+
+    // Compute nodal velocity
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
+                  std::placeholders::_1),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    if (!USL){
+      // Iterate over each particle to calculate strain
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, phase, dt_));
+
+      // Iterate over each particle to compute stress
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
+                    std::placeholders::_1, phase));
+    }
+    // Spawn a task for external force
+    task_group.run([&] {
+      // Iterate over each particle to compute nodal body force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                    std::placeholders::_1, phase, this->gravity_));
+
+      // Iterate over each particle to map traction force to nodes
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
+                    std::placeholders::_1, phase));
+
+      //! Apply nodal tractions
+      if (nodal_tractions_) this->apply_nodal_tractions();
+    });
+
+    // Spawn a task for internal force
+    task_group.run([&] {
+      // Iterate over each particle to compute nodal internal force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                    std::placeholders::_1, phase));
+    });
+    task_group.wait();
+
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce external force
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+      // MPI all reduce internal force
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
+    }
+#endif
+
+    // Iterate over active nodes to compute acceleratation and velocity
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
+                  std::placeholders::_1, phase, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    // Use nodal velocity to update position
+    if (velocity_update_)
+      // Iterate over each particle to compute updated position
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
+                    std::placeholders::_1, phase, this->dt_));
+    else
+      // Iterate over each particle to compute updated position
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                    std::placeholders::_1, phase, this->dt_));
+    if (USL = true){
+      // Iterate over each particle to calculate strain
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, phase, dt_));
+
+      // Iterate over each particle to compute stress
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
+                    std::placeholders::_1, phase));
+    }
+
+    // Iterate over each particle to update particle volume
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                  std::placeholders::_1, phase, this->dt_));
+
+    // Locate particles
+    auto unlocatable_particles = mesh_->locate_particles_mesh();
+
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
+
+    if (step_ % output_steps_ == 0) {
+      // HDF5 outputs
+      this->write_hdf5(this->step_, this->nsteps_);
+#ifdef USE_VTK
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
+#endif
+    }
+  }
+  auto solver_end = std::chrono::steady_clock::now();
+  console_->info("Rank {}, USF solver duration: {} ms", mpi_rank,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     solver_end - solver_begin)
+                     .count());
+
+  return status;
+}
+
+
+
+
+
+
+
+

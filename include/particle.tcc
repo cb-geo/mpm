@@ -205,14 +205,16 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
+      // Zero matrix
+      Eigen::Matrix<double, Tdim, 1> zero;
+      zero.setZero();
+
       // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_, this->natural_size_,
-                                  Eigen::Matrix<double, Tdim, 1>::Zero());
+      shapefn_ = element->shapefn(this->xi_, this->natural_size_, zero);
 
       // Compute bmatrix of the particle for reference cell
       bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
-                                  this->natural_size_,
-                                  Eigen::Matrix<double, Tdim, 1>::Zero());
+                                  this->natural_size_, zero);
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -348,7 +350,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // Strain rate
-  Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
   // particle_strain_rate
   Eigen::Matrix<double, 6, 1> particle_strain_rate;
   particle_strain_rate.setZero();

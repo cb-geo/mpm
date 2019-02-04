@@ -27,6 +27,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
+  //! Define DOFs
+  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
+
   //! Construct a particle with id and coordinates
   //! \param[in] id Particle id
   //! \param[in] coord coordinates of the particle
