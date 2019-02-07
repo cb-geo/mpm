@@ -85,6 +85,14 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
+  //! Assign traction force to the node
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Nodal traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction_force(unsigned phase, unsigned direction,
+                             double traction) override;
+
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

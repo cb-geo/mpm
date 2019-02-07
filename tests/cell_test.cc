@@ -8,8 +8,10 @@
 #include "element.h"
 #include "factory.h"
 #include "hexahedron_element.h"
+#include "hexahedron_quadrature.h"
 #include "node.h"
 #include "quadrilateral_element.h"
+#include "quadrilateral_quadrature.h"
 
 //! \brief Check cell class for 2D case
 TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
@@ -352,6 +354,92 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Generate points in cell") {
+        // Number of nodes in cell
+        const unsigned Nnodes = 4;
+
+        // Coordinates
+        Eigen::Vector2d coords;
+
+        coords << 2.0, 1.0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 4.0, 2.0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 2.0, 4.0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 1.0, 3.0;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        // 4-noded quadrilateral shape functions
+        std::shared_ptr<mpm::Element<Dim>> element =
+            Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+
+        mpm::Index id = 0;
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+        REQUIRE(cell->add_node(0, node0) == true);
+        REQUIRE(cell->add_node(1, node1) == true);
+        REQUIRE(cell->add_node(2, node2) == true);
+        REQUIRE(cell->add_node(3, node3) == true);
+        REQUIRE(cell->nnodes() == 4);
+
+        // Initialise cell
+        REQUIRE(cell->initialise() == true);
+
+        // Assuming a quadrature of 1x1
+        auto points = cell->generate_points();
+        REQUIRE(points.size() == 1);
+
+        auto quad = std::make_shared<mpm::QuadrilateralQuadrature<Dim, 1>>();
+        auto quadrature = quad->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
+
+        // Assign quadrature 2x2
+        cell->assign_quadrature(2);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 4);
+
+        auto quad4 = std::make_shared<mpm::QuadrilateralQuadrature<Dim, 4>>();
+        quadrature = quad4->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
+
+        // Assign quadrature 3x3
+        cell->assign_quadrature(3);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 9);
+
+        auto quad9 = std::make_shared<mpm::QuadrilateralQuadrature<Dim, 9>>();
+        quadrature = quad9->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
       }
     }
   }
@@ -1257,6 +1345,112 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         for (unsigned i = 0; i < local_point4.size(); ++i)
           REQUIRE(local_point4[i] ==
                   Approx(point_unit_cell4[i]).epsilon(Tolerance));
+      }
+
+      SECTION("Generate points in cell") {
+        // Number of nodes in cell
+        const unsigned Nnodes = 8;
+
+        // Coordinates
+        Eigen::Vector3d coords;
+
+        coords << 2, 1, -1;
+        std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+        coords << 4, 2, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+        coords << 2, 4, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+        coords << 1, 3, -1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+        coords << 2, 1, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+        coords << 4, 2, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+        coords << 2, 4, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+        coords << 1, 3, 1.;
+        std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+        // 8-noded hexahedron shape functions
+        std::shared_ptr<mpm::Element<Dim>> element =
+            Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+
+        mpm::Index id = 0;
+        auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+        cell->add_node(0, node0);
+        cell->add_node(1, node1);
+        cell->add_node(2, node2);
+        cell->add_node(3, node3);
+        cell->add_node(4, node4);
+        cell->add_node(5, node5);
+        cell->add_node(6, node6);
+        cell->add_node(7, node7);
+        REQUIRE(cell->nnodes() == 8);
+
+        // Initialise cell
+        REQUIRE(cell->initialise() == true);
+
+        // Assuming a quadrature of 1x1x1
+        auto points = cell->generate_points();
+        REQUIRE(points.size() == 1);
+
+        auto quad = std::make_shared<mpm::HexahedronQuadrature<Dim, 1>>();
+        auto quadrature = quad->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
+
+        // Assign quadrature 2x2x2
+        cell->assign_quadrature(2);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 8);
+
+        auto quad2 = std::make_shared<mpm::HexahedronQuadrature<Dim, 8>>();
+        quadrature = quad2->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
+
+        // Assign quadrature 3x3x3
+        cell->assign_quadrature(3);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 27);
+
+        auto quad3 = std::make_shared<mpm::HexahedronQuadrature<Dim, 27>>();
+        quadrature = quad3->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
       }
     }
   }

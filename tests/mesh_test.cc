@@ -397,8 +397,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Compute cell volume
     cell1->compute_volume();
 
+    // Generate material points in cell
+    auto points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 0);
+
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Generate material points in cell
+    points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 1);
+
+    points = mesh->generate_material_points(2);
+    REQUIRE(points.size() == 4);
+
+    points = mesh->generate_material_points(3);
+    REQUIRE(points.size() == 9);
 
     // Particle 1
     coords << 1.0, 1.0;
@@ -726,6 +740,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 6);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
             }
 
             // Test assign particles stresses
@@ -1235,8 +1270,22 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Compute cell volume
     cell1->compute_volume();
 
+    // Generate material points in cell
+    auto points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 0);
+
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Generate material points in cell
+    points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 1);
+
+    points = mesh->generate_material_points(2);
+    REQUIRE(points.size() == 8);
+
+    points = mesh->generate_material_points(3);
+    REQUIRE(points.size() == 27);
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
@@ -1600,6 +1649,27 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 12);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 4, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
             }
 
             // Test assign particles stresses

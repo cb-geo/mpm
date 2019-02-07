@@ -88,20 +88,8 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
   // Clear existing list of active nodes
   this->active_nodes_.clear();
 
-  // Create a local variable to pass as lambda
-  Container<NodeBase<Tdim>> active_nodes;
-
-  tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
-      [=, &active_nodes](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        // If node is active add to a list of active nodes
-        std::lock_guard<std::mutex> guard(mesh_mutex_);
-        if (node->status()) {
-          active_nodes.add(node);
-        }
-      });
-
-  this->active_nodes_ = active_nodes;
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
 //! Iterate over active nodes
@@ -239,6 +227,35 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
   tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
+}
+
+//! Create cells from node lists
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>>
+    mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
+  std::vector<VectorDim> points;
+  try {
+    if (cells_.size() > 0) {
+      points.reserve(cells_.size() * std::pow(nquadratures, Tdim));
+
+      // Generate points
+      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+        (*citr)->assign_quadrature(nquadratures);
+        const auto cpoints = (*citr)->generate_points();
+        points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
+      }
+      console_->info(
+          "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
+          "# of points generated: {}",
+          cells_.size(), cells_.size() * std::pow(nquadratures, Tdim),
+          points.size());
+    } else
+      throw std::runtime_error("No cells are found in the mesh!");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    points.clear();
+  }
+  return points;
 }
 
 //! Create particles from coordinates
@@ -526,6 +543,38 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
         status = map_particles_[pid]->assign_traction(phase, dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign node tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        node_tractions) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign traction");
+    for (const auto& node_traction : node_tractions) {
+      // Node id
+      mpm::Index pid = std::get<0>(node_traction);
+      // Direction
+      unsigned dir = std::get<1>(node_traction);
+      // Traction
+      double traction = std::get<2>(node_traction);
+
+      if (map_nodes_.find(pid) != map_nodes_.end())
+        status = map_nodes_[pid]->assign_traction_force(phase, dir, traction);
+
+      if (!status) throw std::runtime_error("Traction is invalid for node");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

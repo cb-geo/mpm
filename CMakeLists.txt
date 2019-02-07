@@ -107,6 +107,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
 )
@@ -142,6 +143,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    
