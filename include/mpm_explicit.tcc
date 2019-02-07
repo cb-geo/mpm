@@ -658,6 +658,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
                   std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    // Update stress first
     if (!usl_) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
