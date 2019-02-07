@@ -30,9 +30,6 @@ class MPMExplicit : public MPM {
  public:
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
-  
-  //USL or USF
-  bool USL;
 
   //! Initialise mesh
   bool initialise_mesh() override;
@@ -60,6 +57,10 @@ class MPMExplicit : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+ private:
+  //! Boolean to switch between USL and USF
+  bool usl_{false};
+  
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
