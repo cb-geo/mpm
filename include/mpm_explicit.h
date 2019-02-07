@@ -57,10 +57,6 @@ class MPMExplicit : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
- private:
-  //! Boolean to switch between USL and USF
-  bool usl_{false};
-  
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
@@ -93,6 +89,10 @@ class MPMExplicit : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
+
+ private:
+  //! Boolean to switch between USL and USF
+  bool usl_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm
