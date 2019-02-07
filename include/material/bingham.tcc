@@ -33,7 +33,7 @@ double mpm::Bingham<Tdim>::thermodynamic_pressure(
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr) {
+    const ParticleBase<Tdim>* ptr, std::map<std::string, double>* state_vars) {
 
   const unsigned phase = 0;
 

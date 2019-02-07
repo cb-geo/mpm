@@ -27,6 +27,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
+  //! Define DOFs
+  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
+
   //! Construct a particle with id and coordinates
   //! \param[in] id Particle id
   //! \param[in] coord coordinates of the particle
@@ -224,6 +227,13 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
 
+  //! Return a state variable
+  //! \param[in] var State variable
+  //! \retval Quantity of the state history variable
+  double state_variable(const std::string& var) const override {
+    return state_variables_.at(var);
+  }
+
  private:
   //! Update pressure of the particles
   //! \param[in] phase Index corresponding to the phase
@@ -245,6 +255,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! State variables
+  using ParticleBase<Tdim>::state_variables_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume

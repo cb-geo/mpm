@@ -5,7 +5,6 @@
 #include <array>
 #include <limits>
 #include <memory>
-#include <mutex>
 #include <numeric>
 #include <vector>
 
@@ -225,6 +224,12 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
+  //! Assign nodal traction force
+  //! \param[in] nodal_tractions Traction at dir on nodes
+  bool assign_nodal_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          nodal_tractions);
+
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
   bool assign_particles_stresses(
@@ -242,6 +247,11 @@ class Mesh {
   //! Return status of the mesh. A mesh is active, if at least one particle is
   //! present
   bool status() const { return particles_.size(); }
+
+  //! Generate points
+  //! \param[in] nquadratures Number of points per direction in cell
+  //! \retval point Material point coordinates
+  std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
 
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
@@ -278,8 +288,6 @@ class Mesh {
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
  private:
-  //! Mutex
-  std::mutex mesh_mutex_;
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Isoparametric mesh

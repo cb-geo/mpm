@@ -138,6 +138,47 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->update_external_force(true, bad_phase, force) == false);
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, bad_phase, force) == false);
+
+      SECTION("Check traction") {
+        // External force
+        force.setZero();
+        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+
+        // Traction
+        double traction = 65.32;
+        const unsigned Direction = 0;
+        // Check traction
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(Nphase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
+                true);
+
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+
+        // Check for incorrect direction / phase
+        const unsigned wrong_dir = 4;
+        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
+                false);
+
+        // Check again to ensure value hasn't been updated
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+      }
     }
 
     SECTION("Check internal force") {
@@ -515,6 +556,47 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->update_external_force(true, 1, force_bad) == false);
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, 1, force_bad) == false);
+
+      SECTION("Check traction") {
+        // External force
+        force.setZero();
+        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+
+        // Traction
+        double traction = 65.32;
+        const unsigned Direction = 0;
+        // Check traction
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(Nphase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
+                true);
+
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+
+        // Check for incorrect direction / phase
+        const unsigned wrong_dir = 4;
+        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
+                false);
+
+        // Check again to ensure value hasn't been updated
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+      }
     }
 
     SECTION("Check internal force") {
@@ -867,6 +949,47 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
+
+      SECTION("Check traction") {
+        // External force
+        force.setZero();
+        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+
+        // Traction
+        double traction = 65.32;
+        const unsigned Direction = 0;
+        // Check traction
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->external_force(Nphase)(i) ==
+                  Approx(0.).epsilon(Tolerance));
+
+        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
+                true);
+
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+
+        // Check for incorrect direction / phase
+        const unsigned wrong_dir = 4;
+        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
+                false);
+
+        // Check again to ensure value hasn't been updated
+        for (unsigned i = 0; i < Dim; ++i) {
+          if (i == Direction)
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(traction).epsilon(Tolerance));
+          else
+            REQUIRE(node->external_force(Nphase)(i) ==
+                    Approx(0.).epsilon(Tolerance));
+        }
+      }
     }
 
     SECTION("Check internal force") {
