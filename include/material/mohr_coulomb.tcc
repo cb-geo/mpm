@@ -10,20 +10,20 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     poisson_ratio_ =
       material_properties["poisson_ratio"].template get<double>();
     friction_angle_ =
-      material_properties["friction_angle"].template get<double>();
+      material_properties["friction"].template get<double>();
     dilation_angle_ =
-      material_properties["dilation_angle"].template get<double>();
+      material_properties["dilation"].template get<double>();
     cohesion_ = material_properties["cohesion"].template get<double>();
     residual_friction_angle_ =
-      material_properties["residual_friction_angle"].template get<double>();
+      material_properties["residual_friction"].template get<double>();
     residual_dilation_angle_ =
-      material_properties["residual_dilation_angle"].template get<double>();
+      material_properties["residual_dilation"].template get<double>();
     residual_cohesion_ =
       material_properties["residual_cohesion"].template get<double>();
     peak_EPDS_ =
-      material_properties["peak_EPDS"].template get<double>();
+      material_properties["peak_epds"].template get<double>();
     crit_EPDS_ =
-      material_properties["crit_EPDS"].template get<double>();
+      material_properties["critical_epds"].template get<double>();
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
     porosity_ = material_properties["porosity"].template get<double>();
