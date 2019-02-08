@@ -33,6 +33,21 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     console_->error("Material parameter not set: {}\n", except.what());
   }
 }
+
+//! Initialise state variables
+//! equivalent plastic deviatoric strain (epds)
+template <unsigned Tdim>
+bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
+    std::map<std::string, double>* state_vars) {
+  bool status = false;
+  status = state_vars->insert(std::make_pair("epds", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds"] = 0.;
+    status = true;
+  }
+  return status;
+}
+
 //! Return elastic tensor
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
@@ -308,7 +323,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_df_dp(
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr) {
+    const ParticleBase<Tdim>* ptr, std::map<std::string, double>* state_vars) {
   // Friction and dilation in radians
   const double phi_max = friction_angle_ * PI / 180.;
   const double psi_max = dilation_angle_ * PI / 180.;

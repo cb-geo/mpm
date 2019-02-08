@@ -227,6 +227,13 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
 
+  //! Return a state variable
+  //! \param[in] var State variable
+  //! \retval Quantity of the state history variable
+  double state_variable(const std::string& var) const override {
+    return state_variables_.at(var);
+  }
+
   //! call the PDS_
   Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain() const override {
     return PDS_;
@@ -256,6 +263,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! State variables
+  using ParticleBase<Tdim>::state_variables_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
@@ -276,6 +285,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
+  //! Plastic deviatoric strain_
+  Eigen::Matrix<double, 6, 1> PDS_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Set traction
@@ -288,8 +299,6 @@ class Particle : public ParticleBase<Tdim> {
   std::vector<Eigen::MatrixXd> bmatrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  //! Plastic deviatoric strain_
-  Eigen::Matrix<double, 6, 1> PDS_;
 };  // Particle class
 }  // namespace mpm
 
