@@ -181,8 +181,8 @@ class ParticleBase {
 
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
-  
-  //!call the PDS
+
+  //! call the PDS
   virtual Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain() const = 0;
 
   //! update the PDS
