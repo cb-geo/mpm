@@ -34,6 +34,10 @@ class MohrCoulomb : public Material<Tdim> {
   //! Delete assignement operator
   MohrCoulomb& operator=(const MohrCoulomb&) = delete;
 
+  //! Initialise history variables
+  //! \param[in] state_vars State variables with history
+  bool initialise_state_variables(std::map<std::string, double>* state_vars);
+
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
@@ -45,9 +49,11 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
+  //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr) override;
+                          const ParticleBase<Tdim>* ptr,
+                          std::map<std::string, double>* state_vars) override;
 
  protected:
   //! material id
@@ -60,14 +66,17 @@ class MohrCoulomb : public Material<Tdim> {
  private:
   //! Compute elastic tensor
   bool compute_elastic_tensor();
+
   //! Compute j2, j3, rho, theta
   bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
                          double& _rho, double& _theta);
+
   //! Check the yield type(tension/shear) and return the value of two yield
   //! functions
   int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function,
                   const double _epsilon, const double _rho,
                   const double _theta);
+
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
                      const double _rho, const double _theta,
@@ -75,7 +84,6 @@ class MohrCoulomb : public Material<Tdim> {
                      Vector6d& _dP_dSigma, const double _epds,
                      double& _softening, const ParticleBase<Tdim>* ptr);
 
- private:
   //! Elastic stiffness matrix
   Matrix6x6 de_;
   //! Density

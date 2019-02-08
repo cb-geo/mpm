@@ -44,7 +44,7 @@ class MPMExplicit : public MPM {
   bool apply_nodal_tractions() override;
 
   //! Solve
-  bool solve() override = 0;
+  bool solve() override;
 
   //! Checkpoint resume
   bool checkpoint_resume() override;
@@ -89,6 +89,10 @@ class MPMExplicit : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
+
+ private:
+  //! Boolean to switch between USL and USF
+  bool usl_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm
