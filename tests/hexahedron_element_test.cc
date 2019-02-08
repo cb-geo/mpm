@@ -663,10 +663,10 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // auxiliary matrices for checking its multiplication by scalar
-      auto ni_nj_matrix_unit = 1 * ni_nj_matrix;
-      auto ni_nj_matrix_zero = 0 * ni_nj_matrix;
-      auto ni_nj_matrix_negative = -2 * ni_nj_matrix;
-      double scalar = 100;
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
       auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -674,14 +674,14 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
           // check multiplication by unity;
           REQUIRE(ni_nj_matrix_unit(i, j) ==
-                  Approx(1 * mass(i, j)).epsilon(Tolerance));
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
           // check multiplication by zero;
           REQUIRE(ni_nj_matrix_zero(i, j) ==
-                  Approx(0 * mass(i, j)).epsilon(Tolerance));
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
           // check multiplication by negative number;
           REQUIRE(ni_nj_matrix_negative(i, j) ==
-                  Approx(-2 * mass(i, j)).epsilon(Tolerance));
-          // check multiplication by scalar (100);
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
           REQUIRE(ni_nj_matrix_scalar(i, j) ==
                   Approx(scalar * mass(i, j)).epsilon(Tolerance));
         }
@@ -2059,10 +2059,10 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // auxiliary matrices for checking its multiplication by scalar
-      auto ni_nj_matrix_unit = 1 * ni_nj_matrix;
-      auto ni_nj_matrix_zero = 0 * ni_nj_matrix;
-      auto ni_nj_matrix_negative = -2 * ni_nj_matrix;
-      double scalar = 100;
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
       auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
 
       for (unsigned i = 0; i < nfunctions; ++i) {
@@ -2070,14 +2070,14 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
           // check multiplication by unity;
           REQUIRE(ni_nj_matrix_unit(i, j) ==
-                  Approx(1 * mass(i, j)).epsilon(Tolerance));
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
           // check multiplication by zero;
           REQUIRE(ni_nj_matrix_zero(i, j) ==
-                  Approx(0 * mass(i, j)).epsilon(Tolerance));
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
           // check multiplication by negative number;
           REQUIRE(ni_nj_matrix_negative(i, j) ==
-                  Approx(-2 * mass(i, j)).epsilon(Tolerance));
-          // check multiplication by scalar (100);
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
           REQUIRE(ni_nj_matrix_scalar(i, j) ==
                   Approx(scalar * mass(i, j)).epsilon(Tolerance));
         }
