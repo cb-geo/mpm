@@ -62,16 +62,18 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_elastic_tensor();
   //! Compute j2, j3, rho, theta
   bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
-			 double& _rho, double& _theta);
-  //! Check the yield type(tension/shear) and return the value of two yield functions
+                         double& _rho, double& _theta);
+  //! Check the yield type(tension/shear) and return the value of two yield
+  //! functions
   int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function,
-       const double _epsilon, const double _rho, const double _theta);
+                  const double _epsilon, const double _rho,
+                  const double _theta);
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
-         const double _rho, const double _theta, const Vector6d stress,
-         Vector6d& _dF_dSigma, Vector6d& _dP_dSigma,
-         const double _epds, double& _softening,
-         const ParticleBase<Tdim>* ptr);
+                     const double _rho, const double _theta,
+                     const Vector6d stress, Vector6d& _dF_dSigma,
+                     Vector6d& _dP_dSigma, const double _epds,
+                     double& _softening, const ParticleBase<Tdim>* ptr);
 
  private:
   //! Elastic stiffness matrix
@@ -114,7 +116,8 @@ class MohrCoulomb : public Material<Tdim> {
   double psi_{std::numeric_limits<double>::max()};
   //! Cohesion
   double c_{std::numeric_limits<double>::max()};
-private:
+
+ private:
   //! tracke the equivalent_plastic_deviatoric_strain
   double epds_last = 0.;
   //! value of PI

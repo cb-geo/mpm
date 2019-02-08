@@ -226,12 +226,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
-  
+
   //! call the PDS_
-  Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain() const override { return PDS_; }
+  Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain() const override {
+    return PDS_;
+  }
 
   //! update the PDS
-  void update_PDS(Eigen::Matrix<double, 6, 1> _PDS) override {PDS_ = _PDS;}
+  void update_PDS(Eigen::Matrix<double, 6, 1> _PDS) override { PDS_ = _PDS; }
 
  private:
   //! Update pressure of the particles
