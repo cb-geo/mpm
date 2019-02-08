@@ -768,7 +768,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank, (this->usl_ == true?"USL":"USF"), 
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
