@@ -109,9 +109,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Residual cohesion
   double residual_cohesion_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
-  double peak_EPDS_{std::numeric_limits<double>::max()};
+  double peak_epds_{std::numeric_limits<double>::max()};
   //! Critical plastic deviatoric strain
-  double crit_EPDS_{std::numeric_limits<double>::max()};
+  double crit_epds_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
   //! Porosity

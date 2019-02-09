@@ -18,8 +18,8 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["residual_dilation"].template get<double>();
     residual_cohesion_ =
         material_properties["residual_cohesion"].template get<double>();
-    peak_EPDS_ = material_properties["peak_epds"].template get<double>();
-    crit_EPDS_ = material_properties["critical_epds"].template get<double>();
+    peak_epds_ = material_properties["peak_epds"].template get<double>();
+    crit_epds_ = material_properties["critical_epds"].template get<double>();
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
     porosity_ = material_properties["porosity"].template get<double>();
@@ -326,10 +326,10 @@ bool mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // compute softening part
   double dPhi_dPstrain = 0.;
   double dC_dPstrain = 0.;
-  if (_yield_type == 2 && _epds > peak_EPDS_ && _epds < crit_EPDS_) {
+  if (_yield_type == 2 && _epds > peak_epds_ && _epds < crit_epds_) {
     dPhi_dPstrain = (residual_friction_angle_ - friction_angle_) * PI / 180. /
-                    (crit_EPDS_ - peak_EPDS_);
-    dC_dPstrain = (residual_cohesion_ - cohesion_) / (crit_EPDS_ - peak_EPDS_);
+                    (crit_epds_ - peak_epds_);
+    dC_dPstrain = (residual_cohesion_ - cohesion_) / (crit_epds_ - peak_epds_);
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double dF_dPhi =
@@ -380,14 +380,14 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   psi_ = psi_max;
   c_ = c_max;
   int yield_type = this->check_yield(yield_function, epsilon, rho, theta);
-  if (yield_type != 1 && (epds - peak_EPDS_) > 0. && (crit_EPDS_ - epds) > 0.) {
-    phi_ = phi_min + ((phi_max - phi_min) * (epds - crit_EPDS_) /
-                      (peak_EPDS_ - crit_EPDS_));
-    psi_ = psi_min + ((psi_max - psi_min) * (epds - crit_EPDS_) /
-                      (peak_EPDS_ - crit_EPDS_));
+  if (yield_type != 1 && (epds - peak_epds_) > 0. && (crit_epds_ - epds) > 0.) {
+    phi_ = phi_min + ((phi_max - phi_min) * (epds - crit_epds_) /
+                      (peak_epds_ - crit_epds_));
+    psi_ = psi_min + ((psi_max - psi_min) * (epds - crit_epds_) /
+                      (peak_epds_ - crit_epds_));
     c_ = c_min +
-         ((c_max - c_min) * (epds - crit_EPDS_) / (peak_EPDS_ - crit_EPDS_));
-  } else if (yield_type != 1 && (epds - crit_EPDS_) >= 0.) {
+         ((c_max - c_min) * (epds - crit_epds_) / (peak_epds_ - crit_epds_));
+  } else if (yield_type != 1 && (epds - crit_epds_) >= 0.) {
     phi_ = phi_min;
     psi_ = psi_min;
     c_ = c_min;
@@ -407,7 +407,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_df_dp(yield_type, j2, j3, rho, theta, stress, dF_dSigma,
                       dP_dSigma, epds, softening, ptr);
   // Check the epds
-  if (epds_last < peak_EPDS_ && epds > peak_EPDS_) softening = 0;
+  if (epds_last < peak_epds_ && epds > peak_epds_) softening = 0;
   lambda = dF_dSigma.dot(this->de_ * dstrain) /
            ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening);
   //}
@@ -422,7 +422,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
                       dF_dSigma_trial, dP_dSigma_trial, epds, softening_trial,
                       ptr);
   // Check the epds
-  if (epds_last < peak_EPDS_ && epds > peak_EPDS_) softening_trial = 0;
+  if (epds_last < peak_epds_ && epds > peak_epds_) softening_trial = 0;
   if (yield_type_trial == 1)
     lambda_trial =
         yield_function_trial(0) /

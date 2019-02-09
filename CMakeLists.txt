@@ -16,7 +16,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # GNU specific settings
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 # Intel specific settings
