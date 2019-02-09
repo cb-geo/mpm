@@ -10,8 +10,8 @@
 namespace mpm {
 
 //! MohrCoulomb class
-//! \brief Linear Elastic material model
-//! \details MohrCoulomb class stresses and strains
+//! \brief Mohr Coulomb material model
+//! \details Mohr Coulomb material model with softening
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MohrCoulomb : public Material<Tdim> {

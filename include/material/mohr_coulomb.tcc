@@ -268,38 +268,48 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Compute dTheta / dSigma (the same in two yield types)
   double r_val = 0.;
   if (fabs(j2) > 1.E-22) r_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
-  double devider = 1 - (r_val * r_val);
-  if (devider <= 0.) devider = 0.001;
-  double dTheta_dR = -1 / (3. * sqrt(devider));
-  double dR_dJ2 = (-9 * sqrt(3.) / 4.) * j3;
-  if (fabs(j2) > 1.E-22) dR_dJ2 = dR_dJ2 / pow(j2, 2.5);
-  double dR_dJ3 = 1.5 * sqrt(3.);
-  if (fabs(j2) > 1.E-22) dR_dJ3 = dR_dJ3 / pow(j2, 1.5);
-  Vector6d dJ2_dSigma = dev_stress;
-  dJ2_dSigma(3) = dev_stress(3);
-  Vector6d dJ3_dSigma = Vector6d::Zero();
-  Eigen::Matrix<double, 3, 1> dev1, dev2, dev3;
+
+  double divider = 1 - (r_val * r_val);
+  if (divider <= 0.) divider = 1.0E-3;
+  double dtheta_dr = -1 / (3. * sqrt(divider));
+
+  double dr_dj2 = (-9 * sqrt(3.) / 4.) * j3;
+  if (fabs(j2) > 1.0E-22) dr_dj2 = dr_dj2 / pow(j2, 2.5);
+
+  double dr_dj3 = 1.5 * sqrt(3.);
+  if (fabs(j2) > 1.0E-22) dr_dj3 = dr_dj3 / pow(j2, 1.5);
+
+  Vector6d dj2_dsigma = dev_stress;
+  dj2_dsigma(3) = dev_stress(3);
+
+  Eigen::Matrix<double, 3, 1> dev1;
   dev1(0) = dev_stress(0);
   dev1(1) = dev_stress(3);
   dev1(2) = dev_stress(5);
+
+  Eigen::Matrix<double, 3, 1> dev2;
   dev2(0) = dev_stress(3);
   dev2(1) = dev_stress(1);
   dev2(2) = dev_stress(4);
+
+  Eigen::Matrix<double, 3, 1> dev3;
   dev3(0) = dev_stress(5);
   dev3(1) = dev_stress(4);
   dev3(2) = dev_stress(2);
-  dJ3_dSigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
-  dJ3_dSigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
-  dJ3_dSigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
-  dJ3_dSigma(3) = dev1.dot(dev2);
+
+  Vector6d dj3_dsigma = Vector6d::Zero();
+  dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
+  dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
+  dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
+  dj3_dsigma(3) = dev1.dot(dev2);
   if (Tdim == 3) {
-    dJ3_dSigma(4) = dev2.dot(dev3);
-    dJ3_dSigma(5) = dev1.dot(dev3);
+    dj3_dsigma(4) = dev2.dot(dev3);
+    dj3_dsigma(5) = dev1.dot(dev3);
   }
 
-  // Compute dTheta / dSigma (the same in two yield types)
+  // compute dtheta / dsigma (the same in two yield types)
   Vector6d dtheta_dsigma = Vector6d::Zero();
-  dtheta_dsigma = dTheta_dR * ((dR_dJ2 * dJ2_dSigma) + (dR_dJ3 * dJ3_dSigma));
+  dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
   if (Tdim == 2) {
     dtheta_dsigma(4) = 0.;
     dtheta_dsigma(5) = 0.;
