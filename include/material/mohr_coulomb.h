@@ -71,17 +71,20 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_rho_theta(const Vector6d& stress, double* j2, double* j3,
                          double* rho, double* theta);
 
-  //! Check the yield type(tension/shear) and return the value of two yield
-  //! functions
-  int check_yield(Eigen::Matrix<double, 2, 1>& yield_function,
-                  const double epsilon, const double rho, const double theta);
+  //! Compute yield
+  Eigen::Matrix<double, 2, 1> compute_yield(double epsilon, double rho,
+                                            double theta);
+
+  //! Check the yield type (tension/shear)
+  int check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
+                  double epsilon, double rho, double theta);
 
   //! Compute dF/dSigma and dP/dSigma
-  bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
-                     const double _rho, const double _theta,
-                     const Vector6d stress, Vector6d& _dF_dSigma,
-                     Vector6d& _dP_dSigma, const double _epds,
-                     double& _softening, const ParticleBase<Tdim>* ptr);
+  bool compute_df_dp(const int yield_type, const double j2, const double j3,
+                     const double rho, const double theta,
+                     const Vector6d stress, Vector6d& df_dsigma,
+                     Vector6d& dp_dsigma, const double epds, double& softening,
+                     const ParticleBase<Tdim>* ptr);
 
   //! Elastic stiffness matrix
   Matrix6x6 de_;
