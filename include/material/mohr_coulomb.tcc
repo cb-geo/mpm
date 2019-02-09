@@ -415,18 +415,23 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   // Current MC parameters using a linear softening rule
   // plastic deviatoric strain
-  Eigen::Matrix<double, 6, 1> PDS;
-  PDS(0) = (*state_vars).at("epds0");
-  PDS(1) = (*state_vars).at("epds1");
-  PDS(2) = (*state_vars).at("epds2");
-  PDS(3) = (*state_vars).at("epds3");
-  PDS(4) = (*state_vars).at("epds4");
-  PDS(5) = (*state_vars).at("epds5");
+  Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain;
+  plastic_deviatoric_strain(0) = (*state_vars).at("epds0");
+  plastic_deviatoric_strain(1) = (*state_vars).at("epds1");
+  plastic_deviatoric_strain(2) = (*state_vars).at("epds2");
+  plastic_deviatoric_strain(3) = (*state_vars).at("epds3");
+  plastic_deviatoric_strain(4) = (*state_vars).at("epds4");
+  plastic_deviatoric_strain(5) = (*state_vars).at("epds5");
 
   const double epds =
       (2. / 3.) *
-      sqrt(3. / 2. * (PDS(0) * PDS(0) + PDS(1) * PDS(1) + PDS(2) * PDS(2)) +
-           3. * (PDS(3) * PDS(3) + PDS(4) * PDS(4) + PDS(5) * PDS(5)));
+      sqrt(3. / 2. *
+               (plastic_deviatoric_strain(0) * plastic_deviatoric_strain(0) +
+                plastic_deviatoric_strain(1) * plastic_deviatoric_strain(1) +
+                plastic_deviatoric_strain(2) * plastic_deviatoric_strain(2)) +
+           3. * (plastic_deviatoric_strain(3) * plastic_deviatoric_strain(3) +
+                 plastic_deviatoric_strain(4) * plastic_deviatoric_strain(4) +
+                 plastic_deviatoric_strain(5) * plastic_deviatoric_strain(5)));
   Vector6d trial_stress = stress + (this->de_ * dstrain);
 
   double j2 = 0;
@@ -467,7 +472,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_df_dp(yield_type, j2, j3, rho, theta, stress, epds, &df_dsigma,
                       &dp_dsigma, &softening, ptr);
   // Check the epds
-  if (epds_last < peak_epds_ && epds > peak_epds_) softening = 0;
+  if (epds_final < peak_epds_ && epds > peak_epds_) softening = 0;
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
                   ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
 
@@ -492,7 +497,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
                       ptr);
 
   // Check the epds
-  if (epds_last < peak_epds_ && epds > peak_epds_) softening_trial = 0;
+  if (epds_final < peak_epds_ && epds > peak_epds_) softening_trial = 0;
   double lambda_trial = 0.;
 
   if (yield_type_trial == 1)
@@ -528,15 +533,15 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     update_pds = true;
   }
   // update stress (plastic correction)
-  Vector6d stress_update =
+  Vector6d updated_stress =
       trial_stress - (p_multiplier * this->de_ * dp_dsigma_final);
   // compute plastic deviatoric strain
-  Vector6d dstress = stress_update - stress;
+  Vector6d dstress = updated_stress - stress;
   Vector6d dpstrain = dstrain - (this->de_.inverse()) * dstress;
   if (Tdim == 2) dpstrain(4) = dpstrain(5) = 0.;
 
   // Record the epds
-  epds_last = epds;
+  epds_final = epds;
 
   // Update plastic deviatoric strain if it is a load process
   if (update_pds) {
@@ -549,13 +554,13 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     dp_ds(3) = 0.5 * dpstrain(3);
     dp_ds(4) = 0.5 * dpstrain(4);
     dp_ds(5) = 0.5 * dpstrain(5);
-    PDS += dp_ds;
-    (*state_vars).at("epds0") = PDS(0);
-    (*state_vars).at("epds1") = PDS(1);
-    (*state_vars).at("epds2") = PDS(2);
-    (*state_vars).at("epds3") = PDS(3);
-    (*state_vars).at("epds4") = PDS(4);
-    (*state_vars).at("epds5") = PDS(5);
+    plastic_deviatoric_strain += dp_ds;
+    (*state_vars).at("epds0") = plastic_deviatoric_strain(0);
+    (*state_vars).at("epds1") = plastic_deviatoric_strain(1);
+    (*state_vars).at("epds2") = plastic_deviatoric_strain(2);
+    (*state_vars).at("epds3") = plastic_deviatoric_strain(3);
+    (*state_vars).at("epds4") = plastic_deviatoric_strain(4);
+    (*state_vars).at("epds5") = plastic_deviatoric_strain(5);
   }
-  return stress_update;
+  return updated_stress;
 }

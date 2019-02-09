@@ -127,8 +127,8 @@ class MohrCoulomb : public Material<Tdim> {
   double c_{std::numeric_limits<double>::max()};
 
  private:
-  //! tracke the equivalent_plastic_deviatoric_strain
-  double epds_last = 0.;
+  //! track the equivalent_plastic_deviatoric_strain
+  double epds_final = 0.;
   //! value of PI
   const double PI = std::atan(1.0) * 4.;
 
