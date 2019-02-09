@@ -68,14 +68,13 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_elastic_tensor();
 
   //! Compute j2, j3, rho, theta
-  bool compute_rho_theta(const Vector6d stress, double& _j2, double& _j3,
-                         double& _rho, double& _theta);
+  bool compute_rho_theta(const Vector6d& stress, double* j2, double* j3,
+                         double* rho, double* theta);
 
   //! Check the yield type(tension/shear) and return the value of two yield
   //! functions
-  int check_yield(Eigen::Matrix<double, 2, 1>& _yield_function,
-                  const double _epsilon, const double _rho,
-                  const double _theta);
+  int check_yield(Eigen::Matrix<double, 2, 1>& yield_function,
+                  const double epsilon, const double rho, const double theta);
 
   //! Compute dF/dSigma and dP/dSigma
   bool compute_df_dp(const int _yield_type, const double _j2, const double _j3,
