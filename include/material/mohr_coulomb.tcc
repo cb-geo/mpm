@@ -4,29 +4,41 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
                                     const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
-    density_ = material_properties["density"].template get<double>();
+    // Elastic parameters
     youngs_modulus_ =
         material_properties["youngs_modulus"].template get<double>();
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
+
+    // Peak friction, dilation and cohesion
     friction_angle_ = material_properties["friction"].template get<double>();
     dilation_angle_ = material_properties["dilation"].template get<double>();
     cohesion_ = material_properties["cohesion"].template get<double>();
+
+    // Residual friction, dilation and cohesion
     residual_friction_angle_ =
         material_properties["residual_friction"].template get<double>();
     residual_dilation_angle_ =
         material_properties["residual_dilation"].template get<double>();
     residual_cohesion_ =
         material_properties["residual_cohesion"].template get<double>();
+
+    // plastic deviatoric strain
     peak_epds_ = material_properties["peak_epds"].template get<double>();
     crit_epds_ = material_properties["critical_epds"].template get<double>();
+
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
+
+    density_ = material_properties["density"].template get<double>();
     porosity_ = material_properties["porosity"].template get<double>();
+
     properties_ = material_properties;
+
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
     shear_modulus_ = youngs_modulus_ / (2.0 * (1 + poisson_ratio_));
+
     // Set elastic tensor
     this->compute_elastic_tensor();
   } catch (std::exception& except) {
@@ -40,6 +52,8 @@ template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
     std::map<std::string, double>* state_vars) {
   bool status = false;
+
+  // Plastic deviatoric strain components
   status = state_vars->insert(std::make_pair("epds0", 0.)).second;
   if (!status) {
     (*state_vars)["epds0"] = 0.;
@@ -80,8 +94,9 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
   const double G = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
   const double a1 = bulk_modulus_ + (4.0 / 3.0) * G;
   const double a2 = bulk_modulus_ - (2.0 / 3.0) * G;
+
+  // compute elastic stiffness matrix
   // clang-format off
-  // compute elasticityTensor
   de_(0,0)=a1;    de_(0,1)=a2;    de_(0,2)=a2;    de_(0,3)=0;    de_(0,4)=0;    de_(0,5)=0;
   de_(1,0)=a2;    de_(1,1)=a1;    de_(1,2)=a2;    de_(1,3)=0;    de_(1,4)=0;    de_(1,5)=0;
   de_(2,0)=a2;    de_(2,1)=a2;    de_(2,2)=a1;    de_(2,3)=0;    de_(2,4)=0;    de_(2,5)=0;
@@ -89,13 +104,14 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
   de_(4,0)= 0;    de_(4,1)= 0;    de_(4,2)= 0;    de_(4,3)=0;    de_(4,4)=G;    de_(4,5)=0;
   de_(5,0)= 0;    de_(5,1)= 0;    de_(5,2)= 0;    de_(5,3)=0;    de_(5,4)=0;    de_(5,5)=G;
   // clang-format on
+  
   return true;
 }
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
-bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d stress,
-                                               double& j2, double& j3,
-                                               double& rho, double& theta) {
+bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d& stress,
+                                               double* j2, double* j3,
+                                               double* rho, double* theta) {
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
   Vector6d dev_stress = Vector6d::Zero();
   dev_stress(0) = stress(0) - mean_p;
@@ -106,29 +122,33 @@ bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d stress,
     dev_stress(4) = stress(4);
     dev_stress(5) = stress(5);
   }
-  // compute j2
-  j2 = (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
-        pow((stress(0) - stress(2)), 2)) /
-           6.0 +
-       pow(stress(3), 2);
-  if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
-  // compute j3
-  j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-       (dev_stress(2) * pow(dev_stress(3), 2));
+  
+  // compute J2
+  (*j2) = (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
+           pow((stress(0) - stress(2)), 2)) /
+              6.0 +
+          pow(stress(3), 2);
+  if (Tdim == 3) (*j2) += pow(stress(4), 2) + pow(stress(5), 2);
+  
+  // compute J3
+  (*j3) = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
+          (dev_stress(2) * pow(dev_stress(3), 2));
   if (Tdim == 3)
-    j3 += ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-           (dev_stress(0) * pow(dev_stress(4), 2) -
-            dev_stress(1) * pow(dev_stress(5), 2)));
+    (*j3) += ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+              (dev_stress(0) * pow(dev_stress(4), 2) -
+               dev_stress(1) * pow(dev_stress(5), 2)));
+  
   // compute theta value
   double theta_val = 0.;
-  if (fabs(j2) > 0.0) theta_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
+  if (fabs(*j2) > 0.0) theta_val = (3. * sqrt(3.) / 2.) * ((*j3) / pow((*j2), 1.5));
   if (theta_val > 0.99) theta_val = 1.0;
   if (theta_val < -0.99) theta_val = -1.0;
-  theta = (1. / 3.) * acos(theta_val);
-  if (theta > PI / 3.) theta = PI / 3.;
-  if (theta < 0.0) theta = 0.;
+  
+  (*theta) = (1. / 3.) * acos(theta_val);
+  if ((*theta) > PI / 3.) (*theta) = PI / 3.;
+  if ((*theta) < 0.0) (*theta) = 0.;
 
-  rho = sqrt(2 * j2);
+  (*rho) = sqrt(2 * (*j2));
   return true;
 }
 
@@ -369,9 +389,14 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
       (2. / 3.) *
       sqrt(3. / 2. * (PDS(0) * PDS(0) + PDS(1) * PDS(1) + PDS(2) * PDS(2)) +
            3. * (PDS(3) * PDS(3) + PDS(4) * PDS(4) + PDS(5) * PDS(5)));
-  double j2, j3, rho, theta;
   Vector6d trial_stress = stress + (this->de_ * dstrain);
-  this->compute_rho_theta(stress, j2, j3, rho, theta);
+
+  double j2 = 0;
+  double j3 = 0;
+  double rho = 0;
+  double theta = 0;
+  this->compute_rho_theta(stress, &j2, &j3, &rho, &theta);
+  
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   Eigen::Matrix<double, 2, 1> yield_function, yield_function_trial;
   phi_ = phi_max;
@@ -408,10 +433,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   if (epds_last < peak_epds_ && epds > peak_epds_) softening = 0;
   lambda = dF_dSigma.dot(this->de_ * dstrain) /
            ((dF_dSigma.dot(this->de_ * dP_dSigma)) + softening);
-  //}
+
   // Compute the trial stress
   j2 = j3 = rho = theta = 0.;
-  this->compute_rho_theta(trial_stress, j2, j3, rho, theta);
+  this->compute_rho_theta(trial_stress, &j2, &j3, &rho, &theta);
+  
   epsilon =
       (1. / sqrt(3.)) * (trial_stress(0) + trial_stress(1) + trial_stress(2));
   yield_type_trial =
