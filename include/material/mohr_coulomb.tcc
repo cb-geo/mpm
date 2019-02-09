@@ -40,9 +40,34 @@ template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
     std::map<std::string, double>* state_vars) {
   bool status = false;
-  status = state_vars->insert(std::make_pair("epds", 0.)).second;
+  status = state_vars->insert(std::make_pair("epds0", 0.)).second;
   if (!status) {
-    (*state_vars)["epds"] = 0.;
+    (*state_vars)["epds0"] = 0.;
+    status = true;
+  }
+  status = state_vars->insert(std::make_pair("epds1", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds1"] = 0.;
+    status = true;
+  }
+  status = state_vars->insert(std::make_pair("epds2", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds2"] = 0.;
+    status = true;
+  }
+  status = state_vars->insert(std::make_pair("epds3", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds3"] = 0.;
+    status = true;
+  }
+  status = state_vars->insert(std::make_pair("epds4", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds4"] = 0.;
+    status = true;
+  }
+  status = state_vars->insert(std::make_pair("epds5", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds5"] = 0.;
     status = true;
   }
   return status;
@@ -331,8 +356,17 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   const double phi_min = residual_friction_angle_ * PI / 180.;
   const double psi_min = residual_dilation_angle_ * PI / 180.;
   const double c_min = residual_cohesion_;
+
   // Current MC parameters using a linear softening rule
-  Eigen::Matrix<double, 6, 1> PDS = ptr->plastic_deviatoric_strain();
+  // plastic deviatoric strain
+  Eigen::Matrix<double, 6, 1> PDS;
+  PDS(0) = (*state_vars).at("epds0");
+  PDS(1) = (*state_vars).at("epds1");
+  PDS(2) = (*state_vars).at("epds2");
+  PDS(3) = (*state_vars).at("epds3");
+  PDS(4) = (*state_vars).at("epds4");
+  PDS(5) = (*state_vars).at("epds5");
+
   const double epds =
       (2. / 3.) *
       sqrt(3. / 2. * (PDS(0) * PDS(0) + PDS(1) * PDS(1) + PDS(2) * PDS(2)) +
@@ -442,7 +476,12 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     dPDS(4) = 0.5 * dpstrain(4);
     dPDS(5) = 0.5 * dpstrain(5);
     PDS += dPDS;
-    ptr->update_PDS(PDS);
+    (*state_vars).at("epds0") = PDS(0);
+    (*state_vars).at("epds1") = PDS(1);
+    (*state_vars).at("epds2") = PDS(2);
+    (*state_vars).at("epds3") = PDS(3);
+    (*state_vars).at("epds4") = PDS(4);
+    (*state_vars).at("epds5") = PDS(5);
   }
   return stress_update;
 }

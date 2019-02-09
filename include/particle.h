@@ -234,21 +234,12 @@ class Particle : public ParticleBase<Tdim> {
     return state_variables_.at(var);
   }
 
-  //! call the PDS_
-  Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain() const override {
-    return PDS_;
-  }
-
-  //! update the PDS
-  void update_PDS(Eigen::Matrix<double, 6, 1> _PDS) override { PDS_ = _PDS; }
-
  private:
   //! Update pressure of the particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
   bool update_pressure(unsigned phase, double dvolumetric_strain);
 
- private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -285,8 +276,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
-  //! Plastic deviatoric strain_
-  Eigen::Matrix<double, 6, 1> PDS_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Set traction
