@@ -491,7 +491,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_df_dp(yield_type, j2, j3, rho, theta, stress, epds, &df_dsigma,
                       &dp_dsigma, &softening, ptr);
   // Check the epds
-  if (epds_final < peak_epds_ && epds > peak_epds_) softening = 0;
+  if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_) softening = 0;
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
                   ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
 
@@ -516,7 +516,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
                       ptr);
 
   // Check the epds
-  if (epds_final < peak_epds_ && epds > peak_epds_) softening_trial = 0;
+  if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_)
+    softening_trial = 0;
   double lambda_trial = 0.;
 
   if (yield_type_trial == 1)
@@ -560,7 +561,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   if (Tdim == 2) dpstrain(4) = dpstrain(5) = 0.;
 
   // Record the epds
-  epds_final = epds;
+  (*state_vars)["epds"] = epds;
 
   // Update plastic deviatoric strain if it is a load process
   if (update_pds) {
