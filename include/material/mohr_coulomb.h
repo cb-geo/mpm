@@ -73,17 +73,20 @@ class MohrCoulomb : public Material<Tdim> {
 
   //! Compute yield
   Eigen::Matrix<double, 2, 1> compute_yield(double epsilon, double rho,
-                                            double theta);
+                                            double theta, double phi,
+                                            double cohesion);
 
   //! Check the yield type (tension/shear)
   int check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
-                  double epsilon, double rho, double theta);
+                  double epsilon, double rho, double theta, double phi,
+                  double cohesion);
 
   //! Compute dF/dSigma and dP/dSigma
   void compute_df_dp(int yield_type, double j2, double j3, double rho,
-                     double theta, const Vector6d& stress, double epds,
-                     Vector6d* df_dsigma, Vector6d* dp_dsigma,
-                     double* softening, const ParticleBase<Tdim>* ptr);
+                     double theta, double phi, double psi, double cohesion,
+                     const Vector6d& stress, double epds, Vector6d* df_dsigma,
+                     Vector6d* dp_dsigma, double* softening,
+                     const ParticleBase<Tdim>* ptr);
 
   //! Elastic stiffness matrix
   Matrix6x6 de_;
@@ -109,12 +112,6 @@ class MohrCoulomb : public Material<Tdim> {
   double psi_residual_{std::numeric_limits<double>::max()};
   //! Residual cohesion
   double cohesion_residual_{std::numeric_limits<double>::max()};
-  //! Friction angle phi
-  double phi_{std::numeric_limits<double>::max()};
-  //! Dilation angle psi
-  double psi_{std::numeric_limits<double>::max()};
-  //! Cohesion
-  double cohesion_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
   double peak_epds_{std::numeric_limits<double>::max()};
   //! Critical plastic deviatoric strain
