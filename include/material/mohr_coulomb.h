@@ -97,18 +97,24 @@ class MohrCoulomb : public Material<Tdim> {
   double shear_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
+  //! Maximum friction angle phi
+  double phi_max_{std::numeric_limits<double>::max()};
+  //! Maximum dilation angle psi
+  double psi_max_{std::numeric_limits<double>::max()};
+  //! Maximum cohesion
+  double cohesion_max_{std::numeric_limits<double>::max()};
+  //! Residual friction angle phi
+  double phi_residual_{std::numeric_limits<double>::max()};
+  //! Residual dilation angle psi
+  double psi_residual_{std::numeric_limits<double>::max()};
+  //! Residual cohesion
+  double cohesion_residual_{std::numeric_limits<double>::max()};
   //! Friction angle phi
-  double friction_angle_{std::numeric_limits<double>::max()};
+  double phi_{std::numeric_limits<double>::max()};
   //! Dilation angle psi
-  double dilation_angle_{std::numeric_limits<double>::max()};
+  double psi_{std::numeric_limits<double>::max()};
   //! Cohesion
   double cohesion_{std::numeric_limits<double>::max()};
-  //! Residual friction angle phi
-  double residual_friction_angle_{std::numeric_limits<double>::max()};
-  //! Residual dilation angle psi
-  double residual_dilation_angle_{std::numeric_limits<double>::max()};
-  //! Residual cohesion
-  double residual_cohesion_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
   double peak_epds_{std::numeric_limits<double>::max()};
   //! Critical plastic deviatoric strain
@@ -119,12 +125,6 @@ class MohrCoulomb : public Material<Tdim> {
   double porosity_{std::numeric_limits<double>::max()};
   //! Permeability
   double permeability_{std::numeric_limits<double>::max()};
-  //! Friction angle phi
-  double phi_{std::numeric_limits<double>::max()};
-  //! Dilation angle psi
-  double psi_{std::numeric_limits<double>::max()};
-  //! Cohesion
-  double c_{std::numeric_limits<double>::max()};
 
  private:
   //! track the equivalent_plastic_deviatoric_strain

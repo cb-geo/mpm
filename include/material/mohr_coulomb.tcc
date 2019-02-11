@@ -11,16 +11,25 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["poisson_ratio"].template get<double>();
 
     // Peak friction, dilation and cohesion
-    friction_angle_ = material_properties["friction"].template get<double>();
-    dilation_angle_ = material_properties["dilation"].template get<double>();
-    cohesion_ = material_properties["cohesion"].template get<double>();
+    phi_max_ =
+        material_properties["friction"].template get<double>() * PI / 180.;
+    psi_max_ =
+        material_properties["dilation"].template get<double>() * PI / 180.;
+    cohesion_max_ = material_properties["cohesion"].template get<double>();
+
+    // Friction, dilation and cohesion
+    phi_ = phi_max_;
+    psi_ = psi_max_;
+    cohesion_ = cohesion_max_;
 
     // Residual friction, dilation and cohesion
-    residual_friction_angle_ =
-        material_properties["residual_friction"].template get<double>();
-    residual_dilation_angle_ =
-        material_properties["residual_dilation"].template get<double>();
-    residual_cohesion_ =
+    phi_residual_ =
+        material_properties["residual_friction"].template get<double>() * PI /
+        180.;
+    psi_residual_ =
+        material_properties["residual_dilation"].template get<double>() * PI /
+        180.;
+    cohesion_residual_ =
         material_properties["residual_cohesion"].template get<double>();
 
     // plastic deviatoric strain
@@ -53,35 +62,42 @@ bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
     std::map<std::string, double>* state_vars) {
   bool status = false;
 
+  // Equivalent plastic deviatoric strain
+  status = state_vars->insert(std::make_pair("epds", 0.)).second;
+  if (!status) {
+    (*state_vars)["epds"] = 0.;
+    status = true;
+  }
+
   // Plastic deviatoric strain components
-  status = state_vars->insert(std::make_pair("epds0", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds0", 0.)).second;
   if (!status) {
-    (*state_vars)["epds0"] = 0.;
+    (*state_vars)["pds0"] = 0.;
     status = true;
   }
-  status = state_vars->insert(std::make_pair("epds1", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds1", 0.)).second;
   if (!status) {
-    (*state_vars)["epds1"] = 0.;
+    (*state_vars)["pds1"] = 0.;
     status = true;
   }
-  status = state_vars->insert(std::make_pair("epds2", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds2", 0.)).second;
   if (!status) {
-    (*state_vars)["epds2"] = 0.;
+    (*state_vars)["pds2"] = 0.;
     status = true;
   }
-  status = state_vars->insert(std::make_pair("epds3", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds3", 0.)).second;
   if (!status) {
-    (*state_vars)["epds3"] = 0.;
+    (*state_vars)["pds3"] = 0.;
     status = true;
   }
-  status = state_vars->insert(std::make_pair("epds4", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds4", 0.)).second;
   if (!status) {
-    (*state_vars)["epds4"] = 0.;
+    (*state_vars)["pds4"] = 0.;
     status = true;
   }
-  status = state_vars->insert(std::make_pair("epds5", 0.)).second;
+  status = state_vars->insert(std::make_pair("pds5", 0.)).second;
   if (!status) {
-    (*state_vars)["epds5"] = 0.;
+    (*state_vars)["pds5"] = 0.;
     status = true;
   }
   return status;
@@ -167,7 +183,7 @@ Eigen::Matrix<double, 2, 1> mpm::MohrCoulomb<Tdim>::compute_yield(
   yield_function(1) = sqrt(3. / 2.) * rho *
                           ((sin(theta + PI / 3.) / (sqrt(3.) * cos(phi_))) +
                            (cos(theta + PI / 3.) * tan(phi_) / 3.)) +
-                      (epsilon / sqrt(3.)) * tan(phi_) - c_;
+                      (epsilon / sqrt(3.)) * tan(phi_) - cohesion_;
 
   return yield_function;
 }
@@ -187,7 +203,7 @@ int mpm::MohrCoulomb<Tdim>::check_yield(
   // Check for tension or shear
   if (yield_tension > 1.E-22 && yield_shear > 1.E-22) {
     double n_phi = (1. + sin(phi_)) / (1. - sin(phi_));
-    double sigma_p = tension_cutoff_ * n_phi - 2. * c_ * sqrt(n_phi);
+    double sigma_p = tension_cutoff_ * n_phi - 2. * cohesion_ * sqrt(n_phi);
     double alpha_p = sqrt(1. + n_phi * n_phi) + n_phi;
     // Compute the shear-tension edge
     double h = sqrt(2. / 3.) * cos(theta) * rho + epsilon / sqrt(3.) -
@@ -371,9 +387,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     double r_mw_num = (4. * (1. - e_val * e_val) * pow(cos(theta), 2)) +
                       pow((2. * e_val - 1.), 2);
     double r_mw = (r_mw_num / r_mw_den) * r_mc;
-    double xi = 0.1;
-    double omega =
-        pow((xi * c_ * tan(psi_)), 2) + pow((r_mw * sqrt(3. / 2.) * rho), 2);
+    const double xi = 0.1;
+    double omega = pow((xi * cohesion_ * tan(psi_)), 2) +
+                   pow((r_mw * sqrt(3. / 2.) * rho), 2);
     if (omega < 1.e-22) omega = 0.001;
     double l = r_mw_num;
     double m = r_mw_den;
@@ -395,9 +411,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
   if (yield_type == 2 && epds > peak_epds_ && epds < crit_epds_) {
-    dphi_dpstrain = (residual_friction_angle_ - friction_angle_) * PI / 180. /
-                    (crit_epds_ - peak_epds_);
-    dc_dpstrain = (residual_cohesion_ - cohesion_) / (crit_epds_ - peak_epds_);
+    dphi_dpstrain =
+        (phi_residual_ - phi_) * PI / 180. / (crit_epds_ - peak_epds_);
+    dc_dpstrain = (cohesion_residual_ - cohesion_) / (crit_epds_ - peak_epds_);
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double df_dphi = sqrt(3. / 2.) * rho *
@@ -415,23 +431,16 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, std::map<std::string, double>* state_vars) {
-  // Friction and dilation in radians
-  const double phi_max = friction_angle_ * PI / 180.;
-  const double psi_max = dilation_angle_ * PI / 180.;
-  const double c_max = cohesion_;
-  const double phi_min = residual_friction_angle_ * PI / 180.;
-  const double psi_min = residual_dilation_angle_ * PI / 180.;
-  const double c_min = residual_cohesion_;
 
   // Current MC parameters using a linear softening rule
   // plastic deviatoric strain
   Eigen::Matrix<double, 6, 1> plastic_deviatoric_strain;
-  plastic_deviatoric_strain(0) = (*state_vars).at("epds0");
-  plastic_deviatoric_strain(1) = (*state_vars).at("epds1");
-  plastic_deviatoric_strain(2) = (*state_vars).at("epds2");
-  plastic_deviatoric_strain(3) = (*state_vars).at("epds3");
-  plastic_deviatoric_strain(4) = (*state_vars).at("epds4");
-  plastic_deviatoric_strain(5) = (*state_vars).at("epds5");
+  plastic_deviatoric_strain(0) = (*state_vars).at("pds0");
+  plastic_deviatoric_strain(1) = (*state_vars).at("pds1");
+  plastic_deviatoric_strain(2) = (*state_vars).at("pds2");
+  plastic_deviatoric_strain(3) = (*state_vars).at("pds3");
+  plastic_deviatoric_strain(4) = (*state_vars).at("pds4");
+  plastic_deviatoric_strain(5) = (*state_vars).at("pds5");
 
   const double epds =
       (2. / 3.) *
@@ -451,24 +460,25 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_rho_theta(stress, &j2, &j3, &rho, &theta);
 
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
-  phi_ = phi_max;
-  psi_ = psi_max;
-  c_ = c_max;
+  phi_ = phi_max_;
+  psi_ = psi_max_;
+  cohesion_ = cohesion_max_;
 
   Eigen::Matrix<double, 2, 1> yield_function =
       this->compute_yield(epsilon, rho, theta);
   int yield_type = this->check_yield(yield_function, epsilon, rho, theta);
   if (yield_type != 1 && (epds - peak_epds_) > 0. && (crit_epds_ - epds) > 0.) {
-    phi_ = phi_min + ((phi_max - phi_min) * (epds - crit_epds_) /
-                      (peak_epds_ - crit_epds_));
-    psi_ = psi_min + ((psi_max - psi_min) * (epds - crit_epds_) /
-                      (peak_epds_ - crit_epds_));
-    c_ = c_min +
-         ((c_max - c_min) * (epds - crit_epds_) / (peak_epds_ - crit_epds_));
+    phi_ = phi_residual_ + ((phi_max_ - phi_residual_) * (epds - crit_epds_) /
+                            (peak_epds_ - crit_epds_));
+    psi_ = psi_residual_ + ((psi_max_ - psi_residual_) * (epds - crit_epds_) /
+                            (peak_epds_ - crit_epds_));
+    cohesion_ =
+        cohesion_residual_ + ((cohesion_max_ - cohesion_residual_) *
+                              (epds - crit_epds_) / (peak_epds_ - crit_epds_));
   } else if (yield_type != 1 && (epds - crit_epds_) >= 0.) {
-    phi_ = phi_min;
-    psi_ = psi_min;
-    c_ = c_min;
+    phi_ = phi_residual_;
+    psi_ = psi_residual_;
+    cohesion_ = cohesion_residual_;
   }
 
   // Yield function for the current stress state
@@ -565,12 +575,12 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     dp_ds(4) = 0.5 * dpstrain(4);
     dp_ds(5) = 0.5 * dpstrain(5);
     plastic_deviatoric_strain += dp_ds;
-    (*state_vars).at("epds0") = plastic_deviatoric_strain(0);
-    (*state_vars).at("epds1") = plastic_deviatoric_strain(1);
-    (*state_vars).at("epds2") = plastic_deviatoric_strain(2);
-    (*state_vars).at("epds3") = plastic_deviatoric_strain(3);
-    (*state_vars).at("epds4") = plastic_deviatoric_strain(4);
-    (*state_vars).at("epds5") = plastic_deviatoric_strain(5);
+    (*state_vars).at("pds0") = plastic_deviatoric_strain(0);
+    (*state_vars).at("pds1") = plastic_deviatoric_strain(1);
+    (*state_vars).at("pds2") = plastic_deviatoric_strain(2);
+    (*state_vars).at("pds3") = plastic_deviatoric_strain(3);
+    (*state_vars).at("pds4") = plastic_deviatoric_strain(4);
+    (*state_vars).at("pds5") = plastic_deviatoric_strain(5);
   }
   return updated_stress;
 }
