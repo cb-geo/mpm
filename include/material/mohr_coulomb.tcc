@@ -411,8 +411,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
   if (yield_type == 2 && epds > peak_epds_ && epds < crit_epds_) {
-    dphi_dpstrain =
-        (phi_residual_ - phi_) * PI / 180. / (crit_epds_ - peak_epds_);
+    dphi_dpstrain = (phi_residual_ - phi_) / (crit_epds_ - peak_epds_);
     dc_dpstrain = (cohesion_residual_ - cohesion_) / (crit_epds_ - peak_epds_);
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
