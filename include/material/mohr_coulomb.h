@@ -126,9 +126,6 @@ class MohrCoulomb : public Material<Tdim> {
   //! Permeability
   double permeability_{std::numeric_limits<double>::max()};
 
- private:
-  //! track the equivalent_plastic_deviatoric_strain
-  double epds_final{0.};
   //! value of PI
   const double PI = std::atan(1.0) * 4.;
 
