@@ -35,7 +35,6 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["tension_cutoff"].template get<double>();
 
     density_ = material_properties["density"].template get<double>();
-    porosity_ = material_properties["porosity"].template get<double>();
 
     properties_ = material_properties;
 
