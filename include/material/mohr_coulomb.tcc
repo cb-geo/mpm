@@ -542,7 +542,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     if (yield_type == 1 && dyfun_t > 0) {
       p_multiplier = lambda;
       dp_dsigma_final = dp_dsigma;
-      update_pds = true;
     } else if (yield_type == 2 && dyfun_s > 0) {
       p_multiplier = lambda;
       dp_dsigma_final = dp_dsigma;
@@ -551,7 +550,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   } else if (yield_type_trial != 0) {
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
-    update_pds = true;
+    if(yield_type_trial == 2)update_pds = true;
   }
   // update stress (plastic correction)
   Vector6d updated_stress =
