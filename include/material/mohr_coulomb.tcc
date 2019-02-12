@@ -225,8 +225,7 @@ template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     int yield_type, double j2, double j3, double rho, double theta, double phi,
     double psi, double cohesion, const Vector6d& stress, double epds,
-    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening,
-    const ParticleBase<Tdim>* ptr) {
+    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
 
   // mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
@@ -491,7 +490,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   Vector6d df_dsigma = Vector6d::Zero();
   Vector6d dp_dsigma = Vector6d::Zero();
   this->compute_df_dp(yield_type, j2, j3, rho, theta, phi, psi, cohesion,
-                      stress, epds, &df_dsigma, &dp_dsigma, &softening, ptr);
+                      stress, epds, &df_dsigma, &dp_dsigma, &softening);
   // Check the epds
   if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_) softening = 0;
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
@@ -515,7 +514,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   Vector6d dp_dsigma_trial = Vector6d::Zero();
   this->compute_df_dp(yield_type_trial, j2, j3, rho, theta, phi, psi, cohesion,
                       trial_stress, epds, &df_dsigma_trial, &dp_dsigma_trial,
-                      &softening_trial, ptr);
+                      &softening_trial);
 
   // Check the epds
   if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_)

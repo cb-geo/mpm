@@ -88,8 +88,7 @@ class MohrCoulomb : public Material<Tdim> {
   void compute_df_dp(int yield_type, double j2, double j3, double rho,
                      double theta, double phi, double psi, double cohesion,
                      const Vector6d& stress, double epds, Vector6d* df_dsigma,
-                     Vector6d* dp_dsigma, double* softening,
-                     const ParticleBase<Tdim>* ptr);
+                     Vector6d* dp_dsigma, double* softening);
 
   //! Elastic stiffness matrix
   Matrix6x6 de_;
