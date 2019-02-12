@@ -37,7 +37,8 @@ class Newtonian : public Material<Tdim> {
 
   //! Initialise history variables
   //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(std::map<std::string, double>* state_vars) {
+  bool initialise_state_variables(
+      std::map<std::string, double>* state_vars) override {
     return true;
   }
 

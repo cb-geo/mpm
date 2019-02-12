@@ -12,17 +12,17 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 
     // Peak friction, dilation and cohesion
     phi_max_ =
-        material_properties["friction"].template get<double>() * PI / 180.;
+        material_properties["friction"].template get<double>() * M_PI / 180.;
     psi_max_ =
-        material_properties["dilation"].template get<double>() * PI / 180.;
+        material_properties["dilation"].template get<double>() * M_PI / 180.;
     cohesion_max_ = material_properties["cohesion"].template get<double>();
 
     // Residual friction, dilation and cohesion
     phi_residual_ =
-        material_properties["residual_friction"].template get<double>() * PI /
+        material_properties["residual_friction"].template get<double>() * M_PI /
         180.;
     psi_residual_ =
-        material_properties["residual_dilation"].template get<double>() * PI /
+        material_properties["residual_dilation"].template get<double>() * M_PI /
         180.;
     cohesion_residual_ =
         material_properties["residual_cohesion"].template get<double>();
@@ -157,7 +157,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_rho_theta(const Vector6d& stress,
   if (theta_val < -0.99) theta_val = -1.0;
 
   (*theta) = (1. / 3.) * acos(theta_val);
-  if ((*theta) > PI / 3.) (*theta) = PI / 3.;
+  if ((*theta) > M_PI / 3.) (*theta) = M_PI / 3.;
   if ((*theta) < 0.0) (*theta) = 0.;
 
   (*rho) = sqrt(2 * (*j2));
@@ -176,8 +176,8 @@ Eigen::Matrix<double, 2, 1> mpm::MohrCoulomb<Tdim>::compute_yield(
 
   // Shear
   yield_function(1) = sqrt(3. / 2.) * rho *
-                          ((sin(theta + PI / 3.) / (sqrt(3.) * cos(phi))) +
-                           (cos(theta + PI / 3.) * tan(phi) / 3.)) +
+                          ((sin(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) +
+                           (cos(theta + M_PI / 3.) * tan(phi) / 3.)) +
                       (epsilon / sqrt(3.)) * tan(phi) - cohesion;
 
   return yield_function;
@@ -203,7 +203,7 @@ int mpm::MohrCoulomb<Tdim>::check_yield(
     // Compute the shear-tension edge
     double h = sqrt(2. / 3.) * cos(theta) * rho + epsilon / sqrt(3.) -
                tension_cutoff_ +
-               alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * PI / 3.) * rho +
+               alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
                           epsilon / sqrt(3.) - sigma_p);
     // Tension
     if (h > 1.E-22) yield_type = 1;
@@ -254,11 +254,12 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Values in shear yield
   else {
     df_depsilon = tan(phi) / sqrt(3.);
-    df_drho = sqrt(3. / 2.) * ((sin(theta + PI / 3.) / (sqrt(3.) * cos(phi))) +
-                               (cos(theta + PI / 3.) * tan(phi) / 3.));
+    df_drho =
+        sqrt(3. / 2.) * ((sin(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) +
+                         (cos(theta + M_PI / 3.) * tan(phi) / 3.));
     df_dtheta = sqrt(3. / 2.) * rho *
-                ((cos(theta + PI / 3.) / (sqrt(3.) * cos(phi))) -
-                 (sin(theta + PI / 3.) * tan(phi) / 3.));
+                ((cos(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) -
+                 (sin(theta + M_PI / 3.) * tan(phi) / 3.));
   }
 
   // Compute dEpsilon / dSigma (the same in two yield types)
@@ -412,9 +413,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double df_dphi = sqrt(3. / 2.) * rho *
-                       ((sin(phi) * sin(theta + PI / 3.) /
+                       ((sin(phi) * sin(theta + M_PI / 3.) /
                          (sqrt(3.) * cos(phi) * cos(phi))) +
-                        (cos(theta + PI / 3.) / (3. * cos(phi) * cos(phi)))) +
+                        (cos(theta + M_PI / 3.) / (3. * cos(phi) * cos(phi)))) +
                    (epsilon / (sqrt(3.) * cos(phi) * cos(phi)));
   double df_dc = -1.;
   (*softening) =
@@ -466,12 +467,12 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   int yield_type =
       this->check_yield(yield_function, epsilon, rho, theta, phi, cohesion);
-  
+
   if (yield_type != 1 && (epds - peak_epds_) > 0. && (crit_epds_ - epds) > 0.) {
     phi = phi_residual_ + ((phi_max_ - phi_residual_) * (epds - crit_epds_) /
-                            (peak_epds_ - crit_epds_));
+                           (peak_epds_ - crit_epds_));
     psi = psi_residual_ + ((psi_max_ - psi_residual_) * (epds - crit_epds_) /
-                            (peak_epds_ - crit_epds_));
+                           (peak_epds_ - crit_epds_));
     cohesion =
         cohesion_residual_ + ((cohesion_max_ - cohesion_residual_) *
                               (epds - crit_epds_) / (peak_epds_ - crit_epds_));
@@ -483,7 +484,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   // Yield function for the current stress state
   yield_function = this->compute_yield(epsilon, rho, theta, phi, cohesion);
-  yield_type = this->check_yield(yield_function, epsilon, rho, theta, phi, cohesion);
+  yield_type =
+      this->check_yield(yield_function, epsilon, rho, theta, phi, cohesion);
   double softening = 0.;
 
   // Compute plastic multiplier from the current stress state
@@ -506,8 +508,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Trial yield function
   Eigen::Matrix<double, 2, 1> yield_function_trial =
       this->compute_yield(epsilon, rho, theta, phi, cohesion);
-  int yield_type_trial =
-      this->check_yield(yield_function_trial, epsilon, rho, theta, phi, cohesion);
+  int yield_type_trial = this->check_yield(yield_function_trial, epsilon, rho,
+                                           theta, phi, cohesion);
 
   double softening_trial = 0.;
   Vector6d df_dsigma_trial = Vector6d::Zero();

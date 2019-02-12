@@ -3,6 +3,8 @@
 
 #include <limits>
 
+#include <cmath>
+
 #include "Eigen/Dense"
 
 #include "material.h"
@@ -36,7 +38,8 @@ class MohrCoulomb : public Material<Tdim> {
 
   //! Initialise history variables
   //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(std::map<std::string, double>* state_vars);
+  bool initialise_state_variables(
+      std::map<std::string, double>* state_vars) override;
 
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
@@ -122,9 +125,6 @@ class MohrCoulomb : public Material<Tdim> {
   double porosity_{std::numeric_limits<double>::max()};
   //! Permeability
   double permeability_{std::numeric_limits<double>::max()};
-
-  //! value of PI
-  static constexpr double PI = std::atan(1.0) * 4.;
 
 };  // MohrCoulomb class
 }  // namespace mpm
