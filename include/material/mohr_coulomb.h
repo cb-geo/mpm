@@ -121,11 +121,6 @@ class MohrCoulomb : public Material<Tdim> {
   double crit_epds_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
-  //! Porosity
-  double porosity_{std::numeric_limits<double>::max()};
-  //! Permeability
-  double permeability_{std::numeric_limits<double>::max()};
-
 };  // MohrCoulomb class
 }  // namespace mpm
 
