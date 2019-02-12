@@ -5,6 +5,7 @@
 
 #include "Eigen/Dense"
 #include "json.hpp"
+#include <tsl/robin_map.h>
 
 #include "factory.h"
 #include "logger.h"
@@ -59,7 +60,7 @@ class Material {
 
   //! Initialise history variables
   virtual bool initialise_state_variables(
-      std::map<std::string, double>* state_vars) = 0;
+      tsl::robin_map<std::string, double>* state_vars) = 0;
 
   //! Compute thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
@@ -75,7 +76,7 @@ class Material {
   virtual Vector6d compute_stress(
       const Vector6d& stress, const Vector6d& dstrain,
       const ParticleBase<Tdim>* ptr,
-      std::map<std::string, double>* state_vars) = 0;
+      tsl::robin_map<std::string, double>* state_vars) = 0;
 
  protected:
   //! material id

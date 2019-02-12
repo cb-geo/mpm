@@ -54,7 +54,7 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 //! equivalent plastic deviatoric strain (epds)
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
-    std::map<std::string, double>* state_vars) {
+    tsl::robin_map<std::string, double>* state_vars) {
   bool status = false;
 
   // Friction (phi)
@@ -131,7 +131,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
-    const Vector6d& stress, std::map<std::string, double>* state_vars) {
+    const Vector6d& stress, tsl::robin_map<std::string, double>* state_vars) {
 
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
 
@@ -184,21 +184,21 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   return true;
 }
 
-//! Compute yield function in tension and shear
+//! Compute yield and return yield state
 template <unsigned Tdim>
-Eigen::Matrix<double, 2, 1> mpm::MohrCoulomb<Tdim>::compute_yield(
-    std::map<std::string, double>* state_vars) {
+typename mpm::MohrCoulomb<Tdim>::FailureState
+    mpm::MohrCoulomb<Tdim>::compute_yield_state(
+        Eigen::Matrix<double, 2, 1>* yield_function,
+        const tsl::robin_map<std::string, double>* state_vars) {
 
   // Yield functions (Tension & shear)
-  Eigen::Matrix<double, 2, 1> yield_function;
-
   // Tension
-  yield_function(0) =
+  (*yield_function)(0) =
       sqrt(2. / 3.) * cos((*state_vars).at("theta")) * (*state_vars).at("rho") +
       (*state_vars).at("epsilon") / sqrt(3.) - tension_cutoff_;
 
   // Shear
-  yield_function(1) =
+  (*yield_function)(1) =
       sqrt(3. / 2.) * (*state_vars).at("rho") *
           ((sin((*state_vars).at("theta") + M_PI / 3.) /
             (sqrt(3.) * cos((*state_vars).at("phi")))) +
@@ -207,19 +207,9 @@ Eigen::Matrix<double, 2, 1> mpm::MohrCoulomb<Tdim>::compute_yield(
       ((*state_vars).at("epsilon") / sqrt(3.)) * tan((*state_vars).at("phi")) -
       (*state_vars).at("cohesion");
 
-  return yield_function;
-}
+  const double yield_tension = (*yield_function)(0);
 
-//! Check the yield state and return the value of yield function
-template <unsigned Tdim>
-typename mpm::MohrCoulomb<Tdim>::FailureState
-    mpm::MohrCoulomb<Tdim>::check_yield(
-        const Eigen::Matrix<double, 2, 1>& yield_function,
-        std::map<std::string, double>* state_vars) {
-
-  const double yield_tension = yield_function(0);
-
-  const double yield_shear = yield_function(1);
+  const double yield_shear = (*yield_function)(1);
 
   // Yield type 0: elastic, 1: tension failure, 2: shear failure
   auto yield_type = FailureState::Elastic;
@@ -264,8 +254,9 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    std::map<std::string, double>* state_vars, const Vector6d& stress,
-    double epds, Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
+    const tsl::robin_map<std::string, double>* state_vars,
+    const Vector6d& stress, Vector6d* df_dsigma, Vector6d* dp_dsigma,
+    double* softening) {
 
   // Stress invariants
   const double j2 = (*state_vars).at("j2");
@@ -276,6 +267,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double phi = (*state_vars).at("phi");
   const double psi = (*state_vars).at("psi");
   const double cohesion = (*state_vars).at("cohesion");
+  const double epds = (*state_vars).at("cohesion");
 
   // mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
@@ -471,14 +463,15 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
       (-1.) * ((df_dphi * dphi_dpstrain) + (df_dc * dc_dpstrain)) * dp_dj;
 
   // Check the epds
-  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_) (*softening) = 0;
+  if (epds < epds_peak_ && epds > epds_peak_) (*softening) = 0;
 }
 
 //! Compute stress
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr, std::map<std::string, double>* state_vars) {
+    const ParticleBase<Tdim>* ptr,
+    tsl::robin_map<std::string, double>* state_vars) {
 
   // Current MC parameters using a linear softening rule
   // plastic deviatoric strain
@@ -502,9 +495,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   this->compute_stress_invariants(stress, state_vars);
 
-  Eigen::Matrix<double, 2, 1> yield_function = this->compute_yield(state_vars);
-
-  auto yield_type = this->check_yield(yield_function, state_vars);
+  Eigen::Matrix<double, 2, 1> yield_function;
+  auto yield_type = this->compute_yield_state(&yield_function, state_vars);
 
   if (yield_type != FailureState::Tensile && (epds - epds_peak_) > 0. &&
       (epds_residual_ - epds) > 0.) {
@@ -526,15 +518,14 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   }
 
   // Yield function for the current stress state
-  yield_function = this->compute_yield(state_vars);
-  yield_type = this->check_yield(yield_function, state_vars);
+  yield_type = this->compute_yield_state(&yield_function, state_vars);
 
   // Compute plastic multiplier from the current stress state
   Vector6d df_dsigma = Vector6d::Zero();
   Vector6d dp_dsigma = Vector6d::Zero();
   double softening = 0.;
-  this->compute_df_dp(yield_type, state_vars, stress, epds, &df_dsigma,
-                      &dp_dsigma, &softening);
+  this->compute_df_dp(yield_type, state_vars, stress, &df_dsigma, &dp_dsigma,
+                      &softening);
 
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
                   ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
@@ -544,14 +535,14 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_stress_invariants(trial_stress, state_vars);
 
   // Trial yield function
-  Eigen::Matrix<double, 2, 1> yield_function_trial =
-      this->compute_yield(state_vars);
-  auto yield_type_trial = this->check_yield(yield_function_trial, state_vars);
+  Eigen::Matrix<double, 2, 1> yield_function_trial;
+  auto yield_type_trial =
+      this->compute_yield_state(&yield_function_trial, state_vars);
 
   double softening_trial = 0.;
   Vector6d df_dsigma_trial = Vector6d::Zero();
   Vector6d dp_dsigma_trial = Vector6d::Zero();
-  this->compute_df_dp(yield_type_trial, state_vars, trial_stress, epds,
+  this->compute_df_dp(yield_type_trial, state_vars, trial_stress,
                       &df_dsigma_trial, &dp_dsigma_trial, &softening_trial);
 
   // Lambda trial

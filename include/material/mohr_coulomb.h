@@ -39,7 +39,7 @@ class MohrCoulomb : public Material<Tdim> {
   //! Initialise history variables
   //! \param[in] state_vars State variables with history
   bool initialise_state_variables(
-      std::map<std::string, double>* state_vars) override;
+      tsl::robin_map<std::string, double>* state_vars) override;
 
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
@@ -54,9 +54,10 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] particle Constant point to particle base
   //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr,
-                          std::map<std::string, double>* state_vars) override;
+  Vector6d compute_stress(
+      const Vector6d& stress, const Vector6d& dstrain,
+      const ParticleBase<Tdim>* ptr,
+      tsl::robin_map<std::string, double>* state_vars) override;
 
   //! Failure state
   enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
@@ -74,21 +75,18 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_elastic_tensor();
 
   //! Compute stress invariants (j2, j3, rho, theta, and epsilon)
-  bool compute_stress_invariants(const Vector6d& stress,
-                                 std::map<std::string, double>* state_vars);
-
-  //! Compute yield
-  Eigen::Matrix<double, 2, 1> compute_yield(
-      std::map<std::string, double>* state_vars);
+  bool compute_stress_invariants(
+      const Vector6d& stress, tsl::robin_map<std::string, double>* state_vars);
 
   //! Check the yield type (tension/shear)
-  FailureState check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
-                           std::map<std::string, double>* state_vars);
+  FailureState compute_yield_state(
+      Eigen::Matrix<double, 2, 1>* yield_function,
+      const tsl::robin_map<std::string, double>* state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
   void compute_df_dp(FailureState yield_type,
-                     std::map<std::string, double>* state_vars,
-                     const Vector6d& stress, double epds, Vector6d* df_dsigma,
+                     const tsl::robin_map<std::string, double>* state_vars,
+                     const Vector6d& stress, Vector6d* df_dsigma,
                      Vector6d* dp_dsigma, double* softening);
 
   //! Elastic stiffness matrix

@@ -85,7 +85,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      std::map<std::string, double> state_variables;
+      tsl::robin_map<std::string, double> state_variables;
       REQUIRE(material->initialise_state_variables(&state_variables) == true);
     }
   }
@@ -155,7 +155,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
@@ -241,7 +241,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
@@ -337,7 +337,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -425,7 +425,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      std::map<std::string, double> state_variables;
+      tsl::robin_map<std::string, double> state_variables;
       REQUIRE(material->initialise_state_variables(&state_variables) == true);
     }
   }
@@ -513,7 +513,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -616,7 +616,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -727,7 +727,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
-    std::map<std::string, double> state_vars;
+    tsl::robin_map<std::string, double> state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
