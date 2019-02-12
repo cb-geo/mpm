@@ -37,7 +37,7 @@ class LinearElastic : public Material<Tdim> {
   //! Initialise history variables
   //! \param[in] state_vars State variables with history
   bool initialise_state_variables(
-      std::map<std::string, double>* state_vars) override {
+      tsl::robin_map<std::string, double>* state_vars) override {
     return true;
   }
 
@@ -52,9 +52,10 @@ class LinearElastic : public Material<Tdim> {
   //! \param[in] particle Constant point to particle base
   //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr,
-                          std::map<std::string, double>* state_vars) override;
+  Vector6d compute_stress(
+      const Vector6d& stress, const Vector6d& dstrain,
+      const ParticleBase<Tdim>* ptr,
+      tsl::robin_map<std::string, double>* state_vars) override;
 
  protected:
   //! material id
