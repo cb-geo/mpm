@@ -133,7 +133,8 @@ template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
     const Vector6d& stress, std::map<std::string, double>* state_vars) {
 
-  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
+  const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
+
   Vector6d dev_stress = Vector6d::Zero();
   dev_stress(0) = stress(0) - mean_p;
   dev_stress(1) = stress(1) - mean_p;
@@ -270,7 +271,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double j2 = (*state_vars).at("j2");
   const double j3 = (*state_vars).at("j3");
   const double rho = (*state_vars).at("rho");
-  double epsilon = (*state_vars).at("epsilon");
+  const double epsilon = (*state_vars).at("epsilon");
   const double theta = (*state_vars).at("theta");
   const double phi = (*state_vars).at("phi");
   const double psi = (*state_vars).at("psi");
@@ -298,7 +299,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     df_drho = sqrt(2. / 3.) * cos(theta);
     df_dtheta = -sqrt(2. / 3.) * rho * sin(theta);
   }
-  // Values in shear yield
+  // Values in shear yield / elastic
   else {
     df_depsilon = tan(phi) / sqrt(3.);
     df_drho =
@@ -309,13 +310,13 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
                  (sin(theta + M_PI / 3.) * tan(phi) / 3.));
   }
 
-  // Compute dEpsilon / dSigma (the same in two yield types)
+  // Compute dEpsilon / dSigma (the same in both tension / shear yield types)
   Vector6d depsilon_dsigma = Vector6d::Zero();
   depsilon_dsigma(0) = 1. / sqrt(3.);
   depsilon_dsigma(1) = 1. / sqrt(3.);
   depsilon_dsigma(2) = 1. / sqrt(3.);
 
-  // Compute dRho / dSigma (the same in two yield types)
+  // Compute dRho / dSigma (the same in both tension / shear yield types)
   Vector6d drho_dsigma = Vector6d::Zero();
   double multiplier = 1.;
   if (fabs(rho) > 0.) multiplier = 1. / rho;
@@ -325,7 +326,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     drho_dsigma(5) = 0.;
   }
 
-  // Compute dTheta / dSigma (the same in two yield types)
+  // Compute dTheta / dSigma (the same in both tension / shear yield types)
   double r_val = 0.;
   if (fabs(j2) > 1.E-22) r_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
 
@@ -367,7 +368,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     dj3_dsigma(5) = dev1.dot(dev3);
   }
 
-  // compute dtheta / dsigma (the same in two yield types)
+  // compute dtheta / dsigma (the same in both tension / shear yield types)
   Vector6d dtheta_dsigma = Vector6d::Zero();
   dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
   if (Tdim == 2) {
@@ -375,7 +376,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     dtheta_dsigma(5) = 0.;
   }
 
-  // Compute dF/dSigma
+  // Compute dF/dSigma (the same in both tension / shear yield types)
   (*df_dsigma) = (df_depsilon * depsilon_dsigma) + (df_drho * drho_dsigma) +
                  (df_dtheta * dtheta_dsigma);
   if (Tdim == 2) {
@@ -460,7 +461,6 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     dc_dpstrain =
         (cohesion_residual_ - cohesion_peak_) / (epds_residual_ - epds_peak_);
   }
-  epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double df_dphi = sqrt(3. / 2.) * rho *
                        ((sin(phi) * sin(theta + M_PI / 3.) /
                          (sqrt(3.) * cos(phi) * cos(phi))) +
@@ -469,6 +469,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double df_dc = -1.;
   (*softening) =
       (-1.) * ((df_dphi * dphi_dpstrain) + (df_dc * dc_dpstrain)) * dp_dj;
+
+  // Check the epds
+  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_) (*softening) = 0;
 }
 
 //! Compute stress
@@ -496,7 +499,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
            3. * (plastic_deviatoric_strain(3) * plastic_deviatoric_strain(3) +
                  plastic_deviatoric_strain(4) * plastic_deviatoric_strain(4) +
                  plastic_deviatoric_strain(5) * plastic_deviatoric_strain(5)));
-  Vector6d trial_stress = stress + (this->de_ * dstrain);
 
   this->compute_stress_invariants(stress, state_vars);
 
@@ -526,19 +528,19 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Yield function for the current stress state
   yield_function = this->compute_yield(state_vars);
   yield_type = this->check_yield(yield_function, state_vars);
-  double softening = 0.;
 
   // Compute plastic multiplier from the current stress state
   Vector6d df_dsigma = Vector6d::Zero();
   Vector6d dp_dsigma = Vector6d::Zero();
+  double softening = 0.;
   this->compute_df_dp(yield_type, state_vars, stress, epds, &df_dsigma,
                       &dp_dsigma, &softening);
-  // Check the epds
-  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_) softening = 0;
+
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
                   ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
 
   // Compute the trial stress
+  Vector6d trial_stress = stress + (this->de_ * dstrain);
   this->compute_stress_invariants(trial_stress, state_vars);
 
   // Trial yield function
@@ -552,43 +554,42 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_df_dp(yield_type_trial, state_vars, trial_stress, epds,
                       &df_dsigma_trial, &dp_dsigma_trial, &softening_trial);
 
-  // Check the epds
-  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_)
-    softening_trial = 0;
-  double lambda_trial = 0.;
-
+  // Lambda trial
+  double yield = 0.;
   if (yield_type_trial == FailureState::Tensile)
-    lambda_trial =
-        yield_function_trial(0) /
-        ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
-         softening_trial);
-  else
-    lambda_trial =
-        yield_function_trial(1) /
-        ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
-         softening_trial);
+    yield = yield_function_trial(0);
+  if (yield_type_trial == FailureState::Tensile)
+    yield = yield_function_trial(1);
+  double lambda_trial =
+      yield /
+      ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
+       softening_trial);
+
   // Compute the correction stress
   double p_multiplier = 0.;
   Vector6d dp_dsigma_final = Vector6d::Zero();
   bool update_pds = false;
-  // check if it is a load process or an unload process
+
+  // check if it is a loading or an unloading process
   double dyfun_t = yield_function_trial(0) - yield_function(0);
   double dyfun_s = yield_function_trial(1) - yield_function(1);
-  if (yield_type != FailureState::Elastic) {
-    if (yield_type == FailureState::Tensile && dyfun_t > 0) {
-      p_multiplier = lambda;
-      dp_dsigma_final = dp_dsigma;
-      update_pds = true;
-    } else if (yield_type == FailureState::Shear && dyfun_s > 0) {
-      p_multiplier = lambda;
-      dp_dsigma_final = dp_dsigma;
-      update_pds = true;
-    }
-  } else if (yield_type_trial != FailureState::Elastic) {
+
+  // Yield is in tension or shear and dyfun_t and dyfun_s are greater than 0
+  if ((yield_type == FailureState::Tensile && dyfun_t > 0) ||
+      (yield_type == FailureState::Shear && dyfun_s > 0)) {
+    p_multiplier = lambda;
+    dp_dsigma_final = dp_dsigma;
+    update_pds = true;
+  }
+
+  // If yield type is elastic, but yield trial is not elastic
+  if (yield_type == FailureState::Elastic &&
+      yield_type_trial != FailureState::Elastic) {
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
     update_pds = true;
   }
+
   // update stress (plastic correction)
   Vector6d updated_stress =
       trial_stress - (p_multiplier * this->de_ * dp_dsigma_final);
@@ -597,27 +598,23 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   Vector6d dpstrain = dstrain - (this->de_.inverse()) * dstress;
   if (Tdim == 2) dpstrain(4) = dpstrain(5) = 0.;
 
+  // Update plastic deviatoric strain if it is a load process
+  if (update_pds) {
+    double dpvstrain = p_multiplier * (dp_dsigma_final(0) + dp_dsigma_final(1) +
+                                       dp_dsigma_final(2));
+
+    (*state_vars).at("pds0") =
+        plastic_deviatoric_strain(0) + dpstrain(0) - (1. / 3. * dpvstrain);
+    (*state_vars).at("pds1") =
+        plastic_deviatoric_strain(1) + dpstrain(0) - (1. / 3. * dpvstrain);
+    (*state_vars).at("pds2") =
+        plastic_deviatoric_strain(2) + dpstrain(0) - (1. / 3. * dpvstrain);
+    (*state_vars).at("pds3") = plastic_deviatoric_strain(3) + 0.5 * dpstrain(3);
+    (*state_vars).at("pds4") = plastic_deviatoric_strain(4) + 0.5 * dpstrain(4);
+    (*state_vars).at("pds5") = plastic_deviatoric_strain(5) + 0.5 * dpstrain(5);
+  }
   // Record the epds
   (*state_vars)["epds"] = epds;
 
-  // Update plastic deviatoric strain if it is a load process
-  if (update_pds) {
-    Vector6d dp_ds = dpstrain;
-    double dpvstrain = p_multiplier * (dp_dsigma_final(0) + dp_dsigma_final(1) +
-                                       dp_dsigma_final(2));
-    dp_ds(0) -= (1. / 3. * dpvstrain);
-    dp_ds(1) -= (1. / 3. * dpvstrain);
-    dp_ds(2) -= (1. / 3. * dpvstrain);
-    dp_ds(3) = 0.5 * dpstrain(3);
-    dp_ds(4) = 0.5 * dpstrain(4);
-    dp_ds(5) = 0.5 * dpstrain(5);
-    plastic_deviatoric_strain += dp_ds;
-    (*state_vars).at("pds0") = plastic_deviatoric_strain(0);
-    (*state_vars).at("pds1") = plastic_deviatoric_strain(1);
-    (*state_vars).at("pds2") = plastic_deviatoric_strain(2);
-    (*state_vars).at("pds3") = plastic_deviatoric_strain(3);
-    (*state_vars).at("pds4") = plastic_deviatoric_strain(4);
-    (*state_vars).at("pds5") = plastic_deviatoric_strain(5);
-  }
   return updated_stress;
 }
