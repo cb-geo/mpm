@@ -382,7 +382,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     double r_mw_num = (4. * (1. - e_val * e_val) * pow(cos(theta), 2)) +
                       pow((2. * e_val - 1.), 2);
     double r_mw = (r_mw_num / r_mw_den) * r_mc;
-    const double xi = 0.1;
+    double xi = 0.1;
     double omega = pow((xi * cohesion * tan(psi)), 2) +
                    pow((r_mw * sqrt(3. / 2.) * rho), 2);
     if (omega < 1.e-22) omega = 0.001;
@@ -406,8 +406,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
   if (yield_type == 2 && epds > peak_epds_ && epds < crit_epds_) {
-    dphi_dpstrain = (phi_residual_ - phi) / (crit_epds_ - peak_epds_);
-    dc_dpstrain = (cohesion_residual_ - cohesion) / (crit_epds_ - peak_epds_);
+    dphi_dpstrain = (phi_residual_ - phi_max_) / (crit_epds_ - peak_epds_);
+    dc_dpstrain =
+        (cohesion_residual_ - cohesion_max_) / (crit_epds_ - peak_epds_);
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double df_dphi = sqrt(3. / 2.) * rho *
