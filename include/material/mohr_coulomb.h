@@ -73,23 +73,21 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute elastic tensor
   bool compute_elastic_tensor();
 
-  //! Compute j2, j3, rho, theta
-  bool compute_rho_theta(const Vector6d& stress, double* j2, double* j3,
-                         double* rho, double* theta);
+  //! Compute stress invariants (j2, j3, rho, theta, and epsilon)
+  bool compute_stress_invariants(const Vector6d& stress,
+                                 std::map<std::string, double>* state_vars);
 
   //! Compute yield
-  Eigen::Matrix<double, 2, 1> compute_yield(double epsilon, double rho,
-                                            double theta, double phi,
-                                            double cohesion);
+  Eigen::Matrix<double, 2, 1> compute_yield(
+      std::map<std::string, double>* state_vars);
 
   //! Check the yield type (tension/shear)
   FailureState check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
-                           double epsilon, double rho, double theta, double phi,
-                           double cohesion);
+                           std::map<std::string, double>* state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
-  void compute_df_dp(FailureState yield_type, double j2, double j3, double rho,
-                     double theta, double phi, double psi, double cohesion,
+  void compute_df_dp(FailureState yield_type,
+                     std::map<std::string, double>* state_vars,
                      const Vector6d& stress, double epds, Vector6d* df_dsigma,
                      Vector6d* dp_dsigma, double* softening);
 
