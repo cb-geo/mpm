@@ -184,16 +184,18 @@ Eigen::Matrix<double, 2, 1> mpm::MohrCoulomb<Tdim>::compute_yield(
 
 //! Check the yield state and return the value of yield function
 template <unsigned Tdim>
-int mpm::MohrCoulomb<Tdim>::check_yield(
-    const Eigen::Matrix<double, 2, 1>& yield_function, double epsilon,
-    double rho, double theta, double phi, double cohesion) {
+typename mpm::MohrCoulomb<Tdim>::FailureState
+    mpm::MohrCoulomb<Tdim>::check_yield(
+        const Eigen::Matrix<double, 2, 1>& yield_function, double epsilon,
+        double rho, double theta, double phi, double cohesion) {
 
   const double yield_tension = yield_function(0);
 
   const double yield_shear = yield_function(1);
 
   // Yield type 0: elastic, 1: tension failure, 2: shear failure
-  int yield_type = 0;
+  auto yield_type = FailureState::Elastic;
+
   // Check for tension or shear
   if (yield_tension > 1.E-22 && yield_shear > 1.E-22) {
     double n_phi = (1. + sin(phi)) / (1. - sin(phi));
@@ -205,17 +207,19 @@ int mpm::MohrCoulomb<Tdim>::check_yield(
                alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
                           epsilon / sqrt(3.) - sigma_p);
     // Tension
-    if (h > 1.E-22) yield_type = 1;
+    if (h > 1.E-22) yield_type = FailureState::Tensile;
     // Shear
     else
-      yield_type = 2;
+      yield_type = FailureState::Shear;
   }
 
   // Shear
-  if (yield_tension < 1.E-22 && yield_shear > 1.E-22) yield_type = 2;
+  if (yield_tension < 1.E-22 && yield_shear > 1.E-22)
+    yield_type = FailureState::Shear;
 
   // Tension
-  if (yield_tension > 1.E-22 && yield_shear < 1.E-22) yield_type = 1;
+  if (yield_tension > 1.E-22 && yield_shear < 1.E-22)
+    yield_type = FailureState::Tensile;
 
   return yield_type;
 }
@@ -223,9 +227,10 @@ int mpm::MohrCoulomb<Tdim>::check_yield(
 //! Compute dF/dSigma and dP/dSigma
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
-    int yield_type, double j2, double j3, double rho, double theta, double phi,
-    double psi, double cohesion, const Vector6d& stress, double epds,
-    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
+    mpm::MohrCoulomb<Tdim>::FailureState yield_type, double j2, double j3,
+    double rho, double theta, double phi, double psi, double cohesion,
+    const Vector6d& stress, double epds, Vector6d* df_dsigma,
+    Vector6d* dp_dsigma, double* softening) {
 
   // mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
@@ -244,7 +249,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Compute dF / dEpsilon,  dF / dRho, dF / dTheta
   double df_depsilon, df_drho, df_dtheta;
   // Values in tension yield
-  if (yield_type == 1) {
+  if (yield_type == FailureState::Tensile) {
     df_depsilon = 1. / sqrt(3.);
     df_drho = sqrt(2. / 3.) * cos(theta);
     df_dtheta = -sqrt(2. / 3.) * rho * sin(theta);
@@ -336,7 +341,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 
   // compute dp/dsigma, dp/dj
   double dp_dj = 0.;
-  if (yield_type == 1) {
+  if (yield_type == FailureState::Tensile) {
     double et_value = 0.6;
     double xit = 0.1;
     double rt_den =
@@ -405,7 +410,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // compute softening part
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
-  if (yield_type == 2 && epds > peak_epds_ && epds < crit_epds_) {
+  if (yield_type == FailureState::Shear && epds > peak_epds_ &&
+      epds < crit_epds_) {
     dphi_dpstrain = (phi_residual_ - phi_max_) / (crit_epds_ - peak_epds_);
     dc_dpstrain =
         (cohesion_residual_ - cohesion_max_) / (crit_epds_ - peak_epds_);
@@ -464,10 +470,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   Eigen::Matrix<double, 2, 1> yield_function =
       this->compute_yield(epsilon, rho, theta, phi, cohesion);
 
-  int yield_type =
+  auto yield_type =
       this->check_yield(yield_function, epsilon, rho, theta, phi, cohesion);
 
-  if (yield_type != 1 && (epds - peak_epds_) > 0. && (crit_epds_ - epds) > 0.) {
+  if (yield_type != FailureState::Tensile && (epds - peak_epds_) > 0. &&
+      (crit_epds_ - epds) > 0.) {
     phi = phi_residual_ + ((phi_max_ - phi_residual_) * (epds - crit_epds_) /
                            (peak_epds_ - crit_epds_));
     psi = psi_residual_ + ((psi_max_ - psi_residual_) * (epds - crit_epds_) /
@@ -475,7 +482,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     cohesion =
         cohesion_residual_ + ((cohesion_max_ - cohesion_residual_) *
                               (epds - crit_epds_) / (peak_epds_ - crit_epds_));
-  } else if (yield_type != 1 && (epds - crit_epds_) >= 0.) {
+  } else if (yield_type != FailureState::Tensile && (epds - crit_epds_) >= 0.) {
     phi = phi_residual_;
     psi = psi_residual_;
     cohesion = cohesion_residual_;
@@ -507,8 +514,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Trial yield function
   Eigen::Matrix<double, 2, 1> yield_function_trial =
       this->compute_yield(epsilon, rho, theta, phi, cohesion);
-  int yield_type_trial = this->check_yield(yield_function_trial, epsilon, rho,
-                                           theta, phi, cohesion);
+  auto yield_type_trial = this->check_yield(yield_function_trial, epsilon, rho,
+                                            theta, phi, cohesion);
 
   double softening_trial = 0.;
   Vector6d df_dsigma_trial = Vector6d::Zero();
@@ -522,7 +529,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     softening_trial = 0;
   double lambda_trial = 0.;
 
-  if (yield_type_trial == 1)
+  if (yield_type_trial == FailureState::Tensile)
     lambda_trial =
         yield_function_trial(0) /
         ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
@@ -539,17 +546,17 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // check if it is a load process or an unload process
   double dyfun_t = yield_function_trial(0) - yield_function(0);
   double dyfun_s = yield_function_trial(1) - yield_function(1);
-  if (yield_type != 0) {
-    if (yield_type == 1 && dyfun_t > 0) {
+  if (yield_type != FailureState::Elastic) {
+    if (yield_type == FailureState::Tensile && dyfun_t > 0) {
       p_multiplier = lambda;
       dp_dsigma_final = dp_dsigma;
       update_pds = true;
-    } else if (yield_type == 2 && dyfun_s > 0) {
+    } else if (yield_type == FailureState::Shear && dyfun_s > 0) {
       p_multiplier = lambda;
       dp_dsigma_final = dp_dsigma;
       update_pds = true;
     }
-  } else if (yield_type_trial != 0) {
+  } else if (yield_type_trial != FailureState::Elastic) {
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
     update_pds = true;

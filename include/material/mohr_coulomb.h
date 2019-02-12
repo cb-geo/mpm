@@ -58,6 +58,9 @@ class MohrCoulomb : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           std::map<std::string, double>* state_vars) override;
 
+  //! Failure state
+  enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
+
  protected:
   //! material id
   using Material<Tdim>::id_;
@@ -80,12 +83,12 @@ class MohrCoulomb : public Material<Tdim> {
                                             double cohesion);
 
   //! Check the yield type (tension/shear)
-  int check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
-                  double epsilon, double rho, double theta, double phi,
-                  double cohesion);
+  FailureState check_yield(const Eigen::Matrix<double, 2, 1>& yield_function,
+                           double epsilon, double rho, double theta, double phi,
+                           double cohesion);
 
   //! Compute dF/dSigma and dP/dSigma
-  void compute_df_dp(int yield_type, double j2, double j3, double rho,
+  void compute_df_dp(FailureState yield_type, double j2, double j3, double rho,
                      double theta, double phi, double psi, double cohesion,
                      const Vector6d& stress, double epds, Vector6d* df_dsigma,
                      Vector6d* dp_dsigma, double* softening);
