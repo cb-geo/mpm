@@ -11,11 +11,11 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["poisson_ratio"].template get<double>();
 
     // Peak friction, dilation and cohesion
-    phi_max_ =
+    phi_peak_ =
         material_properties["friction"].template get<double>() * M_PI / 180.;
-    psi_max_ =
+    psi_peak_ =
         material_properties["dilation"].template get<double>() * M_PI / 180.;
-    cohesion_max_ = material_properties["cohesion"].template get<double>();
+    cohesion_peak_ = material_properties["cohesion"].template get<double>();
 
     // Residual friction, dilation and cohesion
     phi_residual_ =
@@ -28,8 +28,9 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
         material_properties["residual_cohesion"].template get<double>();
 
     // plastic deviatoric strain
-    peak_epds_ = material_properties["peak_epds"].template get<double>();
-    crit_epds_ = material_properties["critical_epds"].template get<double>();
+    epds_peak_ = material_properties["peak_epds"].template get<double>();
+    epds_residual_ =
+        material_properties["critical_epds"].template get<double>();
 
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
@@ -410,11 +411,11 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // compute softening part
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
-  if (yield_type == FailureState::Shear && epds > peak_epds_ &&
-      epds < crit_epds_) {
-    dphi_dpstrain = (phi_residual_ - phi_max_) / (crit_epds_ - peak_epds_);
+  if (yield_type == FailureState::Shear && epds > epds_peak_ &&
+      epds < epds_residual_) {
+    dphi_dpstrain = (phi_residual_ - phi_peak_) / (epds_residual_ - epds_peak_);
     dc_dpstrain =
-        (cohesion_residual_ - cohesion_max_) / (crit_epds_ - peak_epds_);
+        (cohesion_residual_ - cohesion_peak_) / (epds_residual_ - epds_peak_);
   }
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
   double df_dphi = sqrt(3. / 2.) * rho *
@@ -463,9 +464,9 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   double epsilon = (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
 
   // Friction, dilation and cohesion
-  double phi = phi_max_;
-  double psi = psi_max_;
-  double cohesion = cohesion_max_;
+  double phi = phi_peak_;
+  double psi = psi_peak_;
+  double cohesion = cohesion_peak_;
 
   Eigen::Matrix<double, 2, 1> yield_function =
       this->compute_yield(epsilon, rho, theta, phi, cohesion);
@@ -473,16 +474,19 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   auto yield_type =
       this->check_yield(yield_function, epsilon, rho, theta, phi, cohesion);
 
-  if (yield_type != FailureState::Tensile && (epds - peak_epds_) > 0. &&
-      (crit_epds_ - epds) > 0.) {
-    phi = phi_residual_ + ((phi_max_ - phi_residual_) * (epds - crit_epds_) /
-                           (peak_epds_ - crit_epds_));
-    psi = psi_residual_ + ((psi_max_ - psi_residual_) * (epds - crit_epds_) /
-                           (peak_epds_ - crit_epds_));
-    cohesion =
-        cohesion_residual_ + ((cohesion_max_ - cohesion_residual_) *
-                              (epds - crit_epds_) / (peak_epds_ - crit_epds_));
-  } else if (yield_type != FailureState::Tensile && (epds - crit_epds_) >= 0.) {
+  if (yield_type != FailureState::Tensile && (epds - epds_peak_) > 0. &&
+      (epds_residual_ - epds) > 0.) {
+    phi =
+        phi_residual_ + ((phi_peak_ - phi_residual_) * (epds - epds_residual_) /
+                         (epds_peak_ - epds_residual_));
+    psi =
+        psi_residual_ + ((psi_peak_ - psi_residual_) * (epds - epds_residual_) /
+                         (epds_peak_ - epds_residual_));
+    cohesion = cohesion_residual_ +
+               ((cohesion_peak_ - cohesion_residual_) *
+                (epds - epds_residual_) / (epds_peak_ - epds_residual_));
+  } else if (yield_type != FailureState::Tensile &&
+             (epds - epds_residual_) >= 0.) {
     phi = phi_residual_;
     psi = psi_residual_;
     cohesion = cohesion_residual_;
@@ -500,7 +504,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_df_dp(yield_type, j2, j3, rho, theta, phi, psi, cohesion,
                       stress, epds, &df_dsigma, &dp_dsigma, &softening);
   // Check the epds
-  if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_) softening = 0;
+  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_) softening = 0;
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
                   ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
 
@@ -525,7 +529,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
                       &softening_trial);
 
   // Check the epds
-  if ((*state_vars)["epds"] < peak_epds_ && epds > peak_epds_)
+  if ((*state_vars)["epds"] < epds_peak_ && epds > epds_peak_)
     softening_trial = 0;
   double lambda_trial = 0.;
 

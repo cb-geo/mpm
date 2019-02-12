@@ -106,11 +106,11 @@ class MohrCoulomb : public Material<Tdim> {
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Maximum friction angle phi
-  double phi_max_{std::numeric_limits<double>::max()};
+  double phi_peak_{std::numeric_limits<double>::max()};
   //! Maximum dilation angle psi
-  double psi_max_{std::numeric_limits<double>::max()};
+  double psi_peak_{std::numeric_limits<double>::max()};
   //! Maximum cohesion
-  double cohesion_max_{std::numeric_limits<double>::max()};
+  double cohesion_peak_{std::numeric_limits<double>::max()};
   //! Residual friction angle phi
   double phi_residual_{std::numeric_limits<double>::max()};
   //! Residual dilation angle psi
@@ -118,9 +118,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Residual cohesion
   double cohesion_residual_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
-  double peak_epds_{std::numeric_limits<double>::max()};
-  //! Critical plastic deviatoric strain
-  double crit_epds_{std::numeric_limits<double>::max()};
+  double epds_peak_{std::numeric_limits<double>::max()};
+  //! Residual plastic deviatoric strain
+  double epds_residual_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
 };  // MohrCoulomb class
