@@ -578,7 +578,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
       yield_type_trial != FailureState::Elastic) {
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
-    update_pds = true;
+    // Plastic deviatoric strain is updated only in shear
+    if (yield_type_trial == FailureState::Shear) update_pds = true;
   }
 
   // update stress (plastic correction)
