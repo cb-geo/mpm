@@ -20,4 +20,3 @@ static Register<mpm::MPM, mpm::MPMExplicit<2>, std::unique_ptr<mpm::IO>&&>
 // 3D Explicit MPM USL
 static Register<mpm::MPM, mpm::MPMExplicit<3>, std::unique_ptr<mpm::IO>&&>
     mpm_explicit_usl_3d("MPMExplicitUSL3D");
-
