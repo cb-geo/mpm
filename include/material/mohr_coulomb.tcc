@@ -191,21 +191,23 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
         Eigen::Matrix<double, 2, 1>* yield_function,
         const tsl::robin_map<std::string, double>* state_vars) {
 
+  // Stress invariants
+  const double epsilon = (*state_vars).at("epsilon");
+  const double phi = (*state_vars).at("phi");
+  const double rho = (*state_vars).at("rho");
+  const double theta = (*state_vars).at("theta");
+  const double cohesion = (*state_vars).at("cohesion");
+
   // Yield functions (Tension & shear)
   // Tension
   (*yield_function)(0) =
-      sqrt(2. / 3.) * cos((*state_vars).at("theta")) * (*state_vars).at("rho") +
-      (*state_vars).at("epsilon") / sqrt(3.) - tension_cutoff_;
+      sqrt(2. / 3.) * cos(theta) * rho + epsilon / sqrt(3.) - tension_cutoff_;
 
   // Shear
-  (*yield_function)(1) =
-      sqrt(3. / 2.) * (*state_vars).at("rho") *
-          ((sin((*state_vars).at("theta") + M_PI / 3.) /
-            (sqrt(3.) * cos((*state_vars).at("phi")))) +
-           (cos((*state_vars).at("theta") + M_PI / 3.) *
-            tan((*state_vars).at("phi")) / 3.)) +
-      ((*state_vars).at("epsilon") / sqrt(3.)) * tan((*state_vars).at("phi")) -
-      (*state_vars).at("cohesion");
+  (*yield_function)(1) = sqrt(3. / 2.) * rho *
+                             ((sin(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) +
+                              (cos(theta + M_PI / 3.) * tan(phi) / 3.)) +
+                         (epsilon / sqrt(3.)) * tan(phi) - cohesion;
 
   const double yield_tension = (*yield_function)(0);
 
@@ -216,22 +218,17 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 
   // Check for tension or shear
   if (yield_tension > 1.E-22 && yield_shear > 1.E-22) {
-    double n_phi = (1. + sin((*state_vars).at("phi"))) /
-                   (1. - sin((*state_vars).at("phi")));
+    double n_phi = (1. + sin(phi)) / (1. - sin(phi));
 
-    double sigma_p = tension_cutoff_ * n_phi -
-                     2. * (*state_vars).at("cohesion") * sqrt(n_phi);
+    double sigma_p = tension_cutoff_ * n_phi - 2. * cohesion * sqrt(n_phi);
 
     double alpha_p = sqrt(1. + n_phi * n_phi) + n_phi;
 
     // Compute the shear-tension edge
-    double h = sqrt(2. / 3.) * cos((*state_vars).at("theta")) *
-                   (*state_vars).at("rho") +
-               (*state_vars).at("epsilon") / sqrt(3.) - tension_cutoff_ +
-               alpha_p * (sqrt(2. / 3.) *
-                              cos((*state_vars).at("theta") - 4. * M_PI / 3.) *
-                              (*state_vars).at("rho") +
-                          (*state_vars).at("epsilon") / sqrt(3.) - sigma_p);
+    double h = sqrt(2. / 3.) * cos(theta) * rho + epsilon / sqrt(3.) -
+               tension_cutoff_ +
+               alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
+                          epsilon / sqrt(3.) - sigma_p);
     // Tension
     if (h > 1.E-22) yield_type = FailureState::Tensile;
     // Shear
@@ -267,7 +264,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double phi = (*state_vars).at("phi");
   const double psi = (*state_vars).at("psi");
   const double cohesion = (*state_vars).at("cohesion");
-  const double epds = (*state_vars).at("cohesion");
+  const double epds = (*state_vars).at("epds");
 
   // mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
