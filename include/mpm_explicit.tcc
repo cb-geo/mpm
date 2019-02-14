@@ -542,11 +542,13 @@ void mpm::MPMExplicit<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
-  
-  // Get anlysis type USL/USF
-  bool USL = false;
-  if (io_-> analysis_type() == "MPMExplicitUSL2D"|| io_-> analysis_type()  == "MPMExplicitUSL3D")
-    USL = true; 
+
+  // Get analysis type USL/USF
+  if (io_->analysis_type() == "MPMExplicitUSL2D" ||
+      io_->analysis_type() == "MPMExplicitUSL3D")
+    this->usl_ = true;
+
+  console_->error("Analysis{} {}", io_->analysis_type());
 
   // Initialise MPI rank and size
   int mpi_rank = 0;
@@ -604,11 +606,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Main loop
   for (; step_ < nsteps_; ++step_) {
 
-#ifdef USE_MPI
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
-#else
-    console_->info("Step: {} of {}.\n", step_, nsteps_);
-#endif
 
     // Create a TBB task group
     tbb::task_group task_group;
@@ -662,7 +660,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
                   std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-    if (!USL){
+
+    // Update stress first
+    if (!usl_) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -673,6 +673,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                     std::placeholders::_1, phase));
     }
+
     // Spawn a task for external force
     task_group.run([&] {
       // Iterate over each particle to compute nodal body force
@@ -735,7 +736,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                     std::placeholders::_1, phase, this->dt_));
-    if (USL = true){
+
+    // Update Stress Last
+    if (usl_ == true) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -768,18 +771,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, USF solver duration: {} ms", mpi_rank,
+  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+                 (this->usl_ ? "USL" : "USF"),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
 
   return status;
 }
-
-
-
-
-
-
-
-
