@@ -25,7 +25,7 @@ double mpm::Newtonian<Tdim>::thermodynamic_pressure(
 template <>
 Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
-    tsl::robin_map<std::string, double>* state_vars) {
+    mpm::dense_map* state_vars) {
 
   const unsigned phase = 0;
 
@@ -51,7 +51,7 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
 template <>
 Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
-    tsl::robin_map<std::string, double>* state_vars) {
+    mpm::dense_map* state_vars) {
 
   const unsigned phase = 0;
 

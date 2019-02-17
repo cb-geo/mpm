@@ -53,59 +53,34 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 //! Initialise state variables
 //! equivalent plastic deviatoric strain (epds)
 template <unsigned Tdim>
-bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
-    tsl::robin_map<std::string, double>* state_vars) {
-  bool status = false;
-
-  // Friction (phi)
-  status = state_vars->insert(std::make_pair("phi", this->phi_peak_)).second;
-  if (!status) (*state_vars)["phi"] = this->phi_peak_;
-
-  // Dilation (psi)
-  status = state_vars->insert(std::make_pair("psi", this->psi_peak_)).second;
-  if (!status) (*state_vars)["psi"] = this->psi_peak_;
-
-  // Cohesion
-  status = state_vars->insert(std::make_pair("cohesion", this->cohesion_peak_))
-               .second;
-  if (!status) (*state_vars)["cohesion"] = this->cohesion_peak_;
-
-  // Stress invariants
-  // J2
-  status = state_vars->insert(std::make_pair("j2", 0.)).second;
-  if (!status) (*state_vars)["j2"] = 0.;
-  // J3
-  status = state_vars->insert(std::make_pair("j3", 0.)).second;
-  if (!status) (*state_vars)["j3"] = 0.;
-  // Epsilon
-  status = state_vars->insert(std::make_pair("epsilon", 0.)).second;
-  if (!status) (*state_vars)["epsilon"] = 0.;
-  // Rho
-  status = state_vars->insert(std::make_pair("rho", 0.)).second;
-  if (!status) (*state_vars)["rho"] = 0.;
-  // Theta
-  status = state_vars->insert(std::make_pair("theta", 0.)).second;
-  if (!status) (*state_vars)["theta"] = 0.;
-
-  // Equivalent plastic deviatoric strain
-  status = state_vars->insert(std::make_pair("epds", 0.)).second;
-  if (!status) (*state_vars)["epds"] = 0.;
-
-  // Plastic deviatoric strain components
-  status = state_vars->insert(std::make_pair("pds0", 0.)).second;
-  if (!status) (*state_vars)["pds0"] = 0.;
-  status = state_vars->insert(std::make_pair("pds1", 0.)).second;
-  if (!status) (*state_vars)["pds1"] = 0.;
-  status = state_vars->insert(std::make_pair("pds2", 0.)).second;
-  if (!status) (*state_vars)["pds2"] = 0.;
-  status = state_vars->insert(std::make_pair("pds3", 0.)).second;
-  if (!status) (*state_vars)["pds3"] = 0.;
-  status = state_vars->insert(std::make_pair("pds4", 0.)).second;
-  if (!status) (*state_vars)["pds4"] = 0.;
-  status = state_vars->insert(std::make_pair("pds5", 0.)).second;
-  if (!status) (*state_vars)["pds5"] = 0.;
-
-  return status;
+mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
+  mpm::dense_map state_vars = {// Friction (phi)
+                               {"phi", this->phi_peak_},
+                               // Dilation (psi)
+                               {"psi", this->psi_peak_},
+                               // Cohesion
+                               {"cohesion", this->cohesion_peak_},
+                               // Stress invariants
+                               // J2
+                               {"j2", 0.},
+                               // J3
+                               {"j3", 0.},
+                               // Epsilon
+                               {"epsilon", 0.},
+                               // Rho
+                               {"rho", 0.},
+                               // Theta
+                               {"theta", 0.},
+                               // Equivalent plastic deviatoric strain
+                               {"epds", 0.},
+                               // Plastic deviatoric strain components
+                               {"pds0", 0.},
+                               {"pds1", 0.},
+                               {"pds2", 0.},
+                               {"pds3", 0.},
+                               {"pds4", 0.},
+                               {"pds5", 0.}};
+  return state_vars;
 }
 
 //! Return elastic tensor
@@ -131,7 +106,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
-    const Vector6d& stress, tsl::robin_map<std::string, double>* state_vars) {
+    const Vector6d& stress, mpm::dense_map* state_vars) {
 
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
 
@@ -189,7 +164,7 @@ template <unsigned Tdim>
 typename mpm::MohrCoulomb<Tdim>::FailureState
     mpm::MohrCoulomb<Tdim>::compute_yield_state(
         Eigen::Matrix<double, 2, 1>* yield_function,
-        const tsl::robin_map<std::string, double>* state_vars) {
+        const mpm::dense_map* state_vars) {
 
   // Stress invariants
   const double epsilon = (*state_vars).at("epsilon");
@@ -251,9 +226,8 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    const tsl::robin_map<std::string, double>* state_vars,
-    const Vector6d& stress, Vector6d* df_dsigma, Vector6d* dp_dsigma,
-    double* softening) {
+    const mpm::dense_map* state_vars, const Vector6d& stress,
+    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
 
   // Stress invariants
   const double j2 = (*state_vars).at("j2");
@@ -467,8 +441,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr,
-    tsl::robin_map<std::string, double>* state_vars) {
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
   // Current MC parameters using a linear softening rule
   // plastic deviatoric strain
