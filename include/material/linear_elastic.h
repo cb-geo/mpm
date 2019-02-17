@@ -35,9 +35,10 @@ class LinearElastic : public Material<Tdim> {
   LinearElastic& operator=(const LinearElastic&) = delete;
 
   //! Initialise history variables
-  //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(mpm::dense_map* state_vars) override {
-    return true;
+  //! \retval state_vars State variables with history
+  mpm::dense_map initialise_state_variables() override {
+    mpm::dense_map state_vars;
+    return state_vars;
   }
 
   //! Thermodynamic pressure

@@ -37,8 +37,8 @@ class MohrCoulomb : public Material<Tdim> {
   MohrCoulomb& operator=(const MohrCoulomb&) = delete;
 
   //! Initialise history variables
-  //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(mpm::dense_map* state_vars) override;
+  //! \retval state_vars State variables with history
+  mpm::dense_map initialise_state_variables() override;
 
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
