@@ -37,9 +37,8 @@ class MohrCoulomb : public Material<Tdim> {
   MohrCoulomb& operator=(const MohrCoulomb&) = delete;
 
   //! Initialise history variables
-  //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(
-      tsl::robin_map<std::string, double>* state_vars) override;
+  //! \retval state_vars State variables with history
+  mpm::dense_map initialise_state_variables() override;
 
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
@@ -54,10 +53,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] particle Constant point to particle base
   //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
-  Vector6d compute_stress(
-      const Vector6d& stress, const Vector6d& dstrain,
-      const ParticleBase<Tdim>* ptr,
-      tsl::robin_map<std::string, double>* state_vars) override;
+  Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
+                          const ParticleBase<Tdim>* ptr,
+                          mpm::dense_map* state_vars) override;
 
   //! Failure state
   enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
@@ -75,17 +73,15 @@ class MohrCoulomb : public Material<Tdim> {
   bool compute_elastic_tensor();
 
   //! Compute stress invariants (j2, j3, rho, theta, and epsilon)
-  bool compute_stress_invariants(
-      const Vector6d& stress, tsl::robin_map<std::string, double>* state_vars);
+  bool compute_stress_invariants(const Vector6d& stress,
+                                 mpm::dense_map* state_vars);
 
   //! Check the yield type (tension/shear)
-  FailureState compute_yield_state(
-      Eigen::Matrix<double, 2, 1>* yield_function,
-      const tsl::robin_map<std::string, double>* state_vars);
+  FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
+                                   const mpm::dense_map* state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
-  void compute_df_dp(FailureState yield_type,
-                     const tsl::robin_map<std::string, double>* state_vars,
+  void compute_df_dp(FailureState yield_type, const mpm::dense_map* state_vars,
                      const Vector6d& stress, Vector6d* df_dsigma,
                      Vector6d* dp_dsigma, double* softening);
 

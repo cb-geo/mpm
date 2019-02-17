@@ -3,12 +3,17 @@
 
 #include <algorithm>
 
+#include <sparsepp/spp.h>
 #include <tsl/robin_map.h>
 
 namespace mpm {
 
 // Global index type for the map
 using Index = unsigned long long;
+
+// Global dense hash map type
+using dense_map = tsl::robin_map<std::string, double>;
+// using dense_map = spp::sparse_hash_map<std::string, double>;
 
 // Map class
 //! \brief A class that offers a container and iterators

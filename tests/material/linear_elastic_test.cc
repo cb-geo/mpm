@@ -76,8 +76,8 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      tsl::robin_map<std::string, double> state_variables;
-      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
     }
   }
 
@@ -133,8 +133,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    tsl::robin_map<std::string, double> state_vars;
-    material->initialise_state_variables(&state_vars);
+    mpm::dense_map state_vars = material->initialise_state_variables();
     stress =
         material->compute_stress(stress, strain, particle.get(), &state_vars);
 
@@ -238,8 +237,8 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      tsl::robin_map<std::string, double> state_variables;
-      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
     }
   }
 
@@ -297,8 +296,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     strain(5) = 0.0000000;
 
     // Compute updated stress
-    tsl::robin_map<std::string, double> state_vars;
-    material->initialise_state_variables(&state_vars);
+    mpm::dense_map state_vars = material->initialise_state_variables();
     stress =
         material->compute_stress(stress, strain, particle.get(), &state_vars);
 

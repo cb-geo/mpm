@@ -13,4 +13,5 @@ ignore: # files and folders for processing
   - external/spdlog/*
   - external/tclap/*
   - external/tsl/*
+  - external/sparsepp/*
   - src/main.cc
