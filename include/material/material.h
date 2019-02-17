@@ -5,10 +5,10 @@
 
 #include "Eigen/Dense"
 #include "json.hpp"
-#include <tsl/robin_map.h>
 
 #include "factory.h"
 #include "logger.h"
+#include "map.h"
 #include "particle.h"
 #include "particle_base.h"
 
@@ -59,8 +59,7 @@ class Material {
   double property(const std::string& key);
 
   //! Initialise history variables
-  virtual bool initialise_state_variables(
-      tsl::robin_map<std::string, double>* state_vars) = 0;
+  virtual bool initialise_state_variables(mpm::dense_map* state_vars) = 0;
 
   //! Compute thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
@@ -73,10 +72,10 @@ class Material {
   //! \param[in] particle Constant point to particle base
   //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
-  virtual Vector6d compute_stress(
-      const Vector6d& stress, const Vector6d& dstrain,
-      const ParticleBase<Tdim>* ptr,
-      tsl::robin_map<std::string, double>* state_vars) = 0;
+  virtual Vector6d compute_stress(const Vector6d& stress,
+                                  const Vector6d& dstrain,
+                                  const ParticleBase<Tdim>* ptr,
+                                  mpm::dense_map* state_vars) = 0;
 
  protected:
   //! material id

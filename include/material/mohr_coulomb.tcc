@@ -54,7 +54,7 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 //! equivalent plastic deviatoric strain (epds)
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::initialise_state_variables(
-    tsl::robin_map<std::string, double>* state_vars) {
+    mpm::dense_map* state_vars) {
   bool status = false;
 
   // Friction (phi)
@@ -131,7 +131,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
-    const Vector6d& stress, tsl::robin_map<std::string, double>* state_vars) {
+    const Vector6d& stress, mpm::dense_map* state_vars) {
 
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
 
@@ -189,7 +189,7 @@ template <unsigned Tdim>
 typename mpm::MohrCoulomb<Tdim>::FailureState
     mpm::MohrCoulomb<Tdim>::compute_yield_state(
         Eigen::Matrix<double, 2, 1>* yield_function,
-        const tsl::robin_map<std::string, double>* state_vars) {
+        const mpm::dense_map* state_vars) {
 
   // Stress invariants
   const double epsilon = (*state_vars).at("epsilon");
@@ -251,9 +251,8 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    const tsl::robin_map<std::string, double>* state_vars,
-    const Vector6d& stress, Vector6d* df_dsigma, Vector6d* dp_dsigma,
-    double* softening) {
+    const mpm::dense_map* state_vars, const Vector6d& stress,
+    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
 
   // Stress invariants
   const double j2 = (*state_vars).at("j2");
@@ -467,8 +466,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr,
-    tsl::robin_map<std::string, double>* state_vars) {
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
   // Current MC parameters using a linear softening rule
   // plastic deviatoric strain

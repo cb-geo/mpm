@@ -10,8 +10,6 @@
 #include "hdf5.h"
 #include "material/material.h"
 
-#include <tsl/robin_map.h>
-
 namespace mpm {
 
 // Forward declaration of Material
@@ -203,7 +201,7 @@ class ParticleBase {
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
   //! Material state history variables
-  tsl::robin_map<std::string, double> state_variables_;
+  mpm::dense_map state_variables_;
 };  // ParticleBase class
 }  // namespace mpm
 
