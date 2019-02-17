@@ -201,7 +201,7 @@ class ParticleBase {
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
   //! Material state history variables
-  std::map<std::string, double> state_variables_;
+  mpm::dense_map state_variables_;
 };  // ParticleBase class
 }  // namespace mpm
 

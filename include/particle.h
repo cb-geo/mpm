@@ -240,7 +240,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
   bool update_pressure(unsigned phase, double dvolumetric_strain);
 
- private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
