@@ -85,8 +85,8 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      mpm::dense_map state_variables;
-      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
     }
   }
 
@@ -425,8 +425,8 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
-      mpm::dense_map state_variables;
-      REQUIRE(material->initialise_state_variables(&state_variables) == true);
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
     }
   }
 
