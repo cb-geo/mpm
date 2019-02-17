@@ -95,10 +95,10 @@ class Element {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
-  //! Evaluate the mass matrix
+  //! Evaluate the Ni Nj matrix
   //! \param[in] xi_s Vector of local coordinates
-  //! \retval mass_matrix mass matrix
-  virtual Eigen::MatrixXd mass_matrix(
+  //! \retval ni_nj_matrix Ni Nj matrix
+  virtual Eigen::MatrixXd ni_nj_matrix(
       const std::vector<VectorDim>& xi_s) const = 0;
 
   //! Evaluate the Laplace matrix at given local coordinates for a real cell
