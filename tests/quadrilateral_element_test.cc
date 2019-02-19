@@ -436,8 +436,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                      Eigen::Vector2d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("Four noded quadrilateral mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("Four noded quadrilateral ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -453,15 +453,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(xi_s.size() == 4);
 
-      // Get mass matrix
-      const auto mass_matrix = quad->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = quad->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni_nj_matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 4, 4> mass;
       // clang-format off
@@ -471,9 +472,30 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                0.2222222222222222, 0.1111111111111111, 0.2222222222222222, 0.4444444444444445;
       // clang-format on
 
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
@@ -1133,8 +1155,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                      Eigen::Vector2d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("Eight noded quadrilateral mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("Eight noded quadrilateral ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -1150,15 +1172,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(xi_s.size() == 4);
 
-      // Get mass matrix
-      const auto mass_matrix = quad->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = quad->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni_nj_matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 8, 8> mass;
       mass << 0.07407407407407406, 0.00000000000000, 0.037037037037037,
@@ -1182,10 +1205,32 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
           -0.07407407407407397, -0.1481481481481481, -0.1481481481481481,
           -0.07407407407407396, 0.4444444444444442, 0.2962962962962961,
           0.4444444444444442, 0.5925925925925923;
+      // clang-format on
 
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
@@ -1575,8 +1620,8 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(gradsf(8, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
-    // Mass matrix of a cell
-    SECTION("Nine noded quadrilateral mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("Nine noded quadrilateral ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -1592,15 +1637,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
 
       REQUIRE(xi_s.size() == 4);
 
-      // Get mass matrix
-      const auto mass_matrix = quad->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = quad->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni_nj_matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 9, 9> mass;
       mass << 0.04938271604938273, -0.02469135802469136, 0.01234567901234568,
@@ -1630,10 +1676,32 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
           0.04938271604938271, 0.04938271604938271, 0.0493827160493827,
           0.0493827160493827, 0.1975308641975307, 0.1975308641975307,
           0.1975308641975307, 0.1975308641975307, 0.7901234567901227;
+      // clang-format on
 
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
