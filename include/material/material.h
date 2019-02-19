@@ -8,6 +8,7 @@
 
 #include "factory.h"
 #include "logger.h"
+#include "map.h"
 #include "particle.h"
 #include "particle_base.h"
 
@@ -57,6 +58,9 @@ class Material {
   //! \retval result Value of material property
   double property(const std::string& key);
 
+  //! Initialise history variables
+  virtual mpm::dense_map initialise_state_variables() = 0;
+
   //! Compute thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Thermodynamic pressure for volumetric strain
@@ -66,10 +70,12 @@ class Material {
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
+  //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
                                   const Vector6d& dstrain,
-                                  const ParticleBase<Tdim>* ptr) = 0;
+                                  const ParticleBase<Tdim>* ptr,
+                                  mpm::dense_map* state_vars) = 0;
 
  protected:
   //! material id
