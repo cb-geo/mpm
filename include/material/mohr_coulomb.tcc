@@ -568,9 +568,9 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     (*state_vars).at("pds0") =
         plastic_deviatoric_strain(0) + dpstrain(0) - (1. / 3. * dpvstrain);
     (*state_vars).at("pds1") =
-        plastic_deviatoric_strain(1) + dpstrain(0) - (1. / 3. * dpvstrain);
+        plastic_deviatoric_strain(1) + dpstrain(1) - (1. / 3. * dpvstrain);
     (*state_vars).at("pds2") =
-        plastic_deviatoric_strain(2) + dpstrain(0) - (1. / 3. * dpvstrain);
+        plastic_deviatoric_strain(2) + dpstrain(2) - (1. / 3. * dpvstrain);
     (*state_vars).at("pds3") = plastic_deviatoric_strain(3) + 0.5 * dpstrain(3);
     (*state_vars).at("pds4") = plastic_deviatoric_strain(4) + 0.5 * dpstrain(4);
     (*state_vars).at("pds5") = plastic_deviatoric_strain(5) + 0.5 * dpstrain(5);
