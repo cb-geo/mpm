@@ -71,6 +71,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -78,6 +82,12 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -145,10 +155,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -230,10 +241,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -325,9 +337,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -398,6 +411,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -405,6 +422,12 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -490,9 +513,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -592,9 +616,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -702,9 +727,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
