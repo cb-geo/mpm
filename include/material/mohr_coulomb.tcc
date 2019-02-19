@@ -453,15 +453,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   plastic_deviatoric_strain(4) = (*state_vars).at("pds4");
   plastic_deviatoric_strain(5) = (*state_vars).at("pds5");
 
-  const double epds =
-      (2. / 3.) *
-      sqrt(3. / 2. *
-               (plastic_deviatoric_strain(0) * plastic_deviatoric_strain(0) +
-                plastic_deviatoric_strain(1) * plastic_deviatoric_strain(1) +
-                plastic_deviatoric_strain(2) * plastic_deviatoric_strain(2)) +
-           3. * (plastic_deviatoric_strain(3) * plastic_deviatoric_strain(3) +
-                 plastic_deviatoric_strain(4) * plastic_deviatoric_strain(4) +
-                 plastic_deviatoric_strain(5) * plastic_deviatoric_strain(5)));
+  const double epds = (*state_vars).at("epds");
 
   this->compute_stress_invariants(stress, state_vars);
 
@@ -575,8 +567,17 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     (*state_vars).at("pds4") = plastic_deviatoric_strain(4) + 0.5 * dpstrain(4);
     (*state_vars).at("pds5") = plastic_deviatoric_strain(5) + 0.5 * dpstrain(5);
   }
-  // Record the epds
-  (*state_vars)["epds"] = epds;
+  // epds
+  (*state_vars)["epds"] =
+      (2. / 3.) *
+      sqrt(3. / 2. *
+               (plastic_deviatoric_strain(0) * plastic_deviatoric_strain(0) +
+                plastic_deviatoric_strain(1) * plastic_deviatoric_strain(1) +
+                plastic_deviatoric_strain(2) * plastic_deviatoric_strain(2)) +
+           3. * (plastic_deviatoric_strain(3) * plastic_deviatoric_strain(3) +
+                 plastic_deviatoric_strain(4) * plastic_deviatoric_strain(4) +
+                 plastic_deviatoric_strain(5) * plastic_deviatoric_strain(5)));
+  ;
 
   return updated_stress;
 }
