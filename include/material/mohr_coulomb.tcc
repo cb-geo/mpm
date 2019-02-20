@@ -511,7 +511,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   double yield = 0.;
   if (yield_type_trial == FailureState::Tensile)
     yield = yield_function_trial(0);
-  if (yield_type_trial == FailureState::Tensile)
+  if (yield_type_trial == FailureState::Shear)
     yield = yield_function_trial(1);
   double lambda_trial =
       yield /
@@ -577,7 +577,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
            3. * (plastic_deviatoric_strain(3) * plastic_deviatoric_strain(3) +
                  plastic_deviatoric_strain(4) * plastic_deviatoric_strain(4) +
                  plastic_deviatoric_strain(5) * plastic_deviatoric_strain(5)));
-  ;
 
   return updated_stress;
 }
