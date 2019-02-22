@@ -1,28 +1,41 @@
 //! Read material properties
 template <unsigned Tdim>
-void mpm::LinearElastic<Tdim>::properties(const Json& material_properties) {
+mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
+                                        const Json& material_properties)
+    : Material<Tdim>(id, material_properties) {
   try {
     density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
         material_properties["youngs_modulus"].template get<double>();
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
+    // Calculate bulk modulus
+    bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
     properties_ = material_properties;
-    status_ = true;
+    // Set elastic tensor
+    this->compute_elastic_tensor();
   } catch (std::exception& except) {
     console_->error("Material parameter not set: {}\n", except.what());
   }
 }
 
+//! Compute pressure
+template <unsigned Tdim>
+double mpm::LinearElastic<Tdim>::thermodynamic_pressure(
+    double volumetric_strain) const {
+  // Bulk modulus
+  return (-bulk_modulus_ * volumetric_strain);
+}
+
 //! Return elastic tensor
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 6> mpm::LinearElastic<Tdim>::elastic_tensor() {
-  // Bulk and shear modulus
-  const double K = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+bool mpm::LinearElastic<Tdim>::compute_elastic_tensor() {
+  // Shear modulus
   const double G = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
 
-  const double a1 = K + (4.0 / 3.0) * G;
-  const double a2 = K - (2.0 / 3.0) * G;
+  const double a1 = bulk_modulus_ + (4.0 / 3.0) * G;
+  const double a2 = bulk_modulus_ - (2.0 / 3.0) * G;
 
   // clang-format off
   // compute elasticityTensor
@@ -33,24 +46,14 @@ Eigen::Matrix<double, 6, 6> mpm::LinearElastic<Tdim>::elastic_tensor() {
   de_(4,0)= 0;    de_(4,1)= 0;    de_(4,2)= 0;    de_(4,3)=0;    de_(4,4)=G;    de_(4,5)=0;
   de_(5,0)= 0;    de_(5,1)= 0;    de_(5,2)= 0;    de_(5,3)=0;    de_(5,4)=0;    de_(5,5)=G;
   // clang-format on
-
-  return de_;
-}
-
-//! Compute stress
-template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
-    const Vector6d& stress, const Vector6d& dstrain) {
-
-  const Vector6d dstress = this->elastic_tensor() * dstrain;
-  return (stress + dstress);
+  return true;
 }
 
 //! Compute stress
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::LinearElastic<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr) {
-
-  return this->compute_stress(stress, dstrain);
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
+  const Vector6d dstress = this->de_ * dstrain;
+  return (stress + dstress);
 }

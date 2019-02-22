@@ -36,25 +36,20 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
 
   // Check add node
   SECTION("Check add node functionality") {
-    // Add node 1 and check status
-    bool status1 = nodecontainer->add(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = nodecontainer->add(node2);
-    REQUIRE(status2 == true);
-    // Try and node 2 again and check status
-    bool status3 = nodecontainer->add(node2);
-    REQUIRE(status3 == false);
+    // Add node 1 and check
+    REQUIRE(nodecontainer->add(node1, true) == true);
+    // Add node 2 and check
+    REQUIRE(nodecontainer->add(node2, false) == true);
+    // Try and node 2 again and check
+    REQUIRE(nodecontainer->add(node2) == false);
 
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
 
-    // Remove node 2 and check status
-    bool remove_status = nodecontainer->remove(node2);
-    REQUIRE(remove_status == true);
-    // Try and remove node 2 again and check status
-    bool remove_status1 = nodecontainer->remove(node2);
-    REQUIRE(remove_status1 == false);
+    // Remove node 2 and check
+    REQUIRE(nodecontainer->remove(node2) == true);
+    // Try and remove node 2 again and check
+    REQUIRE(nodecontainer->remove(node2) == false);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 1);
 
@@ -150,25 +145,20 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
 
   // Check add node
   SECTION("Check add node functionality") {
-    // Add node 1 and check status
-    bool status1 = nodecontainer->add(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = nodecontainer->add(node2);
-    REQUIRE(status2 == true);
-    // Try and node 2 again and check status
-    bool status3 = nodecontainer->add(node2);
-    REQUIRE(status3 == false);
+    // Add node 1 and check
+    REQUIRE(nodecontainer->add(node1) == true);
+    // Add node 2 and check
+    REQUIRE(nodecontainer->add(node2) == true);
+    // Try and node 2 again and check
+    REQUIRE(nodecontainer->add(node2) == false);
 
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 2);
 
-    // Remove node 2 and check status
-    bool remove_status = nodecontainer->remove(node2);
-    REQUIRE(remove_status == true);
-    // Try and remove node 2 again and check status
-    bool remove_status1 = nodecontainer->remove(node2);
-    REQUIRE(remove_status1 == false);
+    // Remove node 2 and check
+    REQUIRE(nodecontainer->remove(node2) == true);
+    // Try and remove node 2 again and check
+    REQUIRE(nodecontainer->remove(node2) == false);
     // Check size of node hanlder
     REQUIRE(nodecontainer->size() == 1);
 

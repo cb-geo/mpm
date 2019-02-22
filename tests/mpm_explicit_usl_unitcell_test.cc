@@ -4,7 +4,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "mpm_explicit_usl.h"
+#include "mpm_explicit.h"
 #include "write_mesh_particles_unitcell.h"
 
 // Check MPM Explicit USL
@@ -16,16 +16,13 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicitUSL2D";
-  bool status = mpm_test::write_json_unitcell(2, analysis, fname);
-  REQUIRE(status == true);
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, fname) == true);
 
   // Write Mesh
-  bool mesh_status = mpm_test::write_mesh_2d_unitcell();
-  REQUIRE(mesh_status == true);
+  REQUIRE(mpm_test::write_mesh_2d_unitcell() == true);
 
   // Write Particles
-  bool particle_status = mpm_test::write_particles_2d_unitcell();
-  REQUIRE(particle_status == true);
+  REQUIRE(mpm_test::write_particles_2d_unitcell() == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
@@ -39,16 +36,18 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-    // Initialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh and particles
+    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == false);
+    REQUIRE(mpm->initialise_mesh() == false);
+    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -58,7 +57,7 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }
@@ -73,16 +72,13 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicitUSL3D";
-  bool status = mpm_test::write_json_unitcell(3, analysis, fname);
-  REQUIRE(status == true);
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, fname) == true);
 
   // Write Mesh
-  bool mesh_status = mpm_test::write_mesh_3d_unitcell();
-  REQUIRE(mesh_status == true);
+  REQUIRE(mpm_test::write_mesh_3d_unitcell() == true);
 
   // Write Particles
-  bool particle_status = mpm_test::write_particles_3d_unitcell();
-  REQUIRE(particle_status == true);
+  REQUIRE(mpm_test::write_particles_3d_unitcell() == true);
 
   // Assign argc and argv to input arguments of MPM
   int argc = 5;
@@ -96,16 +92,18 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-    // Initialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == true);
+    // Initialise mesh and particles
+    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh_particles() == false);
+    REQUIRE(mpm->initialise_mesh() == false);
+    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -115,7 +113,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }

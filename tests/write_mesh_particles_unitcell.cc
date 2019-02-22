@@ -33,7 +33,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
        {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
         {"velocity_constraints", "velocity-constraints-unitcell.txt"},
         {"particles", "particles-" + dimension + "-unitcell.txt"},
-        {"initial_stresses", "initial_soil_stress.txt"},
+        {"particle_stresses", "initial-stresses-" + dimension + "d.txt"},
         {"materials", "materials.txt"},
         {"traction", "traction.txt"}}},
       {"mesh",
@@ -41,6 +41,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"node_type", node_type},
         {"material_id", 1},
         {"cell_type", cell_type},
+        {"generate_particles_cells", 1},
         {"particle_type", particle_type}}},
       {"materials",
        {{{"id", 0},
@@ -165,24 +166,10 @@ bool write_particles_2d_unitcell() {
   particle << 0.25, 0.75;
   coordinates.emplace_back(particle);
 
-  /*
-  // Cell 1
-  // Particle 4
-  particle << 1.25, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 5
-  particle << 1.75, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 6
-  particle << 1.75, 0.75;
-  coordinates.emplace_back(particle);
-  // Particle 7
-  particle << 1.25, 0.75;
-  coordinates.emplace_back(particle);
-  */
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-2d-unitcell.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -192,6 +179,25 @@ bool write_particles_2d_unitcell() {
   }
 
   file.close();
+
+  // Vector of particle stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+  // Stresses
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(1.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(2.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(3.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(4.4));
+
+  // Dump initial stresses as an input file to be read
+  file.open("initial-stresses-2d.txt");
+  file << particles_stresses.size() << "\n";
+  // Write particle coordinates
+  for (const auto& stress : particles_stresses) {
+    for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+    file << "\n";
+  }
+  file.close();
+
   return true;
 }
 
@@ -319,36 +325,11 @@ bool write_particles_3d_unitcell() {
   // Particle 7
   particle << 0.75, 0.75, 0.75;
   coordinates.emplace_back(particle);
-  /*
-    // Cell 1
-    // Particle 8
-    particle << 1.25, 0.25, 0.25;
-    coordinates.emplace_back(particle);
-    // Particle 9
-    particle << 1.75, 0.25, 0.25;
-    coordinates.emplace_back(particle);
-    // Particle 10
-    particle << 1.25, 0.75, 0.25;
-    coordinates.emplace_back(particle);
-    // Particle 11
-    particle << 1.75, 0.75, 0.25;
-    coordinates.emplace_back(particle);
-    // Particle 12
-    particle << 1.25, 0.25, 0.75;
-    coordinates.emplace_back(particle);
-    // Particle 13
-    particle << 1.25, 0.25, 0.75;
-    coordinates.emplace_back(particle);
-    // Particle 14
-    particle << 1.75, 0.75, 0.75;
-    coordinates.emplace_back(particle);
-    // Particle 15
-    particle << 1.75, 0.75, 0.75;
-    coordinates.emplace_back(particle);
-    */
+
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-3d-unitcell.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -356,8 +337,30 @@ bool write_particles_3d_unitcell() {
     }
     file << "\n";
   }
-
   file.close();
+
+  // Vector of particle stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+  // Stresses
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(1.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(2.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(3.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(4.4));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(5.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(6.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(7.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(8.4));
+
+  // Dump initial stresses as an input file to be read
+  file.open("initial-stresses-3d.txt");
+  file << particles_stresses.size() << "\n";
+  // Write particle coordinates
+  for (const auto& stress : particles_stresses) {
+    for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+    file << "\n";
+  }
+  file.close();
+
   return true;
 }
 

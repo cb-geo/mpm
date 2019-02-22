@@ -6,7 +6,8 @@
 #include "quadrilateral_gimp_element.h"
 
 //! \brief Check quadrilateral element class
-TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
+TEST_CASE("Quadrilateral gimp elements are checked",
+          "[quad][element][2D][gimp]") {
   const unsigned Dim = 2;
   const double Tolerance = 1.E-7;
 
@@ -407,8 +408,24 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
       REQUIRE(gradsf(15, 1) == Approx(0.0).epsilon(Tolerance));
     }
 
+    // Coordinates is (0,0)
+    SECTION("Four noded local sf quadrilateral element for coordinates(0,0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = quad->shapefn_local(coords, Eigen::Vector2d::Zero(),
+                                         Eigen::Vector2d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == 4);
+
+      REQUIRE(shapefn(0) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.25).epsilon(Tolerance));
+    }
+
     // Check Jacobian
-    SECTION("Four noded quadrilateral Jacobian with deformation gradient") {
+    SECTION("16-noded quadrilateral Jacobian with deformation gradient") {
       Eigen::Matrix<double, 16, Dim> coords;
       // clang-format off
       // clang-format off
@@ -446,6 +463,40 @@ TEST_CASE("Quadrilateral gimp elements are checked", "[gimp]") {
 
       // Get Jacobian
       auto jac = quad->jacobian(xi, coords, psize, defgrad);
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Four noded quadrilateral local Jacobian for local "
+        "coordinates(0.5,0.5)") {
+      Eigen::Matrix<double, 4, Dim> coords;
+      // clang-format off
+      coords << 2., 1.,
+                4., 2.,
+                2., 4.,
+                1., 3.;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5;
+
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5,
+                 -0.875, 1.0;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = quad->jacobian_local(xi, coords, Eigen::Vector2d::Zero(),
+                                      Eigen::Vector2d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());

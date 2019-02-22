@@ -19,78 +19,83 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   const unsigned Dim = 2;
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+  jmaterial["tau0"] = 771.8;
+  jmaterial["mu"] = 0.0451;
+  jmaterial["critical_shear_rate"] = 0.2;
+
   //! Check for id = 0
   SECTION("Bingham id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("Bingham id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
+  }
+
+  // Failed initialisation material
+  SECTION("Bingham failed initialisation") {
+    unsigned id = 0;
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["tau0"] = 771.8;
+    jmaterial["mu"] = 0.0451;
+    jmaterial["critical_shear_rate"] = 0.2;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
   }
 
   //! Read material properties
   SECTION("Bingham check properties") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
 
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
@@ -150,10 +155,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -167,23 +173,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   SECTION("Bingham check stresses with strain rate, no yield") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
 
     // Add particle
     mpm::Index pid = 0;
@@ -248,15 +241,16 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-208333.3333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-208333.3333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-52083.3333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-52083.3333333333).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -265,10 +259,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
   SECTION("Bingham check stresses with strain rate, yielded") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham2D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -278,10 +268,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham2D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -347,14 +337,15 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-20833520.3557401).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-20833613.8669434).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-5208520.35574006).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-5208613.86694342).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-233.778008402801).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
@@ -368,78 +359,84 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   const unsigned Dim = 3;
 
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+  jmaterial["tau0"] = 771.8;
+  jmaterial["mu"] = 0.0451;
+  jmaterial["critical_shear_rate"] = 0.2;
+
   //! Check for id = 0
   SECTION("Bingham id is zero") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
   }
 
   SECTION("Bingham id is positive") {
     //! Check for id is a positive value
     unsigned id = std::numeric_limits<unsigned>::max();
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == std::numeric_limits<unsigned>::max());
+  }
+
+  // Failed initialisation material
+  SECTION("Bingham failed initialisation") {
+    unsigned id = 0;
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["tau0"] = 771.8;
+    jmaterial["mu"] = 0.0451;
+    jmaterial["critical_shear_rate"] = 0.2;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
   }
 
   //! Read material properties
   SECTION("Bingham check properties") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
     REQUIRE(material->id() == 0);
-
-    // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    // Check material status before assigning material property
-    REQUIRE(material->status() == false);
-
-    // Get material properties
-    REQUIRE(material->property("density") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    // Check for property that does not exist
-    REQUIRE(material->property("noproperty") ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->status() == true);
 
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 1.0E-5;
+    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -516,9 +513,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -532,23 +530,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   SECTION("Bingham check stresses with strain rate, no yield") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
-    Json jmaterial;
-    jmaterial["density"] = 1000.;
-    jmaterial["youngs_modulus"] = 1.0E+7;
-    jmaterial["poisson_ratio"] = 0.3;
-    jmaterial["tau0"] = 771.8;
-    jmaterial["mu"] = 0.0451;
-    jmaterial["critical_shear_rate"] = 0.2;
-
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -630,15 +616,16 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-41666.66666666666).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-41666.66666666666).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-41666.66666666666).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-5208.33333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-5208.33333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-5208.33333333333).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
@@ -646,10 +633,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
   SECTION("Bingham check stresses with strain rate, yielded") {
     unsigned id = 0;
-    auto material = Factory<mpm::Material<Dim>, unsigned>::instance()->create(
-        "Bingham3D", std::move(id));
-    REQUIRE(material->id() == 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -659,10 +642,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     jmaterial["mu"] = 200;
     jmaterial["critical_shear_rate"] = 0.2;
 
-    material->properties(jmaterial);
-
-    // Check material status after assigning material property
-    REQUIRE(material->property_handle() == true);
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Bingham3D", std::move(id), jmaterial);
+    REQUIRE(material->id() == 0);
 
     // Add particle
     mpm::Index pid = 0;
@@ -744,15 +727,16 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-4166810.21531557).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-4166795.86045068).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-4166379.56936886).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-520976.881982238).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-520962.527117347).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-520546.236035524).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(-150.726081349795).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(21.532297335685).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(-71.7743244522832).epsilon(Tolerance));

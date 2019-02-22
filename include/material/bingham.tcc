@@ -1,6 +1,7 @@
-//! Read material properties
+//! Constructor with material properties
 template <unsigned Tdim>
-void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
+mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
+    : Material<Tdim>(id, material_properties) {
   try {
     density_ = material_properties["density"].template get<double>();
     youngs_modulus_ =
@@ -11,54 +12,32 @@ void mpm::Bingham<Tdim>::properties(const Json& material_properties) {
     mu_ = material_properties["mu"].template get<double>();
     critical_shear_rate_ =
         material_properties["critical_shear_rate"].template get<double>();
+    // Calculate bulk modulus
+    bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
+
     properties_ = material_properties;
-    status_ = true;
   } catch (std::exception& except) {
     console_->error("Material parameter not set: {}\n", except.what());
   }
 }
 
-//! Elastic tensor is not defined in Bingham model, throws an error
+//! Compute pressure
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 6> mpm::Bingham<Tdim>::elastic_tensor() {
-
-  throw std::runtime_error("Elastic tensor is not used for this material");
-
-  return Eigen::Matrix<double, 6, 6>::Zero();
-}
-
-//! Compute stress without a particle handle is undefined in the Bingham model,
-//! throws an error
-template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
-    const Vector6d& stress, const Vector6d& dstrain) {
-
-  throw std::runtime_error(
-      "Stress computation for this material requires a particle handle");
-
-  return Vector6d::Zero();
+double mpm::Bingham<Tdim>::thermodynamic_pressure(
+    double volumetric_strain) const {
+  // Bulk modulus
+  return (-bulk_modulus_ * volumetric_strain);
 }
 
 //! Compute stress
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr) {
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
   const unsigned phase = 0;
 
-  // Bulk modulus
-  const double bulk_modulus =
-      youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
-
-  // Get volumetric strain from particle
-  const double volumetric_strain = ptr->volumetric_strain_centroid(phase);
-
-  // Compute thermodynamic pressure
-  // thermodynamic_pressure = -bulk_modulus * volstrain
-  // Expansion causes a decrease in thermodynamic pressure
-  const double thermodynamic_pressure = -bulk_modulus * volumetric_strain;
-
+  // Get strain rate
   auto strain_rate = ptr->strain_rate(phase);
 
   // Convert strain rate to rate of deformation tensor
@@ -75,14 +54,15 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // D_1^2 + D_2^2 + 2*D_3^2 + 2*D_4^2 + 2*D_5^2 Yielding is defined: rate of
   // shear > critical_shear_rate_^2 Checking yielding from strain rate vs
   // critical yielding shear rate
-  const double shear_rate_squared =
-      2 * (strain_rate.dot(strain_rate) +
-           strain_rate.tail(3).dot(strain_rate.tail(3)));
+  double shear_rate =
+      std::sqrt(2. * (strain_rate.dot(strain_rate) +
+                      strain_rate.tail(3).dot(strain_rate.tail(3))));
 
   // Apparent_viscosity maps shear rate to shear stress
-  double apparent_viscosity = 0;
-  if (shear_rate_squared > critical_shear_rate_ * critical_shear_rate_)
-    apparent_viscosity = 2 * ((tau0_ / (std::sqrt(shear_rate_squared))) + mu_);
+  // Check if shear rate is 0
+  double apparent_viscosity = 0.;
+  if (shear_rate * shear_rate > critical_shear_rate_ * critical_shear_rate_)
+    apparent_viscosity = 2. * ((tau0_ / shear_rate) + mu_);
 
   // Compute shear change to volumetric
   // tau deviatoric part of cauchy stress tensor
@@ -96,10 +76,11 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
   // Update volumetric and deviatoric stress
+  // thermodynamic pressure is from material point
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -thermodynamic_pressure * this->dirac_delta() + tau;
+      -ptr->pressure(phase) * this->dirac_delta() + tau;
 
   return updated_stress;
 }

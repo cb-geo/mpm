@@ -1,8 +1,9 @@
 //! Constructor with cell id, number of nodes and element
 template <unsigned Tdim>
 mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
-                      const std::shared_ptr<const Element<Tdim>>& elementptr)
-    : id_{id}, nnodes_{nnodes} {
+                      const std::shared_ptr<const Element<Tdim>>& elementptr,
+                      bool isoparametric)
+    : id_{id}, nnodes_{nnodes}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
 
@@ -34,6 +35,19 @@ bool mpm::Cell<Tdim>::initialise() {
       this->compute_volume();
       this->compute_centroid();
       this->compute_mean_length();
+      this->compute_nodal_coordinates();
+
+      // Get centroid of a cell in natural coordinates which are zeros
+      Eigen::Matrix<double, Tdim, 1> xi_centroid;
+      xi_centroid.setZero();
+
+      Eigen::Matrix<double, Tdim, 1> zero;
+      zero.setZero();
+
+      // Get B-Matrix at the centroid
+      bmatrix_centroid_ =
+          element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
+
       status = true;
     } else {
       throw std::runtime_error(
@@ -56,9 +70,60 @@ bool mpm::Cell<Tdim>::is_initialised() const {
           // Check if volume of a cell is initialised
           (std::fabs(this->volume_ - std::numeric_limits<double>::max()) >
            1.0E-10) &&
-          // Check if mean lenght of a cell is initialised
+          // Check if mean length of a cell is initialised
           (std::fabs(this->mean_length_ - std::numeric_limits<double>::max()) >
            1.0E-10));
+}
+
+//! Assign quadrature
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_quadrature(unsigned nquadratures) {
+  this->quadrature_ = element_->quadrature(nquadratures);
+}
+
+//! Assign quadrature
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
+  // Assign a default quadrature of 1
+  if (this->quadrature_ == nullptr) this->assign_quadrature(1);
+
+  const auto quadratures = quadrature_->quadratures();
+
+  // Vector of gauss points
+  std::vector<Eigen::Matrix<double, Tdim, 1>> points;
+
+  // Get indices of corner nodes
+  Eigen::VectorXi indices = element_->corner_indices();
+  // Matrix of nodal coordinates
+  Eigen::MatrixXd nodal_coords;
+  nodal_coords.resize(Tdim, indices.size());
+
+  for (unsigned j = 0; j < indices.size(); ++j)
+    nodal_coords.col(j) = nodes_[indices(j)]->coordinates();
+
+  // Zeros
+  Eigen::Matrix<double, Tdim, 1> zeros = Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  // Get local coordinates of gauss points and transform to global
+  for (unsigned i = 0; i < quadratures.cols(); ++i) {
+    const auto lpoint = quadratures.col(i);
+    // Get shape functions
+    const auto sf = element_->shapefn(lpoint, zeros, zeros);
+    const auto point = nodal_coords * sf;
+    const auto xi = this->transform_real_to_unit_cell(point);
+    bool status = true;
+    // Check if point is within the cell
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+    if (status)
+      points.emplace_back(point);
+    else
+      console_->warn("Cannot generate point: ({}, {}) in cell xi: ({}, {})",
+                     point(0), point(1), xi(0), xi(1));
+  }
+
+  return points;
 }
 
 //! Add a node pointer and return the status of addition of a node
@@ -72,7 +137,8 @@ bool mpm::Cell<Tdim>::add_node(
     // The local id should be between 0 and maximum number of nodes
     if (nodes_.size() < this->nnodes_ &&
         (local_id >= 0 && local_id < this->nnodes_)) {
-      insertion_status = nodes_.insert(local_id, node_ptr);
+      nodes_.emplace_back(node_ptr);
+      insertion_status = true;
     } else {
       throw std::runtime_error(
           "Number nodes in a cell exceeds the maximum allowed per cell");
@@ -87,8 +153,26 @@ bool mpm::Cell<Tdim>::add_node(
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::activate_nodes() {
   // If number of particles are present, set all associated nodes as active
-  if (particles_.size() > 0)
+  if (particles_.size() > 0) {
+    // std::lock_guard<std::mutex> guard(cell_mutex_);
     for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->assign_status(true);
+  }
+}
+
+//! Return a vector of side node id pairs
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Cell<Tdim>::side_node_pairs()
+    const {
+  // Create a vector of node_pairs
+  std::vector<std::array<mpm::Index, 2>> node_pairs;
+  // Get the indices of sides
+  Eigen::MatrixXi indices = element_->sides_indices();
+  // Iterate over indices and get node ids
+  for (unsigned i = 0; i < indices.rows(); ++i)
+    node_pairs.emplace_back(std::array<mpm::Index, 2>(
+        {nodes_[indices(i, 0)]->id(), nodes_[indices(i, 1)]->id()}));
+
+  return node_pairs;
 }
 
 //! Add a neighbour cell and return the status of addition of a node
@@ -113,6 +197,7 @@ bool mpm::Cell<Tdim>::add_neighbour(
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::add_particle_id(Index id) {
   bool status = false;
+  std::lock_guard<std::mutex> guard(cell_mutex_);
   // Check if it is found in the container
   auto itr = std::find(particles_.begin(), particles_.end(), id);
   if (itr == particles_.end()) {
@@ -125,6 +210,7 @@ bool mpm::Cell<Tdim>::add_particle_id(Index id) {
 //! Remove a particle id
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::remove_particle_id(Index id) {
+  std::lock_guard<std::mutex> guard(cell_mutex_);
   particles_.erase(std::remove(particles_.begin(), particles_.end(), id),
                    particles_.end());
 }
@@ -277,15 +363,13 @@ void mpm::Cell<Tdim>::compute_mean_length() {
 
 //! Return nodal coordinates
 template <unsigned Tdim>
-Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
-  Eigen::MatrixXd coordinates;
-  coordinates.resize(this->nnodes_, Tdim);
-  coordinates.setZero();
+void mpm::Cell<Tdim>::compute_nodal_coordinates() {
+  nodal_coordinates_.resize(this->nnodes_, Tdim);
   try {
     // If cell is initialised
     if (this->is_initialised()) {
       for (unsigned i = 0; i < nodes_.size(); ++i)
-        coordinates.row(i) = nodes_[i]->coordinates().transpose();
+        nodal_coordinates_.row(i) = nodes_[i]->coordinates().transpose();
     } else {
       throw std::runtime_error(
           "Cell is not initialised to return nodal coordinates!");
@@ -293,148 +377,77 @@ Eigen::MatrixXd mpm::Cell<Tdim>::nodal_coordinates() {
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
-  return coordinates;
 }
 
-//! Check if a point is in a 1D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 1D cell by checking bounding box range
 template <>
-inline bool mpm::Cell<1>::point_in_cell(
+inline bool mpm::Cell<1>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 1, 1>& point) {
-
-  bool status = false;
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Distance of point from 2 vertices
-  const double length = (nodes_[0]->coordinates() - point).norm() +
-                        (nodes_[1]->coordinates() - point).norm();
-
-  // Check if the point is inside the hedron
-  if (std::fabs(length - this->volume_) < tolerance) status = true;
-
-  return status;
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0))
+    return true;
+  else
+    return false;
 }
 
-//! Check if a point is in a 2D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 2D cell by checking bounding box range
 template <>
-inline bool mpm::Cell<2>::point_in_cell(
+inline bool mpm::Cell<2>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Get the indices of sub-triangles
-  Eigen::MatrixXi indices = element_->inhedron_indices();
-
-  // Initialise sub-triangle areas to 0
-  double triareas = 0.;
-
-  // Return status
-  bool status = false;
-
-  // Iterate over each sub-triangles to calculate the area
-  // of each sub-triangle. If the sum of area of all
-  // sub-triangle is equal to the area of hexahedron then
-  // the point is inside the Hexahedron, if not the point is outside
-  for (unsigned i = 0; i < indices.rows(); ++i) {
-
-    // Get the 2 vertices of the sub-triangle
-    const Eigen::Matrix<double, 2, 1> a = nodes_[indices(i, 0)]->coordinates();
-    const Eigen::Matrix<double, 2, 1> b = nodes_[indices(i, 1)]->coordinates();
-
-    // Compute the area of a triangle
-    // Area = |1/2(x1(y2−y3)+x2(y3−y1)+x3(y1−y2))|
-    Eigen::Matrix<double, 3, 3> area;
-    // clang-format off
-    area << 1.  , 1.  , 1.,
-            a(0), b(0), point(0),
-            a(1), b(1), point(1);
-    // clang-format on
-    const double triarea = 0.5 * std::fabs(area.determinant());
-
-    triareas += triarea;
-
-    // Optimisation check, if the sub-tetrahedra area exceeds the area of
-    // hexahedron, abort and return false (point is outside).
-    if ((triareas > volume_) && (std::fabs(triareas - volume_) > tolerance)) {
-      return false;
-    }
-  }
-
-  // Check if the point is inside the hedron
-  if (std::fabs(triareas - volume_) < tolerance) status = true;
-
-  return status;
+  // Check if a point is within x and y ranges
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0) &&
+      nodes_[1]->coordinates()(1) <= point(1) &&
+      nodes_[2]->coordinates()(1) >= point(1))
+    return true;
+  else
+    return false;
 }
 
-//! Check if a point is in a 3D cell by breaking the cell into sub-volumes
+//! Check if a point is in a 3D cell by checking bounding box range
 template <>
-inline bool mpm::Cell<3>::point_in_cell(
+inline bool mpm::Cell<3>::point_in_cartesian_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
-
-  // Tolerance for volume / area comparison
-  const double tolerance = 1.0E-10;
-
-  if (std::fabs(volume_ - std::numeric_limits<double>::max()) < tolerance)
-    this->compute_volume();
-
-  // Get the indices of sub-tetrahedron
-  Eigen::MatrixXi indices = element_->inhedron_indices();
-
-  // Initialise sub-tetrahedra volumes to 0
-  double tetvolumes = 0.;
-
-  // Return status
-  bool status = false;
-
-  // Iterate over each sub-tetrahedrons to calculate the volume
-  // of each sub-tetrahedron. If the sum of volume of all
-  // sub-tetrahedron is equal to the volume of hexahedron then
-  // the point is inside the Hexahedron, if not the point is outside
-  for (unsigned i = 0; i < indices.rows(); ++i) {
-
-    // Get the 3 vertices of the sub-tetrahedron
-    const Eigen::Matrix<double, 3, 1> a = nodes_[indices(i, 0)]->coordinates();
-    const Eigen::Matrix<double, 3, 1> b = nodes_[indices(i, 1)]->coordinates();
-    const Eigen::Matrix<double, 3, 1> c = nodes_[indices(i, 2)]->coordinates();
-
-    // Compute the volume of a tetrahedron
-    // Volume = 1/6 | (a - d).((b - d) x (c - d)) |
-    const double tetvolume =
-        (1. / 6.) * std::fabs((a - point).dot((b - point).cross(c - point)));
-
-    tetvolumes += tetvolume;
-    // Optimisation check, if the sub-tetrahedra volume exceeds the volume of
-    // hexahedron, abort and return false (point is outside).
-    if ((tetvolumes > volume_) &&
-        (std::fabs(tetvolumes - volume_) > tolerance)) {
-      return false;
-    }
-  }
-  // Check if the point is inside the hedron
-  if (std::fabs(tetvolumes - volume_) < tolerance) status = true;
-
-  return status;
+  // Check if a point is within x, y and z ranges
+  if (nodes_[0]->coordinates()(0) <= point(0) &&
+      nodes_[1]->coordinates()(0) >= point(0) &&
+      nodes_[1]->coordinates()(1) <= point(1) &&
+      nodes_[2]->coordinates()(1) >= point(1) &&
+      nodes_[0]->coordinates()(2) <= point(2) &&
+      nodes_[4]->coordinates()(2) >= point(2))
+    return true;
+  else
+    return false;
 }
 
-//! Check if a point is in a 3D cell by affine transformation and newton-raphson
+//! Check approximately if a point is in a cell by using cell length
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::approx_point_in_cell(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+  const double length = (point - this->centroid_).norm();
+  if (length < (this->mean_length_ * 2.))
+    return true;
+  else
+    return false;
+}
+
+//! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
     const Eigen::Matrix<double, Tdim, 1>& point) {
+
+  // Check if point is approximately in the cell
+  if (!this->approx_point_in_cell(point)) return false;
+
+  // Check if cell is cartesian, if so use cartesian checker
+  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
+
   bool status = true;
   // Get local coordinates
   Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1.) status = false;
-
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
   return status;
 }
 
@@ -567,7 +580,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
       xi(1) = 2. * (point(1) - centre(1)) / ylength;
-      xi(2) = 2. * (point(2) - centre(2)) / ylength;
+      xi(2) = 2. * (point(2) - centre(2)) / zlength;
 
     } else {
       throw std::runtime_error("Unable to compute local coordinates");
@@ -590,14 +603,13 @@ template <>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 2, 1>& point) {
 
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<2>::local_coordinates_point(point);
+
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
-
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 500;
-  // Tolerance for newton raphson
-  const double tolerance = 1.e-10;
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
@@ -613,63 +625,208 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     }
   }
 
+  // Check for an analytical solution
+  const long double x = point(0);
+  const long double y = point(1);
+
+  const double x0 = nodal_coords(0, 0);
+  const double x1 = nodal_coords(0, 1);
+  const double x2 = nodal_coords(0, 2);
+  const double x3 = nodal_coords(0, 3);
+
+  const double y0 = nodal_coords(1, 0);
+  const double y1 = nodal_coords(1, 1);
+  const double y2 = nodal_coords(1, 2);
+  const double y3 = nodal_coords(1, 3);
+
+  const long double a = (x1 - x3) * (y0 - y2) - (x0 - x2) * (y1 - y3);
+  const long double b = -(x0 - x1 - x2 + x3) * y + (x - 2 * x1 + x3) * y0 -
+                        (x - 2 * x0 + x2) * y1 - (x - x1) * y2 + (x - x0) * y3;
+  const long double c = (x0 - x1) * y - (x - x1) * y0 + (x - x0) * y1;
+
+  const long double discriminant = b * b - 4 * a * c;
+
+  // Discriminant is negative if the point is not in the cell
+  if (discriminant > 0.0) {
+    long double eta1, eta2;
+    // Special case #1: if a is zero, then use the linear formula
+    if (a == 0.0 && b != 0.0) {
+      eta1 = -c / b;
+      eta2 = -c / b;
+    }
+    // Special case #2: a is zero for parallelograms and very small for
+    // near-parallelograms:
+    else if (std::abs(a) < 1e-8 * std::abs(b)) {
+      // if both a and c are very small then the root should be near
+      // zero: this first case will capture that
+      eta1 = 2 * c / (-b - std::sqrt(discriminant));
+      eta2 = 2 * c / (-b + std::sqrt(discriminant));
+    }
+    // finally, use the plain version:
+    else {
+      eta1 = (-b - std::sqrt(discriminant)) / (2 * a);
+      eta2 = (-b + std::sqrt(discriminant)) / (2 * a);
+    }
+
+    // pick the one closer to the center of the cell.
+    // eta
+    const long double eta =
+        (std::abs(eta1 - 0.5) < std::abs(eta2 - 0.5)) ? eta1 : eta2;
+    // Scale from 0 to 1 -> -1 to 1
+    xi(1) = (2. * eta) - 1.;
+
+    // There are two ways to compute xi from eta, but either one may have a
+    // zero denominator.
+    const long double subexpr0 = -eta * x2 + x0 * (eta - 1);
+    const long double xi_denominator0 = eta * x3 - x1 * (eta - 1) + subexpr0;
+    const double max_x = std::max(std::max(std::abs(x0), std::abs(x1)),
+                                  std::max(std::abs(x2), std::abs(x3)));
+
+    if (std::abs(xi_denominator0) > 1.0E-10 * max_x) {
+      const long double xi0 = (x + subexpr0) / xi_denominator0;
+      xi(0) = (2. * xi0) - 1.;
+      bool status = true;
+      // Check if xi is within the cell
+      for (unsigned i = 0; i < xi.size(); ++i)
+        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+      if (status) return xi;
+    } else {
+      const double max_y = std::max(std::max(std::abs(y0), std::abs(y1)),
+                                    std::max(std::abs(y2), std::abs(y3)));
+      const long double subexpr1 = -eta * y2 + y0 * (eta - 1);
+      const long double xi_denominator1 = eta * y3 - y1 * (eta - 1) + subexpr1;
+      if (std::abs(xi_denominator1) > 1.0E-10 * max_y) {
+        const long double xi0 = (subexpr1 + y) / xi_denominator1;
+        xi(0) = (2. * xi0) - 1.;
+        bool status = true;
+        // Check if xi is within the cell
+        for (unsigned i = 0; i < xi.size(); ++i)
+          if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+        if (status) return xi;
+      }
+    }
+  }
+
+  // Affine guess of xi
+  Eigen::Matrix<double, 2, 1> affine_guess;
+  // Boolean to check if affine is nan
+  bool affine_nan = false;
+  // Zeros
+  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+
+  // Affine tolerance
+  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
+
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
+
+  // Affine residual
+  Eigen::Matrix<double, 2, 1> affine_residual;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    Eigen::Matrix<double, 2, 2> A;
-    A = nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+    const Eigen::Matrix<double, 2, 2> A =
+        nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
 
     // b = vertex * Kb
-    Eigen::Matrix<double, 2, 1> b =
+    const Eigen::Matrix<double, 2, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 2, 1> affine_guess = A.inverse() * b;
+    // const Eigen::Matrix<double, 2, 1>
+    affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) affine_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!affine_nan) xi = affine_guess;
+    // If guess is nan set xi to zero
+    else
+      xi.setZero();
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> fx = (nodal_coords * sf) - point;
+    affine_residual = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
+    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
       return xi;
   }
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 100;
+
+  // Tolerance for newton raphson
+  const double Tolerance = 1.0E-10;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
+  Eigen::Matrix<double, 2, 1> nr_residual;
+  unsigned iter = 0;
+  for (; iter < max_iterations; ++iter) {
+    // Calculate local Jacobian
+    const Eigen::Matrix<double, 2, 2> jacobian =
+        element_->jacobian_local(xi, unit_cell, zero, zero);
 
-    // Calculate Jacobian
-    Eigen::Matrix<double, 2, 2> jacobian = element_->jacobian(xi, unit_cell);
+    // Set guess xi to zero
+    if (std::abs(jacobian.determinant()) < 1.0E-10) xi.setZero();
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // Residual (f(x))
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 2, 1> residual = (nodal_coords * sf) - point;
+    nr_residual = (nodal_coords * sf) - point;
 
-    // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * residual);
+    // f(x)/f'(x)
+    const Eigen::Matrix<double, 2, 1> delta = jacobian.inverse() * nr_residual;
 
+    // Line search
+    double step_length = 1.;
+    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
+      // Trial xi
+      // x_{n+1} = x_n - f(x)/f'(x)
+      const Eigen::Matrix<double, 2, 1> xi_trial = xi - (step_length * delta);
+
+      // Trial shape function
+      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
+
+      // Trial residual: f(x) = p(x) - p, where p is the real point
+      const Eigen::Matrix<double, 2, 1> nr_residual_trial =
+          (nodal_coords * sf_trial) - point;
+
+      if (nr_residual_trial.norm() < nr_residual.norm()) {
+        xi = xi_trial;
+        nr_residual = nr_residual_trial;
+        break;
+      } else if (step_length > 0.05)
+        step_length /= 2.;
+      else {
+        // Line search failed
+        break;
+      }
+    }
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if ((step_length * delta).norm() < Tolerance) break;
+
+    // Check for nan and set to a trial xi
+    if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
+  // At end of iteration return affine or xi based on lowest norm
+  if ((iter == max_iterations) && !affine_nan &&
+      (element_->degree() == mpm::ElementDegree::Linear))
+    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+
   return xi;
 }
 
@@ -678,14 +835,13 @@ template <>
 inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     const Eigen::Matrix<double, 3, 1>& point) {
 
+  // If not isoparametric then use cartesian transformation
+  if (!this->isoparametric_)
+    return mpm::Cell<3>::local_coordinates_point(point);
+
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 3, 1> xi;
   xi.setZero();
-
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 100;
-  // Tolerance for newton raphson
-  const double tolerance = 1.e-11;
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
@@ -701,63 +857,125 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     }
   }
 
+  // Affine transformation, using linear interpolation for the initial guess
+  // Affine guess of xi
+  Eigen::Matrix<double, 3, 1> affine_guess;
+  // Boolean to check if affine is nan
+  bool affine_nan = false;
+  // Zeros
+  const Eigen::Matrix<double, 3, 1> zero = Eigen::Matrix<double, 3, 1>::Zero();
+
+  // Affine tolerance
+  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
+
   // Coordinates of a unit cell
   const auto unit_cell = element_->unit_cell_coordinates();
+
+  // Affine residual
+  Eigen::Matrix<double, 3, 1> affine_residual;
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    Eigen::Matrix<double, 3, 3> A;
-    A = nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
+    const Eigen::Matrix<double, 3, 3> A =
+        nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
 
     // b = vertex * Kb
-    Eigen::Matrix<double, 3, 1> b =
+    const Eigen::Matrix<double, 3, 1> b =
         point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
 
     // Affine transform: A^-1 * b
-    Eigen::Matrix<double, 3, 1> affine_guess = A.inverse() * b;
+    // const Eigen::Matrix<double, 3, 1>
+    affine_guess = A.inverse() * b;
 
     // Check for nan
-    bool guess_nan = false;
     for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(std::fabs(affine_guess(i)))) bool guess_nan = true;
+      if (std::isnan(affine_guess(i))) affine_nan = true;
 
     // Set xi to affine guess
-    if (!guess_nan) xi = affine_guess;
+    if (!affine_nan) xi = affine_guess;
+    // If guess is nan set xi to zero
+    else
+      xi.setZero();
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Local shape function
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
     // f(x) = p(x) - p, where p is the real point
-    Eigen::Matrix<double, 3, 1> fx = (nodal_coords * sf) - point;
+    affine_residual = (nodal_coords * sf) - point;
 
     // Early exit
-    if (fx.squaredNorm() < (1e-24 * this->mean_length_ * this->mean_length_))
+    if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
       return xi;
   }
+
+  // Maximum iterations of newton raphson
+  const unsigned max_iterations = 100;
+
+  // Tolerance for newton raphson
+  const double Tolerance = 1.0E-10;
 
   // Newton Raphson iteration to solve for x
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  for (unsigned iter = 0; iter < max_iterations; ++iter) {
-    // Calculate Jacobian
-    Eigen::Matrix<double, 3, 3> jacobian = element_->jacobian(xi, unit_cell);
+  Eigen::Matrix<double, 3, 1> nr_residual;
+  unsigned iter = 0;
+  for (; iter < max_iterations; ++iter) {
+    // Calculate local Jacobian
+    const Eigen::Matrix<double, 3, 3> jacobian =
+        element_->jacobian_local(xi, unit_cell, zero, zero);
 
-    // Shape function
-    const auto sf = element_->shapefn(xi);
+    // Set guess xi to zero
+    if (std::abs(jacobian.determinant()) < 1.0E-10) xi.setZero();
 
-    // Residual f(x)
-    Eigen::Matrix<double, 3, 1> residual;
-    // f(x) = p(x) - p
-    residual = (nodal_coords * sf) - point;
+    // Local shape function
+    const auto sf = element_->shapefn_local(xi, zero, zero);
 
-    // x_{n+1} = x_n - f(x)/f'(x)
-    xi -= (jacobian.inverse() * residual);
+    // Residual (f(x))
+    // f(x) = p(x) - p, where p is the real point
+    nr_residual = (nodal_coords * sf) - point;
 
+    // f(x)/f'(x)
+    const Eigen::Matrix<double, 3, 1> delta = jacobian.inverse() * nr_residual;
+
+    // Line search
+    double step_length = 1.;
+    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
+      // Trial xi
+      // x_{n+1} = x_n - f(x)/f'(x)
+      const Eigen::Matrix<double, 3, 1> xi_trial = xi - (step_length * delta);
+
+      // Trial shape function
+      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
+
+      // Trial residual: f(x) = p(x) - p, where p is the real point
+      const Eigen::Matrix<double, 3, 1> nr_residual_trial =
+          (nodal_coords * sf_trial) - point;
+
+      if (nr_residual_trial.norm() < nr_residual.norm()) {
+        xi = xi_trial;
+        nr_residual = nr_residual_trial;
+        break;
+      } else if (step_length > 0.05)
+        step_length /= 2.;
+      else {
+        // Line search failed
+        break;
+      }
+    }
     // Convergence criteria
-    if (residual.norm() < tolerance) break;
+    if ((step_length * delta).norm() < Tolerance) break;
+
+    // Check for nan and set to a trial xi
+    if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
+  // At end of iteration return affine or xi based on lowest norm
+  if ((iter == max_iterations) && !affine_nan &&
+      (element_->degree() == mpm::ElementDegree::Linear))
+    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+
   return xi;
 }
 
@@ -806,24 +1024,8 @@ template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
     const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
   // Define strain rate
-  Eigen::VectorXd strain_rate;
-
-  switch (Tdim) {
-    case (1): {
-      strain_rate.resize(1);
-      break;
-    }
-    case (2): {
-      strain_rate.resize(3);
-      break;
-    }
-    default: {
-      strain_rate.resize(6);
-      break;
-    }
-  }
-
-  strain_rate.setZero();
+  Eigen::Matrix<double, Tdof, 1> strain_rate =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
 
   try {
     // Check if B-Matrix size and number of nodes match
@@ -832,10 +1034,8 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
       throw std::runtime_error(
           "Number of nodes / shapefn doesn't match BMatrix");
 
-    for (unsigned i = 0; i < this->nnodes(); ++i) {
-      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
-      strain_rate += bmatrix.at(i) * node_velocity;
-    }
+    for (unsigned i = 0; i < this->nnodes(); ++i)
+      strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -845,25 +1045,15 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
-  // Get centroid of a cell in natural coordinates which are zeros
-  Eigen::Matrix<double, Tdim, 1> xi_centroid;
-  xi_centroid.setZero();
-
-  // Get B-Matrix at the centroid
-  auto bmatrix = element_->bmatrix(xi_centroid, this->nodal_coordinates());
 
   // Define strain rate at centroid
-  Eigen::VectorXd strain_rate_centroid;
-  strain_rate_centroid.resize(bmatrix.at(0).rows());
-  strain_rate_centroid.setZero();
+  Eigen::Matrix<double, Tdof, 1> strain_rate_centroid =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix_centroid_.at(0).rows());
 
   // Compute strain rate
-  for (unsigned i = 0; i < bmatrix.size(); ++i) {
-    for (unsigned i = 0; i < this->nnodes(); ++i) {
-      Eigen::Matrix<double, Tdim, 1> node_velocity = nodes_[i]->velocity(phase);
-      strain_rate_centroid += bmatrix.at(i) * node_velocity;
-    }
-  }
+  for (unsigned i = 0; i < this->nnodes(); ++i)
+    strain_rate_centroid +=
+        bmatrix_centroid_.at(i) * nodes_[i]->velocity(phase);
   return strain_rate_centroid;
 }
 
@@ -925,10 +1115,11 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
 
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(
+Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
     const Eigen::VectorXd& shapefn, unsigned phase) {
-  Eigen::Matrix<double, Tdim, 1> velocity =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::Matrix<double, Tdim, 1> velocity;
+  velocity.setZero();
+
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     velocity += shapefn(i) * nodes_[i]->velocity(phase);
 
@@ -937,10 +1128,10 @@ Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_velocity(
 
 //! Return acceleration at a point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::interpolate_nodal_acceleration(
+Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     const Eigen::VectorXd& shapefn, unsigned phase) {
-  Eigen::Matrix<double, Tdim, 1> acceleration =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
+  Eigen::Matrix<double, Tdim, 1> acceleration;
+  acceleration.setZero();
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 

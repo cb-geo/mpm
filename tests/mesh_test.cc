@@ -3,6 +3,10 @@
 
 #include "Eigen/Dense"
 #include "catch.hpp"
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
 
 #include "element.h"
 #include "hexahedron_element.h"
@@ -34,6 +38,14 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       unsigned id = 0;
       auto mesh = std::make_shared<mpm::Mesh<Dim>>(id);
       REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == true);
+    }
+
+    SECTION("Mesh id is zero and cartesian") {
+      unsigned id = 0;
+      auto mesh = std::make_shared<mpm::Mesh<Dim>>(id, false);
+      REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == false);
     }
 
     SECTION("Mesh id is positive") {
@@ -71,38 +83,39 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Define nodes
     coords << 0., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    // Add node 0 and check status
-    bool node_status0 = mesh->add_node(node0);
-    REQUIRE(node_status0 == true);
+    // Add node 0 and check
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    // Add node 1 and check status
-    bool node_status1 = mesh->add_node(node1);
-    REQUIRE(node_status1 == true);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    // Add node 2 and check status
-    bool node_status2 = mesh->add_node(node2);
-    REQUIRE(node_status2 == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    // Add node 3 and check status
-    bool node_status3 = mesh->add_node(node3);
-    REQUIRE(node_status3 == true);
+    // Add node 3 and check
+    REQUIRE(mesh->add_node(node3) == true);
 
     // Create cell1
     coords.setZero();
@@ -114,18 +127,20 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Add cell 1 and check status
+    // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Add particle 1 and check status
-    bool status1 = mesh->add_particle(particle1);
-    REQUIRE(status1 == true);
-    // Add particle 2 and check status
-    bool status2 = mesh->add_particle(particle2);
-    REQUIRE(status2 == true);
-    // Add particle 2 again and check status
-    bool status3 = mesh->add_particle(particle2);
-    REQUIRE(status3 == false);
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 4);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 4);
+
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
+    // Add particle 2 again and check
+    REQUIRE(mesh->add_particle(particle2) == false);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -157,9 +172,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
-    // Remove particle 2 and check status
-    bool remove_status = mesh->remove_particle(particle2);
-    REQUIRE(remove_status == true);
+    // Remove particle 2 and check
+    REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
   }
@@ -183,18 +197,23 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add node 1 and check status
-    bool status1 = mesh->add_node(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = mesh->add_node(node2);
-    REQUIRE(status2 == true);
-    // Add node 2 again and check status
-    bool status3 = mesh->add_node(node2);
-    REQUIRE(status3 == false);
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
+    // Add node 2 again and check
+    REQUIRE(mesh->add_node(node2) == false);
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 2);
 
     // Update coordinates
     Eigen::Vector2d coordinates;
@@ -226,6 +245,42 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
+    coordinates.setZero();
+    node1->assign_coordinates(coordinates);
+    node2->assign_coordinates(coordinates);
+    for (unsigned i = 0; i < coordinates.size(); ++i) {
+      REQUIRE(node1->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node2->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(node1->status() == false);
+    REQUIRE(node2->status() == true);
+
+    mesh->find_active_nodes();
+
+    // Check iterate over functionality if nodes are active
+    coordinates.fill(5.3);
+
+    mesh->iterate_over_active_nodes(
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                  std::placeholders::_1, coordinates));
+
+    // Node 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(5.3).epsilon(Tolerance));
+    }
+
+    coordinates.fill(1.0);
     // Check iterate over functionality
     mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                                        std::placeholders::_1, coordinates));
@@ -247,9 +302,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         REQUIRE(check_coords[i] == Approx(1.).epsilon(Tolerance));
     }
 
-    // Remove node 2 and check status
-    bool remove_status = mesh->remove_node(node2);
-    REQUIRE(remove_status == true);
+    // Remove node 2 and check
+    REQUIRE(mesh->remove_node(node2) == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
   }
@@ -271,15 +325,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add cell 1 and check status
-    bool status1 = mesh->add_cell(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = mesh->add_cell(cell2);
-    REQUIRE(status2 == true);
-    // Add cell 2 again and check status
-    bool status3 = mesh->add_cell(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+    // Add cell 2 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
+    // Add cell 2 again and check
+    REQUIRE(mesh->add_cell(cell2) == false);
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
@@ -288,9 +339,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mesh->iterate_over_cells(
         std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
 
-    // Remove cell 2 and check status
-    bool remove_status = mesh->remove_cell(cell2);
-    REQUIRE(remove_status == true);
+    // Remove cell 2 and check
+    REQUIRE(mesh->remove_cell(cell2) == true);
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 1);
   }
@@ -310,33 +360,29 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
 
-    // Add node 0 and check status
-    bool node_status0 = mesh->add_node(node0);
-    REQUIRE(node_status0 == true);
+    // Add node 0 and check
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
 
-    // Add node 1 and check status
-    bool node_status1 = mesh->add_node(node1);
-    REQUIRE(node_status1 == true);
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
 
-    // Add node 2 and check status
-    bool node_status2 = mesh->add_node(node2);
-    REQUIRE(node_status2 == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    // Add node 3 and check status
-    bool node_status3 = mesh->add_node(node3);
-    REQUIRE(node_status3 == true);
+    // Add node 3 and check
+    REQUIRE(mesh->add_node(node3) == true);
 
     // Create cell1
     coords.setZero();
@@ -351,9 +397,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Compute cell volume
     cell1->compute_volume();
 
-    // Add cell 1 and check status
-    bool cell_status1 = mesh->add_cell(cell1);
-    REQUIRE(cell_status1 == true);
+    // Generate material points in cell
+    auto points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 0);
+
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Generate material points in cell
+    points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 1);
+
+    points = mesh->generate_material_points(2);
+    REQUIRE(points.size() == 4);
+
+    points = mesh->generate_material_points(3);
+    REQUIRE(points.size() == 9);
 
     // Particle 1
     coords << 1.0, 1.0;
@@ -365,12 +424,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
 
-    // Add particle 1 and check status
-    bool particle_status1 = mesh->add_particle(particle1);
-    REQUIRE(particle_status1 == true);
-    // Add particle 2 and check status
-    bool particle_status2 = mesh->add_particle(particle2);
-    REQUIRE(particle_status2 == true);
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -426,7 +483,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       const std::string node_type = "N2D";
       // Global node index
       mpm::Index gnid = 0;
-      mesh->create_nodes(gnid, node_type, coordinates);
+      mesh->create_nodes(gnid, node_type, coordinates, false);
       // Check if mesh has added nodes
       REQUIRE(mesh->nnodes() == coordinates.size());
       // Try again this shouldn't add more coordinates
@@ -452,7 +509,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
         // Global cell index
         mpm::Index gcid = 0;
-        mesh->create_cells(gcid, element, cells);
+        mesh->create_cells(gcid, element, cells, false);
         // Check if mesh has added cells
         REQUIRE(mesh->ncells() == cells.size());
         // Try again this shouldn't add more cells
@@ -516,14 +573,66 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particle type 2D
             const std::string particle_type = "P2D";
             // Global particle index
-            mpm::Index gpid = 0;
-            mesh->create_particles(gpid, particle_type, coordinates);
+            std::vector<mpm::Index> gpid(coordinates.size());
+            std::iota(gpid.begin(), gpid.end(), 0);
+            mesh->create_particles(gpid, particle_type, coordinates, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
             // Try again this shouldn't add more coordinates
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
+
+            // Test assign particles cells
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({3, 0}));
+
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({4, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({5, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({6, 1}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({7, 1}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == true);
+
+              // Locate particles
+              auto missing_particles = mesh->locate_particles_mesh();
+              REQUIRE(missing_particles.size() == 0);
+
+              auto check_particles_cells = mesh->particles_cells();
+
+              REQUIRE(check_particles_cells.size() == mesh->nparticles());
+
+              for (unsigned i = 0; i < particles_cells.size(); ++i)
+                for (unsigned j = 0; j < 2; ++j)
+                  REQUIRE(check_particles_cells.at(i).at(j) ==
+                          particles_cells.at(i).at(j));
+            }
+
+            // Locate particles
+            auto missing_particles = mesh->locate_particles_mesh();
+            REQUIRE(missing_particles.size() == 0);
+
+            // Test assign particles cells again should fail
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>(
+                  {3, std::numeric_limits<mpm::Index>::max()}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({50, 0}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == false);
+            }
+
             // Clear coordinates and try creating a list of particles with
             // an empty list
             unsigned nparticles = coordinates.size();
@@ -567,9 +676,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
                   std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
 
-              // Add particle100 and check status
-              bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == false);
+              // Add particle100 and check
+              REQUIRE(mesh->add_particle(particle100) == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
@@ -580,6 +688,27 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
+            }
+
+            // Test assign particles volumes
+            SECTION("Check assign particles volumes") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, double>> particles_volumes;
+              // Volumes
+              particles_volumes.emplace_back(std::make_tuple(0, 10.5));
+              particles_volumes.emplace_back(std::make_tuple(1, 10.5));
+
+              REQUIRE(mesh->nparticles() == 8);
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      true);
+
+              // When volume assignment fails
+              particles_volumes.emplace_back(std::make_tuple(2, 0.0));
+              particles_volumes.emplace_back(std::make_tuple(3, -10.0));
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      false);
             }
 
             // Test assign particles tractions
@@ -593,6 +722,15 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
 
+              REQUIRE(mesh->nparticles() == 8);
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              // Compute volume
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
+                            std::placeholders::_1, phase));
+
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
               // When tractions fail
@@ -602,6 +740,65 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 6);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+            }
+
+            // Test assign particles stresses
+            SECTION("Check assign particles stresses") {
+              // Vector of particle stresses
+              std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+              REQUIRE(mesh->nparticles() == 8);
+
+              // Stresses
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.0));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.1));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.2));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.3));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.4));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.5));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.6));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.7));
+
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      true);
+              // When stresses fail
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.8));
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      false);
+              unsigned id = 1;
+              auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(id);
+              REQUIRE(mesh_fail->assign_particles_stresses(
+                          particles_stresses) == false);
             }
           }
         }
@@ -669,6 +866,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       unsigned id = 0;
       auto mesh = std::make_shared<mpm::Mesh<Dim>>(id);
       REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == true);
+    }
+
+    SECTION("Mesh id is zero and cartesian") {
+      unsigned id = 0;
+      auto mesh = std::make_shared<mpm::Mesh<Dim>>(id, false);
+      REQUIRE(mesh->id() == 0);
+      REQUIRE(mesh->is_isoparametric() == false);
     }
 
     SECTION("Mesh id is positive") {
@@ -706,38 +911,51 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
     // Define nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+    REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+    REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+    REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+    REQUIRE(mesh->add_node(node3) == true);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+    REQUIRE(mesh->add_node(node4) == true);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+    REQUIRE(mesh->add_node(node5) == true);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+    REQUIRE(mesh->add_node(node6) == true);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+    REQUIRE(mesh->add_node(node7) == true);
 
     // Create cell1
     auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
@@ -756,11 +974,16 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     REQUIRE(mesh->add_cell(cell1) == true);
 
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 8);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 12);
+
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
     // Add particle 2 and check
     REQUIRE(mesh->add_particle(particle2) == true);
-    // Add particle 2 again and check status
+    // Add particle 2 again and check
     REQUIRE(mesh->add_particle(particle2) == false);
 
     // Check mesh is active
@@ -768,9 +991,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 2);
 
-    // Remove particle 2 and check status
-    bool remove_status = mesh->remove_particle(particle2);
-    REQUIRE(remove_status == true);
+    // Remove particle 2 and check
+    REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
   }
@@ -793,15 +1015,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add node 1 and check status
-    bool status1 = mesh->add_node(node1);
-    REQUIRE(status1 == true);
-    // Add node 2 and check status
-    bool status2 = mesh->add_node(node2);
-    REQUIRE(status2 == true);
-    // Add node 2 again and check status
-    bool status3 = mesh->add_node(node2);
-    REQUIRE(status3 == false);
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 0);
+    // Check node pairs size
+    REQUIRE(mesh->node_pairs().size() == 0);
+
+    // Add node 1 and check
+    REQUIRE(mesh->add_node(node1) == true);
+    // Add node 2 and check
+    REQUIRE(mesh->add_node(node2) == true);
+    // Add node 2 again and check
+    REQUIRE(mesh->add_node(node2) == false);
+
+    // Check nodal coordinates size
+    REQUIRE(mesh->nodal_coordinates().size() == 2);
 
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 2);
@@ -836,6 +1063,43 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
     }
 
+    coordinates.setZero();
+    node1->assign_coordinates(coordinates);
+    node2->assign_coordinates(coordinates);
+    for (unsigned i = 0; i < coordinates.size(); ++i) {
+      REQUIRE(node1->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+      REQUIRE(node2->coordinates()[i] == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(node1->status() == false);
+    REQUIRE(node2->status() == true);
+
+    mesh->find_active_nodes();
+
+    // Check iterate over functionality if nodes are active
+    coordinates.fill(5.3);
+
+    mesh->iterate_over_active_nodes(
+        std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                  std::placeholders::_1, coordinates));
+
+    // Node 1
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(0.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(5.3).epsilon(Tolerance));
+    }
+
+    coordinates.fill(7.0);
+
     // Check iterate over functionality
     mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                                        std::placeholders::_1, coordinates));
@@ -857,9 +1121,50 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
     }
 
-    // Remove node 2 and check status
-    bool remove_status = mesh->remove_node(node2);
-    REQUIRE(remove_status == true);
+    mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::update_mass,
+                                       std::placeholders::_1, false, 0, 10.0));
+
+#ifdef USE_MPI
+    // Get number of MPI ranks
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) {
+      // Run if there is more than a single MPI task
+      // MPI all reduce nodal mass
+      mesh->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Dim>::mass, std::placeholders::_1, 0),
+          std::bind(&mpm::NodeBase<Dim>::update_mass, std::placeholders::_1,
+                    false, 0, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      mesh->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Dim>::coordinates, std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
+                    std::placeholders::_1, std::placeholders::_2));
+    }
+#endif
+    // Node 1
+    {
+      // Check mass
+      REQUIRE(node1->mass(0) == Approx(10.).epsilon(Tolerance));
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node1->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
+    // Node 2
+    {
+      // Check mass
+      REQUIRE(node2->mass(0) == Approx(10.).epsilon(Tolerance));
+      // Check if nodal coordinate update has gone through
+      auto check_coords = node2->coordinates();
+      // Check if coordinates for each node is zero
+      for (unsigned i = 0; i < check_coords.size(); ++i)
+        REQUIRE(check_coords[i] == Approx(7.).epsilon(Tolerance));
+    }
+
+    // Remove node 2 and check
+    REQUIRE(mesh->remove_node(node2) == true);
     // Check number of nodes in mesh
     REQUIRE(mesh->nnodes() == 1);
   }
@@ -880,15 +1185,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check mesh is active
     REQUIRE(mesh->status() == false);
 
-    // Add cell 1 and check status
-    bool status1 = mesh->add_cell(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = mesh->add_cell(cell2);
-    REQUIRE(status2 == true);
-    // Add cell 2 again and check status
-    bool status3 = mesh->add_cell(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+    // Add cell 2 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
+    // Add cell 2 again and check
+    REQUIRE(mesh->add_cell(cell2) == false);
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
@@ -897,9 +1199,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->iterate_over_cells(
         std::bind(&mpm::Cell<Dim>::nnodes, std::placeholders::_1));
 
-    // Remove cell 2 and check status
-    bool remove_status = mesh->remove_cell(cell2);
-    REQUIRE(remove_status == true);
+    // Remove cell 2 and check
+    REQUIRE(mesh->remove_cell(cell2) == true);
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 1);
   }
@@ -969,9 +1270,22 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Compute cell volume
     cell1->compute_volume();
 
-    // Add cell 1 and check status
-    bool cell_status1 = mesh->add_cell(cell1);
-    REQUIRE(cell_status1 == true);
+    // Generate material points in cell
+    auto points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 0);
+
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Generate material points in cell
+    points = mesh->generate_material_points(1);
+    REQUIRE(points.size() == 1);
+
+    points = mesh->generate_material_points(2);
+    REQUIRE(points.size() == 8);
+
+    points = mesh->generate_material_points(3);
+    REQUIRE(points.size() == 27);
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
@@ -983,12 +1297,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
 
-    // Add particle 1 and check status
-    bool particle_status1 = mesh->add_particle(particle1);
-    REQUIRE(particle_status1 == true);
-    // Add particle 2 and check status
-    bool particle_status2 = mesh->add_particle(particle2);
-    REQUIRE(particle_status2 == true);
+    // Add particle 1 and check
+    REQUIRE(mesh->add_particle(particle1) == true);
+    // Add particle 2 and check
+    REQUIRE(mesh->add_particle(particle2) == true);
 
     // Check mesh is active
     REQUIRE(mesh->status() == true);
@@ -1173,7 +1485,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particle type 3D
             const std::string particle_type = "P3D";
             // Global particle index
-            mpm::Index gpid = 0;
+            std::vector<mpm::Index> gpid(coordinates.size());
+            std::iota(gpid.begin(), gpid.end(), 0);
             mesh->create_particles(gpid, particle_type, coordinates);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
@@ -1188,6 +1501,21 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // This fails with empty list error in particle creation
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
+
+            // Test assign particles cells again should fail
+            SECTION("Check assign particles cells") {
+              // Vector of particle cells
+              std::vector<std::array<mpm::Index, 2>> particles_cells;
+              // Particle cells
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>(
+                  {3, std::numeric_limits<mpm::Index>::max()}));
+              particles_cells.emplace_back(std::array<mpm::Index, 2>({50, 0}));
+
+              REQUIRE(mesh->assign_particles_cells(particles_cells) == false);
+            }
 
             const unsigned phase = 0;
             // Particles coordinates
@@ -1222,18 +1550,76 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
                   std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
 
-              // Add particle100 and check status
-              bool particle100_status = mesh->add_particle(particle100);
-              REQUIRE(particle100_status == false);
+              // Add particle100 and check
+              REQUIRE(mesh->add_particle(particle100) == false);
 
               // Locate particles in a mesh
               particles = mesh->locate_particles_mesh();
               // Should miss particle100
               REQUIRE(particles.size() == 0);
+
+              SECTION("Check return particles cells") {
+                // Vector of particle cells
+                std::vector<std::array<mpm::Index, 2>> particles_cells;
+                // Particle cells
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({0, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({1, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({2, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({3, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({4, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({5, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({6, 0}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({7, 0}));
+
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({8, 1}));
+                particles_cells.emplace_back(std::array<mpm::Index, 2>({9, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({10, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({11, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({12, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({13, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({14, 1}));
+                particles_cells.emplace_back(
+                    std::array<mpm::Index, 2>({15, 1}));
+
+                auto check_particles_cells = mesh->particles_cells();
+
+                REQUIRE(check_particles_cells.size() == mesh->nparticles());
+
+                for (unsigned i = 0; i < particles_cells.size(); ++i)
+                  for (unsigned j = 0; j < 2; ++j)
+                    REQUIRE(check_particles_cells.at(i).at(j) ==
+                            particles_cells.at(i).at(j));
+              }
             }
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+            }
+
+            // Test assign particles volumes
+            SECTION("Check assign particles volumes") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, double>> particles_volumes;
+              // Volumes
+              particles_volumes.emplace_back(std::make_tuple(0, 10.5));
+              particles_volumes.emplace_back(std::make_tuple(1, 10.5));
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      true);
+
+              // When volume assignment fails
+              particles_volumes.emplace_back(std::make_tuple(2, 0.0));
+              particles_volumes.emplace_back(std::make_tuple(3, -10.0));
+
+              REQUIRE(mesh->assign_particles_volumes(particles_volumes) ==
+                      false);
             }
 
             // Test assign particles tractions
@@ -1248,6 +1634,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+                      false);
+              // Compute volume
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
+                            std::placeholders::_1, phase));
+
+              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
               // When tractions fail
               particles_tractions.emplace_back(std::make_tuple(3, 3, 0.0));
@@ -1256,6 +1649,81 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       false);
+            }
+
+            // Test assign nodes tractions
+            SECTION("Check assign nodes tractions") {
+              // Vector of node coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  nodes_tractions;
+              // Tractions
+              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
+              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
+              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
+              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->nnodes() == 12);
+
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
+              // When tractions fail
+              nodes_tractions.emplace_back(std::make_tuple(3, 4, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
+              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+            }
+
+            // Test assign particles stresses
+            SECTION("Check assign particles stresses") {
+              // Vector of particle stresses
+              std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              // Stresses
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.0));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.1));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.2));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.4));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.3));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.5));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.6));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.7));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.8));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.9));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.10));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.11));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.12));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.13));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(-0.14));
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.15));
+
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      true);
+              // When stresses fail
+              particles_stresses.emplace_back(
+                  Eigen::Matrix<double, 6, 1>::Constant(0.16));
+              REQUIRE(mesh->assign_particles_stresses(particles_stresses) ==
+                      false);
+              unsigned id = 1;
+              auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(id);
+              REQUIRE(mesh_fail->assign_particles_stresses(
+                          particles_stresses) == false);
             }
           }
         }

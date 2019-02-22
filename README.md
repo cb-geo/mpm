@@ -1,5 +1,5 @@
-# 2D/3D Material Point Method (mpm)
-> Cambridge Berkeley - Geomechanics
+# High-Performance Material Point Method (CB-Geo mpm)
+> [CB-Geo Computational Geomechanics Research Group](https://www.cb-geo.com)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/cb-geo/mpm/develop/license.md)
 [![Developer docs](https://img.shields.io/badge/developer-docs-blue.svg)](http://cb-geo.github.io/mpm)
@@ -28,6 +28,7 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
+* [MPI](https://www.open-mpi.org/)
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -36,9 +37,19 @@ Please run the following command:
 
 ```shell
 dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
-                   git hdf5 hdf5-devel kernel-devel lcov\
+                   git hdf5 hdf5-devel hdf5-openmpi hdf5-openmpi-devel kernel-devel lcov\
                    make openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
                    voro++ voro++-devel vtk vtk-devel wget
+```
+
+### Ubuntu installation
+
+Please run the following commands to install dependencies:
+
+```
+sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
+                        libtbb-dev libvtk7-dev
+
 ```
 
 ## Compile
@@ -56,7 +67,6 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 
 To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
 
-
 ### Run tests
 
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
@@ -67,19 +77,22 @@ To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TY
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
 ```
-./mpm  -f <working_dir> [-i <input_file>] [--] [--version]
-       [-h]
+   ./mpm  [-p <tbb_parallel>] [-i <input_file>] -f <working_dir> [--]
+          [--version] [-h]
 ```
 
 For example:
 
 ```
-./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json
+./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json -p 8
 ```
 
 Where:
 
 ```
+
+   -p <tbb_parallel>,  --tbb_parallel <tbb_parallel>
+     Number of parallel TBB threads
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]
@@ -97,6 +110,38 @@ Where:
      Displays usage information and exits.
 ```
 
-## References
-* [Aspect](https://github.com/geodynamics/aspect)
-* [Dealii](https://github.com/dealii/dealii)
+## Compile with MPI (Running on a cluster)
+
+The CB-Geo mpm code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
+
+Additional steps to load `OpenMPI` on Fedora:
+
+```
+source /etc/profile.d/modules.sh
+export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+module load mpi/openmpi-x86_64
+```
+
+Compile with OpenMPI:
+
+```
+mkdir build && cd build 
+export CXX_COMPILER=mpicxx
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+make -jN
+```
+
+### Running the code with MPI
+
+To run the CB-Geo mpm code on a cluster with MPI:
+
+```
+mpirun -N <#-MPI-tasks> ./mpm -f /path/to/input-dir/ -i mpm.json
+```
+
+For example to run the code on 4 compute nodes (MPI tasks):
+
+```
+mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
+```
+

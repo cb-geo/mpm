@@ -35,6 +35,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
         {"particles", "particles-" + dimension + ".txt"}}},
       {"mesh",
        {{"mesh_reader", mesh_reader},
+        {"check_duplicates", true},
         {"node_type", node_type},
         {"material_id", 1},
         {"cell_type", cell_type},
@@ -186,6 +187,7 @@ bool write_particles_2d() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-2d.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {
@@ -352,6 +354,7 @@ bool write_particles_3d() {
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
   file.open("particles-3d.txt");
+  file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
     for (unsigned i = 0; i < coord.size(); ++i) {

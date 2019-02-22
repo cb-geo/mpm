@@ -1,6 +1,7 @@
 #ifndef MPM_MPM_H_
 #define MPM_MPM_H_
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -39,10 +40,16 @@ class MPM {
   }
 
   // Initialise mesh and particles
-  virtual bool initialise_mesh_particles() = 0;
+  virtual bool initialise_mesh() = 0;
+
+  // Initialise particles
+  virtual bool initialise_particles() = 0;
 
   // Initialise materials
   virtual bool initialise_materials() = 0;
+
+  //! Apply nodal tractions
+  virtual bool apply_nodal_tractions() = 0;
 
   // Solve
   virtual bool solve() = 0;
