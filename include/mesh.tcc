@@ -1,6 +1,7 @@
 // Constructor with id
 template <unsigned Tdim>
-mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
+mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
+    : id_{id}, isoparametric_{isoparametric} {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   //! Logger
@@ -14,7 +15,8 @@ mpm::Mesh<Tdim>::Mesh(unsigned id) : id_{id} {
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
                                    const std::string& node_type,
-                                   const std::vector<VectorDim>& coordinates) {
+                                   const std::vector<VectorDim>& coordinates,
+                                   bool check_duplicates) {
   bool status = true;
   try {
     // Check if nodal coordinates is empty
@@ -28,7 +30,8 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
           Factory<mpm::NodeBase<Tdim>, mpm::Index,
                   const Eigen::Matrix<double, Tdim, 1>&>::instance()
               ->create(node_type, static_cast<mpm::Index>(gnid),
-                       node_coordinates));
+                       node_coordinates),
+          check_duplicates);
 
       // Increment node id
       if (insert_status) ++gnid;
@@ -45,9 +48,9 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
 
 //! Add a node to the mesh
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_node(
-    const std::shared_ptr<mpm::NodeBase<Tdim>>& node) {
-  bool insertion_status = nodes_.add(node);
+bool mpm::Mesh<Tdim>::add_node(const std::shared_ptr<mpm::NodeBase<Tdim>>& node,
+                               bool check_duplicates) {
+  bool insertion_status = nodes_.add(node, check_duplicates);
   // Add node to map
   if (insertion_status) map_nodes_.insert(node->id(), node);
   return insertion_status;
@@ -73,16 +76,89 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  for (auto itr = nodes_.cbegin(); itr != nodes_.cend(); ++itr) {
-    if (pred(*itr)) oper(*itr);
-  }
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
+                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+                           if (pred(node)) oper(node);
+                         });
 }
+
+//! Create a list of active nodes in mesh
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_active_nodes() {
+  // Clear existing list of active nodes
+  this->active_nodes_.clear();
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
+}
+
+//! Iterate over active nodes
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
+  tbb::parallel_for_each(active_nodes_.cbegin(), active_nodes_.cend(), oper);
+}
+
+#ifdef USE_MPI
+//! All reduce over nodal scalar property
+template <unsigned Tdim>
+template <typename Tgetfunctor, typename Tsetfunctor>
+void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
+                                                      Tsetfunctor setter) {
+  // Create vector of nodal scalars
+  mpm::Index nnodes = this->nodes_.size();
+  std::vector<double> prop_get(nnodes), prop_set(nnodes);
+
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        prop_get.at(node->id()) = getter(node);
+      });
+
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
+                MPI_COMM_WORLD);
+
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        setter(node, prop_set.at(node->id()));
+      });
+}
+#endif
+
+#ifdef USE_MPI
+//! All reduce over nodal vector property
+template <unsigned Tdim>
+template <typename Tgetfunctor, typename Tsetfunctor>
+void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
+                                                      Tsetfunctor setter) {
+  // Create vector of nodal vectors
+  mpm::Index nnodes = this->nodes_.size();
+  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
+      prop_set(nnodes);
+
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        prop_get.at(node->id()) = getter(node);
+      });
+
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
+                MPI_SUM, MPI_COMM_WORLD);
+
+  tbb::parallel_for_each(
+      nodes_.cbegin(), nodes_.cend(),
+      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+        setter(node, prop_set.at(node->id()));
+      });
+}
+#endif
 
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
     mpm::Index gcid, const std::shared_ptr<mpm::Element<Tdim>>& element,
-    const std::vector<std::vector<mpm::Index>>& cells) {
+    const std::vector<std::vector<mpm::Index>>& cells, bool check_duplicates) {
   bool status = true;
   try {
     // Check if nodes in cell list is not empty
@@ -91,8 +167,8 @@ bool mpm::Mesh<Tdim>::create_cells(
 
     for (const auto& nodes : cells) {
       // Create cell with element
-      auto cell =
-          std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element);
+      auto cell = std::make_shared<mpm::Cell<Tdim>>(gcid, nodes.size(), element,
+                                                    this->isoparametric_);
 
       // Cell local node id
       unsigned local_nid = 0;
@@ -109,7 +185,8 @@ bool mpm::Mesh<Tdim>::create_cells(
         // Initialise cell before insertion
         cell->initialise();
         // If cell is initialised insert to mesh
-        if (cell->is_initialised()) insert_cell = this->add_cell(cell);
+        if (cell->is_initialised())
+          insert_cell = this->add_cell(cell, check_duplicates);
       } else
         throw std::runtime_error("Invalid node ids for cell!");
 
@@ -128,8 +205,11 @@ bool mpm::Mesh<Tdim>::create_cells(
 
 //! Add a cell to the mesh
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
-  bool insertion_status = cells_.add(cell);
+bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
+                               bool check_duplicates) {
+  bool insertion_status = cells_.add(cell, check_duplicates);
+  // Add cell to map
+  if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
 }
 
@@ -137,9 +217,9 @@ bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
+  const mpm::Index id = cell->id();
   // Remove a cell if found in the container
-  bool status = cells_.remove(cell);
-  return status;
+  return (cells_.remove(cell) && map_cells_.remove(id));
 }
 
 //! Iterate over cells
@@ -149,13 +229,43 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
   tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
 }
 
+//! Create cells from node lists
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, Tdim, 1>>
+    mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
+  std::vector<VectorDim> points;
+  try {
+    if (cells_.size() > 0) {
+      points.reserve(cells_.size() * std::pow(nquadratures, Tdim));
+
+      // Generate points
+      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+        (*citr)->assign_quadrature(nquadratures);
+        const auto cpoints = (*citr)->generate_points();
+        points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
+      }
+      console_->info(
+          "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
+          "# of points generated: {}",
+          cells_.size(), cells_.size() * std::pow(nquadratures, Tdim),
+          points.size());
+    } else
+      throw std::runtime_error("No cells are found in the mesh!");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    points.clear();
+  }
+  return points;
+}
+
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
-    mpm::Index gpid, const std::string& particle_type,
-    const std::vector<VectorDim>& coordinates) {
+    const std::vector<mpm::Index>& gp_ids, const std::string& particle_type,
+    const std::vector<VectorDim>& coordinates, bool check_duplicates) {
   bool status = true;
   try {
+    unsigned gpid = 0;
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
@@ -165,8 +275,9 @@ bool mpm::Mesh<Tdim>::create_particles(
       bool insert_status = this->add_particle(
           Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                   const Eigen::Matrix<double, Tdim, 1>&>::instance()
-              ->create(particle_type, static_cast<mpm::Index>(gpid),
-                       particle_coordinates));
+              ->create(particle_type, static_cast<mpm::Index>(gp_ids.at(gpid)),
+                       particle_coordinates),
+          check_duplicates);
 
       // Increment particle id
       if (insert_status) ++gpid;
@@ -184,14 +295,22 @@ bool mpm::Mesh<Tdim>::create_particles(
 //! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle, bool checks) {
   bool status = false;
   try {
-    // Add only if particle can be located in any cell of the mesh
-    if (this->locate_particle_cells(particle))
-      status = particles_.add(particle);
-    else
-      throw std::runtime_error("Particle not found in mesh");
+    if (checks) {
+      // Add only if particle can be located in any cell of the mesh
+      if (this->locate_particle_cells(particle)) {
+        status = particles_.add(particle, checks);
+        map_particles_.insert(particle->id(), particle);
+      } else {
+        throw std::runtime_error("Particle not found in mesh");
+      }
+    } else {
+      status = particles_.add(particle, checks);
+      map_particles_.insert(particle->id(), particle);
+    }
+    if (!status) throw std::runtime_error("Particle addition failed");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -203,9 +322,9 @@ bool mpm::Mesh<Tdim>::add_particle(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-  // Remove a particle if found in the container
-  bool status = particles_.remove(particle);
-  return status;
+  const mpm::Index id = particle->id();
+  // Remove a particle if found in the container and map
+  return (particles_.remove(particle) && map_particles_.remove(id));
 }
 
 //! Locate particles in a cell
@@ -215,14 +334,13 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 
   std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
 
-  tbb::parallel_for_each(
-      particles_.cbegin(), particles_.cend(),
-      [=, &particles](std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
-        // If particle is not found in mesh add to a list of particles
-        if (!this->locate_particle_cells(particle))
-          // Needs a lock guard here
-          particles.emplace_back(particle);
-      });
+  std::for_each(particles_.cbegin(), particles_.cend(),
+                [=, &particles](
+                    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+                  // If particle is not found in mesh add to a list of particles
+                  if (!this->locate_particle_cells(particle))
+                    particles.emplace_back(particle);
+                });
 
   return particles;
 }
@@ -230,15 +348,19 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) {
+    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   // Check the current cell if it is not invalid
-  if (particle->cell_id() != std::numeric_limits<mpm::Index>::max())
+  if (particle->cell_id() != std::numeric_limits<mpm::Index>::max()) {
+    // If a cell id is present, but not a cell locate the cell from map
+    if (!particle->cell_ptr())
+      particle->assign_cell(map_cells_[particle->cell_id()]);
     if (particle->compute_reference_location()) return true;
+  }
 
   bool status = false;
   tbb::parallel_for_each(
       cells_.cbegin(), cells_.cend(),
-      [=, &status](std::shared_ptr<mpm::Cell<Tdim>> cell) {
+      [=, &status](const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
@@ -367,12 +489,77 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
   return status;
 }
 
+//! Assign friction constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_friction_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+        friction_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign friction "
+          "constraints");
+
+    for (const auto& friction_constraint : friction_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(friction_constraint);
+      // Direction
+      unsigned dir = std::get<1>(friction_constraint);
+      // Sign
+      int sign = std::get<2>(friction_constraint);
+      // Friction
+      double friction = std::get<3>(friction_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_friction_constraint(dir, sign, friction);
+
+      if (!status)
+        throw std::runtime_error("Node or friction constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particles volumes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_volumes(
+    const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
+  bool status = true;
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign volume");
+
+    for (const auto& particle_volume : particle_volumes) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_volume);
+      // Volume
+      double volume = std::get<1>(particle_volume);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_volume(phase, volume);
+
+      if (!status)
+        throw std::runtime_error("Cannot assign invalid particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particle tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
-  bool status = false;
+  bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
@@ -387,21 +574,121 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       // Traction
       double traction = std::get<2>(particle_traction);
 
-      // Apply traction
-      for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-        if ((*pitr)->id() == pid) {
-          status = (*pitr)->assign_traction(phase, dir, traction);
-          break;
-        }
-      }
-      if (!status)
-        throw std::runtime_error("Particle not found / traction is invalid");
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_traction(phase, dir, traction);
+
+      if (!status) throw std::runtime_error("Traction is invalid for particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+//! Assign node tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        node_tractions) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign traction");
+    for (const auto& node_traction : node_tractions) {
+      // Node id
+      mpm::Index pid = std::get<0>(node_traction);
+      // Direction
+      unsigned dir = std::get<1>(node_traction);
+      // Traction
+      double traction = std::get<2>(node_traction);
+
+      if (map_nodes_.find(pid) != map_nodes_.end())
+        status = map_nodes_[pid]->assign_traction_force(phase, dir, traction);
+
+      if (!status) throw std::runtime_error("Traction is invalid for node");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle stresses
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_stresses(
+    const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign stresses");
+
+    if (particles_.size() != particle_stresses.size())
+      throw std::runtime_error(
+          "Number of particles in mesh and initial stresses don't match");
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      (*pitr)->initial_stress(phase, particle_stresses.at(i));
+      ++i;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle cells
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_cells(
+    const std::vector<std::array<mpm::Index, 2>>& particles_cells) {
+  bool status = true;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign cells");
+    for (const auto& particle_cell : particles_cells) {
+      // Particle id
+      mpm::Index pid = particle_cell[0];
+      // Cell id
+      mpm::Index cid = particle_cell[1];
+
+      map_particles_[pid]->assign_cell_id(cid);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Return particle cells
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
+    const {
+  std::vector<std::array<mpm::Index, 2>> particles_cells;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot write cells");
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      if ((*pitr)->cell_id() != std::numeric_limits<mpm::Index>::max())
+        particles_cells.emplace_back(
+            std::array<mpm::Index, 2>({(*pitr)->id(), (*pitr)->cell_id()}));
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    particles_cells.clear();
+  }
+  return particles_cells;
 }
 
 //! Assign velocity constraints to cells
@@ -471,6 +758,12 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     for (unsigned j = 0; j < Tdim; ++j)
       velocity[j] = (*pitr)->velocity(phase)[j];
 
+    // Particle local size
+    Eigen::Vector3d nsize;
+    nsize.setZero();
+    Eigen::VectorXd size = (*pitr)->natural_size();
+    for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
+
     Eigen::Matrix<double, 6, 1> stress = (*pitr)->stress(phase);
 
     Eigen::Matrix<double, 6, 1> strain = (*pitr)->strain(phase);
@@ -478,10 +771,15 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
     particle_data[i].id = (*pitr)->id();
     particle_data[i].mass = (*pitr)->mass(phase);
     particle_data[i].volume = (*pitr)->volume(phase);
+    particle_data[i].pressure = (*pitr)->pressure(phase);
 
     particle_data[i].coord_x = coordinates[0];
     particle_data[i].coord_y = coordinates[1];
     particle_data[i].coord_z = coordinates[2];
+
+    particle_data[i].nsize_x = nsize[0];
+    particle_data[i].nsize_y = nsize[1];
+    particle_data[i].nsize_z = nsize[2];
 
     particle_data[i].velocity_x = velocity[0];
     particle_data[i].velocity_y = velocity[1];
@@ -505,19 +803,22 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
     particle_data[i].status = (*pitr)->status();
 
+    particle_data[i].cell_id = (*pitr)->cell_id();
     // Counter
     ++i;
   }
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 23;
+  const hsize_t NFIELDS = 28;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
-      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, coord_x),
-      HOFFSET(HDF5Particle, coord_y),    HOFFSET(HDF5Particle, coord_z),
+      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
+      HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
+      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, nsize_x),
+      HOFFSET(HDF5Particle, nsize_y),    HOFFSET(HDF5Particle, nsize_z),
       HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
       HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
       HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
@@ -526,13 +827,15 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, strain_yy),  HOFFSET(HDF5Particle, strain_zz),
       HOFFSET(HDF5Particle, gamma_xy),   HOFFSET(HDF5Particle, gamma_yz),
       HOFFSET(HDF5Particle, gamma_xz),   HOFFSET(HDF5Particle, epsilon_v),
-      HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, status),     HOFFSET(HDF5Particle, cell_id),
   };
 
   size_t dst_sizes[NFIELDS] = {
       sizeof(particle_data[0].id),         sizeof(particle_data[0].mass),
-      sizeof(particle_data[0].volume),     sizeof(particle_data[0].coord_x),
-      sizeof(particle_data[0].coord_y),    sizeof(particle_data[0].coord_z),
+      sizeof(particle_data[0].volume),     sizeof(particle_data[0].pressure),
+      sizeof(particle_data[0].coord_x),    sizeof(particle_data[0].coord_y),
+      sizeof(particle_data[0].coord_z),    sizeof(particle_data[0].nsize_x),
+      sizeof(particle_data[0].nsize_y),    sizeof(particle_data[0].nsize_z),
       sizeof(particle_data[0].velocity_x), sizeof(particle_data[0].velocity_y),
       sizeof(particle_data[0].velocity_z), sizeof(particle_data[0].stress_xx),
       sizeof(particle_data[0].stress_yy),  sizeof(particle_data[0].stress_zz),
@@ -541,16 +844,17 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       sizeof(particle_data[0].strain_yy),  sizeof(particle_data[0].strain_zz),
       sizeof(particle_data[0].gamma_xy),   sizeof(particle_data[0].gamma_yz),
       sizeof(particle_data[0].gamma_xz),   sizeof(particle_data[0].epsilon_v),
-      sizeof(particle_data[0].status),
+      sizeof(particle_data[0].status),     sizeof(particle_data[0].cell_id),
   };
 
   // Define particle field information
   const char* field_names[NFIELDS] = {
-      "id",        "mass",       "volume",     "coord_x",    "coord_y",
-      "coord_z",   "velocity_x", "velocity_y", "velocity_z", "stress_xx",
-      "stress_yy", "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",
-      "strain_xx", "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",
-      "gamma_xz",  "epsilon_v",  "status"};
+      "id",         "mass",       "volume",     "pressure",  "coord_x",
+      "coord_y",    "coord_z",    "nsize_x",    "nsize_y",   "nsize_z",
+      "velocity_x", "velocity_y", "velocity_z", "stress_xx", "stress_yy",
+      "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx",
+      "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",
+      "epsilon_v",  "status",     "cell_id"};
 
   hid_t field_type[NFIELDS];
   hid_t string_type;
@@ -582,7 +886,12 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   field_type[19] = H5T_NATIVE_DOUBLE;
   field_type[20] = H5T_NATIVE_DOUBLE;
   field_type[21] = H5T_NATIVE_DOUBLE;
-  field_type[22] = H5T_NATIVE_HBOOL;
+  field_type[22] = H5T_NATIVE_DOUBLE;
+  field_type[23] = H5T_NATIVE_DOUBLE;
+  field_type[24] = H5T_NATIVE_DOUBLE;
+  field_type[25] = H5T_NATIVE_DOUBLE;
+  field_type[26] = H5T_NATIVE_HBOOL;
+  field_type[27] = H5T_NATIVE_LLONG;
 
   // Create a new file using default properties.
   file_id =
@@ -611,13 +920,15 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   const unsigned nparticles = this->nparticles();
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 23;
+  const hsize_t NFIELDS = 28;
 
   size_t dst_size = sizeof(HDF5Particle);
   size_t dst_offset[NFIELDS] = {
       HOFFSET(HDF5Particle, id),         HOFFSET(HDF5Particle, mass),
-      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, coord_x),
-      HOFFSET(HDF5Particle, coord_y),    HOFFSET(HDF5Particle, coord_z),
+      HOFFSET(HDF5Particle, volume),     HOFFSET(HDF5Particle, pressure),
+      HOFFSET(HDF5Particle, coord_x),    HOFFSET(HDF5Particle, coord_y),
+      HOFFSET(HDF5Particle, coord_z),    HOFFSET(HDF5Particle, nsize_x),
+      HOFFSET(HDF5Particle, nsize_y),    HOFFSET(HDF5Particle, nsize_z),
       HOFFSET(HDF5Particle, velocity_x), HOFFSET(HDF5Particle, velocity_y),
       HOFFSET(HDF5Particle, velocity_z), HOFFSET(HDF5Particle, stress_xx),
       HOFFSET(HDF5Particle, stress_yy),  HOFFSET(HDF5Particle, stress_zz),
@@ -626,7 +937,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, strain_yy),  HOFFSET(HDF5Particle, strain_zz),
       HOFFSET(HDF5Particle, gamma_xy),   HOFFSET(HDF5Particle, gamma_yz),
       HOFFSET(HDF5Particle, gamma_xz),   HOFFSET(HDF5Particle, epsilon_v),
-      HOFFSET(HDF5Particle, status),
+      HOFFSET(HDF5Particle, status),     HOFFSET(HDF5Particle, cell_id),
   };
 
   // To get size
@@ -634,8 +945,10 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
 
   size_t dst_sizes[NFIELDS] = {
       sizeof(particle.id),         sizeof(particle.mass),
-      sizeof(particle.volume),     sizeof(particle.coord_x),
-      sizeof(particle.coord_y),    sizeof(particle.coord_z),
+      sizeof(particle.volume),     sizeof(particle.pressure),
+      sizeof(particle.coord_x),    sizeof(particle.coord_y),
+      sizeof(particle.coord_z),    sizeof(particle.nsize_x),
+      sizeof(particle.nsize_y),    sizeof(particle.nsize_z),
       sizeof(particle.velocity_x), sizeof(particle.velocity_y),
       sizeof(particle.velocity_z), sizeof(particle.stress_xx),
       sizeof(particle.stress_yy),  sizeof(particle.stress_zz),
@@ -644,7 +957,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
       sizeof(particle.strain_yy),  sizeof(particle.strain_zz),
       sizeof(particle.gamma_xy),   sizeof(particle.gamma_yz),
       sizeof(particle.gamma_xz),   sizeof(particle.epsilon_v),
-      sizeof(particle.status),
+      sizeof(particle.status),     sizeof(particle.cell_id),
   };
 
   std::vector<HDF5Particle> dst_buf;
@@ -663,4 +976,58 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   // close the file
   H5Fclose(file_id);
   return true;
+}
+
+//! Nodal coordinates
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()
+    const {
+
+  // Nodal coordinates
+  std::vector<Eigen::Matrix<double, 3, 1>> coordinates;
+  coordinates.reserve(nodes_.size());
+
+  try {
+    if (nodes_.size() == 0)
+      throw std::runtime_error("No nodes have been initialised!");
+
+    // Fill nodal coordinates
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+      // initialise coordinates
+      Eigen::Matrix<double, 3, 1> node;
+      node.setZero();
+      auto coords = (*nitr)->coordinates();
+
+      for (unsigned i = 0; i < coords.size(); ++i) node(i) = coords(i);
+
+      coordinates.emplace_back(node);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    coordinates.clear();
+  }
+  return coordinates;
+}
+
+//! Cell node pairs
+template <unsigned Tdim>
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
+  // Vector of node_pairs
+  std::vector<std::array<mpm::Index, 2>> node_pairs;
+
+  try {
+    if (cells_.size() == 0)
+      throw std::runtime_error("No cells have been initialised!");
+
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      const auto pairs = (*citr)->side_node_pairs();
+      node_pairs.insert(std::end(node_pairs), std::begin(pairs),
+                        std::end(pairs));
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    node_pairs.clear();
+  }
+  return node_pairs;
 }

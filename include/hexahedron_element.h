@@ -125,21 +125,20 @@ class HexahedronElement : public Element<Tdim> {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  //! \retval shapefn Shape function of a given cell
-  Eigen::VectorXd shapefn(const VectorDim& xi) const override;
-
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval shapefn Shape function of a given cell
   Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
                           const VectorDim& deformation_gradient) const override;
 
-  //! Evaluate gradient of shape functions
+  //! Evaluate local shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  //! \retval grad_shapefn Gradient of shape function of a given cell
-  Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const override;
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval shapefn Shape function of a given cell
+  Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const override;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
@@ -153,14 +152,6 @@ class HexahedronElement : public Element<Tdim> {
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const Eigen::Matrix<double, 3, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
-
-  //! Compute Jacobian
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
@@ -170,18 +161,17 @@ class HexahedronElement : public Element<Tdim> {
       const Eigen::Matrix<double, 3, 1>& particle_size,
       const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
-  //! Evaluate B matrix at given local coordinates
-  //! \param[in] xi given local coordinates
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const override;
-
-  //! Evaluate the B matrix at given local coordinates for a real cell
+  //! Compute Jacobian local
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval bmatrix B matrix
-  std::vector<Eigen::MatrixXd> bmatrix(
-      const VectorDim& xi,
-      const Eigen::MatrixXd& nodal_coordinates) const override;
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
+      const Eigen::Matrix<double, 3, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates,
+      const Eigen::Matrix<double, 3, 1>& particle_size,
+      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
@@ -194,10 +184,10 @@ class HexahedronElement : public Element<Tdim> {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
 
-  //! Evaluate the mass matrix
+  //! Evaluate the Ni Nj matrix
   //! \param[in] xi_s Vector of local coordinates
-  //! \retval mass_matrix mass matrix
-  Eigen::MatrixXd mass_matrix(
+  //! \retval ni_nj_matrix Ni Nj matrix
+  Eigen::MatrixXd ni_nj_matrix(
       const std::vector<VectorDim>& xi_s) const override;
 
   //! Evaluate the Laplace matrix at given local coordinates for a real cell
@@ -212,7 +202,9 @@ class HexahedronElement : public Element<Tdim> {
   mpm::ElementDegree degree() const override;
 
   //! Return the type of shape function
-  mpm::ShapefnType shapefn_type() const { return mpm::ShapefnType::NORMAL_MPM; }
+  mpm::ShapefnType shapefn_type() const override {
+    return mpm::ShapefnType::NORMAL_MPM;
+  }
 
   //! Return nodal coordinates of a unit cell
   Eigen::MatrixXd unit_cell_coordinates() const override;
@@ -236,9 +228,14 @@ class HexahedronElement : public Element<Tdim> {
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
   //! Return the number of faces in a hexahedron
-  unsigned nfaces() const { return 6; }
+  unsigned nfaces() const override { return 6; }
+
   //! Return unit element volume 3D 2*2*2
-  double unit_element_volume() const { return 8.; }
+  double unit_element_volume() const override { return 8.; }
+
+  //! Return quadrature of the element
+  std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
+      unsigned nquadratures = 1) const override;
 
  private:
   //! Logger

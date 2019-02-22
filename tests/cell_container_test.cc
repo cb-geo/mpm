@@ -43,25 +43,20 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
 
   // Check add cell
   SECTION("Check add cell functionality") {
-    // Add cell 1 and check status
-    bool status1 = cellcontainer->add(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = cellcontainer->add(cell2);
-    REQUIRE(status2 == true);
-    // Try and cell 2 again and check status
-    bool status3 = cellcontainer->add(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(cellcontainer->add(cell1, false) == true);
+    // Add cell 2 and check
+    REQUIRE(cellcontainer->add(cell2, false) == true);
+    // Try and cell 2 again and check
+    REQUIRE(cellcontainer->add(cell2) == false);
 
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 
-    // Remove cell 2 and check status
-    bool remove_status = cellcontainer->remove(cell2);
-    REQUIRE(remove_status == true);
-    // Try and remove cell 2 again and check status
-    bool remove_status1 = cellcontainer->remove(cell2);
-    REQUIRE(remove_status1 == false);
+    // Remove cell 2 and check
+    REQUIRE(cellcontainer->remove(cell2) == true);
+    // Try and remove cell 2 again and check
+    REQUIRE(cellcontainer->remove(cell2) == false);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 1);
 
@@ -188,25 +183,20 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
 
   // Check add cell
   SECTION("Check add cell functionality") {
-    // Add cell 1 and check status
-    bool status1 = cellcontainer->add(cell1);
-    REQUIRE(status1 == true);
-    // Add cell 2 and check status
-    bool status2 = cellcontainer->add(cell2);
-    REQUIRE(status2 == true);
-    // Try and cell 2 again and check status
-    bool status3 = cellcontainer->add(cell2);
-    REQUIRE(status3 == false);
+    // Add cell 1 and check
+    REQUIRE(cellcontainer->add(cell1, false) == true);
+    // Add cell 2 and check
+    REQUIRE(cellcontainer->add(cell2, false) == true);
+    // Try and cell 2 again and check
+    REQUIRE(cellcontainer->add(cell2) == false);
 
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 2);
 
-    // Remove cell 2 and check status
-    bool remove_status = cellcontainer->remove(cell2);
-    REQUIRE(remove_status == true);
-    // Try and remove cell 2 again and check status
-    bool remove_status1 = cellcontainer->remove(cell2);
-    REQUIRE(remove_status1 == false);
+    // Remove cell 2 and check
+    REQUIRE(cellcontainer->remove(cell2) == true);
+    // Try and remove cell 2 again and check
+    REQUIRE(cellcontainer->remove(cell2) == false);
     // Check size of cell hanlder
     REQUIRE(cellcontainer->size() == 1);
 

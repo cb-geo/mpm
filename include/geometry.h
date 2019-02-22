@@ -23,9 +23,9 @@ class Geometry {
   //! Compute the angle between two vectors in radians
   //! \param[in] vector_a First vector
   //! \param[in] vector_b Second vector
-  const double angle_between_vectors(
+  double angle_between_vectors(
       const Eigen::Matrix<double, Tdim, 1>& vector_a,
-      const Eigen::Matrix<double, Tdim, 1>& vector_b);
+      const Eigen::Matrix<double, Tdim, 1>& vector_b) const;
 
   //! Compute euler angles with respect to the Cartesian coordinates
   //! \param[in] new_axes New orthogonal coordinate systems (2 vectors for 2D, 3

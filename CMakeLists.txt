@@ -45,6 +45,14 @@ link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+# MPI
+find_package(MPI)
+if (MPI_FOUND)
+  add_definitions("-DUSE_MPI")
+  include_directories(${MPI_CXX_INCLUDE_DIRS})
+  link_libraries(${MPI_CXX_LIBRARIES})
+endif()
+
 # HDF5
 ENABLE_LANGUAGE(C)
 find_package(HDF5 COMPONENTS CXX HL)
@@ -99,6 +107,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
+  ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
 )
@@ -121,7 +130,9 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
+    ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
@@ -129,8 +140,10 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/node_container_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    

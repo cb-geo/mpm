@@ -4,6 +4,7 @@
 #include <array>
 #include <limits>
 #include <mutex>
+#include <tuple>
 #include <vector>
 
 #include "logger.h"
@@ -85,17 +86,25 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
+  //! Assign traction force to the node
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Nodal traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction_force(unsigned phase, unsigned direction,
+                             double traction) override;
+
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
   bool update_external_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force) override;
+                             const VectorDim& force) override;
 
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd external_force(unsigned phase) const override {
+  VectorDim external_force(unsigned phase) const override {
     return external_force_.col(phase);
   }
 
@@ -105,11 +114,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   bool update_internal_force(bool update, unsigned phase,
-                             const Eigen::VectorXd& force) override;
+                             const VectorDim& force) override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd internal_force(unsigned phase) const override {
+  VectorDim internal_force(unsigned phase) const override {
     return internal_force_.col(phase);
   }
 
@@ -119,11 +128,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
   bool update_momentum(bool update, unsigned phase,
-                       const Eigen::VectorXd& momentum) override;
+                       const VectorDim& momentum) override;
 
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd momentum(unsigned phase) const override {
+  VectorDim momentum(unsigned phase) const override {
     return momentum_.col(phase);
   }
 
@@ -132,7 +141,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Return velocity at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned phase) const override {
+  VectorDim velocity(unsigned phase) const override {
     return velocity_.col(phase);
   }
 
@@ -142,11 +151,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
   bool update_acceleration(bool update, unsigned phase,
-                           const Eigen::VectorXd& acceleration) override;
+                           const VectorDim& acceleration) override;
 
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd acceleration(unsigned phase) const override {
+  VectorDim acceleration(unsigned phase) const override {
     return acceleration_.col(phase);
   }
 
@@ -163,6 +172,18 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
+
+  //! Assign friction constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of friction constraint
+  //! \param[in] sign Sign of normal wrt coordinate system for friction
+  //! \param[in] friction Applied friction constraint
+  bool assign_friction_constraint(unsigned dir, int sign,
+                                  double friction) override;
+
+  //! Apply friction constraints
+  //! \param[in] dt Time-step
+  void apply_friction_constraints(double dt) override;
 
  private:
   //! Mutex
@@ -191,6 +212,9 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Frictional constraints
+  bool friction_{false};
+  std::tuple<unsigned, int, double> friction_constraint_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class

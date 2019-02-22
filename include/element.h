@@ -3,9 +3,13 @@
 
 #include <exception>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <Eigen/Dense>
+
+#include "factory.h"
+#include "quadrature.h"
 
 namespace mpm {
 
@@ -36,19 +40,19 @@ class Element {
 
   //! Evaluate shape functions at given local coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::VectorXd shapefn(const VectorDim& xi) const = 0;
-
-  //! Evaluate shape functions at given local coordinates
-  //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   virtual Eigen::VectorXd shapefn(
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
-  //! Evaluate gradient of shape functions
+  //! Evaluate local shape functions at given coordinates
   //! \param[in] xi given local coordinates
-  virtual Eigen::MatrixXd grad_shapefn(const VectorDim& xi) const = 0;
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  virtual Eigen::VectorXd shapefn_local(
+      const VectorDim& xi, const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const = 0;
 
   //! Evaluate gradient of shape functions
   //! \param[in] xi given local coordinates
@@ -61,13 +65,6 @@ class Element {
   //! Compute Jacobian
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval jacobian Jacobian matrix
-  virtual Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
-
-  //! Compute Jacobian
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
@@ -76,17 +73,16 @@ class Element {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
-  //! Evaluate and return the B-matrix
-  //! \param[in] xi given local coordinates
-  //! \retval bmatrix B matrix
-  virtual std::vector<Eigen::MatrixXd> bmatrix(const VectorDim& xi) const = 0;
-
-  //! Evaluate the B matrix at given local coordinates for a real cell
+  //! Compute Jacobian local
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \retval bmatrix B matrix
-  virtual std::vector<Eigen::MatrixXd> bmatrix(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates) const = 0;
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  //! \retval jacobian Jacobian matrix
+  virtual Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const = 0;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
@@ -99,10 +95,10 @@ class Element {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
-  //! Evaluate the mass matrix
+  //! Evaluate the Ni Nj matrix
   //! \param[in] xi_s Vector of local coordinates
-  //! \retval mass_matrix mass matrix
-  virtual Eigen::MatrixXd mass_matrix(
+  //! \retval ni_nj_matrix Ni Nj matrix
+  virtual Eigen::MatrixXd ni_nj_matrix(
       const std::vector<VectorDim>& xi_s) const = 0;
 
   //! Evaluate the Laplace matrix at given local coordinates for a real cell
@@ -144,6 +140,10 @@ class Element {
   virtual unsigned nfaces() const = 0;
   //! Return unit element volume
   virtual double unit_element_volume() const = 0;
+
+  //! Return quadrature of the element
+  virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
+      unsigned nquadratures) const = 0;
 };
 
 }  // namespace mpm

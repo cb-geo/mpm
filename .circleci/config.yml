@@ -8,22 +8,27 @@ jobs:
       - checkout
       # GCC-8
       - run:
-          name: GCC-8 build
+          name: GCC-8 build + MPI
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4
+            source /etc/profile.d/modules.sh
+            export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+            module load mpi/openmpi-x86_64
+            export CXX_COMPILER=mpicxx
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            make -j2
+            ctest -VV
       # Clang-6.0
       - run:
-          name: Clang-6.0 build
+          name: Clang-6.0 + Static analysis
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j4 
+            scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            scan-build make -j2 
             ctest -VV
       # cppcheck
       - run:
@@ -44,8 +49,8 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
-            make mpmtest_coverage -j4
+            make mpmtest_coverage -j2
             ./mpmtest_coverage
-            make gcov
+            make gcov -j2  --ignore-errors
             make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov

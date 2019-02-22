@@ -14,6 +14,10 @@ using Json = nlohmann::json;
 // Speed log
 #include "spdlog/spdlog.h"
 
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 namespace mpm {
 //! \brief Input/Output handler
 class IO {
@@ -22,6 +26,9 @@ class IO {
   //! \param[in] argc Number of input arguments
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
+
+  //! Return number of tbb threads
+  unsigned nthreads() const { return nthreads_; }
 
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
@@ -63,6 +70,8 @@ class IO {
                                       unsigned step, unsigned max_steps);
 
  private:
+  //! Number of parallel threads
+  unsigned nthreads_{0};
   //! Working directory
   std::string working_dir_;
   //! Input file name

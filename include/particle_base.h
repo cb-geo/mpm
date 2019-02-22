@@ -74,8 +74,14 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Assign cell id
+  virtual bool assign_cell_id(Index id) = 0;
+
   //! Return cell id
   virtual Index cell_id() const = 0;
+
+  //! Return cell ptr status
+  virtual bool cell_ptr() const = 0;
 
   //! Remove cell
   virtual void remove_cell() = 0;
@@ -84,10 +90,13 @@ class ParticleBase {
   virtual bool compute_shapefn() = 0;
 
   //! Assign volume
-  virtual void assign_volume(unsigned phase, double volume) = 0;
+  virtual bool assign_volume(unsigned phase, double volume) = 0;
 
   //! Return volume
   virtual double volume(unsigned phase) const = 0;
+
+  //! Return size of particle in natural coordinates
+  virtual VectorDim natural_size() const = 0;
 
   //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
@@ -120,6 +129,9 @@ class ParticleBase {
   //! Return mass
   virtual double mass(unsigned phase) const = 0;
 
+  //! Return pressure
+  virtual double pressure(unsigned phase) const = 0;
+
   //! Compute strain
   virtual void compute_strain(unsigned phase, double dt) = 0;
 
@@ -131,6 +143,10 @@ class ParticleBase {
 
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid(unsigned phase) const = 0;
+
+  //! Initial stress
+  virtual void initial_stress(unsigned phase,
+                              const Eigen::Matrix<double, 6, 1>&) = 0;
 
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
@@ -145,18 +161,17 @@ class ParticleBase {
   virtual bool map_internal_force(unsigned phase) = 0;
 
   //! Assign velocity
-  virtual bool assign_velocity(unsigned phase,
-                               const Eigen::VectorXd& velocity) = 0;
+  virtual bool assign_velocity(unsigned phase, const VectorDim& velocity) = 0;
 
   //! Return velocity
-  virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
+  virtual VectorDim velocity(unsigned phase) const = 0;
 
   //! Assign traction
   virtual bool assign_traction(unsigned phase, unsigned direction,
                                double traction) = 0;
 
   //! Return traction
-  virtual Eigen::VectorXd traction(unsigned phase) const = 0;
+  virtual VectorDim traction(unsigned phase) const = 0;
 
   //! Map traction force
   virtual void map_traction_force(unsigned phase) = 0;
@@ -166,6 +181,9 @@ class ParticleBase {
 
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
+
+  //! Return a state variable
+  virtual double state_variable(const std::string& var) const = 0;
 
  protected:
   //! particleBase id
@@ -182,6 +200,8 @@ class ParticleBase {
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
+  //! Material state history variables
+  mpm::dense_map state_variables_;
 };  // ParticleBase class
 }  // namespace mpm
 

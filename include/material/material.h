@@ -8,6 +8,7 @@
 
 #include "factory.h"
 #include "logger.h"
+#include "map.h"
 #include "particle.h"
 #include "particle_base.h"
 
@@ -34,9 +35,9 @@ class Material {
 
   // Constructor with id
   //! \param[in] id Material id
-  Material(unsigned id) : id_{id} {
+  Material(unsigned id, const Json& material_properties) : id_{id} {
     //! Logger
-    std::string logger = "material_base";
+    std::string logger = "material::" + std::to_string(id);
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
@@ -52,48 +53,33 @@ class Material {
   //! Return id of the material
   unsigned id() const { return id_; }
 
-  //! Return status as true, when properties are assigned
-  bool status() const { return status_; }
-
-  //! Read material properties
-  //! \param[in] material_properties Material properties
-  virtual void properties(const Json&) = 0;
-
   //! Get material property
   //! \param[in] key Material properties key
   //! \retval result Value of material property
   double property(const std::string& key);
 
-  //! Compute elastic tensor
-  //! \retval de_ Elastic tensor
-  virtual Matrix6x6 elastic_tensor() = 0;
+  //! Initialise history variables
+  virtual mpm::dense_map initialise_state_variables() = 0;
 
-  //! Compute stress
-  //! \param[in] stress Stress
-  //! \param[in] dstrain Strain
-  //! \retval updated_stress Updated value of stress
-  virtual Vector6d compute_stress(const Vector6d& stress,
-                                  const Vector6d& dstrain) = 0;
+  //! Compute thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Thermodynamic pressure for volumetric strain
+  virtual double thermodynamic_pressure(double volumetric_strain) const = 0;
 
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
   //! \param[in] particle Constant point to particle base
+  //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
                                   const Vector6d& dstrain,
-                                  const ParticleBase<Tdim>* ptr) = 0;
-
-  //! Check if this material needs a particle handle
-  //! Set true, if material needs other parameters from the particle
-  //! For eg, dstrain_rate. These function calls can only to const functions
-  virtual bool property_handle() const = 0;
+                                  const ParticleBase<Tdim>* ptr,
+                                  mpm::dense_map* state_vars) = 0;
 
  protected:
   //! material id
   unsigned id_{std::numeric_limits<unsigned>::max()};
-  //! status
-  bool status_{false};
   //! Material properties
   Json properties_;
   //! Logger

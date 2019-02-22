@@ -1,12 +1,21 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
+#include <numeric>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+#include "tbb/task_group.h"
+
 #include "container.h"
+#include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
 
@@ -22,14 +31,20 @@ class MPMExplicit : public MPM {
   //! Default constructor
   MPMExplicit(std::unique_ptr<IO>&& io);
 
-  //! Initialise mesh and particles
-  bool initialise_mesh_particles() override;
+  //! Initialise mesh
+  bool initialise_mesh() override;
+
+  //! Initialise particles
+  bool initialise_particles() override;
 
   //! Initialise materials
   bool initialise_materials() override;
 
+  //! Apply nodal tractions
+  bool apply_nodal_tractions() override;
+
   //! Solve
-  virtual bool solve() = 0;
+  bool solve() override;
 
   //! Checkpoint resume
   bool checkpoint_resume() override;
@@ -62,14 +77,22 @@ class MPMExplicit : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
+  //! velocity update
+  bool velocity_update_{false};
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
-  std::vector<std::unique_ptr<mpm::Mesh<Tdim>>> meshes_;
+  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
+  //! Bool nodal tractions
+  bool nodal_tractions_{true};
+
+ private:
+  //! Boolean to switch between USL and USF
+  bool usl_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm

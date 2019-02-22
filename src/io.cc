@@ -19,6 +19,12 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
+    // Define # TBB parallel threads
+    TCLAP::ValueArg<unsigned int> tbb_arg("p", "tbb_parallel",
+                                          "Number of parallel TBB threads",
+                                          false, 0, "tbb_parallel");
+    cmd.add(tbb_arg);
+
     // Parse arguments
     cmd.parse(argc, argv);
 
@@ -27,6 +33,9 @@ mpm::IO::IO(int argc, char** argv) {
 
     // Set input file if the optional argument is not empty
     input_file_ = input_arg.getValue();
+
+    // Set number of threads
+    nthreads_ = tbb_arg.getValue();
 
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
@@ -81,7 +90,7 @@ bool mpm::IO::check_file(const std::string& filename) {
     file.open(filename);
     status = true;
     file.close();
-  } catch (std::ifstream::failure& exception) {
+  } catch (std::exception& exception) {
     status = false;
     console_->error("Failed to find file {}: {}", filename, exception.what());
   }
@@ -103,6 +112,21 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   int digits = log10(max_steps) + 1;
   file_name.width(digits);
   file_name << step;
+
+#ifdef USE_MPI
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  if (mpi_size > 1) {
+    const std::string rank_size =
+        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size);
+    file_name << rank_size;
+  }
+#endif
+
   file_name << file_extension;
 
   // Include path

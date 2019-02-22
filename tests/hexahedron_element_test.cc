@@ -23,7 +23,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Eight noded hexahedron element for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -38,7 +39,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(7) == Approx(0.125).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -74,7 +76,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Eight noded hexahedron element for coordinates(-1, -1, -1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -1., -1., -1.;
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
 
@@ -88,7 +91,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -124,7 +128,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Eight noded hexahedron element for coordinates(1, 1, 1)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 1., 1., 1.;
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -139,7 +144,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(7) == Approx(0.0).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -169,6 +175,27 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(5, 2) == Approx(0.0).epsilon(Tolerance));
       REQUIRE(gradsf(6, 2) == Approx(0.5).epsilon(Tolerance));
       REQUIRE(gradsf(7, 2) == Approx(0.0).epsilon(Tolerance));
+    }
+
+    // Coordinates is (0, 0, 0)
+    SECTION(
+        "Eight noded local sf hexahedron element for coordinates(0, 0, 0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = hex->shapefn_local(coords, Eigen::Vector3d::Zero(),
+                                        Eigen::Vector3d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      REQUIRE(shapefn(0) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(0.125).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(0.125).epsilon(Tolerance));
     }
 
     SECTION("Eight noded hexahedron shapefn with deformation gradient") {
@@ -252,7 +279,48 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // Get Jacobian
-      auto jac = hex->jacobian(xi, coords);
+      auto jac = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
+                               Eigen::Vector3d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check local Jacobian
+    SECTION(
+        "Eight noded hexahedron local Jacobian for local "
+        "coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 8, Dim> coords;
+      // clang-format off
+      coords << 2., 1., 0.5,
+                4., 2., 1.0,
+                2., 4., 1.0,
+                1., 3., 0.5,
+                2., 1., 1.5,
+                4., 2., 2.0,
+                2., 4., 2.0,
+                1., 3., 1.5;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.625, 0.5, 0.25,
+                 -0.875, 1.0, 0.00,
+                  0.000, 0.0, 0.50;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian_local(xi, coords, Eigen::Vector3d::Zero(),
+                                     Eigen::Vector3d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -305,114 +373,6 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     }
 
     // Coordinates is (0, 0, 0)
-    SECTION("Eight noded hexahedron B-matrix for coordinates(0, 0, 0)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords.setZero();
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0.5, 0.5, 0.5)
-    SECTION("Eight noded hexahedron B-matrix for coordinates(0.5, 0.5, 0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << 0.5, 0.5, 0.5;
-
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (-0.5, -0.5, -0.5)
-    SECTION(
-        "Eight noded hexahedron B-matrix for coordinates(-0.5, -0.5, -0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << -0.5, -0.5, -0.5;
-
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0, 0, 0)
     SECTION("Eight noded hexahedron B-matrix cell for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0., 0., 0.;
@@ -430,10 +390,12 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hex->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -479,10 +441,12 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hex->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -528,10 +492,12 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // Get B-Matrix
-      auto bmatrix = hex->bmatrix(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(xi);
+      auto gradsf = hex->grad_shapefn(xi, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       gradsf *= 2.;
 
       // Check size of B-matrix
@@ -627,12 +593,14 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = hex->bmatrix(xi, coords);
-      auto jacobian = hex->jacobian(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
+      auto jacobian = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
+                                    Eigen::Vector3d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("Eight noded hexahedron mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("Eight noded hexahedron ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -657,15 +625,16 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       REQUIRE(xi_s.size() == 8);
 
-      // Get mass matrix
-      const auto mass_matrix = hex->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = hex->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni-nj-matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 8, 8> mass;
       // clang-format off
@@ -692,9 +661,31 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
               0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
               0.2962962962962963;
       // clang-format on
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
@@ -954,7 +945,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
     SECTION("Twenty noded hexahedron element for coordinates(0, 0, 0)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords.setZero();
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1004,7 +996,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(19) == Approx(0.25).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1150,7 +1143,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
         "-0.5, -0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << -0.5, -0.5, -0.5;
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1200,7 +1194,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(19) == Approx(0.046875).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1345,7 +1340,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
         "0.5, 0.5)") {
       Eigen::Matrix<double, Dim, 1> coords;
       coords << 0.5, 0.5, 0.5;
-      auto shapefn = hex->shapefn(coords);
+      auto shapefn = hex->shapefn(coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
 
       // Check shape function
       REQUIRE(shapefn.size() == nfunctions);
@@ -1395,7 +1391,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(shapefn(19) == Approx(0.421875).epsilon(Tolerance));
 
       // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
+      auto gradsf = hex->grad_shapefn(coords, Eigen::Vector3d::Zero(),
+                                      Eigen::Vector3d::Zero());
       REQUIRE(gradsf.rows() == nfunctions);
       REQUIRE(gradsf.cols() == Dim);
 
@@ -1533,6 +1530,62 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       REQUIRE(gradsf(17, 2) == Approx(0.09375).epsilon(Tolerance));
       REQUIRE(gradsf(18, 2) == Approx(0.28125).epsilon(Tolerance));
       REQUIRE(gradsf(19, 2) == Approx(0.28125).epsilon(Tolerance));
+    }
+
+    // Coordinates is (0, 0, 0)
+    SECTION(
+        "Twenty noded local sf hexahedron element for coordinates(0, 0, 0)") {
+      Eigen::Matrix<double, Dim, 1> coords;
+      coords.setZero();
+      auto shapefn = hex->shapefn_local(coords, Eigen::Vector3d::Zero(),
+                                        Eigen::Vector3d::Zero());
+
+      // Check shape function
+      REQUIRE(shapefn.size() == nfunctions);
+
+      // Edge nodes
+      // N0 = 0.125*(1 - xi(0))(1. - xi(1))(1 - xi(2))(-xi(0) - xi(1) -xi(2) -2)
+      // N1 = 0.125*(1 + xi(0))(1. - xi(1))(1 - xi(2))(+xi(0) - xi(1) -xi(2) -2)
+      // N2 = 0.125*(1 + xi(0))(1. + xi(1))(1 - xi(2))(+xi(0) + xi(1) -xi(2) -2)
+      // N3 = 0.125*(1 - xi(0))(1. + xi(1))(1 - xi(2))(-xi(0) + xi(1) -xi(2) -2)
+      // N4 = 0.125*(1 - xi(0))(1. - xi(1))(1 + xi(2))(-xi(0) - xi(1) +xi(2) -2)
+      // N5 = 0.125*(1 + xi(0))(1. - xi(1))(1 + xi(2))(+xi(0) - xi(1) +xi(2) -2)
+      // N6 = 0.125*(1 + xi(0))(1. + xi(1))(1 + xi(2))(+xi(0) + xi(1) +xi(2) -2)
+      // N7 = 0.125*(1 - xi(0))(1. + xi(1))(1 + xi(2))(-xi(0) + xi(1) +xi(2) -2)
+      REQUIRE(shapefn(0) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(1) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(2) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(3) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(4) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(5) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(6) == Approx(-0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(7) == Approx(-0.25).epsilon(Tolerance));
+
+      // Midside nodes
+      // N8 = 0.25*(1 - xi(0)^2)(1 - xi(1))(1 - xi(2))
+      // N9 = 0.25*(1 - xi(0))(1 - xi(1)^2)(1 - xi(2))
+      // N10 = 0.25*(1 - xi(0))(1 - xi(1))(1 - xi(2)^2)
+      // N11 = 0.25*(1 + xi(0))(1 - xi(1)^2)(1 - xi(2))
+      // N12 = 0.25*(1 + xi(0))(1 - xi(1))(1 - xi(2)^2)
+      // N13 = 0.25*(1 - xi(0)^2)(1 + xi(1))(1 - xi(2))
+      // N14 = 0.25*(1 + xi(0))(1 + xi(1))(1 - xi(2)^2)
+      // N15 = 0.25*(1 - xi(0))(1 + xi(1))(1 - xi(2)^2)
+      // N16 = 0.25*(1 - xi(0)^2)(1 - xi(1))(1 + xi(2))
+      // N17 = 0.25*(1 - xi(0))(1 - xi(1)^2)(1 + xi(2))
+      // N18 = 0.25*(1 + xi(0))(1 - xi(1)^2)(1 + xi(2))
+      // N19 = 0.25*(1 - xi(0)^2)(1 + xi(1))(1 + xi(2))
+      REQUIRE(shapefn(8) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(9) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(10) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(11) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(12) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(13) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(14) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(15) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(16) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(17) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(18) == Approx(0.25).epsilon(Tolerance));
+      REQUIRE(shapefn(19) == Approx(0.25).epsilon(Tolerance));
     }
 
     SECTION("Twenty noded hexahedron element with grad deformation") {
@@ -1691,7 +1744,60 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // clang-format on
 
       // Get Jacobian
-      auto jac = hex->jacobian(xi, coords);
+      auto jac = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
+                               Eigen::Vector3d::Zero());
+
+      // Check size of jacobian
+      REQUIRE(jac.size() == jacobian.size());
+
+      // Check Jacobian
+      for (unsigned i = 0; i < Dim; ++i)
+        for (unsigned j = 0; j < Dim; ++j)
+          REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
+    }
+
+    // Check Jacobian
+    SECTION(
+        "20 noded hexahedron local Jacobian for local "
+        "coordinates(0.5,0.5,0.5)") {
+      Eigen::Matrix<double, 20, Dim> coords;
+      // clang-format off
+      coords << 2.0, 1.0, 0.50,
+                4.0, 2.0, 1.00,
+                2.0, 4.0, 1.00,
+                1.0, 3.0, 0.50,
+                2.0, 1.0, 1.50,
+                4.0, 2.0, 2.00,
+                2.0, 4.0, 2.00,
+                1.0, 3.0, 1.50,
+                3.0, 1.5, 0.75,
+                1.5, 2.0, 0.50,
+                2.0, 1.0, 1.00,
+                3.0, 3.0, 1.00,
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 0.75,
+                2.0, 4.0, 1.50,
+                1.0, 3.0, 1.00,
+                3.0, 1.5, 1.75,
+                1.5, 2.0, 1.50,
+                4.0, 2.0, 1.50,
+                1.5, 3.5, 1.75;
+      // clang-format on
+
+      Eigen::Matrix<double, Dim, 1> xi;
+      xi << 0.5, 0.5, 0.5;
+
+      // Jacobian result
+      Eigen::Matrix<double, Dim, Dim> jacobian;
+      // clang-format off
+      jacobian << 0.90625, 0.21875, 0.109375,
+                 -1.43750, 1.56250, 0.281250,
+                  0.28125,-0.28125, 0.359375;
+      // clang-format on
+
+      // Get Jacobian
+      auto jac = hex->jacobian_local(xi, coords, Eigen::Vector3d::Zero(),
+                                     Eigen::Vector3d::Zero());
 
       // Check size of jacobian
       REQUIRE(jac.size() == jacobian.size());
@@ -1756,113 +1862,6 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           REQUIRE(jac(i, j) == Approx(jacobian(i, j)).epsilon(Tolerance));
     }
 
-    // Coordinates is (0, 0, 0)
-    SECTION("20-noded hexahedron B-matrix for coordinates(0, 0, 0)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords.setZero();
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (0.5, 0.5, 0.5)
-    SECTION("20-noded hexahedron B-matrix for coordinates(0.5, 0.5, 0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << 0.5, 0.5, 0.5;
-
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
-    // Coordinates is (-0.5, -0.5, -0.5)
-    SECTION("20-noded hexahedron B-matrix for coordinates(-0.5, -0.5, -0.5)") {
-      Eigen::Matrix<double, Dim, 1> coords;
-      coords << -0.5, -0.5, -0.5;
-
-      // Get B-Matrix
-      auto bmatrix = hex->bmatrix(coords);
-
-      // Check gradient of shape functions
-      auto gradsf = hex->grad_shapefn(coords);
-
-      // Check size of B-matrix
-      REQUIRE(bmatrix.size() == nfunctions);
-
-      for (unsigned i = 0; i < nfunctions; ++i) {
-        REQUIRE(bmatrix.at(i)(0, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(0, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(1, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(2, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 0) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(3, 2) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 0) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 1) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(4, 2) == Approx(gradsf(i, 1)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 0) == Approx(gradsf(i, 2)).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 1) == Approx(0.).epsilon(Tolerance));
-        REQUIRE(bmatrix.at(i)(5, 2) == Approx(gradsf(i, 0)).epsilon(Tolerance));
-      }
-    }
-
     SECTION("20-noded hexahedron B-matrix and Jacobian failure") {
       Eigen::Matrix<double, Dim, 1> xi;
       xi << 0., 0., 0.;
@@ -1878,12 +1877,14 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                 1., 1., 1.;
       // clang-format on
       // Get B-Matrix
-      auto bmatrix = hex->bmatrix(xi, coords);
-      auto jacobian = hex->jacobian(xi, coords);
+      auto bmatrix = hex->bmatrix(xi, coords, Eigen::Vector3d::Zero(),
+                                  Eigen::Vector3d::Zero());
+      auto jacobian = hex->jacobian(xi, coords, Eigen::Vector3d::Zero(),
+                                    Eigen::Vector3d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("20-noded hexahedron mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("20-noded hexahedron ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -1908,15 +1909,16 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       REQUIRE(xi_s.size() == 8);
 
-      // Get mass matrix
-      const auto mass_matrix = hex->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = hex->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni-nj-matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 20, 20> mass;
       //! clang-format off
@@ -2055,9 +2057,31 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           0.1975308641975307, 0.2962962962962961, 0.2962962962962961,
           0.3950617283950615;
       // clang-format on
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell

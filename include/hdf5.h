@@ -15,8 +15,12 @@ typedef struct HDF5Particle {
   double mass;
   // Volume
   double volume;
+  // Pressure
+  double pressure;
   // Coordinates
   double coord_x, coord_y, coord_z;
+  // Natural particle size
+  double nsize_x, nsize_y, nsize_z;
   // Velocity
   double velocity_x, velocity_y, velocity_z;
   // Stresses
@@ -29,6 +33,8 @@ typedef struct HDF5Particle {
   double epsilon_v;
   // Status
   bool status;
+  // Index
+  mpm::Index cell_id;
 } HDF5Particle;
 
 }  // namespace mpm

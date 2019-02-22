@@ -77,17 +77,25 @@ class NodeBase {
   //! Return volume at a given node for a given phase
   virtual double volume(unsigned phase) const = 0;
 
+  //! Assign traction force to the node
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Nodal traction in specified direction
+  //! \retval status Assignment status
+  virtual bool assign_traction_force(unsigned phase, unsigned direction,
+                                     double traction) = 0;
+
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
   virtual bool update_external_force(bool update, unsigned phase,
-                                     const Eigen::VectorXd& force) = 0;
+                                     const VectorDim& force) = 0;
 
   //! Return external force
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd external_force(unsigned phase) const = 0;
+  virtual VectorDim external_force(unsigned phase) const = 0;
 
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -95,11 +103,11 @@ class NodeBase {
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   virtual bool update_internal_force(bool update, unsigned phase,
-                                     const Eigen::VectorXd& force) = 0;
+                                     const VectorDim& force) = 0;
 
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd internal_force(unsigned phase) const = 0;
+  virtual VectorDim internal_force(unsigned phase) const = 0;
 
   //! Update nodal momentum
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -107,18 +115,18 @@ class NodeBase {
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
   virtual bool update_momentum(bool update, unsigned phase,
-                               const Eigen::VectorXd& momentum) = 0;
+                               const VectorDim& momentum) = 0;
 
   //! Return momentum
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd momentum(unsigned phase) const = 0;
+  virtual VectorDim momentum(unsigned phase) const = 0;
 
   //! Compute velocity from the momentum
   virtual void compute_velocity() = 0;
 
   //! Return velocity
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd velocity(unsigned phase) const = 0;
+  virtual VectorDim velocity(unsigned phase) const = 0;
 
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -126,13 +134,14 @@ class NodeBase {
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
   virtual bool update_acceleration(bool update, unsigned phase,
-                                   const Eigen::VectorXd& acceleration) = 0;
+                                   const VectorDim& acceleration) = 0;
 
   //! Return acceleration
   //! \param[in] phase Index corresponding to the phase
-  virtual Eigen::VectorXd acceleration(unsigned phase) const = 0;
+  virtual VectorDim acceleration(unsigned phase) const = 0;
 
   //! Compute acceleration
+  //! \param[in] dt Time-step
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
   //! Assign velocity constraint
@@ -143,6 +152,18 @@ class NodeBase {
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
+
+  //! Assign friction constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of friction constraint
+  //! \param[in] sign Sign of normal wrt coordinate system for friction
+  //! \param[in] friction Applied friction constraint
+  virtual bool assign_friction_constraint(unsigned dir, int sign,
+                                          double friction) = 0;
+
+  //! Apply friction constraints
+  //! \param[in] dt Time-step
+  virtual void apply_friction_constraints(double dt) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

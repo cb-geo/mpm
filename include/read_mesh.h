@@ -1,6 +1,7 @@
 #ifndef MPM_READ_MESH_H_
 #define MPM_READ_MESH_H_
 
+#include <array>
 #include <exception>
 #include <fstream>
 #include <memory>
@@ -58,16 +59,45 @@ class ReadMesh {
   virtual std::vector<VectorDim> read_particles(
       const std::string& particles_file) = 0;
 
+  //! Read particle stresses
+  //! \param[in] particles_stresses file name with particle stresses
+  //! \retval stresses Vector of particle stresses
+  virtual std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
+      const std::string& particles_stresses) = 0;
+
   //! Read velocity constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
 
+  //! Read friction constraints file
+  //! \param[in] friction_constraints_files file name with frictions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+      read_friction_constraints(
+          const std::string& friction_constraints_file) = 0;
+
+  //! Read particles volume file
+  //! \param[in] volume_files file name with particle volumes
+  virtual std::vector<std::tuple<mpm::Index, double>> read_particles_volumes(
+      const std::string& volume_file) = 0;
+
   //! Read particles traction file
   //! \param[in] traction_files file name with particle tractions
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_particles_tractions(const std::string& traction_file) = 0;
+
+  //! Read particles cells file
+  //! \param[in] particles_cells_file file name with particle cell ids
+  virtual std::vector<std::array<mpm::Index, 2>> read_particles_cells(
+      const std::string& particles_cells_file) = 0;
+
+  //! Write particles cells file
+  //! \param[in] particle_cells List of particles and cells
+  //! \param[in] particles_cells_file file name with particle cell ids
+  virtual void write_particles_cells(
+      const std::string& particles_cells_file,
+      const std::vector<std::array<mpm::Index, 2>>& particles_cells) = 0;
 
 };  // ReadMesh class
 }  // namespace mpm

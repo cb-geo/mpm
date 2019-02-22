@@ -27,6 +27,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
+  //! Define DOFs
+  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
+
   //! Construct a particle with id and coordinates
   //! \param[in] id Particle id
   //! \param[in] coord coordinates of the particle
@@ -68,8 +71,15 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) override;
 
+  //! Assign cell id
+  //! \param[in] id Cell id
+  bool assign_cell_id(Index id) override;
+
   //! Return cell id
   Index cell_id() const override { return cell_id_; }
+
+  //! Return cell ptr status
+  bool cell_ptr() const override { return cell_ != nullptr; }
 
   //! Remove cell associated with the particle
   void remove_cell() override;
@@ -80,11 +90,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign volume
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume of particle for the phase
-  void assign_volume(unsigned phase, double volume) override;
+  bool assign_volume(unsigned phase, double volume) override;
 
   //! Return volume
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
+
+  //! Return size of particle in natural coordinates
+  VectorDim natural_size() const override { return natural_size_; }
 
   //! Compute volume as cell volume / nparticles
   //! \param[in] phase Index corresponding to the phase
@@ -111,7 +124,7 @@ class Particle : public ParticleBase<Tdim> {
     mass_(phase) = mass;
   }
 
-  //! Return mass of the particlesx
+  //! Return mass of the particles
   //! \param[in] phase Index corresponding to the phase
   double mass(unsigned phase) const override { return mass_(phase); }
 
@@ -119,6 +132,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] material Pointer to a material
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
+
+  //! Return pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -144,6 +161,14 @@ class Particle : public ParticleBase<Tdim> {
     return volumetric_strain_centroid_(phase);
   }
 
+  //! Initial stress
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] stress Initial sress corresponding to the phase
+  void initial_stress(unsigned phase,
+                      const Eigen::Matrix<double, 6, 1>& stress) override {
+    this->stress_.col(phase) = stress;
+  }
+
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
@@ -166,12 +191,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(unsigned phase,
-                       const Eigen::VectorXd& velocity) override;
+  bool assign_velocity(unsigned phase, const VectorDim& velocity) override;
 
   //! Return velocity of the particle
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd velocity(unsigned phase) const override {
+  VectorDim velocity(unsigned phase) const override {
     return velocity_.col(phase);
   }
 
@@ -185,7 +209,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return traction of the particle
   //! \param[in] phase Index corresponding to the phase
-  Eigen::VectorXd traction(unsigned phase) const override {
+  VectorDim traction(unsigned phase) const override {
     return traction_.col(phase);
   }
 
@@ -203,7 +227,19 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
 
+  //! Return a state variable
+  //! \param[in] var State variable
+  //! \retval Quantity of the state history variable
+  double state_variable(const std::string& var) const override {
+    return state_variables_.at(var);
+  }
+
  private:
+  //! Update pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
+  bool update_pressure(unsigned phase, double dvolumetric_strain);
+
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -218,12 +254,18 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! State variables
+  using ParticleBase<Tdim>::state_variables_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
   Eigen::Matrix<double, 1, Tnphases> volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
+  //! Size of particle in natural coordinates
+  Eigen::Matrix<double, 1, Tdim> natural_size_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
   //! Strains
