@@ -217,14 +217,14 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
                                         this->internal_force_.col(phase)) /
                                        this->mass_(phase);
 
+      // Apply friction constraints
+      this->apply_friction_constraints(dt);
+
       // Velocity += acceleration * dt
       this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_velocity_constraints();
-
-      // Apply friction constraints
-      this->apply_friction_constraints(dt);
 
       // Set a threshold
       for (unsigned i = 0; i < Tdim; ++i) {
@@ -276,8 +276,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
-    // If friction is not set
-    if (!this->friction_) this->acceleration_(direction, phase) = 0.;
+    // Set acceleration to 0 in direction of velocity constraint
+    this->acceleration_(direction, phase) = 0.;
   }
 }
 
