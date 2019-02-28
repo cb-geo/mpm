@@ -489,6 +489,74 @@ bool mpm::Mesh<Tdim>::assign_velocity_constraints(
   return status;
 }
 
+//! Assign inclined velocity constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_inclined_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        inclined_velocity_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign velocity "
+          "constraints");
+
+    for (const auto& velocity_constraint : inclined_velocity_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(velocity_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
+
+      if (!status)
+        throw std::runtime_error("Node or velocity constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign rotation matrix to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_rotation_matrices(
+    const std::vector<std::map<mpm::Index, unsigned,
+                               Eigen::Matrix<double, Tdim, 1>>>& euler_angles) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign rotation "
+          "matrix");
+
+    for (const auto& euler_angle : euler_angles) {
+      // Node id
+      mpm::Index nid = std::get<0>(euler_angle);
+      // Euler angles
+      Eigen::Matrix<double, Tdim, 1> angles = std::get<1>(euler_angle);
+
+      // Compute rotation matrix
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
+          rotation_matrix(angles);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+
+      if (!status)
+        throw std::runtime_error("Node or euler angles is/are invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particles volumes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(

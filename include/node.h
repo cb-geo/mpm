@@ -6,7 +6,6 @@
 #include <mutex>
 #include <vector>
 
-#include "geometry.h"
 #include "logger.h"
 #include "node_base.h"
 

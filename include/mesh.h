@@ -21,6 +21,7 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "geometry.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
@@ -205,6 +206,21 @@ class Mesh {
   bool assign_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
+
+  //! Assign inclined velocity constraints to nodes
+  //! \param[in] inclined_velocity_constraints Constraint at node id, dir, and
+  //! velocity
+  bool assign_inclined_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          inclined_velocity_constraints);
+
+  //! Assign rotation matrix
+  //! \param[in] inclined_velocity_constraints Constraint at node id and euler
+  //! angles
+  bool assign_rotation_matrices(
+      const std::vector<
+          std::map<mpm::Index, unsigned, Eigen::Matrix<double, Tdim, 1>>>&
+          euler_angles);
 
   //! Assign velocity constraints to cells
   //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
