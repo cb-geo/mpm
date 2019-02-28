@@ -157,6 +157,25 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
             "Velocity constraints are not properly assigned");
     }
 
+    // Read and assign inclined velocity constraints
+    if (!io_->file_name("inclined_velocity_constraints").empty()) {
+      bool inclined_velocity_constraints =
+          mesh_->assign_inclined_velocity_constraints(
+              mesh_reader->read_inclined_velocity_constraints(
+                  io_->file_name("inclined_velocity_constraints")));
+      if (!inclined_velocity_constraints)
+        throw std::runtime_error(
+            "Inclined velocity constraints are not properly assigned");
+    }
+
+    // Read nodal euler angles and assign rotation matrices
+    if (!io_->file_name("nodal_euler_angles").empty()) {
+      bool rotation_matrices = mesh_->assign_rotation_matrices(
+          mesh_reader->read_euler_angles(io_->file_name("nodal_euler_angles")));
+      if (!rotation_matrices)
+        throw std::runtime_error("Euler angles are not properly assigned");
+    }
+
     // Set nodal traction as false if file is empty
     if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
 
