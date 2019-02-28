@@ -6,6 +6,7 @@
 #include <mutex>
 #include <vector>
 
+#include "geometry.h"
 #include "logger.h"
 #include "node_base.h"
 
@@ -169,8 +170,23 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] velocity Applied velocity constraint
   bool assign_velocity_constraint(unsigned dir, double velocity) override;
 
+  //! Assign inclined velocity constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of velocity constraint
+  //! \param[in] velocity Applied velocity constraint
+  bool assign_inclined_velocity_constraint(unsigned dir, double velocity) override;
+
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  bool assign_rotation_matrix(Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override {
+    rotation_matrix_ = rotation_matrix;
+  }
+
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
+
+  //! Apply inclined velocity constraints
+  void apply_inclined_velocity_constraints() override;
 
  private:
   //! Mutex
@@ -199,6 +215,10 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Rotation matrix for inclined velocity constraints
+  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! Inclided velocity constraints
+  std::map<unsigned, double> inclined_velocity_constraints_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class

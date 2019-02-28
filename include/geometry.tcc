@@ -1,4 +1,4 @@
-//! Compute the inverse of a 2d rotation matrix for an orthogonal axis
+//! Compute the 2d rotation matrix for an orthogonal axis
 //! coordinate system
 template <>
 inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::rotation_matrix(
@@ -11,15 +11,15 @@ inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::rotation_matrix(
 
   // clang-format off
   const Eigen::Matrix<double, 2, 2> rotation_matrix = 
-    (Eigen::Matrix<double, 2, 2>() << cos_alpha_cos_beta - sin_alpha_sin_beta,  -cos_alpha_sin_beta - cos_alpha_cos_beta,
+    (Eigen::Matrix<double, 2, 2>() << cos_alpha_cos_beta - sin_alpha_sin_beta,  -cos_alpha_sin_beta - sin_alpha_cos_beta,
                                       sin_alpha_cos_beta + cos_alpha_sin_beta,  -sin_alpha_sin_beta + cos_alpha_cos_beta).finished();                                 
   // clang-format on            
 
-  // inverted rotation matrix
+  // rotation matrix
   return rotation_matrix;
 }
 
-//! Compute the inverse of a 3d rotation matrix for an orthogonal axis coordinate system
+//! Compute the 3d rotation matrix for an orthogonal axis coordinate system
 template <>
 inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const 
     Eigen::Matrix<double, 3, 1>& angles) const {
@@ -50,7 +50,7 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const
                                       cos_gamma).finished();
   // clang-format on
 
-  // inverted rotation matrix
+  // rotation matrix
   return rotation_matrix;
 }
 
