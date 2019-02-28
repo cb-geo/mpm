@@ -337,21 +337,21 @@ inline std::vector<Eigen::MatrixXd>
   return bmatrix;
 }
 
-//! Return mass_matrix of a Hexahedron Element
+//! Return ni_nj_matrix of a Hexahedron Element
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXd
-    mpm::QuadrilateralElement<Tdim, Tnfunctions>::mass_matrix(
+    mpm::QuadrilateralElement<Tdim, Tnfunctions>::ni_nj_matrix(
         const std::vector<VectorDim>& xi_s) const {
-  // Mass matrix
-  Eigen::Matrix<double, Tnfunctions, Tnfunctions> mass_matrix;
-  mass_matrix.setZero();
+  // Ni Nj matrix
+  Eigen::Matrix<double, Tnfunctions, Tnfunctions> ni_nj_matrix;
+  ni_nj_matrix.setZero();
   for (const auto& xi : xi_s) {
     const Eigen::Matrix<double, Tnfunctions, 1> shape_fn =
         this->shapefn(xi, Eigen::Matrix<double, Tdim, 1>::Zero(),
                       Eigen::Matrix<double, Tdim, 1>::Zero());
-    mass_matrix += (shape_fn * shape_fn.transpose());
+    ni_nj_matrix += (shape_fn * shape_fn.transpose());
   }
-  return mass_matrix;
+  return ni_nj_matrix;
 }
 
 //! Return the laplace_matrix of a quadrilateral Element

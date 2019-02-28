@@ -35,10 +35,10 @@ class LinearElastic : public Material<Tdim> {
   LinearElastic& operator=(const LinearElastic&) = delete;
 
   //! Initialise history variables
-  //! \param[in] state_vars State variables with history
-  bool initialise_state_variables(
-      std::map<std::string, double>* state_vars) override {
-    return true;
+  //! \retval state_vars State variables with history
+  mpm::dense_map initialise_state_variables() override {
+    mpm::dense_map state_vars;
+    return state_vars;
   }
 
   //! Thermodynamic pressure
@@ -54,7 +54,7 @@ class LinearElastic : public Material<Tdim> {
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
                           const ParticleBase<Tdim>* ptr,
-                          std::map<std::string, double>* state_vars) override;
+                          mpm::dense_map* state_vars) override;
 
  protected:
   //! material id
