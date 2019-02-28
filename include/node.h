@@ -174,11 +174,13 @@ class Node : public NodeBase<Tdim> {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  bool assign_inclined_velocity_constraint(unsigned dir, double velocity) override;
+  bool assign_inclined_velocity_constraint(unsigned dir,
+                                           double velocity) override;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
-  bool assign_rotation_matrix(Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override {
+  bool assign_rotation_matrix(
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override {
     rotation_matrix_ = rotation_matrix;
   }
 

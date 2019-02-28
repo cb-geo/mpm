@@ -153,11 +153,13 @@ class NodeBase {
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
-  virtual bool assign_inclined_velocity_constraint(unsigned dir, double velocity) = 0;
+  virtual bool assign_inclined_velocity_constraint(unsigned dir,
+                                                   double velocity) = 0;
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
-  virtual bool assign_rotation_matrix(Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) = 0;
+  virtual bool assign_rotation_matrix(
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) = 0;
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;

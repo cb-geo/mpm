@@ -270,8 +270,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_inclined_velocity_constraint(
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
     if (dir >= 0 && dir < (Tdim * Tnphases))
-      this->inclined_velocity_constraints_.insert(std::make_pair<unsigned, double>(
-          static_cast<unsigned>(dir), static_cast<double>(velocity)));
+      this->inclined_velocity_constraints_.insert(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
     else
       throw std::runtime_error("Constraint direction is out of bounds");
 
@@ -286,7 +287,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_inclined_velocity_constraint(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
   // Apply inclided velocity constraints
-  this->apply_inclined_velocity_constraints();
+  // this->apply_inclined_velocity_constraints();
 
   // Apply cartesian constraints
   // Set velocity constraint
@@ -314,8 +315,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_inclined_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
     // Transform to local coordinate
-    Eigen::Matrix<double, Tdim, Tnphases> local_velocity = rotation_matrix_ * this->velocity_;
-    Eigen::Matrix<double, Tdim, Tnphases> local_acceleration = rotation_matrix_ * this->acceleration_;
+    Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
+        rotation_matrix_ * this->velocity_;
+    Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
+        rotation_matrix_ * this->acceleration_;
     // Apply boundary condition in local coordinate
     local_velocity(direction, phase) = constraint.second;
     local_acceleration(direction, phase) = 0.;
