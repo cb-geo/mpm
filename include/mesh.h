@@ -218,8 +218,7 @@ class Mesh {
   //! \param[in] inclined_velocity_constraints Constraint at node id and euler
   //! angles
   bool assign_rotation_matrices(
-      const std::vector<
-          std::map<mpm::Index, unsigned, Eigen::Matrix<double, Tdim, 1>>>&
+      const std::vector<std::tuple<mpm::Index, Eigen::Matrix<double, Tdim, 1>>>&
           euler_angles);
 
   //! Assign velocity constraints to cells
@@ -324,6 +323,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Geometry to call functions within it
+  std::unique_ptr<mpm::Geometry<Tdim>> geometry_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class

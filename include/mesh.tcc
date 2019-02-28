@@ -8,6 +8,9 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   std::string logger = "mesh::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
+  //! Geometry
+  geometry_ = std::make_unique<mpm::Geometry<Tdim>>();
+
   particles_.clear();
 }
 
@@ -525,8 +528,8 @@ bool mpm::Mesh<Tdim>::assign_inclined_velocity_constraints(
 //! Assign rotation matrix to nodes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_rotation_matrices(
-    const std::vector<std::map<mpm::Index, unsigned,
-                               Eigen::Matrix<double, Tdim, 1>>>& euler_angles) {
+    const std::vector<std::tuple<mpm::Index, Eigen::Matrix<double, Tdim, 1>>>&
+        euler_angles) {
   bool status = false;
   try {
     if (!nodes_.size())
@@ -542,7 +545,7 @@ bool mpm::Mesh<Tdim>::assign_rotation_matrices(
 
       // Compute rotation matrix
       Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
-          rotation_matrix(angles);
+          geometry_->rotation_matrix(angles);
 
       // Apply constraint
       status = map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);

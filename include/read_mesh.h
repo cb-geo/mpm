@@ -71,6 +71,19 @@ class ReadMesh {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
 
+  //! Read inclined velocity constraints file
+  //! \param[in] inclined_velocity_constraints_file file name with constraints
+  //! in local coordinate
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_inclined_velocity_constraints(
+          const std::string& inclined_velocity_constraints_file) = 0;
+
+  //! Read nodal euler angles file
+  //! \param[in] nodal_euler_angles_file file name with nodal id and respective
+  //! euler angles
+  virtual std::vector<std::tuple<mpm::Index, Eigen::Matrix<double, Tdim, 1>>>
+      read_euler_angles(const std::string& nodal_euler_angles_file) = 0;
+
   //! Read particles volume file
   //! \param[in] volume_files file name with particle volumes
   virtual std::vector<std::tuple<mpm::Index, double>> read_particles_volumes(
