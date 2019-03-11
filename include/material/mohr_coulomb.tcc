@@ -10,13 +10,13 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
 
-    // MC parametrs
     // Peak friction, dilation and cohesion
     phi_peak_ =
         material_properties["friction"].template get<double>() * M_PI / 180.;
     psi_peak_ =
         material_properties["dilation"].template get<double>() * M_PI / 180.;
     cohesion_peak_ = material_properties["cohesion"].template get<double>();
+
     // Residual friction, dilation and cohesion
     phi_residual_ =
         material_properties["residual_friction"].template get<double>() * M_PI /
@@ -54,8 +54,7 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 //! Initialise state variables
 template <unsigned Tdim>
 mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
-  mpm::dense_map state_vars = {// MC parameters
-                               // Friction (phi)
+  mpm::dense_map state_vars = {// Friction (phi)
                                {"phi", this->phi_peak_},
                                // Dilation (psi)
                                {"psi", this->psi_peak_},
