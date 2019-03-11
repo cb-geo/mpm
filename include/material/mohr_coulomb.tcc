@@ -173,7 +173,7 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
   const double epsilon = (*state_vars).at("epsilon");
   const double rho = (*state_vars).at("rho");
   const double theta = (*state_vars).at("theta");
-  // MC parameters
+
   const double phi = (*state_vars).at("phi");
   const double cohesion = (*state_vars).at("cohesion");
 
@@ -239,7 +239,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double rho = (*state_vars).at("rho");
   const double epsilon = (*state_vars).at("epsilon");
   const double theta = (*state_vars).at("theta");
-  // MC paramters
+
   const double phi = (*state_vars).at("phi");
   const double psi = (*state_vars).at("psi");
   const double cohesion = (*state_vars).at("cohesion");
