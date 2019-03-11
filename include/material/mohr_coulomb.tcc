@@ -1,7 +1,7 @@
 //! Constructor with id and material properties
 template <unsigned Tdim>
 mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
-                                    const Json &material_properties)
+                                    const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
     // Elastic parameters
@@ -46,7 +46,7 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
 
     // Set elastic tensor
     this->compute_elastic_tensor();
-  } catch (std::exception &except) {
+  } catch (std::exception& except) {
     console_->error("Material parameter not set: {}\n", except.what());
   }
 }
@@ -86,7 +86,8 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
 }
 
 //! Return elastic tensor
-template <unsigned Tdim> bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
+template <unsigned Tdim>
+bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
   // Shear modulus
   const double G = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
   const double a1 = bulk_modulus_ + (4.0 / 3.0) * G;
@@ -107,7 +108,7 @@ template <unsigned Tdim> bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
-    const Vector6d &stress, mpm::dense_map *state_vars) {
+    const Vector6d& stress, mpm::dense_map* state_vars) {
 
   // Compute the mean pressure
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
@@ -129,8 +130,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
        pow((stress(0) - stress(2)), 2)) /
           6.0 +
       pow(stress(3), 2);
-  if (Tdim == 3)
-    (*state_vars)["j2"] += pow(stress(4), 2) + pow(stress(5), 2);
+  if (Tdim == 3) (*state_vars)["j2"] += pow(stress(4), 2) + pow(stress(5), 2);
 
   // Compute J3
   (*state_vars)["j3"] = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
@@ -146,16 +146,12 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   if (fabs((*state_vars).at("j2")) > 0.0)
     theta_val = (3. * sqrt(3.) / 2.) *
                 ((*state_vars).at("j3") / pow((*state_vars).at("j2"), 1.5));
-  if (theta_val > 0.99)
-    theta_val = 1.0;
-  if (theta_val < -0.99)
-    theta_val = -1.0;
+  if (theta_val > 0.99) theta_val = 1.0;
+  if (theta_val < -0.99) theta_val = -1.0;
 
   (*state_vars)["theta"] = (1. / 3.) * acos(theta_val);
-  if ((*state_vars).at("theta") > M_PI / 3.)
-    (*state_vars)["theta"] = M_PI / 3.;
-  if ((*state_vars).at("theta") < 0.0)
-    (*state_vars)["theta"] = 0.;
+  if ((*state_vars).at("theta") > M_PI / 3.) (*state_vars)["theta"] = M_PI / 3.;
+  if ((*state_vars).at("theta") < 0.0) (*state_vars)["theta"] = 0.;
 
   // Rho
   (*state_vars)["rho"] = sqrt(2 * ((*state_vars).at("j2")));
@@ -170,9 +166,9 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
 //! Compute yield and return yield state
 template <unsigned Tdim>
 typename mpm::MohrCoulomb<Tdim>::FailureState
-mpm::MohrCoulomb<Tdim>::compute_yield_state(
-    Eigen::Matrix<double, 2, 1> *yield_function,
-    const mpm::dense_map *state_vars) {
+    mpm::MohrCoulomb<Tdim>::compute_yield_state(
+        Eigen::Matrix<double, 2, 1>* yield_function,
+        const mpm::dense_map* state_vars) {
 
   // Stress invariants
   const double epsilon = (*state_vars).at("epsilon");
@@ -214,8 +210,7 @@ mpm::MohrCoulomb<Tdim>::compute_yield_state(
                alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
                           epsilon / sqrt(3.) - sigma_p);
     // Tension
-    if (h > 1.E-22)
-      yield_type = FailureState::Tensile;
+    if (h > 1.E-22) yield_type = FailureState::Tensile;
     // Shear
     else
       yield_type = FailureState::Shear;
@@ -236,8 +231,8 @@ mpm::MohrCoulomb<Tdim>::compute_yield_state(
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    const mpm::dense_map *state_vars, const Vector6d &stress,
-    Vector6d *df_dsigma, Vector6d *dp_dsigma, double *softening) {
+    const mpm::dense_map* state_vars, const Vector6d& stress,
+    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
 
   // Stress invariants
   const double j2 = (*state_vars).at("j2");
@@ -294,8 +289,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Compute dRho / dSigma (the same in both tension / shear yield types)
   Vector6d drho_dsigma = Vector6d::Zero();
   double multiplier = 1.;
-  if (fabs(rho) > 0.)
-    multiplier = 1. / rho;
+  if (fabs(rho) > 0.) multiplier = 1. / rho;
   drho_dsigma = multiplier * dev_stress;
   if (Tdim == 2) {
     drho_dsigma(4) = 0.;
@@ -304,21 +298,17 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 
   // Compute dTheta / dSigma (the same in both tension / shear yield types)
   double r_val = 0.;
-  if (fabs(j2) > 1.E-22)
-    r_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
+  if (fabs(j2) > 1.E-22) r_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
 
   double divider = 1 - (r_val * r_val);
-  if (divider <= 0.)
-    divider = 1.0E-3;
+  if (divider <= 0.) divider = 1.0E-3;
   double dtheta_dr = -1 / (3. * sqrt(divider));
 
   double dr_dj2 = (-9 * sqrt(3.) / 4.) * j3;
-  if (fabs(j2) > 1.0E-22)
-    dr_dj2 = dr_dj2 / pow(j2, 2.5);
+  if (fabs(j2) > 1.0E-22) dr_dj2 = dr_dj2 / pow(j2, 2.5);
 
   double dr_dj3 = 1.5 * sqrt(3.);
-  if (fabs(j2) > 1.0E-22)
-    dr_dj3 = dr_dj3 / pow(j2, 1.5);
+  if (fabs(j2) > 1.0E-22) dr_dj3 = dr_dj3 / pow(j2, 1.5);
 
   Vector6d dj2_dsigma = dev_stress;
 
@@ -370,14 +360,12 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     double xit = 0.1;
     double sqpart = 4. * (1 - et_value * et_value) * cos(theta) * cos(theta) +
                     5. * et_value * et_value - 4. * et_value;
-    if (sqpart < 0.)
-      sqpart = 0.00001;
+    if (sqpart < 0.) sqpart = 0.00001;
     double rt_den = 2. * (1 - et_value * et_value) * cos(theta) +
                     (2. * et_value - 1) * sqrt(sqpart);
     double rt_num = 4. * (1 - et_value * et_value) * cos(theta) * cos(theta) +
                     (2. * et_value - 1) * (2. * et_value - 1);
-    if (fabs(rt_den) < 1.e-22)
-      rt_den = 0.001;
+    if (fabs(rt_den) < 1.e-22) rt_den = 0.001;
     double rt = rt_num / (3. * rt_den);
     double dp_drt = 1.5 * rho * rho * rt /
                     sqrt(xit * xit * tension_cutoff_ * tension_cutoff_ +
@@ -403,26 +391,21 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   } else {
     double r_mc = (3. - sin(phi)) / (6 * cos(phi));
     double e_val = (3. - sin(phi)) / (3. + sin(phi));
-    if ((e_val - 0.5) <= 0.)
-      e_val = 0.501;
-    if ((e_val - 1.) >= 0.)
-      e_val = 0.999;
+    if ((e_val - 0.5) <= 0.) e_val = 0.501;
+    if ((e_val - 1.) >= 0.) e_val = 0.999;
     double sqpart = (4. * (1 - e_val * e_val) * pow(cos(theta), 2)) +
                     (5 * e_val * e_val) - (4. * e_val);
-    if (sqpart < 0.)
-      sqpart = 0.00001;
+    if (sqpart < 0.) sqpart = 0.00001;
     double r_mw_den = (2. * (1 - e_val * e_val) * cos(theta)) +
                       ((2. * e_val - 1) * sqrt(sqpart));
-    if (fabs(r_mw_den) < 1.e-22)
-      r_mw_den = 0.001;
+    if (fabs(r_mw_den) < 1.e-22) r_mw_den = 0.001;
     double r_mw_num = (4. * (1. - e_val * e_val) * pow(cos(theta), 2)) +
                       pow((2. * e_val - 1.), 2);
     double r_mw = (r_mw_num / r_mw_den) * r_mc;
     double xi = 0.1;
     double omega = pow((xi * cohesion * tan(psi)), 2) +
                    pow((r_mw * sqrt(3. / 2.) * rho), 2);
-    if (omega < 1.e-22)
-      omega = 0.001;
+    if (omega < 1.e-22) omega = 0.001;
     double l = r_mw_num;
     double m = r_mw_den;
     double dl_dtheta = -8. * (1. - e_val * e_val) * cos(theta) * sin(theta);
@@ -463,8 +446,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 //! Compute stress
 template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
-    const Vector6d &stress, const Vector6d &dstrain,
-    const ParticleBase<Tdim> *ptr, mpm::dense_map *state_vars) {
+    const Vector6d& stress, const Vector6d& dstrain,
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
   // Equivalent plastic deviatoric strain
   const double epds = (*state_vars).at("epds");
@@ -524,8 +507,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   double yield = 0.;
   if (yield_type_trial == FailureState::Tensile)
     yield = yield_function_trial(0);
-  if (yield_type_trial == FailureState::Shear)
-    yield = yield_function_trial(1);
+  if (yield_type_trial == FailureState::Shear) yield = yield_function_trial(1);
 
   double lambda_trial =
       yield /
@@ -546,8 +528,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     p_multiplier = lambda;
     dp_dsigma_final = dp_dsigma;
     // Plastic deviatoric strain is updated only in shear
-    if (yield_type == FailureState::Shear)
-      update_pds = true;
+    if (yield_type == FailureState::Shear) update_pds = true;
   }
 
   // If yield type is elastic, but yield trial is not elastic
@@ -556,8 +537,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
     // Plastic deviatoric strain is updated only in shear
-    if (yield_type_trial == FailureState::Shear)
-      update_pds = true;
+    if (yield_type_trial == FailureState::Shear) update_pds = true;
   }
 
   // update stress (plastic correction)
@@ -581,8 +561,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // compute plastic deviatoric strain
   Vector6d dstress = updated_stress - stress;
   Vector6d dpstrain = dstrain - (this->de_.inverse()) * dstress;
-  if (Tdim == 2)
-    dpstrain(4) = dpstrain(5) = 0.;
+  if (Tdim == 2) dpstrain(4) = dpstrain(5) = 0.;
 
   // Update plastic deviatoric strain if it is a load process
   if (update_pds) {
