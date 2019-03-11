@@ -531,8 +531,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   }
 
   // If yield type is elastic, but yield trial is not elastic
-  else if (yield_type == FailureState::Elastic &&
-           yield_type_trial != FailureState::Elastic) {
+  if (yield_type == FailureState::Elastic &&
+      yield_type_trial != FailureState::Elastic) {
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
     // Plastic deviatoric strain is updated only in shear
