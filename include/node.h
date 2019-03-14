@@ -172,6 +172,13 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  bool assign_rotation_matrix(
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override {
+    rotation_matrix_ = rotation_matrix;
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -199,6 +206,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Rotation matrix for inclined velocity constraints
+  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class
