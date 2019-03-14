@@ -152,6 +152,11 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  virtual bool assign_rotation_matrix(
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
