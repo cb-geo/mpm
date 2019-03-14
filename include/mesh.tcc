@@ -7,6 +7,8 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   //! Logger
   std::string logger = "mesh::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  //! Geometry
+  geometry_ = std::make_unique<mpm::Geometry<Tdim>>();
 
   particles_.clear();
 }
@@ -511,6 +513,41 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
 
       if (!status)
         throw std::runtime_error("Cannot assign invalid particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign rotation matrix to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_rotation_matrices(
+    const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign rotation "
+          "matrix");
+
+    // Loop through nodal_euler_angles of different nodes
+    for (const auto& nodal_euler_angles : euler_angles) {
+      // Node id
+      mpm::Index nid = std::get<0>(nodal_euler_angles);
+      // Euler angles
+      Eigen::Matrix<double, Tdim, 1> angles = std::get<1>(nodal_euler_angles);
+
+      // Compute rotation matrix
+      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
+          geometry_->rotation_matrix(angles);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+
+      if (!status)
+        throw std::runtime_error("Node or euler angles is/are invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
