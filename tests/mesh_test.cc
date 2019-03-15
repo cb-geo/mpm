@@ -1,3 +1,4 @@
+#include <cmath>
 #include <limits>
 #include <memory>
 
@@ -819,6 +820,31 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
           REQUIRE(mesh->assign_velocity_constraints(velocity_constraints) ==
                   false);
+        }
+
+        // Test assign rotation matrices to nodes
+        SECTION("Check assign rotation matrices to nodes") {
+          // Map of nodal id and euler angles
+          std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
+          // Euler angles
+          euler_angles.emplace(std::make_pair(
+              0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
+                  20. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              1, (Eigen::Matrix<double, Dim, 1>() << 30. * M_PI / 180,
+                  40. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              2, (Eigen::Matrix<double, Dim, 1>() << 50. * M_PI / 180,
+                  60. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              3, (Eigen::Matrix<double, Dim, 1>() << 70. * M_PI / 180,
+                  80. * M_PI / 180)
+                     .finished()));
+
+          REQUIRE(mesh->assign_rotation_matrices(euler_angles) == true);
         }
 
         // Test assign velocity constraints to cells
