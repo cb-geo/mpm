@@ -845,6 +845,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                      .finished()));
 
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
+          // Check for failure
+          auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(1);
+          REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
+                  false);
         }
 
         // Test assign velocity constraints to cells
@@ -1796,6 +1800,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                      .finished()));
 
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
+          // Check for failure
+          auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(1);
+          REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
+                  false);
         }
 
         // Test assign velocity constraints to cells
