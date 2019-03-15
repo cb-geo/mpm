@@ -1773,6 +1773,31 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                   false);
         }
 
+        // Test assign rotation matrices to nodes
+        SECTION("Check assign rotation matrices to nodes") {
+          // Map of nodal id and euler angles
+          std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
+          // Euler angles
+          euler_angles.emplace(std::make_pair(
+              0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
+                  20. * M_PI / 180, 30. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              1, (Eigen::Matrix<double, Dim, 1>() << 40. * M_PI / 180,
+                  50. * M_PI / 180, 60. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              2, (Eigen::Matrix<double, Dim, 1>() << 70. * M_PI / 180,
+                  80. * M_PI / 180, 90. * M_PI / 180)
+                     .finished()));
+          euler_angles.emplace(std::make_pair(
+              3, (Eigen::Matrix<double, Dim, 1>() << 100. * M_PI / 180,
+                  110. * M_PI / 180, 120. * M_PI / 180)
+                     .finished()));
+
+          REQUIRE(mesh->assign_rotation_matrices(euler_angles) == true);
+        }
+
         // Test assign velocity constraints to cells
         SECTION("Check assign velocity constraints to cells") {
           // Vector of particle coordinates
