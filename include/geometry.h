@@ -4,39 +4,34 @@
 #include "Eigen/Dense"
 
 namespace mpm {
-
-//! Geometry class
-//! \brief Base class that performs geometric manipulations / operations
+//! geometric manipulations / operations
+namespace geometry {
+//! Compute the Euler rotation matrix for an orthogonal axis
+//! coordinate system
+//! \param[in] angles Rotation angles depending on the dimension
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class Geometry {
- public:
-  //! Constructor
-  Geometry() = default;
+Eigen::Matrix<double, Tdim, Tdim> rotation_matrix(
+    const Eigen::Matrix<double, Tdim, 1>& angles);
 
-  //! Compute the Euler rotation matrix for an orthogonal axis
-  //! coordinate system
-  //! \param[in] angles Rotation angles depending on the dimension
-  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix(
-      const Eigen::Matrix<double, Tdim, 1>& angles) const;
+//! Compute the angle between two vectors in radians
+//! \param[in] vector_a First vector
+//! \param[in] vector_b Second vector
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+double angle_between_vectors(const Eigen::Matrix<double, Tdim, 1>& vector_a,
+                             const Eigen::Matrix<double, Tdim, 1>& vector_b);
 
-  //! Compute the angle between two vectors in radians
-  //! \param[in] vector_a First vector
-  //! \param[in] vector_b Second vector
-  double angle_between_vectors(
-      const Eigen::Matrix<double, Tdim, 1>& vector_a,
-      const Eigen::Matrix<double, Tdim, 1>& vector_b) const;
-
-  //! Compute euler angles with respect to the Cartesian coordinates
-  //! \param[in] new_axes New orthogonal coordinate systems (2 vectors for 2D, 3
-  //! vectors for 3D)
-  //! \retval euler_angles Euler Angles (2 angles for 2D, 3
-  //! angles for 3D)
-  Eigen::Matrix<double, Tdim, 1> euler_angles_cartesian(
-      const Eigen::Matrix<double, Tdim, Tdim>& new_axes);
-};
+//! Compute euler angles with respect to the Cartesian coordinates
+//! \param[in] new_axes New orthogonal coordinate systems (2 vectors for 2D, 3
+//! vectors for 3D)
+//! \retval euler_angles Euler Angles (2 angles for 2D, 3
+//! angles for 3D)
+//! \tparam Tdim Dimension
+template <unsigned Tdim>
+Eigen::Matrix<double, Tdim, 1> euler_angles_cartesian(
+    const Eigen::Matrix<double, Tdim, Tdim>& new_axes);
+}  // namespace geometry
 }  // namespace mpm
-
-#include "geometry.tcc"
 
 #endif  // MPM_GEOMETRY_H_
