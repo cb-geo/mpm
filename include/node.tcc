@@ -276,15 +276,3 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     this->acceleration_(direction, phase) = 0.;
   }
 }
-
-//! Assign rotation matrix
-//! \param[in] rotation_matrix Rotation matrix of the node
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_rotation_matrix(
-    Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) {
-  bool status = true;
-
-  rotation_matrix_ = rotation_matrix;
-
-  return status;
-}

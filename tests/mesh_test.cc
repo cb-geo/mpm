@@ -844,7 +844,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                   80. * M_PI / 180)
                      .finished()));
 
-          REQUIRE(mesh->assign_rotation_matrices(euler_angles) == true);
+          REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
         }
 
         // Test assign velocity constraints to cells
@@ -1795,7 +1795,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                   110. * M_PI / 180, 120. * M_PI / 180)
                      .finished()));
 
-          REQUIRE(mesh->assign_rotation_matrices(euler_angles) == true);
+          REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
         }
 
         // Test assign velocity constraints to cells
