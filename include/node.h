@@ -174,8 +174,10 @@ class Node : public NodeBase<Tdim> {
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
-  bool assign_rotation_matrix(
-      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override;
+  void assign_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) override {
+    rotation_matrix_ = rotation_matrix;
+  }
 
  private:
   //! Mutex
