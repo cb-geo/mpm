@@ -154,7 +154,7 @@ class NodeBase {
 
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
-  virtual bool assign_rotation_matrix(
+  virtual void assign_rotation_matrix(
       Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) = 0;
 
 };  // NodeBase class
