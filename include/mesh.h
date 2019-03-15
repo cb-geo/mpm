@@ -21,7 +21,7 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
-#include "geometry.h" 
+#include "geometry.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
