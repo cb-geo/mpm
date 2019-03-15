@@ -1,8 +1,8 @@
 //! Compute the 2d rotation matrix for an orthogonal axis
 //! coordinate system
 template <>
-inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::rotation_matrix(
-    const Eigen::Matrix<double, 2, 1>& angles) const {
+Eigen::Matrix<double, 2, 2> mpm::geometry::rotation_matrix(
+    const Eigen::Matrix<double, 2, 1>& angles) {
   // Get cos and sin of angles
   const double cos_alpha_cos_beta = cos(angles(0)) * cos(angles(1));
   const double cos_alpha_sin_beta = cos(angles(0)) * sin(angles(1));
@@ -21,8 +21,8 @@ inline Eigen::Matrix<double, 2, 2> mpm::Geometry<2>::rotation_matrix(
 
 //! Compute the 3d rotation matrix for an orthogonal axis coordinate system
 template <>
-inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const 
-    Eigen::Matrix<double, 3, 1>& angles) const {
+ Eigen::Matrix<double, 3, 3> mpm::geometry::rotation_matrix(const 
+    Eigen::Matrix<double, 3, 1>& angles)  {
 
   // Get cos and sin of angles
   const double cos_alpha_cos_beta = cos(angles(0)) * cos(angles(1));
@@ -56,18 +56,17 @@ inline Eigen::Matrix<double, 3, 3> mpm::Geometry<3>::rotation_matrix(const
 
 //! Compute the angle between two vectors in radians
 template <unsigned Tdim>
-inline double mpm::Geometry<Tdim>::angle_between_vectors(
+double mpm::geometry<Tdim>::angle_between_vectors(
     const Eigen::Matrix<double, Tdim, 1>& vector_a,
-    const Eigen::Matrix<double, Tdim, 1>& vector_b) const {
+    const Eigen::Matrix<double, Tdim, 1>& vector_b) {
   // angle between two vectors a and b = arccos( a dot b / ||a|| ||b||)
   return acos((vector_a.normalized()).dot((vector_b.normalized())));
 }
 
 //! Compute euler angles with respect to the Cartesian coordinates
 template <unsigned Tdim>
-inline Eigen::Matrix<double, Tdim, 1>
-    mpm::Geometry<Tdim>::euler_angles_cartesian(
-        const Eigen::Matrix<double, Tdim, Tdim>& new_axes) {
+Eigen::Matrix<double, Tdim, 1> mpm::geometry<Tdim>::euler_angles_cartesian(
+    const Eigen::Matrix<double, Tdim, Tdim>& new_axes) {
 
   // Make cartesian coordinate system
   Eigen::Matrix<double, Tdim, Tdim> original_axes;
