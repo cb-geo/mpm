@@ -523,7 +523,7 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
 
 //! Assign rotation matrix to nodes
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_rotation_matrices(
+bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
     const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles) {
   bool status = false;
   try {
@@ -535,16 +535,17 @@ bool mpm::Mesh<Tdim>::assign_rotation_matrices(
     // Loop through nodal_euler_angles of different nodes
     for (const auto& nodal_euler_angles : euler_angles) {
       // Node id
-      mpm::Index nid = std::get<0>(nodal_euler_angles);
+      mpm::Index nid = nodal_euler_angles.first;
       // Euler angles
-      Eigen::Matrix<double, Tdim, 1> angles = std::get<1>(nodal_euler_angles);
-
+      Eigen::Matrix<double, Tdim, 1> angles = nodal_euler_angles.second;
       // Compute rotation matrix
       Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
           geometry_->rotation_matrix(angles);
 
-      // Apply constraint
-      status = map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+      // Apply rotation matrix to nodes
+      map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+
+      status = true;
 
       if (!status)
         throw std::runtime_error("Node or euler angles is/are invalid");

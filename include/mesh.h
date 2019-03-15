@@ -208,9 +208,8 @@ class Mesh {
           velocity_constraints);
 
   //! Assign rotation matrix
-  //! \param[in] inclined_velocity_constraints Constraint at node id and euler
-  //! angles
-  bool assign_rotation_matrices(
+  //! \param[in] euler_angles Map of node numebr and respective euler_angles
+  bool compute_nodal_rotation_matrices(
       const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles);
 
   //! Assign velocity constraints to cells
