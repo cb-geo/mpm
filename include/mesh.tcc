@@ -544,11 +544,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
 
       // Apply rotation matrix to nodes
       map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
-
       status = true;
-
-      if (!status)
-        throw std::runtime_error("Node or euler angles is/are invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
