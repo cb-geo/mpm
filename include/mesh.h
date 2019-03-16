@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <vector>
@@ -207,8 +208,8 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
-  //! Assign rotation matrix
-  //! \param[in] euler_angles Map of node numebr and respective euler_angles
+  //! Compute and assign rotation matrix to nodes
+  //! \param[in] euler_angles Map of node number and respective euler_angles
   bool compute_nodal_rotation_matrices(
       const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles);
 
