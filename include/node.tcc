@@ -273,7 +273,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
 
-    if (flag) {
+    if (!generic_velocity_constraints_) {
       this->velocity_(direction, phase) = constraint.second;
       this->acceleration_(direction, phase) = 0.;
     } else {
