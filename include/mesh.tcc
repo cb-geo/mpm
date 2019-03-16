@@ -542,7 +542,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
       auto rotation_matrix = geometry_->rotation_matrix(angles);
 
       // Apply rotation matrix to nodes
-      map_nodes_.at(nid)->assign_rotation_matrix(rotation_matrix);
+      map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
       status = true;
     }
   } catch (std::exception& exception) {
