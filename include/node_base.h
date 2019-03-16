@@ -155,7 +155,7 @@ class NodeBase {
   //! Assign rotation matrix
   //! \param[in] rotation_matrix Rotation matrix of the node
   virtual void assign_rotation_matrix(
-      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix) = 0;
+      const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
 };  // NodeBase class
 }  // namespace mpm
