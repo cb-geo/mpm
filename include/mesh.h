@@ -314,8 +314,6 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
-  //! Geometry to call functions within it
-  std::unique_ptr<mpm::Geometry<Tdim>> geometry_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class
