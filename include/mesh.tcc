@@ -521,7 +521,7 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
   return status;
 }
 
-//! Assign rotation matrix to nodes
+//! Compute and assign rotation matrix to nodes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
     const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles) {
@@ -539,11 +539,10 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
       // Euler angles
       Eigen::Matrix<double, Tdim, 1> angles = nodal_euler_angles.second;
       // Compute rotation matrix
-      Eigen::Matrix<double, Tdim, Tdim> rotation_matrix =
-          geometry_->rotation_matrix(angles);
+      auto rotation_matrix = geometry_->rotation_matrix(angles);
 
       // Apply rotation matrix to nodes
-      map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+      map_nodes_.at(nid)->assign_rotation_matrix(rotation_matrix);
       status = true;
     }
   } catch (std::exception& exception) {
