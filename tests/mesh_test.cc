@@ -826,10 +826,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
           std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
-          // Node 0 (non-existent) with Euler angles of 10 and 20  deg
-          // Node 1 (non-existent) with Euler angles of 30 and 40 deg
-          // Node 2 (non-existent) with Euler angles of 50 and 60 deg
-          // Node 3 (non-existent) with Euler angles of 70 and 80 deg
+          // Node 0 with Euler angles of 10 and 20 deg
+          // Node 1 with Euler angles of 30 and 40 deg
+          // Node 2 with Euler angles of 50 and 60 deg
+          // Node 3 with Euler angles of 70 and 80 deg
+          // Insert euler angles and node id into map
           euler_angles.emplace(std::make_pair(
               0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
                   20. * M_PI / 180)
@@ -847,6 +848,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                   80. * M_PI / 180)
                      .finished()));
 
+          // Check compute and assign pass
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
 
           // Check for failure when missing node id
@@ -1799,10 +1801,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
           std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
-          // Node 0 (non-existent) with Euler angles of 10, 20 and 30 deg
-          // Node 1 (non-existent) with Euler angles of 40, 50 and 60 deg
-          // Node 2 (non-existent) with Euler angles of 70, 80 and 90 deg
-          // Node 3 (non-existent) with Euler angles of 100, 110 and 120 deg
+          // Node 0 with Euler angles of 10, 20 and 30 deg
+          // Node 1 with Euler angles of 40, 50 and 60 deg
+          // Node 2 with Euler angles of 70, 80 and 90 deg
+          // Node 3 with Euler angles of 100, 110 and 120 deg
+          // Insert euler angles and node id into map
           euler_angles.emplace(std::make_pair(
               0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
                   20. * M_PI / 180, 30. * M_PI / 180)
@@ -1820,6 +1823,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                   110. * M_PI / 180, 120. * M_PI / 180)
                      .finished()));
 
+          // Check compute and assign pass
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
 
           // Check for failure when missing node id
