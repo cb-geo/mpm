@@ -7,8 +7,6 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   //! Logger
   std::string logger = "mesh::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
-  //! Geometry
-  geometry_ = std::make_unique<mpm::Geometry<Tdim>>();
 
   particles_.clear();
 }
@@ -539,7 +537,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
       // Euler angles
       Eigen::Matrix<double, Tdim, 1> angles = nodal_euler_angles.second;
       // Compute rotation matrix
-      auto rotation_matrix = geometry_->rotation_matrix(angles);
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(angles);
 
       // Apply rotation matrix to nodes
       map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
