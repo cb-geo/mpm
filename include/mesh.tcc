@@ -7,6 +7,8 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   //! Logger
   std::string logger = "mesh::" + std::to_string(id);
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  //! Geometry
+  geometry_ = std::make_unique<mpm::Geometry<Tdim>>();
 
   particles_.clear();
 }
