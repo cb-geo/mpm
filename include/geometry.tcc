@@ -1,3 +1,4 @@
+//! Angle between two vectors in radians
 template <int Tdim>
 inline double mpm::geometry::angle_between_vectors(
     const Eigen::Matrix<double, Tdim, 1>& vector_a,
@@ -8,7 +9,7 @@ inline double mpm::geometry::angle_between_vectors(
 
 //! Compute Euler angles with respect to the Cartesian coordinates
 //! \param[in] new_axes New orthogonal coordinate systems
-//! \retval euler_angles Euler Angles (2 for 2D, 3 for 3D)
+//! \retval euler_angles Euler Angles
 //! \tparam Tdim Dimension
 template <int Tdim>
 inline Eigen::Matrix<double, Tdim, 1> mpm::geometry::euler_angles_cartesian(

@@ -6,7 +6,7 @@
 namespace mpm {
 namespace geometry {
 //! Compute the Euler rotation matrix in orthogonal axis coordinate system
-//! \param[in] angles Rotation angles depending on the dimension
+//! \param[in] angles Rotation angles wrt to the coordinate system
 //! \tparam Tdim Dimension
 template <int Tdim>
 Eigen::Matrix<double, Tdim, Tdim> rotation_matrix(
@@ -23,7 +23,7 @@ inline double angle_between_vectors(
 
 //! Compute Euler angles with respect to the Cartesian coordinates
 //! \param[in] new_axes New orthogonal coordinate systems
-//! \retval euler_angles Euler Angles (2 for 2D, 3 for 3D)
+//! \retval euler_angles Euler Angles
 //! \tparam Tdim Dimension
 template <int Tdim>
 inline Eigen::Matrix<double, Tdim, 1> euler_angles_cartesian(
