@@ -108,8 +108,8 @@ TEST_CASE("Geometry is checked for 3D case", "[geometry][3D]") {
 
     const double angle = 1.150261991510931;
 
-    // REQUIRE(mpm::geometry::angle_between_vectors(vector_a, vector_b) ==
-    //        Approx(angle).epsilon(Tolerance));
+    REQUIRE(mpm::geometry::angle_between_vectors(vector_a, vector_b) ==
+            Approx(angle).epsilon(Tolerance));
   }
 
   SECTION("Check euler angles computations") {
