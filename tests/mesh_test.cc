@@ -826,7 +826,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
           std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
-          // Euler angles
+          // Node 0 (non-existent) with Euler angles of 10 and 20  deg
+          // Node 1 (non-existent) with Euler angles of 30 and 40 deg
+          // Node 2 (non-existent) with Euler angles of 50 and 60 deg
+          // Node 3 (non-existent) with Euler angles of 70 and 80 deg
           euler_angles.emplace(std::make_pair(
               0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
                   20. * M_PI / 180)
@@ -845,7 +848,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                      .finished()));
 
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
-          // Check for failure
+
+          // Check for failure when missing node id
+          // Node 100 (non-existent) with Euler angles of 90 and 100 deg
+          euler_angles.emplace(std::make_pair(
+              100, (Eigen::Matrix<double, Dim, 1>() << 90. * M_PI / 180,
+                    100. * M_PI / 180)
+                       .finished()));
+          REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == false);
+
+          // Check for failure of empty input
+          std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>>
+              empty_euler_angles;
+          REQUIRE(mesh->compute_nodal_rotation_matrices(empty_euler_angles) ==
+                  false);
+
+          // Check for failure when no nodes are assigned
           auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(1);
           REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
                   false);
@@ -1781,7 +1799,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
           std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>> euler_angles;
-          // Euler angles
+          // Node 0 (non-existent) with Euler angles of 10, 20 and 30 deg
+          // Node 1 (non-existent) with Euler angles of 40, 50 and 60 deg
+          // Node 2 (non-existent) with Euler angles of 70, 80 and 90 deg
+          // Node 3 (non-existent) with Euler angles of 100, 110 and 120 deg
           euler_angles.emplace(std::make_pair(
               0, (Eigen::Matrix<double, Dim, 1>() << 10. * M_PI / 180,
                   20. * M_PI / 180, 30. * M_PI / 180)
@@ -1800,7 +1821,22 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                      .finished()));
 
           REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == true);
-          // Check for failure
+
+          // Check for failure when missing node id
+          // Node 100 (non-existent) with Euler angles of 130, 140 and 150 deg
+          euler_angles.emplace(std::make_pair(
+              100, (Eigen::Matrix<double, Dim, 1>() << 130. * M_PI / 180,
+                    140. * M_PI / 180, 150. * M_PI / 180)
+                       .finished()));
+          REQUIRE(mesh->compute_nodal_rotation_matrices(euler_angles) == false);
+
+          // Check for failure of empty input
+          std::map<mpm::Index, Eigen::Matrix<double, Dim, 1>>
+              empty_euler_angles;
+          REQUIRE(mesh->compute_nodal_rotation_matrices(empty_euler_angles) ==
+                  false);
+
+          // Check for failure when no nodes are assigned
           auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(1);
           REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
                   false);
