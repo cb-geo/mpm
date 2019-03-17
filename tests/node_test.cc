@@ -836,6 +836,21 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+      Eigen::Matrix<double, Dim, 1> euler_angles;
+      euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+      node->assign_rotation_matrix(rotation_matrix);
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      acceleration << -2.462019382530521, 2.934120444167327;
+      for (unsigned i = 0; i < Dim; ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
     }
   }
 }
@@ -1231,6 +1246,22 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Check apply constraints
       acceleration << 0.0, 0.0, 5.;
       for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
+      // and gamma = 30 deg
+      Eigen::Matrix<double, Dim, 1> euler_angles;
+      euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+      node->assign_rotation_matrix(rotation_matrix);
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      acceleration << 0.375959332951088, -2.132171329881108, 3.75;
+      for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
     }
