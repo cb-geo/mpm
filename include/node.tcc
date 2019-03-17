@@ -279,15 +279,15 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     } else {
       // Transform to local coordinate
       Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
-          rotation_matrix_ * this->velocity_;
+          rotation_matrix_.inverse() * this->velocity_;
       Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
-          rotation_matrix_ * this->acceleration_;
+          rotation_matrix_.inverse() * this->acceleration_;
       // Apply boundary condition in local coordinate
       local_velocity(direction, phase) = constraint.second;
       local_acceleration(direction, phase) = 0.;
       // Transform back to global coordinate
-      this->velocity_ = rotation_matrix_.inverse() * local_velocity;
-      this->acceleration_ = rotation_matrix_.inverse() * local_acceleration;
+      this->velocity_ = rotation_matrix_ * local_velocity;
+      this->acceleration_ = rotation_matrix_ * local_acceleration;
     }
   }
 }
