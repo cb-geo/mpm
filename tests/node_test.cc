@@ -1,9 +1,11 @@
+#include <cmath>
 #include <limits>
 #include <memory>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "geometry.h"
 #include "node.h"
 
 // Check node class for 1D case
@@ -776,6 +778,21 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
                 Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+      Eigen::Matrix<double, Dim, 1> euler_angles;
+      euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+      node->assign_rotation_matrix(rotation_matrix);
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      velocity << -14.789494816219520, -1.821114255872096;
+      for (unsigned i = 0; i < Dim; ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
     }
 
     SECTION("Check acceleration") {
@@ -1154,6 +1171,22 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Check apply constraints
       velocity << 10.5, -12.5, 0.1;
       for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
+      // and gamma = 30 deg
+      Eigen::Matrix<double, Dim, 1> euler_angles;
+      euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+      node->assign_rotation_matrix(rotation_matrix);
+
+      // Apply constraints
+      node->apply_velocity_constraints();
+
+      // Check apply constraints
+      velocity << 15.774625541122909, -8.021674875339704, 2.117469796447889;
+      for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
                 Approx(velocity(i)).epsilon(Tolerance));
     }
