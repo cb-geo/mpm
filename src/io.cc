@@ -161,3 +161,44 @@ std::string mpm::IO::output_folder() const {
   }
   return path;
 }
+
+//! Return map of entity sets from the JSON file
+std::map<Index, std::vector<Index>> mpm::IO::entity_sets(const std::string& filename, const std::string& sets_type) {
+
+  bool status = false;
+  // Get entity sets JSON file
+  std::ifstream sfs(filename);
+  // Map of the entity sets
+  std::map<Index, std::vector<Index>> entity_sets;
+
+  try {
+    if (sfs.is_open()){
+      status = true;
+      // Entity sets JSON object
+      Json json_sets_ = Json::parse(sfs);
+     // Input the type of sets (node sets or particle sets)
+      Json esets = json_sets_["sets_type"];
+
+      if (esets.size() > 0) {
+        for (Json::iterator itr = esets.begin(); itr != esets.end(); ++itr) {
+          // Get the entity set ids
+          Index id = (*itr)["id"].template get<Index>();
+          // Get the entity ids
+          std::vector<Index> eids;
+          // Get the size of the set vector
+          eids.resize((*itr).at("set").size());
+
+          for (unsigned i = 0; i < (*itr).at("set").size(); ++i)
+            eids.emplace_back((*itr).at("set").at(i).template get<Index>());
+
+          entity_sets[id] = eids;
+        }
+      }
+      
+    }
+  } catch (const std::exception& except) {
+    console_->error("Failed to find file {}", filename);
+  }
+
+  return entity_sets;
+}

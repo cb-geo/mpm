@@ -21,7 +21,8 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"particles", "particles-3d.txt"},
           {"initial_stresses", "initial_soil_stress.txt"},
           {"materials", "materials.txt"},
-          {"traction", "traction.txt"}}},
+          {"traction", "traction.txt"},
+          {"entity_sets", "entity_sets.json"}}},
         {"mesh",
          {{"mesh_reader", "Ascii3D"},
           {"cell_type", "ED3H8"},
@@ -47,11 +48,29 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
         {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
 
+    //Make json object with entity sets files
+    Json json_set_file = {
+        {"node_sets",
+         {{"id", 0},
+          {"set", {0, 1}}},
+         {{"id", 1},
+          {"set", {2, 3}}}},
+        {"particle_sets",
+         {{"id", 0},
+          {"set", {0, 1}}},
+         {{"id", 1},
+          {"set", {2, 3}}}}};
     // Dump JSON as an input file to be read
     std::ofstream file;
     file.open("mpm.json");
     file << json_file.dump(2);
     file.close();
+
+    // Dump JSON as an input file to be read
+    std::ofstream set_file;
+    set_file.open("entity_sets.json");
+    set_file << json_set_file.dump(2);
+    set_file.close();
 
     // Assign argc and argv to nput arguments of MPM
     int argc = 7;
@@ -127,5 +146,19 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(meshfile == "./results/MPM/geometry057.vtp");
     // Check output folder
     REQUIRE(io->output_folder() == "results/");
+
+    const std::string filename = "entity_sets";
+    const std::string sets_type = "node_sets";
+    std::map<Index, std::vector<Index>> node_sets;
+    std::map<Index, std::vector<Index>> particle_sets;
+    std::vector<Index> node_set0 ={0, 1};
+    std::vector<Index> node_set1 ={2, 3};
+    node_sets[0] = node_set0;
+    node_sets[1] = node_set1;
+    std::vector<Index> particle_set0 ={0, 1};
+    std::vector<Index> particle_set1 ={2, 3};
+    particle_sets[0] = particle_set0;
+    particle_sets[1] = particle_set1;
+    REQUIRE(io->entity_sets(filename, sets_type) == node_sets);
   }
 }
