@@ -890,7 +890,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->velocity(Nphase)(i) ==
                 Approx(velocity(i)).epsilon(Tolerance));
 
-      // Check that the velocity is -12.5 in 0 direction in local coordinate
+      // Check that the velocity is -12.5 in 0 direction in the local coordinate
       REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
               Approx(-12.5).epsilon(Tolerance));
 
