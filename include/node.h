@@ -177,7 +177,6 @@ class Node : public NodeBase<Tdim> {
   void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
     rotation_matrix_ = rotation_matrix;
-    inverse_rotation_matrix_ = rotation_matrix_.inverse();
     generic_velocity_constraints_ = true;
   }
 
@@ -210,8 +209,6 @@ class Node : public NodeBase<Tdim> {
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
-  //! Inverse rotation matrix for general velocity constraints
-  Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_velocity_constraints_{false};
