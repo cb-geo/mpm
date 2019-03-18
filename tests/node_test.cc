@@ -1382,7 +1382,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       SECTION("Check general velocity constraints in 2 directions") {
         // Apply velocity constraints
         REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
-        REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(2, -12.5) == true);
 
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
         // and gamma = 30 deg
@@ -1397,7 +1397,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         node->apply_velocity_constraints();
 
         // Check apply constraints
-        velocity << 15.157544222406660, -4.522032811278529, -4.037597367390767;
+        velocity << 8.056429712589052, 10.985674281018227, -8.995236782890776;
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->velocity(Nphase)(i) ==
                   Approx(velocity(i)).epsilon(Tolerance));
@@ -1405,12 +1405,12 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         // Check that the velocity is as specified in local coordinate
         REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
                 Approx(10.5).epsilon(Tolerance));
-        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(1) ==
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(2) ==
                 Approx(-12.5).epsilon(Tolerance));
 
         // Check apply constraints
-        acceleration << 0.199888855381353, -1.133626031468458,
-            1.993788003069981;
+        acceleration << -1.754172871235121, 2.722373665593709,
+            1.723750597747385;
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->acceleration(Nphase)(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
@@ -1418,7 +1418,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         // Check that the acceleration is 0 in local coordinate
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
                 Approx(0).epsilon(Tolerance));
-        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(1) ==
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(2) ==
                 Approx(0).epsilon(Tolerance));
       }
 
