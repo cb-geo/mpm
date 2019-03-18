@@ -11,6 +11,8 @@
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
+//! MPM Index
+using Index = unsigned long long;
 // Speed log
 #include "spdlog/spdlog.h"
 
@@ -68,6 +70,9 @@ class IO {
                                       const std::string& file_extension,
                                       const std::string& analysis_id,
                                       unsigned step, unsigned max_steps);
+
+  //! Get the entity sets from the set JSON file
+  std::map<Index, std::vector<Index>> entity_sets(const std::string& filename, const std::string& sets_type);
 
  private:
   //! Number of parallel threads
