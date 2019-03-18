@@ -881,7 +881,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       node->assign_rotation_matrix(rotation_matrix);
       const auto inverse_rotation_matrix = rotation_matrix.inverse();
 
-      // Apply constraints
+      // Apply inclined velocity constraints
       node->apply_velocity_constraints();
 
       // Check applied velocity constraints in the global coordinates
