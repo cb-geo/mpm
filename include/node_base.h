@@ -141,6 +141,7 @@ class NodeBase {
   virtual VectorDim acceleration(unsigned phase) const = 0;
 
   //! Compute acceleration
+  //! \param[in] dt Time-step
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
   //! Assign velocity constraint
@@ -151,6 +152,18 @@ class NodeBase {
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
+
+  //! Assign friction constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of friction constraint
+  //! \param[in] sign Sign of normal wrt coordinate system for friction
+  //! \param[in] friction Applied friction constraint
+  virtual bool assign_friction_constraint(unsigned dir, int sign,
+                                          double friction) = 0;
+
+  //! Apply friction constraints
+  //! \param[in] dt Time-step
+  virtual void apply_friction_constraints(double dt) = 0;
 
 };  // NodeBase class
 }  // namespace mpm
