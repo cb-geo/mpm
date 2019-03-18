@@ -900,7 +900,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
-      // Check that the acceleration is 0 in 0 direction local coordinate
+      // Check that the acceleration is 0 in 0 direction in the local coordinates
       REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
               Approx(0).epsilon(Tolerance));
     }
