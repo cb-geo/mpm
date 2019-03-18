@@ -884,7 +884,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Apply constraints
       node->apply_velocity_constraints();
 
-      // Check apply constraints
+      // Check applied velocity constraints in the global coordinates
       velocity << -9.583478335521184, -8.025403099849004;
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
