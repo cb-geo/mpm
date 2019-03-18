@@ -894,7 +894,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
               Approx(-12.5).epsilon(Tolerance));
 
-      // Check apply constraints
+      // Check applied constraints on acceleration in the global coordinates
       acceleration << -0.396139826697847, 0.472101061636807;
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
