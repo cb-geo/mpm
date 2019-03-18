@@ -871,38 +871,80 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
-      // Apply velocity constraints
-      REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+      SECTION("Check general velocity constraints in 1 direction") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+  
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+  
+        // Apply inclined velocity constraints
+        node->apply_velocity_constraints();
+  
+        // Check applied velocity constraints in the global coordinates
+        velocity << -9.583478335521184, -8.025403099849004;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+  
+        // Check that the velocity is -12.5 in 0 direction in the local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(-12.5).epsilon(Tolerance));
+  
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << -0.396139826697847, 0.472101061636807;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+  
+        // Check that the acceleration is 0 in 0 direction in the local coordinates
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+      }
 
-      // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
-      Eigen::Matrix<double, Dim, 1> euler_angles;
-      euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
-      const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
-      node->assign_rotation_matrix(rotation_matrix);
-      const auto inverse_rotation_matrix = rotation_matrix.inverse();
+      SECTION("Check general velocity constraints in all directions") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(1, 7.5) == true);
+  
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << -10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix = mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+  
+        // Apply inclined velocity constraints
+        node->apply_velocity_constraints();
+  
+        // Check applied velocity constraints in the global coordinates
+        velocity << -14.311308834766370, 2.772442864323454;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+  
+        // Check that the velocity is -12.5 in 0 direction in the local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(-12.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(1) ==
+                Approx(7.5).epsilon(Tolerance));
 
-      // Apply inclined velocity constraints
-      node->apply_velocity_constraints();
-
-      // Check applied velocity constraints in the global coordinates
-      velocity << -9.583478335521184, -8.025403099849004;
-      for (unsigned i = 0; i < Dim; ++i)
-        REQUIRE(node->velocity(Nphase)(i) ==
-                Approx(velocity(i)).epsilon(Tolerance));
-
-      // Check that the velocity is -12.5 in 0 direction in the local coordinate
-      REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
-              Approx(-12.5).epsilon(Tolerance));
-
-      // Check applied constraints on acceleration in the global coordinates
-      acceleration << -0.396139826697847, 0.472101061636807;
-      for (unsigned i = 0; i < Dim; ++i)
-        REQUIRE(node->acceleration(Nphase)(i) ==
-                Approx(acceleration(i)).epsilon(Tolerance));
-
-      // Check that the acceleration is 0 in 0 direction in the local coordinates
-      REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
-              Approx(0).epsilon(Tolerance));
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 0, 0;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+  
+        // Check that the acceleration is 0 in 0 direction in the local coordinates
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(1) ==
+                Approx(0).epsilon(Tolerance));
+      }
     }
   }
 }
