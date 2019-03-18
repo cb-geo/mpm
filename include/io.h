@@ -53,6 +53,13 @@ class IO {
   //! Return json object
   Json json_object(const std::string& name) const { return json_[name]; }
 
+  //! Return the entity sets from the input set JSON file
+  //! \param[in] filename File name
+  //! \param[in] sets_type type of sets
+  //! \return map of entity sets
+  std::map<Index, std::vector<Index>> entity_sets(const std::string& filename,
+                                                  const std::string& sets_type);
+
   //! Return post processing object
   Json post_processing() const { return json_["post_processing"]; }
 
@@ -70,9 +77,6 @@ class IO {
                                       const std::string& file_extension,
                                       const std::string& analysis_id,
                                       unsigned step, unsigned max_steps);
-
-  //! Get the entity sets from the set JSON file
-  std::map<Index, std::vector<Index>> entity_sets(const std::string& filename, const std::string& sets_type);
 
  private:
   //! Number of parallel threads
