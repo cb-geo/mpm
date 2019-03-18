@@ -87,17 +87,6 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
     vtk_attributes_ = vtk;
     console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
-
-  // Entity sets
-  try{
-    if (!io_->file_name("entity_sets").empty()){
-      std::string entity_sets_ = io_->file_name("entity_sets");
-      node_sets_ = io-> entity_sets(entity_sets_, "node_sets");
-      particle_sets_ = io-> entity_sets(entity_sets_, "particle_sets");
-    }
-  } catch (std::exception& exception) {
-    console_->error("No entity set is defined");
-  }
 }
 
 // Initialise mesh
