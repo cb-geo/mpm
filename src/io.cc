@@ -163,40 +163,43 @@ std::string mpm::IO::output_folder() const {
 }
 
 //! Return map of entity sets from the JSON file
-std::map<Index, std::vector<Index>> mpm::IO::entity_sets(
+std::map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
     const std::string& filename, const std::string& sets_type) {
 
   // Input file stream for sets JSON file
-  std::ifstream sfs;
-  sfs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  std::ifstream sets_file;
+  sets_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   // Map of the entity sets
-  std::map<Index, std::vector<Index>> entity_sets;
+  std::map<mpm::Index, std::vector<mpm::Index>> entity_sets;
 
   try {
-    sfs.open(filename);
+    sets_file.open(filename);
     // Entity sets JSON object
-    Json json_sets_ = Json::parse(sfs);
-    // type of sets (ex: node sets or particle sets)
-    Json esets = json_sets_["sets_type"];
+    Json json_sets_ = Json::parse(sets_file);
+    // type of sets (e.g: node_sets or particle_sets)
+    Json sets = json_sets_[sets_type];
 
-    if (esets.size() > 0) {
-      for (Json::iterator itr = esets.begin(); itr != esets.end(); ++itr) {
+    if (sets.size() > 0) {
+      for (Json::iterator itr = sets.begin(); itr != sets.end(); ++itr) {
         // Get the entity set ids
-        Index id = (*itr)["id"].template get<Index>();
+        mpm::Index id = (*itr)["id"].template get<mpm::Index>();
         // Get the entity ids
-        std::vector<Index> eids;
+        std::vector<mpm::Index> entity_ids;
         // Get the size of the set vector
-        eids.resize((*itr).at("set").size());
+        entity_ids.resize((*itr).at("set").size());
 
         for (unsigned i = 0; i < (*itr).at("set").size(); ++i)
-          eids.emplace_back((*itr).at("set").at(i).template get<Index>());
-
-        entity_sets[id] = eids;
+          entity_ids.emplace_back(
+              (*itr).at("set").at(i).template get<mpm::Index>());
+        // Add the entity set to the list
+        entity_sets.insert(
+            std::pair<mpm::Index, std::vector<mpm::Index>>(id, entity_ids));
       }
     }
-    sfs.close();
+    sets_file.close();
   } catch (const std::exception& exception) {
-    console_->error("Failed to find file {}: {}", filename, exception.what());
+    console_->error("No {} found in file {}: {}", sets_type, filename,
+                    exception.what());
   }
 
   return entity_sets;

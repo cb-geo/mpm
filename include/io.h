@@ -11,8 +11,7 @@
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
-//! MPM Index
-using Index = unsigned long long;
+
 // Speed log
 #include "spdlog/spdlog.h"
 
@@ -22,6 +21,10 @@ using Index = unsigned long long;
 
 namespace mpm {
 //! \brief Input/Output handler
+
+//! MPM Index
+using Index = unsigned long long;
+
 class IO {
  public:
   //! Constructor with argc and argv
@@ -56,9 +59,9 @@ class IO {
   //! Return the entity sets from the input set JSON file
   //! \param[in] filename File name
   //! \param[in] sets_type type of sets
-  //! \return map of entity sets
-  std::map<Index, std::vector<Index>> entity_sets(const std::string& filename,
-                                                  const std::string& sets_type);
+  //! \retval entity_sets map of entity sets
+  std::map<mpm::Index, std::vector<mpm::Index>> entity_sets(
+      const std::string& filename, const std::string& sets_type);
 
   //! Return post processing object
   Json post_processing() const { return json_["post_processing"]; }
