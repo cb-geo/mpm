@@ -184,22 +184,18 @@ std::map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
         // Get the entity set ids
         mpm::Index id = (*itr)["id"].template get<mpm::Index>();
         // Get the entity ids
-        std::vector<mpm::Index> entity_ids;
-        // Get the size of the set vector
-        entity_ids.resize((*itr).at("set").size());
-
-        for (unsigned i = 0; i < (*itr).at("set").size(); ++i)
-          entity_ids.emplace_back(
-              (*itr).at("set").at(i).template get<mpm::Index>());
+        std::vector<mpm::Index> entity_ids = (*itr).at("set");
         // Add the entity set to the list
         entity_sets.insert(
             std::pair<mpm::Index, std::vector<mpm::Index>>(id, entity_ids));
       }
     }
     sets_file.close();
+  } catch (const std::out_of_range& range_error) {
+    console_->warn("{} {} reading {}: {}", __FILE__, __LINE__, sets_type,
+                   filename, range_error.what());
   } catch (const std::exception& exception) {
-    console_->error("No {} found in file {}: {}", sets_type, filename,
-                    exception.what());
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
 
   return entity_sets;
