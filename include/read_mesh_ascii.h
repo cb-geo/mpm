@@ -1,6 +1,7 @@
 #ifndef MPM_READ_MESH_ASCII_H_
 #define MPM_READ_MESH_ASCII_H_
 
+#include <map>
 #include <vector>
 
 #include "Eigen/Dense"
@@ -59,6 +60,12 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   std::vector<std::tuple<mpm::Index, unsigned, double>>
       read_velocity_constraints(
           const std::string& velocity_constraints_file) override;
+
+  //! Read nodal euler angles file
+  //! \param[in] nodal_euler_angles_file file name with nodal id and respective
+  //! euler angles
+  std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>> read_euler_angles(
+      const std::string& nodal_euler_angles_file) override;
 
   //! Read volume file
   //! \param[in] volume_files file name with particle volumes
