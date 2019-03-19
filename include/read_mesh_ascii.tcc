@@ -318,15 +318,12 @@ std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
           while (istream.good()) {
-            // ID
+            // ID and read stream
             mpm::Index id;
-            // Angles
-            Eigen::Matrix<double, Tdim, 1> angles;
-            // Read stream
             istream >> id;
-            for (unsigned i = 0; i < Tdim; ++i) {
-              istream >> angles[i];
-            }
+            // Angles and ream stream
+            Eigen::Matrix<double, Tdim, 1> angles;
+            for (unsigned i = 0; i < Tdim; ++i) istream >> angles[i];
             euler_angles.emplace(std::make_pair(id, angles));
           }
         }
