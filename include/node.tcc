@@ -272,7 +272,27 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     const auto direction = static_cast<unsigned>(dir % Tdim);
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
-    this->velocity_(direction, phase) = constraint.second;
-    this->acceleration_(direction, phase) = 0.;
+
+    if (!generic_velocity_constraints_) {
+      // Velocity constraints are applied on Cartesian boundaries
+      this->velocity_(direction, phase) = constraint.second;
+      this->acceleration_(direction, phase) = 0.;
+    } else {
+      // Velocity constraints on general boundaries
+      // Compute inverse rotation matrix
+      const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+          rotation_matrix_.inverse();
+      // Transform to local coordinate
+      Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
+          inverse_rotation_matrix * this->velocity_;
+      Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
+          inverse_rotation_matrix * this->acceleration_;
+      // Apply boundary condition in local coordinate
+      local_velocity(direction, phase) = constraint.second;
+      local_acceleration(direction, phase) = 0.;
+      // Transform back to global coordinate
+      this->velocity_ = rotation_matrix_ * local_velocity;
+      this->acceleration_ = rotation_matrix_ * local_acceleration;
+    }
   }
 }
