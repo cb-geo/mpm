@@ -11,7 +11,6 @@
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
-
 // Speed log
 #include "spdlog/spdlog.h"
 
