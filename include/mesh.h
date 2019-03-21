@@ -28,6 +28,8 @@
 #include "particle.h"
 #include "particle_base.h"
 
+#include "map.h"
+
 namespace mpm {
 
 //! Mesh class
@@ -282,6 +284,20 @@ class Mesh {
   //! Return node pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs() const;
 
+  //! Return map of particle sets
+  std::map<mpm::Index, std::vector<mpm::Index>> particle_sets() const {
+    return this->particle_sets_;
+  };
+
+  //! Create map of particle sets
+  void create_particle_sets(
+      const std::map<mpm::Index, std::vector<mpm::Index>>& particle_sets) {
+    this->particle_sets_ = particle_sets;
+  };
+
+  //! Return map of particles for fast retrieval
+  Map<ParticleBase<Tdim>> map_particles() { return this->map_particles_; };
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -298,10 +314,14 @@ class Mesh {
   Container<ParticleBase<Tdim>> particles_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
+  //! Map of particle sets
+  std::map<mpm::Index, std::vector<mpm::Index>> particle_sets_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
+  //! Map of node sets
+  std::map<mpm::Index, std::vector<mpm::Index>> node_sets_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Map of cells for fast retrieval

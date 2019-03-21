@@ -209,6 +209,8 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
+    // Get particle properties
+    auto particle_props = io_->json_object("particle");
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
@@ -269,7 +271,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
 
     // Particle type
     const auto particle_type =
-        mesh_props["particle_type"].template get<std::string>();
+        particle_props["particle_type"].template get<std::string>();
 
     // Create particles from file
     bool particle_status =
@@ -367,6 +369,12 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_traction_end - particles_traction_begin)
                        .count());
+
+    // Read and assign particle sets
+    if (!io_->file_name("entity_sets").empty()) {
+      mesh_->create_particle_sets(
+          io_->entity_sets(io_->file_name("entity_sets"), "particle_sets"));
+    }
 
   } catch (std::exception& exception) {
     console_->error("#{}: Reading particles: {}", __LINE__, exception.what());
@@ -582,10 +590,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (!particle_status) status = false;
 
   // Assign material to particles
-  // Get mesh properties
-  auto mesh_props = io_->json_object("mesh");
+  // Get particle properties
+  auto particle_props = io_->json_object("particle");
   // Material id
-  const auto material_id = mesh_props["material_id"].template get<unsigned>();
+  const auto material_id =
+      particle_props["material_id"].template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);
@@ -594,6 +603,35 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
+
+  // Assign material to particle sets
+  // Get particle sets
+  if (particle_props["particle_sets"].size() != 0) {
+    // Get particle sets properties
+    auto particle_sets = particle_props["particle_sets"];
+    // Assign material to each particle sets
+    for (const auto psets : particle_sets) {
+      // Get set material id
+      auto set_material_id = psets["set_material_id"];
+      // Get set material from list of materials
+      auto set_material = materials_.at(set_material_id);
+      // Get sets ids
+      std::vector<mpm::Index> sids = psets["set_id"];
+      // Assign material to particles in the specific set
+      for (std::vector<mpm::Index>::iterator sitr = sids.begin();
+           sitr != sids.end(); ++sitr) {
+        // Get particles ids
+        std::vector<mpm::Index> pids = mesh_->particle_sets().at(*sitr);
+        // Assign material to particles
+        for (std::vector<mpm::Index>::iterator pitr = pids.begin();
+             pitr != pids.end(); ++pitr) {
+          bool status = false;
+          status =
+              (mesh_->map_particles())[*pitr]->assign_material(set_material);
+        }
+      }
+    }
+  }
 
   // Check point resume
   if (resume) this->checkpoint_resume();
