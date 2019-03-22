@@ -617,18 +617,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       auto set_material = materials_.at(set_material_id);
       // Get sets ids
       std::vector<mpm::Index> sids = psets["set_id"];
-      // Assign material to particles in the specific set
+      // Assign material to particles in the specific sets
       for (std::vector<mpm::Index>::iterator sitr = sids.begin();
            sitr != sids.end(); ++sitr) {
-        // Get particles ids
-        std::vector<mpm::Index> pids = mesh_->particle_sets().at(*sitr);
-        // Assign material to particles
-        for (std::vector<mpm::Index>::iterator pitr = pids.begin();
-             pitr != pids.end(); ++pitr) {
-          bool status = false;
-          status =
-              (mesh_->map_particles())[*pitr]->assign_material(set_material);
-        }
+        mesh_->iterate_over_particle_set(
+            std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                      std::placeholders::_1, set_material),
+            (*sitr));
       }
     }
   }

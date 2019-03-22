@@ -193,6 +193,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Iterate over particle set
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \param[in] particle set id
+  template <typename Toper>
+  void iterate_over_particle_set(Toper oper, unsigned sid);
+
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
@@ -284,19 +290,10 @@ class Mesh {
   //! Return node pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs() const;
 
-  //! Return map of particle sets
-  std::map<mpm::Index, std::vector<mpm::Index>> particle_sets() const {
-    return this->particle_sets_;
-  };
-
-  //! Create map of particle sets
+  //! Create map of container of particles in sets
+  //! \param[in] map of particles ids in sets
   void create_particle_sets(
-      const std::map<mpm::Index, std::vector<mpm::Index>>& particle_sets) {
-    this->particle_sets_ = particle_sets;
-  };
-
-  //! Return map of particles for fast retrieval
-  Map<ParticleBase<Tdim>> map_particles() { return this->map_particles_; };
+      std::map<mpm::Index, std::vector<mpm::Index>> particle_sets);
 
  private:
   // Locate a particle in mesh cells
@@ -312,16 +309,16 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Container of particle sets
+  spp::sparse_hash_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
-  //! Map of particle sets
-  std::map<mpm::Index, std::vector<mpm::Index>> particle_sets_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Container of node sets
+  spp::sparse_hash_map<unsigned, Container<ParticleBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
-  //! Map of node sets
-  std::map<mpm::Index, std::vector<mpm::Index>> node_sets_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Map of cells for fast retrieval
