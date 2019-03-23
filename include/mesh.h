@@ -195,9 +195,9 @@ class Mesh {
 
   //! Iterate over particle set
   //! \tparam Toper Callable object typically a baseclass functor
-  //! \param[in] particle set id
+  //! \param[in] set_id particle set id
   template <typename Toper>
-  void iterate_over_particle_set(Toper oper, unsigned sid);
+  void iterate_over_particle_set(unsigned set_id, Toper oper);
 
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
@@ -292,8 +292,11 @@ class Mesh {
 
   //! Create map of container of particles in sets
   //! \param[in] map of particles ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
   void create_particle_sets(
-      std::map<mpm::Index, std::vector<mpm::Index>> particle_sets);
+      const spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>>&
+          particle_sets,
+      bool check_duplicates);
 
  private:
   // Locate a particle in mesh cells
@@ -316,7 +319,7 @@ class Mesh {
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
   //! Container of node sets
-  spp::sparse_hash_map<unsigned, Container<ParticleBase<Tdim>>> node_sets_;
+  spp::sparse_hash_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval

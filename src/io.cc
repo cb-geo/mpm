@@ -163,14 +163,14 @@ std::string mpm::IO::output_folder() const {
 }
 
 //! Return map of entity sets from the JSON file
-std::map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
+spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
     const std::string& filename, const std::string& sets_type) {
 
   // Input file stream for sets JSON file
   std::ifstream sets_file;
   sets_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   // Map of the entity sets
-  std::map<mpm::Index, std::vector<mpm::Index>> entity_sets;
+  spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> entity_sets;
 
   try {
     sets_file.open(filename);
@@ -184,7 +184,8 @@ std::map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
         // Get the entity set ids
         mpm::Index id = (*itr)["id"].template get<mpm::Index>();
         // Get the entity ids
-        std::vector<mpm::Index> entity_ids = (*itr).at("set");
+        std::vector<mpm::Index> entity_ids =
+            (*itr)["set"].template get<std::vector<mpm::Index>>();
         // Add the entity set to the list
         entity_sets.insert(
             std::pair<mpm::Index, std::vector<mpm::Index>>(id, entity_ids));

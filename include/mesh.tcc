@@ -383,9 +383,9 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
-void mpm::Mesh<Tdim>::iterate_over_particle_set(Toper oper, unsigned sid) {
-  tbb::parallel_for_each(this->particle_sets_.at(sid).cbegin(),
-                         this->particle_sets_.at(sid).cend(), oper);
+void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
+  tbb::parallel_for_each(this->particle_sets_.at(set_id).cbegin(),
+                         this->particle_sets_.at(set_id).cend(), oper);
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
@@ -1008,11 +1008,11 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
 //! Create map of container of particles in sets
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_particle_sets(
-    std::map<mpm::Index, std::vector<mpm::Index>> particle_sets) {
+    const spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>>&
+        particle_sets,
+    bool check_duplicates) {
   // Create container for each particle set
-  for (std::map<mpm::Index, std::vector<mpm::Index>>::iterator sitr =
-           particle_sets.begin();
-       sitr != particle_sets.end(); ++sitr) {
+  for (auto sitr = particle_sets.begin(); sitr != particle_sets.end(); ++sitr) {
     // Get particles ids in the set
     std::vector<mpm::Index> pset = sitr->second;
     // Create a container for the set
@@ -1020,7 +1020,8 @@ void mpm::Mesh<Tdim>::create_particle_sets(
     // Add particles to the container
     for (std::vector<mpm::Index>::iterator pitr = pset.begin();
          pitr != pset.end(); ++pitr) {
-      particles.add(map_particles_[*pitr]);
+      bool insertion_status =
+          particles.add(map_particles_[*pitr], check_duplicates);
     }
     // Create the map of the container
     this->particle_sets_.insert(

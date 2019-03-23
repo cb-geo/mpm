@@ -14,6 +14,8 @@ using Json = nlohmann::json;
 // Speed log
 #include "spdlog/spdlog.h"
 
+#include "map.h"
+
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
@@ -59,7 +61,7 @@ class IO {
   //! \param[in] filename File name
   //! \param[in] sets_type type of sets
   //! \retval entity_sets map of entity sets
-  std::map<mpm::Index, std::vector<mpm::Index>> entity_sets(
+  spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> entity_sets(
       const std::string& filename, const std::string& sets_type);
 
   //! Return post processing object
