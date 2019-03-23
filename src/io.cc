@@ -163,14 +163,14 @@ std::string mpm::IO::output_folder() const {
 }
 
 //! Return map of entity sets from the JSON file
-spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
+tsl::robin_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
     const std::string& filename, const std::string& sets_type) {
 
   // Input file stream for sets JSON file
   std::ifstream sets_file;
   sets_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   // Map of the entity sets
-  spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> entity_sets;
+  tsl::robin_map<mpm::Index, std::vector<mpm::Index>> entity_sets;
 
   try {
     sets_file.open(filename);

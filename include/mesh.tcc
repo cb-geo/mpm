@@ -1008,8 +1008,7 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
 //! Create map of container of particles in sets
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_particle_sets(
-    const spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>>&
-        particle_sets,
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
     bool check_duplicates) {
   // Create container for each particle set
   for (auto sitr = particle_sets.begin(); sitr != particle_sets.end(); ++sitr) {

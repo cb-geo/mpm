@@ -147,10 +147,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(io->output_folder() == "results/");
 
     // Check entity sets
-    spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(0, {0, 1}));
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(1, {2, 3}));
-    spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>> check =
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> check =
         io->entity_sets(io->file_name("entity_sets"), "node_sets");
     REQUIRE(std::equal(check.begin(), check.end(), node_sets.begin()) == true);
     REQUIRE(check.size() == node_sets.size());

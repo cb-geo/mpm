@@ -18,6 +18,8 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 
+#include <tsl/robin_map.h>
+
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
@@ -27,8 +29,6 @@
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
-
-#include "map.h"
 
 namespace mpm {
 
@@ -294,8 +294,7 @@ class Mesh {
   //! \param[in] map of particles ids in sets
   //! \param[in] check_duplicates Parameter to check duplicates
   void create_particle_sets(
-      const spp::sparse_hash_map<mpm::Index, std::vector<mpm::Index>>&
-          particle_sets,
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
  private:
@@ -313,13 +312,13 @@ class Mesh {
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
   //! Container of particle sets
-  spp::sparse_hash_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
+  tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
   //! Container of node sets
-  spp::sparse_hash_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
+  tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval
