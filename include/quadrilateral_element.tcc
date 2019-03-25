@@ -323,14 +323,12 @@ inline std::vector<Eigen::MatrixXd>
 
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
-  Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+  Eigen::MatrixXd grad_shapefn = grad_sf * (jacobian.inverse()).transpose();
 
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     Eigen::Matrix<double, 3, Tdim> bi;
     // clang-format off
-    bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;
-    bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1);
-    bi(2, 0) = grad_shapefn(i, 1); bi(2, 1) = grad_shapefn(i, 0);
+    Eigen::MatrixXd grad_shapefn = jacobian.inverse() * grad_sf.transpose();
     bmatrix.push_back(bi);
     // clang-format on
   }

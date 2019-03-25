@@ -1,0 +1,44 @@
+﻿{
+  "title" : "Cylinder",
+  "input_files" : {
+    "mesh" : "mesh.txt",
+    "velocity_constraints" : "velocity-constraints.txt",
+    "particles" : "particles_4by4.txt",
+    "particles_volumes" : "particles_volume.txt",
+    "particles_tractions": "particles-tractions.txt"
+  }, 
+  "mesh" : {
+    "cell_type": "ED2Q4",
+    "isoparametric": true,
+    "material_id": 0,
+    "mesh_reader": "Ascii2D",
+    "node_type": "N2D",
+    "particle_type": "P2D"
+  },
+  "materials" : [
+    {
+    "id" : 0,
+    "type" : "LinearElastic2D",
+    "density" : 2000.0,
+    "youngs_modulus" : 1.0E+8,
+    "poisson_ratio" : 0.2
+    }
+  ],
+  "analysis" : {
+    "type" : "MPMExplicitUSF2D", 
+    "dt" : 1.0E-5,
+    "uuid" : "cylinder",
+    "nsteps" : 100,
+    "gravity": [0.0, 0.0],
+    "velocity_update" : true,
+    "resume" : {
+      "resume": false,
+      "uuid" : "cylinder",
+      "step" : 5
+    }
+  },
+  "post_processing" : {
+    "path" : "results/",
+    "output_steps" : 2
+  }
+}
