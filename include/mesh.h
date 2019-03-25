@@ -206,6 +206,13 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
+  //! Assign friction constraints to nodes
+  //! \param[in] friction_constraints Constraint at node, dir, sign, and
+  //! friction
+  bool assign_friction_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+          friction_constraints);
+
   //! Assign velocity constraints to cells
   //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
   //! velocity
