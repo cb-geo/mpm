@@ -207,17 +207,24 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
-  //! Compute and assign rotation matrix to nodes
-  //! \param[in] euler_angles Map of node number and respective euler_angles
-  bool compute_nodal_rotation_matrices(
-      const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles);
-
   //! Assign velocity constraints to cells
   //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
   //! velocity
   bool assign_cell_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
+
+  //! Assign friction constraints to nodes
+  //! \param[in] friction_constraints Constraint at node, dir, sign, and
+  //! friction
+  bool assign_friction_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+          friction_constraints);
+
+  //! Compute and assign rotation matrix to nodes
+  //! \param[in] euler_angles Map of node number and respective euler_angles
+  bool compute_nodal_rotation_matrices(
+      const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles);
 
   //! Assign particles volumes
   //! \param[in] particle_volumes Volume at dir on particle

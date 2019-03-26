@@ -72,6 +72,12 @@ class ReadMesh {
       read_velocity_constraints(
           const std::string& velocity_constraints_file) = 0;
 
+  //! Read friction constraints file
+  //! \param[in] friction_constraints_files file name with frictions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+      read_friction_constraints(
+          const std::string& friction_constraints_file) = 0;
+
   //! Read nodal euler angles file
   //! \param[in] nodal_euler_angles_file file name with nodal id and respective
   //! euler angles
