@@ -29,8 +29,8 @@ external/*#
 doc/*
 *.swp*
 lcov/*
-lem
-lemtest
+mpm
+mpmtest
 *stats.txt*
 aclocal.m4
 Makefile.in
