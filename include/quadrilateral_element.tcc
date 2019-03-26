@@ -328,7 +328,9 @@ inline std::vector<Eigen::MatrixXd>
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     Eigen::Matrix<double, 3, Tdim> bi;
     // clang-format off
-    Eigen::MatrixXd grad_shapefn = jacobian.inverse() * grad_sf.transpose();
+    bi(0, 0) = grad_shapefn(i, 0); bi(0, 1) = 0.;
+    bi(1, 0) = 0.;                 bi(1, 1) = grad_shapefn(i, 1);
+    bi(2, 0) = grad_shapefn(i, 1); bi(2, 1) = grad_shapefn(i, 0);
     bmatrix.push_back(bi);
     // clang-format on
   }
