@@ -1012,15 +1012,14 @@ void mpm::Mesh<Tdim>::create_particle_sets(
     bool check_duplicates) {
   // Create container for each particle set
   for (auto sitr = particle_sets.begin(); sitr != particle_sets.end(); ++sitr) {
-    // Get particles ids in the set
-    std::vector<mpm::Index> pset = sitr->second;
     // Create a container for the set
     Container<ParticleBase<Tdim>> particles;
+    // Reserve the size of the container
+    // particles.reserve(sitr->second.size());
     // Add particles to the container
-    for (std::vector<mpm::Index>::iterator pitr = pset.begin();
-         pitr != pset.end(); ++pitr) {
+    for (const auto pitr : sitr->second) {
       bool insertion_status =
-          particles.add(map_particles_[*pitr], check_duplicates);
+          particles.add(map_particles_[pitr], check_duplicates);
     }
     // Create the map of the container
     this->particle_sets_.insert(

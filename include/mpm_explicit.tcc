@@ -454,7 +454,7 @@ bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
 
 //! Assign materials to particle sets
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::assign_set_material() {
+bool mpm::MPMExplicit<Tdim>::apply_entity_sets_properties() {
   bool status = false;
   // Assign material to particle sets
   try {
@@ -463,19 +463,16 @@ bool mpm::MPMExplicit<Tdim>::assign_set_material() {
     // Get particle sets properties
     auto particle_sets = particle_props["particle_sets"];
     // Assign material to each particle sets
-    for (const auto psets : particle_sets) {
-      // Get set material id
-      auto set_material_id = psets["set_material_id"];
+    for (const auto& psets : particle_sets) {
       // Get set material from list of materials
-      auto set_material = materials_.at(set_material_id);
+      auto set_material = materials_.at(psets["material_id"]);
       // Get sets ids
       std::vector<mpm::Index> sids = psets["set_id"];
       // Assign material to particles in the specific sets
-      for (std::vector<mpm::Index>::iterator sitr = sids.begin();
-           sitr != sids.end(); ++sitr) {
+      for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
-            (*sitr), std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                               std::placeholders::_1, set_material));
+            sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                            std::placeholders::_1, set_material));
       }
     }
     status = true;
@@ -641,7 +638,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
     // Assign material to particles in the specific sets
-    bool set_material_status = this->assign_set_material();
+    bool set_material_status = this->apply_entity_sets_properties();
   }
 
   // Check point resume
