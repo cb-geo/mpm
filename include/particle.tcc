@@ -338,7 +338,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
     } else {
-      throw std::runtime_error("Particle mass has not be computed");
+      throw std::runtime_error("Particle mass has not been computed");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -605,7 +605,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_pressure_to_nodes(unsigned phase) {
       this->cell_->map_pressure_to_nodes(this->shapefn_, phase, mass_(phase),
                                          pressure_(phase));
     } else {
-      throw std::runtime_error("Particle mass has not be computed");
+      throw std::runtime_error("Particle mass has not been computed");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -620,18 +620,15 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure_smoothing(unsigned phase) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Get interpolated nodal pressure
-      double pressure =
-          cell_->interpolate_nodal_pressure(this->shapefn_, phase);
-
+    if (cell_ != nullptr)
       // Update particle pressure to interpolated nodal pressure
-      this->pressure_(phase) = pressure;
-    } else {
+      this->pressure_(phase) =
+          cell_->interpolate_nodal_pressure(this->shapefn_, phase);
+    else
       throw std::runtime_error(
           "Cell is not initialised! "
           "cannot compute pressure smoothing of the particle");
-    }
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
