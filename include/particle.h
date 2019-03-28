@@ -234,12 +234,20 @@ class Particle : public ParticleBase<Tdim> {
     return state_variables_.at(var);
   }
 
- private:
   //! Update pressure of the particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(unsigned phase, double dvolumetric_strain);
+  bool update_pressure(unsigned phase, double dvolumetric_strain) override;
 
+  //! Map particle pressure to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_pressure_to_nodes(unsigned phase) override;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_pressure_smoothing(unsigned phase) override;
+
+ private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates

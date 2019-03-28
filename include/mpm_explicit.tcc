@@ -579,6 +579,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (analysis_.find("resume") != analysis_.end())
     resume = analysis_["resume"]["resume"].template get<bool>();
 
+  // Pressure smoothing
+  if (analysis_.find("pressure_smoothing") != analysis_.end())
+    pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
+
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
@@ -678,6 +682,32 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, phase, dt_));
 
+      // Pressure smoothing
+      if (pressure_smoothing_) {
+        // Assign pressure to nodes
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                      std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+        // Run if there is more than a single MPI task
+        if (mpi_size > 1) {
+          // MPI all reduce nodal pressure
+          mesh_->allreduce_nodal_scalar_property(
+              std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
+                        phase),
+              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
+                        std::placeholders::_1, false, phase,
+                        std::placeholders::_2));
+        }
+#endif
+
+        // Smooth pressure over particles
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                      std::placeholders::_1, phase));
+      }
+
       // Iterate over each particle to compute stress
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
@@ -753,6 +783,32 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, phase, dt_));
+
+      // Pressure smoothing
+      if (pressure_smoothing_) {
+        // Assign pressure to nodes
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                      std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+        // Run if there is more than a single MPI task
+        if (mpi_size > 1) {
+          // MPI all reduce nodal pressure
+          mesh_->allreduce_nodal_scalar_property(
+              std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
+                        phase),
+              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
+                        std::placeholders::_1, false, phase,
+                        std::placeholders::_2));
+        }
+#endif
+
+        // Smooth pressure over particles
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                      std::placeholders::_1, phase));
+      }
 
       // Iterate over each particle to compute stress
       mesh_->iterate_over_particles(

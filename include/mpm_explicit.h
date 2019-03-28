@@ -93,6 +93,8 @@ class MPMExplicit : public MPM {
  private:
   //! Boolean to switch between USL and USF
   bool usl_{false};
+  //! Pressure smoothing
+  bool pressure_smoothing_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm
