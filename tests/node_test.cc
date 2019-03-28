@@ -114,9 +114,18 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Update pressure to 2001.4
       node->update_pressure(true, Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
-      // Assign mass to 1000
+      // Assign pressure to 1000
       pressure = 1000.;
       node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
@@ -544,6 +553,15 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Assign mass to 1000
       pressure = 1000.;
       node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
@@ -978,6 +996,15 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Assign mass to 1000
       pressure = 1000.;
       node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
