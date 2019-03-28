@@ -133,10 +133,6 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
 
-  //! Return pressure of the particles
-  //! \param[in] phase Index corresponding to the phase
-  double pressure(unsigned phase) const override { return pressure_(phase); }
-
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
@@ -246,6 +242,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute pressure smoothing of the particle based on nodal pressure
   //! \param[in] phase Index corresponding to the phase
   bool compute_pressure_smoothing(unsigned phase) override;
+
+  //! Return pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
+  double pressure(unsigned phase) const override { return pressure_(phase); }
 
  private:
   //! particle id

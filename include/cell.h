@@ -203,6 +203,7 @@ class Cell {
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] ppressure Pressure of particle
+  //! $$p_i = \frac{\sum_{p = 1}^{n_p} N_i (x_p) M_p p_p}{m_i}$$
   void map_pressure_to_nodes(const Eigen::VectorXd& shapefn, unsigned phase,
                              double pmass, double ppressure);
 

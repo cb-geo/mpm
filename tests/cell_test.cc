@@ -623,7 +623,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       // Map particle pressure to nodes
       cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
       for (const auto& node : nodes)
-        REQUIRE(node->pressure(phase) == Approx(1.5).epsilon(Tolerance));
+        REQUIRE(node->pressure(phase) == Approx(6.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
@@ -1901,7 +1901,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       // Map particle pressure to nodes
       cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
       for (const auto& node : nodes)
-        REQUIRE(node->pressure(phase) == Approx(0.75).epsilon(Tolerance));
+        REQUIRE(node->pressure(phase) == Approx(6.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
