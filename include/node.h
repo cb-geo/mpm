@@ -190,7 +190,7 @@ class Node : public NodeBase<Tdim> {
   void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
     rotation_matrix_ = rotation_matrix;
-    generic_velocity_constraints_ = true;
+    generic_boundary_constraints_ = true;
   }
 
  private:
@@ -224,7 +224,7 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
-  bool generic_velocity_constraints_{false};
+  bool generic_boundary_constraints_{false};
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
