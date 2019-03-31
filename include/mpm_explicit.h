@@ -43,6 +43,9 @@ class MPMExplicit : public MPM {
   //! Apply nodal tractions
   bool apply_nodal_tractions() override;
 
+  //! Apply entity sets properties (e.g: node_sets or particle_sets)
+  bool apply_entity_sets_properties() override;
+
   //! Solve
   bool solve() override;
 
