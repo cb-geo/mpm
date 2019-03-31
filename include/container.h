@@ -33,6 +33,9 @@ class Container {
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
 
+  //! Reserve the size of container
+  void reserve(const mpm::Index size) { elements_.reserve(size); }
+
   //! Clear
   void clear() { elements_.clear(); }
 
