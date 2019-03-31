@@ -157,6 +157,16 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
             "Velocity constraints are not properly assigned");
     }
 
+    // Read and assign friction constraints
+    if (!io_->file_name("friction_constraints").empty()) {
+      bool friction_constraints = mesh_->assign_friction_constraints(
+          mesh_reader->read_friction_constraints(
+              io_->file_name("friction_constraints")));
+      if (!friction_constraints)
+        throw std::runtime_error(
+            "Friction constraints are not properly assigned");
+    }
+
     // Set nodal traction as false if file is empty
     if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
 
