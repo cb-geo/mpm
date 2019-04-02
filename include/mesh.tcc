@@ -1042,23 +1042,31 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
 
 //! Create map of container of particles in sets
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::create_particle_sets(
+bool mpm::Mesh<Tdim>::create_particle_sets(
     const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
     bool check_duplicates) {
-  // Create container for each particle set
-  for (auto sitr = particle_sets.begin(); sitr != particle_sets.end(); ++sitr) {
-    // Create a container for the set
-    Container<ParticleBase<Tdim>> particles;
-    // Reserve the size of the container
-    particles.reserve((sitr->second).size());
-    // Add particles to the container
-    for (const auto pitr : sitr->second) {
-      bool insertion_status =
-          particles.add(map_particles_[pitr], check_duplicates);
+  bool status = false;
+  try {
+    // Create container for each particle set
+    for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
+         ++sitr) {
+      // Create a container for the set
+      Container<ParticleBase<Tdim>> particles;
+      // Reserve the size of the container
+      particles.reserve((sitr->second).size());
+      // Add particles to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status =
+            particles.add(map_particles_[pid], check_duplicates);
+      }
+      // Create the map of the container
+      this->particle_sets_.insert(
+          std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(sitr->first,
+                                                               particles));
+      status = true;
     }
-    // Create the map of the container
-    this->particle_sets_.insert(
-        std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(sitr->first,
-                                                             particles));
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
+  return status;
 }

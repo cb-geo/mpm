@@ -382,7 +382,7 @@ bool mpm::MPMExplicit<Tdim>::initialise_particles() {
 
     // Read and assign particle sets
     if (!io_->file_name("entity_sets").empty()) {
-      mesh_->create_particle_sets(
+      bool particle_sets = mesh_->create_particle_sets(
           (io_->entity_sets(io_->file_name("entity_sets"), "particle_sets")),
           check_duplicates);
     }
@@ -477,7 +477,7 @@ bool mpm::MPMExplicit<Tdim>::apply_entity_sets_properties() {
       // Get set material from list of materials
       auto set_material = materials_.at(psets["material_id"]);
       // Get sets ids
-      std::vector<mpm::Index> sids = psets["set_id"];
+      std::vector<unsigned> sids = psets["set_id"];
       // Assign material to particles in the specific sets
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(

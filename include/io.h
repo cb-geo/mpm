@@ -1,15 +1,12 @@
 #ifndef MPM_IO_H_
 #define MPM_IO_H_
 
+#include "tclap/CmdLine.h"
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <memory>
 #include <string>
-
-#include <boost/filesystem.hpp>
-
 #include <tsl/robin_map.h>
-
-#include "tclap/CmdLine.h"
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;

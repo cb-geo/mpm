@@ -300,7 +300,8 @@ class Mesh {
   //! Create map of container of particles in sets
   //! \param[in] map of particles ids in sets
   //! \param[in] check_duplicates Parameter to check duplicates
-  void create_particle_sets(
+  //! \retval status Status of  create particle sets
+  bool create_particle_sets(
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
