@@ -338,7 +338,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
     } else {
-      throw std::runtime_error("Particle mass has not be computed");
+      throw std::runtime_error("Particle mass has not been computed");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -587,6 +587,48 @@ bool mpm::Particle<Tdim, Tnphases>::update_pressure(unsigned phase,
     } else {
       throw std::runtime_error("Material is invalid");
     }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map particle pressure to nodes
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_pressure_to_nodes(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle mass is set
+    if (mass_(phase) != std::numeric_limits<double>::max()) {
+      // Map particle mass and momentum to nodes
+      this->cell_->map_pressure_to_nodes(this->shapefn_, phase, mass_(phase),
+                                         pressure_(phase));
+    } else {
+      throw std::runtime_error("Particle mass has not been computed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute pressure smoothing of the particle based on nodal pressure
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_pressure_smoothing(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr)
+      // Update particle pressure to interpolated nodal pressure
+      this->pressure_(phase) =
+          cell_->interpolate_nodal_pressure(this->shapefn_, phase);
+    else
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute pressure smoothing of the particle");
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
