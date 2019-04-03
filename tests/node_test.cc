@@ -718,6 +718,9 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     }
 
     SECTION("Check momentum, velocity and acceleration") {
+      // Time step
+      const double dt = 0.1;
+
       // Check momentum
       Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
@@ -900,6 +903,50 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(0).epsilon(Tolerance));
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(1) ==
                 Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check Cartesian friction constraints") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_friction_constraint(2, 1, 0.2) == false);
+
+        // Apply friction constraints
+        node->apply_friction_constraints(dt);
+
+        // Check apply constraints
+        acceleration << 4., 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general friction constraints in 1 direction") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply general friction constraints
+        node->apply_friction_constraints(dt);
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 4.905579787672637, 4.920772034660430;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check the acceleration in local coordinate
+        acceleration << 6.920903430595146, 0.616284167162194;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
       }
     }
   }
@@ -1173,6 +1220,9 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     }
 
     SECTION("Check momentum, velocity and acceleration") {
+      // Time step
+      const double dt = 0.1;
+
       // Check momentum
       Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
@@ -1361,6 +1411,51 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
                 Approx(0).epsilon(Tolerance));
         REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(2) ==
                 Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check Cartesian friction constraints") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_friction_constraint(4, 1, 0.2) == false);
+
+        // Apply constraints
+        node->apply_friction_constraints(dt);
+
+        // Check apply constraints
+        acceleration << 3.939339828220179, 3.939339828220179, 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general friction constraints in 1 direction") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
+        // and gamma = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply inclined velocity constraints
+        node->apply_friction_constraints(dt);
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 4.602895052828914, 4.492575657560740, 4.751301246937935;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check the acceleration in local coordinate
+        acceleration << 6.878925666702865, 3.365244416454818, 2.302228080558999;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
       }
     }
   }
