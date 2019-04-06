@@ -448,6 +448,7 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
     if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
   return status;
 }
 
@@ -507,12 +508,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       //   | /   \ |
       // 0 0---------0 1
       //         d
-      const double xlength = (nodes_[indices(0)]->coordinates() -
-                              nodes_[indices(1)]->coordinates())
-                                 .norm();
-      const double ylength = (nodes_[indices(1)]->coordinates() -
-                              nodes_[indices(2)]->coordinates())
-                                 .norm();
+      const double xlength = std::fabs(nodes_[indices(0)]->coordinates()[0] -
+                                       nodes_[indices(1)]->coordinates()[0]);
+      const double ylength = std::fabs(nodes_[indices(1)]->coordinates()[1] -
+                                       nodes_[indices(2)]->coordinates()[1]);
 
       const Eigen::Matrix<double, 2, 1> centre =
           (nodes_[indices(0)]->coordinates() +
@@ -739,6 +738,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // const Eigen::Matrix<double, 2, 1>
     affine_guess = A.inverse() * b;
 
+    // Apply tolerance to affine_guess
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (affine_guess(i) >= -1.00001 && affine_guess(i) <= -1.0)
+        affine_guess(i) = -1.0;
+
     // Check for nan
     for (unsigned i = 0; i < affine_guess.size(); ++i)
       if (std::isnan(affine_guess(i))) affine_nan = true;
@@ -754,6 +758,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
     // f(x) = p(x) - p, where p is the real point
     affine_residual = (nodal_coords * sf) - point;
+
+    // Apply tolerance to xi location
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (xi(i) >= -1.00001 && xi(i) <= -1.0) xi(i) = -1.0;
 
     // Early exit
     if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
@@ -822,6 +830,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
 
+  // Apply tolerance to xi location
+  for (unsigned i = 0; i < xi.size(); ++i)
+    if (xi(i) >= -1.00001 && xi(i) <= -1.0) xi(i) = -1.0;
+
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
       (element_->degree() == mpm::ElementDegree::Linear))
@@ -888,6 +900,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     // const Eigen::Matrix<double, 3, 1>
     affine_guess = A.inverse() * b;
 
+    // Apply tolerance to affine_guess
+    for (unsigned i = 0; i < affine_guess.size(); ++i)
+      if (affine_guess(i) >= -1.00001 && affine_guess(i) <= -1.0)
+        affine_guess(i) = -1.0;
+
     // Check for nan
     for (unsigned i = 0; i < affine_guess.size(); ++i)
       if (std::isnan(affine_guess(i))) affine_nan = true;
@@ -903,6 +920,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
     // f(x) = p(x) - p, where p is the real point
     affine_residual = (nodal_coords * sf) - point;
+
+    // Apply tolerance to xi location
+    for (unsigned i = 0; i < xi.size(); ++i)
+      if (xi(i) >= -1.00001 && xi(i) <= -1.0) xi(i) = -1.0;
 
     // Early exit
     if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
@@ -970,6 +991,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
+
+  // Apply tolerance to xi location
+  for (unsigned i = 0; i < xi.size(); ++i)
+    if (xi(i) >= -1.00001 && xi(i) <= -1.0) xi(i) = -1.0;
 
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&

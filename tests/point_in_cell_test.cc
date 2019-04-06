@@ -53,7 +53,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+    auto cell = std::make_unique<mpm::Cell<Dim>>(id, Nnodes, element);
 
     REQUIRE(cell->add_node(0, node0) == true);
     REQUIRE(cell->add_node(1, node1) == true);
@@ -103,7 +103,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+    auto cell = std::make_unique<mpm::Cell<Dim>>(id, Nnodes, element);
 
     REQUIRE(cell->add_node(0, node0) == true);
     REQUIRE(cell->add_node(1, node1) == true);
@@ -149,7 +149,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
     mpm::Index id = 0;
-    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+    auto cell = std::make_unique<mpm::Cell<Dim>>(id, Nnodes, element);
 
     REQUIRE(cell->add_node(0, node0) == true);
     REQUIRE(cell->add_node(1, node1) == true);
@@ -177,5 +177,94 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point << 0.823751, 2.43189;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+  }
+  // Check if a point is in a skewed isoparametric element
+  SECTION(
+      "Point in a skewed isoparametric element with Affine transformation and "
+      "Newton Raphson") {
+
+    // Shape function
+    // 4-noded quadrilateral shape functions
+    std::shared_ptr<mpm::Element<Dim>> element =
+        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+
+    Eigen::Vector2d coords;
+    coords.setZero();
+
+    // Check point in cell
+    Eigen::Vector2d point;
+    point << 0.37763268079517553, 0.10469406123558715;
+
+    // Local coordinates
+    Eigen::Vector2d xi;
+
+    // Coordinates
+    coords << 0.375, 0.1013;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 0.38, 0.098247997;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 0.38, 0.10325;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0.375, 0.1063;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    //! Check Cell IDs
+    mpm::Index id = 0;
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell1->is_initialised() == false);
+
+    cell1->add_node(0, node0);
+    cell1->add_node(1, node1);
+    cell1->add_node(2, node2);
+    cell1->add_node(3, node3);
+    REQUIRE(cell1->nnodes() == 4);
+
+    REQUIRE(cell1->nfunctions() == 4);
+
+    // Check using unit cell with affine transformation / Newton-Raphson
+    REQUIRE(cell1->is_point_in_cell(point) == false);
+
+    // Cell 2
+    mpm::Index id2 = 1;
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
+
+    // Check if cell is initialised, before addition of nodes
+    REQUIRE(cell2->is_initialised() == false);
+
+    // Element 1
+    coords << 0.375, 0.1063;
+    std::shared_ptr<mpm::NodeBase<Dim>> node10 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+
+    coords << 0.38, 0.10325;
+    std::shared_ptr<mpm::NodeBase<Dim>> node11 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+
+    coords << 0.38, 0.10825;
+    std::shared_ptr<mpm::NodeBase<Dim>> node12 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(12, coords);
+
+    coords << 0.375, 0.1113;
+    std::shared_ptr<mpm::NodeBase<Dim>> node13 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(13, coords);
+
+    cell2->add_node(0, node10);
+    cell2->add_node(1, node11);
+    cell2->add_node(2, node12);
+    cell2->add_node(3, node13);
+    REQUIRE(cell2->nnodes() == 4);
+    REQUIRE(cell2->nfunctions() == 4);
+
+    // Point in cell captures with tolerance
+    REQUIRE(cell2->is_point_in_cell(point) == true);
   }
 }
