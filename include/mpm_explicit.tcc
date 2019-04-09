@@ -462,9 +462,9 @@ bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
   return status;
 }
 
-//! Assign materials to particle sets
+//! Apply properties to particles sets (e.g: material)
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::apply_entity_sets_properties() {
+bool mpm::MPMExplicit<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
   // Assign material to particle sets
   try {
@@ -648,7 +648,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
     // Assign material to particles in the specific sets
-    bool set_material_status = this->apply_entity_sets_properties();
+    bool set_material_status = this->apply_properties_to_particles_sets();
   }
 
   // Check point resume

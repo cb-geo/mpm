@@ -1,11 +1,14 @@
 #ifndef MPM_IO_H_
 #define MPM_IO_H_
 
-#include "tclap/CmdLine.h"
-#include <boost/filesystem.hpp>
 #include <fstream>
 #include <memory>
 #include <string>
+
+#include <boost/filesystem.hpp>
+
+#include "tclap/CmdLine.h"
+
 #include <tsl/robin_map.h>
 //! Alias for JSON
 #include "json.hpp"

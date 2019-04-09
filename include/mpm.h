@@ -51,8 +51,8 @@ class MPM {
   //! Apply nodal tractions
   virtual bool apply_nodal_tractions() = 0;
 
-  //! Apply entity sets properties (e.g: node_sets or particle_sets)
-  virtual bool apply_entity_sets_properties() = 0;
+  //! Apply properties to particles sets (e.g: material)
+  virtual bool apply_properties_to_particles_sets() = 0;
 
   // Solve
   virtual bool solve() = 0;
