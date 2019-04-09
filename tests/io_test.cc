@@ -6,6 +6,8 @@ using Json = nlohmann::json;
 
 #include "io.h"
 
+#include "map.h"
+
 // Check IO for input string
 TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
@@ -23,10 +25,13 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"materials", "materials.txt"},
           {"traction", "traction.txt"},
           {"entity_sets", "entity_sets.json"}}},
-        {"mesh",
-         {{"mesh_reader", "Ascii3D"},
-          {"cell_type", "ED3H8"},
-          {"particle_type", "P3D"}}},
+        {"mesh", {{"mesh_reader", "Ascii3D"}, {"cell_type", "ED3H8"}}},
+        {"particle",
+         {{"material_id", "0"},
+          {"particle_type", "P3D"},
+          {"particle_sets",
+           {{{"set_id", {0}}, {"material_id", 0}},
+            {{"set_id", {1}}, {"material_id", 1}}}}}},
         {"materials",
          {{{"id", 0},
            {"type", "LinearElastic"},
@@ -145,10 +150,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(io->output_folder() == "results/");
 
     // Check entity sets
-    std::map<mpm::Index, std::vector<mpm::Index>> node_sets;
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(0, {0, 1}));
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(1, {2, 3}));
-    std::map<mpm::Index, std::vector<mpm::Index>> check =
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> check =
         io->entity_sets(io->file_name("entity_sets"), "node_sets");
     REQUIRE(std::equal(check.begin(), check.end(), node_sets.begin()) == true);
     REQUIRE(check.size() == node_sets.size());

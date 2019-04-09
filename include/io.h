@@ -8,6 +8,8 @@
 #include <boost/filesystem.hpp>
 
 #include "tclap/CmdLine.h"
+
+#include <tsl/robin_map.h>
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
@@ -59,7 +61,7 @@ class IO {
   //! \param[in] filename File name
   //! \param[in] sets_type type of sets
   //! \retval entity_sets map of entity sets
-  std::map<mpm::Index, std::vector<mpm::Index>> entity_sets(
+  tsl::robin_map<mpm::Index, std::vector<mpm::Index>> entity_sets(
       const std::string& filename, const std::string& sets_type);
 
   //! Return post processing object
