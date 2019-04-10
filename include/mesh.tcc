@@ -586,6 +586,40 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
   return status;
 }
 
+//! Assign particles velocity constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_velocity_constraints) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign velocity");
+    for (const auto& particle_velocity_constraint :
+         particle_velocity_constraints) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(particle_velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(particle_velocity_constraint);
+
+      // if (map_particles_.find(pid) != map_particles_.end())
+      status = map_particles_[pid]->assign_particle_velocity_constraint(
+          dir, velocity);
+
+      if (!status) throw std::runtime_error("Velocity is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign node tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_tractions(
