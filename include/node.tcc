@@ -26,6 +26,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
+  pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -150,6 +151,30 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     status = false;
   }
   return status;
+}
+
+//! Update pressure at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
+                                                      unsigned phase,
+                                                      double mass_pressure) {
+  try {
+    const double tolerance = 1.E-16;
+
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    // Update/assign pressure
+    if (mass_(phase) > tolerance) {
+      std::lock_guard<std::mutex> guard(node_mutex_);
+      pressure_(phase) =
+          (pressure_(phase) * factor) + mass_pressure / mass_(phase);
+    } else
+      throw std::runtime_error("Nodal mass is zero or below threshold");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
 }
 
 //! Compute velocity from momentum
