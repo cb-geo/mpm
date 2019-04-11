@@ -505,35 +505,42 @@ bool mpm::MPMExplicit<Tdim>::checkpoint_resume() {
       throw std::runtime_error("Resume analysis option is disabled!");
 
     // Get unique analysis id
-    this->uuid_ = analysis_["resume"]["uuid"].template get<std::string>();
+    uuid_ = analysis_["resume"]["uuid"].template get<std::string>();
     // Get step
-    this->step_ = analysis_["resume"]["step"].template get<mpm::Index>();
+    step_ = analysis_["resume"]["step"].template get<mpm::Index>();
 
     // Input particle h5 file for resume
     std::string attribute = "particles";
     std::string extension = ".h5";
 
     auto particles_file =
-        io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
-            .string();
+        io_->output_file(attribute, extension, uuid_, step_, nsteps_).string();
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
+
+    // Clear cell associated to particle
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::remove_cell, std::placeholders::_1));
+
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
+
+    // Activate nodes
+    mesh_->iterate_over_cells(
+        std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
     // Increament step
-    ++this->step_;
+    ++step_;
 
-    console_->info("Checkpoint resume at step {} of {}", this->step_,
-                   this->nsteps_);
+    console_->info("Checkpoint resume at step {} of {}", step_, nsteps_);
 
   } catch (std::exception& exception) {
     console_->info("{} {} Resume failed, restarting analysis: {}", __FILE__,
                    __LINE__, exception.what());
-    this->step_ = 0;
+    step_ = 0;
     checkpoint = false;
   }
   return checkpoint;
@@ -595,7 +602,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Get analysis type USL/USF
   if (io_->analysis_type() == "MPMExplicitUSL2D" ||
       io_->analysis_type() == "MPMExplicitUSL3D")
-    this->usl_ = true;
+    usl_ = true;
 
   console_->error("Analysis{} {}", io_->analysis_type());
 
@@ -623,15 +630,15 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
 
   // Initialise material
-  bool mat_status = this->initialise_materials();
+  bool mat_status = initialise_materials();
   if (!mat_status) status = false;
 
   // Initialise mesh
-  bool mesh_status = this->initialise_mesh();
+  bool mesh_status = initialise_mesh();
   if (!mesh_status) status = false;
 
   // Initialise particles
-  bool particle_status = this->initialise_particles();
+  bool particle_status = initialise_particles();
   if (!particle_status) status = false;
 
   // Assign material to particles
@@ -649,14 +656,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                 std::placeholders::_1, material));
 
-  // Assign material to particle sets
-  if (particle_props["particle_sets"].size() != 0) {
-    // Assign material to particles in the specific sets
-    bool set_material_status = this->apply_properties_to_particles_sets();
-  }
+  // Assign material to particles in the specific sets
+  bool particle_material_status = true;
+  if (particle_props["particle_sets"].size() != 0)
+    particle_material_status = apply_properties_to_particles_sets();
+  if (!particle_material_status) status = false;
 
   // Check point resume
-  if (resume) this->checkpoint_resume();
+  if (resume) checkpoint_resume();
 
   // Compute mass
   mesh_->iterate_over_particles(std::bind(
@@ -765,7 +772,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to compute nodal body force
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, phase, this->gravity_));
+                    std::placeholders::_1, phase, gravity_));
 
       // Iterate over each particle to map traction force to nodes
       mesh_->iterate_over_particles(
@@ -773,7 +780,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, phase));
 
       //! Apply nodal tractions
-      if (nodal_tractions_) this->apply_nodal_tractions();
+      if (nodal_tractions_) apply_nodal_tractions();
     });
 
     // Spawn a task for internal force
@@ -808,7 +815,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Iterate over active nodes to compute acceleratation and velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, phase, this->dt_),
+                  std::placeholders::_1, phase, dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Use nodal velocity to update position
@@ -816,12 +823,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to compute updated position
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, phase, dt_));
     else
       // Iterate over each particle to compute updated position
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, phase, dt_));
 
     // Update Stress Last
     if (usl_ == true) {
@@ -865,7 +872,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Iterate over each particle to update particle volume
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-                  std::placeholders::_1, phase, this->dt_));
+                  std::placeholders::_1, phase, dt_));
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
@@ -875,16 +882,16 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
-      this->write_hdf5(this->step_, this->nsteps_);
+      write_hdf5(step_, nsteps_);
 #ifdef USE_VTK
       // VTK outputs
-      this->write_vtk(this->step_, this->nsteps_);
+      write_vtk(step_, nsteps_);
 #endif
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
   console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 (this->usl_ ? "USL" : "USF"),
+                 (usl_ ? "USL" : "USF"),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
