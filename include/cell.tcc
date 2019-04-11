@@ -1009,6 +1009,16 @@ void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
   }
 }
 
+//! Map particle pressure to nodes for a given phase
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
+                                            unsigned phase, double pmass,
+                                            double ppressure) {
+
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+}
+
 //! Compute nodal momentum from particle mass and velocity for a given phase
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
@@ -1136,6 +1146,17 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
 
   return acceleration;
+}
+
+//! Return pressure at a point by interpolating from nodes
+template <unsigned Tdim>
+double mpm::Cell<Tdim>::interpolate_nodal_pressure(
+    const Eigen::VectorXd& shapefn, unsigned phase) {
+  double pressure = 0;
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    pressure += shapefn(i) * nodes_[i]->pressure(phase);
+
+  return pressure;
 }
 
 //! Assign velocity constraint
