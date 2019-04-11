@@ -6,6 +6,8 @@ using Json = nlohmann::json;
 
 #include "io.h"
 
+#include "map.h"
+
 // Check IO for input string
 TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
@@ -21,11 +23,15 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"particles", "particles-3d.txt"},
           {"initial_stresses", "initial_soil_stress.txt"},
           {"materials", "materials.txt"},
-          {"traction", "traction.txt"}}},
-        {"mesh",
-         {{"mesh_reader", "Ascii3D"},
-          {"cell_type", "ED3H8"},
-          {"particle_type", "P3D"}}},
+          {"traction", "traction.txt"},
+          {"entity_sets", "entity_sets.json"}}},
+        {"mesh", {{"mesh_reader", "Ascii3D"}, {"cell_type", "ED3H8"}}},
+        {"particle",
+         {{"material_id", "0"},
+          {"particle_type", "P3D"},
+          {"particle_sets",
+           {{{"set_id", {0}}, {"material_id", 0}},
+            {{"set_id", {1}}, {"material_id", 1}}}}}},
         {"materials",
          {{{"id", 0},
            {"type", "LinearElastic"},
@@ -47,11 +53,23 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
           {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
         {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
 
+    // Make json object with entity sets files
+    Json json_set_file = {
+        {"node_sets",
+         {{{"id", 0}, {"set", {0, 1}}}, {{"id", 1}, {"set", {2, 3}}}}},
+        {"particle_sets",
+         {{{"id", 0}, {"set", {0, 1}}}, {{"id", 1}, {"set", {2, 3}}}}}};
     // Dump JSON as an input file to be read
     std::ofstream file;
     file.open("mpm.json");
     file << json_file.dump(2);
     file.close();
+
+    // Dump JSON as an entity sets file to be read
+    std::ofstream set_file;
+    set_file.open("entity_sets.json");
+    set_file << json_set_file.dump(2);
+    set_file.close();
 
     // Assign argc and argv to nput arguments of MPM
     int argc = 7;
@@ -80,6 +98,9 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
 
     // Check if mpm.json exists
     REQUIRE(io->check_file("./mpm.json") == true);
+
+    // Check if entity_sets.json exists
+    REQUIRE(io->check_file("./entity_sets.json") == true);
 
     // Check if a non-existant file is present
     REQUIRE(io->check_file("../fail.txt") == false);
@@ -127,5 +148,14 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(meshfile == "./results/MPM/geometry057.vtp");
     // Check output folder
     REQUIRE(io->output_folder() == "results/");
+
+    // Check entity sets
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+    node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(0, {0, 1}));
+    node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(1, {2, 3}));
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> check =
+        io->entity_sets(io->file_name("entity_sets"), "node_sets");
+    REQUIRE(std::equal(check.begin(), check.end(), node_sets.begin()) == true);
+    REQUIRE(check.size() == node_sets.size());
   }
 }

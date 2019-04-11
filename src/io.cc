@@ -161,3 +161,42 @@ std::string mpm::IO::output_folder() const {
   }
   return path;
 }
+
+//! Return map of entity sets from the JSON file
+tsl::robin_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
+    const std::string& filename, const std::string& sets_type) {
+
+  // Input file stream for sets JSON file
+  std::ifstream sets_file;
+  sets_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  // Map of the entity sets
+  tsl::robin_map<mpm::Index, std::vector<mpm::Index>> entity_sets;
+
+  try {
+    sets_file.open(filename);
+    // Entity sets JSON object
+    Json json_sets_ = Json::parse(sets_file);
+    // type of sets (e.g: node_sets or particle_sets)
+    Json sets = json_sets_[sets_type];
+
+    if (sets.size() > 0) {
+      for (Json::iterator itr = sets.begin(); itr != sets.end(); ++itr) {
+        // Get the entity set ids
+        mpm::Index id = (*itr)["id"].template get<mpm::Index>();
+        // Get the entity ids
+        std::vector<mpm::Index> entity_ids = (*itr).at("set");
+        // Add the entity set to the list
+        entity_sets.insert(
+            std::pair<mpm::Index, std::vector<mpm::Index>>(id, entity_ids));
+      }
+    }
+    sets_file.close();
+  } catch (const std::out_of_range& range_error) {
+    console_->warn("{} {} reading {}: {}", __FILE__, __LINE__, sets_type,
+                   filename, range_error.what());
+  } catch (const std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+
+  return entity_sets;
+}
