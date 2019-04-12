@@ -526,6 +526,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
       // Update particle velocity from interpolated nodal acceleration
       this->velocity_.col(phase) += nodal_acceleration * dt;
 
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
+
       // Get interpolated nodal velocity
       const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
@@ -558,6 +561,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
 
       // Update particle velocity to interpolated nodal velocity
       this->velocity_.col(phase) = nodal_velocity;
+
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
 
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
@@ -634,4 +640,42 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pressure_smoothing(unsigned phase) {
     status = false;
   }
   return status;
+}
+
+//! Assign particle velocity constraint
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
+    unsigned dir, double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir >= 0 && dir < (Tdim * Tnphases))
+      this->particle_velocity_constraints_.insert(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
+    else
+      throw std::runtime_error(
+          "Particle velocity constraint direction is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Apply particle velocity constraints
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
+  // Set particle velocity constraint
+  for (const auto& constraint : this->particle_velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+    this->velocity_(direction, phase) = constraint.second;
+  }
 }

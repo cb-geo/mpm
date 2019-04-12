@@ -108,6 +108,26 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
+  //! Test particles velocity constraints
+  SECTION("Particle with velocity constraints") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    const unsigned phase = 0;
+    // Apply particles velocity constraints
+    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
+    // Check out of bounds condition
+    REQUIRE(particle->assign_particle_velocity_constraint(1, 0) == false);
+
+    // Apply constraints
+    particle->apply_particle_velocity_constraints();
+
+    // Check apply constraints
+    REQUIRE(particle->velocity(Phase)(0) == Approx(10.5).epsilon(Tolerance));
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -461,6 +481,29 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     auto pstress = particle->stress(phase);
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
+  //! Test particles velocity constraints
+  SECTION("Particle with velocity constraints") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    const unsigned phase = 0;
+
+    // Apply particles velocity constraints
+    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
+    REQUIRE(particle->assign_particle_velocity_constraint(1, -12.5) == true);
+    // Check out of bounds condition
+    REQUIRE(particle->assign_particle_velocity_constraint(2, 0) == false);
+
+    // Apply constraints
+    particle->apply_particle_velocity_constraints();
+
+    // Check apply constraints
+    REQUIRE(particle->velocity(Phase)(0) == Approx(10.5).epsilon(Tolerance));
+    REQUIRE(particle->velocity(Phase)(1) == Approx(-12.5).epsilon(Tolerance));
   }
 
   //! Test particle, cell and node functions
@@ -824,9 +867,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check nodal acceleration
     Eigen::Matrix<double, 4, 2> nodal_acceleration;
     // clang-format off
-    nodal_acceleration <<  2179.487179487179, 4733.779743589742, 
-                          -5512.820512820512, 3708.138717948717, 
-                          -6538.461538461537, -14240.57923076923, 
+    nodal_acceleration <<  2179.487179487179, 4733.779743589742,
+                          -5512.820512820512, 3708.138717948717,
+                          -6538.461538461537, -14240.57923076923,
                            1153.846153846153, -13214.9382051282;
     // clang-format on
     // Check nodal acceleration
@@ -1310,6 +1353,31 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
+  //! Test particles velocity constraints
+  SECTION("Particle with velocity constraints") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords, status);
+    const unsigned phase = 0;
+
+    // Apply particles velocity constraints
+    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
+    REQUIRE(particle->assign_particle_velocity_constraint(1, -12.5) == true);
+    REQUIRE(particle->assign_particle_velocity_constraint(2, 14.5) == true);
+    // Check out of bounds condition
+    REQUIRE(particle->assign_particle_velocity_constraint(3, 0) == false);
+
+    // Apply constraints
+    particle->apply_particle_velocity_constraints();
+
+    // Check apply constraints
+    REQUIRE(particle->velocity(Phase)(0) == Approx(10.5).epsilon(Tolerance));
+    REQUIRE(particle->velocity(Phase)(1) == Approx(-12.5).epsilon(Tolerance));
+    REQUIRE(particle->velocity(Phase)(2) == Approx(14.5).epsilon(Tolerance));
+  }
+
   //! Test particle, cell and node functions
   SECTION("Test particle, cell and node functions") {
     // Add particle
@@ -1718,13 +1786,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check nodal velocity
     // clang-format off
-    nodal_velocity <<  490.3846153846152,  914.4615384615383, 1395.249769230769, 
-                      -240.3846153846155,  941.1025641025641, 1448.531820512821, 
-                      -214.7435897435898,   57.4871794871796, 1091.557461538462, 
-                       516.0256410256410,   32.8461538461539, 1042.275410256410, 
-                       541.6666666666666,  559.4871794871794, -148.032282051282, 
-                      -189.1025641025641,  586.1282051282051, -94.75023076923067, 
-                      -163.4615384615384, -297.4871794871795, -451.7245897435898, 
+    nodal_velocity <<  490.3846153846152,  914.4615384615383, 1395.249769230769,
+                      -240.3846153846155,  941.1025641025641, 1448.531820512821,
+                      -214.7435897435898,   57.4871794871796, 1091.557461538462,
+                       516.0256410256410,   32.8461538461539, 1042.275410256410,
+                       541.6666666666666,  559.4871794871794, -148.032282051282,
+                      -189.1025641025641,  586.1282051282051, -94.75023076923067,
+                      -163.4615384615384, -297.4871794871795, -451.7245897435898,
                        567.3076923076923, -322.1282051282053, -501.0066410256412;
     // clang-format on
     // Check nodal velocity
@@ -1736,13 +1804,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check nodal acceleration
     Eigen::Matrix<double, 8, 3> nodal_acceleration;
     // clang-format off
-    nodal_acceleration << 4903.846153846152, 9134.615384615383, 13932.49769230769, 
-                         -2403.846153846155, 9391.025641025641, 14445.31820512821, 
-                         -2147.435897435898, 544.8717948717959, 10855.57461538462, 
-                          5160.256410256409, 288.461538461539,  10342.7541025641, 
-                          5416.666666666666, 5544.871794871794, -1580.32282051282, 
-                         -1891.025641025641, 5801.282051282051, -1067.502307692307, 
-                         -1634.615384615384, -3044.871794871795, -4657.245897435898, 
+    nodal_acceleration << 4903.846153846152, 9134.615384615383, 13932.49769230769,
+                         -2403.846153846155, 9391.025641025641, 14445.31820512821,
+                         -2147.435897435898, 544.8717948717959, 10855.57461538462,
+                          5160.256410256409, 288.461538461539,  10342.7541025641,
+                          5416.666666666666, 5544.871794871794, -1580.32282051282,
+                         -1891.025641025641, 5801.282051282051, -1067.502307692307,
+                         -1634.615384615384, -3044.871794871795, -4657.245897435898,
                           5673.076923076923, -3301.282051282052, -5170.066410256411;
     // clang-format on
     // Check nodal acceleration
