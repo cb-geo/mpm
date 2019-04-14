@@ -194,6 +194,16 @@ class ParticleBase {
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
 
+  //! Assign particle velocity constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle velocity constraint
+  virtual bool assign_particle_velocity_constraint(unsigned dir,
+                                                   double velocity) = 0;
+
+  //! Apply particle velocity constraints
+  virtual void apply_particle_velocity_constraints() = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
