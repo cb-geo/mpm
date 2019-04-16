@@ -1016,7 +1016,7 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
                                             double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+    nodes_[i]->update_mass_pressure(phase, shapefn(i) * pmass * ppressure);
 }
 
 //! Compute nodal momentum from particle mass and velocity for a given phase

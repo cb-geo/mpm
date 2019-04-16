@@ -123,6 +123,11 @@ class Node : public NodeBase<Tdim> {
   }
 
   //! Update pressure at the nodes from particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  void update_mass_pressure(unsigned phase, double mass_pressure) override;
+
+  //! Update pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
