@@ -122,6 +122,17 @@ class Node : public NodeBase<Tdim> {
     return internal_force_.col(phase);
   }
 
+  //! Update pressure at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  void update_pressure(bool update, unsigned phase,
+                       double mass_pressure) override;
+
+  //! Return pressure at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
+
   //! Update momentum at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -212,6 +223,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

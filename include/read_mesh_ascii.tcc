@@ -247,13 +247,13 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   return stresses;
 }
 
-//! Return velocity constraints of particles
+//! Return velocity constraints of nodes or particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>
     mpm::ReadMeshAscii<Tdim>::read_velocity_constraints(
         const std::string& velocity_constraints_file) {
 
-  // Nodal velocity constraints
+  // Nodal or particle velocity constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
   constraints.clear();
 

@@ -380,6 +380,14 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
   tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
 }
 
+//! Iterate over particle set
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
+  tbb::parallel_for_each(this->particle_sets_.at(set_id).cbegin(),
+                         this->particle_sets_.at(set_id).cend(), oper);
+}
+
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_neighbour(
@@ -609,6 +617,40 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
         status = map_particles_[pid]->assign_traction(phase, dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particles velocity constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_velocity_constraints) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign velocity");
+    for (const auto& particle_velocity_constraint :
+         particle_velocity_constraints) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(particle_velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(particle_velocity_constraint);
+
+      // if (map_particles_.find(pid) != map_particles_.end())
+      status = map_particles_[pid]->assign_particle_velocity_constraint(
+          dir, velocity);
+
+      if (!status) throw std::runtime_error("Velocity is invalid for particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1061,4 +1103,35 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
     node_pairs.clear();
   }
   return node_pairs;
+}
+
+//! Create map of container of particles in sets
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_particle_sets(
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
+    bool check_duplicates) {
+  bool status = false;
+  try {
+    // Create container for each particle set
+    for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
+         ++sitr) {
+      // Create a container for the set
+      Container<ParticleBase<Tdim>> particles;
+      // Reserve the size of the container
+      particles.reserve((sitr->second).size());
+      // Add particles to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status =
+            particles.add(map_particles_[pid], check_duplicates);
+      }
+      // Create the map of the container
+      this->particle_sets_.insert(
+          std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(sitr->first,
+                                                               particles));
+      status = true;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
 }

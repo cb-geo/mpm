@@ -8,6 +8,8 @@
 #include <boost/filesystem.hpp>
 
 #include "tclap/CmdLine.h"
+
+#include <tsl/robin_map.h>
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
@@ -20,6 +22,10 @@ using Json = nlohmann::json;
 
 namespace mpm {
 //! \brief Input/Output handler
+
+//! MPM Index
+using Index = unsigned long long;
+
 class IO {
  public:
   //! Constructor with argc and argv
@@ -50,6 +56,13 @@ class IO {
 
   //! Return json object
   Json json_object(const std::string& name) const { return json_[name]; }
+
+  //! Return the entity sets from the input set JSON file
+  //! \param[in] filename File name
+  //! \param[in] sets_type type of sets
+  //! \retval entity_sets map of entity sets
+  tsl::robin_map<mpm::Index, std::vector<mpm::Index>> entity_sets(
+      const std::string& filename, const std::string& sets_type);
 
   //! Return post processing object
   Json post_processing() const { return json_["post_processing"]; }
