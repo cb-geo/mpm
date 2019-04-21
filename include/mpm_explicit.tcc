@@ -147,6 +147,15 @@ bool mpm::MPMExplicit<Tdim>::initialise_mesh() {
                        nodes_end - nodes_begin)
                        .count());
 
+    // Read nodal euler angles and assign rotation matrices
+    if (!io_->file_name("nodal_euler_angles").empty()) {
+      bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
+          mesh_reader->read_euler_angles(io_->file_name("nodal_euler_angles")));
+      if (!rotation_matrices)
+        throw std::runtime_error(
+            "Euler angles are not properly assigned/computed");
+    }
+
     // Read and assign velocity constraints
     if (!io_->file_name("velocity_constraints").empty()) {
       bool velocity_constraints = mesh_->assign_velocity_constraints(
