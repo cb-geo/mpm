@@ -800,6 +800,30 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               REQUIRE(mesh_fail->assign_particles_stresses(
                           particles_stresses) == false);
             }
+
+            // Test assign particles velocity constraints
+            SECTION("Check assign particles velocity constraints") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_velocity_constraints;
+              // Constraint
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(0, 0, 10.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(1, 1, -10.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(2, 0, -12.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_velocity_constraints(
+                          particles_velocity_constraints) == true);
+              // When constraints fail
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(3, 2, 0.0));
+              REQUIRE(mesh->assign_particles_velocity_constraints(
+                          particles_velocity_constraints) == false);
+            }
           }
         }
         // Test assign velocity constraints to nodes
@@ -1724,6 +1748,31 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(id);
               REQUIRE(mesh_fail->assign_particles_stresses(
                           particles_stresses) == false);
+            }
+
+            // Test assign particles velocity constraints
+            SECTION("Check assign particles velocity constraints") {
+              // Vector of particle coordinates
+              std::vector<std::tuple<mpm::Index, unsigned, double>>
+                  particles_velocity_constraints;
+              // Constraint
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(0, 0, 10.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(1, 1, -10.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(2, 2, -12.5));
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(3, 1, 0.0));
+
+              REQUIRE(mesh->assign_particles_velocity_constraints(
+                          particles_velocity_constraints) == true);
+
+              // When constraints fail
+              particles_velocity_constraints.emplace_back(
+                  std::make_tuple(3, 3, 0.0));
+              REQUIRE(mesh->assign_particles_velocity_constraints(
+                          particles_velocity_constraints) == false);
             }
           }
         }

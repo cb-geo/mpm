@@ -159,9 +159,9 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-52083.3332581667).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-52083.3332581667).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-52083.3333183).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-52083.3334085).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-52083.3334085).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-52083.3334085).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000002255).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
@@ -331,9 +331,9 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-5208.33333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-5208.33333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-5208.33333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-15625.0000871933).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-15625.0000871933).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-15625.0000871933).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000000451).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000000902).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000001353).epsilon(Tolerance));

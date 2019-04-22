@@ -104,6 +104,31 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     node->update_mass(false, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
+    SECTION("Check nodal pressure") {
+      // Check pressure
+      REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
+      double pressure = 1000.7;
+      // Update pressure to 1000.7
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
+      // Update pressure to 2001.4
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
+      // Assign pressure to 1000
+      pressure = 1000.;
+      node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+    }
+
     SECTION("Check external force") {
       // Create a force vector
       Eigen::Matrix<double, Dim, 1> force;
@@ -261,6 +286,17 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(node->velocity(Nphase)(i) ==
                 Approx(velocity(i)).epsilon(Tolerance));
+
+      // Apply friction constraints
+      REQUIRE(node->assign_friction_constraint(0, 1., 0.5) == true);
+      // Apply friction constraints
+      REQUIRE(node->assign_friction_constraint(-1, 1., 0.5) == false);
+      REQUIRE(node->assign_friction_constraint(3, 1., 0.5) == false);
+      // Test acceleration with constraints
+      acceleration[1] = 0.5 * acceleration[1];
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -503,6 +539,31 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     mass = 100.;
     node->update_mass(false, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
+
+    SECTION("Check nodal pressure") {
+      // Check pressure
+      REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
+      double pressure = 1000.7;
+      // Update pressure to 1000.7
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
+      // Update pressure to 2001.4
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
+      // Assign mass to 1000
+      pressure = 1000.;
+      node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+    }
 
     SECTION("Check volume") {
       // Check volume
@@ -921,6 +982,31 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     mass = 100.;
     node->update_mass(false, Nphase, mass);
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
+
+    SECTION("Check nodal pressure") {
+      // Check pressure
+      REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
+      double pressure = 1000.7;
+      // Update pressure to 1000.7
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
+      // Update pressure to 2001.4
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
+      // Assign mass to 1000
+      pressure = 1000.;
+      node->update_pressure(false, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+      // Assign mass to 0
+      mass = 0.;
+      node->update_mass(false, Nphase, mass);
+      REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
+      // Try to update pressure to 2000, should throw and keep to 1000.
+      pressure = 1000.;
+      const double pmass = 1.5;
+      node->update_pressure(true, Nphase, mass * pressure);
+      REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
+    }
 
     SECTION("Check external force") {
       // Create a force vector

@@ -333,7 +333,7 @@ inline std::vector<Eigen::MatrixXd>
 
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi
-  Eigen::MatrixXd grad_shapefn = grad_sf * jacobian.inverse();
+  Eigen::MatrixXd grad_shapefn = grad_sf * (jacobian.inverse()).transpose();
 
   for (unsigned i = 0; i < Tnfunctions; ++i) {
     // clang-format off

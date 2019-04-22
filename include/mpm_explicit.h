@@ -43,6 +43,9 @@ class MPMExplicit : public MPM {
   //! Apply nodal tractions
   bool apply_nodal_tractions() override;
 
+  //! Apply properties to particles sets (e.g: material)
+  bool apply_properties_to_particles_sets() override;
+
   //! Solve
   bool solve() override;
 
@@ -93,6 +96,8 @@ class MPMExplicit : public MPM {
  private:
   //! Boolean to switch between USL and USF
   bool usl_{false};
+  //! Pressure smoothing
+  bool pressure_smoothing_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm
