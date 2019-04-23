@@ -748,6 +748,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, phase, dt_));
 
+      // Iterate over each particle to update particle volume
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                    std::placeholders::_1, phase, this->dt_));
+
       // Pressure smoothing
       if (pressure_smoothing_) {
         // Assign pressure to nodes
@@ -850,6 +855,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, phase, dt_));
 
+      // Iterate over each particle to update particle volume
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                    std::placeholders::_1, phase, this->dt_));
+
       // Pressure smoothing
       if (pressure_smoothing_) {
         // Assign pressure to nodes
@@ -881,11 +891,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                     std::placeholders::_1, phase));
     }
-
-    // Iterate over each particle to update particle volume
-    // mesh_->iterate_over_particles(
-    //     std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-    //               std::placeholders::_1, phase, this->dt_));
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
