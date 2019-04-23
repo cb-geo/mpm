@@ -276,6 +276,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
+  //! Volumetric mass density (mass / volume)
+  Eigen::Matrix<double, 1, Tnphases> mass_density_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
