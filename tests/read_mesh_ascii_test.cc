@@ -246,6 +246,58 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     }
   }
 
+  SECTION("Check nodal euler angle file") {
+    // Map of euler angles
+    std::map<mpm::Index, Eigen::Matrix<double, dim, 1>> euler_angles;
+    euler_angles.emplace(
+        std::make_pair(0, (Eigen::Matrix<double, dim, 1>(10.5, 20.5))));
+    euler_angles.emplace(
+        std::make_pair(1, (Eigen::Matrix<double, dim, 1>(30.5, -40.5))));
+    euler_angles.emplace(
+        std::make_pair(2, (Eigen::Matrix<double, dim, 1>(-50.5, -60.5))));
+    euler_angles.emplace(
+        std::make_pair(3, (Eigen::Matrix<double, dim, 1>(-70.5, 80.5))));
+
+    // Dump euler angles as an input file to be read
+    std::ofstream file;
+    file.open("nodal-euler-angles-2d.txt");
+    // Write particle coordinates
+    for (const auto& angles : euler_angles) {
+      file << angles.first << "\t";
+      for (unsigned i = 0; i < dim; ++i) file << (angles.second)(i) << "\t";
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read euler angles
+    SECTION("Check euler angles") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read euler angles from a non-existant file
+      auto read_euler_angles =
+          read_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
+      // Check number of euler angles
+      REQUIRE(read_euler_angles.size() == 0);
+
+      // Check euler angles
+      read_euler_angles =
+          read_mesh->read_euler_angles("nodal-euler-angles-2d.txt");
+
+      // Check number of elements
+      REQUIRE(read_euler_angles.size() == euler_angles.size());
+
+      // Check euler angles
+      for (unsigned i = 0; i < euler_angles.size(); ++i) {
+        for (unsigned j = 0; j < dim; ++j) {
+          REQUIRE(read_euler_angles.at(i)(j) ==
+                  Approx(euler_angles.at(i)(j)).epsilon(Tolerance));
+        }
+      }
+    }
+  }
+
   SECTION("Check tractions file") {
     // Vector of particle tractions
     std::vector<std::tuple<mpm::Index, unsigned, double>> particles_tractions;
@@ -629,6 +681,58 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check nodal euler angle file") {
+    // Map of euler angles
+    std::map<mpm::Index, Eigen::Matrix<double, dim, 1>> euler_angles;
+    euler_angles.emplace(
+        std::make_pair(0, (Eigen::Matrix<double, dim, 1>(10.5, 20.5, 30.5))));
+    euler_angles.emplace(
+        std::make_pair(1, (Eigen::Matrix<double, dim, 1>(40.5, -50.5, -60.5))));
+    euler_angles.emplace(std::make_pair(
+        2, (Eigen::Matrix<double, dim, 1>(-70.5, -80.5, -90.5))));
+    euler_angles.emplace(std::make_pair(
+        3, (Eigen::Matrix<double, dim, 1>(-100.5, 110.5, 120.5))));
+
+    // Dump euler angles as an input file to be read
+    std::ofstream file;
+    file.open("nodal-euler-angles-3d.txt");
+    // Write particle coordinates
+    for (const auto& angles : euler_angles) {
+      file << angles.first << "\t";
+      for (unsigned i = 0; i < dim; ++i) file << (angles.second)(i) << "\t";
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read euler angles
+    SECTION("Check euler angles") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+
+      // Try to read euler angles from a non-existant file
+      auto read_euler_angles =
+          read_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
+      // Check number of euler angles
+      REQUIRE(read_euler_angles.size() == 0);
+
+      // Check euler angles
+      read_euler_angles =
+          read_mesh->read_euler_angles("nodal-euler-angles-3d.txt");
+
+      // Check number of elements
+      REQUIRE(read_euler_angles.size() == euler_angles.size());
+
+      // Check euler angles
+      for (unsigned i = 0; i < euler_angles.size(); ++i) {
+        for (unsigned j = 0; j < dim; ++j) {
+          REQUIRE(read_euler_angles.at(i)(j) ==
+                  Approx(euler_angles.at(i)(j)).epsilon(Tolerance));
+        }
       }
     }
   }
