@@ -675,12 +675,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     bool set_material_status = this->apply_properties_to_particles_sets();
   }
 
-  // Check point resume
-  if (resume) this->checkpoint_resume();
-
   // Compute mass
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
+  // Check point resume
+  if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
