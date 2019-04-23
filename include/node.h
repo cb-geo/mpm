@@ -201,6 +201,14 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Time-step
   void apply_friction_constraints(double dt) override;
 
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  void assign_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
+    rotation_matrix_ = rotation_matrix;
+    generic_boundary_constraints_ = true;
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -230,6 +238,11 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Rotation matrix for general velocity constraints
+  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! A general velocity (non-Cartesian/inclined) constraint is specified at the
+  //! node
+  bool generic_boundary_constraints_{false};
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;

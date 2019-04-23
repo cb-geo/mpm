@@ -562,6 +562,37 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
   return status;
 }
 
+//! Compute and assign rotation matrix to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
+    const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign rotation "
+          "matrix");
+
+    // Loop through nodal_euler_angles of different nodes
+    for (const auto& nodal_euler_angles : euler_angles) {
+      // Node id
+      mpm::Index nid = nodal_euler_angles.first;
+      // Euler angles
+      Eigen::Matrix<double, Tdim, 1> angles = nodal_euler_angles.second;
+      // Compute rotation matrix
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(angles);
+
+      // Apply rotation matrix to nodes
+      map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+      status = true;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particle tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_tractions(
