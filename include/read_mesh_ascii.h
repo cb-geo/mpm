@@ -66,6 +66,12 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
       read_friction_constraints(
           const std::string& friction_constraints_file) override;
 
+  //! Read nodal euler angles file
+  //! \param[in] nodal_euler_angles_file file name with nodal id and respective
+  //! euler angles
+  std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>> read_euler_angles(
+      const std::string& nodal_euler_angles_file) override;
+
   //! Read volume file
   //! \param[in] volume_files file name with particle volumes
   std::vector<std::tuple<mpm::Index, double>> read_particles_volumes(
