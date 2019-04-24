@@ -314,8 +314,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     // Check if particle volume is set and material ptr is valid
     if (volume_(phase) != std::numeric_limits<double>::max() &&
         material_ != nullptr) {
-      // Mass = volume of particle * density
-      this->mass_(phase) = volume_(phase) * material_->property("density");
+      // Mass = volume of particle * mass_density
+      mass_density_(phase) = material_->property("density");
+      this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
           "Cell or material is invalid! cannot compute mass for the particle");
