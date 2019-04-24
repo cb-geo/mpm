@@ -1135,3 +1135,33 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
   }
   return status;
 }
+
+//! Create map of remove steps
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::create_remove_step(const mpm::Index rstep,
+                                         const std::vector<unsigned> set_ids) {
+  // Create the map of particle sets id need to be removed at a step
+  this->remove_steps_.insert(
+      std::pair<mpm::Index, std::vector<unsigned>>(rstep, set_ids));
+}
+
+//! Apply remove step
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
+  bool status = false;
+  if (this->remove_steps_.count(rstep) > 0) {
+    try {
+      for (auto sid : this->remove_steps_.at(rstep)) {
+        for (auto particle = this->particle_sets_.at(sid).cbegin();
+             particle != this->particle_sets_.at(sid).cend(); particle++) {
+          status = this->remove_particle(*particle);
+          if (!status) throw std::runtime_error("Removing particle is invalid");
+        }
+      }
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+      status = false;
+    }
+  }
+  return status;
+}

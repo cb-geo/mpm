@@ -317,6 +317,17 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Create map of remove steps
+  //! \param[in] particle set id need to be removed
+  //! \param[in] step when remove the particles in set
+  void create_remove_step(const mpm::Index rstep,
+                          const std::vector<unsigned> set_ids);
+
+  //! Apply remove step
+  //! \param[in] remove step
+  //! \retval remove_status Return the successful remove of particle sets
+  bool apply_remove_step(const mpm::Index rstep);
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -333,6 +344,8 @@ class Mesh {
   Container<ParticleBase<Tdim>> particles_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
+  //! Container of remove steps
+  tsl::robin_map<mpm::Index, std::vector<unsigned>> remove_steps_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes

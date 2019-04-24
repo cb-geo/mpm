@@ -682,6 +682,20 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Check point resume
   if (resume) this->checkpoint_resume();
 
+  // Create remove steps (excavation)
+  if (!particle_props["remove"].empty()) {
+    // Get remove step properties
+    auto remove_step = particle_props["remove"];
+    for (const auto& remove : remove_step) {
+      // Get the number of remove step
+      mpm::Index rstep = remove["rstep"];
+      // Get ids of sets need to be removed
+      std::vector<unsigned> sids = remove["set_id"];
+      // Add remove step to the map
+      mesh_->create_remove_step(rstep, sids);
+    }
+  }
+
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
   for (; step_ < nsteps_; ++step_) {
@@ -690,6 +704,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Create a TBB task group
     tbb::task_group task_group;
+
+    // Apply remove step (excavation)
+    bool remove_status = mesh_->apply_remove_step(step_);
 
     // Spawn a task for initialising nodes and cells
     task_group.run([&] {
