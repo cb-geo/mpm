@@ -74,10 +74,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
       for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
         std::string attribute =
             post_process_["vtk"][i].template get<std::string>();
-        if (std::find(vtk.begin(), vtk.end(), attribute) != vtk.end())
-          vtk_attributes_.emplace_back(attribute);
-        else
-          throw std::runtime_error("Specificed VTK argument is incorrect");
+        vtk_attributes_.emplace_back(attribute);
       }
     } else {
       throw std::runtime_error(
