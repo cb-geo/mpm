@@ -1140,9 +1140,12 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_remove_step(const mpm::Index rstep,
                                          const std::vector<unsigned> set_ids) {
-  // Create the map of particle sets id need to be removed at a step
-  this->remove_steps_.insert(
-      std::pair<mpm::Index, std::vector<unsigned>>(rstep, set_ids));
+  // Check if there is a rstep exsited in the map
+  std::vector<unsigned> sids = this->remove_steps_[rstep];
+  // Add the set_ids into the vector
+  sids.insert(sids.end(), set_ids.begin(), set_ids.end());
+  // Update the remove step
+  this->remove_steps_[rstep] = sids;
 }
 
 //! Apply remove step

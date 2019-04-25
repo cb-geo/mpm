@@ -683,16 +683,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (resume) this->checkpoint_resume();
 
   // Create remove steps (excavation)
-  if (!particle_props["remove"].empty()) {
+  if (!particle_props["particle_sets"].empty()) {
     // Get remove step properties
-    auto remove_step = particle_props["remove"];
-    for (const auto& remove : remove_step) {
-      // Get the number of remove step
-      mpm::Index rstep = remove["rstep"];
-      // Get ids of sets need to be removed
-      std::vector<unsigned> sids = remove["set_id"];
-      // Add remove step to the map
-      mesh_->create_remove_step(rstep, sids);
+    for (const auto& remove : particle_props["particle_sets"]) {
+      if (remove["remove"] == true) {
+        // Get the number of remove step
+        mpm::Index rstep = remove["rstep"];
+        // Get ids of sets need to be removed
+        std::vector<unsigned> sids = remove["set_id"];
+        // Add remove step to the map
+        mesh_->create_remove_step(rstep, sids);
+      }
     }
   }
 
