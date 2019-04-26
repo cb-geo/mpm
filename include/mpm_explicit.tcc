@@ -482,7 +482,7 @@ bool mpm::MPMExplicit<Tdim>::apply_nodal_tractions() {
   return status;
 }
 
-//! Apply properties to particles sets (e.g: material)
+//! Apply properties to particles sets (e.g: material, remove step)
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
@@ -492,8 +492,9 @@ bool mpm::MPMExplicit<Tdim>::apply_properties_to_particles_sets() {
     auto particle_props = io_->json_object("particle");
     // Get particle sets properties
     auto particle_sets = particle_props["particle_sets"];
-    // Assign material to each particle sets
+    // Iterate over each particle sets
     for (const auto& psets : particle_sets) {
+      // Assign material to particle set
       // Get set material from list of materials
       auto set_material = materials_.at(psets["material_id"]);
       // Get sets ids
@@ -503,6 +504,17 @@ bool mpm::MPMExplicit<Tdim>::apply_properties_to_particles_sets() {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
                             std::placeholders::_1, set_material));
+      }
+
+      // Create remove steps (excavation)
+      // Check if remove step is needed
+      if (psets["remove"] == true) {
+        // Get the number of remove step
+        mpm::Index rstep = psets["rstep"];
+        // Get ids of sets need to be removed
+        std::vector<unsigned> sids = psets["set_id"];
+        // Add remove step to the map
+        mesh_->create_remove_step(rstep, sids);
       }
     }
     status = true;
@@ -681,21 +693,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Check point resume
   if (resume) this->checkpoint_resume();
-
-  // Create remove steps (excavation)
-  if (!particle_props["particle_sets"].empty()) {
-    // Get remove step properties
-    for (const auto& remove : particle_props["particle_sets"]) {
-      if (remove["remove"] == true) {
-        // Get the number of remove step
-        mpm::Index rstep = remove["rstep"];
-        // Get ids of sets need to be removed
-        std::vector<unsigned> sids = remove["set_id"];
-        // Add remove step to the map
-        mesh_->create_remove_step(rstep, sids);
-      }
-    }
-  }
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
