@@ -160,6 +160,15 @@ class ParticleBase {
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;
 
+  //! Update pressure of the particles
+  virtual bool update_pressure(unsigned phase, double dvolumetric_strain) = 0;
+
+  //! Map particle pressure to nodes
+  virtual bool map_pressure_to_nodes(unsigned phase) = 0;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  virtual bool compute_pressure_smoothing(unsigned phase) = 0;
+
   //! Assign velocity
   virtual bool assign_velocity(unsigned phase, const VectorDim& velocity) = 0;
 
@@ -184,6 +193,16 @@ class ParticleBase {
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
+
+  //! Assign particle velocity constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle velocity constraint
+  virtual bool assign_particle_velocity_constraint(unsigned dir,
+                                                   double velocity) = 0;
+
+  //! Apply particle velocity constraints
+  virtual void apply_particle_velocity_constraints() = 0;
 
  protected:
   //! particleBase id

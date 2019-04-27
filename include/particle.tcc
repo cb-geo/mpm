@@ -338,7 +338,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, phase, mass_(phase), velocity_.col(phase));
     } else {
-      throw std::runtime_error("Particle mass has not be computed");
+      throw std::runtime_error("Particle mass has not been computed");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -520,14 +520,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal acceleration
-      Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+      const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
           cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
       // Update particle velocity from interpolated nodal acceleration
       this->velocity_.col(phase) += nodal_acceleration * dt;
 
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
+
       // Get interpolated nodal velocity
-      Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // New position  current position + velocity * dt
@@ -553,14 +556,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
-      Eigen::Matrix<double, Tdim, 1> velocity =
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) = velocity;
+      this->velocity_.col(phase) = nodal_velocity;
+
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
 
       // New position current position + velocity * dt
-      this->coordinates_ += this->velocity_.col(phase) * dt;
+      this->coordinates_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -592,4 +598,84 @@ bool mpm::Particle<Tdim, Tnphases>::update_pressure(unsigned phase,
     status = false;
   }
   return status;
+}
+
+//! Map particle pressure to nodes
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_pressure_to_nodes(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle mass is set
+    if (mass_(phase) != std::numeric_limits<double>::max()) {
+      // Map particle mass and momentum to nodes
+      this->cell_->map_pressure_to_nodes(this->shapefn_, phase, mass_(phase),
+                                         pressure_(phase));
+    } else {
+      throw std::runtime_error("Particle mass has not been computed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute pressure smoothing of the particle based on nodal pressure
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_pressure_smoothing(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr)
+      // Update particle pressure to interpolated nodal pressure
+      this->pressure_(phase) =
+          cell_->interpolate_nodal_pressure(this->shapefn_, phase);
+    else
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute pressure smoothing of the particle");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle velocity constraint
+//! Constrain directions can take values between 0 and Dim * Nphases
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
+    unsigned dir, double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim * Nphases
+    if (dir >= 0 && dir < (Tdim * Tnphases))
+      this->particle_velocity_constraints_.insert(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
+    else
+      throw std::runtime_error(
+          "Particle velocity constraint direction is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Apply particle velocity constraints
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
+  // Set particle velocity constraint
+  for (const auto& constraint : this->particle_velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+    this->velocity_(direction, phase) = constraint.second;
+  }
 }

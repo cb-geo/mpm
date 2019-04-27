@@ -109,6 +109,17 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
+  //! Update pressure at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  virtual void update_pressure(bool update, unsigned phase,
+                               double mass_pressure) = 0;
+
+  //! Return pressure at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double pressure(unsigned phase) const = 0;
+
   //! Update nodal momentum
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -141,6 +152,7 @@ class NodeBase {
   virtual VectorDim acceleration(unsigned phase) const = 0;
 
   //! Compute acceleration
+  //! \param[in] dt Time-step
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
   //! Assign velocity constraint
@@ -151,6 +163,18 @@ class NodeBase {
 
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
+
+  //! Assign friction constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of friction constraint
+  //! \param[in] sign Sign of normal wrt coordinate system for friction
+  //! \param[in] friction Applied friction constraint
+  virtual bool assign_friction_constraint(unsigned dir, int sign,
+                                          double friction) = 0;
+
+  //! Apply friction constraints
+  //! \param[in] dt Time-step
+  virtual void apply_friction_constraints(double dt) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

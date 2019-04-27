@@ -133,10 +133,6 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
 
-  //! Return pressure of the particles
-  //! \param[in] phase Index corresponding to the phase
-  double pressure(unsigned phase) const override { return pressure_(phase); }
-
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
@@ -234,12 +230,36 @@ class Particle : public ParticleBase<Tdim> {
     return state_variables_.at(var);
   }
 
- private:
   //! Update pressure of the particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(unsigned phase, double dvolumetric_strain);
+  bool update_pressure(unsigned phase, double dvolumetric_strain) override;
 
+  //! Map particle pressure to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_pressure_to_nodes(unsigned phase) override;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  //! \param[in] phase Index corresponding to the phase
+  bool compute_pressure_smoothing(unsigned phase) override;
+
+  //! Return pressure of the particles
+  //! \param[in] phase Index corresponding to the phase
+  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
+  double pressure(unsigned phase) const override { return pressure_(phase); }
+
+  //! Assign particle velocity constraints
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle velocity constraint
+  //! \retval status Assignment status
+  bool assign_particle_velocity_constraint(unsigned dir,
+                                           double velocity) override;
+
+  //! Apply particle velocity constraints
+  void apply_particle_velocity_constraints() override;
+
+ private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -278,6 +298,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Particle velocity constraints
+  std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
   bool set_traction_{false};
   //! Traction
