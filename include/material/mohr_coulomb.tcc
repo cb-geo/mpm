@@ -113,7 +113,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
 
   // compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
+  auto dev_stress = Vector6d::Zero();
   dev_stress(0) = stress(0) - mean_p;
   dev_stress(1) = stress(1) - mean_p;
   dev_stress(2) = stress(2) - mean_p;
@@ -250,7 +250,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
 
   // deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
+  auto dev_stress = Vector6d::Zero();
   dev_stress(0) = stress(0) - mean_p;
   dev_stress(1) = stress(1) - mean_p;
   dev_stress(2) = stress(2) - mean_p;
@@ -280,13 +280,13 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   }
 
   // compute dEpsilon / dSigma (the same in both tension / shear yield types)
-  Vector6d depsilon_dsigma = Vector6d::Zero();
+  auto depsilon_dsigma = Vector6d::Zero();
   depsilon_dsigma(0) = 1. / sqrt(3.);
   depsilon_dsigma(1) = 1. / sqrt(3.);
   depsilon_dsigma(2) = 1. / sqrt(3.);
 
   // compute dRho / dSigma (the same in both tension / shear yield types)
-  Vector6d drho_dsigma = Vector6d::Zero();
+  auto drho_dsigma = Vector6d::Zero();
   double multiplier = 1.;
   if (fabs(rho) > 0.) multiplier = 1. / rho;
   drho_dsigma = multiplier * dev_stress;
@@ -326,7 +326,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   dev3(1) = dev_stress(4);
   dev3(2) = dev_stress(2);
 
-  Vector6d dj3_dsigma = Vector6d::Zero();
+  auto dj3_dsigma = Vector6d::Zero();
   dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
   dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
   dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
@@ -337,7 +337,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   }
 
   // compute dtheta / dsigma (the same in both tension / shear yield types)
-  Vector6d dtheta_dsigma = Vector6d::Zero();
+  auto dtheta_dsigma = Vector6d::Zero();
   dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
   if (Tdim == 2) {
     dtheta_dsigma(4) = 0.;
@@ -484,8 +484,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Correct the stress back to the yield surface if it is in plastic state
   // Compute plastic multiplier based on trial stress (Lambda trial)
   double softening_trial = 0.;
-  Vector6d df_dsigma_trial = Vector6d::Zero();
-  Vector6d dp_dsigma_trial = Vector6d::Zero();
+  auto df_dsigma_trial = Vector6d::Zero();
+  auto dp_dsigma_trial = Vector6d::Zero();
   this->compute_df_dp(yield_type_trial, state_vars, trial_stress,
                       &df_dsigma_trial, &dp_dsigma_trial, &softening_trial);
   double yield = 0.;
@@ -504,8 +504,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   auto yield_type = this->compute_yield_state(&yield_function, state_vars);
   // Compute plastic multiplier based on stress input (Lambda)
   double softening = 0.;
-  Vector6d df_dsigma = Vector6d::Zero();
-  Vector6d dp_dsigma = Vector6d::Zero();
+  auto df_dsigma = Vector6d::Zero();
+  auto dp_dsigma = Vector6d::Zero();
   this->compute_df_dp(yield_type, state_vars, stress, &df_dsigma, &dp_dsigma,
                       &softening);
   double lambda = df_dsigma.dot(this->de_ * dstrain) /
@@ -513,7 +513,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   // Compute the correction stress
   double p_multiplier = 0.;
-  Vector6d dp_dsigma_final = Vector6d::Zero();
+  auto dp_dsigma_final = Vector6d::Zero();
   bool update_pds = false;
 
   // check if it is a loading or an unloading process
@@ -546,7 +546,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   yield_type = this->compute_yield_state(&yield_function, state_vars);
 
   // Yield function tolerance
-  double Tolerance = 1.E-10;
+  const double Tolerance = 1.E-10;
   // Compute yield function based on updated stress
   if (yield_type == FailureState::Tensile) yield = yield_function(0);
   if (yield_type == FailureState::Shear) yield = yield_function(1);
