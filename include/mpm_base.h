@@ -60,6 +60,11 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+ private:
+  //! Return if a mesh will be isoparametric or not
+  //! \retval isoparametric Status of mesh type
+  bool is_isoparametric();
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;

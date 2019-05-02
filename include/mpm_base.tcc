@@ -12,18 +12,7 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
   step_ = 0;
 
   // Set mesh as isoparametric
-  bool isoparametric = true;
-
-  try {
-    const auto mesh_props = io_->json_object("mesh");
-    isoparametric = mesh_props["isoparametric"].template get<bool>();
-  } catch (std::exception& exception) {
-    console_->warn(
-        "{} {} Isoparametric status of mesh: {}\n Setting mesh as "
-        "isoparametric.",
-        __FILE__, __LINE__, exception.what());
-    isoparametric = true;
-  }
+  bool isoparametric = is_isoparametric();
 
   mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id, isoparametric);
 
@@ -607,3 +596,21 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   }
 }
 #endif
+
+//! Return if a mesh is isoparametric
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::is_isoparametric() {
+  bool isoparametric = true;
+
+  try {
+    const auto mesh_props = io_->json_object("mesh");
+    isoparametric = mesh_props["isoparametric"].template get<bool>();
+  } catch (std::exception& exception) {
+    console_->warn(
+        "{} {} Isoparametric status of mesh: {}\n Setting mesh as "
+        "isoparametric.",
+        __FILE__, __LINE__, exception.what());
+    isoparametric = true;
+  }
+  return isoparametric;
+}

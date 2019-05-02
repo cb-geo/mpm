@@ -55,7 +55,7 @@ sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-ser
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ /path/to/CMakeLists.txt`.
+0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
@@ -65,7 +65,7 @@ sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-ser
 
 ### Compile without tests [Editing CMake options]
 
-To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off /path/to/CMakeLists.txt`.
+To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off ..`.
 
 ### Run tests
 

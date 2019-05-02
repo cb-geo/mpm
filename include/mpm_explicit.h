@@ -1,23 +1,7 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
-#include <numeric>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
-// MPI
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
-#include "tbb/task_group.h"
-
-#include "container.h"
-#include "mpi_wrapper.h"
 #include "mpm_base.h"
-#include "particle.h"
 
 namespace mpm {
 
