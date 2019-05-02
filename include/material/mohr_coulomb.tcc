@@ -444,10 +444,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
 
 //! Compute stress
 template <unsigned Tdim>
-Vector6d mpm::MohrCoulomb<Tdim>::compute_stress(const Vector6d& stress,
-                                                const Vector6d& dstrain,
-                                                const ParticleBase<Tdim>* ptr,
-                                                mpm::dense_map* state_vars) {
+Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
+    const Vector6d& stress, const Vector6d& dstrain,
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
   // Equivalent plastic deviatoric strain
   const double epds = (*state_vars).at("epds");
