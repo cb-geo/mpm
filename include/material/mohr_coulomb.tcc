@@ -107,7 +107,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
 //! Return j2, j3, rho and theta
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
-    const Vector6d& stress, mpm::dense_map* state_vars) {
+    const Eigen::Matrix<double, 6, 1>& stress, mpm::dense_map* state_vars) {
 
   // compute the mean pressure
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
@@ -230,8 +230,9 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 template <unsigned Tdim>
 void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    const mpm::dense_map* state_vars, const Vector6d& stress,
-    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
+    const mpm::dense_map* state_vars, const Eigen::Matrix<double, 6, 1>& stress,
+    Eigen::Matrix<double, 6, 1>* df_dsigma,
+    Eigen::Matrix<double, 6, 1>* dp_dsigma, double* softening) {
 
   // Stress invariants
   const double j2 = (*state_vars).at("j2");
