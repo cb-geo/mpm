@@ -49,30 +49,28 @@ inline Eigen::VectorXd
       Eigen::Matrix<double, Tdim, 1> sni;
       //! loop to iterate over dimensions
       for (unsigned i = 0; i < Tdim; ++i) {
+        double lp = particle_size(i) / 2;
         double ni = local_nodes(n, i);
         double npni = xi(i) - ni;  // local particle  - local node
         //! Conditional shape function statement see: Bardenhagen 2004
-        if (npni <= (-element_length - particle_size(i))) {
+        if (npni <= (-element_length - lp)) {
           sni(i) = 0.;
-        } else if ((-element_length - particle_size(i)) < npni &&
-                   npni <= (-element_length + particle_size(i))) {
-          sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
-                   (4. * (element_length * particle_size(i)));
-        } else if ((-element_length + particle_size(i)) < npni &&
-                   npni <= -particle_size(i)) {
+        } else if ((-element_length - lp) < npni &&
+                   npni <= (-element_length + lp)) {
+          sni(i) = std::pow(element_length + lp + npni, 2.) /
+                   (4. * (element_length * lp));
+        } else if ((-element_length + lp) < npni && npni <= -lp) {
           sni(i) = 1. + (npni / element_length);
-        } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
+        } else if (-lp < npni && npni <= lp) {
           sni(i) =
-              1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                    (2. * element_length * particle_size(i)));
-        } else if (particle_size(i) < npni &&
-                   npni <= (element_length - particle_size(i))) {
+              1. - (((npni * npni) + (lp * lp)) / (2. * element_length * lp));
+        } else if (lp < npni && npni <= (element_length - lp)) {
           sni(i) = 1. - (npni / element_length);
-        } else if ((element_length - particle_size(i)) < npni &&
-                   npni <= element_length + particle_size(i)) {
-          sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
-                   (4. * element_length * particle_size(i));
-        } else if ((element_length + particle_size(i)) < npni) {
+        } else if ((element_length - lp) < npni &&
+                   npni <= element_length + lp) {
+          sni(i) = std::pow(element_length + lp - npni, 2.) /
+                   (4. * element_length * lp);
+        } else if ((element_length + lp) < npni) {
           sni(i) = 0.;
         } else {
           throw std::runtime_error(
@@ -82,7 +80,6 @@ inline Eigen::VectorXd
       shapefn(n) = sni(0) * sni(1);  // See: Pruijn, N.S., 2016. Eq(4.30)
     }
   } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     return shapefn;
   }
   return shapefn;
@@ -113,40 +110,36 @@ inline Eigen::MatrixXd
       Eigen::Matrix<double, Tdim, 1> dni;
       //! loop to iterate over dimensions
       for (unsigned i = 0; i < Tdim; ++i) {
+        double lp = particle_size(i) / 2;
         double ni = local_nodes(n, i);
         double npni = xi(i) - ni;  // local particle  - local node
         //! Conditional shape function statement
         // see: Pruijn, N.S., 2016. Eq(4.30)
-        if (npni <= (-element_length - particle_size(i))) {
+        if (npni <= (-element_length - lp)) {
           sni(i) = 0.;
           dni(i) = 0.;
-        } else if ((-element_length - particle_size(i)) < npni &&
-                   npni <= (-element_length + particle_size(i))) {
+        } else if ((-element_length - lp) < npni &&
+                   npni <= (-element_length + lp)) {
 
-          sni(i) = std::pow(element_length + particle_size(i) + npni, 2.) /
-                   (4. * (element_length * particle_size(i)));
-          dni(i) = (element_length + particle_size(i) + npni) /
-                   (2. * element_length * particle_size(i));
-        } else if ((-element_length + particle_size(i)) < npni &&
-                   npni <= -particle_size(i)) {
+          sni(i) = std::pow(element_length + lp + npni, 2.) /
+                   (4. * (element_length * lp));
+          dni(i) = (element_length + lp + npni) / (2. * element_length * lp);
+        } else if ((-element_length + lp) < npni && npni <= -lp) {
           sni(i) = 1. + (npni / element_length);
           dni(i) = 1. / element_length;
-        } else if (-particle_size(i) < npni && npni <= particle_size(i)) {
+        } else if (-lp < npni && npni <= lp) {
           sni(i) =
-              1. - (((npni * npni) + (particle_size(i) * particle_size(i))) /
-                    (2. * element_length * particle_size(i)));
-          dni(i) = -(npni / (element_length * particle_size(i)));
-        } else if (particle_size(i) < npni &&
-                   npni <= (element_length - particle_size(i))) {
+              1. - (((npni * npni) + (lp * lp)) / (2. * element_length * lp));
+          dni(i) = -(npni / (element_length * lp));
+        } else if (lp < npni && npni <= (element_length - lp)) {
           sni(i) = 1. - (npni / element_length);
           dni(i) = -(1. / element_length);
-        } else if ((element_length - particle_size(i)) < npni &&
-                   npni <= (element_length + particle_size(i))) {
-          sni(i) = std::pow(element_length + particle_size(i) - npni, 2.) /
-                   (4. * element_length * particle_size(i));
-          dni(i) = -((element_length + particle_size(i) - npni) /
-                     (2. * element_length * particle_size(i)));
-        } else if ((element_length + particle_size(i)) < npni) {
+        } else if ((element_length - lp) < npni &&
+                   npni <= (element_length + lp)) {
+          sni(i) = std::pow(element_length + lp - npni, 2.) /
+                   (4. * element_length * lp);
+          dni(i) = -((element_length + lp - npni) / (2. * element_length * lp));
+        } else if ((element_length + lp) < npni) {
           sni(i) = 0.;
           dni(i) = 0.;
         } else {
