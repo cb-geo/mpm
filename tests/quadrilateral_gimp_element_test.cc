@@ -262,7 +262,7 @@ TEST_CASE("Quadrilateral gimp elements are checked",
       coords << -0.8, -0.8;
       // Size of particle (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.25, 0.25;
+      psize << 0.5, 0.5;
       // Deformarion gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
@@ -339,7 +339,7 @@ TEST_CASE("Quadrilateral gimp elements are checked",
       coords << 0.8, 0.8;
       // Size of particle (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.25, 0.25;
+      psize << 0.5, 0.5;
       // Deformarion gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
