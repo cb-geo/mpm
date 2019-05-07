@@ -110,7 +110,7 @@ inline Eigen::MatrixXd
       Eigen::Matrix<double, Tdim, 1> dni;
       //! loop to iterate over dimensions
       for (unsigned i = 0; i < Tdim; ++i) {
-        double lp = particle_size(i) / 2;
+        double lp = particle_size(i) * 0.5;
         double ni = local_nodes(n, i);
         double npni = xi(i) - ni;  // local particle  - local node
         //! Conditional shape function statement
