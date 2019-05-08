@@ -138,8 +138,8 @@ class Element {
 
   //! Return number of faces
   virtual unsigned nfaces() const = 0;
-  //! Return unit element volume
-  virtual double unit_element_volume() const = 0;
+  //! Return unit element length
+  virtual double unit_element_length() const = 0;
 
   //! Return quadrature of the element
   virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
