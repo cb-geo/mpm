@@ -2458,9 +2458,9 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Check number of faces
       REQUIRE(hex->nfaces() == 6);
     }
-    SECTION("Hexahedron element volume") {
-      // Check element volume
-      REQUIRE(hex->unit_element_volume() == Approx(8).epsilon(Tolerance));
+    SECTION("Hexahedron element length") {
+      // Check element length
+      REQUIRE(hex->unit_element_length() == Approx(2).epsilon(Tolerance));
     }
   }
 }

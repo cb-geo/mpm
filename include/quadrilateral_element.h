@@ -192,8 +192,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! Return the number of faces in a quadrilateral
   unsigned nfaces() const override { return 4; }
 
-  //! Return unit element volume 2D 2*2
-  double unit_element_volume() const override { return 4.; }
+  //! Return unit element length
+  double unit_element_length() const override { return 2.; }
 
   //! Return quadrature of the element
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
