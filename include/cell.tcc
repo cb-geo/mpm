@@ -420,6 +420,34 @@ inline bool mpm::Cell<3>::point_in_cartesian_cell(
     return false;
 }
 
+//! Check if a point is in a 2D cell by checking if lambda >= 0
+//! (x2 - x1)(ya - y1) - (xa - x1)(y2 - y1) = \lambda1 >= 0
+//! (x3 - x2)(ya - y2) - (xa - x2)(y3 - y2) = \lambda2 >= 0
+//! (x4 - x3)(ya - y3) - (xa - x3)(y4 - y3) = \lambda3 >= 0
+//! (x1 - x4)(ya - y4) - (xa - x4)(y1 - y4) = \lambda4 >= 0
+template <unsigned Tdim>
+inline bool mpm::Cell<Tdim>::point_in_2d_cell(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+  const double xa = point(0);
+  const double ya = point(1);
+  const double x1 = nodes_[0]->coordinates()(0);
+  const double y1 = nodes_[0]->coordinates()(1);
+  const double x2 = nodes_[1]->coordinates()(0);
+  const double y2 = nodes_[1]->coordinates()(1);
+  const double x3 = nodes_[2]->coordinates()(0);
+  const double y3 = nodes_[2]->coordinates()(1);
+  const double x4 = nodes_[3]->coordinates()(0);
+  const double y4 = nodes_[3]->coordinates()(1);
+
+  if ((((x2 - x1) * (ya - y1) - (xa - x1) * (y2 - y1)) >= 0.) &&
+      (((x3 - x2) * (ya - y2) - (xa - x2) * (y3 - y2)) >= 0.) &&
+      (((x4 - x3) * (ya - y3) - (xa - x3) * (y4 - y3)) >= 0.) &&
+      (((x1 - x4) * (ya - y4) - (xa - x4) * (y1 - y4)) >= 0.))
+    return true;
+  else
+    return false;
+}
+
 //! Check approximately if a point is in a cell by using cell length
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::approx_point_in_cell(
@@ -588,6 +616,27 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
+  return xi;
+}
+
+//! Return the local coordinates of a point in a 2D cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2D(
+    const Eigen::Matrix<double, Tdim, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+
+  const double xa = point(0);
+  const double ya = point(1);
+  const double x1 = nodes_[0]->coordinates()(0);
+  const double y1 = nodes_[0]->coordinates()(1);
+  const double x2 = nodes_[1]->coordinates()(0);
+  const double y2 = nodes_[1]->coordinates()(1);
+  const double x3 = nodes_[2]->coordinates()(0);
+  const double y3 = nodes_[2]->coordinates()(1);
+  const double x4 = nodes_[3]->coordinates()(0);
+  const double y4 = nodes_[3]->coordinates()(1);
+
   return xi;
 }
 

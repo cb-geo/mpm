@@ -69,10 +69,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point << 0.632582, 0.425948;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.632585, 0.42595;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
   }
 
   SECTION("Transform real to unit cell Newton-Raphson") {
@@ -165,17 +169,25 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point << 0.879474, 2.43095;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.87903, 2.4815;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.821834, 2.48175;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.823751, 2.43189;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
+    // Test if point is in 2D cell
+    REQUIRE(cell->point_in_2d_cell(point) == true);
   }
 }
