@@ -625,6 +625,7 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2
     const Eigen::Matrix<double, Tdim, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 2, 1> xi;
+  xi << std::numeric_limits<double>::max(), std::numeric_limits<double>::max();
 
   const double xa = point(0);
   const double ya = point(1);
@@ -637,6 +638,53 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2
   const double x4 = nodes_[3]->coordinates()(0);
   const double y4 = nodes_[3]->coordinates()(1);
 
+  const double a1 = x1 + x2 + x3 + x4;
+  const double a2 = -x1 + x2 + x3 - x4;
+  const double a3 = -x1 - x2 + x3 + x4;
+  const double a4 = x1 - x2 + x3 - x4;
+
+  const double b1 = y1 + y2 + y3 + y4;
+  const double b2 = -y1 + y2 + y3 - y4;
+  const double b3 = -y1 - y2 + y3 + y4;
+  const double b4 = y1 - y2 + y3 - y4;
+
+  if (a4 == 0 && b4 == 0) {
+    xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
+    xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
+  } else if (a4 == 0 && b4 != 0) {
+    if (a2 == 0 && a3 !=0) {
+      xi(1) = c1 / a3;
+      xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
+    } else if (a2 != 0 && a3 == 0) {
+      xi(0) = c1 / a2;
+      xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
+    } else if (a3 != 0 && a3 != 0) {
+      const double aa = b4 * a3 / a2;
+      const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
+      const double cc = -(b2 * c1 / a2) + c2;
+      // TODO: We need to check this as there are two possible solutions
+      xi(1) = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      xi(0) = (c1 - a3 * xi(1)) / a2;
+    }
+  } else if (a4 != 0 && b4 == 0) {
+    if (b2 == 0 && b3 != 0) {
+      xi(1) = c2 / b3;
+      xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
+    }
+    else if (b2 != 0 && b3 == 0) {
+      xi(0) = c2 / b2;
+      xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
+    } else if (b2 != 0 && b2 != 0) {
+      const double aa = a4 * b3 / b2;
+      const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
+      const double cc = -(a2 * c2 / b2) + c1;
+
+      // TODO: We need to check this as there are two possible solutions
+      xi(1) = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      xi(0) = (c2 - b3 * xi(1)) / b2;
+    }
+  }
+  // Start eq 21
   return xi;
 }
 
