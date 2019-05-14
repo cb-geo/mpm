@@ -248,9 +248,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
-      // Set local particle size based on volume of element in natural
-      // coordinates
-      this->natural_size_.fill(element->unit_element_volume() /
+      // Set local particle size based on length of element in natural
+      // coordinates (cpGIMP Bardenhagen 2008 (pp485))
+      this->natural_size_.fill(element->unit_element_length() /
                                cell_->nparticles());
     }
   } catch (std::exception& exception) {
