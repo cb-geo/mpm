@@ -110,6 +110,15 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual bool map_mass_momentum_to_nodes(unsigned phase) = 0;
 
+  //! Map mass and momentum of a particle in a subdomain to nodes
+  virtual bool map_mass_momentum_to_nodes_subdomain(unsigned phase) = 0;
+
+  //! Map particle coordinates to nodes
+  virtual bool map_coordinates_to_nodes(unsigned phase) = 0;
+
+  //! Map coordinates of a particle in a subdomain to nodes
+  virtual bool map_coordinates_to_nodes_subdomain(unsigned phase) = 0;
+
   // Assign material
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
@@ -135,6 +144,9 @@ class ParticleBase {
   //! Compute strain
   virtual void compute_strain(unsigned phase, double dt) = 0;
 
+  //! Compute strain of asubdomain
+  virtual void compute_strain_subdomain(unsigned phase, double dt) = 0;
+
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain(unsigned phase) const = 0;
 
@@ -157,8 +169,15 @@ class ParticleBase {
   //! Map body force
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 
+  //! Map body force of a subdomain
+  virtual void map_body_force_subdomain(unsigned phase,
+                                        const VectorDim& pgravity) = 0;
+
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;
+
+  //! Map internal force of a subdomain
+  virtual bool map_internal_force_subdomain(unsigned phase) = 0;
 
   //! Update pressure of the particles
   virtual bool update_pressure(unsigned phase, double dvolumetric_strain) = 0;
@@ -185,11 +204,23 @@ class ParticleBase {
   //! Map traction force
   virtual void map_traction_force(unsigned phase) = 0;
 
+  //! Map traction force of a subdomain
+  virtual void map_traction_force_subdomain(unsigned phase) = 0;
+
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;
 
+  //! Compute updated position of the particle of a subdomain
+  virtual bool compute_updated_position_subdomain(unsigned phase,
+                                                  double dt) = 0;
+
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
+
+  //! Compute updated position of the particle of a subdomain based on nodal
+  //! velocity
+  virtual bool compute_updated_position_velocity_subdomain(unsigned phase,
+                                                           double dt) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

@@ -116,6 +116,18 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool map_mass_momentum_to_nodes(unsigned phase) override;
 
+  //! Map mass and momentum of a particle in a subdomain to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_mass_momentum_to_nodes_subdomain(unsigned phase) override;
+
+  //! Map particle coordinates to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_coordinates_to_nodes(unsigned phase) override;
+
+  //! Map coordinates of a particle in a subdomain to nodes
+  //! \param[in] phase Index corresponding to the phase
+  bool map_coordinates_to_nodes_subdomain(unsigned phase) override;
+
   //! Assign nodal mass to particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
@@ -137,6 +149,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   void compute_strain(unsigned phase, double dt) override;
+
+  //! Compute strain of a subdomain
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  void compute_strain_subdomain(unsigned phase, double dt) override;
 
   //! Return strain of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -179,9 +196,19 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(unsigned phase, const VectorDim& pgravity) override;
 
+  //! Map body force of a subdomain
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pgravity Gravity of a particle
+  void map_body_force_subdomain(unsigned phase,
+                                const VectorDim& pgravity) override;
+
   //! Map internal force
   //! \param[in] phase Index corresponding to the phase
   bool map_internal_force(unsigned phase) override;
+
+  //! Map internal force of a subdomain
+  //! \param[in] phase Index corresponding to the phase
+  bool map_internal_force_subdomain(unsigned phase) override;
 
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase
@@ -213,15 +240,30 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   void map_traction_force(unsigned phase) override;
 
+  //! Map traction force of a subdomain
+  //! \param[in] phase Index corresponding to the phase
+  void map_traction_force_subdomain(unsigned phase) override;
+
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position(unsigned phase, double dt) override;
 
+  //! Compute updated position of the particle of a subdomain
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool compute_updated_position_subdomain(unsigned phase, double dt) override;
+
   //! Compute updated position of the particle based on nodal velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
+  //! Compute updated position of the particle of a subdomain based on nodal
+  //! velocity \param[in] phase Index corresponding to the phase \param[in] dt
+  //! Analysis time step
+  bool compute_updated_position_velocity_subdomain(unsigned phase,
+                                                   double dt) override;
 
   //! Return a state variable
   //! \param[in] var State variable

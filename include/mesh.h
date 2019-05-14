@@ -251,6 +251,14 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           nodal_tractions);
 
+  //! Assign nodal traction force of a subdomain
+  //! \param[in] nodal_tractions Traction at dir on nodes
+  //! \param[in] mid Subdomain id (material id)
+  bool assign_nodal_tractions_subdomain(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          nodal_tractions,
+      unsigned mid);
+
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle
   bool assign_particles_velocity_constraints(

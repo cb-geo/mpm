@@ -37,6 +37,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (analysis_.find("resume") != analysis_.end())
     resume = analysis_["resume"]["resume"].template get<bool>();
 
+  // Test if contact computation is needed
+  bool contact = false;
+  if (analysis_.find("contact") != analysis_.end())
+    contact = analysis_["contact"]["contact"].template get<bool>();
+
   // Pressure smoothing
   if (analysis_.find("pressure_smoothing") != analysis_.end())
     pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
@@ -96,6 +101,17 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       mesh_->iterate_over_nodes(
           std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
+      // Initialise nodes for each subdomain for contact computation
+      if (contact) {
+        auto subdomains = io_->analysis()["contact"]["subdomains"];
+        for (const auto& sub : subdomains) {
+          unsigned mid = sub["material_id"];
+          mesh_->iterate_over_nodes(
+              std::bind(&mpm::NodeBase<Tdim>::initialise_subdomain,
+                        std::placeholders::_1, mid));
+        }
+      }
+
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
 
@@ -115,6 +131,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
+
+    // Assign mass and momentum for each subdomain to nodes
+    if (contact)
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes_subdomain,
+          std::placeholders::_1, phase));
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -140,12 +162,76 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                   std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
+    // Compute nodal velocity of each subdomain for contact computation
+    if (contact) {
+      // Map coordinates to nodes from particles
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_coordinates_to_nodes,
+                    std::placeholders::_1, phase));
+
+      // Map subdomain coordinates to nodes from particles
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_coordinates_to_nodes_subdomain,
+          std::placeholders::_1, phase));
+
+      // Compute normal vector
+      auto subdomains = io_->analysis()["contact"]["subdomains"];
+      for (const auto& sub : subdomains) {
+        unsigned mid = sub["material_id"];
+        // Get default normal vector in "SN" method
+        Eigen::Matrix<double, Tdim, 1> normal_vector;
+        normal_vector.setZero();
+        if (sub["normal_vector_type"] == "SN") {
+          for (unsigned i = 0; i < Tdim; ++i) {
+            normal_vector[i] = sub["normal_vector"].at(i);
+          }
+        }
+        // Compute normalised normal vector
+        mesh_->iterate_over_nodes_predicate(
+            std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
+                      std::placeholders::_1, sub["normal_vector_type"],
+                      normal_vector, mid),
+            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+      }
+
+      // Compute contact nodes ("Correct momentume" or "Implement contact
+      // force")
+      for (const auto& sub : subdomains) {
+        unsigned mid = sub["material_id"];
+        mesh_->iterate_over_nodes_predicate(
+            std::bind(&mpm::NodeBase<Tdim>::compute_contact_interface,
+                      std::placeholders::_1,
+                      io_->analysis()["contact"]["contact_force"],
+                      sub["friction_type"], sub["friction_coefficient"],
+                      io_->analysis()["contact"]["separation_cut_off"],
+                      sub["dc_n"], sub["dc_t"], sub["material_id"]),
+            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+      }
+
+      // Compute nodal velocity
+      for (const auto& sub : subdomains) {
+        unsigned mid = sub["material_id"];
+        mesh_->iterate_over_nodes_predicate(
+            std::bind(&mpm::NodeBase<Tdim>::compute_velocity_subdomain,
+                      std::placeholders::_1, mid),
+            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+      }
+    }
+
     // Update stress first
     if (!usl_) {
       // Iterate over each particle to calculate strain
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+      if (!contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                      std::placeholders::_1, phase, dt_));
+
+      // Iterate over each particle to calculate strain of each subdomain for
+      // contact computation
+      if (contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_strain_subdomain,
+                      std::placeholders::_1, phase, dt_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
@@ -186,26 +272,69 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Spawn a task for external force
     task_group.run([&] {
-      // Iterate over each particle to compute nodal body force
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, phase, this->gravity_));
+      if (!contact) {
+        // Iterate over each particle to compute nodal body force
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                      std::placeholders::_1, phase, this->gravity_));
 
-      // Iterate over each particle to map traction force to nodes
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                    std::placeholders::_1, phase));
+        // Iterate over each particle to map traction force to nodes
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
+                      std::placeholders::_1, phase));
+      }
+
+      if (contact) {
+        // Iterate over each particle to compute nodal body force of each
+        // subdomian for contact computation
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_body_force_subdomain,
+                      std::placeholders::_1, phase, this->gravity_));
+        // Iterate over each particle to map traction force of each subdomian
+        // for contact computation
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_traction_force_subdomain,
+                      std::placeholders::_1, phase));
+      }
 
       //! Apply nodal tractions
-      if (nodal_tractions_) this->apply_nodal_tractions();
+      if (!contact && nodal_tractions_) this->apply_nodal_tractions();
+
+      //! Apply nodal tractions of each subdomain for contact computation
+      if (contact && nodal_tractions_) {
+        auto subdomains = io_->analysis()["contact"]["subdomains"];
+        for (const auto& sub : subdomains) {
+          unsigned mid = sub["material_id"];
+          // Get mesh properties
+          auto mesh_props = io_->json_object("mesh");
+          // Get Mesh reader from JSON object
+          const std::string reader =
+              mesh_props["mesh_reader"].template get<std::string>();
+          auto node_reader =
+              Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+          bool nodal_tractions_subdomain =
+              mesh_->assign_nodal_tractions_subdomain(
+                  node_reader->read_particles_tractions(
+                      io_->file_name("nodal_tractions")),
+                  mid);
+        }
+      }
     });
 
     // Spawn a task for internal force
     task_group.run([&] {
       // Iterate over each particle to compute nodal internal force
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                    std::placeholders::_1, phase));
+      if (!contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                      std::placeholders::_1, phase));
+
+      // Iterate over each particle to compute nodal internal force of each
+      // subdomain for contact computation
+      if (contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_internal_force_subdomain,
+                      std::placeholders::_1, phase));
     });
     task_group.wait();
 
@@ -230,22 +359,54 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #endif
 
     // Iterate over active nodes to compute acceleratation and velocity
-    mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, phase, this->dt_),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    if (!contact)
+      mesh_->iterate_over_nodes_predicate(
+          std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
+                    std::placeholders::_1, phase, this->dt_),
+          std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    // Iterate over active nodes to compute acceleratation and velocity of each
+    // subdomain for contact computation
+    if (contact) {
+      auto subdomains = io_->analysis()["contact"]["subdomains"];
+      for (const auto& sub : subdomains) {
+        unsigned mid = sub["material_id"];
+        mesh_->iterate_over_nodes_predicate(
+            std::bind(
+                &mpm::NodeBase<Tdim>::compute_acceleration_velocity_subdomain,
+                std::placeholders::_1, phase, this->dt_, mid),
+            std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+      }
+    }
 
     // Use nodal velocity to update position
-    if (velocity_update_)
+    if (velocity_update_) {
       // Iterate over each particle to compute updated position
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, phase, this->dt_));
-    else
+      if (!contact)
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
+            std::placeholders::_1, phase, this->dt_));
+      // Iterate over each particle to compute updated position of each
+      // subdomain for contact computation
+      if (contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<
+                          Tdim>::compute_updated_position_velocity_subdomain,
+                      std::placeholders::_1, phase, this->dt_));
+    } else {
       // Iterate over each particle to compute updated position
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, phase, this->dt_));
+      if (!contact)
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                      std::placeholders::_1, phase, this->dt_));
+
+      // Iterate over each particle to compute updated position of each
+      // subdomain for contact computation
+      if (contact)
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::compute_updated_position_subdomain,
+            std::placeholders::_1, phase, this->dt_));
+    }
 
     // Update Stress Last
     if (usl_ == true) {
