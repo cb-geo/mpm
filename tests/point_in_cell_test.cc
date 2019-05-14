@@ -191,7 +191,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Test if point is in 2D cell
     REQUIRE(cell->point_in_2d_cell(point) == true);
   }
-  */
+
   SECTION("Transform real to unit cell analytical solution") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
@@ -315,7 +315,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     for (unsigned i = 0; i < local_point.size(); ++i)
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
   }
-
+  */
   SECTION("Check point in unit cell analytical solution") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
@@ -386,8 +386,6 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     REQUIRE(cell2->initialise() == true);
     // Test if point is in cell
     REQUIRE(cell2->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell2->point_in_2d_cell(point) == false);
 
     // Coordinates of the point in an unit cell
     Eigen::Matrix<double, 2, 1> point_unit_cell;
