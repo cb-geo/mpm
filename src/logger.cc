@@ -16,6 +16,10 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::read_mesh_ascii =
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_logger =
     spdlog::stdout_color_st("MPM");
 
+// Create a logger for MPM Base
+const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_base_logger =
+    spdlog::stdout_color_st("MPMBase");
+
 // Create a logger for MPM Explicit
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_logger =
     spdlog::stdout_color_st("MPMExplicit");
