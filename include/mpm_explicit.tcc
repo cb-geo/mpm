@@ -105,10 +105,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       if (contact) {
         auto subdomains = io_->analysis()["contact"]["subdomains"];
         for (const auto& sub : subdomains) {
-          unsigned mid = sub["material_id"];
           mesh_->iterate_over_nodes(
               std::bind(&mpm::NodeBase<Tdim>::initialise_subdomain,
-                        std::placeholders::_1, mid));
+                        std::placeholders::_1, sub["material_id"]));
         }
       }
 
@@ -177,7 +176,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Compute normal vector
       auto subdomains = io_->analysis()["contact"]["subdomains"];
       for (const auto& sub : subdomains) {
-        unsigned mid = sub["material_id"];
         // Get default normal vector in "SN" method
         Eigen::Matrix<double, Tdim, 1> normal_vector;
         normal_vector.setZero();
@@ -190,14 +188,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         mesh_->iterate_over_nodes_predicate(
             std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
                       std::placeholders::_1, sub["normal_vector_type"],
-                      normal_vector, mid),
+                      normal_vector, sub["material_id"]),
             std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
       }
 
       // Compute contact nodes ("Correct momentume" or "Implement contact
       // force")
       for (const auto& sub : subdomains) {
-        unsigned mid = sub["material_id"];
         mesh_->iterate_over_nodes_predicate(
             std::bind(&mpm::NodeBase<Tdim>::compute_contact_interface,
                       std::placeholders::_1,
@@ -210,10 +207,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       // Compute nodal velocity
       for (const auto& sub : subdomains) {
-        unsigned mid = sub["material_id"];
         mesh_->iterate_over_nodes_predicate(
             std::bind(&mpm::NodeBase<Tdim>::compute_velocity_subdomain,
-                      std::placeholders::_1, mid),
+                      std::placeholders::_1, sub["material_id"]),
             std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
       }
     }
@@ -304,7 +300,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       if (contact && nodal_tractions_) {
         auto subdomains = io_->analysis()["contact"]["subdomains"];
         for (const auto& sub : subdomains) {
-          unsigned mid = sub["material_id"];
           // Get mesh properties
           auto mesh_props = io_->json_object("mesh");
           // Get Mesh reader from JSON object
@@ -316,7 +311,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
               mesh_->assign_nodal_tractions_subdomain(
                   node_reader->read_particles_tractions(
                       io_->file_name("nodal_tractions")),
-                  mid);
+                  sub["material_id"]);
         }
       }
     });
@@ -370,11 +365,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (contact) {
       auto subdomains = io_->analysis()["contact"]["subdomains"];
       for (const auto& sub : subdomains) {
-        unsigned mid = sub["material_id"];
         mesh_->iterate_over_nodes_predicate(
             std::bind(
                 &mpm::NodeBase<Tdim>::compute_acceleration_velocity_subdomain,
-                std::placeholders::_1, phase, this->dt_, mid),
+                std::placeholders::_1, phase, this->dt_, sub["material_id"]),
             std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
       }
     }
