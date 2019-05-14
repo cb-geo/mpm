@@ -188,21 +188,25 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << 0.5, 0.5;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->point_in_2d_cell(point) == true);
 
         // Check point on vertex
         point << 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->point_in_2d_cell(point) == true);
 
         // Check point on edge
         point << 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->point_in_2d_cell(point) == true);
 
         // Check point outside
         point << -2, 2.;
         REQUIRE(cell->point_in_cartesian_cell(point) == false);
         REQUIRE(cell->is_point_in_cell(point) == false);
+        REQUIRE(cell->point_in_2d_cell(point) == false);
       }
 
       // Find local coordinates of a point in a cell
@@ -217,6 +221,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         // Get local coordinates of the point
         auto local_point = cell->local_coordinates_point(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+        // Get local coordinates of the point using analytical solution
+        local_point = cell->local_coordinates_point_2d(point);
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));

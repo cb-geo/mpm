@@ -621,8 +621,9 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
 
 //! Return the local coordinates of a point in a 2D cell
 template <unsigned Tdim>
-inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2D(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::local_coordinates_point_2d(
+        const Eigen::Matrix<double, Tdim, 1>& point) {
   // Local point coordinates
   Eigen::Matrix<double, 2, 1> xi;
   xi << std::numeric_limits<double>::max(), std::numeric_limits<double>::max();
@@ -648,11 +649,106 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2
   const double b3 = -y1 - y2 + y3 + y4;
   const double b4 = y1 - y2 + y3 - y4;
 
+  const double c1 = 4. * xa - a1;
+  const double c2 = 4. * ya - b1;
+
+  const double u1 =
+      (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
+       (-a3 * b4 + a4 * b3) *
+           ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
+             4 * b4 * xa) /
+                (2 * (a3 * b4 - a4 * b3)) -
+            (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
+                       2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
+                       4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
+                       8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+                       4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+                       16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+                       8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
+                       a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
+                       8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
+                       a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+                       16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+                       16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+                       16 * b4 * b4 * xa * xa)) /
+                (2 * (a3 * b4 - a4 * b3)))) /
+      (a2 * b4 - a4 * b2);
+
+  const double u2 =
+      (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
+          (2 * (a3 * b4 - a4 * b3)) -
+      (std::sqrt(
+          a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
+          2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
+          8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+          4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+          16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+          8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
+          2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
+          8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+          16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+          16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+          16 * b4 * b4 * xa * xa)) /
+          (2 * (a3 * b4 - a4 * b3));
+
+  const double v1 =
+      (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
+       (-a3 * b4 + a4 * b3) *
+           ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
+             4 * b4 * xa) /
+                (2 * (a3 * b4 - a4 * b3)) +
+            (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
+                       2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
+                       4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
+                       8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+                       4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+                       16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+                       8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
+                       a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
+                       8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
+                       a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+                       16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+                       16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+                       16 * b4 * b4 * xa * xa)) /
+                (2 * (a3 * b4 - a4 * b3)))) /
+      (a2 * b4 - a4 * b2);
+
+  const double v2 =
+      (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
+          (2 * (a3 * b4 - a4 * b3)) +
+      (std::sqrt(
+          a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
+          2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
+          8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+          4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+          16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+          8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
+          2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
+          8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+          16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+          16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+          16 * b4 * b4 * xa * xa)) /
+          (2 * (a3 * b4 - a4 * b3));
+
+  console_->error("(u1, u2) = ({}, {});  (v1, v2) = ({}, {});", u1, u2, v1, v2);
+  if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
+    xi(0) = u1;
+    xi(1) = u2;
+    return xi;
+  } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
+    xi(0) = v1;
+    xi(1) = v2;
+    return xi;
+  }
+
+  console_->error("{} {}", a4, b4);
+
   if (a4 == 0 && b4 == 0) {
     xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
     xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
+    console_->error("Case 1: {} {}", xi(0), xi(1));
   } else if (a4 == 0 && b4 != 0) {
-    if (a2 == 0 && a3 !=0) {
+    if (a2 == 0 && a3 != 0) {
       xi(1) = c1 / a3;
       xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
     } else if (a2 != 0 && a3 == 0) {
@@ -666,25 +762,59 @@ inline Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::local_coordinates_point_2
       xi(1) = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
       xi(0) = (c1 - a3 * xi(1)) / a2;
     }
+    console_->error("Case 2: {} {}", xi(0), xi(1));
   } else if (a4 != 0 && b4 == 0) {
     if (b2 == 0 && b3 != 0) {
       xi(1) = c2 / b3;
       xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
-    }
-    else if (b2 != 0 && b3 == 0) {
+      console_->error("3.1 xi {}, {} ", xi(0), xi(1));
+    } else if (b2 != 0 && b3 == 0) {
       xi(0) = c2 / b2;
       xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
-    } else if (b2 != 0 && b2 != 0) {
+      console_->error("3.2 xi {}, {} ", xi(0), xi(1));
+    } else if (b2 != 0 && b3 != 0) {
       const double aa = a4 * b3 / b2;
       const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
       const double cc = -(a2 * c2 / b2) + c1;
-
       // TODO: We need to check this as there are two possible solutions
-      xi(1) = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      xi(1) = (-bb + std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
       xi(0) = (c2 - b3 * xi(1)) / b2;
+      console_->error("3.3 xi {}, {} ", xi(0), xi(1));
     }
+  } else if (a4 != 0 && b4 != 0) {
+    const double a2s = a2 / a4;
+    const double a3s = a3 / a4;
+
+    const double b2s = b2 / b4;
+    const double b3s = b3 / b4;
+
+    const double c1s = c1 / a4;
+    const double c2s = c2 / b4;
+
+    if ((a2s - b2s) == 0) {
+      xi(1) = (c1s - c2s) / (a3s - b3s);
+      xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
+    } else {
+      const double alpha = (c1s - c2s) / (a2s - b2s);
+      const double beta = (a3s - b3s) / (a2s - b2s);
+
+      if (beta == 0) {
+        xi(0) = alpha;
+        xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
+      } else {
+        // TODO Two possible solutions
+        xi(1) =
+            (-(a2s * beta + a3s - alpha) +
+             std::sqrt((a2s * beta + a3s - alpha) * (a2s * beta + a3s - alpha) -
+                       (4 * beta * (c1s - a2s * alpha)))) /
+            (2. * beta);
+        xi(0) = alpha - beta * xi(1);
+      }
+    }
+    console_->error("Case 4: {} {}", xi(0), xi(1));
+  } else {
+    console_->error("Case else: {} {}", xi(0), xi(1));
   }
-  // Start eq 21
   return xi;
 }
 
