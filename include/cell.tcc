@@ -634,6 +634,10 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point_2d(
 }
 
 //! Return the local coordinates of a point in a 2D cell
+//! Analytical solution based on A consistent point-searching algorithm for
+//! solution interpolation in unstructured meshes consisting of 4-node bilinear
+//! quadrilateral elements - Zhao et al., 1999
+
 template <>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     const Eigen::Matrix<double, 2, 1>& point) {
@@ -665,6 +669,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   const double c1 = 4. * xa - a1;
   const double c2 = 4. * ya - b1;
 
+  // General solution of xi and eta based on solving with Sympy
+  // a2 * xi(0) + a3 * xi(1) + a4 * xi(0) * xi(1) = 4 x_a - a1
+  // b2 * xi(0) + b3 * xi(1) + b4 * xi(0) * xi(1) = 4 y_a - b1
   const double u1 =
       (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
        (-a3 * b4 + a4 * b3) *
@@ -704,6 +711,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
           16 * b4 * b4 * xa * xa)) /
           (2 * (a3 * b4 - a4 * b3));
 
+  // Second solution of a quadratic equation
   const double v1 =
       (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
        (-a3 * b4 + a4 * b3) *
@@ -743,6 +751,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
           16 * b4 * b4 * xa * xa)) /
           (2 * (a3 * b4 - a4 * b3));
 
+  // Choosing a quadratic solution
   if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
     xi(0) = u1;
     xi(1) = u2;
@@ -753,17 +762,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     return xi;
   }
 
+  // Case1: a4 == 0 and b4 != 0: Eq 10
   if (a4 == 0 && b4 == 0) {
     xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
     xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
-  } else if (a4 == 0 && b4 != 0) {
-    if (a2 == 0 && a3 != 0) {
+  } else if (a4 == 0 && b4 != 0) {  // Case 2: Eq 11
+    if (a2 == 0 && a3 != 0) {       // Case 2.1 Eq 12
       xi(1) = c1 / a3;
       xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
-    } else if (a2 != 0 && a3 == 0) {
+    } else if (a2 != 0 && a3 == 0) {  // Case 2.2 Eq 13
       xi(0) = c1 / a2;
       xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
-    } else {  // a2 != 0 && a3 != 0
+    } else {  // a2 != 0 && a3 != 0 // Case 2.3 Eq 14
       const double aa = b4 * a3 / a2;
       const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
       const double cc = -(b2 * c1 / a2) + c2;
@@ -781,14 +791,14 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
         xi(1) = v2;
       }
     }
-  } else if (a4 != 0 && b4 == 0) {
-    if (b2 == 0 && b3 != 0) {
+  } else if (a4 != 0 && b4 == 0) {  // Case 3 Eq 16
+    if (b2 == 0 && b3 != 0) {       // Case 3.1 Eq 17
       xi(1) = c2 / b3;
       xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
-    } else if (b2 != 0 && b3 == 0) {
+    } else if (b2 != 0 && b3 == 0) {  // Case 3.2 Eq 18
       xi(0) = c2 / b2;
       xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
-    } else {  // b2 != 0 && b3 != 0
+    } else {  // b2 != 0 && b3 != 0  // Case 3.3 Eq 19
       const double aa = a4 * b3 / b2;
       const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
       const double cc = -(a2 * c2 / b2) + c1;
@@ -806,7 +816,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
         xi(1) = v2;
       }
     }
-  } else {  // a4 != 0 && b4 != 0
+  } else {  // a4 != 0 && b4 != 0   // Case 4 Eq 21
     const double a2s = a2 / a4;
     const double a3s = a3 / a4;
 
@@ -816,17 +826,17 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     const double c1s = c1 / a4;
     const double c2s = c2 / b4;
 
-    if ((a2s - b2s) == 0) {
+    if ((a2s - b2s) == 0) {  // Case 4.1 Eq 25
       xi(1) = (c1s - c2s) / (a3s - b3s);
       xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
     } else {
       const double alpha = (c1s - c2s) / (a2s - b2s);
       const double beta = (a3s - b3s) / (a2s - b2s);
 
-      if (beta == 0) {
+      if (beta == 0) {  // Case 4.2a Eq 28
         xi(0) = alpha;
         xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
-      } else {
+      } else {  // Case 4.2b Eq 29
         // There are two possible solutions
         const double u2 =
             (-(a2s * beta + a3s - alpha) +
@@ -915,9 +925,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Local shape function
   const auto sf = element_->shapefn_local(xi, zero, zero);
   // f(x) = p(x) - p, where p is the real point
-  const auto residual = (nodal_coords * sf) - point;
+  const auto analytical_residual = (nodal_coords * sf) - point;
   // Early exit
-  if ((residual.squaredNorm() < tolerance) && status) return xi;
+  if ((analytical_residual.squaredNorm() < tolerance) && status) return xi;
+  // If tolerance is high
+  const auto analytical_xi = xi;
 
   // Affine guess of xi
   Eigen::Matrix<double, 2, 1> affine_guess;
@@ -966,6 +978,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Early exit
     if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
       return xi;
+  }
+  // Select the best of analytical and affine transformation
+  Eigen::Matrix<double, 2, 1> geometry_xi;
+  Eigen::Matrix<double, 2, 1> geometry_residual;
+  geometry_residual.fill(std::numeric_limits<double>::max());
+
+  if (analytical_residual.norm() < affine_residual.norm()) {
+    geometry_residual = analytical_residual;
+    geometry_xi = analytical_xi;
+  } else {
+    geometry_residual = affine_residual;
+    geometry_xi = affine_guess;
   }
 
   // Maximum iterations of newton raphson
@@ -1035,7 +1059,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
       (element_->degree() == mpm::ElementDegree::Linear))
-    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+    return geometry_residual.norm() < nr_residual.norm() ? geometry_xi : xi;
 
   return xi;
 }
