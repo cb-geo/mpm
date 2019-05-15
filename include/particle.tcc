@@ -248,9 +248,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
-      // Set local particle size based on volume of element in natural
-      // coordinates
-      this->natural_size_.fill(element->unit_element_volume() /
+      // Set local particle size based on length of element in natural
+      // coordinates (cpGIMP Bardenhagen 2008 (pp485))
+      this->natural_size_.fill(element->unit_element_length() /
                                cell_->nparticles());
     }
   } catch (std::exception& exception) {
@@ -314,8 +314,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     // Check if particle volume is set and material ptr is valid
     if (volume_(phase) != std::numeric_limits<double>::max() &&
         material_ != nullptr) {
-      // Mass = volume of particle * density
-      this->mass_(phase) = volume_(phase) * material_->property("density");
+      // Mass = volume of particle * mass_density
+      mass_density_(phase) = material_->property("density");
+      this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
           "Cell or material is invalid! cannot compute mass for the particle");

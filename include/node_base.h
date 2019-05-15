@@ -176,6 +176,11 @@ class NodeBase {
   //! \param[in] dt Time-step
   virtual void apply_friction_constraints(double dt) = 0;
 
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  virtual void assign_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
