@@ -450,10 +450,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
 
   // Equivalent plastic deviatoric strain
   const double epds = (*state_vars).at("epds");
-  // compute the stress invariants
-  this->compute_stress_invariants(stress, state_vars);
 
-  // Current MC parameters using a linear softening rule
+  // Update MC parameters using a linear softening rule
   if ((epds - epds_peak_) > 0. && (epds_residual_ - epds) > 0.) {
     (*state_vars)["phi"] =
         phi_residual_ + ((phi_peak_ - phi_residual_) * (epds - epds_residual_) /
@@ -471,49 +469,49 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     (*state_vars)["cohesion"] = cohesion_residual_;
   }
 
-  // Yield function for the current stress state
-  Eigen::Matrix<double, 2, 1> yield_function;
-  auto yield_type = this->compute_yield_state(&yield_function, state_vars);
-  Vector6d df_dsigma = Vector6d::Zero();
-  Vector6d dp_dsigma = Vector6d::Zero();
-  double softening = 0.;
-
-  // compute based on the stress after checked
-  this->compute_stress_invariants(stress, state_vars);
-  yield_type = this->compute_yield_state(&yield_function, state_vars);
-  this->compute_df_dp(yield_type, state_vars, stress, &df_dsigma, &dp_dsigma,
-                      &softening);
-
-  double lambda = df_dsigma.dot(this->de_ * dstrain) /
-                  ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
-
-  // compute the trial stress
+  // Compute the trial stress
   Vector6d trial_stress = stress + (this->de_ * dstrain);
+  // Compute stress invariants based on trial stress
   this->compute_stress_invariants(trial_stress, state_vars);
-
-  // Trial yield function
+  // Compute yield function based on the trial stress
   Eigen::Matrix<double, 2, 1> yield_function_trial;
   auto yield_type_trial =
       this->compute_yield_state(&yield_function_trial, state_vars);
 
+  // Return the updated stress in elastic state
+  if (yield_type_trial == FailureState::Elastic) return trial_stress;
+
+  // Correct the stress back to the yield surface if it is in plastic state
+  // Compute plastic multiplier based on trial stress (Lambda trial)
   double softening_trial = 0.;
   Vector6d df_dsigma_trial = Vector6d::Zero();
   Vector6d dp_dsigma_trial = Vector6d::Zero();
   this->compute_df_dp(yield_type_trial, state_vars, trial_stress,
                       &df_dsigma_trial, &dp_dsigma_trial, &softening_trial);
-
-  // Lambda trial
   double yield = 0.;
   if (yield_type_trial == FailureState::Tensile)
     yield = yield_function_trial(0);
   if (yield_type_trial == FailureState::Shear) yield = yield_function_trial(1);
-
   double lambda_trial =
       yield /
       ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
        softening_trial);
 
-  // compute the correction stress
+  // Compute stress invariants based on stress input
+  this->compute_stress_invariants(stress, state_vars);
+  // Compute yield function based on stress input
+  Eigen::Matrix<double, 2, 1> yield_function;
+  auto yield_type = this->compute_yield_state(&yield_function, state_vars);
+  // Compute plastic multiplier based on stress input (Lambda)
+  double softening = 0.;
+  Vector6d df_dsigma = Vector6d::Zero();
+  Vector6d dp_dsigma = Vector6d::Zero();
+  this->compute_df_dp(yield_type, state_vars, stress, &df_dsigma, &dp_dsigma,
+                      &softening);
+  double lambda = df_dsigma.dot(this->de_ * dstrain) /
+                  ((df_dsigma.dot(this->de_ * dp_dsigma)) + softening);
+
+  // Compute the correction stress
   double p_multiplier = 0.;
   Vector6d dp_dsigma_final = Vector6d::Zero();
   bool update_pds = false;
@@ -546,18 +544,23 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Check if the current stress state is outside the yield surface
   this->compute_stress_invariants(updated_stress, state_vars);
   yield_type = this->compute_yield_state(&yield_function, state_vars);
-  if (epds > epds_peak_ && yield_type != FailureState::Elastic) {
+
+  // Yield function tolerance
+  const double Tolerance = 1.E-10;
+  // Compute yield function based on updated stress
+  if (yield_type == FailureState::Tensile) yield = yield_function(0);
+  if (yield_type == FailureState::Shear) yield = yield_function(1);
+  // Correct stress again if yield function larger than tolerance
+  if (yield_type != FailureState::Elastic && yield > Tolerance) {
+    // Compute plastic multiplier based on updated stress
     this->compute_df_dp(yield_type, state_vars, updated_stress, &df_dsigma,
                         &dp_dsigma, &softening);
-    if (yield_type == FailureState::Tensile)
-      yield = yield_function(0);
-    else
-      yield = yield_function(1);
     lambda = yield / ((df_dsigma.transpose() * de_).dot(dp_dsigma.transpose()));
+    // Update stress again (ignore softening)
     updated_stress = updated_stress - (lambda * this->de_ * dp_dsigma);
   }
 
-  // compute plastic deviatoric strain
+  // Compute plastic deviatoric strain
   Vector6d dstress = updated_stress - stress;
   Vector6d dpstrain = dstrain - (this->de_.inverse()) * dstress;
   if (Tdim == 2) dpstrain(4) = dpstrain(5) = 0.;
@@ -574,7 +577,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     (*state_vars).at("pds4") += (0.5 * dpstrain(4));
     (*state_vars).at("pds5") += (0.5 * dpstrain(5));
   }
-  // epds
+  // Update equivalent plastic deviatoric strain
   (*state_vars)["epds"] = sqrt(
       1. / 6. *
           (pow(((*state_vars).at("pds0") - (*state_vars).at("pds1")), 2.) +
