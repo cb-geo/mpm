@@ -146,10 +146,6 @@ class Cell {
   //! \param[in] point Coordinates of point
   bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
-  //! Check if a point is in a 2D cell by checking the \lambda >= 0
-  //! \param[in] point Coordinates of point
-  bool point_in_2d_cell(const Eigen::Matrix<double, Tdim, 1>& point);
-
   //! Check if a point is in a isoparametric cell
   //! Use an affine transformation and NR to check if a transformed point is in
   //! a unit cell. This is useful for points on the surface, where

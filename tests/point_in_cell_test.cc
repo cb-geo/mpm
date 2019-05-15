@@ -69,14 +69,10 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point << 0.632582, 0.425948;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.632585, 0.42595;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
   }
 
   SECTION("Transform real to unit cell Newton-Raphson") {
@@ -169,26 +165,18 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     point << 0.879474, 2.43095;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.87903, 2.4815;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.821834, 2.48175;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
 
     point << 0.823751, 2.43189;
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point) == true);
-    // Test if point is in 2D cell
-    REQUIRE(cell->point_in_2d_cell(point) == true);
   }
 
   SECTION("Transform real to unit cell analytical solution") {
@@ -247,7 +235,28 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
 
     // Use analytical solution
-    REQUIRE(cell->point_in_2d_cell(point) == true);
+    local_point = cell->local_coordinates_point_2d(point);
+    for (unsigned i = 0; i < local_point.size(); ++i)
+      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+    // Coordinates of a point in real cell
+    point << 0., 0.;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point) == true);
+    // Coordinates of the point in an unit cell
+    point_unit_cell << 0., 0.;
+    // Use analytical solution
+    local_point = cell->local_coordinates_point_2d(point);
+    for (unsigned i = 0; i < local_point.size(); ++i)
+      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+    // Coordinates of a point in real cell
+    point << -1.5, -1.5;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point) == true);
+    // Coordinates of the point in an unit cell
+    point_unit_cell << -0.75, -0.75;
+    // Use analytical solution
     local_point = cell->local_coordinates_point_2d(point);
     for (unsigned i = 0; i < local_point.size(); ++i)
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
@@ -309,7 +318,17 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
 
     // Use analytical solution
-    REQUIRE(cell->point_in_2d_cell(point) == true);
+    local_point = cell->local_coordinates_point_2d(point);
+    for (unsigned i = 0; i < local_point.size(); ++i)
+      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+    // Coordinates of a point in real cell
+    point << 3., 3.;
+    // Coordinates of the point in an unit cell
+    point_unit_cell << 1., 0.;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point) == true);
+    // Use analytical solution
     local_point = cell->local_coordinates_point_2d(point);
     for (unsigned i = 0; i < local_point.size(); ++i)
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
@@ -368,8 +387,6 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     REQUIRE(cell1->initialise() == true);
     // Test if point is in cell
     REQUIRE(cell1->is_point_in_cell(point) == false);
-    // Test if point is in 2D cell
-    REQUIRE(cell1->point_in_2d_cell(point) == false);
 
     // Cell 2
     mpm::Index id2 = 1;
