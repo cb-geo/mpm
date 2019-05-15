@@ -1009,6 +1009,41 @@ void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
   }
 }
 
+//! Map mass and momentum of a particle in a subdomain to nodes for a given
+//! phase
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_mass_momentum_to_nodes_subdomain(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
+    const Eigen::VectorXd& pvelocity, unsigned mid) {
+
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    nodes_[i]->update_mass_subdomain(true, phase, shapefn(i) * pmass, mid);
+    nodes_[i]->update_momentum_subdomain(true, phase,
+                                         shapefn(i) * pmass * pvelocity, mid);
+  }
+}
+
+//! Map particle coordinates to nodes
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_coordinates_to_nodes(
+    const Eigen::VectorXd& shapefn, double pmass,
+    const Eigen::VectorXd& coordinates) {
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    nodes_[i]->update_coordinates(true, pmass, shapefn(i) * coordinates);
+  }
+}
+
+//! Map coordinates of a particle in a subdomain to nodes
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::map_coordinates_to_nodes_subdomain(
+    const Eigen::VectorXd& shapefn, double pmass,
+    const Eigen::VectorXd& coordinates, unsigned mid) {
+  for (unsigned i = 0; i < this->nfunctions(); ++i) {
+    nodes_[i]->update_coordinates_subdomain(true, pmass,
+                                            shapefn(i) * coordinates, mid);
+  }
+}
+
 //! Map particle pressure to nodes for a given phase
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
@@ -1052,6 +1087,29 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
   return strain_rate;
 }
 
+//! Compute strain rate of a subdomain
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_subdomain(
+    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, unsigned mid) {
+  // Define strain rate
+  Eigen::Matrix<double, Tdof, 1> strain_rate =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
+
+  try {
+    // Check if B-Matrix size and number of nodes match
+    if (this->nfunctions() != bmatrix.size() ||
+        this->nnodes() != bmatrix.size())
+      throw std::runtime_error(
+          "Number of nodes / shapefn doesn't match BMatrix");
+
+    for (unsigned i = 0; i < this->nnodes(); ++i)
+      strain_rate += bmatrix.at(i) * nodes_[i]->velocity_subdomain(phase, mid);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return strain_rate;
+}
+
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
@@ -1067,6 +1125,23 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   return strain_rate_centroid;
 }
 
+//! Compute strain rate of a subdomain for reduced integration at the centroid
+//! of cell
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid_subdomain(
+    unsigned phase, unsigned mid) {
+
+  // Define strain rate at centroid
+  Eigen::Matrix<double, Tdof, 1> strain_rate_centroid =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix_centroid_.at(0).rows());
+
+  // Compute strain rate
+  for (unsigned i = 0; i < this->nnodes(); ++i)
+    strain_rate_centroid +=
+        bmatrix_centroid_.at(i) * nodes_[i]->velocity_subdomain(phase, mid);
+  return strain_rate_centroid;
+}
+
 //! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
@@ -1078,6 +1153,18 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
                                      (shapefn(i) * pgravity * pmass));
 }
 
+//! Compute the nodal body force of a subdomain of a cell from particle mass and
+//! gravity
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_body_force_subdomain(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
+    const VectorDim& pgravity, unsigned mid) {
+  // Map subdomain external forces from particle to nodes
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_external_force_subdomain(
+        true, phase, (shapefn(i) * pgravity * pmass), mid);
+}
+
 //! Compute the nodal traction force of a cell from particle
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_nodal_traction_force(
@@ -1085,6 +1172,17 @@ void mpm::Cell<Tdim>::compute_nodal_traction_force(
   // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, phase, (shapefn(i) * traction));
+}
+
+//! Compute the nodal traction force of a subdomain of a cell from the particle
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_traction_force_subdomain(
+    const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction,
+    unsigned mid) {
+  // Map external forces from particle to nodes
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    nodes_[i]->update_external_force_subdomain(true, phase,
+                                               (shapefn(i) * traction), mid);
 }
 
 //! Compute the nodal internal force  of a cell from particle stress and
@@ -1123,6 +1221,42 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
         true, phase, (pvolume * bmatrix.at(j).transpose() * stress));
 }
 
+//! Compute the noal internal forcee of a subdomain of a cell from particle
+//! stress and volume
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::compute_nodal_internal_force_subdomain(
+    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, double pvolume,
+    const Eigen::Matrix<double, 6, 1>& pstress, unsigned mid) {
+  // Define strain rate
+  Eigen::VectorXd stress;
+
+  switch (Tdim) {
+    case (1): {
+      stress.resize(1);
+      stress.setZero();
+      stress(0) = pstress(0);
+      break;
+    }
+    case (2): {
+      stress.resize(3);
+      stress.setZero();
+      stress(0) = pstress(0);
+      stress(1) = pstress(1);
+      stress(2) = pstress(3);
+      break;
+    }
+    default: {
+      stress.resize(6);
+      stress = pstress;
+      break;
+    }
+  }
+  // Map internal forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_internal_force_subdomain(
+        true, phase, (pvolume * bmatrix.at(j).transpose() * stress), mid);
+}
+
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
@@ -1136,6 +1270,20 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
   return velocity;
 }
 
+//! Return velocity of a subdomain at given location by interpolating from nodes
+template <unsigned Tdim>
+Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::interpolate_nodal_velocity_subdomain(
+        const Eigen::VectorXd& shapefn, unsigned phase, unsigned mid) {
+  Eigen::Matrix<double, Tdim, 1> velocity;
+  velocity.setZero();
+
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    velocity += shapefn(i) * nodes_[i]->velocity_subdomain(phase, mid);
+
+  return velocity;
+}
+
 //! Return acceleration at a point by interpolating from nodes
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
@@ -1144,6 +1292,21 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
   acceleration.setZero();
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     acceleration += shapefn(i) * nodes_[i]->acceleration(phase);
+
+  return acceleration;
+}
+
+//! Return acceleration of a subdomain at given location by interpolating from
+//! nodes
+template <unsigned Tdim>
+Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::interpolate_nodal_acceleration_subdomain(
+        const Eigen::VectorXd& shapefn, unsigned phase, unsigned mid) {
+  Eigen::Matrix<double, Tdim, 1> acceleration;
+  acceleration.setZero();
+
+  for (unsigned i = 0; i < this->nfunctions(); ++i)
+    acceleration += shapefn(i) * nodes_[i]->acceleration_subdomain(phase, mid);
 
   return acceleration;
 }

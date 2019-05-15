@@ -691,6 +691,41 @@ bool mpm::Mesh<Tdim>::assign_nodal_tractions(
   return status;
 }
 
+//! Assign node tractions of a Subdomain
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_tractions_subdomain(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>& node_tractions,
+    unsigned mid) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign subdomain "
+          "traction");
+    for (const auto& node_traction : node_tractions) {
+      // Node id
+      mpm::Index pid = std::get<0>(node_traction);
+      // Direction
+      unsigned dir = std::get<1>(node_traction);
+      // Traction
+      double traction = std::get<2>(node_traction);
+
+      if (map_nodes_.find(pid) != map_nodes_.end())
+        status = map_nodes_[pid]->assign_traction_force_subdomain(
+            phase, dir, traction, mid);
+
+      if (!status)
+        throw std::runtime_error("Subdomain traction is invalid for node");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particle stresses
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_stresses(

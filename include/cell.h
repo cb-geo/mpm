@@ -198,6 +198,34 @@ class Cell {
                                   unsigned phase, double pmass,
                                   const Eigen::VectorXd& pvelocity);
 
+  //! Map mass and momentum of the particle in a subdomain to nodes for a phase
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] pvelocity Velocity of a particle
+  //! \param[in] mid Subdomain id (material id)
+  void map_mass_momentum_to_nodes_subdomain(const Eigen::VectorXd& shapefn,
+                                            unsigned phase, double pmass,
+                                            const Eigen::VectorXd& pvelocity,
+                                            unsigned mid);
+
+  //! Map particle coordinates to nodes
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] coordinates Coordinates of a particle
+  void map_coordinates_to_nodes(const Eigen::VectorXd& shapefn, double pmass,
+                                const Eigen::VectorXd& coordinates);
+
+  //! Map coordinates of a particle in a subdomain to nodes
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] coordinates Coordinates of a particle
+  //! \param[in] mid Subdomain id (material id)
+  void map_coordinates_to_nodes_subdomain(const Eigen::VectorXd& shapefn,
+                                          double pmass,
+                                          const Eigen::VectorXd& coordinates,
+                                          unsigned mid);
+
   //! Map particle pressure to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
@@ -214,12 +242,28 @@ class Cell {
   Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity(
       const Eigen::VectorXd& shapefn, unsigned phase);
 
+  //! Return velocity of a subdomain at given location by interpolating from
+  //! nodes \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] mid Subdomain id (material id)
+  //! \retval velocity Interpolated velocity of a subdomain at xi
+  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity_subdomain(
+      const Eigen::VectorXd& shapefn, unsigned phase, unsigned mid);
+
   //! Return acceleration at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval acceleration Interpolated acceleration at xi
   Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
       const Eigen::VectorXd& shapefn, unsigned phase);
+
+  //! Return acceleration of a subdomain at given location by interpolating from
+  //! nodes \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] mid Subdomain id (material id)
+  //! \retval acceleration Interpolated acceleration of a subdomain at xi
+  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration_subdomain(
+      const Eigen::VectorXd& shapefn, unsigned phase, unsigned mid);
 
   //! Return pressure at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
@@ -234,9 +278,23 @@ class Cell {
   Eigen::VectorXd compute_strain_rate(
       const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
+  //! Compute strain rate of a subdomain
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] mid Subdomain id (material id)
+  Eigen::VectorXd compute_strain_rate_subdomain(
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase,
+      unsigned mid);
+
   //! Compute strain rate for reduced integration at the centroid of cell
   //! \param[in] phase Phase associate to the particle
   Eigen::VectorXd compute_strain_rate_centroid(unsigned phase);
+
+  //! Compute strain rate of a subdomain for reduced integration at the centroid
+  //! of cell \param[in] phase Phase associate to the particle \param[in] mid
+  //! \param[in] mid Subdomain id (material id)
+  Eigen::VectorXd compute_strain_rate_centroid_subdomain(unsigned phase,
+                                                         unsigned mid);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] shapefn Shapefns at local coordinates of particle
@@ -246,6 +304,17 @@ class Cell {
   void compute_nodal_body_force(const Eigen::VectorXd& shapefn, unsigned phase,
                                 double pmass, const VectorDim& pgravity);
 
+  //! Compute the nodal body force of a subdomain of a cell from particle mass
+  //! and gravity \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] pgravity Gravity of a particle
+  //! \param[in] mid Subdomain id (material id)
+  void compute_nodal_body_force_subdomain(const Eigen::VectorXd& shapefn,
+                                          unsigned phase, double pmass,
+                                          const VectorDim& pgravity,
+                                          unsigned mid);
+
   //! Compute the nodal traction force of a cell from the particle
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
@@ -253,7 +322,17 @@ class Cell {
   void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
                                     unsigned phase, const VectorDim& traction);
 
-  //! Compute the noal internal force  of a cell from particle stress and volume
+  //! Compute the nodal traction force of a subdomain of a cell from the
+  //! particle \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] traction Traction force from the particle
+  //! \param[in] mid Subdomain id (material id)
+  void compute_nodal_traction_force_subdomain(const Eigen::VectorXd& shapefn,
+                                              unsigned phase,
+                                              const VectorDim& traction,
+                                              unsigned mid);
+
+  //! Compute the noal internal force of a cell from particle stress and volume
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
@@ -261,6 +340,16 @@ class Cell {
   void compute_nodal_internal_force(const std::vector<Eigen::MatrixXd>& bmatrix,
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
+
+  //! Compute the noal internal forcee of a subdomain of a cell from particle
+  //! stress and volume \param[in] bmatrix Bmatrix corresponding to local
+  //! coordinates of particle \param[in] phase Phase associate to the particle
+  //! \param[in] pvolume Volume of particle
+  //! \param[in] pstress Stress of particle
+  //! \param[in] mid Subdomain id (material id)
+  void compute_nodal_internal_force_subdomain(
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase,
+      double pvolume, const Eigen::Matrix<double, 6, 1>& pstress, unsigned mid);
 
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint
