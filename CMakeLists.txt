@@ -1,9 +1,9 @@
 project(mpm LANGUAGES CXX)
 
-# Require C++14-compliant compiler; only available for CMake v. 3.1 and up
+# Require C++14-compliant compiler; only available for CMake v3.12 and up
 set(CMAKE_CXX_STANDARD 14)
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 SET(CMAKE_COLOR_MAKEFILE ON)
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -16,7 +16,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # GNU specific settings
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 # Intel specific settings
