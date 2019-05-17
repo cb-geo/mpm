@@ -487,24 +487,16 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       // Assign material to particle sets
       // Get set material from list of materials
       auto set_material = materials_.at(psets["material_id"]);
-      // Get sets ids
-      std::vector<unsigned> sids = psets["set_id"];
       // Assign material to particles in the specific sets
-      for (const auto& sitr : sids) {
-        mesh_->iterate_over_particle_set(
-            sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
-      }
+      mesh_->iterate_over_particle_set(
+          psets["set_id"], std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                                     std::placeholders::_1, set_material));
 
       // Assign remove steps to particle sets
       // Check if remove step is needed
       if (psets["remove"] == true) {
-        // Get the number of remove step
-        mpm::Index rstep = psets["rstep"];
-        // Get ids of sets need to be removed
-        std::vector<unsigned> sids = psets["set_id"];
         // Add remove step to the map
-        mesh_->create_remove_step(rstep, sids);
+        mesh_->create_remove_step(psets["rstep"], psets["set_id"]);
       }
     }
     status = true;

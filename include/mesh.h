@@ -319,9 +319,8 @@ class Mesh {
 
   //! Create map of container of remove steps
   //! \param[in] rstep Step number of the removal
-  //! \param[in] set_ids Set ids of particle sets needed to be removed
-  void create_remove_step(const mpm::Index rstep,
-                          const std::vector<unsigned> set_ids);
+  //! \param[in] set_id Set id of particle set removed at "rstep"
+  void create_remove_step(const mpm::Index rstep, const unsigned set_id);
 
   //! Apply remove step
   //! \param[in] remove step
