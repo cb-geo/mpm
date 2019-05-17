@@ -476,7 +476,6 @@ bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
-  // Assign material to particle sets
   try {
     // Get particle properties
     auto particle_props = io_->json_object("particle");
