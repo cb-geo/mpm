@@ -317,9 +317,9 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
-  //! Create map of remove steps
-  //! \param[in] particle set id need to be removed
-  //! \param[in] step when remove the particles in set
+  //! Create map of container of remove steps
+  //! \param[in] rstep Step number of the removal
+  //! \param[in] set_ids Set ids of particle sets needed to be removed
   void create_remove_step(const mpm::Index rstep,
                           const std::vector<unsigned> set_ids);
 
@@ -344,8 +344,6 @@ class Mesh {
   Container<ParticleBase<Tdim>> particles_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
-  //! Container of remove steps
-  tsl::robin_map<mpm::Index, std::vector<unsigned>> remove_steps_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
@@ -360,6 +358,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Container of remove steps
+  tsl::robin_map<mpm::Index, std::vector<unsigned>> remove_steps_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class

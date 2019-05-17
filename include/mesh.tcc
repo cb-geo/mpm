@@ -1136,27 +1136,33 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
   return status;
 }
 
-//! Create map of remove steps
+//! Create map of container of remove steps
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_remove_step(const mpm::Index rstep,
                                          const std::vector<unsigned> set_ids) {
-  // Check if there is a rstep exsited in the map
-  std::vector<unsigned> sids = this->remove_steps_[rstep];
-  // Add the set_ids into the vector
+  // Get or create the remove step existing at "rstep"
+  std::vector<unsigned> sids = remove_steps_[rstep];
+  // Add the set ids of particle sets needed to be removed into the vector
   sids.insert(sids.end(), set_ids.begin(), set_ids.end());
-  // Update the remove step
-  this->remove_steps_[rstep] = sids;
+  // Update the remove step at "rstep"
+  remove_steps_[rstep] = sids;
 }
 
 //! Apply remove step
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
   bool status = false;
-  if (this->remove_steps_.count(rstep) > 0) {
+  if (remove_steps_.find(rstep) != remove_steps_.end()) {
     try {
-      for (auto sid : this->remove_steps_.at(rstep)) {
-        for (auto particle = this->particle_sets_.at(sid).cbegin();
-             particle != this->particle_sets_.at(sid).cend(); particle++) {
+      // Iterate over each particle sets in the remove step
+      for (auto sid : remove_steps_.at(rstep)) {
+        // Iterate over each  particles in the set
+        for (auto particle = particle_sets_.at(sid).cbegin();
+             particle != particle_sets_.at(sid).cend(); particle++) {
+          // Remove particle from the cell
+          map_cells_[(*particle)->cell_id()]->remove_particle_id(
+              (*particle)->id());
+          // Remove particle from the mesh
           status = this->remove_particle(*particle);
           if (!status) throw std::runtime_error("Removing particle is invalid");
         }

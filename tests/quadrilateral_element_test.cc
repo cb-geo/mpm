@@ -2188,9 +2188,9 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       REQUIRE(quad->nfaces() == 4);
     }
 
-    SECTION("Quadrilateral element volume") {
-      // Check element volume
-      REQUIRE(quad->unit_element_volume() == Approx(4).epsilon(Tolerance));
+    SECTION("Quadrilateral element length") {
+      // Check element length
+      REQUIRE(quad->unit_element_length() == Approx(2).epsilon(Tolerance));
     }
   }
 }
