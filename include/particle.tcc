@@ -260,6 +260,29 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   return status;
 }
 
+// Compute volume fraction of the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_volume_fraction() {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Volume fraction for water
+      volume_fraction_(1) = material_->property("porosity");
+      // Volume fraction for solid
+      volume_fraction_(0) = 1 - volume_fraction_(1);
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute volume fraction for the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Compute volume of the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
@@ -268,8 +291,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Volume of the cell / # of particles
-      this->assign_volume(
-          phase, cell_->volume() / cell_->nparticles() * porosity_(phase));
+      this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
+                                     volume_fraction_(phase));
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -317,9 +340,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
         material_ != nullptr) {
       // Mass = volume of particle * mass_density
       mass_density_(phase) = material_->property("density");
-      porosity_(phase) = material_->property("porosity");
-      this->mass_(phase) =
-          volume_(phase) * porosity_(phase) * mass_density_(phase);
+      this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
           "Cell or material is invalid! cannot compute mass for the particle");

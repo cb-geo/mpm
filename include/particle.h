@@ -99,6 +99,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
+  //! Compute volume fraction
+  bool compute_volume_fraction() override;
+
   //! Compute volume as cell volume / nparticles
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
@@ -282,8 +285,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
   Eigen::Matrix<double, 1, Tnphases> volume_;
-  //! Porosity
-  Eigen::Matrix<double, 1, Tnphases> porosity_;
+  //! Volume fraction
+  Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates

@@ -331,6 +331,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         mesh_->particles_cells());
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
+
+    // Compute volume fraction
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_volume_fraction,
+                  std::placeholders::_1));
+
     // Compute volume
     for (unsigned phase = 0; phase < tnphases_; phase++)
       mesh_->iterate_over_particles(
