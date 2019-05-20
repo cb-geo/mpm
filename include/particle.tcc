@@ -268,7 +268,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Volume of the cell / # of particles
-      this->assign_volume(phase, cell_->volume() / cell_->nparticles());
+      this->assign_volume(
+          phase, cell_->volume() / cell_->nparticles() * porosity_(phase));
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -316,7 +317,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
         material_ != nullptr) {
       // Mass = volume of particle * mass_density
       mass_density_(phase) = material_->property("density");
-      this->mass_(phase) = volume_(phase) * mass_density_(phase);
+      porosity_(phase) = material_->property("porosity");
+      this->mass_(phase) =
+          volume_(phase) * porosity_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
           "Cell or material is invalid! cannot compute mass for the particle");

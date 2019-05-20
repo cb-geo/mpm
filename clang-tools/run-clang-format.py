@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/ usr / bin / env python
 """A wrapper script around clang-format, suitable for linting multiple files
 and to use for continuous integration.
 
@@ -45,9 +45,9 @@ def list_files(files, recursive=False, extensions=None, exclude=None):
             for dirpath, dnames, fnames in os.walk(file):
                 fpaths = [os.path.join(dirpath, fname) for fname in fnames]
                 for pattern in exclude:
-                    # os.walk() supports trimming down the dnames list
-                    # by modifying it in-place,
-                    # to avoid unnecessary directory listings.
+#os.walk() supports trimming down the dnames list
+#by modifying it in - place,
+#to avoid unnecessary directory listings.
                     dnames[:] = [
                         x for x in dnames
                         if
@@ -107,30 +107,28 @@ def run_clang_format_diff(args, file):
         raise DiffError(str(exc))
     invocation = [args.clang_format_executable, file]
 
-    # Use of utf-8 to decode the process output.
-    #
-    # Hopefully, this is the correct thing to do.
-    #
-    # It's done due to the following assumptions (which may be incorrect):
-    # - clang-format will returns the bytes read from the files as-is,
-    #   without conversion, and it is already assumed that the files use utf-8.
-    # - if the diagnostics were internationalized, they would use utf-8:
-    #   > Adding Translations to Clang
-    #   >
-    #   > Not possible yet!
-    #   > Diagnostic strings should be written in UTF-8,
-    #   > the client can translate to the relevant code page if needed.
-    #   > Each translation completely replaces the format string
-    #   > for the diagnostic.
-    #   > -- http://clang.llvm.org/docs/InternalsManual.html#internals-diag-translation
-    #
-    # It's not pretty, due to Python 2 & 3 compatibility.
-    encoding_py3 = {}
-    if sys.version_info[0] >= 3:
-        encoding_py3['encoding'] = 'utf-8'
+#Use of utf - 8 to decode the process output.
+#
+#Hopefully, this is the correct thing to do.
+#
+#It's done due to the following assumptions (which may be incorrect):
+#- clang - format will returns the bytes read from the files as - is,
+#without conversion, and it is already assumed that the files use utf - 8.
+#- if the diagnostics were internationalized, they would use utf - 8:
+#> Adding Translations to Clang
+#>
+#> Not possible yet !
+#> Diagnostic strings should be written in UTF - 8,
+#> the client can translate to the relevant code page if needed.
+#> Each translation completely replaces the format string
+#> for the diagnostic.
+#> -- http: //clang.llvm.org/docs/InternalsManual.html#internals-diag-translation
+#
+#It's not pretty, due to Python 2 & 3 compatibility.
+    encoding_py3 = {
+} if sys.version_info[0] >= 3 : encoding_py3['encoding'] = 'utf-8'
 
-    try:
-        proc = subprocess.Popen(
+    try : proc = subprocess.Popen(
             invocation,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -141,12 +139,12 @@ def run_clang_format_diff(args, file):
     proc_stdout = proc.stdout
     proc_stderr = proc.stderr
     if sys.version_info[0] < 3:
-        # make the pipes compatible with Python 3,
-        # reading lines should output unicode
+#make the pipes compatible with Python 3,
+#reading lines should output unicode
         encoding = 'utf-8'
         proc_stdout = codecs.getreader(encoding)(proc_stdout)
         proc_stderr = codecs.getreader(encoding)(proc_stderr)
-    # hopefully the stderr pipe won't get full and block the process
+#hopefully the stderr pipe won't get full and block the process
     outs = list(proc_stdout.readlines())
     errs = list(proc_stderr.readlines())
     proc.wait()
@@ -247,13 +245,13 @@ def main():
 
     args = parser.parse_args()
 
-    # use default signal handling, like diff return SIGINT value on ^C
-    # https://bugs.python.org/issue14229#msg156446
+#use default signal handling, like diff return SIGINT value on ^ C
+#https: // bugs.python.org/issue14229#msg156446
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     try:
         signal.SIGPIPE
     except AttributeError:
-        # compatibility, SIGPIPE does not exist on Windows
+#compatibility, SIGPIPE does not exist on Windows
         pass
     else:
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -283,8 +281,8 @@ def main():
     njobs = min(len(files), njobs)
 
     if njobs == 1:
-        # execute directly instead of in a pool,
-        # less overhead, simpler stacktraces
+#execute directly instead of in a pool,
+#less overhead, simpler stacktraces
         it = (run_clang_format_diff_wrapper(args, file) for file in files)
         pool = None
     else:
@@ -293,34 +291,25 @@ def main():
             partial(run_clang_format_diff_wrapper, args), files)
     while True:
         try:
-            outs, errs = next(it)
-        except StopIteration:
-            break
-        except DiffError as e:
-            print_trouble(parser.prog, str(e), use_colors=colored_stderr)
-            retcode = ExitStatus.TROUBLE
-            sys.stderr.writelines(e.errs)
-        except UnexpectedError as e:
-            print_trouble(parser.prog, str(e), use_colors=colored_stderr)
-            sys.stderr.write(e.formatted_traceback)
-            retcode = ExitStatus.TROUBLE
-            # stop at the first unexpected error,
-            # something could be very wrong,
-            # don't process all files unnecessarily
-            if pool:
-                pool.terminate()
-            break
-        else:
-            sys.stderr.writelines(errs)
-            if outs == []:
-                continue
-            if not args.quiet:
-                print_diff(outs, use_color=colored_stdout)
-            if retcode == ExitStatus.SUCCESS:
-                retcode = ExitStatus.DIFF
-    return retcode
+            outs, errs
+= next(it) except StopIteration
+    : break except DiffError as e : print_trouble(parser.prog, str(e),
+                                                  use_colors = colored_stderr)
+                                        retcode =
+                                            ExitStatus.TROUBLE sys.stderr
+                                                .writelines(e.errs)
+                                                    except UnexpectedError as e
+    : print_trouble(parser.prog, str(e), use_colors = colored_stderr)
+          sys.stderr.write(e.formatted_traceback)
+              retcode = ExitStatus.TROUBLE
+#stop at the first unexpected error,
+#something could be very wrong,
+#don't process all files unnecessarily
+                                    if pool : pool.terminate() break else
+    : sys.stderr.writelines(errs) if outs ==
+                                    [] : continue if not args.quiet
+    : print_diff(outs, use_color = colored_stdout) if retcode ==
+                                    ExitStatus.SUCCESS
+    : retcode = ExitStatus.DIFF return retcode
 
-
-if __name__ == '__main__':
-    sys.exit(main())
-
+                                    if __name__ == '__main__' : sys.exit(main())

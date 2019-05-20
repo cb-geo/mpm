@@ -25,6 +25,8 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
     dt_ = analysis_["dt"].template get<double>();
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
+    // Number of phases
+    tnphases_ = analysis_["tnphases"].template get<unsigned>();
 
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == gravity_.size()) {
@@ -203,8 +205,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
 
   try {
@@ -332,9 +332,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+    for (unsigned phase = 0; phase < tnphases_; phase++)
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
+                    std::placeholders::_1, phase));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
