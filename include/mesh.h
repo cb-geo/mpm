@@ -18,9 +18,12 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_for_each.h>
 
+#include <tsl/robin_map.h>
+
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "geometry.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
@@ -191,6 +194,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Iterate over particle set
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \param[in] set_id particle set id
+  template <typename Toper>
+  void iterate_over_particle_set(unsigned set_id, Toper oper);
+
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
@@ -213,6 +222,18 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
 
+  //! Assign friction constraints to nodes
+  //! \param[in] friction_constraints Constraint at node, dir, sign, and
+  //! friction
+  bool assign_friction_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+          friction_constraints);
+
+  //! Compute and assign rotation matrix to nodes
+  //! \param[in] euler_angles Map of node number and respective euler_angles
+  bool compute_nodal_rotation_matrices(
+      const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles);
+
   //! Assign particles volumes
   //! \param[in] particle_volumes Volume at dir on particle
   bool assign_particles_volumes(
@@ -229,6 +250,12 @@ class Mesh {
   bool assign_nodal_tractions(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           nodal_tractions);
+
+  //! Assign particles velocity constraints
+  //! \param[in] particle_velocity_constraints velocity at dir on particle
+  bool assign_particles_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_velocity_constraints);
 
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
@@ -282,6 +309,14 @@ class Mesh {
   //! Return node pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs() const;
 
+  //! Create map of container of particles in sets
+  //! \param[in] map of particles ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \retval status Status of  create particle sets
+  bool create_particle_sets(
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
+      bool check_duplicates);
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -296,10 +331,14 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Container of particle sets
+  tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Container of node sets
+  tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval

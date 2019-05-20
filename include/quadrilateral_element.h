@@ -146,10 +146,10 @@ class QuadrilateralElement : public Element<Tdim> {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
 
-  //! Evaluate the mass matrix
+  //! Evaluate the Ni Nj matrix
   //! \param[in] xi_s Vector of local coordinates
-  //! \retval mass_matrix mass matrix
-  Eigen::MatrixXd mass_matrix(
+  //! \retval ni_nj_matrix Ni Nj matrix
+  Eigen::MatrixXd ni_nj_matrix(
       const std::vector<VectorDim>& xi_s) const override;
 
   //! Evaluate the Laplace matrix at given local coordinates for a real cell
@@ -192,8 +192,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! Return the number of faces in a quadrilateral
   unsigned nfaces() const override { return 4; }
 
-  //! Return unit element volume 2D 2*2
-  double unit_element_volume() const override { return 4.; }
+  //! Return unit element length
+  double unit_element_length() const override { return 2.; }
 
   //! Return quadrature of the element
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(

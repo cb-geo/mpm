@@ -10,6 +10,7 @@ coverage:
 ignore: # files and folders for processing
   - external/catch.hpp
   - external/json.hpp
+  - external/sparsepp/*
   - external/spdlog/*
   - external/tclap/*
   - external/tsl/*

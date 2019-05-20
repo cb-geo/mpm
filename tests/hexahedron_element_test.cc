@@ -599,8 +599,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                                     Eigen::Vector3d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("Eight noded hexahedron mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("Eight noded hexahedron ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -625,15 +625,16 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       REQUIRE(xi_s.size() == 8);
 
-      // Get mass matrix
-      const auto mass_matrix = hex->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = hex->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni-nj-matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 8, 8> mass;
       // clang-format off
@@ -660,9 +661,31 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
               0.14814814814814810, 0.07407407407407404, 0.14814814814814810,
               0.2962962962962963;
       // clang-format on
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
@@ -1860,8 +1883,8 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                                     Eigen::Vector3d::Zero());
     }
 
-    // Mass matrix of a cell
-    SECTION("20-noded hexahedron mass-matrix") {
+    // Ni Nj matrix of a cell
+    SECTION("20-noded hexahedron ni-nj-matrix") {
       std::vector<Eigen::Matrix<double, Dim, 1>> xi_s;
 
       Eigen::Matrix<double, Dim, 1> xi;
@@ -1886,15 +1909,16 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
 
       REQUIRE(xi_s.size() == 8);
 
-      // Get mass matrix
-      const auto mass_matrix = hex->mass_matrix(xi_s);
+      // Get Ni Nj matrix
+      const auto ni_nj_matrix = hex->ni_nj_matrix(xi_s);
 
-      // Check size of mass-matrix
-      REQUIRE(mass_matrix.rows() == nfunctions);
-      REQUIRE(mass_matrix.cols() == nfunctions);
+      // Check size of ni-nj-matrix
+      REQUIRE(ni_nj_matrix.rows() == nfunctions);
+      REQUIRE(ni_nj_matrix.cols() == nfunctions);
 
       // Sum should be equal to 1. * xi_s.size()
-      REQUIRE(mass_matrix.sum() == Approx(1. * xi_s.size()).epsilon(Tolerance));
+      REQUIRE(ni_nj_matrix.sum() ==
+              Approx(1. * xi_s.size()).epsilon(Tolerance));
 
       Eigen::Matrix<double, 20, 20> mass;
       //! clang-format off
@@ -2033,9 +2057,31 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
           0.1975308641975307, 0.2962962962962961, 0.2962962962962961,
           0.3950617283950615;
       // clang-format on
-      for (unsigned i = 0; i < nfunctions; ++i)
-        for (unsigned j = 0; j < nfunctions; ++j)
-          REQUIRE(mass_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+
+      // auxiliary matrices for checking its multiplication by scalar
+      auto ni_nj_matrix_unit = 1.0 * ni_nj_matrix;
+      auto ni_nj_matrix_zero = 0.0 * ni_nj_matrix;
+      auto ni_nj_matrix_negative = -2.0 * ni_nj_matrix;
+      double scalar = 21.65489;
+      auto ni_nj_matrix_scalar = scalar * ni_nj_matrix;
+
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        for (unsigned j = 0; j < nfunctions; ++j) {
+          REQUIRE(ni_nj_matrix(i, j) == Approx(mass(i, j)).epsilon(Tolerance));
+          // check multiplication by unity;
+          REQUIRE(ni_nj_matrix_unit(i, j) ==
+                  Approx(1.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by zero;
+          REQUIRE(ni_nj_matrix_zero(i, j) ==
+                  Approx(0.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by negative number;
+          REQUIRE(ni_nj_matrix_negative(i, j) ==
+                  Approx(-2.0 * mass(i, j)).epsilon(Tolerance));
+          // check multiplication by an arbitrary scalar;
+          REQUIRE(ni_nj_matrix_scalar(i, j) ==
+                  Approx(scalar * mass(i, j)).epsilon(Tolerance));
+        }
+      }
     }
 
     // Laplace matrix of a cell
@@ -2412,9 +2458,9 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Check number of faces
       REQUIRE(hex->nfaces() == 6);
     }
-    SECTION("Hexahedron element volume") {
-      // Check element volume
-      REQUIRE(hex->unit_element_volume() == Approx(8).epsilon(Tolerance));
+    SECTION("Hexahedron element length") {
+      // Check element length
+      REQUIRE(hex->unit_element_length() == Approx(2).epsilon(Tolerance));
     }
   }
 }

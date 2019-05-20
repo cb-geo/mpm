@@ -4,7 +4,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "mpm_explicit_usl.h"
+#include "mpm_explicit.h"
 #include "write_mesh_particles_unitcell.h"
 
 // Check MPM Explicit USL
@@ -36,7 +36,7 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
@@ -57,7 +57,7 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }
@@ -92,7 +92,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
@@ -113,7 +113,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
     // Run explicit MPM
-    auto mpm = std::make_unique<mpm::MPMExplicitUSL<Dim>>(std::move(io));
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
     // Solve
     REQUIRE(mpm->solve() == true);
   }

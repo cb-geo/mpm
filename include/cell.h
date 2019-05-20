@@ -160,6 +160,12 @@ class Cell {
   Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
+  //! Return the local coordinates of a point in a 2D cell
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, Tdim, 1> local_coordinates_point_2d(
+      const Eigen::Matrix<double, Tdim, 1>& point);
+
   //! Return the local coordinates of a point in a unit cell
   //! Using newton iteration / affine transformation
   //! \param[in] point Coordinates of a point
@@ -198,6 +204,15 @@ class Cell {
                                   unsigned phase, double pmass,
                                   const Eigen::VectorXd& pvelocity);
 
+  //! Map particle pressure to nodes
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pmass Mass of a particle
+  //! \param[in] ppressure Pressure of particle
+  //! $$p_i = \frac{\sum_{p = 1}^{n_p} N_i (x_p) M_p p_p}{m_i}$$
+  void map_pressure_to_nodes(const Eigen::VectorXd& shapefn, unsigned phase,
+                             double pmass, double ppressure);
+
   //! Return velocity at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
@@ -211,6 +226,13 @@ class Cell {
   //! \retval acceleration Interpolated acceleration at xi
   Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
       const Eigen::VectorXd& shapefn, unsigned phase);
+
+  //! Return pressure at given location by interpolating from nodes
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \retval pressure Interpolated pressure at xi
+  double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
+                                    unsigned phase);
 
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle

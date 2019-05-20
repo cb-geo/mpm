@@ -4,6 +4,7 @@
 #include <array>
 #include <limits>
 #include <mutex>
+#include <tuple>
 #include <vector>
 
 #include "logger.h"
@@ -121,6 +122,17 @@ class Node : public NodeBase<Tdim> {
     return internal_force_.col(phase);
   }
 
+  //! Update pressure at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  void update_pressure(bool update, unsigned phase,
+                       double mass_pressure) override;
+
+  //! Return pressure at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double pressure(unsigned phase) const override { return pressure_(phase); }
+
   //! Update momentum at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -172,6 +184,26 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
+  //! Assign friction constraint
+  //! Directions can take values between 0 and Dim * Nphases
+  //! \param[in] dir Direction of friction constraint
+  //! \param[in] sign Sign of normal wrt coordinate system for friction
+  //! \param[in] friction Applied friction constraint
+  bool assign_friction_constraint(unsigned dir, int sign,
+                                  double friction) override;
+
+  //! Apply friction constraints
+  //! \param[in] dt Time-step
+  void apply_friction_constraints(double dt) override;
+
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  void assign_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
+    rotation_matrix_ = rotation_matrix;
+    generic_boundary_constraints_ = true;
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -191,6 +223,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Pressure
+  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
@@ -199,6 +233,14 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Rotation matrix for general velocity constraints
+  Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! A general velocity (non-Cartesian/inclined) constraint is specified at the
+  //! node
+  bool generic_boundary_constraints_{false};
+  //! Frictional constraints
+  bool friction_{false};
+  std::tuple<unsigned, int, double> friction_constraint_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class

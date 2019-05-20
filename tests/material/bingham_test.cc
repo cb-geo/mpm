@@ -71,6 +71,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -78,6 +82,12 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -145,10 +155,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -230,10 +241,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars;
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -325,9 +337,10 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -398,6 +411,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Get material properties
     REQUIRE(material->property("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
+    REQUIRE(material->property("youngs_modulus") ==
+            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
+    REQUIRE(material->property("poisson_ratio") ==
+            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -405,6 +422,12 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const double volumetric_strain = 1.0E-5;
     REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
+
+    // Check if state variable is initialised
+    SECTION("State variable is initialised") {
+      mpm::dense_map state_variables = material->initialise_state_variables();
+      REQUIRE(state_variables.empty() == true);
+    }
   }
 
   SECTION("Bingham check stresses with no strain rate") {
@@ -490,9 +513,10 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
@@ -592,15 +616,16 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-5208.33333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-5208.33333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-5208.33333333333).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-15625.0).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-15625.0).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-15625.0).epsilon(Tolerance));
     REQUIRE(check_stress(3) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
@@ -702,17 +727,18 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Compute updated stress
     mpm::Material<Dim>::Vector6d stress;
+    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
-        material->compute_stress(stress, dstrain, particle.get());
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stressees
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-520976.881982238).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-520962.527117347).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-520546.236035524).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-150.726081349795).epsilon(Tolerance));
-    REQUIRE(check_stress(4) == Approx(21.532297335685).epsilon(Tolerance));
-    REQUIRE(check_stress(5) == Approx(-71.7743244522832).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-1562633.1011227116).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-1562380.2089895592).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-1562766.2022454236).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-59.8955052203).epsilon(Tolerance));
+    REQUIRE(check_stress(4) == Approx(-19.9651684068).epsilon(Tolerance));
+    REQUIRE(check_stress(5) == Approx(-199.6516840678).epsilon(Tolerance));
   }
 }

@@ -262,7 +262,7 @@ TEST_CASE("Quadrilateral gimp elements are checked",
       coords << -0.8, -0.8;
       // Size of particle (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.25, 0.25;
+      psize << 0.5, 0.5;
       // Deformarion gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
@@ -339,7 +339,7 @@ TEST_CASE("Quadrilateral gimp elements are checked",
       coords << 0.8, 0.8;
       // Size of particle (x,y)
       Eigen::Matrix<double, Dim, 1> psize;
-      psize << 0.25, 0.25;
+      psize << 0.5, 0.5;
       // Deformarion gradient
       Eigen::Matrix<double, Dim, 1> defgrad;
       defgrad.setZero();
@@ -559,9 +559,9 @@ TEST_CASE("Quadrilateral gimp elements are checked",
         REQUIRE(bmatrix.at(i)(2, 1) == Approx(gradsf(i, 0)).epsilon(Tolerance));
       }
     }
-    SECTION("Center cell gimp element volume") {
-      // Check element volume
-      REQUIRE(quad->unit_element_volume() == Approx(4).epsilon(Tolerance));
+    SECTION("Center cell gimp element length") {
+      // Check element length
+      REQUIRE(quad->unit_element_length() == Approx(2).epsilon(Tolerance));
     }
   }
 }
