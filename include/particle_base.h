@@ -99,9 +99,6 @@ class ParticleBase {
   virtual VectorDim natural_size() const = 0;
 
   //! Compute volume of particle
-  virtual bool compute_volume_fraction() = 0;
-
-  //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
 
   //! Update volume based on centre volumetric strain rate

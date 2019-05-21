@@ -99,9 +99,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
-  //! Compute volume fraction
-  bool compute_volume_fraction() override;
-
   //! Compute volume as cell volume / nparticles
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;

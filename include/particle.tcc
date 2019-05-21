@@ -260,29 +260,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   return status;
 }
 
-// Compute volume fraction of the particle
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::compute_volume_fraction() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Volume fraction for water
-      volume_fraction_(1) = material_->property("porosity");
-      // Volume fraction for solid
-      volume_fraction_(0) = 1 - volume_fraction_(1);
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute volume fraction for the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 // Compute volume of the particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
@@ -291,8 +268,14 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Volume of the cell / # of particles
-      this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
-                                     volume_fraction_(phase));
+      // Volume of solid phase
+      if (phase == 0)
+        this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
+                                       (1 - material_->property("porosity")));
+      // Volume of water phase
+      if (phase == 1)
+        this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
+                                       material_->property("porosity"));
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
