@@ -30,7 +30,7 @@ bool mpm::MPMExplicit2P<Tdim>::solve() {
 #endif
 
   // Phase
-  unsigned phase = 0;
+  const unsigned phase = 0;
 
   // Test if checkpoint resume is needed
   bool resume = false;
@@ -75,9 +75,8 @@ bool mpm::MPMExplicit2P<Tdim>::solve() {
   }
 
   // Compute mass
-  for (phase = 0; phase < tnphases_; phase++)
-    mesh_->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -113,32 +112,27 @@ bool mpm::MPMExplicit2P<Tdim>::solve() {
     task_group.wait();
 
     // Assign mass and momentum to nodes
-    for (phase = 0; phase < tnphases_; phase++)
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                    std::placeholders::_1, phase));
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+                  std::placeholders::_1, phase));
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce nodal mass
-      for (phase = 0; phase < tnphases_; phase++) {
-        mesh_->allreduce_nodal_scalar_property(
-            std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
-            std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                      false, phase, std::placeholders::_2));
-        // MPI all reduce nodal momentum
-        mesh_->allreduce_nodal_vector_property(
-            std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                      phase),
-            std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                      std::placeholders::_1, false, phase,
-                      std::placeholders::_2));
-      }
+      mesh_->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
+                    false, phase, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
+                    phase),
+          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
+                    std::placeholders::_1, false, phase,
+                    std::placeholders::_2));
     }
 #endif
-    // TODO: Fix phase
-    phase = 0;
 
     // Compute nodal velocity
     mesh_->iterate_over_nodes_predicate(

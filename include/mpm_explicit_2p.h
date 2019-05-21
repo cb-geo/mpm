@@ -50,8 +50,6 @@ class MPMExplicit2P : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::vtk_attributes_;
   //! Bool nodal tractions
   using mpm::MPMBase<Tdim>::nodal_tractions_;
-  //! Number of phases
-  using mpm::MPMBase<Tdim>::tnphases_;
 
  private:
   //! Boolean to switch between USL and USF

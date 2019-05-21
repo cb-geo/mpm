@@ -87,6 +87,10 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn() override;
 
+  //! Assign volume fraction
+  //! \param[in] porosity Porosity of particle
+  bool assign_volume_fraction(double porosity) override;
+
   //! Assign volume
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume of particle for the phase
@@ -282,6 +286,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
   Eigen::Matrix<double, 1, Tnphases> volume_;
+  //! Volume fraction
+  Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
@@ -302,8 +308,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
-  //! Porosity
-  double porosity_;
   //! Set traction
   bool set_traction_{false};
   //! Traction

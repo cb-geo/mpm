@@ -97,8 +97,6 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
-  //! Number of phases
-  unsigned tnphases_;
 };  // MPMBase class
 }  // namespace mpm
 

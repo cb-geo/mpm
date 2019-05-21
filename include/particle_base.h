@@ -89,6 +89,9 @@ class ParticleBase {
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
+  //! Assign volume fraction
+  virtual bool assign_volume_fraction(double porosity) = 0;
+
   //! Assign volume
   virtual bool assign_volume(unsigned phase, double volume) = 0;
 
