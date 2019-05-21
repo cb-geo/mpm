@@ -267,15 +267,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
+      // Initialise porosity
+      porosity_ = material_->property("porosity");
       // Volume of the cell / # of particles
       // Volume of solid phase
       if (phase == 0)
-        this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
-                                       (1 - material_->property("porosity")));
+        this->assign_volume(
+            phase, cell_->volume() / cell_->nparticles() * (1 - porosity_));
       // Volume of water phase
       if (phase == 1)
-        this->assign_volume(phase, cell_->volume() / cell_->nparticles() *
-                                       material_->property("porosity"));
+        this->assign_volume(phase,
+                            cell_->volume() / cell_->nparticles() * porosity_);
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

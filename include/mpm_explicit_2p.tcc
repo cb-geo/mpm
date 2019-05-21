@@ -6,7 +6,7 @@ mpm::MPMExplicit2P<Tdim>::MPMExplicit2P(std::unique_ptr<IO>&& io)
   console_ = spdlog::get("MPMExplicit2P");
 }
 
-//! MPM Explicit (Two Phases) solver
+//! MPM Explicit Two Phases solver
 template <unsigned Tdim>
 bool mpm::MPMExplicit2P<Tdim>::solve() {
   bool status = true;
@@ -137,6 +137,8 @@ bool mpm::MPMExplicit2P<Tdim>::solve() {
       }
     }
 #endif
+    // TODO: Fix phase
+    phase = 0;
 
     // Compute nodal velocity
     mesh_->iterate_over_nodes_predicate(

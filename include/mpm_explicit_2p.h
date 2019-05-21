@@ -6,8 +6,8 @@
 namespace mpm {
 
 //! MPMExplicit Two phases class
-//! \brief A class that implements the fully explicit one phase mpm
-//! \details A single-phase explicit MPM
+//! \brief A class that implements the fully explicit two phase mpm
+//! \details A two-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPMExplicit2P : public MPMBase<Tdim> {
@@ -64,4 +64,4 @@ class MPMExplicit2P : public MPMBase<Tdim> {
 
 #include "mpm_explicit_2p.tcc"
 
-#endif  // MPM_MPM_EXPLICIT_H_
+#endif  // MPM_MPM_EXPLICIT_2P_H_
