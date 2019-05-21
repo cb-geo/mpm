@@ -240,7 +240,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume_fraction(double porosity) {
     // Volume fraction for solid phase
     this->volume_fraction_(0) = 1 - porosity;
     // Volume fraction for water phase
-    this->volume_fraction_(0) = porosity;
+    this->volume_fraction_(1) = porosity;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
