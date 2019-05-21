@@ -111,14 +111,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->update_pressure(true, Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
@@ -547,14 +547,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
-      // Assign mass to 1000
+      // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->update_pressure(true, Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
@@ -1106,14 +1106,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
-      // Assign mass to 1000
+      // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->update_pressure(true, Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
