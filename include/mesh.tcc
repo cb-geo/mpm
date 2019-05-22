@@ -323,6 +323,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   const mpm::Index id = particle->id();
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
 }
@@ -1159,9 +1161,6 @@ bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
         // Iterate over each  particles in the set
         for (auto particle = particle_sets_.at(sid).cbegin();
              particle != particle_sets_.at(sid).cend(); particle++) {
-          // Remove particle from the cell
-          map_cells_[(*particle)->cell_id()]->remove_particle_id(
-              (*particle)->id());
           // Remove particle from the mesh
           status = this->remove_particle(*particle);
           if (!status) throw std::runtime_error("Removing particle is invalid");
