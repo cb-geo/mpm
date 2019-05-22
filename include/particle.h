@@ -94,7 +94,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return volume
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return volume_(phase); }
+  double volume(unsigned phase) const override { return phase_volume_(phase); }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -276,12 +276,16 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
-  //! Volumetric mass density (mass / volume)
-  Eigen::Matrix<double, 1, Tnphases> mass_density_;
-  //! Mass
+  //! Material point volume 
+  using ParticleBase<Tdim>::volume_;
+  //! Material density (intrinsic/real density of each phase material)
+  Eigen::Matrix<double, 1, Tnphases> material_density_;
+  //! Phase mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Volume
-  Eigen::Matrix<double, 1, Tnphases> volume_;
+  //! Phae volume
+  Eigen::Matrix<double, 1, Tnphases> phase_volume_;
+  //! Phase volume fraction 
+  Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
