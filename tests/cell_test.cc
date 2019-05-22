@@ -221,6 +221,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
 
+        // Get local coordinates of the point using analytical solution
+        local_point = cell->local_coordinates_point_2d(point);
+        for (unsigned i = 0; i < local_point.size(); ++i)
+          REQUIRE(local_point[i] ==
+                  Approx(point_unit_cell[i]).epsilon(Tolerance));
+
         // Use Newton-raphson iteration
         local_point = cell->transform_real_to_unit_cell(point);
         for (unsigned i = 0; i < local_point.size(); ++i)
