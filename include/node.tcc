@@ -171,10 +171,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
   }
 }
 
-//! Update pressure at the nodes from particle
+//! Assign pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
-                                                      unsigned phase,
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
   try {
     const double tolerance = 1.E-16;
