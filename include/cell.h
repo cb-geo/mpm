@@ -160,6 +160,12 @@ class Cell {
   Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
+  //! Return the local coordinates of a point in a 2D cell
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, Tdim, 1> local_coordinates_point_2d(
+      const Eigen::Matrix<double, Tdim, 1>& point);
+
   //! Return the local coordinates of a point in a unit cell
   //! Using newton iteration / affine transformation
   //! \param[in] point Coordinates of a point
