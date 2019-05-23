@@ -725,12 +725,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
     xi(0) = u1;
     xi(1) = u2;
-    console_->info("Generic solution: ({}, {})", xi(0), xi(1));
     return xi;
   } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
     xi(0) = v1;
     xi(1) = v2;
-    console_->info("Generic solution: ({}, {})", xi(0), xi(1));
     return xi;
   }
 
@@ -738,16 +736,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   if (a4 == 0 && b4 == 0) {
     xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
     xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
-    console_->info("Case 1: ({}, {})", xi(0), xi(1));
   } else if (a4 == 0 && b4 != 0) {  // Case 2: Eq 11
     if (a2 == 0 && a3 != 0) {       // Case 2.1 Eq 12
       xi(1) = c1 / a3;
       xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
-      console_->info("Case 2.1: ({}, {})", xi(0), xi(1));
     } else if (a2 != 0 && a3 == 0) {  // Case 2.2 Eq 13
       xi(0) = c1 / a2;
       xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
-      console_->info("Case 2.2: ({}, {})", xi(0), xi(1));
     } else {  // a2 != 0 && a3 != 0 // Case 2.3 Eq 14
       const double aa = b4 * a3 / a2;
       const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
@@ -761,22 +756,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
         xi(0) = u1;
         xi(1) = u2;
-        console_->info("Case 2.3a: ({}, {})", xi(0), xi(1));
       } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
         xi(0) = v1;
         xi(1) = v2;
-        console_->info("Case 2.3b: ({}, {})", xi(0), xi(1));
       }
     }
   } else if (a4 != 0 && b4 == 0) {  // Case 3 Eq 16
     if (b2 == 0 && b3 != 0) {       // Case 3.1 Eq 17
       xi(1) = c2 / b3;
       xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
-      console_->info("Case 3.1: ({}, {})", xi(0), xi(1));
     } else if (b2 != 0 && b3 == 0) {  // Case 3.2 Eq 18
       xi(0) = c2 / b2;
       xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
-      console_->info("Case 3.2: ({}, {})", xi(0), xi(1));
     } else {  // b2 != 0 && b3 != 0  // Case 3.3 Eq 19
       const double aa = a4 * b3 / b2;
       const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
@@ -790,11 +781,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
         xi(0) = u1;
         xi(1) = u2;
-        console_->info("Case 3.3a: ({}, {})", xi(0), xi(1));
       } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
         xi(0) = v1;
         xi(1) = v2;
-        console_->info("Case 3.3b: ({}, {})", xi(0), xi(1));
       }
     }
   } else {  // a4 != 0 && b4 != 0   // Case 4 Eq 21
@@ -810,7 +799,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     if ((a2s - b2s) == 0) {  // Case 4.1 Eq 25
       xi(1) = (c1s - c2s) / (a3s - b3s);
       xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
-      console_->info("Case 4.1: ({}, {})", xi(0), xi(1));
     } else {
       const double alpha = (c1s - c2s) / (a2s - b2s);
       const double beta = (a3s - b3s) / (a2s - b2s);
@@ -818,7 +806,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (beta == 0) {  // Case 4.2a Eq 28
         xi(0) = alpha;
         xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
-        console_->info("Case 4.2a: ({}, {})", xi(0), xi(1));
       } else {  // Case 4.2b Eq 29
         // There are two possible solutions
         const double u2 =
@@ -837,11 +824,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
         if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
           xi(0) = u1;
           xi(1) = u2;
-          console_->info("Case 4.3a: ({}, {})", xi(0), xi(1));
         } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
           xi(0) = v1;
           xi(1) = v2;
-          console_->info("Case 4.3b: ({}, {})", xi(0), xi(1));
         }
       }
     }
