@@ -110,11 +110,15 @@ class NodeBase {
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
   //! Update pressure at the nodes from particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  virtual void update_mass_pressure(unsigned phase, double mass_pressure) = 0;
+
+  //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_pressure(bool update, unsigned phase,
-                               double mass_pressure) = 0;
+  virtual void assign_pressure(unsigned phase, double mass_pressure) = 0;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
