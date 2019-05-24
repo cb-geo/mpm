@@ -889,7 +889,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_pressure(false, phase, mass * pressure);
+        node->update_mass_pressure(phase, mass * pressure);
         REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
         // Increment node_counter
         ++node_counter;
@@ -2181,7 +2181,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_pressure(false, phase, mass * pressure);
+        node->update_mass_pressure(phase, mass * pressure);
         REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
         // Increment j
         ++j;

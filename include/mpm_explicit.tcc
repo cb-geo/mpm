@@ -166,9 +166,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           mesh_->allreduce_nodal_scalar_property(
               std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
                         phase),
-              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
-                        std::placeholders::_1, false, phase,
-                        std::placeholders::_2));
+              std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
+                        std::placeholders::_1, phase, std::placeholders::_2));
         }
 #endif
 
@@ -273,9 +272,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           mesh_->allreduce_nodal_scalar_property(
               std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
                         phase),
-              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
-                        std::placeholders::_1, false, phase,
-                        std::placeholders::_2));
+              std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
+                        std::placeholders::_1, phase, std::placeholders::_2));
         }
 #endif
 
