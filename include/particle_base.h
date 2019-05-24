@@ -112,7 +112,7 @@ class ParticleBase {
 
   // Assign material
   virtual bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) = 0;
+      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -218,7 +218,7 @@ class ParticleBase {
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
-  std::shared_ptr<Material<Tdim>> material_;
+  std::map<unsigned, std::shared_ptr<Material<Tdim>>> material_;
   //! Material state history variables
   mpm::dense_map state_variables_;
 };  // ParticleBase class

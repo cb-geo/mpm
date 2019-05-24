@@ -131,7 +131,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
+      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase

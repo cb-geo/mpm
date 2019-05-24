@@ -4,7 +4,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   cell_ = nullptr;
-  material_ = nullptr;
+  material_.clear();
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -18,7 +18,7 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord,
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
-  material_ = nullptr;
+  material_.clear();
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -153,14 +153,13 @@ void mpm::Particle<Tdim, Tnphases>::remove_cell() {
 // Assign a material to particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_material(
-    const std::shared_ptr<Material<Tdim>>& material) {
+    unsigned phase, const std::shared_ptr<Material<Tdim>>& material) {
   bool status = false;
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      material_ = material;
-      state_variables_ = material_->initialise_state_variables();
-      status = true;
+      status = material_.emplace(std::make_pair(phase, material)).second;
+      state_variables_ = material_.at(phase)->initialise_state_variables();
     } else {
       throw std::runtime_error("Material is undefined!");
     }
@@ -313,9 +312,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
   try {
     // Check if particle volume is set and material ptr is valid
     if (volume_(phase) != std::numeric_limits<double>::max() &&
-        material_ != nullptr) {
+        material_.at(phase) != nullptr) {
       // Mass = volume of particle * mass_density
-      mass_density_(phase) = material_->property("density");
+      mass_density_(phase) = material_.at(phase)->property("density");
       this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
@@ -410,10 +409,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   bool status = true;
   try {
     // Check if material ptr is valid
-    if (material_ != nullptr) {
+    if (material_.at(phase) != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Calculate stress
-      this->stress_.col(phase) = material_->compute_stress(
+      this->stress_.col(phase) = material_.at(phase)->compute_stress(
           this->stress_.col(phase), dstrain, this, &state_variables_);
     } else {
       throw std::runtime_error("Material is invalid");
@@ -443,7 +442,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
   bool status = true;
   try {
     // Check if  material ptr is valid
-    if (material_ != nullptr) {
+    if (material_.at(phase) != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
       cell_->compute_nodal_internal_force(this->bmatrix_, phase,
@@ -587,10 +586,10 @@ bool mpm::Particle<Tdim, Tnphases>::update_pressure(unsigned phase,
   bool status = true;
   try {
     // Check if material ptr is valid
-    if (material_ != nullptr) {
+    if (material_.at(phase) != nullptr) {
       // Update pressure
       this->pressure_(phase) +=
-          material_->thermodynamic_pressure(dvolumetric_strain);
+          material_.at(phase)->thermodynamic_pressure(dvolumetric_strain);
     } else {
       throw std::runtime_error("Material is invalid");
     }

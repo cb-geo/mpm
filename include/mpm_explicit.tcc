@@ -66,7 +66,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Iterate over each particle to assign material
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, material));
+                std::placeholders::_1, phase, material));
 
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {

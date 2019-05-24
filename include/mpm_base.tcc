@@ -476,6 +476,8 @@ bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
+  // Set phase to zero
+  unsigned phase = 0;
   // Assign material to particle sets
   try {
     // Get particle properties
@@ -492,7 +494,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
+                            std::placeholders::_1, phase, set_material));
       }
     }
     status = true;
