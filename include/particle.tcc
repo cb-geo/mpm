@@ -176,10 +176,23 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      if (cell_->is_point_in_cell(this->coordinates_))
-        this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
-      else
-        return false;
+      // Check if point is approximately in the cell
+      if (cell_->approx_point_in_cell(this->coordinates_)) {
+        // Compute local coordinates
+        Eigen::Matrix<double, Tdim, 1> xi =
+            cell_->transform_real_to_unit_cell(this->coordinates_);
+        // Check if xi is within the cell
+        bool xi_in_cell = true;
+        for (unsigned i = 0; i < xi.size(); ++i)
+          if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i)))
+            xi_in_cell = false;
+        if (xi_in_cell == true) {
+          this->xi_ = xi;
+          status = true;
+        } else
+          status = false;
+      } else
+        status = false;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
