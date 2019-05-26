@@ -64,15 +64,16 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell->initialise() == true);
 
+    Eigen::Vector2d xi;
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 0.632582, 0.425948;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     point << 0.632585, 0.42595;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
   }
 
   SECTION("Transform real to unit cell Newton-Raphson") {
@@ -114,11 +115,12 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell->initialise() == true);
 
+    Eigen::Vector2d xi;
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 0.0597025, 0.534722;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
   }
 
   SECTION("Transform real to unit cell analytical solution") {
@@ -160,23 +162,24 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell->initialise() == true);
 
+    Eigen::Vector2d xi;
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 0.879474, 2.43095;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     point << 0.87903, 2.4815;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     point << 0.821834, 2.48175;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     point << 0.823751, 2.43189;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
   }
 
   SECTION("Transform real to unit cell analytical solution") {
@@ -218,12 +221,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell->initialise() == true);
 
+    Eigen::Vector2d xi;
+
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 0.5, 0.5;
 
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     // Coordinates of the point in an unit cell
     Eigen::Matrix<double, 2, 1> point_unit_cell;
@@ -242,7 +247,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates of a point in real cell
     point << 0., 0.;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
     // Coordinates of the point in an unit cell
     point_unit_cell << 0., 0.;
     // Use analytical solution
@@ -253,7 +258,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates of a point in real cell
     point << -1.5, -1.5;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
     // Coordinates of the point in an unit cell
     point_unit_cell << -0.75, -0.75;
     // Use analytical solution
@@ -301,12 +306,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell->initialise() == true);
 
+    Eigen::Vector2d xi;
+
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 2.1875, 3.25;
 
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
     // Coordinates of the point in an unit cell
     Eigen::Matrix<double, 2, 1> point_unit_cell;
@@ -327,7 +334,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates of the point in an unit cell
     point_unit_cell << 1., 0.;
     // Test if point is in cell
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
     // Use analytical solution
     local_point = cell->local_coordinates_point_2d(point);
     for (unsigned i = 0; i < local_point.size(); ++i)
@@ -369,6 +376,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     std::shared_ptr<mpm::Element<Dim>> element =
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
+    Eigen::Vector2d xi;
     // Coordinates of a point in real cell
     Eigen::Vector2d point;
     point << 0.377632680795176, 0.104694061235587;
@@ -386,7 +394,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell1->initialise() == true);
     // Test if point is in cell
-    REQUIRE(cell1->is_point_in_cell(point) == false);
+    REQUIRE(cell1->is_point_in_cell(point, &xi) == false);
 
     // Cell 2
     mpm::Index id2 = 1;
@@ -401,7 +409,7 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Initialise cell
     REQUIRE(cell2->initialise() == true);
     // Test if point is in cell
-    REQUIRE(cell2->is_point_in_cell(point) == true);
+    REQUIRE(cell2->is_point_in_cell(point, &xi) == true);
 
     // Coordinates of the point in an unit cell
     Eigen::Matrix<double, 2, 1> point_unit_cell;

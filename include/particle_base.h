@@ -74,6 +74,10 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Assign cell and xi
+  virtual bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                              const Eigen::Matrix<double, Tdim, 1>& xi) = 0;
+
   //! Assign cell id
   virtual bool assign_cell_id(Index id) = 0;
 

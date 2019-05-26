@@ -434,7 +434,11 @@ inline bool mpm::Cell<Tdim>::approx_point_in_cell(
 //! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point,
+    Eigen::Matrix<double, Tdim, 1>* xi) {
+
+  // Set an initial value of Xi
+  (*xi).fill(std::numeric_limits<double>::max());
 
   // Check if point is approximately in the cell
   if (!this->approx_point_in_cell(point)) return false;
@@ -444,10 +448,10 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
 
   bool status = true;
   // Get local coordinates
-  Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
+  (*xi) = this->transform_real_to_unit_cell(point);
   // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+  for (unsigned i = 0; i < (*xi).size(); ++i)
+    if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
   return status;
 }
 

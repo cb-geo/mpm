@@ -103,15 +103,43 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   bool status = true;
   try {
+    Eigen::Matrix<double, Tdim, 1> xi;
     // Assign cell to the new cell ptr, if point can be found in new cell
-    if (cellptr->is_point_in_cell(this->coordinates_)) {
+    if (cellptr->is_point_in_cell(this->coordinates_, &xi)) {
       // if a cell already exists remove particle from that cell
       if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
-      // Calculate the reference location of particle
+      // Compute reference location of particle
       this->compute_reference_location();
+      status = cell_->add_particle_id(this->id());
+    } else {
+      throw std::runtime_error("Point cannot be found in cell!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Assign a cell to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell_xi(
+    const std::shared_ptr<Cell<Tdim>>& cellptr,
+    const Eigen::Matrix<double, Tdim, 1>& xi) {
+  bool status = true;
+  try {
+    // Assign cell to the new cell ptr, if point can be found in new cell
+    if (cellptr != nullptr) {
+      // if a cell already exists remove particle from that cell
+      if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+
+      cell_ = cellptr;
+      cell_id_ = cellptr->id();
+      // Assign the reference location of particle
+      this->xi_ = xi;
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
