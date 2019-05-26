@@ -139,7 +139,17 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell_xi(
       cell_ = cellptr;
       cell_id_ = cellptr->id();
       // Assign the reference location of particle
-      this->xi_ = xi;
+      bool xi_nan = false;
+
+      // Check if point is within the cell
+      for (unsigned i = 0; i < xi.size(); ++i)
+        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) xi_nan = true;
+
+      if (xi_nan == false)
+        this->xi_ = xi;
+      else
+        return false;
+      
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
