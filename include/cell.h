@@ -146,10 +146,6 @@ class Cell {
   //! \param[in] point Coordinates of point
   bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
-  //! Approximately check if a point is in a cell
-  //! \param[in] point Coordinates of point
-  bool approx_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
-
   //! Check if a point is in a isoparametric cell
   //! Use an affine transformation and NR to check if a transformed point is in
   //! a unit cell. This is useful for points on the surface, where
@@ -284,6 +280,11 @@ class Cell {
 
   //! Compute normal vector
   void compute_normals();
+
+ private:
+  //! Approximately check if a point is in a cell
+  //! \param[in] point Coordinates of point
+  bool approx_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
 
  private:
   //! Mutex
