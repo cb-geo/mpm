@@ -152,7 +152,10 @@ class Cell {
   //! volume calculations are tricky. The transformed point should be between -1
   //! and 1 in a unit cell
   //! \param[in] point Coordinates of point
-  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  //! \param[in|out] xi Local coordinates of point
+  //! \retval status Return if a point is in cell or not
+  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point,
+                        Eigen::Matrix<double, Tdim, 1>* xi);
 
   //! Return the local coordinates of a point in a cell
   //! \param[in] point Coordinates of a point

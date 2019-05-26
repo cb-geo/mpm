@@ -430,6 +430,16 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Local coordinates
+    Eigen::Vector2d xi;
+    xi.fill(std::numeric_limits<double>::max());
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == false);
+    // Compute reference location
+    cell->is_point_in_cell(particle->coordinates(), &xi);
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == true);
+
     // Assign cell id again
     REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status
@@ -1296,6 +1306,16 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Local coordinates
+    Eigen::Vector3d xi;
+    xi.fill(std::numeric_limits<double>::max());
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == false);
+    // Compute reference location
+    cell->is_point_in_cell(particle->coordinates(), &xi);
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == true);
+
     // Assign cell id again
     REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status

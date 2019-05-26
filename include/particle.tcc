@@ -103,15 +103,54 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
     const std::shared_ptr<Cell<Tdim>>& cellptr) {
   bool status = true;
   try {
+    Eigen::Matrix<double, Tdim, 1> xi;
     // Assign cell to the new cell ptr, if point can be found in new cell
-    if (cellptr->is_point_in_cell(this->coordinates_)) {
+    if (cellptr->is_point_in_cell(this->coordinates_, &xi)) {
       // if a cell already exists remove particle from that cell
       if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
-      // Calculate the reference location of particle
-      this->compute_reference_location();
+      // Compute reference location of particle
+      bool xi_status = this->compute_reference_location();
+      if (!xi_status) return false;
+      status = cell_->add_particle_id(this->id());
+    } else {
+      throw std::runtime_error("Point cannot be found in cell!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Assign a cell to particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_cell_xi(
+    const std::shared_ptr<Cell<Tdim>>& cellptr,
+    const Eigen::Matrix<double, Tdim, 1>& xi) {
+  bool status = true;
+  try {
+    // Assign cell to the new cell ptr, if point can be found in new cell
+    if (cellptr != nullptr) {
+      // if a cell already exists remove particle from that cell
+      if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+
+      cell_ = cellptr;
+      cell_id_ = cellptr->id();
+      // Assign the reference location of particle
+      bool xi_nan = false;
+
+      // Check if point is within the cell
+      for (unsigned i = 0; i < xi.size(); ++i)
+        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) xi_nan = true;
+
+      if (xi_nan == false)
+        this->xi_ = xi;
+      else
+        return false;
+
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
@@ -176,10 +215,14 @@ bool mpm::Particle<Tdim, Tnphases>::compute_reference_location() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      if (cell_->is_point_in_cell(this->coordinates_))
-        this->xi_ = cell_->transform_real_to_unit_cell(this->coordinates_);
-      else
-        return false;
+      // Compute local coordinates
+      Eigen::Matrix<double, Tdim, 1> xi;
+      // Check if the point is in cell
+      if (cell_->is_point_in_cell(this->coordinates_, &xi)) {
+        this->xi_ = xi;
+        status = true;
+      } else
+        status = false;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -199,9 +242,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Compute local coordinates
-      this->compute_reference_location();
-
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 
