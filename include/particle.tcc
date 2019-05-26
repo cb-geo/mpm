@@ -112,7 +112,8 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell(
       cell_ = cellptr;
       cell_id_ = cellptr->id();
       // Compute reference location of particle
-      this->compute_reference_location();
+      bool xi_status = this->compute_reference_location();
+      if (!xi_status) return false;
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
@@ -149,7 +150,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell_xi(
         this->xi_ = xi;
       else
         return false;
-      
+
       status = cell_->add_particle_id(this->id());
     } else {
       throw std::runtime_error("Point cannot be found in cell!");
@@ -241,9 +242,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Compute local coordinates
-      this->compute_reference_location();
-
       // Get element ptr of a cell
       const auto element = cell_->element_ptr();
 

@@ -355,8 +355,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max()) {
     // If a cell id is present, but not a cell locate the cell from map
     if (!particle->cell_ptr())
-      particle->assign_cell(map_cells_[particle->cell_id()]);
-    if (particle->compute_reference_location()) return true;
+      if (particle->assign_cell(map_cells_[particle->cell_id()])) return true;
   }
 
   bool status = false;
