@@ -443,12 +443,14 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Check if point is approximately in the cell
   if (!this->approx_point_in_cell(point)) return false;
 
-  // Check if cell is cartesian, if so use cartesian checker
-  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
-
   bool status = true;
-  // Get local coordinates
-  (*xi) = this->transform_real_to_unit_cell(point);
+
+  // Check if cell is cartesian, if so use cartesian local coordinates
+  if (!isoparametric_) (*xi) = this->local_coordinates_point(point);
+  // Isoparametric element
+  else
+    (*xi) = this->transform_real_to_unit_cell(point);
+
   // Check if the transformed coordinate is within the unit cell (-1, 1)
   for (unsigned i = 0; i < (*xi).size(); ++i)
     if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
