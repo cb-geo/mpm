@@ -9,6 +9,8 @@
 #include "io.h"
 #include "mpm.h"
 
+#include "particle-sample.h"
+
 int main(int argc, char** argv) {
   // Logger level (trace, debug, info, warn, error, critical, off)
   spdlog::set_level(spdlog::level::trace);
@@ -52,6 +54,8 @@ int main(int argc, char** argv) {
     MPI_Abort(MPI_COMM_WORLD, 1);
 #endif
   }
+
+  run(argc, argv);
 
 #ifdef USE_MPI
   MPI_Finalize();

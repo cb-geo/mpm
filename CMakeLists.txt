@@ -45,6 +45,26 @@ link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
+
+find_package(X11)
+find_package(OpenGL)
+find_package(GLUT)
+
+# OSPRAY
+find_package(OSPRAY)
+include_directories(${OSPRAY_INCLUDE_DIRS})
+link_libraries(${OSPRAY_LIBRARIES})
+
+# Galaxy
+include_directories(/home/krishna/galaxy/include/gxy 
+  ${GXY_INCLUDE_DIR}/data
+  ${GXY_INCLUDE_DIR}/framework
+  ${GXY_INCLUDE_DIR}/renderer
+  ${GXY_INCLUDE_DIR}/ospray)
+link_directories(${GXY_LIBRARY}/lib64)
+
+set(GALAXY_LIBRARIES gxy_framework gxy_renderer gxy_data gxy_ospray)
+              
 # MPI
 find_package(MPI)
 if (MPI_FOUND)
@@ -116,7 +136,7 @@ SET(mpm_src
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
 
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
-target_link_libraries(mpm lmpm)
+target_link_libraries(mpm lmpm ${OSPRAY_LIBRARIES} ${GALAXY_LIBRARIES})
 
 # Unit test
 if(MPM_BUILD_TESTING)
