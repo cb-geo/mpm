@@ -474,6 +474,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Remove assigned cell
     particle->remove_cell();
     REQUIRE(particle->assign_cell(cell) == true);
+
+    // Clear all particle ids
+    REQUIRE(cell->nparticles() == 1);
+    cell->clear_particle_ids();
+    REQUIRE(cell->nparticles() == 0);
   }
 
   //! Test initialise particle stresses
@@ -1354,6 +1359,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Remove assigned cell
     particle->remove_cell();
     REQUIRE(particle->assign_cell(cell) == true);
+
+    // Clear all particle ids
+    REQUIRE(cell->nparticles() == 1);
+    cell->clear_particle_ids();
+    REQUIRE(cell->nparticles() == 0);
   }
 
   //! Test initialise particle stresses
