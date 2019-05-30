@@ -118,6 +118,9 @@ class Cell {
   //! \param[in] id Global id of a particle
   void remove_particle_id(Index id);
 
+  //! Clear all particle ids in the cell
+  void clear_particle_ids() { particles_.clear(); }
+
   //! Compute the volume of the cell
   void compute_volume();
 
