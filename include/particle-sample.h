@@ -69,31 +69,8 @@ int run(int argc, char* argv[]) {
 
   Application theApplication(&argc, &argv);
   theApplication.Start();
-
-  for (int i = 1; i < argc; i++) {
-    if (argv[i][0] == '-') switch (argv[i][1]) {
-        case 'D':
-          dbg = true, dbgarg = argv[i] + 2;
-          break;
-        case 'n':
-          samples_per_partition = atoi(argv[++i]);
-          break;
-        case 'r':
-          radius = atof(argv[++i]);
-          break;
-        case 's':
-          width = atoi(argv[++i]);
-          height = atoi(argv[++i]);
-          break;
-        default:
-          syntax(argv[0]);
-      }
-    else if (data == "")
-      data = argv[i];
-    else
-      syntax(argv[0]);
-  }
-
+  data = "radial-0-oneBall.vol";
+  
   Renderer::Initialize();
   theApplication.Run();
 
