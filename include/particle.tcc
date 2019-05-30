@@ -73,6 +73,9 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   // Status
   this->status_ = particle.status;
 
+  // If a cell already exists remove particle from that cell
+  if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+
   // Cell id
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
