@@ -94,8 +94,8 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   traction_.setZero();
   velocity_.setZero();
   volumetric_strain_centroid_.setZero();
-  volume_fraction_.setOnes(1,Tnphases);
   material_density_.fill(std::numeric_limits<double>::max());
+  volume_fraction_.setOnes(1, Tnphases);
   phase_volume_.fill(std::numeric_limits<double>::max());
 }
 
@@ -311,7 +311,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   }
   return status;
 }
-
 
 // Compute volume of the particle
 // Note 1: \param[in] phase is not used

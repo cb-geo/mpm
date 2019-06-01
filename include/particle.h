@@ -296,7 +296,7 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> material_density_;
   //! Phase mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Phase volume
+  //! Phae volume
   Eigen::Matrix<double, 1, Tnphases> phase_volume_;
   //! Phase volume fraction 
   Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
