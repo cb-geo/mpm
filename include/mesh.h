@@ -323,9 +323,14 @@ class Mesh {
   void create_remove_step(const mpm::Index rstep, const unsigned set_id);
 
   //! Apply remove step
-  //! \param[in] remove step
+  //! \param[in] rstep Remove step
   //! \retval remove_status Return the successful remove of particle sets
   bool apply_remove_step(const mpm::Index rstep);
+
+  //! Initialise remove particles
+  //! \param[in] resume_step Resume step
+  //! \retval remove_status Return the successful remove of particle sets
+  bool resume_remove_particles(const mpm::Index rstep);
 
  private:
   // Locate a particle in mesh cells

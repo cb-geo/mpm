@@ -1158,7 +1158,7 @@ bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
     try {
       // Iterate over each particle sets in the remove step
       for (auto sid : remove_steps_.at(rstep)) {
-        // Iterate over each  particles in the set
+        // Iterate over each particles in the set
         for (auto particle = particle_sets_.at(sid).cbegin();
              particle != particle_sets_.at(sid).cend(); particle++) {
           // Remove particle from the mesh
@@ -1169,6 +1169,35 @@ bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
     } catch (std::exception& exception) {
       console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
       status = false;
+    }
+  }
+  return status;
+}
+
+//! Resume remove particles
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::resume_remove_particles(const mpm::Index resume_step) {
+  bool status = false;
+  // Iterate over each remove steps
+  for (auto rstep : remove_steps_) {
+    // Check remove steps before resume step
+    if (rstep.first <= resume_step) {
+      try {
+        for (auto sid : rstep.second) {
+          // Iterate over each particles in the set
+          for (auto particle = particle_sets_.at(sid).cbegin();
+               particle != particle_sets_.at(sid).cend(); particle++) {
+            // Remove particle from the mesh
+            status = this->remove_particle(*particle);
+            if (!status)
+              throw std::runtime_error(
+                  "Initialise removing particle is invalid");
+          }
+        }
+      } catch (std::exception& exception) {
+        console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+        status = false;
+      }
     }
   }
   return status;
