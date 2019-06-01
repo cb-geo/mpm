@@ -287,6 +287,11 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::state_variables_;
   //! Material point volume 
   using ParticleBase<Tdim>::volume_;
+  //! Material point porosity
+  using ParticleBase<Tdim>::porosity_;
+
+  //! Degree of saturation in porous media
+  double saturation_degree_{1.0};
   //! Material density (intrinsic/real density of each phase material)
   Eigen::Matrix<double, 1, Tnphases> material_density_;
   //! Phase mass

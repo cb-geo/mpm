@@ -226,7 +226,9 @@ class ParticleBase {
   //! Material state history variables
   mpm::dense_map state_variables_;
   //! Material point volume
-  double volume_{0.0};
+  double volume_{std::numeric_limits<double>::max()};
+  //! Material point porosity (volume of voids / total volume)
+  double porosity_{0.0};
 };  // ParticleBase class
 }  // namespace mpm
 

@@ -94,12 +94,8 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   traction_.setZero();
   velocity_.setZero();
   volumetric_strain_centroid_.setZero();
-  // initialise initial volume fraction of each phase to 1.
-  // because the summation of phase volume fractions must be one, this
-  // assignment will ensure that the volume fractions need proper
-  // initialisation for miscible/nonmiscible mixtures
-  // For single phase materials, volume fraction is always one.
-  volume_fraction_.setOnes(1, Tnphases);
+  volume_fraction_.setOnes(1,Tnphases);
+  material_density_.fill(std::numeric_limits<double>::max());
   phase_volume_.fill(std::numeric_limits<double>::max());
 }
 
@@ -205,6 +201,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
     if (material != nullptr) {
       status = material_.emplace(std::make_pair(phase, material)).second;
       state_variables_ = material_.at(phase)->initialise_state_variables();
+      material_density_(phase) = material_.at(phase)->property("density");
     } else {
       throw std::runtime_error("Material is undefined!");
     }
@@ -273,10 +270,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
   return status;
 }
 
-// !!!! TODO: Not sure about the use of input argument "phase".
-// !!!! For now it's not needed.
 // Assign volume to the particle
 // Volume is the material point volume
+// Note: \param[in] phase is not used
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
                                                   double volume) {
@@ -316,18 +312,17 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   return status;
 }
 
-// !!!! TODO: Not sure about the use of input argument "phase".
-// !!!! For now it's not needed.
+
 // Compute volume of the particle
+// Note 1: \param[in] phase is not used
+// Note 2: This method of computing the particle volume only works for
+//         rectilinear grid with fully filled elements
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // Volume of the cell / # of particles
-      // !!!! TODO: this approach won't work for arbitrary shape elements
-      // !!!! when applying traction on particles.
       this->assign_volume(phase, cell_->volume() / cell_->nparticles());
     } else {
       throw std::runtime_error(
@@ -371,35 +366,20 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume_strainrate(unsigned phase,
   return status;
 }
 
-// !!!!  NEEDS A REVISION
-// !!!!  May be we can have materials defined for both phase.
-// !!!!  So we can have material pointers for both phases.
-// !!!!  For example, it will have the capability to model viscous pore fluid
-// !!!!  For now this function computes the mass for the given phase, but needs
-// !!!!  further  changes.
 // Compute mass of particle
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
   bool status = true;
   try {
-    // Check if particle volume is set and material ptr is valid
-<<<<<<< HEAD
-    if (volume_(phase) != std::numeric_limits<double>::max() &&
-        material_.at(phase) != nullptr) {
-      // Mass = volume of particle * mass_density
-      mass_density_(phase) = material_.at(phase)->property("density");
-      this->mass_(phase) = volume_(phase) * mass_density_(phase);
-=======
+    // Check if particle volume and material density are set
     if (volume_ != std::numeric_limits<double>::max() &&
-        material_ != nullptr) {
-      // Mass = volume of particle * mass_density
-      material_density_(phase) = material_->property("density");
+        material_density_(phase) != std::numeric_limits<double>::max()) {
       this->mass_(phase) =
           volume_fraction_(phase) * material_density_(phase) * volume_;
->>>>>>> :Sparkles: :construction: Add material point volume and phase volume separately.
     } else {
       throw std::runtime_error(
-          "Cell or material is invalid! cannot compute mass for the particle");
+          "Particle volume or density is invalid! cannot compute mass for the "
+          "particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
