@@ -430,6 +430,16 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Local coordinates
+    Eigen::Vector2d xi;
+    xi.fill(std::numeric_limits<double>::max());
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == false);
+    // Compute reference location
+    cell->is_point_in_cell(particle->coordinates(), &xi);
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == true);
+
     // Assign cell id again
     REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status
@@ -625,7 +635,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->map_internal_force(phase) == false);
 
     // Assign material properties
-    REQUIRE(particle->assign_material(material) == true);
+    REQUIRE(particle->assign_material(phase, material) == true);
 
     // Compute volume
     REQUIRE(particle->compute_volume(Phase) == true);
@@ -935,10 +945,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(material->id() == 0);
 
     // Check if particle can be assigned a material is null
-    REQUIRE(particle->assign_material(nullptr) == false);
+    REQUIRE(particle->assign_material(Phase, nullptr) == false);
 
     // Assign material to particle
-    REQUIRE(particle->assign_material(material) == true);
+    REQUIRE(particle->assign_material(Phase, material) == true);
   }
 
   SECTION("Check particle properties") {
@@ -1296,6 +1306,16 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->cell_id() == 10);
     // Assign particle to cell
     REQUIRE(particle->assign_cell(cell) == true);
+    // Local coordinates
+    Eigen::Vector3d xi;
+    xi.fill(std::numeric_limits<double>::max());
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == false);
+    // Compute reference location
+    cell->is_point_in_cell(particle->coordinates(), &xi);
+    // Assign particle to cell
+    REQUIRE(particle->assign_cell_xi(cell, xi) == true);
+
     // Assign cell id again
     REQUIRE(particle->assign_cell_id(10) == false);
     // Check particle cell status
@@ -1526,10 +1546,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->map_internal_force(phase) == false);
 
     // Assign material properties
-    REQUIRE(particle->assign_material(material) == true);
+    REQUIRE(particle->assign_material(Phase, material) == true);
 
     // Compute volume
-    REQUIRE(particle->compute_volume(Phase) == true);
+    REQUIRE(particle->compute_volume(phase) == true);
 
     // Compute mass
     REQUIRE(particle->compute_mass(phase) == true);
@@ -1876,9 +1896,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(material->id() == 0);
 
     // Check if particle can be assigned a null material
-    REQUIRE(particle->assign_material(nullptr) == false);
+    REQUIRE(particle->assign_material(Phase, nullptr) == false);
     // Assign material to particle
-    REQUIRE(particle->assign_material(material) == true);
+    REQUIRE(particle->assign_material(Phase, material) == true);
   }
 
   SECTION("Check particle properties") {

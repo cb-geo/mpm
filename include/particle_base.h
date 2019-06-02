@@ -74,6 +74,10 @@ class ParticleBase {
   //! Assign cell
   virtual bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) = 0;
 
+  //! Assign cell and xi
+  virtual bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                              const Eigen::Matrix<double, Tdim, 1>& xi) = 0;
+
   //! Assign cell id
   virtual bool assign_cell_id(Index id) = 0;
 
@@ -88,9 +92,6 @@ class ParticleBase {
 
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
-
-  //! Assign volume fraction
-  virtual bool assign_volume_fraction(double porosity) = 0;
 
   //! Assign volume
   virtual bool assign_volume(unsigned phase, double volume) = 0;
@@ -115,7 +116,7 @@ class ParticleBase {
 
   // Assign material
   virtual bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) = 0;
+      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -221,9 +222,13 @@ class ParticleBase {
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
-  std::shared_ptr<Material<Tdim>> material_;
+  std::map<unsigned, std::shared_ptr<Material<Tdim>>> material_;
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Material point volume
+  double volume_{std::numeric_limits<double>::max()};
+  //! Material point porosity (volume of voids / total volume)
+  double porosity_{0.0};
 };  // ParticleBase class
 }  // namespace mpm
 

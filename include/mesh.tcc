@@ -323,6 +323,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   const mpm::Index id = particle->id();
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
 }
@@ -364,8 +366,9 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (!status && cell->is_point_in_cell(particle->coordinates())) {
-          particle->assign_cell(cell);
+        Eigen::Matrix<double, Tdim, 1> xi;
+        if (!status && cell->is_point_in_cell(particle->coordinates(), &xi)) {
+          particle->assign_cell_xi(cell, xi);
           status = true;
         }
       });

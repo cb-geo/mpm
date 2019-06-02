@@ -71,6 +71,15 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) override;
 
+  //! Assign a cell to particle
+  //! If point is in new cell, assign new cell and remove particle id from old
+  //! cell. If point can't be found in the new cell, check if particle is still
+  //! valid in the old cell, if it is leave it as is. If not, set cell as null
+  //! \param[in] cellptr Pointer to a cell
+  //! \param[in] xi Local coordinates of the point in reference cell
+  bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                      const Eigen::Matrix<double, Tdim, 1>& xi) override;
+
   //! Assign cell id
   //! \param[in] id Cell id
   bool assign_cell_id(Index id) override;
@@ -87,10 +96,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn() override;
 
-  //! Assign volume fraction
-  //! \param[in] porosity Porosity of particle
-  bool assign_volume_fraction(double porosity) override;
-
   //! Assign volume
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume of particle for the phase
@@ -98,7 +103,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return volume
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return volume_(phase); }
+  double volume(unsigned phase) const override { return phase_volume_(phase); }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -135,7 +140,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
+      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -280,13 +285,20 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
-  //! Volumetric mass density (mass / volume)
-  Eigen::Matrix<double, 1, Tnphases> mass_density_;
-  //! Mass
+  //! Material point volume
+  using ParticleBase<Tdim>::volume_;
+  //! Material point porosity
+  using ParticleBase<Tdim>::porosity_;
+
+  //! Degree of saturation in porous media
+  double saturation_degree_{1.0};
+  //! Material density (intrinsic/real density of each phase material)
+  Eigen::Matrix<double, 1, Tnphases> material_density_;
+  //! Phase mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Volume
-  Eigen::Matrix<double, 1, Tnphases> volume_;
-  //! Volume fraction
+  //! Phae volume
+  Eigen::Matrix<double, 1, Tnphases> phase_volume_;
+  //! Phase volume fraction
   Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;

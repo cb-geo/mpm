@@ -35,6 +35,29 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
+    // Get stress update method
+    try {
+      if (analysis_.find("stress_update") != analysis_.end()) {
+        switch (analysis_["stress_update"].template get<int>()) {
+          case (0):
+            stress_update_ = mpm::StressUpdate::usf;
+          case (1):
+            stress_update_ = mpm::StressUpdate::usl;
+          case (2):
+            stress_update_ = mpm::StressUpdate::musl;
+          default:
+            throw std::runtime_error(
+                "Stress update method is invalid, must be 0,1 or 2");
+        }
+      } else
+        console_->warn(
+            "{} #{}: Stress update method is not specified, using default as "
+            "USF",
+            __FILE__, __LINE__);
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    }
+
     // Velocity update
     try {
       velocity_update_ = analysis_["velocity_update"].template get<bool>();
@@ -331,15 +354,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         mesh_->particles_cells());
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
-
-    // Assign volume fraction
-    if (!analysis_["porosity"].empty()) {
-      double porosity = analysis_["porosity"];
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::assign_volume_fraction,
-                    std::placeholders::_1, porosity));
-    }
-
     // Compute volume
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
@@ -485,6 +499,8 @@ bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
+  // Set phase to zero
+  unsigned phase = 0;
   // Assign material to particle sets
   try {
     // Get particle properties
@@ -501,7 +517,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
+                            std::placeholders::_1, phase, set_material));
       }
     }
     status = true;
