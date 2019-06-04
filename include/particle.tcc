@@ -335,25 +335,17 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
   return status;
 }
 
-// !!!!  NEEDS A COMPLETE REVISION
-// !!!!  Centre volume strain rate is used for incompressible materials.
-// !!!! But for other materials, we need to use volume strain rate at particle.
-// !!!! For now this function is disabled until new functions are added.
-// TODO: no need of phase REMOVE
-// Update volume based on the central strain rate
+// Update material point volume
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_volume_strainrate(unsigned phase,
-                                                             double dt) {
+bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
     if (cell_ != nullptr &&
         volume_ != std::numeric_limits<double>::max()) {
-      // Compute at centroid
-      // Strain rate for reduced integration
-      Eigen::VectorXd strain_rate_centroid =
-          cell_->compute_strain_rate_centroid(phase);
-      //this->volume_(phase) *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
+
+      Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+      this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");

@@ -112,10 +112,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
 
-  //! Update volume based on centre volumetric strain rate
+  //! Update material point volume
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool update_volume_strainrate(unsigned phase, double dt) override;
+  bool update_volume(unsigned phase, double dt) override;
 
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
