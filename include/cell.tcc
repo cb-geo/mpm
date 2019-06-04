@@ -434,20 +434,26 @@ inline bool mpm::Cell<Tdim>::approx_point_in_cell(
 //! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point,
+    Eigen::Matrix<double, Tdim, 1>* xi) {
+
+  // Set an initial value of Xi
+  (*xi).fill(std::numeric_limits<double>::max());
 
   // Check if point is approximately in the cell
   if (!this->approx_point_in_cell(point)) return false;
 
-  // Check if cell is cartesian, if so use cartesian checker
-  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
-
   bool status = true;
-  // Get local coordinates
-  Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
+
+  // Check if cell is cartesian, if so use cartesian local coordinates
+  if (!isoparametric_) (*xi) = this->local_coordinates_point(point);
+  // Isoparametric element
+  else
+    (*xi) = this->transform_real_to_unit_cell(point);
+
   // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+  for (unsigned i = 0; i < (*xi).size(); ++i)
+    if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
   return status;
 }
 
@@ -1220,7 +1226,7 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
                                             double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+    nodes_[i]->update_mass_pressure(phase, shapefn(i) * pmass * ppressure);
 }
 
 //! Compute nodal momentum from particle mass and velocity for a given phase
