@@ -284,6 +284,9 @@ class Cell {
   //! Compute normal vector
   void compute_normals();
 
+  //! Return sorted face node ids
+  std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point

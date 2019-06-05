@@ -1445,3 +1445,24 @@ inline void mpm::Cell<3>::compute_normals() {
         static_cast<unsigned>(face_id), normal_vector));
   }
 }
+
+//! Return a sorted list of face node ids
+template <unsigned Tdim>
+inline std::vector<std::vector<mpm::Index>>
+    mpm::Cell<Tdim>::sorted_face_node_ids() {
+  std::vector<std::vector<mpm::Index>> set_face_nodes;
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    std::vector<mpm::Index> face_nodes;
+
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+    for (int id = 0; id < indices.size(); ++id)
+      face_nodes.emplace_back(nodes_[indices(id)]->id());
+
+    // Sort in ascending order
+    std::sort(face_nodes.begin(), face_nodes.end());
+    set_face_nodes.emplace_back(face_nodes);
+  }
+  return set_face_nodes;
+}
