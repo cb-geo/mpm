@@ -21,6 +21,12 @@
 
 namespace mpm {
 
+//! Stress update method
+//! usl: Update Stress Last
+//! usf: Update Stress First
+//! musl: Modified Stress Last
+enum class StressUpdate { usf, usl, musl };
+
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
 //! \details A Base MPM class
@@ -84,7 +90,8 @@ class MPMBase : public MPM {
   using mpm::MPM::post_process_;
   //! Logger
   using mpm::MPM::console_;
-
+  //! Stress update method (default usf = 0, usl = 1, musl = 2)
+  mpm::StressUpdate stress_update_{mpm::StressUpdate::usf};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity

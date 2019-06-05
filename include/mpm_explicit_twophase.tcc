@@ -1,20 +1,15 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
+mpm::MPMExplicitTwoPhase<Tdim>::MPMExplicitTwoPhase(std::unique_ptr<IO>&& io)
     : mpm::MPMBase<Tdim>(std::move(io)) {
   //! Logger
-  console_ = spdlog::get("MPMExplicit");
+  console_ = spdlog::get("MPMExplicitTwoPhase");
 }
 
 //! MPM Explicit solver
 template <unsigned Tdim>
-bool mpm::MPMExplicit<Tdim>::solve() {
+bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   bool status = true;
-
-  // Get analysis type USL/USF
-  if (io_->analysis_type() == "MPMExplicitUSL2D" ||
-      io_->analysis_type() == "MPMExplicitUSL3D")
-    this->usl_ = true;
 
   console_->error("Analysis{} {}", io_->analysis_type());
 
@@ -30,7 +25,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #endif
 
   // Phase
-  const unsigned phase = 0;
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
 
   // Test if checkpoint resume is needed
   bool resume = false;
@@ -56,17 +52,24 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Assign material to particles
   // Get particle properties
   auto particle_props = io_->json_object("particle");
-  // Material id
+  
+  // Change this to read an array of material ids
   const auto material_id =
       particle_props["material_id"].template get<unsigned>();
 
   // Get material from list of materials
-  auto material = materials_.at(material_id);
+  auto solid_skeleton_material = materials_.at(material_id);
+  auto pore_fluid_material = materials_.at(material_id);
 
   // Iterate over each particle to assign material
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, phase, material));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::assign_material, std::placeholders::_1,
+      solid_skeleton, solid_skeleton_material));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::assign_material, std::placeholders::_1,
+      pore_fluid, pore_fluid_material));
+
+  // Read the porosity and assign to particles (set the volume fraction too).
 
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
@@ -141,7 +144,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Update stress first
-    if (!usl_) {
+    if (stress_update_ == mpm::StressUpdate::usf) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -247,7 +250,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, phase, this->dt_));
 
     // Update Stress Last
-    if (usl_ == true) {
+    if (stress_update_ == mpm::StressUpdate::usl) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -306,7 +309,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   }
   auto solver_end = std::chrono::steady_clock::now();
   console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 (this->usl_ ? "USL" : "USF"),
+                 (stress_update_ == mpm::StressUpdate::usl ? "USL" : "USF"),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
