@@ -29,6 +29,10 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
   SECTION("Mesh cell neighbours 2D") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
+    
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
 
     // Coordinates
     Eigen::Vector2d coords;
@@ -70,18 +74,9 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     REQUIRE(cell0->add_node(3, node3) == true);
     REQUIRE(cell0->nnodes() == 4);
 
-    // Initialise cell
+    // Initialise cell and to mesh
     REQUIRE(cell0->initialise() == true);
-
-    // Check face node ids of cell 0
-    auto fnodes = cell0->sorted_face_node_ids();
-    REQUIRE(fnodes.size() == 4);
-
-    std::vector<std::vector<mpm::Index>> fnodes_check = {
-        {0, 1}, {1, 2}, {2, 3}, {0, 3}};
-    for (unsigned i = 0; i < fnodes_check.size(); ++i)
-      for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
-        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+    REQUIRE(mesh->add_cell(cell0) == true);
 
     id = 1;
     auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
@@ -92,34 +87,49 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     REQUIRE(cell1->add_node(3, node2) == true);
     REQUIRE(cell1->nnodes() == 4);
 
-    // Initialise cell
+    // Initialise cell and add to mesh
     REQUIRE(cell1->initialise() == true);
+    REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Check face node ids of cell 1
-    fnodes = cell1->sorted_face_node_ids();
-    REQUIRE(fnodes.size() == 4);
+    SECTION("Test face node neighbour ids") {
+      // Check face node ids of cell 0
+      auto fnodes = cell0->sorted_face_node_ids();
+      REQUIRE(fnodes.size() == 4);
 
-    // Assign neighbours
-    fnodes_check = {{1, 4}, {4, 5}, {2, 5}, {1, 2}};
-    for (unsigned i = 0; i < fnodes_check.size(); ++i)
-      for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
-        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+      std::vector<std::vector<mpm::Index>> fnodes_check = {
+          {0, 1}, {1, 2}, {2, 3}, {0, 3}};
+      for (unsigned i = 0; i < fnodes_check.size(); ++i)
+        for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
+          REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
 
-    // Add neighbours to cell 0
-    REQUIRE(cell0->nneighbours() == 0);
-    REQUIRE(cell0->add_neighbour(1) == true);
-    REQUIRE(cell0->add_neighbour(0) == false);
-    REQUIRE(cell0->add_neighbour(0) == false);
-    REQUIRE(cell0->nneighbours() == 1);
-    for (auto n : cell0->neighbours()) REQUIRE(n == 1);
+      // Check face node ids of cell 1
+      fnodes = cell1->sorted_face_node_ids();
+      REQUIRE(fnodes.size() == 4);
 
-    // Add neighbours to cell 1
-    REQUIRE(cell1->nneighbours() == 0);
-    REQUIRE(cell1->add_neighbour(0) == true);
-    REQUIRE(cell1->add_neighbour(0) == false);
-    REQUIRE(cell1->add_neighbour(1) == false);
-    REQUIRE(cell1->nneighbours() == 1);
-    for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+      // Assign neighbours
+      fnodes_check = {{1, 4}, {4, 5}, {2, 5}, {1, 2}};
+      for (unsigned i = 0; i < fnodes_check.size(); ++i)
+        for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
+          REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+    }
+
+    SECTION("Check add neighbours") {
+      // Add neighbours to cell 0
+      REQUIRE(cell0->nneighbours() == 0);
+      REQUIRE(cell0->add_neighbour(1) == true);
+      REQUIRE(cell0->add_neighbour(0) == false);
+      REQUIRE(cell0->add_neighbour(0) == false);
+      REQUIRE(cell0->nneighbours() == 1);
+      for (auto n : cell0->neighbours()) REQUIRE(n == 1);
+
+      // Add neighbours to cell 1
+      REQUIRE(cell1->nneighbours() == 0);
+      REQUIRE(cell1->add_neighbour(0) == true);
+      REQUIRE(cell1->add_neighbour(0) == false);
+      REQUIRE(cell1->add_neighbour(1) == false);
+      REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+    }
   }
 }
 
@@ -204,16 +214,6 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
 
     REQUIRE(mesh->add_cell(cell0) == true);
 
-    // Check face node ids of cell 0
-    auto fnodes = cell0->sorted_face_node_ids();
-    std::vector<std::vector<mpm::Index>> fnodes_check = {
-        {0, 1, 4, 5}, {1, 2, 5, 6}, {2, 3, 6, 7},
-        {0, 3, 4, 7}, {0, 1, 2, 3}, {4, 5, 6, 7}};
-
-    for (unsigned i = 0; i < fnodes.size(); ++i)
-      for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
-        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
-
     // Cell 1
     coords << 4, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node8 =
@@ -252,28 +252,43 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
 
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Check face node ids of cell 0
-    fnodes = cell1->sorted_face_node_ids();
-    fnodes_check = {{1, 5, 8, 10}, {8, 9, 10, 11}, {2, 6, 9, 11},
-                    {1, 2, 5, 6},  {1, 2, 8, 9},   {5, 6, 10, 11}};
-    for (unsigned i = 0; i < fnodes.size(); ++i)
-      for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
-        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+    SECTION("Check face node ids") {
 
-    // Add neighbours to cell 0
-    REQUIRE(cell0->nneighbours() == 0);
-    REQUIRE(cell0->add_neighbour(1) == true);
-    REQUIRE(cell0->add_neighbour(0) == false);
-    REQUIRE(cell0->add_neighbour(0) == false);
-    REQUIRE(cell0->nneighbours() == 1);
-    for (auto n : cell0->neighbours()) REQUIRE(n == 1);
+      // Check face node ids of cell 0
+      auto fnodes = cell0->sorted_face_node_ids();
+      std::vector<std::vector<mpm::Index>> fnodes_check = {
+          {0, 1, 4, 5}, {1, 2, 5, 6}, {2, 3, 6, 7},
+          {0, 3, 4, 7}, {0, 1, 2, 3}, {4, 5, 6, 7}};
 
-    // Add neighbours to cell 1
-    REQUIRE(cell1->nneighbours() == 0);
-    REQUIRE(cell1->add_neighbour(0) == true);
-    REQUIRE(cell1->add_neighbour(0) == false);
-    REQUIRE(cell1->add_neighbour(1) == false);
-    REQUIRE(cell1->nneighbours() == 1);
-    for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+      for (unsigned i = 0; i < fnodes.size(); ++i)
+        for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
+          REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+
+      // Check face node ids of cell 0
+      fnodes = cell1->sorted_face_node_ids();
+      fnodes_check = {{1, 5, 8, 10}, {8, 9, 10, 11}, {2, 6, 9, 11},
+                      {1, 2, 5, 6},  {1, 2, 8, 9},   {5, 6, 10, 11}};
+      for (unsigned i = 0; i < fnodes.size(); ++i)
+        for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
+          REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+    }
+
+    SECTION("Check assign neighbours") {
+      // Add neighbours to cell 0
+      REQUIRE(cell0->nneighbours() == 0);
+      REQUIRE(cell0->add_neighbour(1) == true);
+      REQUIRE(cell0->add_neighbour(0) == false);
+      REQUIRE(cell0->add_neighbour(0) == false);
+      REQUIRE(cell0->nneighbours() == 1);
+      for (auto n : cell0->neighbours()) REQUIRE(n == 1);
+
+      // Add neighbours to cell 1
+      REQUIRE(cell1->nneighbours() == 0);
+      REQUIRE(cell1->add_neighbour(0) == true);
+      REQUIRE(cell1->add_neighbour(0) == false);
+      REQUIRE(cell1->add_neighbour(1) == false);
+      REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+    }
   }
 }
