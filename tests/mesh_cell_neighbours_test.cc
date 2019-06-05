@@ -111,6 +111,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     REQUIRE(cell0->add_neighbour(0) == false);
     REQUIRE(cell0->add_neighbour(0) == false);
     REQUIRE(cell0->nneighbours() == 1);
+    for (auto n : cell0->neighbours()) REQUIRE(n == 1);
 
     // Add neighbours to cell 1
     REQUIRE(cell1->nneighbours() == 0);
@@ -118,6 +119,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     REQUIRE(cell1->add_neighbour(0) == false);
     REQUIRE(cell1->add_neighbour(1) == false);
     REQUIRE(cell1->nneighbours() == 1);
+    for (auto n : cell1->neighbours()) REQUIRE(n == 0);
   }
 }
 
@@ -264,6 +266,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     REQUIRE(cell0->add_neighbour(0) == false);
     REQUIRE(cell0->add_neighbour(0) == false);
     REQUIRE(cell0->nneighbours() == 1);
+    for (auto n : cell0->neighbours()) REQUIRE(n == 1);
 
     // Add neighbours to cell 1
     REQUIRE(cell1->nneighbours() == 0);
@@ -271,5 +274,6 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     REQUIRE(cell1->add_neighbour(0) == false);
     REQUIRE(cell1->add_neighbour(1) == false);
     REQUIRE(cell1->nneighbours() == 1);
+    for (auto n : cell1->neighbours()) REQUIRE(n == 0);
   }
 }
