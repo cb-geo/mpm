@@ -29,7 +29,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
   SECTION("Mesh cell neighbours 2D") {
     // Number of nodes in cell
     const unsigned Nnodes = 4;
-    
+
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
     REQUIRE(mesh->status() == false);
@@ -128,6 +128,14 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
       REQUIRE(cell1->add_neighbour(0) == false);
       REQUIRE(cell1->add_neighbour(1) == false);
       REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+    }
+
+    SECTION("Compute cell neighbours") {
+      mesh->compute_cell_neighbours();
+      REQUIRE(cell0->nneighbours() == 1);
+      REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell0->neighbours()) REQUIRE(n == 1);
       for (auto n : cell1->neighbours()) REQUIRE(n == 0);
     }
   }
@@ -288,6 +296,14 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
       REQUIRE(cell1->add_neighbour(0) == false);
       REQUIRE(cell1->add_neighbour(1) == false);
       REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+    }
+    // Compute cell neighbours
+    SECTION("Compute cell neighbours") {
+      mesh->compute_cell_neighbours();
+      REQUIRE(cell0->nneighbours() == 1);
+      REQUIRE(cell1->nneighbours() == 1);
+      for (auto n : cell0->neighbours()) REQUIRE(n == 1);
       for (auto n : cell1->neighbours()) REQUIRE(n == 0);
     }
   }

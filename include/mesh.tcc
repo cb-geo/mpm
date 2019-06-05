@@ -231,6 +231,31 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 
 //! Create cells from node lists
 template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_cell_neighbours() {
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    const auto faces = (*citr)->sorted_face_node_ids();
+    for (const auto& face : faces) {
+      faces_cells_.insert(
+          std::pair<std::vector<mpm::Index>, mpm::Index>(face, (*citr)->id()));
+    }
+  }
+
+  // Iterate through all unique keys in faces_cells_
+  for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
+       itr = faces_cells_.upper_bound(itr->first)) {
+    // Returns a pair representing the range of elements with key
+    auto range = faces_cells_.equal_range(itr->first);
+    // A face is shared only by 2 cells (distance between the range is 2)
+    if (std::distance(range.first, range.second) == 2) {
+      // Add cell as neighbours to each other
+      map_cells_[range.first->second]->add_neighbour(range.second->second);
+      map_cells_[range.second->second]->add_neighbour(range.first->second);
+    }
+  }
+}
+
+//! Create cells from node lists
+template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
     mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
   std::vector<VectorDim> points;

@@ -1023,8 +1023,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       }
     }
     // Convergence criteria
-    if ((step_length * delta).norm() < Tolerance)
-      break;
+    if ((step_length * delta).norm() < Tolerance) break;
 
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();

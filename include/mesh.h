@@ -280,6 +280,9 @@ class Mesh {
   //! \retval point Material point coordinates
   std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
 
+  //! Find cell neighbours
+  void compute_cell_neighbours();
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
@@ -347,6 +350,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Faces and cells
+  std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class
