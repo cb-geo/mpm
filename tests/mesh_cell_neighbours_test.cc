@@ -104,6 +104,20 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     for (unsigned i = 0; i < fnodes_check.size(); ++i)
       for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
         REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+
+    // Add neighbours to cell 0
+    REQUIRE(cell0->nneighbours() == 0);
+    REQUIRE(cell0->add_neighbour(1) == true);
+    REQUIRE(cell0->add_neighbour(0) == false);
+    REQUIRE(cell0->add_neighbour(0) == false);
+    REQUIRE(cell0->nneighbours() == 1);
+
+    // Add neighbours to cell 1
+    REQUIRE(cell1->nneighbours() == 0);
+    REQUIRE(cell1->add_neighbour(0) == true);
+    REQUIRE(cell1->add_neighbour(0) == false);
+    REQUIRE(cell1->add_neighbour(1) == false);
+    REQUIRE(cell1->nneighbours() == 1);
   }
 }
 
@@ -243,5 +257,19 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     for (unsigned i = 0; i < fnodes.size(); ++i)
       for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
         REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+
+    // Add neighbours to cell 0
+    REQUIRE(cell0->nneighbours() == 0);
+    REQUIRE(cell0->add_neighbour(1) == true);
+    REQUIRE(cell0->add_neighbour(0) == false);
+    REQUIRE(cell0->add_neighbour(0) == false);
+    REQUIRE(cell0->nneighbours() == 1);
+
+    // Add neighbours to cell 1
+    REQUIRE(cell1->nneighbours() == 0);
+    REQUIRE(cell1->add_neighbour(0) == true);
+    REQUIRE(cell1->add_neighbour(0) == false);
+    REQUIRE(cell1->add_neighbour(1) == false);
+    REQUIRE(cell1->nneighbours() == 1);
   }
 }

@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <vector>
 
 #include "Eigen/Dense"
@@ -100,14 +101,15 @@ class Cell {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add a neighbour cell
-  //! \param[in] local_id local id of the neighbouring cell
-  //! \param[in] neighbour A shared pointer to the neighbouring cell
+  //! \param[in] neighbour_id id of the neighbouring cell
   //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(unsigned local_id,
-                     const std::shared_ptr<Cell<Tdim>>& neighbour);
+  bool add_neighbour(mpm::Index neighbour_id);
 
   //! Number of neighbours
-  unsigned nneighbours() const { return neighbour_cells_.size(); }
+  unsigned nneighbours() const { return neighbours_.size(); }
+
+  //! Return neighbour ids
+  std::set<mpm::Index> neighbours() const { return neighbours_; }
 
   //! Add an id of a particle in the cell
   //! \param[in] id Global id of a particle
@@ -313,8 +315,8 @@ class Cell {
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates
   Eigen::MatrixXd nodal_coordinates_;
-  //! Container of cell neighbours
-  Map<Cell<Tdim>> neighbour_cells_;
+  //! Container of cell neighbour ids
+  std::set<mpm::Index> neighbours_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Quadrature
