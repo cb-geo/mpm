@@ -75,6 +75,8 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
 
     // Check face node ids of cell 0
     auto fnodes = cell0->sorted_face_node_ids();
+    REQUIRE(fnodes.size() == 4);
+
     std::vector<std::vector<mpm::Index>> fnodes_check = {
         {0, 1}, {1, 2}, {2, 3}, {0, 3}};
     for (unsigned i = 0; i < fnodes_check.size(); ++i)
@@ -95,9 +97,151 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
 
     // Check face node ids of cell 1
     fnodes = cell1->sorted_face_node_ids();
+    REQUIRE(fnodes.size() == 4);
+
+    // Assign neighbours
     fnodes_check = {{1, 4}, {4, 5}, {2, 5}, {1, 2}};
     for (unsigned i = 0; i < fnodes_check.size(); ++i)
       for (unsigned j = 0; j < fnodes_check.at(i).size(); ++j)
+        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+  }
+}
+
+TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
+  // Dimension
+  const unsigned Dim = 3;
+  // Degrees of freedom
+  const unsigned Dof = 6;
+  // Number of phases
+  const unsigned Nphases = 1;
+  // Number of nodes per cell
+  const unsigned Nnodes = 8;
+  // Tolerance
+  const double Tolerance = 1.E-9;
+
+  // 8-noded hexahedron element
+  std::shared_ptr<mpm::Element<Dim>> element =
+      Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
+
+  SECTION("Mesh cell neighbours 3D") {
+
+    auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+    // Check mesh is active
+    REQUIRE(mesh->status() == false);
+
+    // Define nodes
+    Eigen::Vector3d coords;
+    coords << 0, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+    REQUIRE(mesh->add_node(node0) == true);
+
+    coords << 2, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+    REQUIRE(mesh->add_node(node1) == true);
+
+    coords << 2, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+    REQUIRE(mesh->add_node(node2) == true);
+
+    coords << 0, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+    REQUIRE(mesh->add_node(node3) == true);
+
+    coords << 0, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+    REQUIRE(mesh->add_node(node4) == true);
+
+    coords << 2, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+    REQUIRE(mesh->add_node(node5) == true);
+
+    coords << 2, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+    REQUIRE(mesh->add_node(node6) == true);
+
+    coords << 0, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+    REQUIRE(mesh->add_node(node7) == true);
+
+    // Create cell0
+    auto cell0 = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+
+    // Add nodes to cell
+    cell0->add_node(0, node0);
+    cell0->add_node(1, node1);
+    cell0->add_node(2, node2);
+    cell0->add_node(3, node3);
+    cell0->add_node(4, node4);
+    cell0->add_node(5, node5);
+    cell0->add_node(6, node6);
+    cell0->add_node(7, node7);
+
+    REQUIRE(cell0->nnodes() == 8);
+
+    REQUIRE(mesh->add_cell(cell0) == true);
+
+    // Check face node ids of cell 0
+    auto fnodes = cell0->sorted_face_node_ids();
+    std::vector<std::vector<mpm::Index>> fnodes_check = {
+        {0, 1, 4, 5}, {1, 2, 5, 6}, {2, 3, 6, 7},
+        {0, 3, 4, 7}, {0, 1, 2, 3}, {4, 5, 6, 7}};
+
+    for (unsigned i = 0; i < fnodes.size(); ++i)
+      for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
+        REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
+
+    // Cell 1
+    coords << 4, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node8 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+    REQUIRE(mesh->add_node(node8) == true);
+
+    coords << 4, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node9 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+    REQUIRE(mesh->add_node(node9) == true);
+
+    coords << 4, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node10 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+    REQUIRE(mesh->add_node(node10) == true);
+
+    coords << 4, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node11 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+    REQUIRE(mesh->add_node(node11) == true);
+
+    // Create cell0
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, element);
+
+    // Add nodes to cell
+    cell1->add_node(0, node1);
+    cell1->add_node(1, node8);
+    cell1->add_node(2, node9);
+    cell1->add_node(3, node2);
+    cell1->add_node(4, node5);
+    cell1->add_node(5, node10);
+    cell1->add_node(6, node11);
+    cell1->add_node(7, node6);
+
+    REQUIRE(cell1->nnodes() == 8);
+
+    REQUIRE(mesh->add_cell(cell1) == true);
+
+    // Check face node ids of cell 0
+    fnodes = cell1->sorted_face_node_ids();
+    fnodes_check = {{1, 5, 8, 10}, {8, 9, 10, 11}, {2, 6, 9, 11},
+                    {1, 2, 5, 6},  {1, 2, 8, 9},   {5, 6, 10, 11}};
+    for (unsigned i = 0; i < fnodes.size(); ++i)
+      for (unsigned j = 0; j < fnodes.at(i).size(); ++j)
         REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
   }
 }
