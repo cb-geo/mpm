@@ -284,9 +284,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
     // Assign material poiint volume.
     // For porous media, this is the volume of the solid skeleton
     volume_ = volume;
-    // This is the volume of each phase represented by the material point
-    this->phase_volume_ = volume * volume_fraction_;
-
     // !!!!!!! TODO
     // Compute size of particle in each direction: This is okay for square
     // element, but won't work for irregular elements when applying traction at
