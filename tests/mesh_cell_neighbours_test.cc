@@ -137,6 +137,23 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
       REQUIRE(cell1->nneighbours() == 1);
       for (auto n : cell0->neighbours()) REQUIRE(n == 1);
       for (auto n : cell1->neighbours()) REQUIRE(n == 0);
+
+      SECTION("Locate particles in mesh") {
+        coords << 3., 1.5;
+        std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+            std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        // Add particle 1 and check
+        REQUIRE(mesh->add_particle(particle1, false) == true);
+
+        // Assign incorrect cell id of 0
+        REQUIRE(particle1->assign_cell_id(0) == true);
+
+        // Locate particles in a mesh
+        auto particles = mesh->locate_particles_mesh();
+
+        // Should find all particles in mesh
+        REQUIRE(particles.size() == 0);
+      }
     }
   }
 }

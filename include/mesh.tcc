@@ -382,6 +382,17 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
     if (!particle->cell_ptr())
       particle->assign_cell(map_cells_[particle->cell_id()]);
     if (particle->compute_reference_location()) return true;
+
+    // Check if material point is in any of its nearest neighbours
+    const auto neighbours = map_cells_[particle->cell_id()]->neighbours();
+    Eigen::Matrix<double, Tdim, 1> xi;
+    Eigen::Matrix<double, Tdim, 1> coordinates = particle->coordinates();
+    for (auto neighbour : neighbours) {
+      if (map_cells_[neighbour]->is_point_in_cell(coordinates, &xi)) {
+        particle->assign_cell_xi(map_cells_[neighbour], xi);
+        return true;
+      }
+    }
   }
 
   bool status = false;
