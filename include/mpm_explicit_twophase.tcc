@@ -69,7 +69,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   auto solid_skeleton_material = materials_.at(solid_skeleton_mid);
   auto pore_fluid_material = materials_.at(pore_fluid_mid);
 
-  // Iterate over each particle to assign material
+  // Iterate over each particle to assign material to each phase
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::assign_material, std::placeholders::_1,
       solid_skeleton, solid_skeleton_material));
@@ -83,9 +83,23 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     bool set_material_status = this->apply_properties_to_particles_sets();
   }
 
-  // Compute mass
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+  // Initialise porosity
+  // Default particle porosity as 0
+  double porosity = 0;
+  // Read and assign porosity (volume fraction and phase volume)
+  if (particle_props.find("porosity") != particle_props.end())
+    porosity = particle_props["porosity"].template get<double>();
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::assign_porosity,
+                std::placeholders::_1, porosity));
+
+  // Compute mass for each phase
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1,
+                solid_skeleton));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1,
+                pore_fluid));
 
   // Check point resume
   if (resume) this->checkpoint_resume();
