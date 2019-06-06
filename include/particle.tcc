@@ -309,6 +309,47 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
   return status;
 }
 
+// Assign porosity to the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_porosity(double porosity) {
+  bool status = true;
+  try {
+    if (porosity < 0. || porosity > 1.)
+      throw std::runtime_error(
+          "Particle porosity is negative or larger than one");
+    // Assign porosity
+    porosity_ = porosity;
+    // Update volume fraction for each phase
+    switch (Tnphases) {
+      case (1): {
+        volume_fraction_[0] = 1. - porosity_;
+        break;
+      }
+      case (2): {
+        volume_fraction_[0] = 1. - porosity_;
+        volume_fraction_[1] = porosity_;
+        break;
+      }
+      case (3): {
+        volume_fraction_[0] = 1. - porosity_;
+        volume_fraction_[1] = porosity_ * saturation_degree_;
+        volume_fraction_[2] = porosity_ - volume_fraction_[1];
+        break;
+      }
+      default: {
+        volume_fraction_[0] = 1. - porosity_;
+        break;
+      }
+    }
+    // Update phase volume for each phase
+    for (unsigned i = 0; i < Tnphases; ++i)
+      phase_volume_[i] = volume_fraction_[i] * volume_;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
 // Compute volume of the particle
 // Note 1: \param[in] phase is not used
 // Note 2: This method of computing the particle volume only works for
@@ -338,8 +379,7 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr &&
-        volume_ != std::numeric_limits<double>::max()) {
+    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
       Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
       this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
