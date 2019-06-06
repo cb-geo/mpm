@@ -368,15 +368,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error("Particles volumes are not properly assigned");
     }
 
-    // Default particle porosity as 0
-    double porosity = 0;
-    // Read and assign porosity (volume fraction and phase volume)
-    if (!particle_props.at("porosity").empty())
-      porosity = particle_props["porosity"].template get<double>();
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::assign_porosity,
-                  std::placeholders::_1, porosity));
-
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
       bool particles_tractions = mesh_->assign_particles_tractions(
