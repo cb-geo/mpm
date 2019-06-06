@@ -167,8 +167,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->assign_volume(Phase, 0.0) == false);
     REQUIRE(particle->assign_volume(Phase, -5.0) == false);
     REQUIRE(particle->assign_volume(Phase, 2.0) == true);
-    // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Check total volume
+    REQUIRE(particle->total_volume() == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 0;
@@ -588,7 +588,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -604,12 +604,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_volume(Phase, 0.0) == false);
     REQUIRE(particle->assign_volume(Phase, -5.0) == false);
     REQUIRE(particle->assign_volume(Phase, 2.0) == true);
-    // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Check total volume
+    REQUIRE(particle->total_volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
     REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->total_volume() == Approx(1.0).epsilon(Tolerance));
 
     // Check reference location
     coords << -0.5, -0.5;
@@ -762,9 +762,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
             Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     // Update volume strain rate
-    REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
-    REQUIRE(particle->volume(phase) == Approx(1.2).epsilon(Tolerance));
+    REQUIRE(particle->total_volume() == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
+    REQUIRE(particle->total_volume() == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -996,8 +996,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_volume(Phase, 0.0) == false);
     REQUIRE(particle->assign_volume(Phase, -5.0) == false);
     REQUIRE(particle->assign_volume(Phase, 2.0) == true);
-    // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Check total volume
+    REQUIRE(particle->total_volume() == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 1;
@@ -1504,7 +1504,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1521,11 +1521,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_volume(Phase, -5.0) == false);
     REQUIRE(particle->assign_volume(Phase, 2.0) == true);
     // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    REQUIRE(particle->total_volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
     REQUIRE(particle->compute_volume(Phase) == true);
     // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->total_volume() == Approx(8.0).epsilon(Tolerance));
 
     // Check reference location
     coords << 0.5, 0.5, 0.5;
@@ -1698,12 +1698,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
             Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     // Update volume strain rate
-    REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
-    REQUIRE(particle->volume(phase) == Approx(12.0).epsilon(Tolerance));
+    REQUIRE(particle->total_volume() == Approx(8.0).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
+    REQUIRE(particle->total_volume() == Approx(12.0).epsilon(Tolerance));
 
     Eigen::Matrix<double, 6, 1> stress;
     // clang-format off
@@ -1950,8 +1950,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_volume(Phase, 0.0) == false);
     REQUIRE(particle->assign_volume(Phase, -5.0) == false);
     REQUIRE(particle->assign_volume(Phase, 2.0) == true);
-    // Check volume
-    REQUIRE(particle->volume(Phase) == Approx(2.0).epsilon(Tolerance));
+    // Check total volume
+    REQUIRE(particle->total_volume() == Approx(2.0).epsilon(Tolerance));
     // Traction
     double traction = 65.32;
     const unsigned Direction = 1;
