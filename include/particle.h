@@ -105,9 +105,12 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] porosity Porosity of particle
   bool assign_porosity(double porosity) override;
 
-  //! Return volume
+  //! Return volume of specified phase
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return phase_volume_(phase); }
+
+  //! Return total volume
+  double total_volume() const override { return volume_; }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -115,6 +118,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute volume as cell volume / nparticles
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
+
+  //! Update material point volume by using the cell-centre strain rate
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_volume_centre_strainrate(unsigned phase, double dt) override;
 
   //! Update material point volume
   //! \param[in] phase Index corresponding to the phase
