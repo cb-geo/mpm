@@ -96,6 +96,9 @@ class ParticleBase {
   //! Assign volume
   virtual bool assign_volume(unsigned phase, double volume) = 0;
 
+  //! Assign porosity
+  virtual bool assign_porosity(double porosity) = 0;
+
   //! Return volume
   virtual double volume(unsigned phase) const = 0;
 
