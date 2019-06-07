@@ -553,6 +553,11 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
             .string();
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
+
+    // Clear all particle ids
+    mesh_->iterate_over_cells(
+        std::bind(&mpm::Cell<Tdim>::clear_particle_ids, std::placeholders::_1));
+
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
 

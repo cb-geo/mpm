@@ -96,14 +96,23 @@ class ParticleBase {
   //! Assign volume
   virtual bool assign_volume(unsigned phase, double volume) = 0;
 
-  //! Return volume
+  //! Assign porosity
+  virtual bool assign_porosity(double porosity) = 0;
+
+  //! Return volume of specified phase
   virtual double volume(unsigned phase) const = 0;
+
+  //! Return total volume
+  virtual double volume() const = 0;
 
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
   //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
+
+  //! Update material point volume by using the cell-centre strain rate
+  virtual bool update_volume_centre_strainrate(unsigned phase, double dt) = 0;
 
   //! Update material point volume
   virtual bool update_volume(unsigned phase, double dt) = 0;

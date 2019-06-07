@@ -909,7 +909,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<int, 6, 4> indices;
       // clang-format off
       indices << 0, 1, 5, 4,
-                 5, 1, 2, 0,
+                 5, 1, 2, 6,
                  7, 6, 2, 3,
                  0, 4, 7, 3,
                  1, 0, 3, 2,
@@ -2438,7 +2438,7 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       Eigen::Matrix<int, 6, 8> indices;
       // clang-format off
       indices << 0, 1, 5, 4,  8, 12, 16, 10,
-                 5, 1, 2, 0, 12, 11, 14, 18,
+                 5, 1, 2, 6, 12, 11, 14, 18,
                  7, 6, 2, 3, 19, 14, 13, 15,
                  0, 4, 7, 3, 10, 17, 15,  9,
                  1, 0, 3, 2,  8,  9, 13, 11,
