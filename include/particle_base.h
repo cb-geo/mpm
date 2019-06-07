@@ -103,7 +103,7 @@ class ParticleBase {
   virtual double volume(unsigned phase) const = 0;
 
   //! Return total volume
-  virtual double total_volume() const = 0;
+  virtual double volume() const = 0;
 
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;

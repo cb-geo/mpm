@@ -110,7 +110,7 @@ class Particle : public ParticleBase<Tdim> {
   double volume(unsigned phase) const override { return phase_volume_(phase); }
 
   //! Return total volume
-  double total_volume() const override { return volume_; }
+  double volume() const override { return volume_; }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
