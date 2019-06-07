@@ -17,10 +17,19 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   const unsigned Dim = 1;
   // Dimension
   const unsigned Dof = 1;
+
+  // Single phase particle
   // Phases
   const unsigned Nphases = 1;
   // Phase
   const unsigned Phase = 0;
+
+  // Two phase particle
+  // Phases
+  const unsigned Nphases_2P = 2;
+  // Phase
+  const unsigned Phase_solid = 0;
+  const unsigned Phase_fluid = 1;
 
   // Coordinates
   Eigen::Matrix<double, 1, 1> coords;
@@ -201,13 +210,6 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   }
 
   SECTION("Check particle properties in two phase") {
-    // Two phase particle
-    // Phases
-    const unsigned Nphases_2P = 2;
-    // Phase
-    const unsigned Phase_solid = 0;
-    const unsigned Phase_fluid = 1;
-
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -442,10 +444,20 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   const unsigned Dim = 2;
   // Degree of freedom
   const unsigned Dof = 2;
+
+  // Single phase particle
   // Number of phases
   const unsigned Nphases = 1;
   // Phase
   const unsigned Phase = 0;
+
+  // Two phase particle
+  // Phases
+  const unsigned Nphases_2P = 2;
+  // Phase
+  const unsigned Phase_solid = 0;
+  const unsigned Phase_fluid = 1;
+
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -1096,6 +1108,43 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_material(Phase, material) == true);
   }
 
+  SECTION("Check assign material to particle in two phase") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75, 0.75;
+    auto particle =
+        std::make_shared<mpm::Particle<Dim, Nphases_2P>>(id, coords);
+
+    unsigned mid_soild = 0;
+    unsigned mid_fluid = 1;
+    // Initialise soil material
+    Json jmaterial_solid;
+    jmaterial_solid["density"] = 1800.;
+    jmaterial_solid["youngs_modulus"] = 1.0E+7;
+    jmaterial_solid["poisson_ratio"] = 0.3;
+    // Initialise fluid material
+    Json jmaterial_fluid;
+    jmaterial_fluid["density"] = 1000.;
+
+    auto material_solid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid_soild), jmaterial_solid);
+
+    auto material_fluid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid_fluid), jmaterial_fluid);
+
+    REQUIRE(material_solid->id() == 0);
+    REQUIRE(material_fluid->id() == 1);
+
+    // Check if particle can be assigned a null material
+    REQUIRE(particle->assign_material(Phase_solid, nullptr) == false);
+    REQUIRE(particle->assign_material(Phase_fluid, nullptr) == false);
+    // Assign material to particle for each phase
+    REQUIRE(particle->assign_material(Phase_solid, material_solid) == true);
+    REQUIRE(particle->assign_material(Phase_fluid, material_fluid) == true);
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -1173,13 +1222,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   }
 
   SECTION("Check particle properties in two phase") {
-    // Two phase particle
-    // Phases
-    const unsigned Nphases_2P = 2;
-    // Phase
-    const unsigned Phase_solid = 0;
-    const unsigned Phase_fluid = 1;
-
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -1415,10 +1457,20 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   const unsigned Dim = 3;
   // Dimension
   const unsigned Dof = 6;
+
+  // Single phase particle
   // Nnumber of phases
   const unsigned Nphases = 1;
   // Phase
   const unsigned Phase = 0;
+
+  // Two phase particle
+  // Phases
+  const unsigned Nphases_2P = 2;
+  // Phase
+  const unsigned Phase_solid = 0;
+  const unsigned Phase_fluid = 1;
+
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -2191,6 +2243,43 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_material(Phase, material) == true);
   }
 
+  SECTION("Check assign material to particle in two phase") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75, 0.75;
+    auto particle =
+        std::make_shared<mpm::Particle<Dim, Nphases_2P>>(id, coords);
+
+    unsigned mid_soild = 0;
+    unsigned mid_fluid = 1;
+    // Initialise soil material
+    Json jmaterial_solid;
+    jmaterial_solid["density"] = 1800.;
+    jmaterial_solid["youngs_modulus"] = 1.0E+7;
+    jmaterial_solid["poisson_ratio"] = 0.3;
+    // Initialise fluid material
+    Json jmaterial_fluid;
+    jmaterial_fluid["density"] = 1000.;
+
+    auto material_solid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid_soild), jmaterial_solid);
+
+    auto material_fluid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid_fluid), jmaterial_fluid);
+
+    REQUIRE(material_solid->id() == 0);
+    REQUIRE(material_fluid->id() == 1);
+
+    // Check if particle can be assigned a null material
+    REQUIRE(particle->assign_material(Phase_solid, nullptr) == false);
+    REQUIRE(particle->assign_material(Phase_fluid, nullptr) == false);
+    // Assign material to particle for each phase
+    REQUIRE(particle->assign_material(Phase_solid, material_solid) == true);
+    REQUIRE(particle->assign_material(Phase_fluid, material_fluid) == true);
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -2267,13 +2356,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   }
 
   SECTION("Check particle properties in two phase") {
-    // Two phase particle
-    // Phases
-    const unsigned Nphases_2P = 2;
-    // Phase
-    const unsigned Phase_solid = 0;
-    const unsigned Phase_fluid = 1;
-
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
