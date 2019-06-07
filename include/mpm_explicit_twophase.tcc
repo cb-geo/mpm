@@ -83,12 +83,8 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     bool set_material_status = this->apply_properties_to_particles_sets();
   }
 
-  // Initialise porosity
-  // Default particle porosity as 0
-  double porosity = 0;
   // Read and assign porosity (volume fraction and phase volume)
-  if (particle_props.find("porosity") != particle_props.end())
-    porosity = particle_props["porosity"].template get<double>();
+  const double porosity = particle_props["porosity"].template get<double>();
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_porosity,
                 std::placeholders::_1, porosity));
