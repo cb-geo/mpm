@@ -14,6 +14,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   auto mesh_reader = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
+  std::vector<unsigned> material_id{{1}};
 
   // 3D
   if (dim == 3) {
@@ -39,6 +40,12 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
         {"node_type", node_type},
         {"cell_type", cell_type}}},
       {"particle", {{"material_id", 1}, {"particle_type", particle_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"material_id", material_id},
+         {"particle_type", particle_type},
+         {"generator", "file"},
+         {"generator_properties", {{"location", "particles"}}}}}},
       {"materials",
        {{{"id", 0},
          {"type", material},
@@ -52,6 +59,8 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
          {"poisson_ratio", 0.25}}}},
       {"analysis",
        {{"type", analysis},
+        {"file_reader", mesh_reader},
+        {"check_duplicates", "true"},
         {"dt", 0.001},
         {"uuid", file_name + "-" + dimension},
         {"nsteps", 10},
