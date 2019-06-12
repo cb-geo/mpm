@@ -393,12 +393,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_traction_end - particles_traction_begin)
                        .count());
 
-    // Read and assign particle sets
-    if (!io_->file_name("entity_sets").empty()) {
-      bool particle_sets = mesh_->create_particle_sets(
-          (io_->entity_sets(io_->file_name("entity_sets"), "particle_sets")),
-          check_duplicates);
-    }
+    // TODO: Read and assign particle sets
   } catch (std::exception& exception) {
     console_->error("#{}: Reading particles: {}", __LINE__, exception.what());
     status = false;

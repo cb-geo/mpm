@@ -313,12 +313,13 @@ class Mesh {
   std::vector<std::array<mpm::Index, 2>> node_pairs() const;
 
   //! Create map of container of particles in sets
-  //! \param[in] map of particles ids in sets
+  //! \param[in] set_id Set id for the particle group
+  //! \param[in] particle_ids map of particles ids in sets
   //! \param[in] check_duplicates Parameter to check duplicates
-  //! \retval status Status of  create particle sets
-  bool create_particle_sets(
-      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
-      bool check_duplicates);
+  //! \retval status Status of create particle sets
+  bool add_particles_set(unsigned set_id,
+                         const std::vector<mpm::Index>& particle_sets,
+                         bool check_duplicates);
 
  private:
   // Locate a particle in mesh cells

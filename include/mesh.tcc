@@ -1146,29 +1146,27 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
 
 //! Create map of container of particles in sets
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::create_particle_sets(
-    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
+bool mpm::Mesh<Tdim>::add_particles_set(
+    unsigned set_id, const std::vector<mpm::Index>& particle_ids,
     bool check_duplicates) {
   bool status = false;
   try {
-    // Create container for each particle set
-    for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
-         ++sitr) {
-      // Create a container for the set
-      Container<ParticleBase<Tdim>> particles;
-      // Reserve the size of the container
-      particles.reserve((sitr->second).size());
-      // Add particles to the container
-      for (auto pid : sitr->second) {
-        bool insertion_status =
-            particles.add(map_particles_[pid], check_duplicates);
-      }
-      // Create the map of the container
-      this->particle_sets_.insert(
-          std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(sitr->first,
-                                                               particles));
-      status = true;
+    // Create container for particle set
+    Container<ParticleBase<Tdim>> particles;
+    // Reserve the size of the container
+    particles.reserve(particle_ids.size());
+    // Add particles to the container
+    for (auto pid : particle_ids) {
+      bool insertion_status =
+          particles.add(map_particles_[pid], check_duplicates);
+      if (!insertion_status)
+        throw std::runtime_error("Adding particle to set failed");
     }
+    // Create the map of the container
+    status = this->particle_sets_
+                 .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
+                     set_id, particles))
+                 .second;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
