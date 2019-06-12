@@ -317,7 +317,7 @@ class Mesh {
   //! \param[in] particle_ids map of particles ids in sets
   //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Status of create particle sets
-  bool add_particles_set(unsigned set_id,
+  bool create_particles_set(unsigned set_id,
                          const std::vector<mpm::Index>& particle_sets,
                          bool check_duplicates);
 

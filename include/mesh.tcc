@@ -1146,11 +1146,15 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
 
 //! Create map of container of particles in sets
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::add_particles_set(
+bool mpm::Mesh<Tdim>::create_particles_set(
     unsigned set_id, const std::vector<mpm::Index>& particle_ids,
     bool check_duplicates) {
   bool status = false;
   try {
+    if (particle_sets_.find(set_id) != particle_sets_.end())
+      throw std::runtime_error(
+          "Particle set it already found, abort creating of particle set");
+
     // Create container for particle set
     Container<ParticleBase<Tdim>> particles;
     // Reserve the size of the container
@@ -1164,7 +1168,7 @@ bool mpm::Mesh<Tdim>::add_particles_set(
     }
     // Create the map of the container
     status = this->particle_sets_
-                 .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
+                 .emplace(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
                      set_id, particles))
                  .second;
   } catch (std::exception& exception) {
