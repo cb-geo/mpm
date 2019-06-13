@@ -186,6 +186,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
+    // Compute cell neighbours
+    mesh_->compute_cell_neighbours();
+
     auto cells_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read cells: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
