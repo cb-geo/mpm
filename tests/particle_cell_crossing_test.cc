@@ -162,7 +162,7 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                material));
+                Phase, material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(
@@ -418,7 +418,7 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                material));
+                Phase, material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(

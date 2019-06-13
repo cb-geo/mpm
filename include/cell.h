@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <vector>
 
 #include "Eigen/Dense"
@@ -100,14 +101,15 @@ class Cell {
   bool add_node(unsigned local_id, const std::shared_ptr<NodeBase<Tdim>>& node);
 
   //! Add a neighbour cell
-  //! \param[in] local_id local id of the neighbouring cell
-  //! \param[in] neighbour A shared pointer to the neighbouring cell
+  //! \param[in] neighbour_id id of the neighbouring cell
   //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(unsigned local_id,
-                     const std::shared_ptr<Cell<Tdim>>& neighbour);
+  bool add_neighbour(mpm::Index neighbour_id);
 
   //! Number of neighbours
-  unsigned nneighbours() const { return neighbour_cells_.size(); }
+  unsigned nneighbours() const { return neighbours_.size(); }
+
+  //! Return neighbour ids
+  std::set<mpm::Index> neighbours() const { return neighbours_; }
 
   //! Add an id of a particle in the cell
   //! \param[in] id Global id of a particle
@@ -117,6 +119,9 @@ class Cell {
   //! Remove a particle id from the cell (moved to a different cell / killed)
   //! \param[in] id Global id of a particle
   void remove_particle_id(Index id);
+
+  //! Clear all particle ids in the cell
+  void clear_particle_ids() { particles_.clear(); }
 
   //! Compute the volume of the cell
   void compute_volume();
@@ -152,12 +157,21 @@ class Cell {
   //! volume calculations are tricky. The transformed point should be between -1
   //! and 1 in a unit cell
   //! \param[in] point Coordinates of point
-  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  //! \param[in|out] xi Local coordinates of point
+  //! \retval status Return if a point is in cell or not
+  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point,
+                        Eigen::Matrix<double, Tdim, 1>* xi);
 
   //! Return the local coordinates of a point in a cell
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
+      const Eigen::Matrix<double, Tdim, 1>& point);
+
+  //! Return the local coordinates of a point in a 2D cell
+  //! \param[in] point Coordinates of a point
+  //! \retval xi Local coordinates of a point
+  Eigen::Matrix<double, Tdim, 1> local_coordinates_point_2d(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a unit cell
@@ -272,6 +286,9 @@ class Cell {
   //! Compute normal vector
   void compute_normals();
 
+  //! Return sorted face node ids
+  std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -298,8 +315,8 @@ class Cell {
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates
   Eigen::MatrixXd nodal_coordinates_;
-  //! Container of cell neighbours
-  Map<Cell<Tdim>> neighbour_cells_;
+  //! Container of cell neighbour ids
+  std::set<mpm::Index> neighbours_;
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Quadrature

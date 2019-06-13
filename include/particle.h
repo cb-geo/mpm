@@ -71,6 +71,15 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] cellptr Pointer to a cell
   bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr) override;
 
+  //! Assign a cell to particle
+  //! If point is in new cell, assign new cell and remove particle id from old
+  //! cell. If point can't be found in the new cell, check if particle is still
+  //! valid in the old cell, if it is leave it as is. If not, set cell as null
+  //! \param[in] cellptr Pointer to a cell
+  //! \param[in] xi Local coordinates of the point in reference cell
+  bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                      const Eigen::Matrix<double, Tdim, 1>& xi) override;
+
   //! Assign cell id
   //! \param[in] id Cell id
   bool assign_cell_id(Index id) override;
@@ -131,7 +140,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
+      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
   //! \param[in] phase Index corresponding to the phase
@@ -276,6 +285,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
+  //! Volumetric mass density (mass / volume)
+  Eigen::Matrix<double, 1, Tnphases> mass_density_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume

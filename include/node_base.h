@@ -110,11 +110,15 @@ class NodeBase {
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
   //! Update pressure at the nodes from particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  virtual void update_mass_pressure(unsigned phase, double mass_pressure) = 0;
+
+  //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_pressure(bool update, unsigned phase,
-                               double mass_pressure) = 0;
+  virtual void assign_pressure(unsigned phase, double mass_pressure) = 0;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -175,6 +179,11 @@ class NodeBase {
   //! Apply friction constraints
   //! \param[in] dt Time-step
   virtual void apply_friction_constraints(double dt) = 0;
+
+  //! Assign rotation matrix
+  //! \param[in] rotation_matrix Rotation matrix of the node
+  virtual void assign_rotation_matrix(
+      const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

@@ -1,9 +1,11 @@
+#include <cmath>
 #include <limits>
 #include <memory>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "geometry.h"
 #include "node.h"
 
 // Check node class for 1D case
@@ -109,14 +111,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
@@ -125,7 +127,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
       const double pmass = 1.5;
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
@@ -545,14 +547,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
-      // Assign mass to 1000
+      // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
@@ -561,7 +563,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
       const double pmass = 1.5;
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
@@ -765,7 +767,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
     }
 
-    SECTION("Check momentum and velocity") {
+    SECTION("Check momentum, velocity and acceleration") {
+      // Time step
+      const double dt = 0.1;
+
       // Check momentum
       Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
@@ -810,36 +815,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
-      // Check if exception is handled
-      unsigned bad_phase = 1;
-      // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
-      // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
-
-      // Apply velocity constraints
-      REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
-      // Check out of bounds condition
-      REQUIRE(node->assign_velocity_constraint(2, 0.) == false);
-
-      // Check velocity before constraints
-      Eigen::Matrix<double, Dim, 1> velocity;
-      velocity << 0.1, 0.1;
-      for (unsigned i = 0; i < velocity.size(); ++i)
-        REQUIRE(node->velocity(Nphase)(i) ==
-                Approx(velocity(i)).epsilon(Tolerance));
-
-      // Apply constraints
-      node->apply_velocity_constraints();
-
-      // Check apply constraints
-      velocity << -12.5, 0.1;
-      for (unsigned i = 0; i < velocity.size(); ++i)
-        REQUIRE(node->velocity(Nphase)(i) ==
-                Approx(velocity(i)).epsilon(Tolerance));
-    }
-
-    SECTION("Check acceleration") {
       // Check acceleration
       Eigen::Matrix<double, Dim, 1> acceleration;
       for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
@@ -861,10 +836,19 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->update_acceleration(true, bad_phase, acceleration_bad) ==
               false);
 
-      // Apply velocity constraints
-      REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
-      // Check out of bounds condition
-      REQUIRE(node->assign_velocity_constraint(2, 0.) == false);
+      // Check if exception is handled
+      bad_phase = 1;
+      // Exception handling invalid momentum dimension
+      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
+      // Exception handling invalid momentum dimension
+      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
+
+      // Check velocity before constraints
+      Eigen::Matrix<double, Dim, 1> velocity;
+      velocity << 0.1, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
 
       // Check acceleration before constraints
       acceleration << 5., 5.;
@@ -872,14 +856,148 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
-      // Apply constraints
-      node->apply_velocity_constraints();
+      SECTION("Check Cartesian velocity constraints") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_velocity_constraint(2, 0.) == false);
 
-      // Check apply constraints
-      acceleration << 0., 5.;
-      for (unsigned i = 0; i < acceleration.size(); ++i)
-        REQUIRE(node->acceleration(Nphase)(i) ==
-                Approx(acceleration(i)).epsilon(Tolerance));
+        // Apply constraints
+        node->apply_velocity_constraints();
+
+        // Check apply constraints
+        velocity << -12.5, 0.1;
+        for (unsigned i = 0; i < velocity.size(); ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        acceleration << 0., 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general velocity constraints in 1 direction") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply inclined velocity constraints
+        node->apply_velocity_constraints();
+
+        // Check applied velocity constraints in the global coordinates
+        velocity << -9.583478335521184, -8.025403099849004;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        // Check that the velocity is as specified in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(-12.5).epsilon(Tolerance));
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << -0.396139826697847, 0.472101061636807;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check that the acceleration is 0 in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check general velocity constraints in all directions") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(1, 7.5) == true);
+
+        // Apply rotation matrix with Euler angles alpha = -10 deg, beta = 30
+        // deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << -10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply inclined velocity constraints
+        node->apply_velocity_constraints();
+
+        // Check applied velocity constraints in the global coordinates
+        velocity << -14.311308834766370, 2.772442864323454;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        // Check that the velocity is as specified in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(-12.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(1) ==
+                Approx(7.5).epsilon(Tolerance));
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 0, 0;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check that the acceleration is 0 in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(1) ==
+                Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check Cartesian friction constraints") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_friction_constraint(2, 1, 0.2) == false);
+
+        // Apply friction constraints
+        node->apply_friction_constraints(dt);
+
+        // Check apply constraints
+        acceleration << 4., 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general friction constraints in 1 direction") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply general friction constraints
+        node->apply_friction_constraints(dt);
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 4.905579787672637, 4.920772034660430;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check the acceleration in local coordinate
+        acceleration << 6.920903430595146, 0.616284167162194;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
     }
   }
 }
@@ -988,14 +1106,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->update_mass_pressure(Nphase, mass * pressure);
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
-      // Assign mass to 1000
+      // Assign pressure to 1000
       pressure = 1000.;
-      node->update_pressure(false, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
@@ -1004,7 +1122,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
       const double pmass = 1.5;
-      node->update_pressure(true, Nphase, mass * pressure);
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
     }
 
@@ -1176,7 +1294,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
     }
 
-    SECTION("Check momentum and velocity") {
+    SECTION("Check momentum, velocity and acceleration") {
+      // Time step
+      const double dt = 0.1;
+
       // Check momentum
       Eigen::Matrix<double, Dim, 1> momentum;
       for (unsigned i = 0; i < momentum.size(); ++i) momentum(i) = 10.;
@@ -1221,30 +1342,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
-      // Apply velocity constraints
-      REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
-      REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
-      // Check out of bounds condition
-      REQUIRE(node->assign_velocity_constraint(4, 0.) == false);
-
-      // Check velocity before constraints
-      Eigen::Matrix<double, Dim, 1> velocity;
-      velocity << 0.1, 0.1, 0.1;
-      for (unsigned i = 0; i < velocity.size(); ++i)
-        REQUIRE(node->velocity(Nphase)(i) ==
-                Approx(velocity(i)).epsilon(Tolerance));
-
-      // Apply constraints
-      node->apply_velocity_constraints();
-
-      // Check apply constraints
-      velocity << 10.5, -12.5, 0.1;
-      for (unsigned i = 0; i < velocity.size(); ++i)
-        REQUIRE(node->velocity(Nphase)(i) ==
-                Approx(velocity(i)).epsilon(Tolerance));
-    }
-
-    SECTION("Check acceleration") {
       // Check acceleration
       Eigen::Matrix<double, Dim, 1> acceleration;
       for (unsigned i = 0; i < acceleration.size(); ++i) acceleration(i) = 5.;
@@ -1265,11 +1362,12 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
               false);
 
-      // Apply velocity constraints
-      REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
-      REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
-      // Check out of bounds condition
-      REQUIRE(node->assign_velocity_constraint(4, 0.) == false);
+      // Check velocity before constraints
+      Eigen::Matrix<double, Dim, 1> velocity;
+      velocity << 0.1, 0.1, 0.1;
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(node->velocity(Nphase)(i) ==
+                Approx(velocity(i)).epsilon(Tolerance));
 
       // Check acceleration before constraints
       acceleration.resize(Dim);
@@ -1278,14 +1376,162 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
-      // Apply constraints
-      node->apply_velocity_constraints();
+      SECTION("Check Cartesian velocity constraints") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
+        REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_velocity_constraint(4, 0.) == false);
 
-      // Check apply constraints
-      acceleration << 0.0, 0.0, 5.;
-      for (unsigned i = 0; i < acceleration.size(); ++i)
-        REQUIRE(node->acceleration(Nphase)(i) ==
-                Approx(acceleration(i)).epsilon(Tolerance));
+        // Apply constraints
+        node->apply_velocity_constraints();
+
+        // Check apply constraints
+        velocity << 10.5, -12.5, 0.1;
+        for (unsigned i = 0; i < velocity.size(); ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        acceleration << 0.0, 0.0, 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general velocity constraints in 2 directions") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
+        REQUIRE(node->assign_velocity_constraint(2, -12.5) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
+        // and gamma = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply constraints
+        node->apply_velocity_constraints();
+
+        // Check apply constraints
+        velocity << 8.056429712589052, 10.985674281018227, -8.995236782890776;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        // Check that the velocity is as specified in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(10.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(2) ==
+                Approx(-12.5).epsilon(Tolerance));
+
+        // Check apply constraints
+        acceleration << -1.754172871235121, 2.722373665593709,
+            1.723750597747385;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check that the acceleration is 0 in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(2) ==
+                Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check general velocity constraints in all directions") {
+        // Apply velocity constraints
+        REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
+        REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(2, 7.5) == true);
+
+        // Apply rotation matrix with Euler angles alpha = -10 deg, beta = 20
+        // deg and gamma = -30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << -10. * M_PI / 180, 20. * M_PI / 180, -30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply constraints
+        node->apply_velocity_constraints();
+
+        // Check apply constraints
+        velocity << 13.351984588153375, -5.717804716697730, 10.572663655835457;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->velocity(Nphase)(i) ==
+                  Approx(velocity(i)).epsilon(Tolerance));
+
+        // Check that the velocity is as specified in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(0) ==
+                Approx(10.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(1) ==
+                Approx(-12.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->velocity(Nphase))(2) ==
+                Approx(7.5).epsilon(Tolerance));
+
+        // Check apply constraints
+        acceleration << 0, 0, 0;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check that the acceleration is 0 in local coordinate
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(0) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(1) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(2) ==
+                Approx(0).epsilon(Tolerance));
+      }
+
+      SECTION("Check Cartesian friction constraints") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
+        // Check out of bounds condition
+        REQUIRE(node->assign_friction_constraint(4, 1, 0.2) == false);
+
+        // Apply constraints
+        node->apply_friction_constraints(dt);
+
+        // Check apply constraints
+        acceleration << 3.939339828220179, 3.939339828220179, 5.;
+        for (unsigned i = 0; i < acceleration.size(); ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
+
+      SECTION("Check general friction constraints in 1 direction") {
+        // Apply friction constraints
+        REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
+
+        // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
+        // and gamma = 30 deg
+        Eigen::Matrix<double, Dim, 1> euler_angles;
+        euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
+        const auto rotation_matrix =
+            mpm::geometry::rotation_matrix(euler_angles);
+        node->assign_rotation_matrix(rotation_matrix);
+        const auto inverse_rotation_matrix = rotation_matrix.inverse();
+
+        // Apply inclined velocity constraints
+        node->apply_friction_constraints(dt);
+
+        // Check applied constraints on acceleration in the global coordinates
+        acceleration << 4.602895052828914, 4.492575657560740, 4.751301246937935;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE(node->acceleration(Nphase)(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+
+        // Check the acceleration in local coordinate
+        acceleration << 6.878925666702865, 3.365244416454818, 2.302228080558999;
+        for (unsigned i = 0; i < Dim; ++i)
+          REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
+                  Approx(acceleration(i)).epsilon(Tolerance));
+      }
     }
   }
 }

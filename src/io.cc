@@ -108,10 +108,6 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
 
   file_name.str(std::string());
   file_name << attribute;
-  file_name.fill('0');
-  int digits = log10(max_steps) + 1;
-  file_name.width(digits);
-  file_name << step;
 
 #ifdef USE_MPI
   int mpi_rank;
@@ -122,11 +118,15 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
 
   if (mpi_size > 1) {
     const std::string rank_size =
-        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size);
+        "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size) + "-";
     file_name << rank_size;
   }
 #endif
 
+  file_name.fill('0');
+  int digits = log10(max_steps) + 1;
+  file_name.width(digits);
+  file_name << step;
   file_name << file_extension;
 
   // Include path

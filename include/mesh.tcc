@@ -231,6 +231,31 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 
 //! Create cells from node lists
 template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_cell_neighbours() {
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    const auto faces = (*citr)->sorted_face_node_ids();
+    for (const auto& face : faces) {
+      faces_cells_.insert(
+          std::pair<std::vector<mpm::Index>, mpm::Index>(face, (*citr)->id()));
+    }
+  }
+
+  // Iterate through all unique keys in faces_cells_
+  for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
+       itr = faces_cells_.upper_bound(itr->first)) {
+    // Returns a pair representing the range of elements with key
+    auto range = faces_cells_.equal_range(itr->first);
+    // A face is shared only by 2 cells (distance between the range is 2)
+    if (std::distance(range.first, range.second) == 2) {
+      // Add cell as neighbours to each other
+      map_cells_[range.first->second]->add_neighbour(range.second->second);
+      map_cells_[range.second->second]->add_neighbour(range.first->second);
+    }
+  }
+}
+
+//! Create cells from node lists
+template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
     mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
   std::vector<VectorDim> points;
@@ -323,6 +348,8 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
     const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
   const mpm::Index id = particle->id();
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
 }
@@ -355,6 +382,17 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
     if (!particle->cell_ptr())
       particle->assign_cell(map_cells_[particle->cell_id()]);
     if (particle->compute_reference_location()) return true;
+
+    // Check if material point is in any of its nearest neighbours
+    const auto neighbours = map_cells_[particle->cell_id()]->neighbours();
+    Eigen::Matrix<double, Tdim, 1> xi;
+    Eigen::Matrix<double, Tdim, 1> coordinates = particle->coordinates();
+    for (auto neighbour : neighbours) {
+      if (map_cells_[neighbour]->is_point_in_cell(coordinates, &xi)) {
+        particle->assign_cell_xi(map_cells_[neighbour], xi);
+        return true;
+      }
+    }
   }
 
   bool status = false;
@@ -364,8 +402,9 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
         // Check if particle is already found, if so don't run for other cells
         // Check if co-ordinates is within the cell, if true
         // add particle to cell
-        if (!status && cell->is_point_in_cell(particle->coordinates())) {
-          particle->assign_cell(cell);
+        Eigen::Matrix<double, Tdim, 1> xi;
+        if (!status && cell->is_point_in_cell(particle->coordinates(), &xi)) {
+          particle->assign_cell_xi(cell, xi);
           status = true;
         }
       });
@@ -554,6 +593,37 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
 
       if (!status)
         throw std::runtime_error("Cannot assign invalid particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute and assign rotation matrix to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
+    const std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>& euler_angles) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign rotation "
+          "matrix");
+
+    // Loop through nodal_euler_angles of different nodes
+    for (const auto& nodal_euler_angles : euler_angles) {
+      // Node id
+      mpm::Index nid = nodal_euler_angles.first;
+      // Euler angles
+      Eigen::Matrix<double, Tdim, 1> angles = nodal_euler_angles.second;
+      // Compute rotation matrix
+      const auto rotation_matrix = mpm::geometry::rotation_matrix(angles);
+
+      // Apply rotation matrix to nodes
+      map_nodes_[nid]->assign_rotation_matrix(rotation_matrix);
+      status = true;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
