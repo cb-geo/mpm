@@ -23,6 +23,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
+  //! Failure state
+  enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
+
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties
   MohrCoulomb(unsigned id, const Json& material_properties);
@@ -57,8 +60,18 @@ class MohrCoulomb : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
-  //! Failure state
-  enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
+  //! Compute stress invariants (j2, j3, rho, theta, and epsilon)
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval status of computation of stress invariants
+  bool compute_stress_invariants(const Vector6d& stress,
+                                 mpm::dense_map* state_vars);
+
+  //! Compute yield function and yield state
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval yield_type Yield type (shear or tensile)
+  FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
+                                   const mpm::dense_map* state_vars);
 
  protected:
   //! material id
@@ -71,14 +84,6 @@ class MohrCoulomb : public Material<Tdim> {
  private:
   //! Compute elastic tensor
   bool compute_elastic_tensor();
-
-  //! Compute stress invariants (j2, j3, rho, theta, and epsilon)
-  bool compute_stress_invariants(const Vector6d& stress,
-                                 mpm::dense_map* state_vars);
-
-  //! Check the yield type (tension/shear)
-  FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
-                                   const mpm::dense_map* state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
   void compute_df_dp(FailureState yield_type, const mpm::dense_map* state_vars,
@@ -115,6 +120,8 @@ class MohrCoulomb : public Material<Tdim> {
   double epds_residual_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
+  //! softening
+  bool softening_{false};
 };  // MohrCoulomb class
 }  // namespace mpm
 
