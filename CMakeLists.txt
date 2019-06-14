@@ -16,7 +16,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # GNU specific settings
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 endif()
 
 # Intel specific settings
@@ -127,10 +127,11 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/hexahedron_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/hexahedron_quadrature_test.cc  
+    ${mpm_SOURCE_DIR}/tests/hexahedron_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
+    ${mpm_SOURCE_DIR}/tests/material/mohr_coulomb_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
@@ -148,11 +149,11 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    
+    ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
-  )   
+  )
   add_executable(mpmtest ${test_src})
   target_link_libraries(mpmtest lmpm)
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
