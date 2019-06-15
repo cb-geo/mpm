@@ -69,9 +69,20 @@ class MohrCoulomb : public Material<Tdim> {
 
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
-  //! \retval yield_type Yield type (shear or tensile)
+  //! \retval yield_type Yield type (elastic, shear or tensile)
   FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
                                    const mpm::dense_map* state_vars);
+
+  //! Compute dF/dSigma and dP/dSigma
+  //! \param[in] yield_type Yield type (elastic, shear or tensile)
+  //! \param[in] state_vars History-dependent state variables
+  //! \param[in] stress Stress
+  //! \param[in] df_dsigma dF/dSigma
+  //! \param[in] dp_dsigma dP/dSigma
+  //! \param[in] softening Softening parameter
+  void compute_df_dp(FailureState yield_type, const mpm::dense_map* state_vars,
+                     const Vector6d& stress, Vector6d* df_dsigma,
+                     Vector6d* dp_dsigma, double* softening);
 
  protected:
   //! material id
@@ -84,11 +95,6 @@ class MohrCoulomb : public Material<Tdim> {
  private:
   //! Compute elastic tensor
   bool compute_elastic_tensor();
-
-  //! Compute dF/dSigma and dP/dSigma
-  void compute_df_dp(FailureState yield_type, const mpm::dense_map* state_vars,
-                     const Vector6d& stress, Vector6d* df_dsigma,
-                     Vector6d* dp_dsigma, double* softening);
 
   //! Elastic stiffness matrix
   Matrix6x6 de_;

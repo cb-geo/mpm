@@ -86,7 +86,7 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
   return state_vars;
 }
 
-//! Return elastic tensor
+//! Compute elastic tensor
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
   // Shear modulus
@@ -376,8 +376,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     double r_mc = (3. - sin(phi)) / (6 * cos(phi));
     // Compute deviatoric eccentricity
     double e_val = (3. - sin(phi)) / (3. + sin(phi));
-    if (e_val <= 0.5) e_val = 0.50001;
-    if (e_val >= 1.) e_val = 0.99999;
+    if (e_val <= 0.5) e_val = 0.5 + 1.E-10;
+    if (e_val > 1.) e_val = 1.;
     // Compute Rmw
     double sqpart = (4. * (1 - e_val * e_val) * pow(cos(theta), 2)) +
                     (5 * e_val * e_val) - (4. * e_val);
