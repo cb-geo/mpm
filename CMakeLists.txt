@@ -1,9 +1,9 @@
 project(mpm LANGUAGES CXX)
 
-# Require C++14-compliant compiler; only available for CMake v. 3.1 and up
+# Require C++14-compliant compiler; only available for CMake v3.10 and up
 set(CMAKE_CXX_STANDARD 14)
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 SET(CMAKE_COLOR_MAKEFILE ON)
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -132,6 +132,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
