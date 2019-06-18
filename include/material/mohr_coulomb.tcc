@@ -38,6 +38,8 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
     // Tensile strength
     tension_cutoff_ =
         material_properties["tension_cutoff"].template get<double>();
+    // Tolerance of yield function
+    tolerance_ = material_properties["tolerance"].template get<double>();
     // Properties
     properties_ = material_properties;
     // Bulk modulus
@@ -166,7 +168,7 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
         Eigen::Matrix<double, 2, 1>* yield_function,
         const mpm::dense_map* state_vars) {
   // Tolerance for yield function
-  const double Tolerance = 1.E-15;
+  const double Tolerance = -tolerance_;
   // Get stress invariants
   const double epsilon = (*state_vars).at("epsilon");
   const double rho = (*state_vars).at("rho");
@@ -394,8 +396,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
                    pow((r_mw * sqrt(3. / 2.) * rho), 2);
     if (omega < 1.E-22) omega = 1.E-5;
     double dl_dtheta = -8. * (1. - e_val * e_val) * cos(theta) * sin(theta);
-    double dm_dtheta = (-2. * (1. - e_val * e_val) * sin(theta)) +
-                       (0.5 * (2. * e_val - 1.) * dl_dtheta) / sqrt(sqpart);
+    double dm_dtheta = ((-2. * (1. - e_val * e_val) * sin(theta)) +
+                        (0.5 * (2. * e_val - 1.) * dl_dtheta)) /
+                       sqrt(sqpart);
     double drmw_dtheta = ((m * dl_dtheta) - (l * dm_dtheta)) / (m * m);
     double dp_depsilon = tan(psi) / sqrt(3.);
     double dp_drho = 3. * rho * r_mw * r_mw / (2. * sqrt(omega));
@@ -470,7 +473,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   //-------------------------------------------------------------------------
   // Plastic-corrector stage: correct the stress back to the yield surface
   // Define tolerance of yield function
-  double Tolerance = 1.E-15;
+  double Tolerance = tolerance_;
   // Compute plastic multiplier based on trial stress (Lambda trial)
   double softening_trial = 0.;
   Vector6d df_dsigma_trial = Vector6d::Zero();
@@ -491,9 +494,10 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Compute yield function based on stress input
   Eigen::Matrix<double, 2, 1> yield_function;
   auto yield_type = this->compute_yield_state(&yield_function, state_vars);
-  double yield = 0.;
-  if (yield_type_trial == FailureState::Tensile) yield = yield_function(0);
-  if (yield_type_trial == FailureState::Shear) yield = yield_function(1);
+  // Initialise value of yield function based on stress
+  double yield{std::numeric_limits<double>::max()};
+  if (yield_type == FailureState::Tensile) yield = yield_function(0);
+  if (yield_type == FailureState::Shear) yield = yield_function(1);
   // Compute plastic multiplier based on stress input (Lambda)
   double softening = 0.;
   Vector6d df_dsigma = Vector6d::Zero();
@@ -519,6 +523,43 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Correct stress back to the yield surface
   Vector6d updated_stress =
       trial_stress - (p_multiplier * this->de_ * dp_dsigma_final);
+
+  // Check the update stress
+  // Compute stress invariants based on updated stress
+  this->compute_stress_invariants(updated_stress, state_vars);
+  // Compute yield function based on updated stress
+  yield_type_trial =
+      this->compute_yield_state(&yield_function_trial, state_vars);
+  // Define the maximum iteration step
+  int itr_max = 100;
+  // Initialise counter of iteration step
+  int itr = 0;
+  // Correct the stress again
+  while ((yield_function_trial(0) > Tolerance ||
+          yield_function_trial(1) > Tolerance) &&
+         itr < itr_max) {
+    // Compute plastic multiplier based on updated stress
+    this->compute_df_dp(yield_type_trial, state_vars, updated_stress,
+                        &df_dsigma_trial, &dp_dsigma_trial, &softening_trial);
+    if (yield_type_trial == FailureState::Tensile)
+      yield_trial = yield_function_trial(0);
+    if (yield_type_trial == FailureState::Shear)
+      yield_trial = yield_function_trial(1);
+    // Compute plastic multiplier based on updated stress
+    lambda_trial =
+        yield_trial /
+        ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
+         softening_trial);
+    // Correct stress back to the yield surface
+    updated_stress -= (lambda_trial * this->de_ * dp_dsigma_trial);
+    // Compute stress invariants based on updated stress
+    this->compute_stress_invariants(updated_stress, state_vars);
+    // Compute yield function based on updated stress
+    yield_type_trial =
+        this->compute_yield_state(&yield_function_trial, state_vars);
+    // Count the iteration step
+    itr++;
+  }
   // Compute incremental of plastic strain
   Vector6d dstress = updated_stress - stress;
   Vector6d dpstrain = dstrain - (this->de_.inverse()) * dstress;
