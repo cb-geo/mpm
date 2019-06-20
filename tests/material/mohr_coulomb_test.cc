@@ -12,7 +12,8 @@
 #include "node.h"
 #include "particle.h"
 
-//! Check MohrCoulomb class in 2D (cohesion only, without softening)
+//! Check MohrCoulomb class in 2D
+//! Cohesion only, without softening
 TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
           "[material][mohr_coulomb][2D]") {
   // Tolerance
@@ -646,7 +647,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
   }
 }
 
-//! Check MohrCoulomb class in 2D (cohesion and friction, without softening)
+//! Check MohrCoulomb class in 2D
+//! Cohesion and friction, without softening
 TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
           "[material][mohr_coulomb][2D]") {
   // Tolerance
@@ -1167,8 +1169,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
   }
 }
 
-//! Check MohrCoulomb class in 2D (cohesion, friction and dilation, without
-//! softening)
+//! Check MohrCoulomb class in 2D
+//! Cohesion, friction and dilation, without softening
 TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
           "[material][mohr_coulomb][2D]") {
   // Tolerance
@@ -1681,6 +1683,607 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       REQUIRE(updated_stress(1) == Approx(-6838.46782671).epsilon(Tolerance));
       REQUIRE(updated_stress(2) == Approx(-9129.41035445).epsilon(Tolerance));
       REQUIRE(updated_stress(3) == Approx(3306.91731143).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
+    }
+  }
+}
+
+//! Check MohrCoulomb class in 2D
+//! Cohesion, friction and dilation, with softening
+TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
+          "[material][mohr_coulomb][2D]") {
+  // Tolerance
+  const double Tolerance = 1.E-2;
+
+  const unsigned Dim = 2;
+
+  // Add particle
+  mpm::Index pid = 0;
+  Eigen::Matrix<double, Dim, 1> coords;
+  coords.setZero();
+  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+  jmaterial["softening"] = true;
+  jmaterial["friction"] = 30.;
+  jmaterial["dilation"] = 15.;
+  jmaterial["cohesion"] = 2000.;
+  jmaterial["residual_friction"] = 0.;
+  jmaterial["residual_dilation"] = 0.;
+  jmaterial["residual_cohesion"] = 1000.;
+  jmaterial["peak_epds"] = 0.;
+  jmaterial["critical_epds"] = 0.001;
+  jmaterial["tension_cutoff"] = 0.;
+  jmaterial["tolerance"] = 0.1;
+
+  //! Check yield correction based on trial stress
+  SECTION("MohrCoulomb check yield correction based on trial stress") {
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "MohrCoulomb2D", std::move(id), jmaterial);
+
+    auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
+
+    REQUIRE(material->id() == 0);
+
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
+    stress.setZero();
+    stress(0) = -5000.;
+    stress(1) = -6000.;
+    stress(2) = -7000.;
+    stress(3) = -1000.;
+
+    // Calculate modulus values
+    const double K = material->property("youngs_modulus") /
+                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
+    const double G = material->property("youngs_modulus") /
+                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double a1 = K + (4.0 / 3.0) * G;
+    const double a2 = K - (2.0 / 3.0) * G;
+    // Compute elastic tensor
+    mpm::Material<Dim>::Matrix6x6 de;
+    de.setZero();
+    de(0, 0) = a1;
+    de(0, 1) = a2;
+    de(0, 2) = a2;
+    de(1, 0) = a2;
+    de(1, 1) = a1;
+    de(1, 2) = a2;
+    de(2, 0) = a2;
+    de(2, 1) = a2;
+    de(2, 2) = a1;
+    de(3, 3) = G;
+    de(4, 4) = G;
+    de(5, 5) = G;
+
+    // Initialise state variables
+    mpm::dense_map state_variables = material->initialise_state_variables();
+    // Check if stress invariants is computed correctly based on stress
+    REQUIRE(mohr_coulomb->compute_stress_invariants(stress, &state_variables) ==
+            true);
+    REQUIRE(state_variables.at("phi") == Approx(0.52359878).epsilon(Tolerance));
+    REQUIRE(state_variables.at("psi") == Approx(0.26179939).epsilon(Tolerance));
+    REQUIRE(state_variables.at("cohesion") ==
+            Approx(jmaterial["cohesion"]).epsilon(Tolerance));
+    REQUIRE(state_variables.at("j2") == Approx(2000000.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("j3") == Approx(1000000000.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("epsilon") ==
+            Approx(-10392.30484541).epsilon(Tolerance));
+    REQUIRE(state_variables.at("rho") == Approx(2000.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("theta") ==
+            Approx(0.13545926).epsilon(Tolerance));
+    REQUIRE(state_variables.at("epds") == Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain0") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain1") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain2") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain3") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain4") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain5") ==
+            Approx(0.).epsilon(Tolerance));
+
+    //! Check for shear failure (epde_peak < epds < epde_residual)
+    SECTION("Check for shear failure (epde_peak < epds < epde_residual)") {
+      // Define current plastic strain
+      state_variables.at("plastic_strain0") = 0.00005;
+      state_variables.at("plastic_strain1") = 0.00006;
+      state_variables.at("plastic_strain2") = 0.00007;
+      state_variables.at("plastic_strain3") = 0.00008;
+      state_variables.at("epds") = 0.0000973;
+      // Modified MC parameters
+      state_variables.at("phi") = 0.472654291926534;
+      state_variables.at("psi") = 0.236327145963267;
+      state_variables.at("cohesion") = 1902.70320320449;
+      // Initialise values of yield functions
+      Eigen::Matrix<double, 2, 1> yield_function;
+      auto yield_type =
+          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
+      REQUIRE(yield_function(1) == Approx(-3342.35152038).epsilon(Tolerance));
+      REQUIRE(yield_type == mohr_coulomb->FailureState::Elastic);
+
+      // Initialise plastic correction components
+      mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
+      df_dsigma.setZero();
+      dp_dsigma.setZero();
+      double softening = 0.;
+      // Compute plastic correction components
+      mohr_coulomb->compute_df_dp(yield_type, &state_variables, stress,
+                                  &df_dsigma, &dp_dsigma, &softening);
+      // Check plastic correction component based on stress
+      // Check dF/dSigma
+      REQUIRE(df_dsigma(0) == Approx(0.59134846).epsilon(Tolerance));
+      REQUIRE(df_dsigma(1) == Approx(0.22587501).epsilon(Tolerance));
+      REQUIRE(df_dsigma(2) == Approx(-0.30591388).epsilon(Tolerance));
+      REQUIRE(df_dsigma(3) == Approx(-0.36547345).epsilon(Tolerance));
+      REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
+      // Check dP/dSigma
+      REQUIRE(dp_dsigma(0) == Approx(0.46190905).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.03373810).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.25481978).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.42817095).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
+
+      // Initialise incremental of strain
+      mpm::Material<Dim>::Vector6d dstrain;
+      dstrain.setZero();
+      dstrain(0) = 0.0001;
+      dstrain(1) = 0.;
+      dstrain(2) = 0.;
+      dstrain(3) = 0.002;
+      // Compute trial stress
+      mpm::Material<Dim>::Vector6d trial_stress = stress + de * dstrain;
+      // Check if stress invariants is computed correctly based on trial stress
+      REQUIRE(mohr_coulomb->compute_stress_invariants(
+                  trial_stress, &state_variables) == true);
+      REQUIRE(state_variables.at("phi") ==
+              Approx(0.472654291926534).epsilon(Tolerance));
+      REQUIRE(state_variables.at("psi") ==
+              Approx(0.236327145963267).epsilon(Tolerance));
+      REQUIRE(state_variables.at("cohesion") ==
+              Approx(1902.70320320449).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j2") ==
+              Approx(46753451.6765286).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j3") ==
+              Approx(56758188775.9403).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epsilon") ==
+              Approx(-8948.92917244).epsilon(Tolerance));
+      REQUIRE(state_variables.at("rho") ==
+              Approx(9669.89676021).epsilon(Tolerance));
+      REQUIRE(state_variables.at("theta") ==
+              Approx(0.36378823).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epds") ==
+              Approx(0.0000973).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain0") ==
+              Approx(0.00005).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain1") ==
+              Approx(0.00006).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain2") ==
+              Approx(0.00007).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain3") ==
+              Approx(0.00008).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain4") ==
+              Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain5") ==
+              Approx(0.).epsilon(Tolerance));
+      // Initialise values of yield functions based on trial stress
+      Eigen::Matrix<double, 2, 1> yield_function_trial;
+      auto yield_type_trial = mohr_coulomb->compute_yield_state(
+          &yield_function_trial, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function_trial(0) ==
+              Approx(2212.05893238).epsilon(Tolerance));
+      REQUIRE(yield_function_trial(1) ==
+              Approx(3358.49952999).epsilon(Tolerance));
+      REQUIRE(yield_type_trial == mohr_coulomb->FailureState::Shear);
+      // Initialise plastic correction components based on trial stress
+      mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
+      df_dsigma_trial.setZero();
+      dp_dsigma_trial.setZero();
+      double softening_trial = 0.;
+      // Compute plastic correction components based on trial stress
+      mohr_coulomb->compute_df_dp(yield_type_trial, &state_variables,
+                                  trial_stress, &df_dsigma_trial,
+                                  &dp_dsigma_trial, &softening_trial);
+
+      // Check plastic correction component based on trial stress
+      // Check dFtrial/dSigma
+      REQUIRE(df_dsigma_trial(0) == Approx(0.32924502).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(1) == Approx(0.18206458).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(2) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(3) == Approx(0.55672601).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check dPtrial/dSigma
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.28490819).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(0.15331028).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.19739109).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.49778340).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check compute stress
+      mpm::Material<Dim>::Vector6d updated_stress =
+          mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
+                                       &state_variables);
+      // Check update stress
+      REQUIRE(updated_stress(0) == Approx(-11675.68349465).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-11177.25985714).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-6134.08248970).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(2403.48305347).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
+    }
+
+    //! Check for shear failure (epds > epde_residual)
+    SECTION("Check for shear failure (epds > epde_residual)") {
+      // Define stress
+      stress(2) = -6500.;
+      stress(3) = 0.;
+      // Define current plastic strain
+      state_variables.at("plastic_strain0") = 0.0005;
+      state_variables.at("plastic_strain1") = 0.0006;
+      state_variables.at("plastic_strain2") = 0.0007;
+      state_variables.at("plastic_strain3") = 0.0009;
+      state_variables.at("epds") = 0.00100167;
+      // Modified MC parameters
+      state_variables.at("phi") = 0.;
+      state_variables.at("psi") = 0.;
+      state_variables.at("cohesion") = 1000.;
+      // Check if stress invariants is computed correctly based on stress
+      REQUIRE(mohr_coulomb->compute_stress_invariants(
+                  stress, &state_variables) == true);
+      REQUIRE(state_variables.at("j2") ==
+              Approx(583333.33333333).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j3") ==
+              Approx(92592592.5925928).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epsilon") ==
+              Approx(-10103.62971082).epsilon(Tolerance));
+      REQUIRE(state_variables.at("rho") ==
+              Approx(1080.12344973).epsilon(Tolerance));
+      REQUIRE(state_variables.at("theta") ==
+              Approx(0.33347317).epsilon(Tolerance));
+      // Initialise values of yield functions
+      Eigen::Matrix<double, 2, 1> yield_function;
+      auto yield_type =
+          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function(0) == Approx(-5000.).epsilon(Tolerance));
+      REQUIRE(yield_function(1) == Approx(-250.).epsilon(Tolerance));
+      REQUIRE(yield_type == mohr_coulomb->FailureState::Elastic);
+
+      // Initialise plastic correction components
+      mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
+      df_dsigma.setZero();
+      dp_dsigma.setZero();
+      double softening = 0.;
+      // Compute plastic correction components
+      mohr_coulomb->compute_df_dp(yield_type, &state_variables, stress,
+                                  &df_dsigma, &dp_dsigma, &softening);
+      // Check plastic correction component based on stress
+      // Check dF/dSigma
+      REQUIRE(df_dsigma(0) == Approx(0.5).epsilon(Tolerance));
+      REQUIRE(df_dsigma(1) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(2) == Approx(-0.5).epsilon(Tolerance));
+      REQUIRE(df_dsigma(3) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
+      // Check dP/dSigma
+      REQUIRE(dp_dsigma(0) == Approx(0.47245559).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(-0.09449112).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.37796447).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
+
+      // Initialise incremental of strain
+      mpm::Material<Dim>::Vector6d dstrain;
+      dstrain.setZero();
+      dstrain(0) = 0.0001;
+      dstrain(1) = 0.;
+      dstrain(2) = 0.;
+      dstrain(3) = 0.002;
+      // Compute trial stress
+      mpm::Material<Dim>::Vector6d trial_stress = stress + de * dstrain;
+      // Check if stress invariants is computed correctly based on trial stress
+      REQUIRE(mohr_coulomb->compute_stress_invariants(
+                  trial_stress, &state_variables) == true);
+      REQUIRE(state_variables.at("phi") == Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("psi") == Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("cohesion") ==
+              Approx(1000.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j2") ==
+              Approx(60593195.2662722).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j3") ==
+              Approx(55145653163.4046).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epsilon") ==
+              Approx(-8660.25403784).epsilon(Tolerance));
+      REQUIRE(state_variables.at("rho") ==
+              Approx(11008.46903673).epsilon(Tolerance));
+      REQUIRE(state_variables.at("theta") ==
+              Approx(0.42072067).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epds") ==
+              Approx(0.00100167).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain0") ==
+              Approx(0.0005).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain1") ==
+              Approx(0.0006).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain2") ==
+              Approx(0.0007).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain3") ==
+              Approx(0.0009).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain4") ==
+              Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain5") ==
+              Approx(0.).epsilon(Tolerance));
+      // Initialise values of yield functions based on trial stress
+      Eigen::Matrix<double, 2, 1> yield_function_trial;
+      auto yield_type_trial = mohr_coulomb->compute_yield_state(
+          &yield_function_trial, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function_trial(0) ==
+              Approx(3204.54446772).epsilon(Tolerance));
+      REQUIRE(yield_function_trial(1) ==
+              Approx(6743.00600619).epsilon(Tolerance));
+      REQUIRE(yield_type_trial == mohr_coulomb->FailureState::Shear);
+      // Initialise plastic correction components based on trial stress
+      mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
+      df_dsigma_trial.setZero();
+      dp_dsigma_trial.setZero();
+      double softening_trial = 0.;
+      // Compute plastic correction components based on trial stress
+      mohr_coulomb->compute_df_dp(yield_type_trial, &state_variables,
+                                  trial_stress, &df_dsigma_trial,
+                                  &dp_dsigma_trial, &softening_trial);
+
+      // Check plastic correction component based on trial stress
+      // Check dFtrial/dSigma
+      REQUIRE(df_dsigma_trial(0) == Approx(0.05712351).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(1) == Approx(-0.05712351).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(2) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(3) == Approx(0.49672619).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check dPtrial/dSigma
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.07488303).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.02353467).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.05134836).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.42790303).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check compute stress
+      mpm::Material<Dim>::Vector6d updated_stress =
+          mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
+                                       &state_variables);
+      // Check update stress
+      REQUIRE(updated_stress(0) == Approx(-3917.72356097).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5340.1440237).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-5742.13241534).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(529.26866296).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
+    }
+  }
+
+  //! Check yield correction based on current stress
+  SECTION("MohrCoulomb check yield correction based on current stress") {
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "MohrCoulomb2D", std::move(id), jmaterial);
+
+    auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
+
+    REQUIRE(material->id() == 0);
+
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
+    stress.setZero();
+    stress(0) = -5000.;
+    stress(1) = -6000.;
+    stress(2) = -7000.;
+    stress(3) = -4168.05;
+
+    // Calculate modulus values
+    const double K = material->property("youngs_modulus") /
+                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
+    const double G = material->property("youngs_modulus") /
+                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double a1 = K + (4.0 / 3.0) * G;
+    const double a2 = K - (2.0 / 3.0) * G;
+    // Compute elastic tensor
+    mpm::Material<Dim>::Matrix6x6 de;
+    de.setZero();
+    de(0, 0) = a1;
+    de(0, 1) = a2;
+    de(0, 2) = a2;
+    de(1, 0) = a2;
+    de(1, 1) = a1;
+    de(1, 2) = a2;
+    de(2, 0) = a2;
+    de(2, 1) = a2;
+    de(2, 2) = a1;
+    de(3, 3) = G;
+    de(4, 4) = G;
+    de(5, 5) = G;
+
+    // Initialise state variables
+    mpm::dense_map state_variables = material->initialise_state_variables();
+    // Check if stress invariants is computed correctly based on stress
+    REQUIRE(mohr_coulomb->compute_stress_invariants(stress, &state_variables) ==
+            true);
+    REQUIRE(state_variables.at("phi") == Approx(0.52359878).epsilon(Tolerance));
+    REQUIRE(state_variables.at("psi") == Approx(0.26179939).epsilon(Tolerance));
+    REQUIRE(state_variables.at("cohesion") ==
+            Approx(jmaterial["cohesion"]).epsilon(Tolerance));
+    REQUIRE(state_variables.at("j2") ==
+            Approx(18372640.8025).epsilon(Tolerance));
+    REQUIRE(state_variables.at("j3") ==
+            Approx(17372640802.5).epsilon(Tolerance));
+    REQUIRE(state_variables.at("epsilon") ==
+            Approx(-10392.30484541).epsilon(Tolerance));
+    REQUIRE(state_variables.at("rho") ==
+            Approx(6061.78864734).epsilon(Tolerance));
+    REQUIRE(state_variables.at("theta") ==
+            Approx(0.32015479).epsilon(Tolerance));
+    REQUIRE(state_variables.at("epds") == Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain0") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain1") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain2") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain3") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain4") ==
+            Approx(0.).epsilon(Tolerance));
+    REQUIRE(state_variables.at("plastic_strain5") ==
+            Approx(0.).epsilon(Tolerance));
+
+    //! Check for shear failure (epde_peak < epds < epde_residual)
+    SECTION("Check for shear failure (epde_peak < epds < epde_residual)") {
+      // Define current plastic strain
+      state_variables.at("plastic_strain0") = 0.0005;
+      state_variables.at("plastic_strain1") = -0.0005;
+      state_variables.at("plastic_strain2") = 0.;
+      state_variables.at("plastic_strain3") = 0.002;
+      state_variables.at("epds") = 0.0000973;
+      // Modified MC parameters
+      state_variables.at("phi") = 0.472654291926534;
+      state_variables.at("psi") = 0.236327145963267;
+      state_variables.at("cohesion") = 1902.70320320449;
+      // Initialise values of yield functions
+      Eigen::Matrix<double, 2, 1> yield_function;
+      auto yield_type =
+          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function(0) == Approx(-1302.0670798).epsilon(Tolerance));
+      REQUIRE(yield_function(1) == Approx(-0.05071318).epsilon(Tolerance));
+      REQUIRE(yield_type == mohr_coulomb->FailureState::Shear);
+
+      // Initialise plastic correction components
+      mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
+      df_dsigma.setZero();
+      dp_dsigma.setZero();
+      double softening = 0.;
+      // Compute plastic correction components
+      mohr_coulomb->compute_df_dp(yield_type, &state_variables, stress,
+                                  &df_dsigma, &dp_dsigma, &softening);
+      // Check plastic correction component based on stress
+      // Check dF/dSigma
+      REQUIRE(df_dsigma(0) == Approx(0.32254113).epsilon(Tolerance));
+      REQUIRE(df_dsigma(1) == Approx(0.18876846).epsilon(Tolerance));
+      REQUIRE(df_dsigma(2) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(3) == Approx(-0.55757115).epsilon(Tolerance));
+      REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
+      // Check dP/dSigma
+      REQUIRE(dp_dsigma(0) == Approx(0.28300931).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.16391888).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.20610082).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.49637487).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
+
+      // Initialise incremental of strain
+      mpm::Material<Dim>::Vector6d dstrain;
+      dstrain.setZero();
+      dstrain(0) = 0.0005;
+      dstrain(1) = -0.0005;
+      dstrain(2) = 0.;
+      dstrain(3) = 0.0001;
+      // Compute trial stress
+      mpm::Material<Dim>::Vector6d trial_stress = stress + de * dstrain;
+      // Check if stress invariants is computed correctly based on trial stress
+      REQUIRE(mohr_coulomb->compute_stress_invariants(
+                  trial_stress, &state_variables) == true);
+      REQUIRE(state_variables.at("phi") ==
+              Approx(0.472654291926534).epsilon(Tolerance));
+      REQUIRE(state_variables.at("psi") ==
+              Approx(0.236327145963267).epsilon(Tolerance));
+      REQUIRE(state_variables.at("cohesion") ==
+              Approx(1902.70320320449).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j2") ==
+              Approx(33953430.7433284).epsilon(Tolerance));
+      REQUIRE(state_variables.at("j3") ==
+              Approx(32953430743.3284).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epsilon") ==
+              Approx(-10392.30484541).epsilon(Tolerance));
+      REQUIRE(state_variables.at("rho") ==
+              Approx(8240.56196425).epsilon(Tolerance));
+      REQUIRE(state_variables.at("theta") ==
+              Approx(0.37442215).epsilon(Tolerance));
+      REQUIRE(state_variables.at("epds") ==
+              Approx(0.0000973).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain0") ==
+              Approx(0.0005).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain1") ==
+              Approx(-0.0005).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain2") ==
+              Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain3") ==
+              Approx(0.002).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain4") ==
+              Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("plastic_strain5") ==
+              Approx(0.).epsilon(Tolerance));
+      // Initialise values of yield functions based on trial stress
+      Eigen::Matrix<double, 2, 1> yield_function_trial;
+      auto yield_type_trial = mohr_coulomb->compute_yield_state(
+          &yield_function_trial, &state_variables);
+      // Check if yield function and yield state is computed correctly
+      REQUIRE(yield_function_trial(0) ==
+              Approx(262.24181576).epsilon(Tolerance));
+      REQUIRE(yield_function_trial(1) ==
+              Approx(1756.8830276).epsilon(Tolerance));
+      REQUIRE(yield_type_trial == mohr_coulomb->FailureState::Shear);
+      // Initialise plastic correction components based on trial stress
+      mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
+      df_dsigma_trial.setZero();
+      dp_dsigma_trial.setZero();
+      double softening_trial = 0.;
+      // Compute plastic correction components based on trial stress
+      mohr_coulomb->compute_df_dp(yield_type_trial, &state_variables,
+                                  trial_stress, &df_dsigma_trial,
+                                  &dp_dsigma_trial, &softening_trial);
+
+      // Check plastic correction component based on trial stress
+      // Check dFtrial/dSigma
+      REQUIRE(df_dsigma_trial(0) == Approx(0.67921631).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(1) == Approx(-0.16790672).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(2) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(3) == Approx(-0.36872079).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check dPtrial/dSigma
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.59702846).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.1611682).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.19503289).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(-0.33001449).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
+      // Check compute stress
+      mpm::Material<Dim>::Vector6d updated_stress =
+          mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
+                                       &state_variables);
+      // Check update stress
+      REQUIRE(updated_stress(0) == Approx(-3249.57727771).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-11120.2054798).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-6920.78010282).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(-2786.53008179).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
     }
