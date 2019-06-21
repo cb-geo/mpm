@@ -586,7 +586,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   (*state_vars).at("plastic_strain5") += dpstrain(5);
   // Update equivalent plastic deviatoric strain
   (*state_vars).at("epds") =
-      sqrt(2. / 3. *
+      sqrt(2. / 9. *
                (pow(((*state_vars).at("plastic_strain0") -
                      (*state_vars).at("plastic_strain1")),
                     2.) +
