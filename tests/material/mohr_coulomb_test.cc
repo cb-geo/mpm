@@ -1696,9 +1696,6 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  // Tolerance for computation of stress
-  const double Tolerance_stress = 1.E-2;
-
   const unsigned Dim = 2;
 
   // Add particle
@@ -1763,6 +1760,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
 
     //! Check for shear failure (epde_peak < epds < epde_residual)
     SECTION("Check for shear failure (epde_peak < epds < epde_residual)") {
+
+      // Tolerance for computation of stress
+      const double Tolerance_stress = 1.E-5;
+
       // Initialise stress
       mpm::Material<Dim>::Vector6d stress;
       stress.setZero();
@@ -2091,16 +2092,12 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) ==
-              Approx(-7573.14655485).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(1) ==
-              Approx(-8293.81378005).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(2) ==
-              Approx(-6337.06362775).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(3) ==
-              Approx(4709.1549025).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
+      REQUIRE(updated_stress(0) == Approx(-7573.14655485).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-8293.81378005).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-6337.06362775).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(4709.1549025).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
@@ -2286,16 +2283,12 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) ==
-              Approx(-3917.72356097).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(1) ==
-              Approx(-5340.1440237).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(2) ==
-              Approx(-5742.13241534).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(3) ==
-              Approx(529.26866296).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
+      REQUIRE(updated_stress(0) == Approx(-3917.72356097).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5340.1440237).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-5742.13241534).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(529.26866296).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
@@ -2354,6 +2347,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
 
     //! Check for shear failure (epde_peak < epds < epde_residual)
     SECTION("Check for shear failure (epde_peak < epds < epde_residual)") {
+
+      // Tolerance for computation of stress
+      const double Tolerance_stress = 1.E-5;
+
       // Initialise stress
       mpm::Material<Dim>::Vector6d stress;
       stress.setZero();
@@ -2687,16 +2684,12 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) ==
-              Approx(-1909.04417786).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(1) ==
-              Approx(-5722.13370553).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(2) ==
-              Approx(-8601.25290489).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(3) ==
-              Approx(2466.78909344).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
+      REQUIRE(updated_stress(0) == Approx(-1909.04417786).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5722.13370553).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-8601.25290489).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(2466.78909344).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
@@ -2880,16 +2873,12 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) ==
-              Approx(-4530.74184152).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(1) ==
-              Approx(-5311.19503602).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(2) ==
-              Approx(-5658.06312247).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(3) ==
-              Approx(877.19525432).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
-      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
+      REQUIRE(updated_stress(0) == Approx(-4530.74184152).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5311.19503602).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-5658.06312247).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(877.19525432).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
