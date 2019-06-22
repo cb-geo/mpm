@@ -327,8 +327,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     (*df_dsigma)(4) = 0.;
     (*df_dsigma)(5) = 0.;
   }
-  // Initialise dp/dj
-  double dp_dj = 0.;
+  // Initialise dp/dq
+  double dp_dq = 0.;
   // Compute dp/dsigma and dp/dj in tension yield
   if (yield_type == FailureState::Tensile) {
     // Define deviatoric eccentricity
@@ -370,7 +370,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     (*dp_dsigma) = (dp_depsilon * depsilon_dsigma) + (dp_drho * drho_dsigma) +
                    (dp_drt * drt_dtheta * dtheta_dsigma);
     // Compute dP/dJ
-    dp_dj = dp_drho * sqrt(2.);
+    dp_dq = dp_drho * sqrt(2. / 3.);
   }
   // Compute dp/dsigma and dp/dj in shear yield
   else {
@@ -407,21 +407,19 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     // compute the value of dp/dsigma and dp/dj in shear yield
     (*dp_dsigma) = (dp_depsilon * depsilon_dsigma) + (dp_drho * drho_dsigma) +
                    (dp_dtheta * dtheta_dsigma);
-    dp_dj = dp_drho * sqrt(2.);
+    dp_dq = dp_drho * sqrt(2. / 3.);
   }
   // Compute softening part
   double dphi_dpstrain = 0.;
   double dc_dpstrain = 0.;
+  (*softening) = 0.;
   if (softening_ && epds > epds_peak_ && epds < epds_residual_) {
     // Compute dPhi/dPstrain
     dphi_dpstrain = (phi_residual_ - phi_peak_) / (epds_residual_ - epds_peak_);
     // Compute dc/dPstrain
     dc_dpstrain =
         (cohesion_residual_ - cohesion_peak_) / (epds_residual_ - epds_peak_);
-  }
-  // Compute dF/dPstrain
-  (*softening) = 0.;
-  if (softening_) {
+    // Compute dF/dPstrain
     double df_dphi =
         sqrt(3. / 2.) * rho *
             ((sin(phi) * sin(theta + M_PI / 3.) /
@@ -430,7 +428,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
         (epsilon / (sqrt(3.) * cos(phi) * cos(phi)));
     double df_dc = -1.;
     (*softening) =
-        (-1.) * ((df_dphi * dphi_dpstrain) + (df_dc * dc_dpstrain)) * dp_dj;
+        (-1.) * ((df_dphi * dphi_dpstrain) + (df_dc * dc_dpstrain)) * dp_dq;
   }
 }
 
@@ -520,6 +518,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
   }
+  // Check plastic multiplier
+  if (p_multiplier < 0.) {
+    throw std::runtime_error(
+        "Plastic multiplier of Mohr-Coulomb model is negative!");
+  }
   // Correct stress back to the yield surface
   Vector6d updated_stress =
       trial_stress - (p_multiplier * this->de_ * dp_dsigma_final);
@@ -550,6 +553,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
         yield_trial /
         ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
          softening_trial);
+    // Check plastic multiplier
+    if (p_multiplier < 0.) {
+      throw std::runtime_error(
+          "Plastic multiplier of Mohr-Coulomb model is negative!");
+    }
     // Correct stress back to the yield surface
     updated_stress -= (lambda_trial * this->de_ * dp_dsigma_trial);
     // Compute stress invariants based on updated stress
@@ -559,6 +567,11 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
         this->compute_yield_state(&yield_function_trial, state_vars);
     // Count the iteration step
     itr++;
+    // Check plastic multiplier
+    if (itr == itr_max) {
+      throw std::runtime_error(
+          "Iteration step of plastic correction is not enough!");
+    }
   }
   // Compute incremental of plastic strain
   Vector6d dstress = updated_stress - stress;
@@ -571,13 +584,9 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   (*state_vars).at("plastic_strain3") += dpstrain(3);
   (*state_vars).at("plastic_strain4") += dpstrain(4);
   (*state_vars).at("plastic_strain5") += dpstrain(5);
-  // Compute plastic volume strain
-  double plastic_vstrain = (*state_vars).at("plastic_strain0") +
-                           (*state_vars).at("plastic_strain1") +
-                           (*state_vars).at("plastic_strain2");
   // Update equivalent plastic deviatoric strain
   (*state_vars).at("epds") =
-      sqrt(1. / 6. *
+      sqrt(2. / 9. *
                (pow(((*state_vars).at("plastic_strain0") -
                      (*state_vars).at("plastic_strain1")),
                     2.) +
@@ -587,9 +596,10 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
                 pow(((*state_vars).at("plastic_strain2") -
                      (*state_vars).at("plastic_strain0")),
                     2.)) +
-           pow(((*state_vars).at("plastic_strain3")), 2.) +
-           pow(((*state_vars).at("plastic_strain4")), 2.) +
-           pow(((*state_vars).at("plastic_strain5")), 2.));
+           1. / 3. *
+               (pow(((*state_vars).at("plastic_strain3")), 2.) +
+                pow(((*state_vars).at("plastic_strain4")), 2.) +
+                pow(((*state_vars).at("plastic_strain5")), 2.)));
 
   return updated_stress;
 }
