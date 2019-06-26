@@ -131,24 +131,46 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     task_group.wait();
 
     // Assign mass and momentum to nodes
+    // Solid phase
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                  std::placeholders::_1, phase));
+                  std::placeholders::_1, solid_skeleton));
+    // Fluid phase
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+                  std::placeholders::_1, pore_fluid));
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce nodal mass
+      // Solid phase
       mesh_->allreduce_nodal_scalar_property(
-          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
+                    solid_skeleton),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, phase, std::placeholders::_2));
+                    false, solid_skeleton, std::placeholders::_2));
+      // Fluid phase
+      mesh_->allreduce_nodal_scalar_property(
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1,
+                    pore_fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
+                    false, pore_fluid, std::placeholders::_2));
+
       // MPI all reduce nodal momentum
+      // Solid phase
       mesh_->allreduce_nodal_vector_property(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    phase),
+                    solid_skeleton),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, phase,
+                    std::placeholders::_1, false, solid_skeleton,
+                    std::placeholders::_2));
+      // Fluid phase
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
+                    pore_fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
+                    std::placeholders::_1, false, pore_fluid,
                     std::placeholders::_2));
     }
 #endif
@@ -161,15 +183,25 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Update stress first
     if (stress_update_ == mpm::StressUpdate::usf) {
-      // Iterate over each particle to calculate strain
+      // Iterate over each particle to calculate strain of solid_skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, solid_skeleton, dt_));
 
-      // Iterate over each particle to update particle volume
+      // Iterate over each particle to calculate strain of solid_skeleton
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, pore_fluid, dt_));
+
+      // Iterate over each particle to update particle volume of solid_skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, solid_skeleton, dt_));
+
+      // Iterate over each particle to update particle volume of solid_skeleton
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+                    std::placeholders::_1, pore_fluid, dt_));
 
       // Pressure smoothing
       if (pressure_smoothing_) {
@@ -196,10 +228,15 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
                       std::placeholders::_1, phase));
       }
 
-      // Iterate over each particle to compute stress
+      // Iterate over each particle to compute stress of solid skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
-                    std::placeholders::_1, phase));
+                    std::placeholders::_1, solid_skeleton));
+
+      // Iterate over each particle to compute stress of pore fluid
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_pore_pressure,
+                    std::placeholders::_1, solid_skeleton, pore_fluid));
     }
 
     // Spawn a task for external force
@@ -267,15 +304,25 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Update Stress Last
     if (stress_update_ == mpm::StressUpdate::usl) {
-      // Iterate over each particle to calculate strain
+      // Iterate over each particle to calculate strain of solid_skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, solid_skeleton, dt_));
 
-      // Iterate over each particle to update particle volume
+      // Iterate over each particle to calculate strain of solid_skeleton
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, pore_fluid, dt_));
+
+      // Iterate over each particle to update particle volume of solid_skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, solid_skeleton, dt_));
+
+      // Iterate over each particle to update particle volume of solid_skeleton
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+                    std::placeholders::_1, pore_fluid, dt_));
 
       // Pressure smoothing
       if (pressure_smoothing_) {
@@ -306,6 +353,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                     std::placeholders::_1, phase));
+
+      // Iterate over each particle to compute stress of pore fluid
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_pore_pressure,
+                    std::placeholders::_1, solid_skeleton, pore_fluid));
     }
 
     // Locate particles
