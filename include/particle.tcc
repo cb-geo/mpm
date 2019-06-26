@@ -517,6 +517,37 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
   return status;
 }
 
+// Compute pore pressure
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
+    unsigned solid_skeleton, unsigned pore_fluid) {
+  bool status = true;
+  try {
+    // Check if material ptr is valid
+    if (material_.at(solid_skeleton) != nullptr &&
+        material_.at(pore_fluid) != nullptr) {
+      // Incremental of strain of solid skeleton
+      Eigen::Matrix<double, 6, 1> dstrain_solid =
+          this->dstrain_.col(solid_skeleton);
+      // Incremental of strain of pore fluid
+      Eigen::Matrix<double, 6, 1> dstrain_fluid =
+          this->dstrain_.col(pore_fluid);
+      // Bulk modulus of fluid
+      double K = material_.at(pore_fluid)->property("bulk_modulus");
+      // Calculate pore pressure
+      this->stress_.col(pore_fluid) += K / porosity_ *
+                                       (volume_fraction_(0) * dstrain_fluid +
+                                        volume_fraction_(1) * dstrain_solid);
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Map body force
 //! \param[in] phase Index corresponding to the phase
 //! \param[in] pgravity Gravity of a particle

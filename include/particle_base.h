@@ -164,6 +164,10 @@ class ParticleBase {
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
 
+  //! Compute pore pressure
+  virtual bool compute_pore_pressure(unsigned solid_skeleton,
+                                     unsigned pore_fluid) = 0;
+
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
 

@@ -189,6 +189,13 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
+  //! Compute pore pressure
+  //! \param[in] solid_skeleton Index corresponding to the phase of solid
+  //! skeleton \param[in] pore_fluid Index corresponding to the phase of pore
+  //! fluid
+  bool compute_pore_pressure(unsigned solid_skeleton,
+                             unsigned pore_fluid) override;
+
   //! Return stress of the particle
   //! \param[in] phase Index corresponding to the phase
   Eigen::Matrix<double, 6, 1> stress(unsigned phase) const override {
