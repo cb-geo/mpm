@@ -26,6 +26,8 @@ class GaussPointGenerator : public PointGenerator<Tdim> {
   using PointGenerator<Tdim>::io_;
   // Generator
   using PointGenerator<Tdim>::generator_;
+  // Logger
+  using PointGenerator<Tdim>::console_;
 
 };  // GaussPointGenerator class
 }  // namespace mpm

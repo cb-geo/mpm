@@ -250,14 +250,13 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Get particles properties
     auto json_particles = io_->json_object("particles");
 
-    auto json_particle0 = json_particles[0];
-    auto generator = json_particle0["generator"];
+    for (const auto json_particle : json_particles) {
+      // Generate particles
+      all_particles = mpm::generator_factory<Tdim>(mesh_, io_, json_particle);
 
-    // Generate particles
-    all_particles = mpm::generator_factory<Tdim>(mesh_, io_, generator);
-
-    if (all_particles.empty())
-      throw std::runtime_error("No particles were generated");
+      if (all_particles.empty())
+        throw std::runtime_error("No particles were generated");
+    }
 
     // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());

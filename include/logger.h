@@ -19,10 +19,13 @@ struct Logger {
   static const std::shared_ptr<spdlog::logger> io_logger;
 
   // Create a logger for reading mesh
-  static const std::shared_ptr<spdlog::logger> read_mesh;
+  static const std::shared_ptr<spdlog::logger> read_mesh_logger;
 
   // Create a logger for reading ascii mesh
-  static const std::shared_ptr<spdlog::logger> read_mesh_ascii;
+  static const std::shared_ptr<spdlog::logger> read_mesh_ascii_logger;
+
+  // Create a logger for point generator
+  static const std::shared_ptr<spdlog::logger> point_generator_logger;
 
   // Create a logger for MPM
   static const std::shared_ptr<spdlog::logger> mpm_logger;

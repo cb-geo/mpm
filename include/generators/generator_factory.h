@@ -21,7 +21,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> generator_factory(
   std::vector<Eigen::Matrix<double, Tdim, 1>> coordinates;
   try {
     // Particle generator
-    const auto generator_type = generator["type"].template get<std::string>();
+    const auto generator_type = generator["generator"]["type"].template get<std::string>();
 
     // Generate particles from file
     if (generator_type == "file") {

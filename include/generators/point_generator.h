@@ -21,7 +21,9 @@ class PointGenerator {
   //! Constructor with mesh pointer and generator properties
   PointGenerator(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
                  const std::shared_ptr<mpm::IO>& io, const Json& generator)
-      : mesh_{mesh}, io_{io}, generator_{generator} {}
+      : mesh_{mesh}, io_{io}, generator_{generator} {
+        console_ = spdlog::get("PointGenerator");
+  }
 
   //! Generate material points
   virtual std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points() = 0;
@@ -33,7 +35,8 @@ class PointGenerator {
   std::shared_ptr<mpm::IO> io_;
   //! JSON generator properties
   Json generator_;
-
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
 };  // PointGenerator class
 }  // namespace mpm
 #endif  // MPM_POINTGENERATOR_H_
