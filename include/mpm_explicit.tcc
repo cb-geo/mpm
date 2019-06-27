@@ -1,7 +1,7 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
-    : mpm::MPMBase<Tdim>(std::move(io)) {
+mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
+    : mpm::MPMBase<Tdim>(io) {
   //! Logger
   console_ = spdlog::get("MPMExplicit");
 }

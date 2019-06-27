@@ -1,8 +1,10 @@
 #ifndef MPM_FILE_POINT_GENERATOR_H_
 #define MPM_FILE_POINT_GENERATOR_H_
 
-
 #include "point_generator.h"
+
+// JSON
+using Json = nlohmann::json;
 
 namespace mpm {
 
@@ -14,14 +16,21 @@ class FilePointGenerator : public PointGenerator<Tdim> {
  public:
   //! Constructor with mesh pointer and generator properties
   FilePointGenerator(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
-                 const Json& generator);
+                     const std::shared_ptr<IO>& io, const Json& generator);
 
   //! Generate material points
   std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points() override;
 
-};  // FilePointGenerator class
+ private:
+  // Mesh object
+  using PointGenerator<Tdim>::mesh_;
+  // IO object
+  using PointGenerator<Tdim>::io_;
+  // Generator
+  using PointGenerator<Tdim>::generator_;
+
+};  // namespace mpm
 }  // namespace mpm
 
 #include "file_point_generator.tcc"
-
 #endif  // MPM_FILE_POINT_GENERATOR_H_

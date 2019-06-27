@@ -1,7 +1,12 @@
 #ifndef MPM_POINT_GENERATOR_H_
 #define MPM_POINT_GENERATOR_H_
 
+#include <memory>
+
+#include "io.h"
 #include "mesh.h"
+#include "read_mesh.h"
+#include "read_mesh_ascii.h"
 
 // JSON
 using Json = nlohmann::json;

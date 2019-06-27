@@ -1,7 +1,6 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
-    : mpm::MPM(std::move(io)) {
+mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   //! Logger
   console_ = spdlog::get("MPMBase");
 
@@ -14,7 +13,7 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
   // Set mesh as isoparametric
   bool isoparametric = is_isoparametric();
 
-  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id, isoparametric);
+  mesh_ = std::make_shared<mpm::Mesh<Tdim>>(id, isoparametric);
 
   // Empty all materials
   materials_.clear();
@@ -248,27 +247,18 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Get all particles
     std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
 
+    // Get particles properties
+    auto json_particles = io_->json_object("particles");
+
+    auto json_particle0 = json_particles[0];
+    auto generator = json_particle0["generator"];
+
     // Generate particles
-    bool read_particles_file = false;
-    try {
-      unsigned nparticles_cell =
-          mesh_props["generate_particles_cells"].template get<unsigned>();
+    all_particles = mpm::generator_factory<Tdim>(mesh_, io_, generator);
 
-      if (nparticles_cell > 0)
-        all_particles = mesh_->generate_material_points(nparticles_cell);
-      else
-        throw std::runtime_error(
-            "Specified # of particles per cell for generation is invalid!");
+    if (all_particles.empty())
+      throw std::runtime_error("No particles were generated");
 
-    } catch (std::exception& exception) {
-      console_->warn("Generate particles is not set, reading particles file");
-      read_particles_file = true;
-    }
-
-    // Read particles from file
-    if (read_particles_file)
-      all_particles =
-          particle_reader->read_particles(io_->file_name("particles"));
     // Get all particle ids
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);

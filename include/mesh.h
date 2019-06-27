@@ -318,8 +318,8 @@ class Mesh {
   //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Status of create particle sets
   bool create_particles_set(unsigned set_id,
-                         const std::vector<mpm::Index>& particle_sets,
-                         bool check_duplicates);
+                            const std::vector<mpm::Index>& particle_sets,
+                            bool check_duplicates);
 
  private:
   // Locate a particle in mesh cells

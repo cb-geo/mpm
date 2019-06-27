@@ -15,6 +15,7 @@
 #include "tbb/task_group.h"
 
 #include "container.h"
+#include "generators/generator_factory.h"
 #include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
@@ -29,7 +30,7 @@ template <unsigned Tdim>
 class MPMBase : public MPM {
  public:
   //! Default constructor
-  MPMBase(std::unique_ptr<IO>&& io);
+  MPMBase(const std::shared_ptr<IO>& io);
 
   //! Initialise mesh
   bool initialise_mesh() override;
@@ -90,7 +91,7 @@ class MPMBase : public MPM {
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
-  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
+  std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! VTK attributes

@@ -1,7 +1,6 @@
 #ifndef MPM_GAUSS_POINT_GENERATOR_H_
 #define MPM_GAUSS_POINT_GENERATOR_H_
 
-
 #include "point_generator.h"
 
 namespace mpm {
@@ -14,10 +13,19 @@ class GaussPointGenerator : public PointGenerator<Tdim> {
  public:
   //! Constructor with mesh pointer and generator properties
   GaussPointGenerator(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
-                 const Json& generator);
+                      const std::shared_ptr<mpm::IO>& io,
+                      const Json& generator);
 
   //! Generate material points
   std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points() override;
+
+ private:
+  // Mesh object
+  using PointGenerator<Tdim>::mesh_;
+  // IO object
+  using PointGenerator<Tdim>::io_;
+  // Generator
+  using PointGenerator<Tdim>::generator_;
 
 };  // GaussPointGenerator class
 }  // namespace mpm

@@ -19,6 +19,6 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
 
   // Read particles from file : this needs modification in IO class
   const auto pfile =
-      io_->working_dir() + generator["location"].template get<std::string>();
+      io_->working_dir() + generator_["location"].template get<std::string>();
   return particle_reader->read_particles(pfile);
 }

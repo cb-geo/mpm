@@ -26,7 +26,7 @@ namespace mpm {
 class MPM {
  public:
   //! Constructor
-  MPM(std::unique_ptr<IO>&& io) : io_(std::move(io)) {
+  MPM(const std::shared_ptr<IO>& io) : io_(io) {
 
     analysis_ = io_->analysis();
 
@@ -79,8 +79,8 @@ class MPM {
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
   //! Output steps
   mpm::Index output_steps_{std::numeric_limits<mpm::Index>::max()};
-  //! A unique ptr to IO object
-  std::unique_ptr<mpm::IO> io_;
+  //! A shared ptr to IO object
+  std::shared_ptr<mpm::IO> io_;
   //! JSON analysis object
   Json analysis_;
   //! JSON post-process object

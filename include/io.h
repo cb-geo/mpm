@@ -82,6 +82,9 @@ class IO {
                                       const std::string& analysis_id,
                                       unsigned step, unsigned max_steps);
 
+  //! Return working directory
+  std::string working_dir() const { return working_dir_; }
+
  private:
   //! Number of parallel threads
   unsigned nthreads_{0};
