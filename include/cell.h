@@ -1,7 +1,6 @@
 #ifndef MPM_CELL_H_
 #define MPM_CELL_H_
 
-#include <iostream>
 #include <limits>
 #include <map>
 #include <memory>
