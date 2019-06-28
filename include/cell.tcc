@@ -1244,7 +1244,7 @@ std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
   // Compute volumetric Bmatrix
   std::vector<Eigen::MatrixXd> bmatrix_vol;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3, Tdim> bvoli;
+    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bvoli;
     bvoli.setZero();
     for (unsigned j = 0; j < Tdim; ++j) {
       for (unsigned k = 0; k < Tdim; ++k)
@@ -1256,14 +1256,15 @@ std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
   // Compute deviatoric Bmatrix
   std::vector<Eigen::MatrixXd> bmatrix_dev;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3, Tdim> bdevi = bmatrix.at(i) - bmatrix_vol.at(i);
+    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bdevi =
+        bmatrix.at(i) - bmatrix_vol.at(i);
     bmatrix_dev.push_back(bdevi);
   }
 
   // Compute volumetric Bmatrix at centroid
   std::vector<Eigen::MatrixXd> bmatrix_centroid_vol;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3, Tdim> bvolcentroidi;
+    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bvolcentroidi;
     bvolcentroidi.setZero();
     for (unsigned j = 0; j < Tdim; ++j) {
       for (unsigned k = 0; k < Tdim; ++k)
@@ -1275,7 +1276,7 @@ std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
   // Compute BBar
   std::vector<Eigen::MatrixXd> bbar_matrix;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3, Tdim> bbari =
+    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bbari =
         bmatrix_dev.at(i) + bmatrix_centroid_vol.at(i);
     bbar_matrix.push_back(bbari);
   }

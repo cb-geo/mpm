@@ -392,7 +392,8 @@ template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // Strain rate
   // Change true to bbar
-  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase, true);
+  bool bbar = false;
+  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase, bbar);
   // particle_strain_rate
   Eigen::Matrix<double, 6, 1> particle_strain_rate;
   particle_strain_rate.setZero();

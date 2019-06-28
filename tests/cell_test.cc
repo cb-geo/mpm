@@ -1,3 +1,4 @@
+#include <iostream>
 #include <limits>
 #include <memory>
 
@@ -667,7 +668,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       }
 
       auto bbar = false;
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase, bbar);
+      Eigen::VectorXd strain_rate =
+          cell->compute_strain_rate(bmatrix, phase, bbar);
       REQUIRE(strain_rate.size() == 3);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
@@ -680,12 +682,32 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
       // Bbar
       auto bbar_matrix = cell->compute_bbar(bmatrix, phase);
+      REQUIRE(bbar_matrix.size() == 4);
+      for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
+        REQUIRE(bbar_matrix.at(i).rows() == 3);
+        REQUIRE(bbar_matrix.at(i).cols() == 2);
+      }
+      Eigen::Matrix<double, 3, 2> bbar_matrix_check;
+      // clang-format off
+      bbar_matrix_check << -0.25,     0, 
+                               0, -0.25, 
+                           -0.25, -0.25;
+      // clang-format on
+      for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
+        for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {
+          for (unsigned k = 0; k << bbar_matrix.at(i).cols(); ++k) {
+            REQUIRE(bbar_matrix.at(i)(j, k) ==
+                    Approx(bbar_matrix_check(j, k)).epsilon(Tolerance));
+          }
+        }
+      }
 
-      REQUIRE(strain_rate.size() == 3);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));      
       bbar = true;
-
+      Eigen::VectorXd strain_rate_bbar =
+          cell->compute_strain_rate(bmatrix, phase, bbar);
+      REQUIRE(strain_rate_bbar.size() == 3);
+      for (unsigned i = 0; i < strain_rate.size(); ++i)
+        REQUIRE(strain_rate_bbar(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
@@ -1952,7 +1974,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       }
 
       auto bbar = false;
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase, bbar);
+      Eigen::VectorXd strain_rate =
+          cell->compute_strain_rate(bmatrix, phase, bbar);
       REQUIRE(strain_rate.size() == 6);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
@@ -1962,6 +1985,38 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(strain_rate_centroid.size() == 6);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
+
+      // Bbar
+      auto bbar_matrix = cell->compute_bbar(bmatrix, phase);
+      REQUIRE(bbar_matrix.size() == 8);
+      for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
+        REQUIRE(bbar_matrix.at(i).rows() == 6);
+        REQUIRE(bbar_matrix.at(i).cols() == 3);
+      }
+      Eigen::Matrix<double, 6, 3> bbar_matrix_check;
+      // clang-format off
+      bbar_matrix_check << -0.125,      0,      0,
+                                0, -0.125,      0,
+                                0,      0, -0.125,
+                           -0.125, -0.125,      0,
+                                0, -0.125, -0.125,
+                           -0.125,      0, -0.125;
+      // clang-format on
+      for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
+        for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {
+          for (unsigned k = 0; k << bbar_matrix.at(i).cols(); ++k) {
+            REQUIRE(bbar_matrix.at(i)(j, k) ==
+                    Approx(bbar_matrix_check(j, k)).epsilon(Tolerance));
+          }
+        }
+      }
+
+      bbar = true;
+      Eigen::VectorXd strain_rate_bbar =
+          cell->compute_strain_rate(bmatrix, phase, bbar);
+      REQUIRE(strain_rate_bbar.size() == 6);
+      for (unsigned i = 0; i < strain_rate.size(); ++i)
+        REQUIRE(strain_rate_bbar(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
