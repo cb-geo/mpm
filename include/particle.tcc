@@ -391,7 +391,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // Strain rate
-  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+  // Change true to bbar
+  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase, true);
   // particle_strain_rate
   Eigen::Matrix<double, 6, 1> particle_strain_rate;
   particle_strain_rate.setZero();

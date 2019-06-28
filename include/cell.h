@@ -1,6 +1,7 @@
 #ifndef MPM_CELL_H_
 #define MPM_CELL_H_
 
+#include <iostream>
 #include <limits>
 #include <map>
 #include <memory>
@@ -242,11 +243,18 @@ class Cell {
   double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
                                     unsigned phase);
 
+  //! Compute Bbar matrix
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  std::vector<Eigen::MatrixXd> compute_bbar(
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
+
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
+  //! \param[in] bbar Option to compute strain using bbar
   Eigen::VectorXd compute_strain_rate(
-      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, bool bbar);
 
   //! Compute strain rate for reduced integration at the centroid of cell
   //! \param[in] phase Phase associate to the particle
