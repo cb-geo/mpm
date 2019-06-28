@@ -16,18 +16,20 @@ template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>> generator_factory(
     const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
     const std::shared_ptr<mpm::IO>& io, const Json& generator) {
-
+  // Logger
+  auto console_ = spdlog::get("PointGenerator");
   // particles coordinates
   std::vector<Eigen::Matrix<double, Tdim, 1>> coordinates;
   try {
     // Particle generator
-    const auto generator_type = generator["generator"]["type"].template get<std::string>();
+    const auto generator_type = generator["type"].template get<std::string>();
 
     // Generate particles from file
     if (generator_type == "file") {
       auto gen =
           std::make_shared<mpm::FilePointGenerator<Tdim>>(mesh, io, generator);
       coordinates = gen->generate_points();
+      console_->error("{} {} {}", __FILE__, __LINE__, coordinates.size());
     }
     // Generate material points at the Gauss location in all cells
     else if (generator_type == "gauss") {
@@ -39,7 +41,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> generator_factory(
           "Particle generator type is not properly specified");
 
   } catch (std::exception& exception) {
-    // console_->warn("Generating particle failed");
+    console_->warn("Generating particle failed");
   }
   return coordinates;
 }
