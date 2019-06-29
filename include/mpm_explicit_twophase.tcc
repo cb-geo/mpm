@@ -241,15 +241,20 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Spawn a task for external force
     task_group.run([&] {
-      // Iterate over each particle to compute nodal body force
+      // Iterate over each particle to compute nodal body force of soild
+      // skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, phase, this->gravity_));
+                    std::placeholders::_1, solid_skeleton, this->gravity_));
+      // Iterate over each particle to compute nodal body force of pore fluid
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                    std::placeholders::_1, pore_fluid, this->gravity_));
 
       // Iterate over each particle to map traction force to nodes
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                    std::placeholders::_1, phase));
+                    std::placeholders::_1, solid_skeleton));
 
       //! Apply nodal tractions
       if (nodal_tractions_) this->apply_nodal_tractions();
@@ -257,30 +262,62 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Spawn a task for internal force
     task_group.run([&] {
-      // Iterate over each particle to compute nodal internal force
+      // Iterate over each particle to compute nodal internal force of solid
+      // skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                    std::placeholders::_1, phase));
+                    std::placeholders::_1, solid_skeleton));
+
+      // Iterate over each particle to compute nodal internal force of pore
+      // fluid
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                    std::placeholders::_1, pore_fluid));
+      // Iterate over each particle to compute nodal drag force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_drag_force,
+                    std::placeholders::_1, pore_fluid, this->gravity_));
     });
     task_group.wait();
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
-      // MPI all reduce external force
+      // MPI all reduce external force of solid skeleton
       mesh_->allreduce_nodal_vector_property(
           std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    phase),
+                    solid_skeleton),
           std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, phase,
+                    std::placeholders::_1, false, solid_skeleton,
                     std::placeholders::_2));
-      // MPI all reduce internal force
+      // MPI all reduce external force of pore fluid
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
+                    pore_fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
+                    std::placeholders::_1, false, pore_fluid,
+                    std::placeholders::_2));
+
+      // MPI all reduce internal force of solid skeleton
       mesh_->allreduce_nodal_vector_property(
           std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    phase),
+                    solid_skeleton),
           std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, phase,
+                    std::placeholders::_1, false, solid_skeleton,
                     std::placeholders::_2));
+      // MPI all reduce internal force of pore fluid
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
+                    pore_fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
+                    std::placeholders::_1, false, pore_fluid,
+                    std::placeholders::_2));
+
+      // MPI all reduce drag force
+      mesh_->allreduce_nodal_vector_property(
+          std::bind(&mpm::NodeBase<Tdim>::drag_force, std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Tdim>::update_drag_force,
+                    std::placeholders::_1, false, std::placeholders::_2));
     }
 #endif
 

@@ -559,6 +559,37 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
                                   pgravity);
 }
 
+//! Map drag force
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase,
+                                                   const VectorDim& pgravity) {
+  bool status = true;
+  try {
+    // Initialise drag force
+    VectorDim drag_force;
+    drag_force.setZero();
+    // Permeability coefficient
+    VectorDim k_coefficient;
+    k_coefficient[0] = material_.at(phase)->property("k_x");
+    k_coefficient[1] = material_.at(phase)->property("k_y");
+    if (Tdim == 3) k_coefficient[2] = material_.at(phase)->property("k_z");
+    // Check if permeability coefficient is valid
+    for (unsigned i = 0; i < Tdim; ++i) {
+      if (k_coefficient[i] > 0.)
+        drag_force[i] = porosity_ * porosity_ * pgravity[i] *
+                        this->velocity_(i, phase) / k_coefficient[i];
+      else
+        throw std::runtime_error("Permeability coefficient is invalid");
+    }
+    // Compute nodal drag force
+    cell_->compute_nodal_drag_force(drag_force);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Map internal force
 //! \param[in] phase Index corresponding to the phase
 template <unsigned Tdim, unsigned Tnphases>

@@ -274,6 +274,10 @@ class Cell {
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
+  //! Compute the nodal drag force of a cell from particle drag force
+  //! \param[in] drag_force Drag force
+  void compute_nodal_drag_force(const VectorDim drag_force);
+
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint
   //! \param[in] dir Direction of velocity constraint

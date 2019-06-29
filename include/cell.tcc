@@ -1333,6 +1333,14 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
         true, phase, (pvolume * bmatrix.at(j).transpose() * stress));
 }
 
+//! Compute the nodal drag force of a cell from particle drag force
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_nodal_drag_force(const VectorDim drag_force) {
+  // Map drag forces from particle to nodes
+  for (unsigned j = 0; j < this->nfunctions(); ++j)
+    nodes_[j]->update_drag_force(true, drag_force);
+}
+
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(

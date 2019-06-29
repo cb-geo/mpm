@@ -105,9 +105,18 @@ class NodeBase {
   virtual bool update_internal_force(bool update, unsigned phase,
                                      const VectorDim& force) = 0;
 
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual bool update_drag_force(bool update, const VectorDim& drag_force) = 0;
+
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
+
+  //! Return drag force at a given node
+  virtual VectorDim drag_force() const = 0;
 
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
