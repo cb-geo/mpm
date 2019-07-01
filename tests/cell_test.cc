@@ -679,35 +679,62 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       REQUIRE(strain_rate_centroid.size() == 3);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
+    }
 
-      // Bbar
-      auto bbar_matrix = cell->compute_bbar(bmatrix, phase);
+    SECTION("Check Bbar computation") {
+      // Local coordinate of a particle
+      Eigen::Vector2d xi_test = Eigen::Vector2d::Zero();
+      xi_test(0) = 0.4;
+      xi_test(1) = -0.3;
+
+      const auto bmatrix_test = element->bmatrix(
+          xi_test, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+          Eigen::Matrix<double, Dim, 1>::Zero());
+
+      auto bbar_matrix = cell->compute_bbar(bmatrix_test, phase);
+
       REQUIRE(bbar_matrix.size() == 4);
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         REQUIRE(bbar_matrix.at(i).rows() == 3);
         REQUIRE(bbar_matrix.at(i).cols() == 2);
       }
-      Eigen::Matrix<double, 3, 2> bbar_matrix_check;
+
+      // Real solution
+      std::vector<Eigen::Matrix<double, 3, 2>> bbar_matrix_check;
+      Eigen::Matrix<double, 3, 2> bbar_check;
       // clang-format off
-      bbar_matrix_check << -0.25,     0, 
-                               0, -0.25, 
-                           -0.25, -0.25;
+      bbar_check << -2.25,  0.416666666666667, 
+                     1.00, -1.083333333333333, 
+                    -1.50, -3.25;
       // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<  2.083333333333333,  1.083333333333333, 
+                    -1.166666666666667, -2.416666666666667, 
+                                 -3.50,              3.25;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<  1.083333333333333, -1.25, 
+                    -0.666666666666667,  2.25, 
+                                  3.50,  1.75;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check << -1.25, -0.583333333333333, 
+                     0.50,  0.916666666666667, 
+                     1.50, -1.75;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {
           for (unsigned k = 0; k << bbar_matrix.at(i).cols(); ++k) {
             REQUIRE(bbar_matrix.at(i)(j, k) ==
-                    Approx(bbar_matrix_check(j, k)).epsilon(Tolerance));
+                    Approx(bbar_matrix_check.at(i)(j, k)).epsilon(Tolerance));
           }
         }
       }
-
-      bbar = true;
-      Eigen::VectorXd strain_rate_bbar =
-          cell->compute_strain_rate(bmatrix, phase, bbar);
-      REQUIRE(strain_rate_bbar.size() == 3);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate_bbar(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
