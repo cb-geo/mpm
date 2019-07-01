@@ -2012,38 +2012,111 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(strain_rate_centroid.size() == 6);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
+    }
 
-      // Bbar
-      auto bbar_matrix = cell->compute_bbar(bmatrix, phase);
+    SECTION("Check Bbar computation") {
+      // Local coordinate of a particle
+      Eigen::Vector3d xi_test = Eigen::Vector3d::Zero();
+      xi_test(0) = 0.4;
+      xi_test(1) = -0.3;
+      xi_test(2) = 0.2;
+
+      const auto bmatrix_test = element->bmatrix(
+          xi_test, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+          Eigen::Matrix<double, Dim, 1>::Zero());
+
+      auto bbar_matrix = cell->compute_bbar(bmatrix_test, phase);
+
       REQUIRE(bbar_matrix.size() == 8);
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         REQUIRE(bbar_matrix.at(i).rows() == 6);
         REQUIRE(bbar_matrix.at(i).cols() == 3);
       }
-      Eigen::Matrix<double, 6, 3> bbar_matrix_check;
+
+      // Real solution
+      std::vector<Eigen::Matrix<double, 6, 3>> bbar_matrix_check;
+      Eigen::Matrix<double, 6, 3> bbar_check;
       // clang-format off
-      bbar_matrix_check << -0.125,      0,      0,
-                                0, -0.125,      0,
-                                0,      0, -0.125,
-                           -0.125, -0.125,      0,
-                                0, -0.125, -0.125,
-                           -0.125,      0, -0.125;
+      bbar_check <<   -0.125000000000000,   0.041666666666667,   0.041666666666667,
+                       0.041666666666667,  -0.125000000000000,   0.041666666666667,
+                       0.041666666666667,   0.041666666666667,  -0.125000000000000,
+                      -0.166666666666667,  -0.166666666666667,                   0,
+                                       0,  -0.166666666666667,  -0.166666666666667,
+                      -0.166666666666667,                   0,  -0.166666666666667;
       // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<    0.041666666666667,   0.041666666666667,   0.041666666666667,
+                      -0.041666666666667,  -0.125000000000000,   0.041666666666667,
+                      -0.041666666666667,   0.041666666666667,  -0.125000000000000,
+                      -0.166666666666667,   0.083333333333333,                   0,
+                                       0,  -0.166666666666667,  -0.166666666666667,
+                      -0.166666666666667,                   0,   0.083333333333333;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<    0.041666666666667,  -0.041666666666667,   0.041666666666667,
+                      -0.041666666666667,   0.041666666666667,   0.041666666666667,
+                      -0.041666666666667,  -0.041666666666667,  -0.125000000000000,
+                       0.083333333333333,   0.083333333333333,                   0,
+                                       0,  -0.166666666666667,   0.083333333333333,
+                      -0.166666666666667,                   0,   0.083333333333333;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<   -0.125000000000000,  -0.041666666666667,   0.041666666666667,
+                       0.041666666666667,   0.041666666666667,   0.041666666666667,
+                       0.041666666666667,  -0.041666666666667,  -0.125000000000000,
+                       0.083333333333333,  -0.166666666666667,                   0,
+                                       0,  -0.166666666666667,   0.083333333333333,
+                      -0.166666666666667,                   0,  -0.166666666666667;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<   -0.125000000000000,   0.041666666666667,  -0.041666666666667,
+                       0.041666666666667,  -0.125000000000000,  -0.041666666666667,
+                       0.041666666666667,   0.041666666666667,   0.041666666666667,
+                      -0.166666666666667,  -0.166666666666667,                   0,
+                                       0,   0.083333333333333,  -0.166666666666667,
+                       0.083333333333333,                   0,  -0.166666666666667;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<    0.041666666666667,   0.041666666666667,  -0.041666666666667,
+                      -0.041666666666667,  -0.125000000000000,  -0.041666666666667,
+                      -0.041666666666667,   0.041666666666667,   0.041666666666667,
+                      -0.166666666666667,   0.083333333333333,                   0,
+                                       0,   0.083333333333333,  -0.166666666666667,
+                       0.083333333333333,                   0,   0.083333333333333;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<    0.041666666666667,  -0.041666666666667,  -0.041666666666667,
+                      -0.041666666666667,   0.041666666666667,  -0.041666666666667,
+                      -0.041666666666667,  -0.041666666666667,   0.041666666666667,
+                       0.083333333333333,   0.083333333333333,                   0,
+                                       0,   0.083333333333333,   0.083333333333333,
+                       0.083333333333333,                   0,   0.083333333333333;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+      // clang-format off
+      bbar_check <<   -0.125000000000000,  -0.041666666666667,  -0.041666666666667,
+                       0.041666666666667,   0.041666666666667,  -0.041666666666667,
+                       0.041666666666667,  -0.041666666666667,   0.041666666666667,
+                       0.083333333333333,  -0.166666666666667,                   0,
+                                       0,   0.083333333333333,   0.083333333333333,
+                       0.083333333333333,                   0,  -0.166666666666667;
+      // clang-format on
+      bbar_matrix_check.push_back(bbar_check);
+
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {
           for (unsigned k = 0; k << bbar_matrix.at(i).cols(); ++k) {
             REQUIRE(bbar_matrix.at(i)(j, k) ==
-                    Approx(bbar_matrix_check(j, k)).epsilon(Tolerance));
+                    Approx(bbar_matrix_check.at(i)(j, k)).epsilon(Tolerance));
           }
         }
       }
-
-      bbar = true;
-      Eigen::VectorXd strain_rate_bbar =
-          cell->compute_strain_rate(bmatrix, phase, bbar);
-      REQUIRE(strain_rate_bbar.size() == 6);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate_bbar(i) == Approx(0.).epsilon(Tolerance));
     }
 
     SECTION("Check particle body force mapping") {
