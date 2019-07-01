@@ -46,6 +46,17 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       velocity_update_ = false;
     }
 
+    // Bbar
+    try {
+      bbar_ = analysis_["bbar"].template get<bool>();
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Bbar parameter is not specified, using default "
+          "as false",
+          __FILE__, __LINE__, exception.what());
+      bbar_ = false;
+    }
+
     post_process_ = io_->post_processing();
     // Output steps
     output_steps_ = post_process_["output_steps"].template get<mpm::Index>();

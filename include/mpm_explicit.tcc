@@ -145,7 +145,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, phase, dt_, bbar_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
@@ -251,7 +251,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, phase, dt_, bbar_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(

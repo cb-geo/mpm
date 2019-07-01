@@ -38,6 +38,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
 
+  //! Bbar
+  using mpm::MPMBase<Tdim>::bbar_;
   //! velocity update
   using mpm::MPMBase<Tdim>::velocity_update_;
   //! Gravity

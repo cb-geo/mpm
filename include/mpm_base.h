@@ -85,6 +85,8 @@ class MPMBase : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
+  //! Bbar
+  bool bbar_{false};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity

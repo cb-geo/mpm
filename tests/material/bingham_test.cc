@@ -111,6 +111,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const unsigned Nnodes = 4;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -143,7 +144,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -193,6 +194,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const unsigned Nnodes = 4;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -229,7 +231,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -288,6 +290,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     const unsigned Nnodes = 4;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -324,7 +327,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -452,6 +455,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const unsigned Nnodes = 8;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -500,7 +504,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -550,6 +554,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const unsigned Nnodes = 8;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -603,7 +608,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -661,6 +666,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     const unsigned Nnodes = 8;
     const unsigned phase = 0;
     const double dt = 1;
+    bool bbar = false;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
@@ -714,7 +720,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     particle->assign_cell(cell);
     particle->assign_material(phase, material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
