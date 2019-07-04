@@ -183,26 +183,28 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       }
 
       SECTION("Check if a point is in a cell") {
+        Eigen::Vector2d xi;
         // Check point in cell
         Eigen::Vector2d point;
         point << 0.5, 0.5;
+
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point on vertex
         point << 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point on edge
         point << 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point outside
         point << -2, 2.;
         REQUIRE(cell->point_in_cartesian_cell(point) == false);
-        REQUIRE(cell->is_point_in_cell(point) == false);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == false);
       }
 
       // Find local coordinates of a point in a cell
@@ -277,8 +279,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         Eigen::Vector2d point;
         point << 2.1875, 3.25;
 
+        Eigen::Vector2d xi;
         // Test if point is in cell
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell;
@@ -295,7 +298,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point1 << 2., 1.;
 
         // Test if point is in cell
-        REQUIRE(cell->is_point_in_cell(point1) == true);
+        REQUIRE(cell->is_point_in_cell(point1, &xi) == true);
 
         // Coordinates of the point in an unit cell
         Eigen::Matrix<double, 2, 1> point_unit_cell1;
@@ -448,14 +451,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         }
       }
     }
-  }
-
-  SECTION("Add neighbours") {
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, element);
-    REQUIRE(cell->nneighbours() == 0);
-    cell->add_neighbour(0, neighbourcell);
-    REQUIRE(cell->nneighbours() == 1);
   }
 
   SECTION("Check shape functions") {
@@ -889,7 +884,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_pressure(false, phase, mass * pressure);
+        node->update_mass_pressure(phase, mass * pressure);
         REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
         // Increment node_counter
         ++node_counter;
@@ -1118,31 +1113,34 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       }
 
       SECTION("Check if a point is in a cell") {
+        Eigen::Vector3d xi;
+
         // Check point in cell
         Eigen::Vector3d point;
         point << 0.5, 0.5, 0.5;
+
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point on vertex
         point << 0., 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point on edge
         point << 0.5, 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point on surface
         point << 0.5, 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
-        REQUIRE(cell->is_point_in_cell(point) == true);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == true);
 
         // Check point outside
         point << 2.5, 2.5, 2.5;
         REQUIRE(cell->point_in_cartesian_cell(point) == false);
-        REQUIRE(cell->is_point_in_cell(point) == false);
+        REQUIRE(cell->is_point_in_cell(point, &xi) == false);
       }
 
       // Find local coordinates of a point in a cell
@@ -1336,6 +1334,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         // Initialise cell
         REQUIRE(cell2->initialise() == true);
 
+        Eigen::Vector3d xi;
         // Check point 1
         // Coordinates of a point in real cell
         Eigen::Vector3d point1;
@@ -1346,8 +1345,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell1 << 0.5, 0.5, 0.5;
 
         // Check if point is in cell
-        REQUIRE(cell1->is_point_in_cell(point1) == true);
-        REQUIRE(cell2->is_point_in_cell(point1) == false);
+        REQUIRE(cell1->is_point_in_cell(point1, &xi) == true);
+        REQUIRE(cell2->is_point_in_cell(point1, &xi) == false);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point1 = cell1->transform_real_to_unit_cell(point1);
@@ -1365,8 +1364,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell2 << -0.5, -0.5, -0.5;
 
         // Check if point is in cell
-        REQUIRE(cell1->is_point_in_cell(point2) == false);
-        REQUIRE(cell2->is_point_in_cell(point2) == true);
+        REQUIRE(cell1->is_point_in_cell(point2, &xi) == false);
+        REQUIRE(cell2->is_point_in_cell(point2, &xi) == true);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point2 = cell2->transform_real_to_unit_cell(point2);
@@ -1384,8 +1383,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell3 << -1., -1., -1.;
 
         // Check if point is in cell
-        REQUIRE(cell1->is_point_in_cell(point3) == true);
-        REQUIRE(cell2->is_point_in_cell(point3) == false);
+        REQUIRE(cell1->is_point_in_cell(point3, &xi) == true);
+        REQUIRE(cell2->is_point_in_cell(point3, &xi) == false);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point3 = cell1->transform_real_to_unit_cell(point3);
@@ -1403,8 +1402,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point_unit_cell4 << 1., 1., 1.;
 
         // Check if point is in cell
-        REQUIRE(cell1->is_point_in_cell(point4) == false);
-        REQUIRE(cell2->is_point_in_cell(point4) == true);
+        REQUIRE(cell1->is_point_in_cell(point4, &xi) == false);
+        REQUIRE(cell2->is_point_in_cell(point4, &xi) == true);
 
         // Use Newton-raphson iteration to find local coordinates
         auto local_point4 = cell2->transform_real_to_unit_cell(point4);
@@ -1519,14 +1518,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         }
       }
     }
-  }
-
-  SECTION("Add neighbours") {
-    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-    auto neighbourcell = std::make_shared<mpm::Cell<Dim>>(1, Nnodes, element);
-    REQUIRE(cell->nneighbours() == 0);
-    cell->add_neighbour(0, neighbourcell);
-    REQUIRE(cell->nneighbours() == 1);
   }
 
   SECTION("Check shape functions") {
@@ -1673,10 +1664,11 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     REQUIRE(cell->nfunctions() == 8);
 
+    Eigen::Vector3d xi;
     // Check point in cell
     Eigen::Vector3d point;
     point << 812482.5000000000, 815878.5000000000, 160.0825000000;
-    REQUIRE(cell->is_point_in_cell(point) == true);
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
   }
 
   // Check if a point is in an oblique cell
@@ -1748,7 +1740,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     xi = cell1->transform_real_to_unit_cell(point);
 
     // Check using unit cell with affine transformation / Newton-Raphson
-    REQUIRE(cell1->is_point_in_cell(point) == true);
+    REQUIRE(cell1->is_point_in_cell(point, &xi) == true);
 
     // Cell 2
     mpm::Index id2 = 0;
@@ -1808,7 +1800,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     xi = cell2->transform_real_to_unit_cell(point);
 
     // Check using unit cell with affine transformation / Newton-Raphson
-    REQUIRE(cell2->is_point_in_cell(point) == false);
+    REQUIRE(cell2->is_point_in_cell(point, &xi) == false);
   }
 
   SECTION("Test particle information mapping") {
@@ -2181,7 +2173,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_pressure(false, phase, mass * pressure);
+        node->update_mass_pressure(phase, mass * pressure);
         REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
         // Increment j
         ++j;
