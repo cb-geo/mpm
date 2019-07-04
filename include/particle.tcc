@@ -386,7 +386,14 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
       Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-      this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
+      // Compute incremental of particle volume
+      double dvolume = this->volume_ * dt * strain_rate.head(Tdim).sum();
+      // Compute particle volume of pore fluid
+      double volume_fluid = this->volume_ * this->porosity_ + dvolume;
+      // Update particle volume
+      this->volume_ += dvolume;
+      // Update porosity
+      this->porosity_ = volume_fluid / this->volume_;
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -526,18 +533,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
     // Check if material ptr is valid
     if (material_.at(solid_skeleton) != nullptr &&
         material_.at(pore_fluid) != nullptr) {
-      // Incremental of strain of solid skeleton
-      Eigen::Matrix<double, 6, 1> dstrain_solid =
-          this->dstrain_.col(solid_skeleton);
-      // Incremental of strain of pore fluid
-      Eigen::Matrix<double, 6, 1> dstrain_fluid =
-          this->dstrain_.col(pore_fluid);
       // Bulk modulus of fluid
       double K = material_.at(pore_fluid)->property("bulk_modulus");
       // Calculate pore pressure
-      this->stress_.col(pore_fluid) += K / porosity_ *
-                                       (volume_fraction_(0) * dstrain_fluid +
-                                        volume_fraction_(1) * dstrain_solid);
+      this->stress_.col(pore_fluid) +=
+          K / porosity_ *
+          (volume_fraction_(0) * this->dstrain_.col(solid_skeleton) +
+           volume_fraction_(1) * this->dstrain_.col(pore_fluid));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -561,28 +563,47 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
 
 //! Map drag force
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase,
-                                                   const VectorDim& pgravity) {
+bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase) {
   bool status = true;
   try {
-    // Initialise drag force
-    VectorDim drag_force;
-    drag_force.setZero();
-    // Permeability coefficient
-    VectorDim k_coefficient;
-    k_coefficient[0] = material_.at(phase)->property("k_x");
-    k_coefficient[1] = material_.at(phase)->property("k_y");
-    if (Tdim == 3) k_coefficient[2] = material_.at(phase)->property("k_z");
-    // Check if permeability coefficient is valid
-    for (unsigned i = 0; i < Tdim; ++i) {
-      if (k_coefficient[i] > 0.)
-        drag_force[i] = porosity_ * porosity_ * pgravity[i] *
-                        this->velocity_(i, phase) / k_coefficient[i];
-      else
-        throw std::runtime_error("Permeability coefficient is invalid");
+    // Check if material ptr is valid
+    if (material_.at(phase) != nullptr) {
+      VectorDim k_coefficient;
+      switch (Tdim) {
+        case (1): {
+          k_coefficient(0) = material_.at(phase)->property("k_x");
+          break;
+        }
+        case (2): {
+          k_coefficient(0) = material_.at(phase)->property("k_x");
+          k_coefficient(1) = material_.at(phase)->property("k_y");
+          break;
+        }
+        default: {
+          k_coefficient(0) = material_.at(phase)->property("k_x");
+          k_coefficient(1) = material_.at(phase)->property("k_y");
+          k_coefficient(2) = material_.at(phase)->property("k_z");
+          break;
+        }
+      }
+      // Initialise drag force coefficient
+      VectorDim drag_force_coefficient;
+      drag_force_coefficient.setZero();
+      // Check if permeability coefficient is valid
+      for (unsigned i = 0; i < Tdim; ++i) {
+        if (k_coefficient[i] > 0.)
+          drag_force_coefficient[i] = porosity_ * porosity_ * 9.81 *
+                                      material_density_(phase) /
+                                      k_coefficient[i];
+        else
+          throw std::runtime_error("Permeability coefficient is invalid");
+      }
+      // Compute nodal drag force
+      cell_->compute_nodal_drag_force(this->shapefn_, this->volume_,
+                                      drag_force_coefficient);
+    } else {
+      throw std::runtime_error("Material is invalid");
     }
-    // Compute nodal drag force
-    cell_->compute_nodal_drag_force(drag_force);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -600,9 +621,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     if (material_.at(phase) != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(
-          this->bmatrix_, phase, this->volume_ * this->volume_fraction_(phase),
-          -1. * this->stress_.col(phase));
+      cell_->compute_nodal_internal_force(this->bmatrix_, phase, this->volume_,
+                                          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -671,6 +691,8 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
                                                              double dt) {
   bool status = true;
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -689,7 +711,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // New position  current position + velocity * dt
-      this->coordinates_ += nodal_velocity * dt;
+      if (phase == solid_skeleton) this->coordinates_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -707,6 +729,8 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
     unsigned phase, double dt) {
   bool status = true;
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -721,7 +745,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
       this->apply_particle_velocity_constraints();
 
       // New position current position + velocity * dt
-      this->coordinates_ += nodal_velocity * dt;
+      if (phase == solid_skeleton) this->coordinates_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

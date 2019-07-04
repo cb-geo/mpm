@@ -267,18 +267,34 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
     unsigned phase, double dt) {
   bool status = true;
   const double tolerance = 1.0E-15;
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
   try {
+    // Initialise drag force
+    VectorDim drag_force;
+    drag_force.setZero();
+    // Compute drag force for two phase computation
+    if (Tnphases > 1) {
+      for (int i = 0; i < Tdim; i++)
+        drag_force(i) =
+            this->drag_force_(i) * (this->velocity_(pore_fluid, i) -
+                                    this->velocity_(solid_skeleton, i));
+    }
+    if (phase == pore_fluid) drag_force = -drag_force;
+
     if (mass_(phase) > tolerance) {
       // acceleration (unbalaced force / mass)
-      this->acceleration_.col(phase) = (this->external_force_.col(phase) +
-                                        this->internal_force_.col(phase)) /
-                                       this->mass_(phase);
+      this->acceleration_.col(phase) =
+          (this->external_force_.col(phase) + this->internal_force_.col(phase) +
+           drag_force) /
+          this->mass_(phase);
 
       // Apply friction constraints
       this->apply_friction_constraints(dt);
 
       // Velocity += acceleration * dt
       this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
+
       // Apply velocity constraints, which also sets acceleration to 0,
       // when velocity is set.
       this->apply_velocity_constraints();

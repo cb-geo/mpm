@@ -275,8 +275,11 @@ class Cell {
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
   //! Compute the nodal drag force of a cell from particle drag force
-  //! \param[in] drag_force Drag force
-  void compute_nodal_drag_force(const VectorDim drag_force);
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] pvolume Volume of particle
+  //! \param[in] drag_force_coefficient Drag force coefficient
+  void compute_nodal_drag_force(const Eigen::VectorXd& shapefn, double pvolume,
+                                const VectorDim drag_force_coefficient);
 
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint

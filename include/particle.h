@@ -208,9 +208,8 @@ class Particle : public ParticleBase<Tdim> {
   void map_body_force(unsigned phase, const VectorDim& pgravity) override;
 
   //! Map drag force
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pgravity Gravity of a particle
-  bool map_drag_force(unsigned phase, const VectorDim& pgravity) override;
+  //! \param[in] k_coefficient Permeability coefficient
+  bool map_drag_force(unsigned phase) override;
 
   //! Map internal force
   //! \param[in] phase Index corresponding to the phase

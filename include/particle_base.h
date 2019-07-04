@@ -175,7 +175,7 @@ class ParticleBase {
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 
   //! Map drag force
-  virtual bool map_drag_force(unsigned phase, const VectorDim& pgravity) = 0;
+  virtual bool map_drag_force(unsigned phase) = 0;
 
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;

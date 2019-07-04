@@ -1335,10 +1335,13 @@ inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
 
 //! Compute the nodal drag force of a cell from particle drag force
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_drag_force(const VectorDim drag_force) {
+void mpm::Cell<Tdim>::compute_nodal_drag_force(
+    const Eigen::VectorXd& shapefn, double pvolume,
+    const VectorDim drag_force_coefficient) {
   // Map drag forces from particle to nodes
   for (unsigned j = 0; j < this->nfunctions(); ++j)
-    nodes_[j]->update_drag_force(true, drag_force);
+    nodes_[j]->update_drag_force(true,
+                                 drag_force_coefficient * pvolume * shapefn(j));
 }
 
 //! Return velocity at a given point by interpolating from nodes
