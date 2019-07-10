@@ -532,6 +532,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     const unsigned phase = 0;
     // Time-step
     const double dt = 0.1;
+    // Bbar
+    bool bbar = false;
 
     // Check particle coordinates
     auto coordinates = particle->coordinates();
@@ -742,7 +744,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0., 0.25, 0., 0.050, 0., 0.;
@@ -1420,6 +1422,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     const unsigned phase = 0;
     // Time-step
     const double dt = 0.1;
+    // Bbar
+    bool bbar = false;
 
     // Check particle coordinates
     auto coordinates = particle->coordinates();
@@ -1677,7 +1681,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->pressure(phase) == Approx(0.).epsilon(Tolerance));
 
     // Compute strain
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(phase, dt, bbar);
     // Strain
     Eigen::Matrix<double, 6, 1> strain;
     strain << 0.00000, 0.07500, 0.40000, -0.02500, 0.35000, -0.05000;

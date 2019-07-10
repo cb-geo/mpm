@@ -1244,19 +1244,18 @@ std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
   const double OneThird = 1.0 / 3.0;
 
   // Compute BBar
-  std::vector<Eigen::MatrixXd> bbar_matrix;
+  std::vector<Eigen::MatrixXd> bbar;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bbari = bmatrix.at(i);
+    auto bbari = bmatrix.at(i);
     for (unsigned j = 0; j < Tdim; ++j) {
       for (unsigned k = 0; k < Tdim; ++k)
-        bbari(j, k) =
-            bmatrix.at(i)(j, k) +
+        bbari(j, k) +=
             OneThird * (bmatrix_centroid_.at(i)(k, k) - bmatrix.at(i)(k, k));
     }
-    bbar_matrix.push_back(bbari);
+    bbar.emplace_back(bbari);
   }
 
-  return bbar_matrix;
+  return bbar;
 }
 
 //! Compute strain rate

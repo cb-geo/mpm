@@ -143,15 +143,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Update stress first
     if (!usl_) {
       // Iterate over each particle to calculate strain
-      if (!bbar_) {
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                      std::placeholders::_1, phase, dt_));
-      } else {
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::compute_strain_bbar,
-                      std::placeholders::_1, phase, dt_));
-      }
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, phase, dt_, bbar_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
@@ -255,15 +249,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Update Stress Last
     if (usl_ == true) {
       // Iterate over each particle to calculate strain
-      if (!bbar_) {
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                      std::placeholders::_1, phase, dt_));
-      } else {
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::compute_strain_bbar,
-                      std::placeholders::_1, phase, dt_));
-      }
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
+                    std::placeholders::_1, phase, dt_, bbar_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(

@@ -704,25 +704,25 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                      1.00, -1.083333333333333, 
                     -1.50, -3.25;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<  2.083333333333333,  1.083333333333333, 
                     -1.166666666666667, -2.416666666666667, 
                                  -3.50,              3.25;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<  1.083333333333333, -1.25, 
                     -0.666666666666667,  2.25, 
                                   3.50,  1.75;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check << -1.25, -0.583333333333333, 
                      0.50,  0.916666666666667, 
                      1.50, -1.75;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
 
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {
@@ -2039,7 +2039,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,  -0.166666666666667,  -0.166666666666667,
                       -0.166666666666667,                   0,  -0.166666666666667;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<    0.041666666666667,   0.041666666666667,   0.041666666666667,
                       -0.041666666666667,  -0.125000000000000,   0.041666666666667,
@@ -2048,7 +2048,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,  -0.166666666666667,  -0.166666666666667,
                       -0.166666666666667,                   0,   0.083333333333333;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<    0.041666666666667,  -0.041666666666667,   0.041666666666667,
                       -0.041666666666667,   0.041666666666667,   0.041666666666667,
@@ -2057,7 +2057,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,  -0.166666666666667,   0.083333333333333,
                       -0.166666666666667,                   0,   0.083333333333333;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<   -0.125000000000000,  -0.041666666666667,   0.041666666666667,
                        0.041666666666667,   0.041666666666667,   0.041666666666667,
@@ -2066,7 +2066,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,  -0.166666666666667,   0.083333333333333,
                       -0.166666666666667,                   0,  -0.166666666666667;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<   -0.125000000000000,   0.041666666666667,  -0.041666666666667,
                        0.041666666666667,  -0.125000000000000,  -0.041666666666667,
@@ -2075,7 +2075,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,   0.083333333333333,  -0.166666666666667,
                        0.083333333333333,                   0,  -0.166666666666667;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<    0.041666666666667,   0.041666666666667,  -0.041666666666667,
                       -0.041666666666667,  -0.125000000000000,  -0.041666666666667,
@@ -2084,7 +2084,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,   0.083333333333333,  -0.166666666666667,
                        0.083333333333333,                   0,   0.083333333333333;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<    0.041666666666667,  -0.041666666666667,  -0.041666666666667,
                       -0.041666666666667,   0.041666666666667,  -0.041666666666667,
@@ -2093,7 +2093,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,   0.083333333333333,   0.083333333333333,
                        0.083333333333333,                   0,   0.083333333333333;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
       // clang-format off
       bbar_check <<   -0.125000000000000,  -0.041666666666667,  -0.041666666666667,
                        0.041666666666667,   0.041666666666667,  -0.041666666666667,
@@ -2102,7 +2102,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                                        0,   0.083333333333333,   0.083333333333333,
                        0.083333333333333,                   0,  -0.166666666666667;
       // clang-format on
-      bbar_matrix_check.push_back(bbar_check);
+      bbar_matrix_check.emplace_back(bbar_check);
 
       for (unsigned i = 0; i < bbar_matrix.size(); ++i) {
         for (unsigned j = 0; j << bbar_matrix.at(i).rows(); ++j) {

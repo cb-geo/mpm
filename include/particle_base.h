@@ -137,10 +137,7 @@ class ParticleBase {
   virtual double pressure(unsigned phase) const = 0;
 
   //! Compute strain
-  virtual void compute_strain(unsigned phase, double dt) = 0;
-
-  //! Compute strain using bbar
-  virtual void compute_strain_bbar(unsigned phase, double dt) = 0;
+  virtual void compute_strain(unsigned phase, double dt, bool bbar) = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain(unsigned phase) const = 0;
