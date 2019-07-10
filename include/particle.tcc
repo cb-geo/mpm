@@ -389,11 +389,67 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 
 // Compute strain of the particle
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt,
-                                                   bool bbar) {
+void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   // Strain rate
-  auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-  if (bbar) strain_rate = cell_->compute_strain_rate_bbar(bmatrix_, phase);
+  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+
+  // particle_strain_rate
+  Eigen::Matrix<double, 6, 1> particle_strain_rate;
+  particle_strain_rate.setZero();
+  // Set dimension of strain rate
+  switch (Tdim) {
+    case (1): {
+      particle_strain_rate(0) = strain_rate(0);
+      break;
+    }
+    case (2): {
+      particle_strain_rate(0) = strain_rate(0);
+      particle_strain_rate(1) = strain_rate(1);
+      particle_strain_rate(3) = strain_rate(2);
+      break;
+    }
+    default: {
+      particle_strain_rate = strain_rate;
+      break;
+    }
+  }
+
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < particle_strain_rate.size(); ++i)
+    if (std::fabs(particle_strain_rate(i)) < 1.E-15)
+      particle_strain_rate(i) = 0.;
+
+  // Assign strain rate
+  strain_rate_.col(phase) = particle_strain_rate;
+  // Update dstrain
+  dstrain_.col(phase) = particle_strain_rate * dt;
+  // Update strain
+  strain_.col(phase) += particle_strain_rate * dt;
+
+  // Compute at centroid
+  // Strain rate for reduced integration
+  Eigen::VectorXd strain_rate_centroid =
+      cell_->compute_strain_rate_centroid(phase);
+
+  // Check to see if value is below threshold
+  for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
+    if (std::fabs(strain_rate_centroid(i)) < 1.E-15)
+      strain_rate_centroid(i) = 0.;
+
+  // Assign volumetric strain at centroid
+  const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
+  volumetric_strain_centroid_(phase) += dvolumetric_strain;
+
+  // Update thermodynamic pressure
+  this->update_pressure(phase, dvolumetric_strain);
+}
+
+// Compute strain of the particle
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::compute_strain_bbar(unsigned phase,
+                                                        double dt) {
+  // Strain rate
+  const auto strain_rate = cell_->compute_strain_rate_bbar(bmatrix_, phase);
 
   // particle_strain_rate
   Eigen::Matrix<double, 6, 1> particle_strain_rate;
