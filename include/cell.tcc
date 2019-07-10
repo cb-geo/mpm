@@ -1272,7 +1272,6 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
       throw std::runtime_error(
           "Number of nodes / shapefn doesn't match BMatrix");
 
-    // Compute strain
     for (unsigned i = 0; i < this->nnodes(); ++i)
       strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
   } catch (std::exception& exception) {
