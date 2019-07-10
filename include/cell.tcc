@@ -1241,43 +1241,16 @@ template <unsigned Tdim>
 std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
     const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
 
-  // Compute volumetric Bmatrix
-  std::vector<Eigen::MatrixXd> bmatrix_vol;
-  for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bvoli;
-    bvoli.setZero();
-    for (unsigned j = 0; j < Tdim; ++j) {
-      for (unsigned k = 0; k < Tdim; ++k)
-        bvoli(j, k) = 1. / 3. * bmatrix.at(i)(k, k);
-    }
-    bmatrix_vol.push_back(bvoli);
-  }
-
-  // Compute deviatoric Bmatrix
-  std::vector<Eigen::MatrixXd> bmatrix_dev;
-  for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bdevi =
-        bmatrix.at(i) - bmatrix_vol.at(i);
-    bmatrix_dev.push_back(bdevi);
-  }
-
-  // Compute volumetric Bmatrix at centroid
-  std::vector<Eigen::MatrixXd> bmatrix_centroid_vol;
-  for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bvolcentroidi;
-    bvolcentroidi.setZero();
-    for (unsigned j = 0; j < Tdim; ++j) {
-      for (unsigned k = 0; k < Tdim; ++k)
-        bvolcentroidi(j, k) = 1. / 3. * bmatrix_centroid_.at(i)(k, k);
-    }
-    bmatrix_centroid_vol.push_back(bvolcentroidi);
-  }
-
   // Compute BBar
   std::vector<Eigen::MatrixXd> bbar_matrix;
   for (unsigned i = 0; i < this->nnodes(); ++i) {
-    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bbari =
-        bmatrix_dev.at(i) + bmatrix_centroid_vol.at(i);
+    Eigen::Matrix<double, 3 * (Tdim - 1), Tdim> bbari;
+    for (unsigned j = 0; j < Tdim; ++j) {
+      for (unsigned k = 0; k < Tdim; ++k)
+        bbari(j, k) =
+            bmatrix.at(i)(j, k) +
+            1. / 3. * (bmatrix_centroid_.at(i)(k, k) - bmatrix.at(i)(k, k));
+    }
     bbar_matrix.push_back(bbari);
   }
 
@@ -1287,7 +1260,7 @@ std::vector<Eigen::MatrixXd> mpm::Cell<Tdim>::compute_bbar(
 //! Compute strain rate
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
-    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, bool bbar) {
+    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
   // Define strain rate
   Eigen::Matrix<double, Tdof, 1> strain_rate =
       Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
@@ -1300,15 +1273,35 @@ Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
           "Number of nodes / shapefn doesn't match BMatrix");
 
     // Compute strain
-    if (bbar) {
-      // Compute bbar
-      auto bbar_matrix = this->compute_bbar(bmatrix, phase);
-      for (unsigned i = 0; i < this->nnodes(); ++i)
-        strain_rate += bbar_matrix.at(i) * nodes_[i]->velocity(phase);
-    } else {
-      for (unsigned i = 0; i < this->nnodes(); ++i)
-        strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
-    }
+    for (unsigned i = 0; i < this->nnodes(); ++i)
+      strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return strain_rate;
+}
+
+//! Compute strain rate using bbar
+template <unsigned Tdim>
+Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_bbar(
+    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, Tdof, 1> strain_rate =
+      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
+
+  try {
+    // Check if B-Matrix size and number of nodes match
+    if (this->nfunctions() != bmatrix.size() ||
+        this->nnodes() != bmatrix.size())
+      throw std::runtime_error(
+          "Number of nodes / shapefn doesn't match BMatrix");
+
+    // Compute bbar
+    auto bbar_matrix = this->compute_bbar(bmatrix, phase);
+
+    // Compute strain
+    for (unsigned i = 0; i < this->nnodes(); ++i)
+      strain_rate += bbar_matrix.at(i) * nodes_[i]->velocity(phase);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <limits>
 #include <memory>
 
@@ -667,9 +666,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         }
       }
 
-      auto bbar = false;
-      Eigen::VectorXd strain_rate =
-          cell->compute_strain_rate(bmatrix, phase, bbar);
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
       REQUIRE(strain_rate.size() == 3);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
@@ -2000,9 +1997,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         }
       }
 
-      auto bbar = false;
-      Eigen::VectorXd strain_rate =
-          cell->compute_strain_rate(bmatrix, phase, bbar);
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
       REQUIRE(strain_rate.size() == 6);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));

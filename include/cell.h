@@ -251,9 +251,14 @@ class Cell {
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  //! \param[in] bbar Option to compute strain using bbar
   Eigen::VectorXd compute_strain_rate(
-      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, bool bbar);
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
+
+  //! Compute strain rate using bbar
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  Eigen::VectorXd compute_strain_rate_bbar(
+      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
   //! Compute strain rate for reduced integration at the centroid of cell
   //! \param[in] phase Phase associate to the particle
