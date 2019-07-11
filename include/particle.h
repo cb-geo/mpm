@@ -146,7 +146,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   //! \param[in] bbar Bmatrix (true: bbar, false: normal B matrix)
-  void compute_strain(unsigned phase, double dt, bool bbar) override;
+  void compute_strain(unsigned phase, double dt, bool bbar = false) override;
 
   //! Return strain of the particle
   //! \param[in] phase Index corresponding to the phase
