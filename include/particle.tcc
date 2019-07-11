@@ -390,7 +390,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
 // Compute strain of the particle
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt,
-                                                   bool bbar) {
+                                                   bool bbar = false) {
   // Strain rate
   Eigen::VectorXd strain_rate;
   if (bbar)
