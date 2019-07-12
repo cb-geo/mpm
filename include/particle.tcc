@@ -386,7 +386,6 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
       Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-      // Update particle volume
       this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
     } else {
       throw std::runtime_error(
