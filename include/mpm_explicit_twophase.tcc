@@ -197,6 +197,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
                     std::placeholders::_1, solid_skeleton, dt_));
 
+      // Iterate over each particle to update porosity
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_porosity,
+                    std::placeholders::_1, solid_skeleton, dt_));
+
       // Pressure smoothing
       if (pressure_smoothing_) {
         // Assign pressure to nodes
@@ -379,6 +384,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // Iterate over each particle to update particle volume of solid_skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+                    std::placeholders::_1, solid_skeleton, dt_));
+
+      // Iterate over each particle to update porosity
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_porosity,
                     std::placeholders::_1, solid_skeleton, dt_));
 
       // Pressure smoothing

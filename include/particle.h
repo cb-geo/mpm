@@ -129,6 +129,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool update_volume(unsigned phase, double dt) override;
 
+  //! Update porosity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_porosity(unsigned phase, double dt) override;
+
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
   bool compute_mass(unsigned phase) override;

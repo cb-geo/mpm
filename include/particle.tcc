@@ -392,11 +392,32 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
       double volume_fluid = this->volume_ * this->porosity_ + dvolume;
       // Update particle volume
       this->volume_ += dvolume;
-      // Update porosity
-      this->porosity_ = volume_fluid / this->volume_;
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Update material point porosity
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::update_porosity(unsigned phase, double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr and a valid volume
+    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
+
+      Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
+      // Update particle volume
+      this->porosity_ +=
+          (1 - this->porosity_) * dt * strain_rate.head(Tdim).sum();
+    } else {
+      throw std::runtime_error(
+          "Cell or volume is not initialised! cannot update particle porosity");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

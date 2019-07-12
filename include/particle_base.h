@@ -117,6 +117,9 @@ class ParticleBase {
   //! Update material point volume
   virtual bool update_volume(unsigned phase, double dt) = 0;
 
+  //! Update porosity
+  virtual bool update_porosity(unsigned phase, double dt) = 0;
+
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
 
