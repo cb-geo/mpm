@@ -637,8 +637,39 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     if (material_.at(phase) != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(this->bmatrix_, phase, this->volume_,
-                                          -1. * this->stress_.col(phase));
+      cell_->compute_nodal_internal_force(
+          this->bmatrix_, phase, this->volume_ * this->volume_fraction_(phase),
+          -1. * this->stress_.col(phase));
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map mixture internal force
+//! \param[in] phase Index corresponding to the phase
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_mixture_internal_force() {
+  bool status = true;
+  try {
+    // Check if material ptr is valid
+    bool material_status = true;
+    for (unsigned phase = 0; phase < Tnphases; ++phase) {
+      if (material_.at(phase) = nullptr) material_status = false;
+      break;
+    }
+    if (material_status) {
+      // Compute nodal mixture internal forces
+      Eigen::Matrix<double, 6, 1> mixture_stress;
+      for (unsigned phase = 0; phase < Tnphases; ++phase)
+        mixture_stress += this->stress_.col(phase);
+      // -pstress * volume
+      cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
+                                                  -1. * mixture_stress);
     } else {
       throw std::runtime_error("Material is invalid");
     }

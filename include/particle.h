@@ -220,6 +220,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool map_internal_force(unsigned phase) override;
 
+  //! Map mixture internal force
+  bool map_mixture_internal_force() override;
+
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity

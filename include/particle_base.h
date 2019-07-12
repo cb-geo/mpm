@@ -183,6 +183,9 @@ class ParticleBase {
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;
 
+  //! Map mixture internal force
+  virtual bool map_mixture_internal_force() = 0;
+
   //! Update pressure of the particles
   virtual bool update_pressure(unsigned phase, double dvolumetric_strain) = 0;
 

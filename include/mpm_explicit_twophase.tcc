@@ -271,8 +271,8 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // Iterate over each particle to compute nodal internal force of solid
       // skeleton
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                    std::placeholders::_1, solid_skeleton));
+          std::bind(&mpm::ParticleBase<Tdim>::map_mixture_internal_force,
+                    std::placeholders::_1));
 
       // Iterate over each particle to compute nodal internal force of pore
       // fluid
@@ -307,11 +307,10 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
       // MPI all reduce internal force of solid skeleton
       mesh_->allreduce_nodal_vector_property(
-          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    solid_skeleton),
-          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, solid_skeleton,
-                    std::placeholders::_2));
+          std::bind(&mpm::NodeBase<Tdim>::mixture_internal_force,
+                    std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Tdim>::update_mixture_internal_force,
+                    std::placeholders::_1, false, std::placeholders::_2));
       // MPI all reduce internal force of pore fluid
       mesh_->allreduce_nodal_vector_property(
           std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,

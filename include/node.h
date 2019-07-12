@@ -116,6 +116,13 @@ class Node : public NodeBase<Tdim> {
   bool update_internal_force(bool update, unsigned phase,
                              const VectorDim& force) override;
 
+  //! Update mixture internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] force Internal force from the particles in a cell
+  //! \retval status Update status
+  bool update_mixture_internal_force(bool update,
+                                     const VectorDim& force) override;
+
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
@@ -126,6 +133,11 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
     return internal_force_.col(phase);
+  }
+
+  //! Return mixture internal force at a given node for a given phase
+  VectorDim mixture_internal_force() const override {
+    return mixture_internal_force_;
   }
 
   //! Return drag force at a given node
@@ -236,6 +248,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Internal force
+  Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
   //! Drag force
   Eigen::Matrix<double, Tdim, 1> drag_force_;
   //! Pressure
