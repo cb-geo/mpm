@@ -386,12 +386,8 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
       Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-      // Compute incremental of particle volume
-      double dvolume = this->volume_ * dt * strain_rate.head(Tdim).sum();
-      // Compute particle volume of pore fluid
-      double volume_fluid = this->volume_ * this->porosity_ + dvolume;
       // Update particle volume
-      this->volume_ += dvolume;
+      this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -413,8 +409,8 @@ bool mpm::Particle<Tdim, Tnphases>::update_porosity(unsigned phase, double dt) {
 
       Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
       // Update particle volume
-      this->porosity_ +=
-          (1 - this->porosity_) * dt * strain_rate.head(Tdim).sum();
+      this->porosity_ =
+          1 - (1 - this->porosity_) / (1 + dt * strain_rate.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle porosity");
