@@ -653,5 +653,39 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
 //! Initialise math functions
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_math_functions() {
+  bool status = true;
+  try {
+    // Get materials properties
+    auto math_functions = io_->json_object("math_functions");
+    for (const auto function_props : math_functions) {
 
+      // Get math function id
+      auto function_id = function_props["id"].template get<unsigned>();
+      
+      // Get function type
+      const std::string function_type =
+          function_props["type"].template get<std::string>();
+
+      // Create a new function from JSON object
+      auto function =
+          Factory<mpm::FunctionBase, unsigned, const Json&>::instance()->create(
+              function_type, std::move(function_id), function_props);
+
+      // Add material to list
+      auto insert_status =
+          math_functions_.insert(std::make_pair(function->id(), function));
+
+      // If insert material failed
+      if (!insert_status.second) {
+        status = false;
+        throw std::runtime_error(
+            "New math function cannot be added, insertion failed");
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("#{}: Reading math functions: {}", __LINE__,
+                    exception.what());
+    status = false;
+  }
+  return status;
 }
