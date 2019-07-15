@@ -1,13 +1,13 @@
 #ifndef MPM_LOAD_BASE_H_
 #define MPM_LOAD_BASE_H_
 
+#include "logger.h"
+
 namespace mpm {
 
 //! Load Base class
 //! \brief Base class that handles external loading
 //! \details load base class to apply external loads on nodes and particles
-//! \tparam Tdim Dimension
-template <unsigned Tdim>
 class LoadBase {
  public:
   // Construct a Load Base with a global unique id
@@ -15,16 +15,20 @@ class LoadBase {
   LoadBase(unsigned id){};
 
   //! Default destructor
-  ~LoadBase() = default;
+  virtual ~LoadBase(){};
 
   //! Delete copy constructor
-  LoadBase(const LoadBase<Tdim>&) = delete;
+  LoadBase(const LoadBase&) = delete;
 
   //! Delete assignement operator
-  LoadBase& operator=(const LoadsBase<Tdim>&) = delete;
+  LoadBase& operator=(const LoadBase&) = delete;
 
   virtual double value(const double current_time,
                        const double magnitude) const = 0;
+
+protected:
+  //! Index
+  unsigned id_;
 };  // LoadBase class
 }  // namespace mpm
 
