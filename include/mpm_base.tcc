@@ -339,16 +339,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error("Particles volumes are not properly assigned");
     }
 
-    // Read and assign particles tractions
-    if (!io_->file_name("particles_tractions").empty()) {
-      bool particles_tractions = mesh_->assign_particles_tractions(
-          particle_reader->read_particles_tractions(
-              io_->file_name("particles_tractions")));
-      if (!particles_tractions)
-        throw std::runtime_error(
-            "Particles tractions are not properly assigned");
-    }
-
     // Read and assign particles velocity constraints
     if (!io_->file_name("particles_velocity_constraints").empty()) {
       bool particles_velocity_constraints =
@@ -631,7 +621,37 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     } else {
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
+
+    // Create a file reader
+    const std::string reader =
+        io_->json_object("mesh")["mesh_reader"].template get<std::string>();
+    auto file_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+    // Read and assign particles surface tractions
+    if (loads.find("particle_surface_traction") != loads.end()) {
+      for (const auto& ptraction : loads["particle_surface_traction"]) {
+        std::shared_ptr<FunctionBase> tfunction = nullptr;
+        if(ptraction.find("math_function_id") != ptraction.end())
+          tfunction = math_functions_.at(
+              ptraction["math_function_id"].template get<unsigned>());
+        bool particles_tractions = mesh_->assign_particles_tractions(
+            tfunction, file_reader->read_particles_tractions(
+                           io_->file_name("particles_tractions")));
+        if (!particles_tractions)
+          throw std::runtime_error(
+              "Particles tractions are not properly assigned");
+      }
+    } else
+      console_->warn(
+          "No particle surface traction is defined for the analysis");
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
+}
+
+//! Initialise math functions
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_math_functions() {
+
 }

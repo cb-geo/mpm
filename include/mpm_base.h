@@ -43,6 +43,9 @@ class MPMBase : public MPM {
   //! Initialise loading
   bool initialise_loads() override;
 
+  //! Initialise math functions
+  bool initialise_math_functions() override;
+
   //! Apply nodal tractions
   bool apply_nodal_tractions() override;
 
@@ -96,6 +99,8 @@ class MPMBase : public MPM {
   std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! Mathematical functions
+  std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
