@@ -220,7 +220,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Map traction force
   //! \param[in] phase Index corresponding to the phase
-  void map_traction_force(unsigned phase) override;
+  void map_traction_force(unsigned phase, double current_time) override;
 
   //! Compute updated position of the particle
   //! \param[in] phase Index corresponding to the phase

@@ -189,7 +189,7 @@ class ParticleBase {
   virtual VectorDim traction(unsigned phase) const = 0;
 
   //! Map traction force
-  virtual void map_traction_force(unsigned phase) = 0;
+  virtual void map_traction_force(unsigned phase, double current_time) = 0;
 
   //! Compute updated position
   virtual bool compute_updated_position(unsigned phase, double dt) = 0;

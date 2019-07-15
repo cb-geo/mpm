@@ -545,11 +545,16 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(
 //! Map traction force
 //! \param[in] phase Index corresponding to the phase
 template <unsigned Tdim, unsigned Tnphases>
-void mpm::Particle<Tdim, Tnphases>::map_traction_force(unsigned phase) {
-  if (this->set_traction_)
+void mpm::Particle<Tdim, Tnphases>::map_traction_force(unsigned phase,
+                                                       double current_time) {
+  if (this->set_traction_) {
+    double scalar = 1.0;
+    if (traction_function_ != nullptr)
+      scalar = (this->traction_function_)->value(current_time);
     // Map particle traction forces to nodes
     cell_->compute_nodal_traction_force(this->shapefn_, phase,
-                                        this->traction_.col(phase));
+                                        scalar * this->traction_.col(phase));
+  }
 }
 
 // Compute updated position of the particle

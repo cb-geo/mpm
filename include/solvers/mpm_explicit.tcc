@@ -197,7 +197,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to map traction force to nodes
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                    std::placeholders::_1, phase));
+                    std::placeholders::_1, phase, (this->step_ * this->dt_)));
 
       //! Apply nodal tractions
       if (nodal_tractions_) this->apply_nodal_tractions();
