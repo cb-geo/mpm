@@ -53,7 +53,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   bool particle_status = this->initialise_particles();
   if (!particle_status) status = false;
 
-  // Initialise loadsing conditions
+  // Initialise loading conditions
   bool loading_status = this->initialise_loads();
   if(!loading_status) status = false;
 
