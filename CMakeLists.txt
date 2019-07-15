@@ -111,6 +111,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
   ${mpm_SOURCE_DIR}/src/element.cc
+  ${mpm_SOURCE_DIR}/src/function.cc
 )
 
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
