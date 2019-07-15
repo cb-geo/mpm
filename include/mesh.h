@@ -27,6 +27,7 @@
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
+#include "functions/function_base.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -242,6 +243,7 @@ class Mesh {
   //! Assign particles tractions
   //! \param[in] particle_tractions Traction at dir on particle
   bool assign_particles_tractions(
+      const std::shared_ptr<FunctionBase>& tfunction,
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 

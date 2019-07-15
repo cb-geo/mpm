@@ -635,6 +635,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
 //! Assign particle tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_tractions(
+    const std::shared_ptr<FunctionBase>& tfunction,
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
   bool status = true;
@@ -653,7 +654,8 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       double traction = std::get<2>(particle_traction);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_traction(phase, dir, traction);
+        status = map_particles_[pid]->assign_traction(phase, dir, traction,
+                                                      tfunction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
     }
