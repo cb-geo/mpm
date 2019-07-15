@@ -53,6 +53,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   bool particle_status = this->initialise_particles();
   if (!particle_status) status = false;
 
+  // Initialise loadsing conditions
+  bool loading_status = this->initialise_loads();
+  if(!loading_status) status = false;
+
   // Assign material to particles
   // Get particle properties
   auto particle_props = io_->json_object("particle");
