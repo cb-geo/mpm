@@ -1,17 +1,20 @@
 // Constructor
-mpm::StepFunction::StepFunction(unsigned id, const std::vector<double>& xvalue,
-                            const std::vector<double>& fx)
-    : mpm::FunctionBase(id) {
-  // unique id
-  id_ = id;
+mpm::StepFunction::StepFunction(unsigned id, const Json& function_properties)
+  : mpm::FunctionBase(id, function_properties) {
+  properties_ = function_properties;
   // get tabular values for the linear step relationship
-  if (xvalue.size() != fx.size())
+  if (properties_.at("xvalues").is_array() &&
+      properties_.at("fxvalues").is_array() &&
+      properties_.at("xvalues").size() == properties_.at("fxvalues").size()) {
+    std::vector<double> xvalue = properties_.at("xvalues");
+    std::vector<double> fx = properties_.at("fxvalues");
+    for (unsigned index = 0; index < xvalue.size(); ++index) {
+      xvalues_.insert({index, xvalue.at(index)});
+      fxvalues_.insert({index, fx.at(index)});
+    }
+  } else
     throw std::runtime_error(
         "Cannot initialise step function; x and f(x) are invalid");
-  for (unsigned index = 0; index < xvalue.size(); ++index) {
-    xvalues_.insert({index, xvalue.at(index)});
-    fxvalues_.insert({index, fx.at(index)});
-  }
 }
 
 // Return f(x) for a given x

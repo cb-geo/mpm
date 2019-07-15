@@ -15,10 +15,8 @@ class StepFunction : public FunctionBase {
  public:
   // Construct a Step function with a unique id
   //! \param[in] id Global id
-  //! \param[in] x
-  //! \param[in] f(x)
-  StepFunction(unsigned id, const std::vector<double>& xvalue,
-               const std::vector<double>& fx);
+  //! \param[in] json object of function properties
+  StepFunction(unsigned id, const Json& function_properties);
 
   //! Default destructor
   ~StepFunction() override{};
@@ -35,7 +33,10 @@ class StepFunction : public FunctionBase {
   double value(const double x_input) override;
 
  private:
-  unsigned id_;
+  //! function id
+  using FunctionBase::id_;
+  //! function properties
+  using FunctionBase::properties_;
   //! Tabular data of x
   //! first->key (unique table index)
   //! second->x

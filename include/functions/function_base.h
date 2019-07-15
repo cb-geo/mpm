@@ -5,7 +5,10 @@
 #include <limits>
 #include <stdexcept>
 
-#include "logger.h"
+#include "json.hpp"
+
+// JSON
+using Json = nlohmann::json;
 
 namespace mpm {
 
@@ -17,7 +20,8 @@ class FunctionBase {
  public:
   // Construct a Function Base with a unique id
   //! \param[in] id Global id
-  FunctionBase(unsigned id){};
+  //! \param[in] json object of function properties
+  FunctionBase(unsigned id, const Json& function_properties) : id_{id} {};
 
   //! Default destructor
   virtual ~FunctionBase(){};
@@ -28,10 +32,19 @@ class FunctionBase {
   //! Delete assignement operator
   FunctionBase& operator=(const FunctionBase&) = delete;
 
+  //! Return id of the material
+  unsigned id() const { return id_; }
+
   //! Return the value of the function at given input
   //! \param[in] input x
   //! \retval f(x)
   virtual double value(const double x_input) = 0;
+
+protected:
+ //! function id
+ unsigned id_{std::numeric_limits<unsigned>::max()};
+ // Function properties
+ Json properties_;
 };  // FunctionBase class
 }  // namespace mpm
 

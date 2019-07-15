@@ -15,7 +15,11 @@ class SineFunction : public FunctionBase {
  public:
   // Construct a Sine function with a unique id
   //! \param[in] id Global id
-  SineFunction(unsigned id) : FunctionBase(id){}
+  //! \param[in] json object of function properties
+  SineFunction(unsigned id, const Json& function_properties)
+    : FunctionBase(id, function_properties) {
+    properties_ = function_properties;
+  }
 
   //! Default destructor
   ~SineFunction() override{};
@@ -31,8 +35,10 @@ class SineFunction : public FunctionBase {
   };
 
  private:
-  //! index
-  unsigned id_;
+  //! function id
+  using FunctionBase::id_;
+  //! function properties
+  using FunctionBase::properties_;
 };  // SineFunction class
 }  // namespace mpm
 
