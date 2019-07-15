@@ -26,15 +26,6 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
-    if (analysis_.at("gravity").is_array() &&
-        analysis_.at("gravity").size() == gravity_.size()) {
-      for (unsigned i = 0; i < gravity_.size(); ++i) {
-        gravity_[i] = analysis_.at("gravity").at(i);
-      }
-    } else {
-      throw std::runtime_error("Specified gravity dimension is invalid");
-    }
-
     // Velocity update
     try {
       velocity_update_ = analysis_["velocity_update"].template get<bool>();
@@ -623,4 +614,24 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
     isoparametric = true;
   }
   return isoparametric;
+}
+
+//! Initialise loads
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_loads() {
+  bool status = true;
+  try {
+    auto loads = io_->json_object("external_loading_conditions");
+    // Initialise gravity loading
+    if (loads.at("gravity").is_array() &&
+        loads.at("gravity").size() == gravity_.size()) {
+      for (unsigned i = 0; i < gravity_.size(); ++i) {
+        gravity_[i] = loads.at("gravity").at(i);
+      }
+    } else {
+      throw std::runtime_error("Specified gravity dimension is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
 }

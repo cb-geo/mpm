@@ -40,6 +40,9 @@ class MPMBase : public MPM {
   //! Initialise materials
   bool initialise_materials() override;
 
+  //! Initialise loading
+  bool initialise_loads() override;
+
   //! Apply nodal tractions
   bool apply_nodal_tractions() override;
 

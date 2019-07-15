@@ -48,6 +48,9 @@ class MPM {
   // Initialise materials
   virtual bool initialise_materials() = 0;
 
+  // Initialise external loads
+  virtual bool initialise_loads() = 0;
+
   //! Apply nodal tractions
   virtual bool apply_nodal_tractions() = 0;
 
