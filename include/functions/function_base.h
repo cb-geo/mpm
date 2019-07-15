@@ -32,7 +32,7 @@ class FunctionBase {
   //! Delete assignement operator
   FunctionBase& operator=(const FunctionBase&) = delete;
 
-  //! Return id of the material
+  //! Return id of the function
   unsigned id() const { return id_; }
 
   //! Return the value of the function at given input
