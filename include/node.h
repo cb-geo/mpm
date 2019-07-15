@@ -9,6 +9,7 @@
 
 #include "logger.h"
 #include "node_base.h"
+#include "loads/load_base.h"
 
 namespace mpm {
 
@@ -245,6 +246,11 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Concentrated force
+  //! first->pointer to load handler
+  //! second->a map of direction 
+  std::tuple<std::shared_ptr<LoadBase>, std::map<unsigned, double>>
+      concentrated_force_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class
