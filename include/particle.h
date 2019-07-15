@@ -214,7 +214,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Map drag force
   //! \param[in] k_coefficient Permeability coefficient
-  bool map_drag_force(unsigned phase) override;
+  bool map_drag_force_coefficient(unsigned phase) override;
 
   //! Map internal force
   //! \param[in] phase Index corresponding to the phase
@@ -259,9 +259,25 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_updated_position(unsigned phase, double dt) override;
 
   //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
+  //! Compute updated position of the particle for two phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] dt Analysis time step
+  bool compute_updated_position_two_phase(unsigned solid_skeleton,
+                                          unsigned pore_fluid,
+                                          double dt) override;
+
+  //! Compute updated position of the particle based on nodal velocity for two
+  //! phase \param[in] phase Index corresponding to the phase \param[in] dt
+  //! Analysis time step
+  bool compute_updated_position_velocity_two_phase(unsigned solid_skeleton,
+                                                   unsigned pore_fluid,
+                                                   double dt) override;
 
   //! Return a state variable
   //! \param[in] var State variable

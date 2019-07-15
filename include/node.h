@@ -127,7 +127,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
   //! \retval status Update status
-  bool update_drag_force(bool update, const VectorDim& drag_force) override;
+  bool update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -141,7 +142,9 @@ class Node : public NodeBase<Tdim> {
   }
 
   //! Return drag force at a given node
-  VectorDim drag_force() const override { return drag_force_; }
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
 
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
@@ -200,6 +203,14 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity(unsigned phase, double dt) override;
 
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_two_phase(unsigned solid_skeleton,
+                                               unsigned pore_fluid,
+                                               double dt) override;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -251,7 +262,7 @@ class Node : public NodeBase<Tdim> {
   //! Mixture internal force
   Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
   //! Drag force
-  Eigen::Matrix<double, Tdim, 1> drag_force_;
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity

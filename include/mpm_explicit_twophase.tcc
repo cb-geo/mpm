@@ -192,7 +192,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, pore_fluid, dt_));
 
-      // Iterate over each particle to update particle volume of solid_skeleton
+      // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
                     std::placeholders::_1, solid_skeleton, dt_));
@@ -268,8 +268,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
     // Spawn a task for internal force
     task_group.run([&] {
-      // Iterate over each particle to compute nodal internal force of solid
-      // skeleton
+      // Iterate over each particle to compute mixture nodal internal
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_mixture_internal_force,
                     std::placeholders::_1));
@@ -282,7 +281,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
       // Iterate over each particle to compute nodal drag force
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_drag_force,
+          std::bind(&mpm::ParticleBase<Tdim>::map_drag_force_coefficient,
                     std::placeholders::_1, pore_fluid));
     });
     task_group.wait();
@@ -321,52 +320,31 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
       // MPI all reduce drag force
       mesh_->allreduce_nodal_vector_property(
-          std::bind(&mpm::NodeBase<Tdim>::drag_force, std::placeholders::_1),
-          std::bind(&mpm::NodeBase<Tdim>::update_drag_force,
+          std::bind(&mpm::NodeBase<Tdim>::drag_force_coefficient,
+                    std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Tdim>::update_drag_force_coefficient,
                     std::placeholders::_1, false, std::placeholders::_2));
     }
 #endif
 
-    // Iterate over active nodes to compute acceleratation and velocity of solid
-    // skeleton
+    // Iterate over active nodes to compute acceleratation and velocity
     mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, solid_skeleton, this->dt_),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-    // Iterate over active nodes to compute acceleratation and velocity of pore
-    // fluid
-    mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                  std::placeholders::_1, pore_fluid, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_two_phase,
+                  std::placeholders::_1, solid_skeleton, pore_fluid, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Use nodal velocity to update position
-    if (velocity_update_) {
-      // Iterate over each particle to compute updated position and velocity of
-      // solid skeleton
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, solid_skeleton, this->dt_));
+    if (velocity_update_)
+      // Iterate over each particle to compute updated position and velocity
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_updated_position_velocity_two_phase,
+          std::placeholders::_1, solid_skeleton, pore_fluid, this->dt_));
 
-      // Iterate over each particle to compute updated velocity of pore fluid
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, pore_fluid, this->dt_));
-
-    } else {
-      // Iterate over each particle to compute updated position and velocity of
-      // solid skeleton
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, solid_skeleton, this->dt_));
-
-      //
-      // Iterate over each particle to compute updated velocity of pore fluid
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, pore_fluid, this->dt_));
-    }
+    else
+      // Iterate over each particle to compute updated position and velocity
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_updated_position_two_phase,
+          std::placeholders::_1, solid_skeleton, pore_fluid, this->dt_));
 
     // Update Stress Last
     if (stress_update_ == mpm::StressUpdate::usl) {

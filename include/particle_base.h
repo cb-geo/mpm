@@ -178,7 +178,7 @@ class ParticleBase {
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 
   //! Map drag force
-  virtual bool map_drag_force(unsigned phase) = 0;
+  virtual bool map_drag_force_coefficient(unsigned phase) = 0;
 
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;
@@ -216,6 +216,15 @@ class ParticleBase {
 
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
+
+  //! Compute updated position for two phase
+  virtual bool compute_updated_position_two_phase(unsigned solid_skeleton,
+                                                  unsigned pore_fluid,
+                                                  double dt) = 0;
+
+  //! Compute updated position based on nodal velocity for two phase
+  virtual bool compute_updated_position_velocity_two_phase(
+      unsigned solid_skeleton, unsigned pore_fluid, double dt) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

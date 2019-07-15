@@ -285,8 +285,9 @@ class Cell {
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] pvolume Volume of particle
   //! \param[in] drag_force_coefficient Drag force coefficient
-  void compute_nodal_drag_force(const Eigen::VectorXd& shapefn, double pvolume,
-                                const VectorDim drag_force_coefficient);
+  void compute_nodal_drag_force_coefficient(
+      const Eigen::VectorXd& shapefn, double pvolume,
+      const VectorDim drag_force_coefficient);
 
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint

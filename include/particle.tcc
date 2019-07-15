@@ -554,8 +554,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
       // Calculate pore pressure
       this->stress_.col(pore_fluid) +=
           K / porosity_ *
-          (volume_fraction_(0) * this->dstrain_.col(solid_skeleton) +
-           volume_fraction_(1) * this->dstrain_.col(pore_fluid));
+          (volume_fraction_(solid_skeleton) *
+               this->dstrain_.col(solid_skeleton) +
+           volume_fraction_(pore_fluid) * this->dstrain_.col(pore_fluid));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -579,7 +580,7 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
 
 //! Map drag force
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase) {
+bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(unsigned phase) {
   bool status = true;
   try {
     // Check if material ptr is valid
@@ -605,6 +606,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase) {
       // Initialise drag force coefficient
       VectorDim drag_force_coefficient;
       drag_force_coefficient.setZero();
+
       // Check if permeability coefficient is valid
       for (unsigned i = 0; i < Tdim; ++i) {
         if (k_coefficient[i] > 0.)
@@ -615,8 +617,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force(unsigned phase) {
           throw std::runtime_error("Permeability coefficient is invalid");
       }
       // Compute nodal drag force
-      cell_->compute_nodal_drag_force(this->shapefn_, this->volume_,
-                                      drag_force_coefficient);
+      cell_->compute_nodal_drag_force_coefficient(this->shapefn_, this->volume_,
+                                                  drag_force_coefficient);
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -656,23 +658,21 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::map_mixture_internal_force() {
   bool status = true;
   try {
-    // Check if material ptr is valid
-    bool material_status = true;
+    // Initialise mixture internal force
+    Eigen::Matrix<double, 6, 1> mixture_internal_force;
+    mixture_internal_force.setZero();
+    // Iterate over each phase
     for (unsigned phase = 0; phase < Tnphases; ++phase) {
-      if (material_.at(phase) = nullptr) material_status = false;
-      break;
+      // Check if material ptr is valid
+      if (material_.at(phase) != nullptr)
+        mixture_internal_force += this->stress_.col(phase);
+      else {
+        throw std::runtime_error("Material is invalid");
+      }
     }
-    if (material_status) {
-      // Compute nodal mixture internal forces
-      Eigen::Matrix<double, 6, 1> mixture_stress;
-      for (unsigned phase = 0; phase < Tnphases; ++phase)
-        mixture_stress += this->stress_.col(phase);
-      // -pstress * volume
-      cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
-                                                  -1. * mixture_stress);
-    } else {
-      throw std::runtime_error("Material is invalid");
-    }
+    // -pstress * volume
+    cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
+                                                -1. * mixture_internal_force);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -738,8 +738,6 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
                                                              double dt) {
   bool status = true;
-  const unsigned solid_skeleton = 0;
-  const unsigned pore_fluid = 1;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -758,7 +756,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // New position  current position + velocity * dt
-      if (phase == solid_skeleton) this->coordinates_ += nodal_velocity * dt;
+      this->coordinates_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -776,8 +774,6 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
     unsigned phase, double dt) {
   bool status = true;
-  const unsigned solid_skeleton = 0;
-  const unsigned pore_fluid = 1;
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
@@ -792,7 +788,95 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
       this->apply_particle_velocity_constraints();
 
       // New position current position + velocity * dt
-      if (phase == solid_skeleton) this->coordinates_ += nodal_velocity * dt;
+      this->coordinates_ += nodal_velocity * dt;
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated coordinates of the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated position of the particle
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_two_phase(
+    unsigned solid_skeleton, unsigned pore_fluid, double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal acceleration of solid skeleton
+      const Eigen::Matrix<double, Tdim, 1> nodal_acceleration_solid =
+          cell_->interpolate_nodal_acceleration(this->shapefn_, solid_skeleton);
+
+      // Get interpolated nodal acceleration of pore fluid
+      const Eigen::Matrix<double, Tdim, 1> nodal_acceleration_fluid =
+          cell_->interpolate_nodal_acceleration(this->shapefn_, pore_fluid);
+
+      // Update particle velocity from interpolated nodal acceleration of solid
+      // skeleton
+      this->velocity_.col(solid_skeleton) += nodal_acceleration_solid * dt;
+      // Update particle velocity from interpolated nodal acceleration of pore
+      // fluid
+      this->velocity_.col(pore_fluid) += nodal_acceleration_fluid * dt;
+
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
+
+      // Get interpolated nodal velocity of solid skeleton
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity_solid =
+          cell_->interpolate_nodal_velocity(this->shapefn_, solid_skeleton);
+
+      // Get interpolated nodal velocity of pore fluid
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity_fluid =
+          cell_->interpolate_nodal_velocity(this->shapefn_, pore_fluid);
+
+      // New position current position + velocity * dt
+      this->coordinates_ += nodal_velocity_solid * dt;
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated coordinates of the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated position of the particle based on nodal velocity
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity_two_phase(
+    unsigned solid_skeleton, unsigned pore_fluid, double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal velocity of solid skeleton
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity_solid =
+          cell_->interpolate_nodal_velocity(this->shapefn_, solid_skeleton);
+
+      // Get interpolated nodal velocity of pore fluid
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity_fluid =
+          cell_->interpolate_nodal_velocity(this->shapefn_, pore_fluid);
+
+      // Update particle velocity to interpolated nodal velocity of solid
+      // skeleton
+      this->velocity_.col(solid_skeleton) = nodal_velocity_solid;
+
+      // Update particle velocity to interpolated nodal velocity of pore fluid
+      this->velocity_.col(pore_fluid) = nodal_velocity_fluid;
+
+      // Apply particle velocity constraints
+      this->apply_particle_velocity_constraints();
+
+      // New position current position + velocity * dt
+      this->coordinates_ += nodal_velocity_solid * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
