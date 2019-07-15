@@ -51,6 +51,9 @@ class MPM {
   // Initialise external loads
   virtual bool initialise_loads() = 0;
 
+  // Initialise math functions
+  virtual bool initialise_math_functions() = 0;
+
   //! Apply nodal tractions
   virtual bool apply_nodal_tractions() = 0;
 
