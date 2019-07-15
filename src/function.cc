@@ -4,10 +4,9 @@
 #include "functions/sine_function.h"
 
 // Step function
-static Register<mpm::FunctionBase, mpm::StepFunction, unsigned,
-                const std::vector<double>&, const std::vector<double>&>
+static Register<mpm::FunctionBase, mpm::StepFunction, unsigned, const Json&>
     stepfunction("STEP");
 
 // Sine function
-static Register<mpm::FunctionBase, mpm::SineFunction, unsigned> sinefunction(
-    "SINE");
+static Register<mpm::FunctionBase, mpm::SineFunction, unsigned, const Json&>
+    sinefunction("SINE");
