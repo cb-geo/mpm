@@ -248,7 +248,7 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
-  //! Internal force
+  //! Mixture internal force
   Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
   //! Drag force
   Eigen::Matrix<double, Tdim, 1> drag_force_;

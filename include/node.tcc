@@ -304,11 +304,19 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
     if (phase == pore_fluid) drag_force = -drag_force;
 
     if (mass_(phase) > tolerance) {
-      // acceleration (unbalaced force / mass)
-      this->acceleration_.col(phase) =
-          (this->external_force_.col(phase) + this->internal_force_.col(phase) +
-           drag_force) /
-          this->mass_(phase);
+      // Acceleration of solid skeleton (unbalaced force / mass)
+      if (phase == solid_skeleton)
+        this->acceleration_.col(phase) =
+            (this->external_force_.col(phase) + this->mixture_internal_force_ -
+             this->internal_force_.col(pore_fluid) + drag_force) /
+            this->mass_(phase);
+
+      // Acceleration of pore fluid (unbalaced force / mass)
+      if (phase == pore_fluid)
+        this->acceleration_.col(phase) =
+            (this->external_force_.col(phase) +
+             this->internal_force_.col(phase) - drag_force) /
+            this->mass_(phase);
 
       // Apply friction constraints
       this->apply_friction_constraints(dt);
