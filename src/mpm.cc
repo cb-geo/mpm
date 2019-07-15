@@ -3,7 +3,7 @@
 #include "factory.h"
 #include "io.h"
 #include "mpm.h"
-#include "mpm_explicit.h"
+#include "solvers/mpm_explicit.h"
 
 // 2D Explicit MPM USF
 static Register<mpm::MPM, mpm::MPMExplicit<2>, std::unique_ptr<mpm::IO>&&>
