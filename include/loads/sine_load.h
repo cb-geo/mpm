@@ -1,5 +1,5 @@
-#ifndef MPM_SINE_TRACTION_H_
-#define MPM_SINE_TRACTION_H_
+#ifndef MPM_SINE_LOAD_H_
+#define MPM_SINE_LOAD_H_
 
 #include <map>
 
@@ -11,28 +11,27 @@ namespace mpm {
 //! \brief class that computes traction from a mathematical function
 //! \details Sine Traction class computes the traction force from a sinusoidal
 //! function
-//! \tparam Tdim Dimension
-template <unsigned Tdim>
-class SineTraction : public LoadBase<Tdim> {
+class SineLoad : public LoadBase {
  public:
   // Construct a Sine traction with a global unique id
   //! \param[in] id Global id
-  SineTraction(unsigned id);
+  SineLoad(unsigned id) : LoadBase(id){}
 
   //! Default destructor
-  ~SineTraction() override{};
+  ~SineLoad() override{};
 
   //! Delete copy constructor
-  SineTraction(const SineTraction<Tdim>&) = delete;
+  SineLoad(const SineLoad&) = delete;
 
   //! Delete assignement operator
-  SineTraction& operator=(const SineTraction<Tdim>&) = delete;
+  SineLoad& operator=(const SineLoad&) = delete;
 
   double value(const double current_time,
                const double magnitude) const override{return 0.0;};
 
  private:
-  unsigned id_;
+  //! index
+  using LoadBase::id_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // StepTraction class

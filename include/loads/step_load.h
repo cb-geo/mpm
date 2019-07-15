@@ -1,5 +1,5 @@
-#ifndef MPM_STEP_TRACTION_H_
-#define MPM_STEP_TRACTION_H_
+#ifndef MPM_STEP_LOAD_H_
+#define MPM_STEP_LOAD_H_
 
 #include <map>
 
@@ -11,28 +11,29 @@ namespace mpm {
 //! \brief class that computes traction from a mathematical function
 //! \details Step Traction class computes the traction force from a step
 //! function
-//! \tparam Tdim Dimension
-template <unsigned Tdim>
-class StepTraction : public LoadBase<Tdim> {
+class StepLoad : public LoadBase {
  public:
   // Construct a Step traction with a global unique id
   //! \param[in] id Global id
-  StepTraction(unsigned id, const std::map<double, double>& time_vs_load);
+  StepLoad(unsigned id, const std::map<double, double>& time_vs_load)
+      : LoadBase(id) {
+    time_vs_load_ = time_vs_load;
+  }
 
   //! Default destructor
-  ~StepTraction() override{};
+  ~StepLoad() override{};
 
   //! Delete copy constructor
-  StepTraction(const StepTraction<Tdim>&) = delete;
+  StepLoad(const StepLoad&) = delete;
 
   //! Delete assignement operator
-  StepTraction& operator=(const StepTraction<Tdim>&) = delete;
+  StepLoad& operator=(const StepLoad&) = delete;
 
   double value(const double current_time,
                const double magnitude) const override{return 0.0;};
 
  private:
-  unsigned id_;
+  using LoadBase::id_;
   //! Tabular data of time and relative loads
   //! first->time (this is total time)
   //! second->relative load
