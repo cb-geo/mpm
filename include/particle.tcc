@@ -519,9 +519,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_velocity(
 
 // Assign traction to the particle
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
-                                                    unsigned direction,
-                                                    double traction) {
+bool mpm::Particle<Tdim, Tnphases>::assign_traction(
+    unsigned phase, unsigned direction, double traction,
+    const std::shared_ptr<FunctionBase>& function) {
   bool status = false;
   try {
     if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim ||
@@ -534,6 +534,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
         traction * this->volume_(phase) / this->size_(direction);
     status = true;
     this->set_traction_ = true;
+    this->traction_function_ = function;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

@@ -209,8 +209,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
-  bool assign_traction(unsigned phase, unsigned direction,
-                       double traction) override;
+  bool assign_traction(unsigned phase, unsigned direction, double traction,
+                       const std::shared_ptr<FunctionBase>& function) override;
 
   //! Return traction of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -313,8 +313,10 @@ class Particle : public ParticleBase<Tdim> {
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
   bool set_traction_{false};
-  //! Traction
+  //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, Tnphases> traction_;
+  //! Mathematical function for surface traction force
+  std::shared_ptr<FunctionBase> traction_function_{nullptr};
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix

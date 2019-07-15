@@ -9,6 +9,7 @@
 #include "cell.h"
 #include "hdf5.h"
 #include "material/material.h"
+#include "functions/function_base.h"
 
 namespace mpm {
 
@@ -180,8 +181,9 @@ class ParticleBase {
   virtual VectorDim velocity(unsigned phase) const = 0;
 
   //! Assign traction
-  virtual bool assign_traction(unsigned phase, unsigned direction,
-                               double traction) = 0;
+  virtual bool assign_traction(
+      unsigned phase, unsigned direction, double traction,
+      const std::shared_ptr<FunctionBase>& function) = 0;
 
   //! Return traction
   virtual VectorDim traction(unsigned phase) const = 0;
