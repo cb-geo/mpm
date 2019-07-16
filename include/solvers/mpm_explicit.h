@@ -48,8 +48,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::materials_;
   //! VTK attributes
   using mpm::MPMBase<Tdim>::vtk_attributes_;
-  //! Bool nodal tractions
-  using mpm::MPMBase<Tdim>::nodal_tractions_;
+  //! Node concentrated force
+  using mpm::MPMBase<Tdim>::set_node_concentrated_force_;
 
  private:
   //! Boolean to switch between USL and USF

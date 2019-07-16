@@ -199,8 +199,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
                     std::placeholders::_1, phase, (this->step_ * this->dt_)));
 
-      //! Apply nodal tractions
-      if (nodal_tractions_) this->apply_nodal_tractions();
+      // Iterate over each node to add concentrated node force to external force
+      if(set_node_concentrated_force_)
+        mesh_->iterate_over_nodes(
+            std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
+                      std::placeholders::_1, phase, (this->step_ * this->dt_)));
     });
 
     // Spawn a task for internal force
