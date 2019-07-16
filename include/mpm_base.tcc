@@ -37,6 +37,10 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       velocity_update_ = false;
     }
 
+    // Check if math functions are defined
+    if(analysis_["math_functions"].template get<bool>())
+      this->initialise_math_functions();
+
     post_process_ = io_->post_processing();
     // Output steps
     output_steps_ = post_process_["output_steps"].template get<mpm::Index>();
@@ -635,8 +639,10 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
           tfunction = math_functions_.at(
               ptraction["math_function_id"].template get<unsigned>());
         bool particles_tractions = mesh_->assign_particles_tractions(
-            tfunction, file_reader->read_particles_tractions(
-                           io_->file_name("particles_tractions")));
+            tfunction,
+            file_reader->read_particles_tractions(
+                io_->working_dir() +
+                ptraction["input_file"].template get<std::string>()));
         if (!particles_tractions)
           throw std::runtime_error(
               "Particles tractions are not properly assigned");
