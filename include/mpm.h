@@ -54,9 +54,6 @@ class MPM {
   // Initialise math functions
   virtual bool initialise_math_functions() = 0;
 
-  //! Apply nodal tractions
-  virtual bool apply_nodal_tractions() = 0;
-
   //! Apply properties to particles sets (e.g: material)
   virtual bool apply_properties_to_particles_sets() = 0;
 

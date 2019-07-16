@@ -243,15 +243,16 @@ class Mesh {
   //! Assign particles tractions
   //! \param[in] particle_tractions Traction at dir on particle
   bool assign_particles_tractions(
-      const std::shared_ptr<FunctionBase>& tfunction,
+      const std::shared_ptr<FunctionBase>& mfunction,
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
   //! Assign nodal traction force
   //! \param[in] nodal_tractions Traction at dir on nodes
-  bool assign_nodal_tractions(
+  bool assign_nodal_concentrated_forces(
+      const std::shared_ptr<FunctionBase>& tfunction,
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          nodal_tractions);
+          node_forces);
 
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle

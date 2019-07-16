@@ -161,9 +161,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Friction constraints are not properly assigned");
     }
 
-    // Set nodal traction as false if file is empty
-    if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
-
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -429,37 +426,6 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
   return status;
 }
 
-//! Apply nodal tractions
-template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
-  bool status = true;
-  try {
-    // Read and assign nodes tractions
-    if (!io_->file_name("nodal_tractions").empty()) {
-      // Get mesh properties
-      auto mesh_props = io_->json_object("mesh");
-      // Get Mesh reader from JSON object
-      const std::string reader =
-          mesh_props["mesh_reader"].template get<std::string>();
-      // Create a mesh reader
-      auto node_reader =
-          Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
-
-      bool nodal_tractions =
-          mesh_->assign_nodal_tractions(node_reader->read_particles_tractions(
-              io_->file_name("nodal_tractions")));
-      if (!nodal_tractions)
-        throw std::runtime_error("Nodal tractions are not properly assigned");
-    } else
-      nodal_tractions_ = false;
-  } catch (std::exception& exception) {
-    console_->error("#{}: Nodal traction: {}", __LINE__, exception.what());
-    status = false;
-    nodal_tractions_ = false;
-  }
-  return status;
-}
-
 //! Apply properties to particles sets (e.g: material)
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
@@ -640,7 +606,7 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
               ptraction["math_function_id"].template get<unsigned>());
         bool particles_tractions = mesh_->assign_particles_tractions(
             tfunction,
-            file_reader->read_particles_tractions(
+            file_reader->read_tractions(
                 io_->working_dir() +
                 ptraction["input_file"].template get<std::string>()));
         if (!particles_tractions)
@@ -651,6 +617,24 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
       console_->warn(
           "No particle surface traction is defined for the analysis");
 
+    // Read and assign nodal concentrated forces
+    if (loads.find("concentrated_nodal_forces") != loads.end()) {
+      for (const auto& nforce : loads["concentrated_nodal_forces"]) {
+        std::shared_ptr<FunctionBase> ffunction = nullptr;
+        if (nforce.find("math_function_id") != nforce.end())
+          ffunction = math_functions_.at(
+              nforce["math_function_id"].template get<unsigned>());
+        bool nodal_force = mesh_->assign_nodal_concentrated_forces(
+            ffunction, file_reader->read_tractions(
+                           io_->working_dir() +
+                           nforce["input_file"].template get<std::string>()));
+        if (!nodal_force)
+          throw std::runtime_error(
+              "Concentrated nodal forces are not properly assigned");
+        set_node_concentrated_force_ = true;
+      }
+    } else
+      console_->warn("No concentrated nodal force is defined for the analysis");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

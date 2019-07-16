@@ -702,28 +702,32 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
 
 //! Assign node tractions
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_tractions(
+bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
+    const std::shared_ptr<FunctionBase>& mfunction,
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        node_tractions) {
+        node_forces) {
   bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
     if (!nodes_.size())
       throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign traction");
-    for (const auto& node_traction : node_tractions) {
-      // Node id
-      mpm::Index pid = std::get<0>(node_traction);
+          "No nodes have been assigned in mesh, cannot assign concentrated "
+          "force");
+    for (const auto& node_force : node_forces) {
+      // Particle id
+      mpm::Index nid = std::get<0>(node_force);
       // Direction
-      unsigned dir = std::get<1>(node_traction);
+      unsigned dir = std::get<1>(node_force);
       // Traction
-      double traction = std::get<2>(node_traction);
+      double concentrated_force = std::get<2>(node_force);
 
-      if (map_nodes_.find(pid) != map_nodes_.end())
-        status = map_nodes_[pid]->assign_traction_force(phase, dir, traction);
+      if (map_nodes_.find(nid) != map_nodes_.end())
+        status = map_nodes_[nid]->assign_concentrated_force(
+            phase, dir, concentrated_force, mfunction);
 
-      if (!status) throw std::runtime_error("Traction is invalid for node");
+      if (!status)
+        throw std::runtime_error("Concentrated force is invalid for node");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
