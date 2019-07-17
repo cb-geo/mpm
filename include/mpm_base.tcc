@@ -37,9 +37,14 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       velocity_update_ = false;
     }
 
-    // Check if math functions are defined
-    if(analysis_["math_functions"].template get<bool>())
-      this->initialise_math_functions();
+    // Math functions
+    try {
+      if (analysis_["math_functions"].template get<bool>())
+        this->initialise_math_functions();
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: No math functions are defined; set to default",
+                     __FILE__, __LINE__, exception.what());
+    }
 
     post_process_ = io_->post_processing();
     // Output steps
@@ -595,19 +600,22 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     // Create a file reader
     const std::string reader =
         io_->json_object("mesh")["mesh_reader"].template get<std::string>();
-    auto file_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+    auto traction_reader =
+        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
     // Read and assign particles surface tractions
     if (loads.find("particle_surface_traction") != loads.end()) {
       for (const auto& ptraction : loads["particle_surface_traction"]) {
+        // Get the math function
         std::shared_ptr<FunctionBase> tfunction = nullptr;
         if(ptraction.find("math_function_id") != ptraction.end())
           tfunction = math_functions_.at(
               ptraction["math_function_id"].template get<unsigned>());
+        // Read and assign particle surface tractions
         bool particles_tractions = mesh_->assign_particles_tractions(
             tfunction,
-            file_reader->read_tractions(
-                io_->working_dir() +
+            traction_reader->read_tractions(
+                io_->working_directory() +
                 ptraction["input_file"].template get<std::string>()));
         if (!particles_tractions)
           throw std::runtime_error(
@@ -620,13 +628,15 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     // Read and assign nodal concentrated forces
     if (loads.find("concentrated_nodal_forces") != loads.end()) {
       for (const auto& nforce : loads["concentrated_nodal_forces"]) {
+        // Get the math function
         std::shared_ptr<FunctionBase> ffunction = nullptr;
         if (nforce.find("math_function_id") != nforce.end())
           ffunction = math_functions_.at(
               nforce["math_function_id"].template get<unsigned>());
+        // Read and assign nodal concentrated forces
         bool nodal_force = mesh_->assign_nodal_concentrated_forces(
             ffunction, file_reader->read_tractions(
-                           io_->working_dir() +
+                           io_->working_directory() +
                            nforce["input_file"].template get<std::string>()));
         if (!nodal_force)
           throw std::runtime_error(
@@ -637,7 +647,9 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
       console_->warn("No concentrated nodal force is defined for the analysis");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
   }
+  return status;
 }
 
 //! Initialise math functions

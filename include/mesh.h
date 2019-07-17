@@ -241,16 +241,18 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, double>>& particle_volumes);
 
   //! Assign particles tractions
+  //! \param[in] mfunction Math function if defined 
   //! \param[in] particle_tractions Traction at dir on particle
   bool assign_particles_tractions(
       const std::shared_ptr<FunctionBase>& mfunction,
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
-  //! Assign nodal traction force
-  //! \param[in] nodal_tractions Traction at dir on nodes
+  //! Assign nodal concentrated force
+  //! \param[in] mfunction Math function if defined
+  //! \param[in] node_forces Concentrated force at dir on nodes
   bool assign_nodal_concentrated_forces(
-      const std::shared_ptr<FunctionBase>& tfunction,
+      const std::shared_ptr<FunctionBase>& mfunction,
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           node_forces);
 
