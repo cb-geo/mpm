@@ -635,7 +635,7 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
               nforce["math_function_id"].template get<unsigned>());
         // Read and assign nodal concentrated forces
         bool nodal_force = mesh_->assign_nodal_concentrated_forces(
-            ffunction, file_reader->read_tractions(
+            ffunction, traction_reader->read_tractions(
                            io_->working_directory() +
                            nforce["input_file"].template get<std::string>()));
         if (!nodal_force)
