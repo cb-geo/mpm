@@ -187,7 +187,7 @@ bool mpm::Cell<Tdim>::add_neighbour(mpm::Index neighbour_id) {
       throw std::runtime_error("Invalid local id of a cell neighbour");
 
   } catch (std::exception& exception) {
-    console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
+    // console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return insertion_status;
 }
@@ -1462,4 +1462,9 @@ inline std::vector<std::vector<mpm::Index>>
     set_face_nodes.emplace_back(face_nodes);
   }
   return set_face_nodes;
+}
+
+template <unsigned Tdim>
+std::set<mpm::Index>* mpm::Cell<Tdim>::get_neighbours_() {
+  return &neighbours_;
 }

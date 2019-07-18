@@ -79,6 +79,93 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
   // Check point resume
+
+  //! Wentao edited
+
+  //! Try to use ParMETIS library
+  bool graph_create = mesh_->create_graph(mpi_size);
+  //! Get the graph
+  auto partition_graph = mesh_->get_graph();
+
+#ifdef USE_MPI
+  // Run if there is more than a single MPI task
+
+  idx_t npes;
+  idx_t mype;
+  MPI_Comm comm;
+  MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+  gkMPI_Comm_size(comm, &npes);
+  gkMPI_Comm_rank(comm, &mype);
+
+  partition_graph.assign_ndims(Tdim);
+  partition_graph.part =
+      ismalloc(partition_graph.get_nvtxs(), mype % partition_graph.get_nparts(),
+               "main: part");
+  partition_graph.sizes = imalloc(2 * npes, "main: sizes");
+
+  if (mpi_size > 1) {
+    // MPI_Comm comm = MPI_COMM_WORLD;
+    idx_t* part = NULL;
+    idx_t* sizes = NULL;
+    part = ismalloc(partition_graph.nvtxs, mype % partition_graph.nparts,
+                    "main: part");
+    sizes = imalloc(2 * npes, "main: sizes");
+
+    idx_t penum;
+    idx_t edgecut;
+
+    idx_t* adjwgt = {};
+
+    //! Parmetis function
+    ParMETIS_V3_PartGeomKway(
+        partition_graph.get_vtxdist(), partition_graph.get_xadj(),
+        partition_graph.get_adjncy(), partition_graph.get_vwgt(), adjwgt,
+        &partition_graph.wgtflag, &partition_graph.numflag,
+        &partition_graph.ndims, partition_graph.xyz, &partition_graph.ncon,
+        &partition_graph.nparts, partition_graph.tpwgts, partition_graph.ubvec,
+        partition_graph.options, &edgecut, part, &comm);
+
+    idx_t rnvtxs;
+    idx_t* rpart;
+
+    MPI_Status status;
+
+    //! Collect the parititon
+
+    if (mype == 0) {
+      idx_t* partition;
+      //! allocate space to partition
+      partition = imalloc(mesh_->ncells(), "partition");
+      int par = 0;
+      int i;
+      for (i = 0; i < partition_graph.get_vtxdist()[1]; i++) {
+        partition[par] = part[i];
+        par = par + 1;
+      }
+      for (penum = 1; penum < npes; penum++) {
+        rnvtxs = partition_graph.get_vtxdist()[penum + 1] -
+                 partition_graph.get_vtxdist()[penum];
+        rpart = imalloc(rnvtxs, "rpart");
+        //! penum is the source process
+        MPI_Recv((void*)rpart, rnvtxs, IDX_T, penum, 1, comm, &status);
+        int i;
+        for (i = 0; i < rnvtxs; i++) {
+          partition[par] = rpart[i];
+          par = par + 1;
+        }
+        gk_free((void**)&rpart, LTERM);
+      }
+
+    } else {
+      MPI_Send((void*)part,
+               partition_graph.get_vtxdist()[mype + 1] -
+                   partition_graph.get_vtxdist()[mype],
+               IDX_T, 0, 1, comm);
+    }
+  }
+#endif
+  //! Wentao edited
+
   if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();

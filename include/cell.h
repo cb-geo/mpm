@@ -289,6 +289,8 @@ class Cell {
   //! Return sorted face node ids
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
+  std::set<mpm::Index>* get_neighbours_();
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -315,8 +317,10 @@ class Cell {
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates
   Eigen::MatrixXd nodal_coordinates_;
+
   //! Container of cell neighbour ids
   std::set<mpm::Index> neighbours_;
+
   //! Shape function
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Quadrature

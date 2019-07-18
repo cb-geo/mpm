@@ -43,6 +43,7 @@ bool mpm::Mesh<Tdim>::create_nodes(mpm::Index gnid,
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
+  // graph_ = NULL;
   return status;
 }
 
@@ -154,6 +155,28 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
 }
 #endif
 
+//! Create graph from cells lists
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_graph(int num_threads) {
+  bool status = true;
+  try {
+    // Check if cells in Container is not empty
+    if (this->cells_.size() == 0) {
+      throw std::runtime_error("Container of cells is empty");
+    }
+    //! Create a graph
+    Graph<Tdim> graph;
+    // graph = Graph<Tdim>(&(this->cells_), num_threads);
+    graph.initialize(&(this->cells_), num_threads);
+    graph_ = graph;
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
@@ -241,6 +264,7 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 
   // Iterate through all unique keys in faces_cells_
+
   for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
        itr = faces_cells_.upper_bound(itr->first)) {
     // Returns a pair representing the range of elements with key
@@ -1173,4 +1197,15 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
+}
+
+template <unsigned Tdim>
+mpm::Graph<Tdim> mpm::Mesh<Tdim>::get_graph() {
+  //! return the graph
+  return (this->graph_);
+}
+
+template <unsigned Tdim>
+mpm::Map<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cell_map() {
+  return &(this->map_cells_);
 }

@@ -1,7 +1,9 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
+#include "graph.h"
 #include "mpm_base.h"
+#include <parmetis.h>
 
 namespace mpm {
 
@@ -17,6 +19,8 @@ class MPMExplicit : public MPMBase<Tdim> {
 
   //! Solve
   bool solve() override;
+
+  bool split();
 
  protected:
   // Generate a unique id for the analysis

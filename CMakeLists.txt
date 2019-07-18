@@ -90,9 +90,26 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
+# METIS
+find_package(METIS)
+if (PARMETIS_FOUND)
+  include(${PARMETIS_INCLUDE_DIRS})
+  link_libraries(${PARMETIS_LIBRARIES})
+endif()
+
+# ParMETIS
+find_package(ParMETIS)
+if (PARMETIS_FOUND)
+  include(${PARMETIS_INCLUDE_DIRS})
+  message("PARMETIS FOUND")
+  message(${PARMETIS_INCLUDE_DIRS})
+  link_libraries(${PARMETIS_LIBRARIES})
+endif()
+
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
+  ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
