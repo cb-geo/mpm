@@ -259,8 +259,7 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_updated_position(unsigned phase, double dt) override;
 
   //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] phase Index corresponding to the solid skeleton
-  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
 
@@ -272,9 +271,10 @@ class Particle : public ParticleBase<Tdim> {
                                           unsigned pore_fluid,
                                           double dt) override;
 
-  //! Compute updated position of the particle based on nodal velocity for two
-  //! phase \param[in] phase Index corresponding to the phase \param[in] dt
-  //! Analysis time step
+  //! Compute updated position of particle based on nodal velocity for two phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity_two_phase(unsigned solid_skeleton,
                                                    unsigned pore_fluid,
                                                    double dt) override;
