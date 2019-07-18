@@ -78,9 +78,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
-  // Check point resume
-
-  //! Wentao edited
+  //Check point resume
+    //! Wentao edited
 
   //! Try to use ParMETIS library
   bool graph_create = mesh_->create_graph(mpi_size);
@@ -165,7 +164,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   }
 #endif
   //! Wentao edited
-
   if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
