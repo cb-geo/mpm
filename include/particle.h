@@ -267,8 +267,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   //! \param[in] update_position Status of update position
-  bool update_position(unsigned phase, double dt,
-                       bool update_position) override;
+  bool update_position_acceleration(unsigned phase, double dt,
+                                    bool update_position) override;
 
   //! Compute updated position of the particle based on nodal velocity
   //! \param[in] phase Index corresponding to the phase

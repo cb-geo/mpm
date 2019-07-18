@@ -559,7 +559,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
       Eigen::VectorXd strain_rate_fluid =
           cell_->compute_strain_rate(bmatrix_, pore_fluid);
       // Calculate pore pressure
-      double dpressure = K / porosity_ *
+      double dpressure = -K / porosity_ *
                          (volume_fraction_(solid_skeleton) * dt *
                               strain_rate_solid.head(Tdim).sum() +
                           volume_fraction_(pore_fluid) * dt *
@@ -815,8 +815,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
 
 // Compute updated position of the particle
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_position(unsigned phase, double dt,
-                                                    bool update_position) {
+bool mpm::Particle<Tdim, Tnphases>::update_position_acceleration(
+    unsigned phase, double dt, bool update_position) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr

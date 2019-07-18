@@ -348,11 +348,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     else {
       // Solid skeleton
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::update_position,
+          std::bind(&mpm::ParticleBase<Tdim>::update_position_acceleration,
                     std::placeholders::_1, solid_skeleton, this->dt_, true));
       // Pore fluid
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::update_position,
+          std::bind(&mpm::ParticleBase<Tdim>::update_position_acceleration,
                     std::placeholders::_1, pore_fluid, this->dt_, false));
     }
 

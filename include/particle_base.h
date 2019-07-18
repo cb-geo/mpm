@@ -218,8 +218,8 @@ class ParticleBase {
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
 
   //! Compute updated position
-  virtual bool update_position(unsigned phase, double dt,
-                               bool update_position) = 0;
+  virtual bool update_position_acceleration(unsigned phase, double dt,
+                                            bool update_position) = 0;
 
   //! Compute updated position based on nodal velocity
   virtual bool update_position_velocity(unsigned phase, double dt,
