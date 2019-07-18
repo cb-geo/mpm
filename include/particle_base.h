@@ -169,7 +169,7 @@ class ParticleBase {
 
   //! Compute pore pressure
   virtual bool compute_pore_pressure(unsigned solid_skeleton,
-                                     unsigned pore_fluid) = 0;
+                                     unsigned pore_fluid, double dt) = 0;
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
@@ -217,14 +217,13 @@ class ParticleBase {
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
 
-  //! Compute updated position for two phase
-  virtual bool compute_updated_position_two_phase(unsigned solid_skeleton,
-                                                  unsigned pore_fluid,
-                                                  double dt) = 0;
+  //! Compute updated position
+  virtual bool update_position(unsigned phase, double dt,
+                               bool update_position) = 0;
 
-  //! Compute updated position based on nodal velocity for two phase
-  virtual bool compute_updated_position_velocity_two_phase(
-      unsigned solid_skeleton, unsigned pore_fluid, double dt) = 0;
+  //! Compute updated position based on nodal velocity
+  virtual bool update_position_velocity(unsigned phase, double dt,
+                                        bool update_position) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

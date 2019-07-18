@@ -195,11 +195,11 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_stress(unsigned phase) override;
 
   //! Compute pore pressure
-  //! \param[in] solid_skeleton Index corresponding to the phase of solid
-  //! skeleton \param[in] pore_fluid Index corresponding to the phase of pore
-  //! fluid
-  bool compute_pore_pressure(unsigned solid_skeleton,
-                             unsigned pore_fluid) override;
+  //! \param[in] solid_skeleton Index corresponding to solid phase
+  //! \param[in] pore_fluid Index corresponding to fluid phase
+  //! \param[in] dt Analysis time step
+  bool compute_pore_pressure(unsigned solid_skeleton, unsigned pore_fluid,
+                             double dt) override;
 
   //! Return stress of the particle
   //! \param[in] phase Index corresponding to the phase
@@ -263,21 +263,19 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
 
-  //! Compute updated position of the particle for two phase
-  //! \param[in] phase Index corresponding to the solid skeleton
-  //! \param[in] phase Index corresponding to the pore fluid
+  //! Compute updated position of the particle
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool compute_updated_position_two_phase(unsigned solid_skeleton,
-                                          unsigned pore_fluid,
-                                          double dt) override;
+  //! \param[in] update_position Status of update position
+  bool update_position(unsigned phase, double dt,
+                       bool update_position) override;
 
-  //! Compute updated position of particle based on nodal velocity for two phase
-  //! \param[in] phase Index corresponding to the solid skeleton
-  //! \param[in] phase Index corresponding to the pore fluid
+  //! Compute updated position of the particle based on nodal velocity
+  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool compute_updated_position_velocity_two_phase(unsigned solid_skeleton,
-                                                   unsigned pore_fluid,
-                                                   double dt) override;
+  //! \param[in] update_position Status of update position
+  bool update_position_velocity(unsigned phase, double dt,
+                                bool update_position) override;
 
   //! Return a state variable
   //! \param[in] var State variable
