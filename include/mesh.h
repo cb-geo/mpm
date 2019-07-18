@@ -24,6 +24,7 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
+#include "graph.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
@@ -124,6 +125,8 @@ class Mesh {
   template <typename Tgetfunctor, typename Tsetfunctor>
   void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
+  //! Create graph from list of cells
+  bool create_graph(int num_threads);
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
@@ -280,6 +283,9 @@ class Mesh {
   //! \retval point Material point coordinates
   std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
 
+  //! Find cell neighbours
+  void compute_cell_neighbours();
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
@@ -317,6 +323,12 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Get the graph
+  mpm::Graph<Tdim> get_graph();
+
+  //! Get the map of cell
+  mpm::Map<mpm::Cell<Tdim>>* get_cell_map();
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -347,8 +359,14 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Faces and cells
+  std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
+  // graph pass the address of the container of cell
+  Graph<Tdim> graph_;
+
 };  // Mesh class
 }  // namespace mpm
 

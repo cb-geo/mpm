@@ -155,23 +155,33 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
-                                                      unsigned phase,
-                                                      double mass_pressure) {
+void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
+    unsigned phase, double mass_pressure) {
   try {
     const double tolerance = 1.E-16;
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
-
-    // Update/assign pressure
+    // Compute pressure from mass*pressure
     if (mass_(phase) > tolerance) {
       std::lock_guard<std::mutex> guard(node_mutex_);
-      pressure_(phase) =
-          (pressure_(phase) * factor) + mass_pressure / mass_(phase);
+      pressure_(phase) += mass_pressure / mass_(phase);
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+}
+
+//! Assign pressure at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
+                                                      double pressure) {
+  try {
+    const double tolerance = 1.E-16;
+
+    // Compute pressure from mass*pressure
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    pressure_(phase) = pressure;
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -360,7 +370,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
     const unsigned dir_n = std::get<0>(this->friction_constraint_);
 
     // Normal direction of friction
-    const double sign_dir_n = sign(std::get<1>(this->friction_constraint_));
+    const double sign_dir_n =
+        std::signbit(std::get<1>(this->friction_constraint_));
 
     // Friction co-efficient
     const double mu = std::get<2>(this->friction_constraint_);
@@ -405,12 +416,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
           if (std::abs(vel_net) <= vel_frictional)
             acc_t = -vel_t / dt;
           else
-            acc_t -= sign(vel_net) * mu * std::abs(acc_n);
+            acc_t -= std::signbit(vel_net) * mu * std::abs(acc_n);
         } else {  // static friction
           if (std::abs(acc_t) <= mu * std::abs(acc_n))
             acc_t = 0.0;
           else
-            acc_t -= sign(acc_t) * mu * std::abs(acc_n);
+            acc_t -= std::signbit(acc_t) * mu * std::abs(acc_n);
         }
 
         if (!generic_boundary_constraints_) {

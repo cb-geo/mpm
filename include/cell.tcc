@@ -177,18 +177,17 @@ std::vector<std::array<mpm::Index, 2>> mpm::Cell<Tdim>::side_node_pairs()
 
 //! Add a neighbour cell and return the status of addition of a node
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
+bool mpm::Cell<Tdim>::add_neighbour(mpm::Index neighbour_id) {
   bool insertion_status = false;
   try {
-    // If number of cell ptrs id is not the current cell id
-    if (cell_ptr->id() != this->id()) {
-      insertion_status = neighbour_cells_.insert(local_id, cell_ptr);
-    } else {
+    // If cell id is not the same as the current cell
+    if (neighbour_id != this->id())
+      insertion_status = (neighbours_.insert(neighbour_id)).second;
+    else
       throw std::runtime_error("Invalid local id of a cell neighbour");
-    }
+
   } catch (std::exception& exception) {
-    console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
+    // console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return insertion_status;
 }
@@ -434,20 +433,26 @@ inline bool mpm::Cell<Tdim>::approx_point_in_cell(
 //! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point,
+    Eigen::Matrix<double, Tdim, 1>* xi) {
+
+  // Set an initial value of Xi
+  (*xi).fill(std::numeric_limits<double>::max());
 
   // Check if point is approximately in the cell
   if (!this->approx_point_in_cell(point)) return false;
 
-  // Check if cell is cartesian, if so use cartesian checker
-  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
-
   bool status = true;
-  // Get local coordinates
-  Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
+
+  // Check if cell is cartesian, if so use cartesian local coordinates
+  if (!isoparametric_) (*xi) = this->local_coordinates_point(point);
+  // Isoparametric element
+  else
+    (*xi) = this->transform_real_to_unit_cell(point);
+
   // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+  for (unsigned i = 0; i < (*xi).size(); ++i)
+    if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
   return status;
 }
 
@@ -591,6 +596,261 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   return xi;
 }
 
+//! Return the local coordinates of a point in a 2D cell
+template <>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point_2d(
+    const Eigen::Matrix<double, 1, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 1, 1> xi;
+  xi << std::numeric_limits<double>::max();
+  console_->error("{} #{}: The analytical solution is valid only for 2D\n",
+                  __FILE__, __LINE__);
+  return xi;
+}
+
+//! Return the local coordinates of a point in a 2D cell
+//! Analytical solution based on A consistent point-searching algorithm for
+//! solution interpolation in unstructured meshes consisting of 4-node bilinear
+//! quadrilateral elements - Zhao et al., 1999
+
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
+    const Eigen::Matrix<double, 2, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+
+  const double xa = point(0);
+  const double ya = point(1);
+  const double x1 = nodes_[0]->coordinates()(0);
+  const double y1 = nodes_[0]->coordinates()(1);
+  const double x2 = nodes_[1]->coordinates()(0);
+  const double y2 = nodes_[1]->coordinates()(1);
+  const double x3 = nodes_[2]->coordinates()(0);
+  const double y3 = nodes_[2]->coordinates()(1);
+  const double x4 = nodes_[3]->coordinates()(0);
+  const double y4 = nodes_[3]->coordinates()(1);
+
+  const double a1 = x1 + x2 + x3 + x4;
+  const double a2 = -x1 + x2 + x3 - x4;
+  const double a3 = -x1 - x2 + x3 + x4;
+  const double a4 = x1 - x2 + x3 - x4;
+
+  const double b1 = y1 + y2 + y3 + y4;
+  const double b2 = -y1 + y2 + y3 - y4;
+  const double b3 = -y1 - y2 + y3 + y4;
+  const double b4 = y1 - y2 + y3 - y4;
+
+  const double c1 = 4. * xa - a1;
+  const double c2 = 4. * ya - b1;
+
+  // General solution of xi and eta based on solving with Sympy
+  // a2 * xi(0) + a3 * xi(1) + a4 * xi(0) * xi(1) = 4 x_a - a1
+  // b2 * xi(0) + b3 * xi(1) + b4 * xi(0) * xi(1) = 4 y_a - b1
+  const double u1 =
+      (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
+       (-a3 * b4 + a4 * b3) *
+           ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
+             4 * b4 * xa) /
+                (2 * (a3 * b4 - a4 * b3)) -
+            (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
+                       2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
+                       4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
+                       8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+                       4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+                       16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+                       8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
+                       a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
+                       8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
+                       a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+                       16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+                       16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+                       16 * b4 * b4 * xa * xa)) /
+                (2 * (a3 * b4 - a4 * b3)))) /
+      (a2 * b4 - a4 * b2);
+
+  const double u2 =
+      (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
+          (2 * (a3 * b4 - a4 * b3)) -
+      (std::sqrt(
+          a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
+          2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
+          8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+          4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+          16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+          8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
+          2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
+          8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+          16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+          16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+          16 * b4 * b4 * xa * xa)) /
+          (2 * (a3 * b4 - a4 * b3));
+
+  // Second solution of a quadratic equation
+  const double v1 =
+      (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
+       (-a3 * b4 + a4 * b3) *
+           ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
+             4 * b4 * xa) /
+                (2 * (a3 * b4 - a4 * b3)) +
+            (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
+                       2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
+                       4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
+                       8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+                       4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+                       16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+                       8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
+                       a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
+                       8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
+                       a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+                       16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+                       16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+                       16 * b4 * b4 * xa * xa)) /
+                (2 * (a3 * b4 - a4 * b3)))) /
+      (a2 * b4 - a4 * b2);
+
+  const double v2 =
+      (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
+          (2 * (a3 * b4 - a4 * b3)) +
+      (std::sqrt(
+          a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
+          2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
+          8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
+          4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
+          16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
+          8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
+          2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
+          8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
+          16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
+          16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
+          16 * b4 * b4 * xa * xa)) /
+          (2 * (a3 * b4 - a4 * b3));
+
+  // Choosing a quadratic solution
+  if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
+    xi(0) = u1;
+    xi(1) = u2;
+    return xi;
+  } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
+    xi(0) = v1;
+    xi(1) = v2;
+    return xi;
+  }
+
+  // Case1: a4 == 0 and b4 != 0: Eq 10
+  if (a4 == 0 && b4 == 0) {
+    xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
+    xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
+  } else if (a4 == 0 && b4 != 0) {  // Case 2: Eq 11
+    if (a2 == 0 && a3 != 0) {       // Case 2.1 Eq 12
+      xi(1) = c1 / a3;
+      xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
+    } else if (a2 != 0 && a3 == 0) {  // Case 2.2 Eq 13
+      xi(0) = c1 / a2;
+      xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
+    } else {  // a2 != 0 && a3 != 0 // Case 2.3 Eq 14
+      const double aa = b4 * a3 / a2;
+      const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
+      const double cc = -(b2 * c1 / a2) + c2;
+      // There are two possible solutions
+      const double u2 = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      const double u1 = (c1 - a3 * u2) / a2;
+      // Second solution of a quadratic equation
+      const double v2 = (-bb - std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
+      const double v1 = (c1 - a3 * v2) / a2;
+      if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
+        xi(0) = u1;
+        xi(1) = u2;
+      } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
+        xi(0) = v1;
+        xi(1) = v2;
+      }
+    }
+  } else if (a4 != 0 && b4 == 0) {  // Case 3 Eq 16
+    if (b2 == 0 && b3 != 0) {       // Case 3.1 Eq 17
+      xi(1) = c2 / b3;
+      xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
+    } else if (b2 != 0 && b3 == 0) {  // Case 3.2 Eq 18
+      xi(0) = c2 / b2;
+      xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
+    } else {  // b2 != 0 && b3 != 0  // Case 3.3 Eq 19
+      const double aa = a4 * b3 / b2;
+      const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
+      const double cc = -(a2 * c2 / b2) + c1;
+      // There are two possible solutions
+      const double u2 = (-bb + std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
+      const double u1 = (c2 - b3 * u2) / b2;
+      // Second solution of a quadratic equation
+      const double v2 = (-bb - std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
+      const double v1 = (c2 - b3 * v2) / b2;
+      if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
+        xi(0) = u1;
+        xi(1) = u2;
+      } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
+        xi(0) = v1;
+        xi(1) = v2;
+      }
+    }
+  } else {  // a4 != 0 && b4 != 0   // Case 4 Eq 21
+    const double a2s = a2 / a4;
+    const double a3s = a3 / a4;
+
+    const double b2s = b2 / b4;
+    const double b3s = b3 / b4;
+
+    const double c1s = c1 / a4;
+    const double c2s = c2 / b4;
+
+    if ((a2s - b2s) == 0) {  // Case 4.1 Eq 25
+      xi(1) = (c1s - c2s) / (a3s - b3s);
+      xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
+    } else {
+      const double alpha = (c1s - c2s) / (a2s - b2s);
+      const double beta = (a3s - b3s) / (a2s - b2s);
+
+      if (beta == 0) {  // Case 4.2a Eq 28
+        xi(0) = alpha;
+        xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
+      } else {  // Case 4.2b Eq 29
+        // There are two possible solutions
+        const double u2 =
+            (-(a2s * beta + a3s - alpha) +
+             std::sqrt((a2s * beta + a3s - alpha) * (a2s * beta + a3s - alpha) -
+                       (4 * beta * (c1s - a2s * alpha)))) /
+            (2. * beta);
+        const double u1 = alpha - beta * u2;
+        // Second solution of a quadratic equation
+        const double v2 =
+            (-(a2s * beta + a3s - alpha) -
+             std::sqrt((a2s * beta + a3s - alpha) * (a2s * beta + a3s - alpha) -
+                       (4 * beta * (c1s - a2s * alpha)))) /
+            (2. * beta);
+        const double v1 = alpha - beta * v2;
+        if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
+          xi(0) = u1;
+          xi(1) = u2;
+        } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
+          xi(0) = v1;
+          xi(1) = v2;
+        }
+      }
+    }
+  }
+  return xi;
+}
+
+//! Return the local coordinates of a point in a 2D cell
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point_2d(
+    const Eigen::Matrix<double, 3, 1>& point) {
+  // Local point coordinates
+  Eigen::Matrix<double, 3, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+  console_->error("{} #{}: The analytical solution is valid only for 2D\n",
+                  __FILE__, __LINE__);
+  return xi;
+}
+
 //! Return the local coordinates of a point in a 1D cell
 template <>
 inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
@@ -611,13 +871,15 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   Eigen::Matrix<double, 2, 1> xi;
   xi.setZero();
 
+  // Zeros
+  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
   nodal_coords.resize(2, indices.size());
-
   for (unsigned j = 0; j < indices.size(); ++j) {
     Eigen::Matrix<double, 2, 1> node = nodes_[indices(j)]->coordinates();
     for (unsigned i = 0; i < 2; ++i) {
@@ -625,96 +887,29 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     }
   }
 
-  // Check for an analytical solution
-  const long double x = point(0);
-  const long double y = point(1);
+  // Try analytical solution
+  xi = this->local_coordinates_point_2d(point);
 
-  const double x0 = nodal_coords(0, 0);
-  const double x1 = nodal_coords(0, 1);
-  const double x2 = nodal_coords(0, 2);
-  const double x3 = nodal_coords(0, 3);
+  // Analytical tolerance
+  const double tolerance = 1.0E-16 * mean_length_ * mean_length_;
 
-  const double y0 = nodal_coords(1, 0);
-  const double y1 = nodal_coords(1, 1);
-  const double y2 = nodal_coords(1, 2);
-  const double y3 = nodal_coords(1, 3);
-
-  const long double a = (x1 - x3) * (y0 - y2) - (x0 - x2) * (y1 - y3);
-  const long double b = -(x0 - x1 - x2 + x3) * y + (x - 2 * x1 + x3) * y0 -
-                        (x - 2 * x0 + x2) * y1 - (x - x1) * y2 + (x - x0) * y3;
-  const long double c = (x0 - x1) * y - (x - x1) * y0 + (x - x0) * y1;
-
-  const long double discriminant = b * b - 4 * a * c;
-
-  // Discriminant is negative if the point is not in the cell
-  if (discriminant > 0.0) {
-    long double eta1, eta2;
-    // Special case #1: if a is zero, then use the linear formula
-    if (a == 0.0 && b != 0.0) {
-      eta1 = -c / b;
-      eta2 = -c / b;
-    }
-    // Special case #2: a is zero for parallelograms and very small for
-    // near-parallelograms:
-    else if (std::abs(a) < 1e-8 * std::abs(b)) {
-      // if both a and c are very small then the root should be near
-      // zero: this first case will capture that
-      eta1 = 2 * c / (-b - std::sqrt(discriminant));
-      eta2 = 2 * c / (-b + std::sqrt(discriminant));
-    }
-    // finally, use the plain version:
-    else {
-      eta1 = (-b - std::sqrt(discriminant)) / (2 * a);
-      eta2 = (-b + std::sqrt(discriminant)) / (2 * a);
-    }
-
-    // pick the one closer to the center of the cell.
-    // eta
-    const long double eta =
-        (std::abs(eta1 - 0.5) < std::abs(eta2 - 0.5)) ? eta1 : eta2;
-    // Scale from 0 to 1 -> -1 to 1
-    xi(1) = (2. * eta) - 1.;
-
-    // There are two ways to compute xi from eta, but either one may have a
-    // zero denominator.
-    const long double subexpr0 = -eta * x2 + x0 * (eta - 1);
-    const long double xi_denominator0 = eta * x3 - x1 * (eta - 1) + subexpr0;
-    const double max_x = std::max(std::max(std::abs(x0), std::abs(x1)),
-                                  std::max(std::abs(x2), std::abs(x3)));
-
-    if (std::abs(xi_denominator0) > 1.0E-10 * max_x) {
-      const long double xi0 = (x + subexpr0) / xi_denominator0;
-      xi(0) = (2. * xi0) - 1.;
-      bool status = true;
-      // Check if xi is within the cell
-      for (unsigned i = 0; i < xi.size(); ++i)
-        if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-
-      if (status) return xi;
-    } else {
-      const double max_y = std::max(std::max(std::abs(y0), std::abs(y1)),
-                                    std::max(std::abs(y2), std::abs(y3)));
-      const long double subexpr1 = -eta * y2 + y0 * (eta - 1);
-      const long double xi_denominator1 = eta * y3 - y1 * (eta - 1) + subexpr1;
-      if (std::abs(xi_denominator1) > 1.0E-10 * max_y) {
-        const long double xi0 = (subexpr1 + y) / xi_denominator1;
-        xi(0) = (2. * xi0) - 1.;
-        bool status = true;
-        // Check if xi is within the cell
-        for (unsigned i = 0; i < xi.size(); ++i)
-          if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
-
-        if (status) return xi;
-      }
-    }
-  }
+  bool status = true;
+  // Check if xi is within the cell
+  for (unsigned i = 0; i < xi.size(); ++i)
+    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+  // Local shape function
+  const auto sf = element_->shapefn_local(xi, zero, zero);
+  // f(x) = p(x) - p, where p is the real point
+  const auto analytical_residual = (nodal_coords * sf) - point;
+  // Early exit
+  if ((analytical_residual.squaredNorm() < tolerance) && status) return xi;
+  // If tolerance is high
+  const auto analytical_xi = xi;
 
   // Affine guess of xi
   Eigen::Matrix<double, 2, 1> affine_guess;
   // Boolean to check if affine is nan
   bool affine_nan = false;
-  // Zeros
-  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
 
   // Affine tolerance
   const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
@@ -758,6 +953,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     // Early exit
     if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
       return xi;
+  }
+  // Select the best of analytical and affine transformation
+  Eigen::Matrix<double, 2, 1> geometry_xi;
+  Eigen::Matrix<double, 2, 1> geometry_residual;
+  geometry_residual.fill(std::numeric_limits<double>::max());
+
+  if (analytical_residual.norm() < affine_residual.norm()) {
+    geometry_residual = analytical_residual;
+    geometry_xi = analytical_xi;
+  } else {
+    geometry_residual = affine_residual;
+    geometry_xi = affine_guess;
   }
 
   // Maximum iterations of newton raphson
@@ -825,7 +1032,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // At end of iteration return affine or xi based on lowest norm
   if ((iter == max_iterations) && !affine_nan &&
       (element_->degree() == mpm::ElementDegree::Linear))
-    return affine_residual.norm() < nr_residual.norm() ? affine_guess : xi;
+    return geometry_residual.norm() < nr_residual.norm() ? geometry_xi : xi;
 
   return xi;
 }
@@ -1016,7 +1223,7 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
                                             double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+    nodes_[i]->update_mass_pressure(phase, shapefn(i) * pmass * ppressure);
 }
 
 //! Compute nodal momentum from particle mass and velocity for a given phase
@@ -1234,4 +1441,30 @@ inline void mpm::Cell<3>::compute_normals() {
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
   }
+}
+
+//! Return a sorted list of face node ids
+template <unsigned Tdim>
+inline std::vector<std::vector<mpm::Index>>
+    mpm::Cell<Tdim>::sorted_face_node_ids() {
+  std::vector<std::vector<mpm::Index>> set_face_nodes;
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    std::vector<mpm::Index> face_nodes;
+
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+    for (int id = 0; id < indices.size(); ++id)
+      face_nodes.emplace_back(nodes_[indices(id)]->id());
+
+    // Sort in ascending order
+    std::sort(face_nodes.begin(), face_nodes.end());
+    set_face_nodes.emplace_back(face_nodes);
+  }
+  return set_face_nodes;
+}
+
+template <unsigned Tdim>
+std::set<mpm::Index>* mpm::Cell<Tdim>::get_neighbours_() {
+  return &neighbours_;
 }
