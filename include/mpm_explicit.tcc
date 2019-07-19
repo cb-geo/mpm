@@ -90,26 +90,24 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #ifdef USE_MPI
   // Run if there is more than a single MPI task
 
-  idx_t npes;
-  idx_t mype;
+  int npes;
+  int mype;
   MPI_Comm comm;
   MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-  gkMPI_Comm_size(comm, &npes);
-  gkMPI_Comm_rank(comm, &mype);
+  MPI_Comm_size(comm, &npes);
+  MPI_Comm_rank(comm, &mype);
 
   partition_graph.assign_ndims(Tdim);
-  partition_graph.part =
-      ismalloc(partition_graph.get_nvtxs(), mype % partition_graph.get_nparts(),
-               "main: part");
-  partition_graph.sizes = imalloc(2 * npes, "main: sizes");
 
   if (mpi_size > 1) {
     // MPI_Comm comm = MPI_COMM_WORLD;
     idx_t* part = NULL;
-    idx_t* sizes = NULL;
-    part = ismalloc(partition_graph.nvtxs, mype % partition_graph.nparts,
-                    "main: part");
-    sizes = imalloc(2 * npes, "main: sizes");
+    idx_t* tpart = (idx_t*)malloc(partition_graph.nvtxs * sizeof(idx_t));
+    int mpart = 0;
+    for (mpart = 0; mpart < partition_graph.nvtxs; mpart++) {
+      tpart[mpart] = mype % partition_graph.get_nparts();
+    }
+    part = tpart;
 
     idx_t penum;
     idx_t edgecut;
@@ -131,11 +129,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     MPI_Status status;
 
     //! Collect the parititon
+    idx_t* partition;
+    //! allocate space to partition
+    partition = (idx_t*)malloc(mesh_->ncells() * sizeof(idx_t));
 
     if (mype == 0) {
-      idx_t* partition;
-      //! allocate space to partition
-      partition = imalloc(mesh_->ncells(), "partition");
+
       int par = 0;
       int i;
       for (i = 0; i < partition_graph.get_vtxdist()[1]; i++) {
@@ -145,7 +144,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       for (penum = 1; penum < npes; penum++) {
         rnvtxs = partition_graph.get_vtxdist()[penum + 1] -
                  partition_graph.get_vtxdist()[penum];
-        rpart = imalloc(rnvtxs, "rpart");
+        rpart = (idx_t*)malloc(rnvtxs * sizeof(idx_t));
         //! penum is the source process
         MPI_Recv((void*)rpart, rnvtxs, IDX_T, penum, 1, comm, &status);
         int i;
@@ -153,7 +152,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           partition[par] = rpart[i];
           par = par + 1;
         }
-        gk_free((void**)&rpart, LTERM);
+        free(rpart);
+      }
+      for (penum = 1; penum < npes; penum++) {
+        MPI_Send((void*)partition, par, IDX_T, penum, 1, comm);
       }
 
     } else {
@@ -161,6 +163,16 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                partition_graph.get_vtxdist()[mype + 1] -
                    partition_graph.get_vtxdist()[mype],
                IDX_T, 0, 1, comm);
+      free(part);
+      MPI_Recv((void*)partition, mesh_->ncells(), IDX_T, 0, 1, comm, &status);
+    }
+
+    //! delete all the particles which is not in local task parititon
+    for (auto stcl = mesh_->get_cells_container()->cbegin();
+         stcl != mesh_->get_cells_container()->cend(); ++stcl) {
+      if (partition[(*stcl)->id()] != mype) {
+        (*stcl)->clear_particle_ids();
+      }
     }
   }
 #endif

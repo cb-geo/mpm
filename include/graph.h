@@ -32,7 +32,11 @@
 
 //#include "proto.h"
 
-#define MAXNCON 32
+#define MAXNCON 1
+#define PMV3_OPTION_DBGLVL  1
+#define PMV3_OPTION_SEED  2
+
+
 #include "cell.h"
 #include "container.h"
 #include "factory.h"

@@ -1209,3 +1209,9 @@ template <unsigned Tdim>
 mpm::Map<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cell_map() {
   return &(this->map_cells_);
 }
+
+
+template <unsigned Tdim>
+mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cells_container(){
+    return &(this->cells_);
+}

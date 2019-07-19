@@ -254,30 +254,50 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
   std::vector<idx_t>(vwgt).swap(vwgt);
 
   //! assign ubvec
-  rset(this->ncon, 1.05, ubvec);
+  int nncon = 0;
+
+  for (nncon = 0; nncon < MAXNCON; nncon++) {
+    ubvec[nncon] = 1.05;
+  }
   //! assign tpwgts
   if (cells_->size() < num_threads) {
     nparts = cells_->size();
   } else {
     nparts = num_threads;
   }
-  tpwgts = rmalloc(nparts * this->ncon, "tpwgts");
 
-  rset(nparts * this->ncon, 1.0 / (real_t)nparts, tpwgts);
+  //! assign tpwgts
+  std::vector<real_t> ttpwgts;
+  int ntpwgts;
+  for (ntpwgts = 0; ntpwgts < (nparts * this->ncon); ntpwgts++) {
+    ttpwgts.push_back(1.0 / (real_t)nparts);
+  }
+  real_t* mtpwts = (real_t*)malloc(ttpwgts.size() * sizeof(real_t));
+  for (ntpwgts = 0; ntpwgts < ttpwgts.size(); ntpwgts++) {
+    mtpwts[ntpwgts] = ttpwgts.at(ntpwgts);
+  }
+  this->tpwgts = mtpwts;
+  std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
   this->nvtxs = cells_->size();
 
-  this->xyz = rmalloc(get_nvtxs() * get_ndims(), "ReadTestCoordinates");
-  counter = 0;
+  //! assign xyz
+  std::vector<real_t> mxyz;
 
   for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
     int dimension = 0;
     for (dimension = 0; dimension < (*stcl)->centroid().rows(); dimension++) {
-      this->xyz[counter + dimension] = ((*stcl)->centroid())(dimension, 0);
+      mxyz.push_back(((*stcl)->centroid())(dimension, 0));
     }
-    counter = counter + ndims;
   }
+
+  real_t* txyz = (real_t*)malloc(mxyz.size() * sizeof(real_t));
+  for (i = 0; i < mxyz.size(); i++) {
+    txyz[i] = mxyz.at(i);
+  }
+  this->xyz = txyz;
+  std::vector<real_t>(mxyz).swap(mxyz);
 }
 
 //! Get the xadj
@@ -310,54 +330,8 @@ mpm::Graph<Tdim>::Graph() {
 }
 
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::assign_nparts(idx_t n) {
-  this->nparts = n;
-}
-
-template <unsigned Tdim>
 void mpm::Graph<Tdim>::assign_ndims(idx_t n) {
   this->ndims = n;
-}
-
-//! Change the option value
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::change_options_PMV3_OPTION_DBGLVL(idx_t a) {
-  this->options[PMV3_OPTION_DBGLVL] = a;
-}
-
-//! Change the option value
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::change_options_PMV3_OPTION_SEED(idx_t a) {
-  this->options[PMV3_OPTION_SEED] = a;
-}
-
-//! Chane the option value
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::change_options_0(idx_t a) {
-  this->options[0] = a;
-}
-
-//! optype
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::assign_optype(idx_t a) {
-  this->optype = a;
-}
-
-//! adptf
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::assign_adptf(idx_t a) {
-  this->adptf = a;
-}
-
-//! ipc2redist
-template <unsigned Tdim>
-void mpm::Graph<Tdim>::assign_ipc2redist(real_t a) {
-  this->ipc2redist = a;
-}
-//! get_nvtxs
-template <unsigned Tdim>
-idx_t mpm::Graph<Tdim>::get_nvtxs() {
-  return this->nvtxs;
 }
 
 //! get_nparts

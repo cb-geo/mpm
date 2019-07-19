@@ -90,21 +90,21 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
-# METIS
-find_package(METIS)
-if (PARMETIS_FOUND)
-  include(${PARMETIS_INCLUDE_DIRS})
-  link_libraries(${PARMETIS_LIBRARIES})
-endif()
+# # METIS
+# find_package(METIS)
+# if (PARMETIS_FOUND)
+#   include(${PARMETIS_INCLUDE_DIRS})
+#   link_libraries(${PARMETIS_LIBRARIES})
+# endif()
 
-# ParMETIS
-find_package(ParMETIS)
-if (PARMETIS_FOUND)
-  include(${PARMETIS_INCLUDE_DIRS})
-  message("PARMETIS FOUND")
-  message(${PARMETIS_INCLUDE_DIRS})
-  link_libraries(${PARMETIS_LIBRARIES})
-endif()
+# # ParMETIS
+# find_package(ParMETIS)
+# if (PARMETIS_FOUND)
+#   include(${PARMETIS_INCLUDE_DIRS})
+#   message("PARMETIS FOUND")
+#   message(${PARMETIS_INCLUDE_DIRS})
+#   link_libraries(${PARMETIS_LIBRARIES})
+# endif()
 
 # Include directories
 include_directories(BEFORE
@@ -131,6 +131,8 @@ SET(mpm_src
 )
 
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
+target_link_libraries(lmpm libparmetis.a libmetis.a)
+
 
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)

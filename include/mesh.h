@@ -329,6 +329,10 @@ class Mesh {
   //! Get the map of cell
   mpm::Map<mpm::Cell<Tdim>>* get_cell_map();
 
+  //! Get the container of cell
+  mpm::Container<Cell<Tdim>>* get_cells_container();
+
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
