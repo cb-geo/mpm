@@ -3,6 +3,14 @@
 #include "hexahedron_quadrature.h"
 #include "quadrilateral_quadrature.h"
 
+// Triangle 1
+static Register<mpm::Quadrature<2>, mpm::TriangleQuadrature<2, 1>>
+    triangle1("QT1");
+
+// Triangle 3
+static Register<mpm::Quadrature<2>, mpm::TriangleQuadrature<2, 3>>
+    triangle3("QT2");
+
 // Quadrilateral 1
 static Register<mpm::Quadrature<2>, mpm::QuadrilateralQuadrature<2, 1>>
     quadrilateral1("QQ1");

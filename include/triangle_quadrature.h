@@ -19,7 +19,7 @@ class TriangleQuadrature : public Quadrature<Tdim> {
 
  public:
   TriangleQuadrature() : Quadrature<Tdim>() {
-    static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
+    static_assert(Tdim == 2, "Invalid dimension for a triangle element");
     static_assert(
         ((Tnquadratures == 1) || (Tnquadratures == 3),
         "Invalid number of quadratures");
@@ -38,4 +38,4 @@ class TriangleQuadrature : public Quadrature<Tdim> {
 
 #include "triangle_quadrature.tcc"
 
-#endif  // MPM_QUADRILATERAL_QUADRATURE_H_
+#endif  // MPM_TRIANGLE_QUADRATURE_H_
