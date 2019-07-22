@@ -2,6 +2,7 @@
 #include "factory.h"
 #include "hexahedron_quadrature.h"
 #include "quadrilateral_quadrature.h"
+#include "triangle_quadrature.h"
 
 // Triangle 1
 static Register<mpm::Quadrature<2>, mpm::TriangleQuadrature<2, 1>>
