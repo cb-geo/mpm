@@ -1,19 +1,6 @@
 #ifndef MPM_TRIANGLE_ELEMENT_H_
 #define MPM_TRIANGLE_ELEMENT_H_
 
-#include <algorithm>
-#include <array>
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <vector>
-
-#include "triangle_quadrature.h"
-#include "triangle_shapefn.h"
-#include "node_base.h"
-#include "quadrature_base.h"
-#include "shapefn_base.h"
-
 #include "element.h"
 #include "logger.h"
 
