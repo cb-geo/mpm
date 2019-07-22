@@ -223,13 +223,30 @@ inline void mpm::Cell<1>::compute_volume() {
 }
 
 //! Compute volume of a 2D cell
-//! Computes the volume of a quadrilateral
+//! Computes the volume of a triangle and a quadrilateral
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
     Eigen::VectorXi indices = element_->corner_indices();
+    // Triangle
+    if (indices.size() == 3) {
+
+      //!   2 0
+      //!     |`\
+      //!     |  `\
+      //!     |    `\
+      //!     |      `\
+      //!     |        `\
+      //!   0 0----------0 1
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+      // 2 * Area = (x1 * y2 - x2 * y1) - (x0 * y2 - x2 * y0) + (x0 * y1 - x1 * y0)
+      volume_ = std::fabs(((node1.at(0) * node2.at(1)) - (node2.at(0) - node1.at(1))) -
+                          ((node0.at(0) * node2.at(1)) - (node2.at(0) - node0.at(1))) +
+                          ((node0.at(0) * node1.at(1)) - (node1.at(0) - node0.at(1))))/2.0;
     // Quadrilateral
-    if (indices.size() == 4) {
+    } else if (indices.size() == 4) {
 
       //        b
       // 3 0---------0 2
