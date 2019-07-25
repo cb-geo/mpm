@@ -10,7 +10,7 @@ inline Eigen::MatrixXd mpm::TriangleQuadrature<2, 1>::quadratures() const {
 
 // Getting the weights for Tnquadratures = 1
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 1>::weights() const {
+inline Eigen::VectorXd mpm::TriangleQuadrature<2, 1>::weights() const {
   Eigen::VectorXd weights(1);
   weights(0) = 0.5;
 
@@ -19,7 +19,7 @@ inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 1>::weights() const {
 
 // Getting the quadratures for Tnquadratures = 3
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 3>::quadratures() const {
+inline Eigen::MatrixXd mpm::TriangleQuadrature<2, 3>::quadratures() const {
   Eigen::Matrix<double, 2, 3> quadratures;
   const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
 
@@ -35,7 +35,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 3>::quadratures() const {
 
 // Getting the weights for Tnquadratures = 3
 template <>
-inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 3>::weights() const {
+inline Eigen::VectorXd mpm::TriangleQuadrature<2, 3>::weights() const {
   Eigen::VectorXd weights(3);
   weights(0) = 1. / 3.;
   weights(1) = 1. / 3.;
