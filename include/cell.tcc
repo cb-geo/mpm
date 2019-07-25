@@ -519,8 +519,43 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     // Indices of corner nodes
     Eigen::VectorXi indices = element_->corner_indices();
 
+    // Triangle
+    if (indices.size() == 3) {
+      //   2 0
+      //     |`\
+      //     |  `\  b
+      //   c |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //           a
+      //
+      const double alength = (nodes_[indices(0)]->coordinates() -
+                              nodes_[indices(1)]->coordinates())
+                                 .norm();
+      const double blength = (nodes_[indices(1)]->coordinates() -
+                              nodes_[indices(2)]->coordinates())
+                                 .norm();
+      const double clength = (nodes_[indices(2)]->coordinates() -
+                              nodes_[indices(0)]->coordinates())
+                                 .norm();
+
+// Use Heron's formula to determine area of cell
+      const double semi_perimeter = (alength + blength + clength)/2.0;
+      const double area = std::sqrt(semi_perimeter *
+                                    (semi_perimeter-alength) *
+                                    (semi_perimeter-blength) *
+                                    (semi_perimeter-clength));
+      auto node0 = nodes_[indices(1)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(1)]->coordinates();
+
+      xi(0) =  1 / (2*area) * ((node2(1) - node0(1))*(point(0) - node0(0))
+                              -(node2(0) - node0(0))*(point(1) - node0(1)));
+      xi(1) = -1 / (2*area) * ((node1(1) - node0(1))*(point(0) - node0(0))
+                              -(node1(0) - node0(0))*(point(1) - node0(1)));
     // Quadrilateral
-    if (indices.size() == 4) {
+    } else if (indices.size() == 4) {
       //        b
       // 3 0--------0 2
       //   | \   / |

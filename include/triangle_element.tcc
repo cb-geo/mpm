@@ -10,14 +10,14 @@
 //! Return shape functions of a 3-node Triangle Element at a given local
 //! coordinate, with particle size and deformation gradient
 template<>
-inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(
+inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(  
     const Eigen::Matrix<double, 2, 1>& xi,
     const Eigen::Matrix<double, 2, 1>& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 3, 1> shapefn;
-  shapefn(0) = 1 - (xi.at(0) + xi.at(1));
-  shapefn(1) = xi.at(0);
-  shapefn(2) = xi.at(1);
+  shapefn(0) = 1 - (xi(0) + xi(1));
+  shapefn(1) = xi(0);
+  shapefn(2) = xi(1);
   return shapefn;
 }
 
@@ -72,12 +72,12 @@ inline Eigen::VectorXd mpm::TriangleElement<2, 6>::shapefn(
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 6, 1> shapefn;
   shapefn(0) =
-      (1. - xi.at(0) - xi.at(1)) * (1. - 2. * xi.at(0) - 2. * xi.at(1));
-  shapefn(1) = xi.at(0) * (2. * xi.at(0) - 1.);
-  shapefn(2) = xi.at(1) * (2. * xi.at(1) - 1.);
-  shapefn(3) = 4. * xi.at(0) * (1. - xi.at(0) - xi.at(1));
-  shapefn(4) = 4. * xi.at(0) * xi.at(1);
-  shapefn(5) = 4. * xi.at(1) * (1. - xi.at(0) - xi.at(1));
+      (1. - xi(0) - xi(1)) * (1. - 2. * xi(0) - 2. * xi(1));
+  shapefn(1) = xi(0) * (2. * xi(0) - 1.);
+  shapefn(2) = xi(1) * (2. * xi(1) - 1.);
+  shapefn(3) = 4. * xi(0) * (1. - xi(0) - xi(1));
+  shapefn(4) = 4. * xi(0) * xi(1);
+  shapefn(5) = 4. * xi(1) * (1. - xi(0) - xi(1));
   return shapefn;
 }
 
@@ -89,19 +89,19 @@ inline Eigen::MatrixXd mpm::TriangleElement<2, 6>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 6, 2> grad_shapefn;
-  grad_shapefn(0, 0) = 4. * xi.at(0) + 4. * xi.at(1) - 3.;
-  grad_shapefn(1, 0) = 4. * xi.at(0) - 1.;
+  grad_shapefn(0, 0) = 4. * xi(0) + 4. * xi(1) - 3.;
+  grad_shapefn(1, 0) = 4. * xi(0) - 1.;
   grad_shapefn(2, 0) = 0;
-  grad_shapefn(3, 0) = 4. - 8. * xi.at(0) - 4. * xi.at(1);
-  grad_shapefn(4, 0) = 4. * xi.at(1);
-  grad_shapefn(5, 0) = -4. * xi.at(1);
+  grad_shapefn(3, 0) = 4. - 8. * xi(0) - 4. * xi(1);
+  grad_shapefn(4, 0) = 4. * xi(1);
+  grad_shapefn(5, 0) = -4. * xi(1);
 
-  grad_shapefn(0, 1) = 4. * xi.at(0) + 4. * xi.at(1) - 3.;
+  grad_shapefn(0, 1) = 4. * xi(0) + 4. * xi(1) - 3.;
   grad_shapefn(1, 1) = 0;
-  grad_shapefn(2, 1) = 4. * xi.at(1) - 1.;
-  grad_shapefn(3, 1) = -4. * xi.at(0);
-  grad_shapefn(4, 1) = 4. * xi.at(0);
-  grad_shapefn(5, 1) = 4. - 4. * xi.at(0) - 8. * xi.at(1);
+  grad_shapefn(2, 1) = 4. * xi(1) - 1.;
+  grad_shapefn(3, 1) = -4. * xi(0);
+  grad_shapefn(4, 1) = 4. * xi(0);
+  grad_shapefn(5, 1) = 4. - 4. * xi(0) - 8. * xi(1);
   return grad_shapefn;
 }
 
@@ -148,9 +148,9 @@ inline Eigen::VectorXd
 
 //! Compute Jacobian with particle size and deformation gradient
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXd
+inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::TriangleElement<Tdim, Tnfunctions>::jacobian(
-        const VectorDim& xi, const MatrixXd& nodal_coordinates,
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
         const VectorDim& particle_size,
         const VectorDim& deformation_gradient) const {
 
@@ -178,7 +178,7 @@ inline Eigen::VectorXd
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::TriangleElement<Tdim, Tnfunctions>::jacobian_local(
-        const VectorDim& xi, const MatrixXd& nodal_coordinates,
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
         const VectorDim& particle_size,
         const VectorDim& deformation_gradient) const {
   // Jacobian dx_i/dxi_j
@@ -210,7 +210,7 @@ mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
         "Bmatrix - Jacobian calculation: Incorrect dimension of xi and "
         "nodal_coordinates");
   } catch (std::exception& exception) {
-    console->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     return bmatrix;
   }
 
