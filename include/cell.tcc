@@ -231,20 +231,21 @@ inline void mpm::Cell<2>::compute_volume() {
     // Triangle
     if (indices.size() == 3) {
 
-      //!   2 0
-      //!     |`\
-      //!     |  `\
-      //!     |    `\
-      //!     |      `\
-      //!     |        `\
-      //!   0 0----------0 1
+      //   2 0
+      //     |`\
+      //     |  `\
+      //     |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //
       auto node0 = nodes_[indices(0)]->coordinates();
       auto node1 = nodes_[indices(1)]->coordinates();
       auto node2 = nodes_[indices(2)]->coordinates();
       // 2 * Area = (x1 * y2 - x2 * y1) - (x0 * y2 - x2 * y0) + (x0 * y1 - x1 * y0)
-      volume_ = std::fabs(((node1[0] * node2[1]) - (node2[0] - node1[1])) -
-                          ((node0[0] * node2[1]) - (node2[0] - node0[1])) +
-                          ((node0[0] * node1[1]) - (node1[0] - node0[1])))/2.0;
+      volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) - node1(1))) -
+                          ((node0(0) * node2(1)) - (node2(0) - node0(1))) +
+                          ((node0(0) * node1(1)) - (node1(0) - node0(1))))/2.0;
     // Quadrilateral
     } else if (indices.size() == 4) {
 
@@ -530,30 +531,19 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       //   0 0----------0 1
       //           a
       //
-      const double alength = (nodes_[indices(0)]->coordinates() -
-                              nodes_[indices(1)]->coordinates())
-                                 .norm();
-      const double blength = (nodes_[indices(1)]->coordinates() -
-                              nodes_[indices(2)]->coordinates())
-                                 .norm();
-      const double clength = (nodes_[indices(2)]->coordinates() -
-                              nodes_[indices(0)]->coordinates())
-                                 .norm();
-
-// Use Heron's formula to determine area of cell
-      const double semi_perimeter = (alength + blength + clength)/2.0;
-      const double area = std::sqrt(semi_perimeter *
-                                    (semi_perimeter-alength) *
-                                    (semi_perimeter-blength) *
-                                    (semi_perimeter-clength));
-      auto node0 = nodes_[indices(1)]->coordinates();
+      
+      auto node0 = nodes_[indices(0)]->coordinates();
       auto node1 = nodes_[indices(1)]->coordinates();
-      auto node2 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
 
-      xi(0) =  1 / (2*area) * ((node2(1) - node0(1))*(point(0) - node0(0))
-                              -(node2(0) - node0(0))*(point(1) - node0(1)));
-      xi(1) = -1 / (2*area) * ((node1(1) - node0(1))*(point(0) - node0(0))
-                              -(node1(0) - node0(0))*(point(1) - node0(1)));
+      const double denominator = (node1(0) - node0(0)) * (node2(1) - node0(1))
+                                -(node2(0) - node0(0)) * (node1(1) - node0(1));
+      
+      xi(0) =  1 / denominator * (point(0) - node0(0)) * (node2(1) - node0(1))
+                                -(node2(0) - node0(0)) * (point(1) - node0(1));
+      
+      xi(1) = -1 / denominator * (point(0) - node0(0)) * (node1(1) - node0(1))
+                                -(node1(0) - node0(0)) * (point(1) - node0(1));
     // Quadrilateral
     } else if (indices.size() == 4) {
       //        b
