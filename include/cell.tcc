@@ -223,13 +223,31 @@ inline void mpm::Cell<1>::compute_volume() {
 }
 
 //! Compute volume of a 2D cell
-//! Computes the volume of a quadrilateral
+//! Computes the volume of a triangle and a quadrilateral
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
     Eigen::VectorXi indices = element_->corner_indices();
+    // Triangle
+    if (indices.size() == 3) {
+
+      //   2 0
+      //     |`\
+      //     |  `\
+      //     |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+      // 2 * Area = (x1 * y2 - x2 * y1) - (x0 * y2 - x2 * y0) + (x0 * y1 - x1 * y0)
+      volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) - node1(1))) -
+                          ((node0(0) * node2(1)) - (node2(0) - node0(1))) +
+                          ((node0(0) * node1(1)) - (node1(0) - node0(1))))/2.0;
     // Quadrilateral
-    if (indices.size() == 4) {
+    } else if (indices.size() == 4) {
 
       //        b
       // 3 0---------0 2
@@ -502,8 +520,32 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     // Indices of corner nodes
     Eigen::VectorXi indices = element_->corner_indices();
 
+    // Triangle
+    if (indices.size() == 3) {
+      //   2 0
+      //     |`\
+      //     |  `\  b
+      //   c |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //           a
+      //
+      
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+
+      const double denominator = (node1(0) - node0(0)) * (node2(1) - node0(1))
+                                -(node2(0) - node0(0)) * (node1(1) - node0(1));
+      
+      xi(0) =  1 / denominator * (point(0) - node0(0)) * (node2(1) - node0(1))
+                                -(node2(0) - node0(0)) * (point(1) - node0(1));
+      
+      xi(1) = -1 / denominator * (point(0) - node0(0)) * (node1(1) - node0(1))
+                                -(node1(0) - node0(0)) * (point(1) - node0(1));
     // Quadrilateral
-    if (indices.size() == 4) {
+    } else if (indices.size() == 4) {
       //        b
       // 3 0--------0 2
       //   | \   / |
