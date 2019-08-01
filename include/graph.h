@@ -33,9 +33,8 @@
 //#include "proto.h"
 
 #define MAXNCON 1
-#define PMV3_OPTION_DBGLVL  1
-#define PMV3_OPTION_SEED  2
-
+#define PMV3_OPTION_DBGLVL 1
+#define PMV3_OPTION_SEED 2
 
 #include "cell.h"
 #include "container.h"
@@ -65,7 +64,7 @@ class Graph {
   Graph& operator=(const Graph& graph);
 
   //! Initialize the graph
-  void initialize(Container<Cell<Tdim>>* cells, int num_threads);
+  void initialize(Container<Cell<Tdim>>* cells, int num_threads, int mype);
 
   //! Get the xadj
   idx_t* get_xadj();
@@ -79,37 +78,14 @@ class Graph {
   //! Get the vwgt
   idx_t* get_vwgt();
 
-  //! Change the option value
-  void change_options_PMV3_OPTION_DBGLVL(idx_t a);
-
-  //! Change the option value
-  void change_options_PMV3_OPTION_SEED(idx_t a);
-
-  //! Chane the option value
-  void change_options_0(idx_t a);
-
-  //! nparts
-  void assign_nparts(idx_t nparts);
-
   //! Tdim
   void assign_ndims(idx_t a);
 
-  //! optype
-  void assign_optype(idx_t a);
-
-  //! adptf
-  void assign_adptf(idx_t a);
-
-  //! ipc2redist
-  void assign_ipc2redist(real_t a);
-  //! ndims
-  idx_t get_ndims() { return ndims; }
+  //! Get nparts
+  idx_t get_nparts();
 
   idx_t* part;
   idx_t* sizes;
-
-  idx_t get_nvtxs();
-  idx_t get_nparts();
 
   idx_t numflag = 0;
   idx_t wgtflag = 2;

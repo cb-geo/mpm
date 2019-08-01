@@ -10,20 +10,6 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads) {
   std::vector<idx_t> vtxdist;
   std::vector<idx_t> vwgt;
 
-  //! These parameters are not needed for our problems
-  // std::vector<idx_t> adjwgt;
-  // std::vector<idx_t> wgtflag;
-  // std::vector<idx_t> numflag;
-  // std::vector<idx_t> ndims;
-  // std::vector<idx_t> xyz;
-  // std::vector<idx_t> ncon;
-  // std::vector<idx_t> nparts;
-  // std::vector<real_t> tpwgts;
-  // std::vector<real_t> ubvec;
-  // std::vector<idx_t> options;
-  // std::vector<idx_t> edgecut;
-  // std::vector<idx_t> part;
-
   //! Insert the 0th position
   xadj.push_back(0);
   //! Iterate through all the cells
@@ -152,15 +138,15 @@ mpm::Graph<Tdim>& mpm::Graph<Tdim>::operator=(const Graph& graph) {
 
 //! Initialize the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
-                                  int num_threads) {
+void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells, int num_threads,
+                                  int mype) {
 
   this->cells_ = cells;
   //! Basic parameters used in ParMETIS
-  std::vector<idx_t> xadj;
-  std::vector<idx_t> adjncy;
-  std::vector<idx_t> vtxdist;
-  std::vector<idx_t> vwgt;
+  std::vector<idx_t> vxadj;
+  std::vector<idx_t> vadjncy;
+  std::vector<idx_t> vvtxdist;
+  std::vector<idx_t> vvwgt;
 
   //! There is no weight to adjwgt
   this->adjwgt = {};
@@ -170,77 +156,86 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
   //! Use default value to fill the options[10]
   this->options[0] = 1;
   //! Can change the value here
-  this->options[PMV3_OPTION_DBGLVL] = 2;
+  this->options[PMV3_OPTION_DBGLVL] = 6;
   this->options[PMV3_OPTION_SEED] = 1;
-
-  //! Insert the 0th position
-  xadj.push_back(0);
-  //! Iterate through all the cells
-  long long counter = 0;
-  for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
-
-    if (counter == 0) {
-      this->ndims = (*stcl)->centroid().rows();
-    }
-    //! Insert the offset of the size of cell's neighbour
-    counter += (*stcl)->nneighbours();
-    xadj.push_back(counter);
-
-    //! get the neighbours
-    auto neighbours = (*stcl)->get_neighbours_();
-
-    //! get the id of neighbours
-    for (auto neigh = neighbours->cbegin(); neigh != neighbours->cend();
-         ++neigh) {
-
-      adjncy.push_back((*neigh));
-    }
-
-    vwgt.push_back((*stcl)->nparticles());
-  }
-
-  //! Assign the processor and assign value to vtxdist
 
   long sum = cells_->size();
 
-  long part = sum / num_threads;
+  long part = 0;
+  part = sum / num_threads;
   long rest = sum % num_threads;
+  if (rest != 0) {
+    part = part + 1;
+  }
 
   long start = 0;
-  vtxdist.push_back(start);
+  vvtxdist.push_back(start);
   start = start + part;
   //! Insert the loal cells for each processor
-  if (sum != 1) {
+  if (sum != 1 && part != 0) {
     while (start < sum) {
-      vtxdist.push_back(start);
+      vvtxdist.push_back(start);
       start = start + part;
     }
   }
+
   //! If the numbr of processor can not be evenly distributed, then the last
   //! processor handle the rest of cells
   if (rest != 0) {
     start = start - part;
-    start = start + rest;
-    vtxdist.push_back(start);
+    start = sum;
+    vvtxdist.push_back(start);
+  } else {
+    vvtxdist.push_back(start);
   }
-  //! Initialize the non-dynamic array
-  idx_t final_xadj[xadj.size()];
-  idx_t final_adjncy[adjncy.size()];
-  idx_t final_vtxdist[vtxdist.size()];
-  idx_t final_vwgt[vwgt.size()];
+
+  vxadj.push_back(0);
+
+  long long counter = 0;
+  start = vvtxdist[mype];
+  idx_t end = vvtxdist[mype + 1];
+
+  for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
+
+    if ((*stcl)->id() >= start && (*stcl)->id() < end) {
+      if (counter == 0) {
+        this->ndims = (*stcl)->centroid().rows();
+      }
+      //! Insert the offset of the size of cell's neighbour
+      counter += (*stcl)->nneighbours();
+
+      vxadj.push_back(counter);
+
+      //! get the neighbours
+      auto neighbours = (*stcl)->get_neighbours_();
+
+      //! get the id of neighbours
+      for (auto neigh = neighbours->cbegin(); neigh != neighbours->cend();
+           ++neigh) {
+        vadjncy.push_back((*neigh));
+      }
+
+      vvwgt.push_back((*stcl)->nparticles());
+    }
+  }
+
+  idx_t* final_xadj = (idx_t*)malloc(vxadj.size() * sizeof(idx_t));
+  idx_t* final_adjncy = (idx_t*)malloc(vadjncy.size() * sizeof(idx_t));
+  idx_t* final_vtxdist = (idx_t*)malloc(vvtxdist.size() * sizeof(idx_t));
+  idx_t* final_vwgt = (idx_t*)malloc(vvwgt.size() * sizeof(idx_t));
   long i;
   //! Assign the value
-  for (i = 0; i < xadj.size(); i++) {
-    final_xadj[i] = xadj.at(i);
+  for (i = 0; i < vxadj.size(); i++) {
+    final_xadj[i] = vxadj.at(i);
   }
-  for (i = 0; i < adjncy.size(); i++) {
-    final_adjncy[i] = adjncy.at(i);
+  for (i = 0; i < vadjncy.size(); i++) {
+    final_adjncy[i] = vadjncy.at(i);
   }
-  for (i = 0; i < vtxdist.size(); i++) {
-    final_vtxdist[i] = vtxdist.at(i);
+  for (i = 0; i < vvtxdist.size(); i++) {
+    final_vtxdist[i] = vvtxdist.at(i);
   }
-  for (i = 0; i < vwgt.size(); i++) {
-    final_vwgt[i] = vwgt.at(i);
+  for (i = 0; i < vvwgt.size(); i++) {
+    final_vwgt[i] = vvwgt.at(i);
   }
 
   //! Assign the pointer
@@ -248,29 +243,33 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
   this->xadj = final_xadj;
   this->vtxdist = final_vtxdist;
   this->vwgt = final_vwgt;
-  std::vector<idx_t>(adjncy).swap(adjncy);
-  std::vector<idx_t>(xadj).swap(xadj);
-  std::vector<idx_t>(vtxdist).swap(vtxdist);
-  std::vector<idx_t>(vwgt).swap(vwgt);
+  std::vector<idx_t>(vadjncy).swap(vadjncy);
+  std::vector<idx_t>(vxadj).swap(vxadj);
+  std::vector<idx_t>(vvtxdist).swap(vvtxdist);
+  std::vector<idx_t>(vvwgt).swap(vvwgt);
 
   //! assign ubvec
   int nncon = 0;
 
+  //! The guide suggests 1.05
   for (nncon = 0; nncon < MAXNCON; nncon++) {
     ubvec[nncon] = 1.05;
   }
-  //! assign tpwgts
-  if (cells_->size() < num_threads) {
-    nparts = cells_->size();
-  } else {
-    nparts = num_threads;
-  }
+  //! assign nparts
+  //! nparts is different from num_threads, but here we can set them equal
+  nparts = num_threads;
 
   //! assign tpwgts
   std::vector<real_t> ttpwgts;
   int ntpwgts;
-  for (ntpwgts = 0; ntpwgts < (nparts * this->ncon); ntpwgts++) {
-    ttpwgts.push_back(1.0 / (real_t)nparts);
+  real_t sub_total = 0.0;
+  for (ntpwgts = 0; ntpwgts < ((nparts) * this->ncon); ntpwgts++) {
+    if (ntpwgts != (nparts * this->ncon) - 1) {
+      ttpwgts.push_back(1.0 / (real_t)nparts);
+      sub_total = sub_total + 1.0 / (real_t)nparts;
+    } else {
+      ttpwgts.push_back(1.0 - sub_total);
+    }
   }
   real_t* mtpwts = (real_t*)malloc(ttpwgts.size() * sizeof(real_t));
   for (ntpwgts = 0; ntpwgts < ttpwgts.size(); ntpwgts++) {
@@ -280,15 +279,17 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
   std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
-  this->nvtxs = cells_->size();
+  this->nvtxs = vtxdist[mype + 1] - vtxdist[mype];
 
   //! assign xyz
   std::vector<real_t> mxyz;
 
   for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
-    int dimension = 0;
-    for (dimension = 0; dimension < (*stcl)->centroid().rows(); dimension++) {
-      mxyz.push_back(((*stcl)->centroid())(dimension, 0));
+    if ((*stcl)->id() >= start && (*stcl)->id() < end) {
+      int dimension = 0;
+      for (dimension = 0; dimension < (*stcl)->centroid().rows(); dimension++) {
+        mxyz.push_back(((*stcl)->centroid())(dimension, 0));
+      }
     }
   }
 
@@ -297,6 +298,7 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells,
     txyz[i] = mxyz.at(i);
   }
   this->xyz = txyz;
+
   std::vector<real_t>(mxyz).swap(mxyz);
 }
 

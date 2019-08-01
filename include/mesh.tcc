@@ -157,7 +157,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
 
 //! Create graph from cells lists
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::create_graph(int num_threads) {
+bool mpm::Mesh<Tdim>::create_graph(int num_threads, int mype) {
   bool status = true;
   try {
     // Check if cells in Container is not empty
@@ -167,7 +167,7 @@ bool mpm::Mesh<Tdim>::create_graph(int num_threads) {
     //! Create a graph
     Graph<Tdim> graph;
     // graph = Graph<Tdim>(&(this->cells_), num_threads);
-    graph.initialize(&(this->cells_), num_threads);
+    graph.initialize(&(this->cells_), num_threads, mype);
     graph_ = graph;
 
   } catch (std::exception& exception) {
@@ -1210,8 +1210,7 @@ mpm::Map<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cell_map() {
   return &(this->map_cells_);
 }
 
-
 template <unsigned Tdim>
-mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cells_container(){
-    return &(this->cells_);
+mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::get_cells_container() {
+  return &(this->cells_);
 }

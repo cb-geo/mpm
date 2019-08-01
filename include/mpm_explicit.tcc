@@ -82,25 +82,26 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   //! Wentao edited
 
-  //! Try to use ParMETIS library
-  bool graph_create = mesh_->create_graph(mpi_size);
-  //! Get the graph
-  auto partition_graph = mesh_->get_graph();
-
 #ifdef USE_MPI
-  // Run if there is more than a single MPI task
 
-  int npes;
-  int mype;
-  MPI_Comm comm;
-  MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-  MPI_Comm_size(comm, &npes);
-  MPI_Comm_rank(comm, &mype);
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
 
-  partition_graph.assign_ndims(Tdim);
+    //! Run if there is more than a single MPI task
+    int npes;
+    int mype;
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    MPI_Comm_size(comm, &npes);
+    MPI_Comm_rank(comm, &mype);
 
-  if (mpi_size > 1) {
-    // MPI_Comm comm = MPI_COMM_WORLD;
+    //! Try to use ParMETIS library
+    bool graph_create = mesh_->create_graph(npes, mype);
+    //! Get the graph
+    auto partition_graph = mesh_->get_graph();
+
+    partition_graph.assign_ndims(Tdim);
+
+    //! MPI_Comm comm = MPI_COMM_WORLD;
     idx_t* part = NULL;
     idx_t* tpart = (idx_t*)malloc(partition_graph.nvtxs * sizeof(idx_t));
     int mpart = 0;

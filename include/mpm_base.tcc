@@ -274,12 +274,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
 
     // Get local particles chunk
-    std::vector<Eigen::Matrix<double, Tdim, 1>> particles;
-    chunk_vector_quantities(all_particles, particles);
+    std::vector<Eigen::Matrix<double, Tdim, 1>> particles = all_particles;
+    // chunk_vector_quantities(all_particles, particles);
 
     // Get local particles ids chunks
-    std::vector<mpm::Index> particles_ids;
-    chunk_scalar_quantities(all_particles_ids, particles_ids);
+    std::vector<mpm::Index> particles_ids = all_particles_ids;
+    // chunk_scalar_quantities(all_particles_ids, particles_ids);
 
     // Particle type
     const auto particle_type =
@@ -377,8 +377,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
           particle_reader->read_particles_stresses(
               io_->file_name("particles_stresses"));
       // Chunked stresses
-      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
-      chunk_vector_quantities(all_particles_stresses, particles_stresses);
+      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses =
+          all_particles_stresses;
+      // chunk_vector_quantities(all_particles_stresses, particles_stresses);
 
       // Read and assign particles stresses
       if (!mesh_->assign_particles_stresses(particles_stresses))

@@ -126,7 +126,7 @@ class Mesh {
   void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
   //! Create graph from list of cells
-  bool create_graph(int num_threads);
+  bool create_graph(int num_threads, int mype);
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
@@ -331,7 +331,6 @@ class Mesh {
 
   //! Get the container of cell
   mpm::Container<Cell<Tdim>>* get_cells_container();
-
 
  private:
   // Locate a particle in mesh cells
