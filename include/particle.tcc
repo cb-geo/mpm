@@ -461,12 +461,12 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
         if (isnan(stress(i))) {
           throw std::runtime_error("Stress computed is not a number");
           nan_status = false;
-        }   
+        }
       }
 
       // Update stress if it is not NaN, keep current stress if NaN
       if (nan_status) {
-        this->stress_.col(phase) = stress;  
+        this->stress_.col(phase) = stress;
       }
 
     } else {

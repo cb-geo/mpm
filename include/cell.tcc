@@ -177,16 +177,15 @@ std::vector<std::array<mpm::Index, 2>> mpm::Cell<Tdim>::side_node_pairs()
 
 //! Add a neighbour cell and return the status of addition of a node
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
+bool mpm::Cell<Tdim>::add_neighbour(mpm::Index neighbour_id) {
   bool insertion_status = false;
   try {
-    // If number of cell ptrs id is not the current cell id
-    if (cell_ptr->id() != this->id()) {
-      insertion_status = neighbour_cells_.insert(local_id, cell_ptr);
-    } else {
+    // If cell id is not the same as the current cell
+    if (neighbour_id != this->id())
+      insertion_status = (neighbours_.insert(neighbour_id)).second;
+    else
       throw std::runtime_error("Invalid local id of a cell neighbour");
-    }
+
   } catch (std::exception& exception) {
     console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -1028,8 +1027,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
   // Check if the first trial xi is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1.) xi(i) = -0.999999999999;
-    else if (xi(i) > 1.) xi(i) = 0.999999999999;
+    if (xi(i) < -1.)
+      xi(i) = -0.999999999999;
+    else if (xi(i) > 1.)
+      xi(i) = 0.999999999999;
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 100;
@@ -1087,10 +1088,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       }
     }
     // Convergence criteria
-    if ((step_length * delta).norm() < Tolerance) {
-      //console_->info("NR solution is successful");
-      break;
-    }
+    if ((step_length * delta).norm() < Tolerance) break;
+
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
@@ -1184,8 +1183,10 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
   // Check if the first trial xi is within the unit cell (-1, 1)
   for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1.) xi(i) = -0.999999999999;
-    else if (xi(i) > 1.) xi(i) = 0.999999999999;
+    if (xi(i) < -1.)
+      xi(i) = -0.999999999999;
+    else if (xi(i) > 1.)
+      xi(i) = 0.999999999999;
 
   // Maximum iterations of newton raphson
   const unsigned max_iterations = 100;
@@ -1512,4 +1513,25 @@ inline void mpm::Cell<3>::compute_normals() {
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
   }
+}
+
+//! Return a sorted list of face node ids
+template <unsigned Tdim>
+inline std::vector<std::vector<mpm::Index>>
+    mpm::Cell<Tdim>::sorted_face_node_ids() {
+  std::vector<std::vector<mpm::Index>> set_face_nodes;
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    std::vector<mpm::Index> face_nodes;
+
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+    for (int id = 0; id < indices.size(); ++id)
+      face_nodes.emplace_back(nodes_[indices(id)]->id());
+
+    // Sort in ascending order
+    std::sort(face_nodes.begin(), face_nodes.end());
+    set_face_nodes.emplace_back(face_nodes);
+  }
+  return set_face_nodes;
 }
