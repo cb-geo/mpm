@@ -79,6 +79,44 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
   // Check point resume
+
+  //! Create graph and delete particles
+
+#ifdef USE_MPI
+
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    //! Run if there is more than a single MPI task
+    int npes;
+    int mype;
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    MPI_Comm_size(comm, &npes);
+    MPI_Comm_rank(comm, &mype);
+
+    //! Try to use ParMETIS library
+    bool graph_creation = mesh_->create_graph(npes, mype);
+    //! Get the graph
+    auto partition_graph = mesh_->graph();
+
+    //! Do the partition using ParMETIS function
+    bool graph_partition = partition_graph.make_partition(&comm);
+
+    //! Collect the partition
+    partition_graph.collect_partition(mesh_->ncells(), npes, mype, &comm);
+
+    //! Delete all the particles which is not in local task parititon
+    for (auto stcl = mesh_->cells_container()->cbegin();
+         stcl != mesh_->cells_container()->cend(); ++stcl) {
+      if (partition_graph.partition[(*stcl)->id()] != mype) {
+        (*stcl)->clear_particle_ids();
+      }
+    }
+    //! Deletition complete, we have replace chunk function with graph partition
+    //! function
+  }
+#endif
+
   if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
