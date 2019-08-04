@@ -452,8 +452,23 @@ bool mpm::Particle<Tdim, Tnphases>::compute_stress(unsigned phase) {
     if (material_.at(phase) != nullptr) {
       Eigen::Matrix<double, 6, 1> dstrain = this->dstrain_.col(phase);
       // Calculate stress
-      this->stress_.col(phase) = material_.at(phase)->compute_stress(
+      auto stress = material_.at(phase)->compute_stress(
           this->stress_.col(phase), dstrain, this, &state_variables_);
+
+      // Checking NaN
+      bool nan_status = true;
+      for (unsigned i = 0; i < stress.size(); ++i) {
+        if (isnan(stress(i))) {
+          throw std::runtime_error("Stress computed is not a number");
+          nan_status = false;
+        }   
+      }
+
+      // Update stress if it is not NaN, keep current stress if NaN
+      if (nan_status) {
+        this->stress_.col(phase) = stress;  
+      }
+
     } else {
       throw std::runtime_error("Material is invalid");
     }
