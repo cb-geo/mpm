@@ -8,6 +8,8 @@
 #include <set>
 #include <vector>
 
+#include <math.h>
+
 #include "Eigen/Dense"
 #include "Eigen/LU"
 
