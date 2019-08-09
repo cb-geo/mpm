@@ -88,9 +88,14 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_active_nodes() {
   // Clear existing list of active nodes
   this->active_nodes_.clear();
+  this->active_nodes_id.clear();
 
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      this->active_nodes_id.insert((*nitr)->id());
+    }
+  }
 }
 
 //! Iterate over active nodes
@@ -1208,4 +1213,44 @@ mpm::Graph<Tdim> mpm::Mesh<Tdim>::graph() {
 template <unsigned Tdim>
 mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::cells_container() {
   return &(this->cells_);
+}
+
+//! Collect shared node
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::shared_node(idx_t* partition) {
+  this->find_active_nodes();
+  auto active_node_id = &(this->active_nodes_id);
+  auto face_cell = &(this->faces_cells_);
+  //! Iterate over the multimap using Iterator
+  for (auto itr = (face_cell)->begin(); itr != (face_cell)->end();
+       itr = (face_cell)->upper_bound(itr->first)) {
+    //! Return a pair representing the range of elements with key
+    if (itr->second == NULL) {
+      break;
+    }
+
+    auto range = (face_cell)->equal_range(itr->first);
+    //！ A face is shared only by 2 cells (distance between the range is 2)
+    bool activation = false;
+    int vectorcount = 0;
+
+    for (vectorcount = 0; vectorcount < (itr->first).size(); vectorcount++) {
+      if ((active_node_id)->count((mpm::Index)itr->first.at(vectorcount))) {
+        activation = true;
+        break;
+      }
+    }
+
+    if (std::distance(range.first, range.second) == 2 &&
+        partition[range.first->second] != partition[range.second->second] &&
+        activation) {
+      std::vector<mpm::Index> cell_pair;
+      cell_pair.push_back(range.first->second);
+      cell_pair.push_back(range.second->second);
+      this->shared_node_cell.insert(
+          std::pair<std::vector<mpm::Index>, std::vector<mpm::Index>>(
+              itr->first, cell_pair));
+      std::vector<mpm::Index>(cell_pair).swap(cell_pair);
+    }
+  }
 }

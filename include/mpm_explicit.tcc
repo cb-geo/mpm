@@ -81,6 +81,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Check point resume
 
   //! Create graph and delete particles
+  Graph<Tdim> partition_graph;
 
 #ifdef USE_MPI
 
@@ -97,7 +98,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     //! Try to use ParMETIS library
     bool graph_creation = mesh_->create_graph(npes, mype);
     //! Get the graph
-    auto partition_graph = mesh_->graph();
+    partition_graph = mesh_->graph();
 
     //! Do the partition using ParMETIS function
     bool graph_partition = partition_graph.make_partition(&comm);
@@ -139,6 +140,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       // mesh_->find_active_nodes();
     });
+
+#ifdef USE_MPI
+    if (step_ == 0) mesh_->shared_node(partition_graph.partition);
+#endif
 
     // Spawn a task for particles
     task_group.run([&] {

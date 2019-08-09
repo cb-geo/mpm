@@ -329,6 +329,9 @@ class Mesh {
   //! Get the container of cell
   mpm::Container<Cell<Tdim>>* cells_container();
 
+  //! Collect shared node
+  void shared_node(idx_t* partition);
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -353,6 +356,8 @@ class Mesh {
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
+  //! Set of active nodes
+  std::set<mpm::Index> active_nodes_id;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Map of cells for fast retrieval
@@ -366,6 +371,8 @@ class Mesh {
 
   // graph pass the address of the container of cell
   Graph<Tdim>* graph_;
+  // shared nodes
+  std::map<std::vector<mpm::Index>, std::vector<mpm::Index>> shared_node_cell;
 
 };  // Mesh class
 }  // namespace mpm
