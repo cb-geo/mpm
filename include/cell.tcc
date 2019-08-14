@@ -1033,7 +1033,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       xi(i) = 0.999999999999;
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 100;
+  const unsigned max_iterations = 10000;
 
   // Tolerance for newton raphson
   const double Tolerance = 1.0E-10;
@@ -1189,7 +1189,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
       xi(i) = 0.999999999999;
 
   // Maximum iterations of newton raphson
-  const unsigned max_iterations = 100;
+  const unsigned max_iterations = 10000;
 
   // Tolerance for newton raphson
   const double Tolerance = 1.0E-10;

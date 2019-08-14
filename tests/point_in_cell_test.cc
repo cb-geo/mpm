@@ -426,4 +426,75 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     for (unsigned i = 0; i < local_point.size(); ++i)
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
   }
+
+  SECTION("Check point in unit cell overall solution") {
+
+    // Number of nodes in cell
+    const unsigned Nnodes = 4;
+
+    // Coordinates
+    Eigen::Vector2d coords;
+
+    coords << 0.499732, 0.00661057;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 0.501049, 0.0062308;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 0.499732, 0.00911057;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0.501049, 0.0087308;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 0.499732, 0.0116106;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 0.501049, 0.0112308;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    // 4-noded quadrilateral shape functions
+    std::shared_ptr<mpm::Element<Dim>> element =
+        Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+
+    Eigen::Vector2d xi;
+    // Coordinates of a point in real cell
+    Eigen::Vector2d point;
+    point << 0.5001136347599692, 0.009000523946142933;
+    // Cell 1
+    mpm::Index id = 0;
+    auto cell1 = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+    REQUIRE(cell1->add_node(0, node0) == true);
+    REQUIRE(cell1->add_node(1, node1) == true);
+    REQUIRE(cell1->add_node(2, node3) == true);
+    REQUIRE(cell1->add_node(3, node2) == true);
+    REQUIRE(cell1->nnodes() == 4);
+
+    // Initialise cell
+    REQUIRE(cell1->initialise() == true);
+    // Test if point is in cell
+    REQUIRE(cell1->is_point_in_cell(point, &xi) == false);
+
+    // Cell 2
+    mpm::Index id2 = 1;
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
+
+    REQUIRE(cell2->add_node(0, node2) == true);
+    REQUIRE(cell2->add_node(1, node3) == true);
+    REQUIRE(cell2->add_node(2, node5) == true);
+    REQUIRE(cell2->add_node(3, node4) == true);
+    REQUIRE(cell2->nnodes() == 4);
+
+    // Initialise cell
+    REQUIRE(cell2->initialise() == true);
+    // Test if point is in cell
+    REQUIRE(cell2->is_point_in_cell(point, &xi) == true);
+  }
 }
