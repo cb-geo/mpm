@@ -10,7 +10,7 @@
 //! Return shape functions of a 3-node Triangle Element at a given local
 //! coordinate, with particle size and deformation gradient
 template <>
-inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn( 
+inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(
     const Eigen::Matrix<double, 2, 1>& xi,
     const Eigen::Matrix<double, 2, 1>& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {

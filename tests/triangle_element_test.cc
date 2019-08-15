@@ -806,8 +806,7 @@ TEST_CASE("Triangle elements are checked", "[tri][element][2D]") {
     }
 
     // Check Jacobian
-    SECTION(
-        "Six noded triangle Jacobian for local coordinates(0.5,0.5)") {
+    SECTION("Six noded triangle Jacobian for local coordinates(0.5,0.5)") {
       Eigen::Matrix<double, 6, Dim> coords;
       // clang-format off
       coords << 2.0, 1.0,
