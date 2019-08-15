@@ -48,6 +48,7 @@ inline Eigen::MatrixXd mpm::TriangleElement<2, 3>::unit_cell_coordinates()
   // clang-format off
   unit_cell << 0., 0.,
                1., 0.,
+    // cppcheck-suppress *
                0., 1.;
   // clang-format on
   return unit_cell;
@@ -117,6 +118,7 @@ inline Eigen::MatrixXd mpm::TriangleElement<2, 6>::unit_cell_coordinates()
                0. , 1. ,
                0.5, 0. ,
                0.5, 0.5,
+    // cppcheck-suppress *
                0. , 0.5;
   // clang-format on
   return unit_cell;
@@ -301,6 +303,7 @@ inline Eigen::MatrixXi
   // clang-format off
   indices << 0, 1,
              1, 2,
+    // cppcheck-suppress *
              2, 0;
   // clang-format on
   return indices;
@@ -311,6 +314,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::TriangleElement<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 3, 1> indices;
+  // cppcheck-suppress *
   indices << 0, 1, 2;
   return indices;
 }
@@ -324,6 +328,7 @@ inline Eigen::MatrixXi
   // clang-format off
   indices << 0, 1,
              1, 2,
+    // cppcheck-suppress *
              2, 0;
   //clang-format on
   return indices;
