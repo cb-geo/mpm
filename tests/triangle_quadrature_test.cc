@@ -17,8 +17,7 @@ TEST_CASE("Triangle quadratures are checked",
   SECTION("Triangle with a single quadrature") {
     const unsigned Nquadratures = 1;
 
-    auto tri =
-        std::make_shared<mpm::TriangleQuadrature<Dim, Nquadratures>>();
+    auto tri = std::make_shared<mpm::TriangleQuadrature<Dim, Nquadratures>>();
 
     // Check quadratures
     auto points = tri->quadratures();
@@ -45,8 +44,7 @@ TEST_CASE("Triangle quadratures are checked",
   SECTION("Triangle with three quadratures") {
     const unsigned Nquadratures = 3;
 
-    auto tri =
-        std::make_shared<mpm::TriangleQuadrature<Dim, Nquadratures>>();
+    auto tri = std::make_shared<mpm::TriangleQuadrature<Dim, Nquadratures>>();
 
     // Check quadratures
     auto points = tri->quadratures();

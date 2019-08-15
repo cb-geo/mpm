@@ -20,9 +20,8 @@ class TriangleQuadrature : public Quadrature<Tdim> {
  public:
   TriangleQuadrature() : Quadrature<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a triangle element");
-    static_assert(
-      ((Tnquadratures == 1) || (Tnquadratures == 3)),
-        "Invalid number of quadratures");
+    static_assert(((Tnquadratures == 1) || (Tnquadratures == 3)),
+                  "Invalid number of quadratures");
   }
 
   //! Return quadrature points

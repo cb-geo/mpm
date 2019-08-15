@@ -9,8 +9,8 @@
 
 //! Return shape functions of a 3-node Triangle Element at a given local
 //! coordinate, with particle size and deformation gradient
-template<>
-inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(  
+template <>
+inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn( 
     const Eigen::Matrix<double, 2, 1>& xi,
     const Eigen::Matrix<double, 2, 1>& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
@@ -23,7 +23,7 @@ inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(
 
 //! Return gradient of shape functions of a 4-node Triangle Element at a
 //! given local coordinate, with particle size and deformation gradient
-template<>
+template <>
 inline Eigen::MatrixXd mpm::TriangleElement<2, 3>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi,
     const Eigen::Matrix<double, 2, 1>& particle_size,
@@ -72,8 +72,7 @@ inline Eigen::VectorXd mpm::TriangleElement<2, 6>::shapefn(
     const Eigen::Matrix<double, 2, 1>& particle_size,
     const Eigen::Matrix<double, 2, 1>& deformation_gradient) const {
   Eigen::Matrix<double, 6, 1> shapefn;
-  shapefn(0) =
-      (1. - xi(0) - xi(1)) * (1. - 2. * xi(0) - 2. * xi(1));
+  shapefn(0) = (1. - xi(0) - xi(1)) * (1. - 2. * xi(0) - 2. * xi(1));
   shapefn(1) = xi(0) * (2. * xi(0) - 1.);
   shapefn(2) = xi(1) * (2. * xi(1) - 1.);
   shapefn(3) = 4. * xi(0) * (1. - xi(0) - xi(1));
@@ -84,7 +83,7 @@ inline Eigen::VectorXd mpm::TriangleElement<2, 6>::shapefn(
 
 //! Return gradient of shape functions of a 6-node Triangle Element at a
 //! given local coordinate, with particle size and deformation gradient
-template<>
+template <>
 inline Eigen::MatrixXd mpm::TriangleElement<2, 6>::grad_shapefn(
     const Eigen::Matrix<double, 2, 1>& xi,
     const Eigen::Matrix<double, 2, 1>& particle_size,
@@ -127,24 +126,23 @@ inline Eigen::MatrixXd mpm::TriangleElement<2, 6>::unit_cell_coordinates()
 //! Return the degree of element
 //! 3-noded triangle
 template <>
-inline mpm::ElementDegree mpm::TriangleElement<2, 3>::degree() const{
+inline mpm::ElementDegree mpm::TriangleElement<2, 3>::degree() const {
   return mpm::ElementDegree::Linear;
 }
 
 //! Return the degree of element
 //! 6-noded triangle
 template <>
-inline mpm::ElementDegree mpm::TriangleElement<2, 6>::degree() const{
+inline mpm::ElementDegree mpm::TriangleElement<2, 6>::degree() const {
   return mpm::ElementDegree::Quadratic;
 }
 
 //! Return local shape functions of a Triangle Element at a given local
 //! coordinate, with particle size and deformation gradient
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXd
-    mpm::TriangleElement<Tdim, Tnfunctions>::shapefn_local(
-        const VectorDim& xi, const VectorDim& particle_size,
-        const VectorDim& deformation_gradient) const {
+inline Eigen::VectorXd mpm::TriangleElement<Tdim, Tnfunctions>::shapefn_local(
+    const VectorDim& xi, const VectorDim& particle_size,
+    const VectorDim& deformation_gradient) const {
   return this->shapefn(xi, particle_size, deformation_gradient);
 }
 
@@ -159,14 +157,15 @@ inline Eigen::Matrix<double, Tdim, Tdim>
   // Get gradient shape functions
   const Eigen::MatrixXd grad_shapefn =
       mpm::TriangleElement<Tdim, Tnfunctions>::grad_shapefn(
-        xi, particle_size, deformation_gradient);
+          xi, particle_size, deformation_gradient);
 
-  try{
+  try {
     // Check if matrices dimensions are correct
-    if((grad_shapefn.rows() != nodal_coordinates.rows()) || (xi.size() != nodal_coordinates.cols()))
+    if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
+        (xi.size() != nodal_coordinates.cols()))
       throw std::runtime_error(
-        "Jacobian calculation: Incorrect dimension of xi and "
-        "nodal_coordinates");
+          "Jacobian calculation: Incorrect dimension of xi and "
+          "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     return Eigen::Matrix<double, Tdim, Tdim>::Zero();
@@ -180,7 +179,7 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, Tdim>
     mpm::TriangleElement<Tdim, Tnfunctions>::jacobian_local(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
         const VectorDim& particle_size,
         const VectorDim& deformation_gradient) const {
   // Jacobian dx_i/dxi_j
@@ -192,13 +191,13 @@ inline Eigen::Matrix<double, Tdim, Tdim>
 //! coordinate for a real cell
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::vector<Eigen::MatrixXd>
-mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
-  const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-  const VectorDim& particle_size,
-  const VectorDim& deformation_gradient) const {
+    mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
+        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+        const VectorDim& particle_size,
+        const VectorDim& deformation_gradient) const {
   // Get gradient shape functions
   Eigen::MatrixXd grad_sf =
-    this->grad_shapefn(xi, particle_size, deformation_gradient);
+      this->grad_shapefn(xi, particle_size, deformation_gradient);
 
   // B-matrix
   std::vector<Eigen::MatrixXd> bmatrix;
@@ -209,8 +208,8 @@ mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
     if ((grad_sf.rows() != nodal_coordinates.rows()) ||
         (xi.rows() != nodal_coordinates.cols()))
       throw std::runtime_error(
-        "Bmatrix - Jacobian calculation: Incorrect dimension of xi and "
-        "nodal_coordinates");
+          "Bmatrix - Jacobian calculation: Incorrect dimension of xi and "
+          "nodal_coordinates");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     return bmatrix;
@@ -218,7 +217,7 @@ mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
 
   // Jacobian dx_i/dxi_j
   Eigen::Matrix<double, Tdim, Tdim> jacobian =
-    (grad_sf.transpose() * nodal_coordinates);
+      (grad_sf.transpose() * nodal_coordinates);
 
   // Gradient shapefn of the cell
   // dN/dx = [J]^-1 * dN/dxi_j
@@ -238,9 +237,8 @@ mpm::TriangleElement<Tdim, Tnfunctions>::bmatrix(
 
 //! Return ni_nj_matrix of a Triangle Element
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
-    mpm::TriangleElement<Tdim, Tnfunctions>::ni_nj_matrix(
-        const std::vector<VectorDim>& xi_s) const {
+inline Eigen::MatrixXd mpm::TriangleElement<Tdim, Tnfunctions>::ni_nj_matrix(
+    const std::vector<VectorDim>& xi_s) const {
   // Ni Nj matrix
   Eigen::Matrix<double, Tnfunctions, Tnfunctions> ni_nj_matrix;
   ni_nj_matrix.setZero();
@@ -255,11 +253,9 @@ inline Eigen::MatrixXd
 
 //! Return the laplace_matrix of a Triangle Element
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXd
-    mpm::TriangleElement<Tdim, Tnfunctions>::laplace_matrix(
-        const std::vector<VectorDim>& xi_s,
-        const Eigen::MatrixXd& nodal_coordinates) const {
-
+inline Eigen::MatrixXd mpm::TriangleElement<Tdim, Tnfunctions>::laplace_matrix(
+    const std::vector<VectorDim>& xi_s,
+    const Eigen::MatrixXd& nodal_coordinates) const {
   try {
     // Check if matrices dimensions are correct
     if ((this->nfunctions() != nodal_coordinates.rows()) ||
@@ -297,8 +293,8 @@ inline Eigen::MatrixXd
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of shape functions
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::MatrixXi
-    mpm::TriangleElement<Tdim, Tnfunctions>::sides_indices() const {
+inline Eigen::MatrixXi mpm::TriangleElement<Tdim, Tnfunctions>::sides_indices()
+    const {
   Eigen::Matrix<int, 3, 2> indices;
   // clang-format off
   indices << 0, 1,
@@ -311,8 +307,8 @@ inline Eigen::MatrixXi
 
 //! Return the corner indices of a cell to calculate the cell volume
 template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::VectorXi
-    mpm::TriangleElement<Tdim, Tnfunctions>::corner_indices() const {
+inline Eigen::VectorXi mpm::TriangleElement<Tdim, Tnfunctions>::corner_indices()
+    const {
   Eigen::Matrix<int, 3, 1> indices;
   // cppcheck-suppress *
   indices << 0, 1, 2;
