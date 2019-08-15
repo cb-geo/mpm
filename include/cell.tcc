@@ -472,13 +472,12 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   // Check if the transformed coordinate is within the unit cell:
   // between 0 and 1-xi(1-i) if the element is a triangle, and between
   // -1 and 1 if otherwise
-  switch (this->element_->corner_indices().size()) {
-    case 3 : for (unsigned i = 0; i < (*xi).size(); ++i)
+  if (this->element_->corner_indices().size()==3) {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
       if ((*xi)(i) < 0. || (*xi)(i) > 1. - (*xi)(1-i) || std::isnan((*xi)(i))) status = false;
-      break;
-    default: for (unsigned i = 0; i < (*xi).size(); ++i)
+  } else {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
       if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
-      break;
   }
   return status;
 }
