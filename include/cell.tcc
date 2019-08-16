@@ -243,12 +243,13 @@ inline void mpm::Cell<2>::compute_volume() {
       auto node1 = nodes_[indices(1)]->coordinates();
       auto node2 = nodes_[indices(2)]->coordinates();
 
-      // 2 * Area = (x1 * y2 - x2 * y1) - (x0 * y2 - x2 * y0) + (x0 * y1 - x1 *
-      // y0)
+      // Area = 0.5 * [ (x1 * y2 - x2 * y1)
+      //              - (x0 * y2 - x2 * y0)
+      //              + (x0 * y1 - x1 * y0) ]
       volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
                           ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
-                          ((node0(0) * node1(1)) - (node1(0) * node0(1)))) /
-                2.0;
+                          ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
+                0.5;
       // Quadrilateral
     } else if (indices.size() == 4) {
 
@@ -552,11 +553,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
                            (node2(0) - node0(0)) * (node1(1) - node0(1))) /
                           2.0;
 
-      xi(0) = 1 / (2 * area) *
+      xi(0) = 1. / (2. * area) *
               ((point(0) - node0(0)) * (node2(1) - node0(1)) -
                (node2(0) - node0(0)) * (point(1) - node0(1)));
 
-      xi(1) = -1 / (2 * area) *
+      xi(1) = -1. / (2. * area) *
               ((point(0) - node0(0)) * (node1(1) - node0(1)) -
                (node1(0) - node0(0)) * (point(1) - node0(1)));
       // Quadrilateral

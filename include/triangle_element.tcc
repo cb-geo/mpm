@@ -21,7 +21,7 @@ inline Eigen::VectorXd mpm::TriangleElement<2, 3>::shapefn(
   return shapefn;
 }
 
-//! Return gradient of shape functions of a 4-node Triangle Element at a
+//! Return gradient of shape functions of a 3-node Triangle Element at a
 //! given local coordinate, with particle size and deformation gradient
 template <>
 inline Eigen::MatrixXd mpm::TriangleElement<2, 3>::grad_shapefn(
