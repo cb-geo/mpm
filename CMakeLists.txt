@@ -150,6 +150,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/triangle_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/triangle_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )   
