@@ -1463,3 +1463,9 @@ inline std::vector<std::vector<mpm::Index>>
   }
   return set_face_nodes;
 }
+
+//! Return particles vector
+template <unsigned Tdim>
+std::set<mpm::Index> mpm::Cell<Tdim>::particles() {
+  return this->particles_set;
+}

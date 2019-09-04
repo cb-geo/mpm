@@ -107,10 +107,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     partition_graph.collect_partition(mesh_->ncells(), npes, mype, &comm);
 
     //! Delete all the particles which is not in local task parititon
-    for (auto stcl = mesh_->cells_container()->cbegin();
-         stcl != mesh_->cells_container()->cend(); ++stcl) {
-      if (partition_graph.partition[(*stcl)->id()] != mype) {
-        (*stcl)->clear_particle_ids();
+    for (auto stcl = mesh_->return_particle_id()->begin();
+         stcl != mesh_->return_particle_id()->end(); ++stcl) {
+      if (partition_graph.partition[stcl->second] != mype) {
+        mesh_->remove_particle_by_id(stcl->first);
       }
     }
     //! Deletition complete, we have replace chunk function with graph partition

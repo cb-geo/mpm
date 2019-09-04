@@ -356,12 +356,16 @@ bool mpm::Mesh<Tdim>::add_particle(
       // Add only if particle can be located in any cell of the mesh
       if (this->locate_particle_cells(particle)) {
         status = particles_.add(particle, checks);
+        particles_id_set.insert(std::pair<mpm::Index, mpm::Index>(
+            particle->id(), particle->cell_id()));
         map_particles_.insert(particle->id(), particle);
       } else {
         throw std::runtime_error("Particle not found in mesh");
       }
     } else {
       status = particles_.add(particle, checks);
+      particles_id_set.insert(std::pair<mpm::Index, mpm::Index>(
+          particle->id(), particle->cell_id()));
       map_particles_.insert(particle->id(), particle);
     }
     if (!status) throw std::runtime_error("Particle addition failed");
@@ -381,6 +385,16 @@ bool mpm::Mesh<Tdim>::remove_particle(
   map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
+}
+
+//! Remove a particle by id
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
+  bool result = particles_.remove(map_particles_[id]);
+  result = result && map_particles_.remove(id);
+  return result;
 }
 
 //! Locate particles in a cell
@@ -1253,4 +1267,10 @@ void mpm::Mesh<Tdim>::shared_node(idx_t* partition) {
       std::vector<mpm::Index>(cell_pair).swap(cell_pair);
     }
   }
+}
+
+//! return particle_ptr
+template <unsigned Tdim>
+std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::return_particle_id() {
+  return &(this->particles_id_set);
 }

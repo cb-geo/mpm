@@ -289,6 +289,9 @@ class Cell {
   //! Return sorted face node ids
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
+  //! Return particles id
+  std::set<Index> particles();
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -311,6 +314,8 @@ class Cell {
   double mean_length_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
+  //! particles ids in set
+  std::set<Index> particles_set;
   //! Container of node pointers (local id, node pointer)
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates
