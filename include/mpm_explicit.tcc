@@ -141,9 +141,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // mesh_->find_active_nodes();
     });
 
-// #ifdef USE_MPI
-//     if (step_ == 0) mesh_->shared_node(partition_graph.partition);
-// #endif
+    // #ifdef USE_MPI
+    //     if (step_ == 0) mesh_->shared_node(partition_graph.partition);
+    // #endif
 
     // Spawn a task for particles
     task_group.run([&] {
