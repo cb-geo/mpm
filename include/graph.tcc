@@ -17,7 +17,7 @@ mpm::Graph<Tdim>& mpm::Graph<Tdim>::operator=(const Graph& graph) {
   }
 
   //! assign option
-  for (i = 0; i < 10; ++i) {
+  for (i = 0; i < 1; ++i) {
     options[i] = graph.options[i];
   }
   // options = graph.options;
@@ -64,11 +64,8 @@ void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells, int num_threads,
   //! There is only one weight of one vertex
   this->ncon = 1;
 
-  //! Use default value to fill the options[10]
-  this->options[0] = 1;
-  //! Can change the value here
-  this->options[PMV3_OPTION_DBGLVL] = 6;
-  this->options[PMV3_OPTION_SEED] = 1;
+  //! Use default value to fill the options[1]
+  this->options[0] = 0;
 
   long sum = cells_->size();
 

@@ -16,8 +16,6 @@
 
 namespace mpm {
 const int MAXNCON = 1;
-const int PMV3_OPTION_DBGLVL = 1;
-const int PMV3_OPTION_SEED = 2;
 
 //! Base class of graph
 //! \brief Base class that stores the information about graph
@@ -70,7 +68,7 @@ class Graph {
   idx_t ncon;
   idx_t nparts;
   real_t ubvec[MAXNCON];
-  idx_t options[10];
+  idx_t options[1];
   real_t* xyz = nullptr;
   idx_t ndims;
   idx_t edgecut = 0;
