@@ -57,6 +57,13 @@ class Graph {
   //! Get nparts
   idx_t get_nparts();
 
+  //! Get partition
+  idx_t* get_partition();
+
+ private:
+  Container<Cell<Tdim>>* cells_;
+
+  real_t ipc2resit;
   idx_t numflag = 0;
   idx_t wgtflag = 2;
 
@@ -64,20 +71,15 @@ class Graph {
   idx_t nparts;
   real_t ubvec[MAXNCON];
   idx_t options[10];
-  real_t* xyz = NULL;
+  real_t* xyz = nullptr;
   idx_t ndims;
   idx_t edgecut = 0;
-
-  real_t* tpwgts = NULL;
+  
+  real_t* tpwgts = nullptr;
   idx_t* adjwgt; /* Array that stores the weights of the adjacency lists */
   idx_t nvtxs;
-  idx_t* part = NULL;
-  idx_t* partition = NULL;
-
- private:
-  Container<Cell<Tdim>>* cells_;
-
-  real_t ipc2resit;
+  idx_t* part = nullptr;
+  idx_t* partition = nullptr;
 
   idx_t adptf;
   idx_t optype;

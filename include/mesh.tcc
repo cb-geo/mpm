@@ -9,7 +9,7 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
   particles_.clear();
-  graph_ = NULL;
+  graph_ = nullptr;
 }
 
 //! Create nodes from coordinates

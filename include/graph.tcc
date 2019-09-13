@@ -248,16 +248,16 @@ template <unsigned Tdim>
 mpm::Graph<Tdim>::Graph() {
   //! Add something to ameliorate
   //! We can add some more codes here
-  this->adjwgt = NULL;
-  this->xadj = NULL;
-  this->vwgt = NULL;
-  this->nvwgt = NULL;
-  this->vsize = NULL;
-  this->adjncy = NULL;
-  this->vtxdist = NULL;
-  this->home = NULL;
-  this->part = NULL;
-  this->partition = NULL;
+  this->adjwgt = nullptr;
+  this->xadj = nullptr;
+  this->vwgt = nullptr;
+  this->nvwgt = nullptr;
+  this->vsize = nullptr;
+  this->adjncy = nullptr;
+  this->vtxdist = nullptr;
+  this->home = nullptr;
+  this->part = nullptr;
+  this->partition = nullptr;
   this->edgecut = 0;
 }
 
@@ -266,10 +266,16 @@ void mpm::Graph<Tdim>::assign_ndims(idx_t n) {
   this->ndims = n;
 }
 
-//! get_nparts
+//! get nparts
 template <unsigned Tdim>
 idx_t mpm::Graph<Tdim>::get_nparts() {
   return this->nparts;
+}
+
+//! get partition
+template <unsigned Tdim>
+idx_t* mpm::Graph<Tdim>::get_partition(){
+  return this->partition;
 }
 
 //! do the partition

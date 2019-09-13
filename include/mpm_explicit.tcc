@@ -95,9 +95,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     MPI_Comm_size(comm, &npes);
     MPI_Comm_rank(comm, &mype);
 
-    //! Try to use ParMETIS library
+    //! Create graph
     bool graph_creation = mesh_->create_graph(npes, mype);
-    //! Get the graph
+    //! Get graph
     partition_graph = mesh_->graph();
 
     //! Do the partition using ParMETIS function
@@ -109,7 +109,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     //! Delete all the particles which is not in local task parititon
     for (auto stcl = mesh_->return_particle_id()->begin();
          stcl != mesh_->return_particle_id()->end(); ++stcl) {
-      if (partition_graph.partition[stcl->second] != mype) {
+      if (partition_graph.get_partition()[stcl->second] != mype) {
         mesh_->remove_particle_by_id(stcl->first);
       }
     }
