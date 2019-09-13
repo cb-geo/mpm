@@ -274,7 +274,7 @@ idx_t mpm::Graph<Tdim>::get_nparts() {
 
 //! get partition
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_partition(){
+idx_t* mpm::Graph<Tdim>::get_partition() {
   return this->partition;
 }
 

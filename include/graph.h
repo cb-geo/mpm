@@ -74,7 +74,7 @@ class Graph {
   real_t* xyz = nullptr;
   idx_t ndims;
   idx_t edgecut = 0;
-  
+
   real_t* tpwgts = nullptr;
   idx_t* adjwgt; /* Array that stores the weights of the adjacency lists */
   idx_t nvtxs;
