@@ -614,7 +614,7 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
 
   try {
     const auto mesh_props = io_->json_object("mesh");
-    isoparametric = mesh_props["isoparametric"].template get<bool>();
+    isoparametric = mesh_props.at("isoparametric").template get<bool>();
   } catch (std::exception& exception) {
     console_->warn(
         "{} {} Isoparametric status of mesh: {}\n Setting mesh as "
