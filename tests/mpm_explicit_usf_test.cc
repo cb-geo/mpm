@@ -44,14 +44,14 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise materials
-    // REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
-    // REQUIRE(mpm->initialise_mesh() == false);
-    // REQUIRE(mpm->initialise_particles() == false);
+    REQUIRE(mpm->initialise_mesh() == false);
+    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
-    // REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE(mpm->initialise_materials() == false);
   }
 
   SECTION("Check solver") {
