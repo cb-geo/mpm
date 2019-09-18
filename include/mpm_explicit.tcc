@@ -79,6 +79,45 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
   // Check point resume
+
+  //! Create graph and delete particles
+  Graph<Tdim> partition_graph;
+
+#ifdef USE_MPI
+
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    //! Run if there is more than a single MPI task
+    int npes;
+    int mype;
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    MPI_Comm_size(comm, &npes);
+    MPI_Comm_rank(comm, &mype);
+
+    //! Create graph
+    bool graph_creation = mesh_->create_graph(npes, mype);
+    //! Get graph
+    partition_graph = mesh_->graph();
+
+    //! Do the partition using ParMETIS function
+    bool graph_partition = partition_graph.make_partition(&comm);
+
+    //! Collect the partition
+    partition_graph.collect_partition(mesh_->ncells(), npes, mype, &comm);
+
+    //! Delete all the particles which is not in local task parititon
+    for (auto stcl = mesh_->return_particle_id()->begin();
+         stcl != mesh_->return_particle_id()->end(); ++stcl) {
+      if (partition_graph.get_partition()[stcl->second] != mype) {
+        mesh_->remove_particle_by_id(stcl->first);
+      }
+    }
+    //! Deletition complete, we have replace chunk function with graph partition
+    //! function
+  }
+#endif
+
   if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
@@ -101,6 +140,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       // mesh_->find_active_nodes();
     });
+
+    // #ifdef USE_MPI
+    //     if (step_ == 0) mesh_->shared_node(partition_graph.partition);
+    // #endif
 
     // Spawn a task for particles
     task_group.run([&] {

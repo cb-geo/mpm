@@ -24,6 +24,7 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
+#include "graph.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
@@ -124,6 +125,8 @@ class Mesh {
   template <typename Tgetfunctor, typename Tsetfunctor>
   void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
+  //! Create graph from list of cells
+  bool create_graph(int num_threads, int mype);
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
@@ -179,6 +182,9 @@ class Mesh {
   //! \retval insertion_status Return the successful addition of a particle
   bool remove_particle(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+
+  //! Remove a particle by id
+  bool remove_particle_by_id(mpm::Index id);
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
@@ -320,6 +326,18 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Get the graph
+  mpm::Graph<Tdim> graph();
+
+  //! Get the container of cell
+  mpm::Container<Cell<Tdim>>* cells_container();
+
+  //! Collect shared node
+  void shared_node(idx_t* partition);
+
+  //! Return particle_ptr
+  std::map<mpm::Index, mpm::Index>* return_particle_id();
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -334,6 +352,8 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Container of particles id
+  std::map<mpm::Index, mpm::Index> particles_id_set;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
@@ -344,6 +364,8 @@ class Mesh {
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
+  //! Set of active nodes
+  std::set<mpm::Index> active_nodes_id;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Map of cells for fast retrieval
@@ -354,6 +376,12 @@ class Mesh {
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
+  // graph pass the address of the container of cell
+  Graph<Tdim>* graph_;
+  // shared nodes
+  std::map<std::vector<mpm::Index>, std::vector<mpm::Index>> shared_node_cell;
+
 };  // Mesh class
 }  // namespace mpm
 

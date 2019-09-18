@@ -9,6 +9,7 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
   particles_.clear();
+  graph_ = nullptr;
 }
 
 //! Create nodes from coordinates
@@ -87,9 +88,14 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_active_nodes() {
   // Clear existing list of active nodes
   this->active_nodes_.clear();
+  this->active_nodes_id.clear();
 
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      this->active_nodes_id.insert((*nitr)->id());
+    }
+  }
 }
 
 //! Iterate over active nodes
@@ -153,6 +159,28 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
       });
 }
 #endif
+
+//! Create graph from cells lists
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_graph(int num_threads, int mype) {
+  bool status = true;
+  try {
+    // Check if cells in Container is not empty
+    if (this->cells_.size() == 0) {
+      throw std::runtime_error("Container of cells is empty");
+    }
+    //! Create a graph
+    Graph<Tdim> graph;
+    // graph = Graph<Tdim>(&(this->cells_), num_threads);
+    graph.initialize(&(this->cells_), num_threads, mype);
+    graph_ = &graph;
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
 
 //! Create cells from node lists
 template <unsigned Tdim>
@@ -241,6 +269,7 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 
   // Iterate through all unique keys in faces_cells_
+
   for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
        itr = faces_cells_.upper_bound(itr->first)) {
     // Returns a pair representing the range of elements with key
@@ -327,12 +356,16 @@ bool mpm::Mesh<Tdim>::add_particle(
       // Add only if particle can be located in any cell of the mesh
       if (this->locate_particle_cells(particle)) {
         status = particles_.add(particle, checks);
+        particles_id_set.insert(std::pair<mpm::Index, mpm::Index>(
+            particle->id(), particle->cell_id()));
         map_particles_.insert(particle->id(), particle);
       } else {
         throw std::runtime_error("Particle not found in mesh");
       }
     } else {
       status = particles_.add(particle, checks);
+      particles_id_set.insert(std::pair<mpm::Index, mpm::Index>(
+          particle->id(), particle->cell_id()));
       map_particles_.insert(particle->id(), particle);
     }
     if (!status) throw std::runtime_error("Particle addition failed");
@@ -352,6 +385,16 @@ bool mpm::Mesh<Tdim>::remove_particle(
   map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
+}
+
+//! Remove a particle by id
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
+  bool result = particles_.remove(map_particles_[id]);
+  result = result && map_particles_.remove(id);
+  return result;
 }
 
 //! Locate particles in a cell
@@ -1173,4 +1216,61 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
+}
+
+template <unsigned Tdim>
+mpm::Graph<Tdim> mpm::Mesh<Tdim>::graph() {
+  //! return the graph
+  return *(this->graph_);
+}
+
+template <unsigned Tdim>
+mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::cells_container() {
+  return &(this->cells_);
+}
+
+//! Collect shared node
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::shared_node(idx_t* partition) {
+  this->find_active_nodes();
+  auto active_node_id = &(this->active_nodes_id);
+  auto face_cell = &(this->faces_cells_);
+  //! Iterate over the multimap using Iterator
+  for (auto itr = (face_cell)->begin(); itr != (face_cell)->end();
+       itr = (face_cell)->upper_bound(itr->first)) {
+    //! Return a pair representing the range of elements with key
+    if (itr->second == NULL) {
+      break;
+    }
+
+    auto range = (face_cell)->equal_range(itr->first);
+    //！ A face is shared only by 2 cells (distance between the range is 2)
+    bool activation = false;
+    int vectorcount = 0;
+
+    for (vectorcount = 0; vectorcount < (itr->first).size(); vectorcount++) {
+      if ((active_node_id)->count((mpm::Index)itr->first.at(vectorcount))) {
+        activation = true;
+        break;
+      }
+    }
+
+    if (std::distance(range.first, range.second) == 2 &&
+        partition[range.first->second] != partition[range.second->second] &&
+        activation) {
+      std::vector<mpm::Index> cell_pair;
+      cell_pair.push_back(range.first->second);
+      cell_pair.push_back(range.second->second);
+      this->shared_node_cell.insert(
+          std::pair<std::vector<mpm::Index>, std::vector<mpm::Index>>(
+              itr->first, cell_pair));
+      std::vector<mpm::Index>(cell_pair).swap(cell_pair);
+    }
+  }
+}
+
+//! return particle_ptr
+template <unsigned Tdim>
+std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::return_particle_id() {
+  return &(this->particles_id_set);
 }

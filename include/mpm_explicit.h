@@ -1,6 +1,7 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
+#include "graph.h"
 #include "mpm_base.h"
 
 namespace mpm {

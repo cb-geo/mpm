@@ -90,9 +90,27 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
+# METIS
+find_package(METIS REQUIRED)
+if (METIS_FOUND)
+    include_directories(SYSTEM ${METIS_INCLUDE_PATH})
+    link_libraries(${METIS_LIBRARIES})
+else (METIS_FOUND)
+    message (SEND_ERROR "This application cannot compile without METIS")
+endif (METIS_FOUND)
+
+# ParMETIS
+find_package(ParMETIS)
+if (PARMETIS_FOUND)
+  include_directories(${PARMETIS_INCLUDE_DIRS})
+  link_libraries(${PARMETIS_LIBRARIES})
+endif()
+
+
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
+  ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -152,6 +170,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
+    ${mpm_SOURCE_DIR}/tests/graph_test.cc
   )   
   add_executable(mpmtest ${test_src})
   target_link_libraries(mpmtest lmpm)
