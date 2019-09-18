@@ -223,13 +223,35 @@ inline void mpm::Cell<1>::compute_volume() {
 }
 
 //! Compute volume of a 2D cell
-//! Computes the volume of a quadrilateral
+//! Computes the volume of a triangle and a quadrilateral
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
     Eigen::VectorXi indices = element_->corner_indices();
-    // Quadrilateral
-    if (indices.size() == 4) {
+    // Triangle
+    if (indices.size() == 3) {
+
+      //   2 0
+      //     |`\
+      //     |  `\
+      //     |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+
+      // Area = 0.5 * [ (x1 * y2 - x2 * y1)
+      //              - (x0 * y2 - x2 * y0)
+      //              + (x0 * y1 - x1 * y0) ]
+      volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
+                          ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
+                          ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
+                0.5;
+      // Quadrilateral
+    } else if (indices.size() == 4) {
 
       //        b
       // 3 0---------0 2
@@ -450,9 +472,18 @@ inline bool mpm::Cell<Tdim>::is_point_in_cell(
   else
     (*xi) = this->transform_real_to_unit_cell(point);
 
-  // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < (*xi).size(); ++i)
-    if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i))) status = false;
+  // Check if the transformed coordinate is within the unit cell:
+  // between 0 and 1-xi(1-i) if the element is a triangle, and between
+  // -1 and 1 if otherwise
+  if (this->element_->corner_indices().size() == 3) {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
+      if ((*xi)(i) < 0. || (*xi)(i) > 1. - (*xi)(1 - i) || std::isnan((*xi)(i)))
+        status = false;
+  } else {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
+      if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i)))
+        status = false;
+  }
   return status;
 }
 
@@ -502,8 +533,35 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     // Indices of corner nodes
     Eigen::VectorXi indices = element_->corner_indices();
 
-    // Quadrilateral
-    if (indices.size() == 4) {
+    // Triangle
+    if (indices.size() == 3) {
+      //   2 0
+      //     |\
+      //     | \  
+      //   c |  \ b
+      //     |   \
+      //     |    \
+      //   0 0-----0 1
+      //        a
+      //
+
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+
+      const double area = ((node1(0) - node0(0)) * (node2(1) - node0(1)) -
+                           (node2(0) - node0(0)) * (node1(1) - node0(1))) /
+                          2.0;
+
+      xi(0) = 1. / (2. * area) *
+              ((point(0) - node0(0)) * (node2(1) - node0(1)) -
+               (node2(0) - node0(0)) * (point(1) - node0(1)));
+
+      xi(1) = -1. / (2. * area) *
+              ((point(0) - node0(0)) * (node1(1) - node0(1)) -
+               (node1(0) - node0(0)) * (point(1) - node0(1)));
+      // Quadrilateral
+    } else if (indices.size() == 4) {
       //        b
       // 3 0--------0 2
       //   | \   / |
@@ -1199,6 +1257,7 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pvolume) {
+
   for (unsigned i = 0; i < shapefn.size(); ++i) {
     nodes_[i]->update_volume(true, phase, shapefn(i) * pvolume);
   }
@@ -1209,7 +1268,6 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
     const Eigen::VectorXd& pvelocity) {
-
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
     nodes_[i]->update_mass(true, phase, shapefn(i) * pmass);
     nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);

@@ -39,7 +39,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Pressure smoothing
   if (analysis_.find("pressure_smoothing") != analysis_.end())
-    pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
+    pressure_smoothing_ =
+        analysis_.at("pressure_smoothing").template get<bool>();
 
   // Initialise material
   bool mat_status = this->initialise_materials();
@@ -58,7 +59,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   auto particle_props = io_->json_object("particle");
   // Material id
   const auto material_id =
-      particle_props["material_id"].template get<unsigned>();
+      particle_props.at("material_id").template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);

@@ -52,7 +52,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 4>::unit_cell_coordinates()
   unit_cell << -1., -1.,
                 1., -1.,
                 1.,  1.,
-  // cppcheck-suppress *
+    // cppcheck-suppress *
                -1.,  1.;
   // clang-format on
   return unit_cell;
