@@ -7,6 +7,7 @@
 
 #include "geometry.h"
 #include "node.h"
+#include "functions/function_base.h"
 
 // Check node class for 1D case
 TEST_CASE("Node is checked for 1D case", "[node][1D]") {
@@ -166,26 +167,29 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, bad_phase, force) == false);
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // concentrated force
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
-        // Check traction
+        // Check external force
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+        double current_time = 0.0;
+        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -193,14 +197,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -295,7 +299,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->assign_friction_constraint(-1, 1., 0.5) == false);
       REQUIRE(node->assign_friction_constraint(3, 1., 0.5) == false);
       // Test acceleration with constraints
-      acceleration[1] = 0.5 * acceleration[1];
+      acceleration[0] = 0.5 * acceleration[0];
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
@@ -620,26 +624,29 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, 1, force_bad) == false);
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // Concentrated force
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
         // Check traction
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+        double current_time = 0.0;
+        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -647,14 +654,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1154,26 +1161,29 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // Concentrated froce
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
-        // Check traction
+        // Check external force
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
-
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+        double current_time = 0.0;
+        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
+       
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1181,14 +1191,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
