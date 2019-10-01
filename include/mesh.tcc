@@ -1174,3 +1174,60 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
   }
   return status;
 }
+
+//! Create map of container of remove steps
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::create_remove_step(const mpm::Index rstep,
+                                         const unsigned set_id) {
+  //! Initialse the set of particle sets ids
+  std::vector<unsigned> sids;
+  // Get the current remove step existing at "rstep"
+  if (remove_steps_.find(rstep) != remove_steps_.end()) {
+    // Get the set of particle sets ids
+    sids = remove_steps_.at(rstep);
+    // Delete the remove step existing at "rstep"
+    remove_steps_.erase(rstep);
+  }
+  // Add set id of particle set into the vector
+  sids.insert(sids.end(), set_id);
+  // Update the current remove step existing at "rstep"
+  remove_steps_.insert(
+      std::pair<mpm::Index, std::vector<unsigned>>(rstep, sids));
+}
+
+//! Apply remove step
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::apply_remove_step(const mpm::Index rstep) {
+  bool status = false;
+  if (remove_steps_.find(rstep) != remove_steps_.end()) {
+    try {
+      // Iterate over each particle sets in the remove step
+      for (auto sid : remove_steps_.at(rstep)) {
+        // Iterate over each particles in the set
+        for (auto particle = particle_sets_.at(sid).cbegin();
+             particle != particle_sets_.at(sid).cend(); particle++) {
+          // Remove particle from the mesh
+          status = this->remove_particle(*particle);
+          if (!status) throw std::runtime_error("Removing particle is invalid");
+        }
+      }
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+      status = false;
+    }
+  }
+  return status;
+}
+
+//! Resume remove particles
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::resume_remove_particles(const mpm::Index resume_step) {
+  bool status = false;
+  // Iterate over each remove steps
+  for (auto rstep : remove_steps_) {
+    // Check remove steps before resume step
+    if (rstep.first <= resume_step)
+      status = this->apply_remove_step(rstep.first);
+  }
+  return status;
+}
