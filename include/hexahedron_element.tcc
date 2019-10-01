@@ -87,6 +87,7 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 8>::unit_cell_coordinates()
                -1., -1.,  1.,
                 1., -1.,  1.,
                 1.,  1.,  1.,
+    // cppcheck-suppress *
                -1.,  1.,  1.;
   // clang-format on
   return unit_cell;
@@ -445,6 +446,7 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::unit_cell_coordinates()
                 0., -1.,  1.,
                -1.,  0.,  1.,
                 1.,  0.,  1.,
+    // cppcheck-suppress *
                 0.,  1.,  1.;
   // clang-format on
   return unit_cell;
@@ -496,6 +498,7 @@ inline Eigen::MatrixXi
              0, 4,
              1, 5,
              2, 6,
+    // cppcheck-suppress *
              3, 7;
   // clang-format on
   return indices;
@@ -509,6 +512,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::HexahedronElement<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 8, 1> indices;
+  // cppcheck-suppress *
   indices << 0, 1, 2, 3, 4, 5, 6, 7;
   return indices;
 }
@@ -533,6 +537,7 @@ inline Eigen::MatrixXi
              7, 4, 0,
              7, 0, 3,
              3, 0, 1,
+    // cppcheck-suppress *
              3, 1, 2;
   //clang-format on
   return indices;
@@ -566,7 +571,7 @@ inline Eigen::VectorXi
   // clang-format off
   const std::map<unsigned, Eigen::Matrix<int, 8, 1>> face_indices_hexahedron{
       {0, (Eigen::Matrix<int, 8, 1>() << 0, 1, 5, 4,  8, 12, 16, 10).finished()},
-      {1, (Eigen::Matrix<int, 8, 1>() << 5, 1, 2, 0, 12, 11, 14, 18).finished()},
+      {1, (Eigen::Matrix<int, 8, 1>() << 5, 1, 2, 6, 12, 11, 14, 18).finished()},
       {2, (Eigen::Matrix<int, 8, 1>() << 7, 6, 2, 3, 19, 14, 13, 15).finished()},
       {3, (Eigen::Matrix<int, 8, 1>() << 0, 4, 7, 3, 10, 17, 15,  9).finished()},
       {4, (Eigen::Matrix<int, 8, 1>() << 1, 0, 3, 2,  8,  9, 13, 11).finished()},
