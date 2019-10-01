@@ -132,6 +132,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
@@ -149,6 +150,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/quadrilateral_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/quadrilateral_quadrature_test.cc    
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/triangle_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/triangle_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )   

@@ -141,7 +141,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
@@ -227,7 +227,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
@@ -322,7 +322,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
@@ -498,7 +498,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
@@ -601,7 +601,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 
@@ -712,7 +712,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(material);
+    particle->assign_material(phase, material);
     particle->compute_shapefn();
     particle->compute_strain(phase, dt);
 

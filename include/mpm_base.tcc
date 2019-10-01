@@ -186,6 +186,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
 
+    // Compute cell neighbours
+    mesh_->compute_cell_neighbours();
+
     auto cells_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read cells: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -476,6 +479,8 @@ bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
+  // Set phase to zero
+  unsigned phase = 0;
   // Assign material to particle sets
   try {
     // Get particle properties
@@ -492,7 +497,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
+                            std::placeholders::_1, phase, set_material));
       }
     }
     status = true;
@@ -528,6 +533,11 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
             .string();
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
+
+    // Clear all particle ids
+    mesh_->iterate_over_cells(
+        std::bind(&mpm::Cell<Tdim>::clear_particle_ids, std::placeholders::_1));
+
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
 
@@ -604,7 +614,7 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
 
   try {
     const auto mesh_props = io_->json_object("mesh");
-    isoparametric = mesh_props["isoparametric"].template get<bool>();
+    isoparametric = mesh_props.at("isoparametric").template get<bool>();
   } catch (std::exception& exception) {
     console_->warn(
         "{} {} Isoparametric status of mesh: {}\n Setting mesh as "

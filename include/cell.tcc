@@ -177,16 +177,15 @@ std::vector<std::array<mpm::Index, 2>> mpm::Cell<Tdim>::side_node_pairs()
 
 //! Add a neighbour cell and return the status of addition of a node
 template <unsigned Tdim>
-bool mpm::Cell<Tdim>::add_neighbour(
-    unsigned local_id, const std::shared_ptr<mpm::Cell<Tdim>>& cell_ptr) {
+bool mpm::Cell<Tdim>::add_neighbour(mpm::Index neighbour_id) {
   bool insertion_status = false;
   try {
-    // If number of cell ptrs id is not the current cell id
-    if (cell_ptr->id() != this->id()) {
-      insertion_status = neighbour_cells_.insert(local_id, cell_ptr);
-    } else {
+    // If cell id is not the same as the current cell
+    if (neighbour_id != this->id())
+      insertion_status = (neighbours_.insert(neighbour_id)).second;
+    else
       throw std::runtime_error("Invalid local id of a cell neighbour");
-    }
+
   } catch (std::exception& exception) {
     console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -224,13 +223,35 @@ inline void mpm::Cell<1>::compute_volume() {
 }
 
 //! Compute volume of a 2D cell
-//! Computes the volume of a quadrilateral
+//! Computes the volume of a triangle and a quadrilateral
 template <>
 inline void mpm::Cell<2>::compute_volume() {
   try {
     Eigen::VectorXi indices = element_->corner_indices();
-    // Quadrilateral
-    if (indices.size() == 4) {
+    // Triangle
+    if (indices.size() == 3) {
+
+      //   2 0
+      //     |`\
+      //     |  `\
+      //     |    `\
+      //     |      `\
+      //     |        `\
+      //   0 0----------0 1
+      //
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+
+      // Area = 0.5 * [ (x1 * y2 - x2 * y1)
+      //              - (x0 * y2 - x2 * y0)
+      //              + (x0 * y1 - x1 * y0) ]
+      volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
+                          ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
+                          ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
+                0.5;
+      // Quadrilateral
+    } else if (indices.size() == 4) {
 
       //        b
       // 3 0---------0 2
@@ -434,20 +455,35 @@ inline bool mpm::Cell<Tdim>::approx_point_in_cell(
 //! Check if a point is in a cell by affine transformation and newton-raphson
 template <unsigned Tdim>
 inline bool mpm::Cell<Tdim>::is_point_in_cell(
-    const Eigen::Matrix<double, Tdim, 1>& point) {
+    const Eigen::Matrix<double, Tdim, 1>& point,
+    Eigen::Matrix<double, Tdim, 1>* xi) {
+
+  // Set an initial value of Xi
+  (*xi).fill(std::numeric_limits<double>::max());
 
   // Check if point is approximately in the cell
   if (!this->approx_point_in_cell(point)) return false;
 
-  // Check if cell is cartesian, if so use cartesian checker
-  if (!isoparametric_) return mpm::Cell<Tdim>::point_in_cartesian_cell(point);
-
   bool status = true;
-  // Get local coordinates
-  Eigen::Matrix<double, Tdim, 1> xi = this->transform_real_to_unit_cell(point);
-  // Check if the transformed coordinate is within the unit cell (-1, 1)
-  for (unsigned i = 0; i < xi.size(); ++i)
-    if (xi(i) < -1. || xi(i) > 1. || std::isnan(xi(i))) status = false;
+
+  // Check if cell is cartesian, if so use cartesian local coordinates
+  if (!isoparametric_) (*xi) = this->local_coordinates_point(point);
+  // Isoparametric element
+  else
+    (*xi) = this->transform_real_to_unit_cell(point);
+
+  // Check if the transformed coordinate is within the unit cell:
+  // between 0 and 1-xi(1-i) if the element is a triangle, and between
+  // -1 and 1 if otherwise
+  if (this->element_->corner_indices().size() == 3) {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
+      if ((*xi)(i) < 0. || (*xi)(i) > 1. - (*xi)(1 - i) || std::isnan((*xi)(i)))
+        status = false;
+  } else {
+    for (unsigned i = 0; i < (*xi).size(); ++i)
+      if ((*xi)(i) < -1. || (*xi)(i) > 1. || std::isnan((*xi)(i)))
+        status = false;
+  }
   return status;
 }
 
@@ -497,8 +533,35 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     // Indices of corner nodes
     Eigen::VectorXi indices = element_->corner_indices();
 
-    // Quadrilateral
-    if (indices.size() == 4) {
+    // Triangle
+    if (indices.size() == 3) {
+      //   2 0
+      //     |\
+      //     | \  
+      //   c |  \ b
+      //     |   \
+      //     |    \
+      //   0 0-----0 1
+      //        a
+      //
+
+      auto node0 = nodes_[indices(0)]->coordinates();
+      auto node1 = nodes_[indices(1)]->coordinates();
+      auto node2 = nodes_[indices(2)]->coordinates();
+
+      const double area = ((node1(0) - node0(0)) * (node2(1) - node0(1)) -
+                           (node2(0) - node0(0)) * (node1(1) - node0(1))) /
+                          2.0;
+
+      xi(0) = 1. / (2. * area) *
+              ((point(0) - node0(0)) * (node2(1) - node0(1)) -
+               (node2(0) - node0(0)) * (point(1) - node0(1)));
+
+      xi(1) = -1. / (2. * area) *
+              ((point(0) - node0(0)) * (node1(1) - node0(1)) -
+               (node1(0) - node0(0)) * (point(1) - node0(1)));
+      // Quadrilateral
+    } else if (indices.size() == 4) {
       //        b
       // 3 0--------0 2
       //   | \   / |
@@ -725,12 +788,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
     xi(0) = u1;
     xi(1) = u2;
-    console_->info("Generic solution: ({}, {})", xi(0), xi(1));
     return xi;
   } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
     xi(0) = v1;
     xi(1) = v2;
-    console_->info("Generic solution: ({}, {})", xi(0), xi(1));
     return xi;
   }
 
@@ -738,16 +799,13 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   if (a4 == 0 && b4 == 0) {
     xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
     xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
-    console_->info("Case 1: ({}, {})", xi(0), xi(1));
   } else if (a4 == 0 && b4 != 0) {  // Case 2: Eq 11
     if (a2 == 0 && a3 != 0) {       // Case 2.1 Eq 12
       xi(1) = c1 / a3;
       xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
-      console_->info("Case 2.1: ({}, {})", xi(0), xi(1));
     } else if (a2 != 0 && a3 == 0) {  // Case 2.2 Eq 13
       xi(0) = c1 / a2;
       xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
-      console_->info("Case 2.2: ({}, {})", xi(0), xi(1));
     } else {  // a2 != 0 && a3 != 0 // Case 2.3 Eq 14
       const double aa = b4 * a3 / a2;
       const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
@@ -761,22 +819,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
         xi(0) = u1;
         xi(1) = u2;
-        console_->info("Case 2.3a: ({}, {})", xi(0), xi(1));
       } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
         xi(0) = v1;
         xi(1) = v2;
-        console_->info("Case 2.3b: ({}, {})", xi(0), xi(1));
       }
     }
   } else if (a4 != 0 && b4 == 0) {  // Case 3 Eq 16
     if (b2 == 0 && b3 != 0) {       // Case 3.1 Eq 17
       xi(1) = c2 / b3;
       xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
-      console_->info("Case 3.1: ({}, {})", xi(0), xi(1));
     } else if (b2 != 0 && b3 == 0) {  // Case 3.2 Eq 18
       xi(0) = c2 / b2;
       xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
-      console_->info("Case 3.2: ({}, {})", xi(0), xi(1));
     } else {  // b2 != 0 && b3 != 0  // Case 3.3 Eq 19
       const double aa = a4 * b3 / b2;
       const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
@@ -790,11 +844,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
         xi(0) = u1;
         xi(1) = u2;
-        console_->info("Case 3.3a: ({}, {})", xi(0), xi(1));
       } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
         xi(0) = v1;
         xi(1) = v2;
-        console_->info("Case 3.3b: ({}, {})", xi(0), xi(1));
       }
     }
   } else {  // a4 != 0 && b4 != 0   // Case 4 Eq 21
@@ -810,7 +862,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     if ((a2s - b2s) == 0) {  // Case 4.1 Eq 25
       xi(1) = (c1s - c2s) / (a3s - b3s);
       xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
-      console_->info("Case 4.1: ({}, {})", xi(0), xi(1));
     } else {
       const double alpha = (c1s - c2s) / (a2s - b2s);
       const double beta = (a3s - b3s) / (a2s - b2s);
@@ -818,7 +869,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
       if (beta == 0) {  // Case 4.2a Eq 28
         xi(0) = alpha;
         xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
-        console_->info("Case 4.2a: ({}, {})", xi(0), xi(1));
       } else {  // Case 4.2b Eq 29
         // There are two possible solutions
         const double u2 =
@@ -837,11 +887,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
         if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
           xi(0) = u1;
           xi(1) = u2;
-          console_->info("Case 4.3a: ({}, {})", xi(0), xi(1));
         } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
           xi(0) = v1;
           xi(1) = v2;
-          console_->info("Case 4.3b: ({}, {})", xi(0), xi(1));
         }
       }
     }
@@ -1033,10 +1081,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
       }
     }
     // Convergence criteria
-    if ((step_length * delta).norm() < Tolerance) {
-      console_->info("NR solution is successful");
-      break;
-    }
+    if ((step_length * delta).norm() < Tolerance) break;
+
     // Check for nan and set to a trial xi
     if (std::isnan(xi(0)) || std::isnan(xi(1))) xi.setZero();
   }
@@ -1211,6 +1257,7 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pvolume) {
+
   for (unsigned i = 0; i < shapefn.size(); ++i) {
     nodes_[i]->update_volume(true, phase, shapefn(i) * pvolume);
   }
@@ -1221,7 +1268,6 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
     const Eigen::VectorXd& pvelocity) {
-
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
     nodes_[i]->update_mass(true, phase, shapefn(i) * pmass);
     nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);
@@ -1235,7 +1281,7 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
                                             double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
-    nodes_[i]->update_pressure(true, phase, shapefn(i) * pmass * ppressure);
+    nodes_[i]->update_mass_pressure(phase, shapefn(i) * pmass * ppressure);
 }
 
 //! Compute nodal momentum from particle mass and velocity for a given phase
@@ -1453,4 +1499,25 @@ inline void mpm::Cell<3>::compute_normals() {
     face_normals_.insert(std::make_pair<unsigned, Eigen::VectorXd>(
         static_cast<unsigned>(face_id), normal_vector));
   }
+}
+
+//! Return a sorted list of face node ids
+template <unsigned Tdim>
+inline std::vector<std::vector<mpm::Index>>
+    mpm::Cell<Tdim>::sorted_face_node_ids() {
+  std::vector<std::vector<mpm::Index>> set_face_nodes;
+  //! Set number of faces from element
+  for (unsigned face_id = 0; face_id < element_->nfaces(); ++face_id) {
+    std::vector<mpm::Index> face_nodes;
+
+    // Get the nodes of the face
+    const Eigen::VectorXi indices = element_->face_indices(face_id);
+    for (int id = 0; id < indices.size(); ++id)
+      face_nodes.emplace_back(nodes_[indices(id)]->id());
+
+    // Sort in ascending order
+    std::sort(face_nodes.begin(), face_nodes.end());
+    set_face_nodes.emplace_back(face_nodes);
+  }
+  return set_face_nodes;
 }

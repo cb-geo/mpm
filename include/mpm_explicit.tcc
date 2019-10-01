@@ -39,7 +39,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Pressure smoothing
   if (analysis_.find("pressure_smoothing") != analysis_.end())
-    pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
+    pressure_smoothing_ =
+        analysis_.at("pressure_smoothing").template get<bool>();
 
   // Initialise material
   bool mat_status = this->initialise_materials();
@@ -58,7 +59,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   auto particle_props = io_->json_object("particle");
   // Material id
   const auto material_id =
-      particle_props["material_id"].template get<unsigned>();
+      particle_props.at("material_id").template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);
@@ -66,7 +67,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Iterate over each particle to assign material
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, material));
+                std::placeholders::_1, phase, material));
 
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
@@ -166,9 +167,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           mesh_->allreduce_nodal_scalar_property(
               std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
                         phase),
-              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
-                        std::placeholders::_1, false, phase,
-                        std::placeholders::_2));
+              std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
+                        std::placeholders::_1, phase, std::placeholders::_2));
         }
 #endif
 
@@ -273,9 +273,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           mesh_->allreduce_nodal_scalar_property(
               std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
                         phase),
-              std::bind(&mpm::NodeBase<Tdim>::update_pressure,
-                        std::placeholders::_1, false, phase,
-                        std::placeholders::_2));
+              std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
+                        std::placeholders::_1, phase, std::placeholders::_2));
         }
 #endif
 
