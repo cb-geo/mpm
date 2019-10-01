@@ -4,7 +4,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "mpm_explicit.h"
+#include "solvers/mpm_explicit.h"
 #include "write_mesh_particles_unitcell.h"
 
 // Check MPM Explicit USF
@@ -44,6 +44,9 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
 
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
+
+    // Initialise external loading
+    REQUIRE(mpm->initialise_loads() == true);
 
     // Reinitialise mesh
     REQUIRE(mpm->initialise_mesh() == false);
