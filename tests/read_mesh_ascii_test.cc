@@ -329,12 +329,12 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
       // Try to read constrtaints from a non-existant file
       auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
+          read_mesh->read_tractions("tractions-missing.txt");
       // Check number of tractions
       REQUIRE(tractions.size() == 0);
 
       // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-2d.txt");
+      tractions = read_mesh->read_tractions("tractions-2d.txt");
       // Check number of particles
       REQUIRE(tractions.size() == particles_tractions.size());
 
@@ -768,12 +768,12 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
       // Try to read constraints from a non-existant file
       auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
+          read_mesh->read_tractions("tractions-missing.txt");
       // Check number of tractions
       REQUIRE(tractions.size() == 0);
 
       // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-3d.txt");
+      tractions = read_mesh->read_tractions("tractions-3d.txt");
       // Check number of particles
       REQUIRE(tractions.size() == particles_tractions.size());
 
