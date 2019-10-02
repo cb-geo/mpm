@@ -47,9 +47,32 @@ dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc
 Please run the following commands to install dependencies:
 
 ```
-sudo apt-get install -y cmake gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
-                        libtbb-dev libvtk7-dev
+sudo apt-get install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
+                        libtbb-dev
 
+```
+
+To install other dependencies:
+> CMake 3.15
+```
+sudo apt-get install software-properties-common
+sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+sudo apt update
+sudo apt upgrade
+```
+
+> OpenGL and X11:Xt
+```
+sudo apt-get install freeglut3-dev libxt-dev
+```
+
+> VTK
+```
+git clone git://vtk.org/VTK.git VTK
+cd VTK && mkdir build && cd build/
+cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
+make -j
+sudo make install
 ```
 
 ## Compile
