@@ -481,29 +481,35 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
   // Set phase to zero
   unsigned phase = 0;
-  // Assign material to particle sets
-  try {
-    // Get particle properties
-    auto particle_props = io_->json_object("particle");
-    // Get particle sets properties
-    auto particle_sets = particle_props["particle_sets"];
-    // Assign material to each particle sets
-    for (const auto& psets : particle_sets) {
-      // Get set material from list of materials
-      auto set_material = materials_.at(psets["material_id"]);
-      // Get sets ids
-      std::vector<unsigned> sids = psets["set_id"];
-      // Assign material to particles in the specific sets
-      for (const auto& sitr : sids) {
+  // Get particle sets properties
+  auto particle_sets = io_->json_object("particle")["particle_sets"];
+  // Iterate over each particle sets
+  for (const auto& psets : particle_sets) {
+    try {
+      // Assign material to each particle sets
+      if (psets["initialise_material"]) {
+        // Get set material from list of materials
+        auto set_material = materials_.at(psets["material_id"]);
+        // Assign material to particles in the specific sets
         mesh_->iterate_over_particle_set(
-            sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, phase, set_material));
+            psets["set_id"],
+            std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                      std::placeholders::_1, phase, set_material));
       }
+    } catch (std::exception& exception) {
+      status = false;
+      console_->error("#{}: Particle sets initialise material: {}", __LINE__,
+                      exception.what());
     }
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("#{}: Particle sets material: {}", __LINE__,
-                    exception.what());
+    // Creat map of remove step
+    try {
+      if (psets["remove"])
+        mesh_->create_remove_step(psets["rstep"], psets["set_id"]);
+    } catch (std::exception& exception) {
+      status = false;
+      console_->error("#{}: Particle sets remove step: {}", __LINE__,
+                      exception.what());
+    }
   }
   return status;
 }
@@ -531,8 +537,12 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     auto particles_file =
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
+
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
+
+    // Resume remove steps
+    bool resume_rstep = mesh_->resume_remove_particles(step_);
 
     // Clear all particle ids
     mesh_->iterate_over_cells(

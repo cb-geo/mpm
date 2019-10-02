@@ -88,6 +88,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
+    // Apply remove step
+    bool remove_status = mesh_->apply_remove_step(step_);
+
     // Create a TBB task group
     tbb::task_group task_group;
 
