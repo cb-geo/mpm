@@ -1139,8 +1139,8 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
   // Affine transformation, using linear interpolation for the initial guess
   // Affine guess of xi
-  Eigen::Matrix<double, 3, 1> affine_guess;
-  affine_guess.setZero();
+  Eigen::Matrix<double, 3, 1> affine_xi;
+  affine_xi.setZero();
 
   // Boolean to check if affine is nan
   bool affine_nan = false;
@@ -1168,11 +1168,11 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
     // Affine transform: A^-1 * b
     // const Eigen::Matrix<double, 3, 1>
-    affine_guess = A.inverse() * b;
+    affine_xi = A.inverse() * b;
 
     // Check for nan
-    for (unsigned i = 0; i < affine_guess.size(); ++i)
-      if (std::isnan(affine_guess(i))) affine_nan = true;
+    for (unsigned i = 0; i < affine_xi.size(); ++i)
+      if (std::isnan(affine_xi(i))) affine_nan = true;
 
     // Set xi to affine guess
     if (!affine_nan) {
@@ -1185,7 +1185,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
 
       // Early exit
       if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
-        return affine_guess;
+        return affine_xi;
     }
   }
 
@@ -1197,7 +1197,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   const double Tolerance = 1.0E-10;
 
   // Trial initial guess for NR
-  Eigen::Matrix<double, 3, 1> nr_xi = affine_guess;
+  Eigen::Matrix<double, 3, 1> nr_xi = affine_xi;
   // Check if the first trial xi is just outside the box
   for (unsigned i = 0; i < nr_xi.size(); ++i) {
     if (nr_xi(i) < -1. && nr_xi(i) > -1.001)
@@ -1264,7 +1264,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   }
 
   // At end of iteration return affine or xi based on lowest norm
-  xi = (affine_residual.norm() < nr_residual.norm()) ? affine_guess : nr_xi;
+  xi = (affine_residual.norm() < nr_residual.norm()) ? affine_xi : nr_xi;
   if (std::isnan(xi(0)) || std::isnan(xi(1)) || std::isnan(xi(2)))
     throw std::runtime_error("Local coordinates of xi is NAN");
 
