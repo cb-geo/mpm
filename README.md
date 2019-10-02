@@ -168,3 +168,7 @@ For example to run the code on 4 compute nodes (MPI tasks):
 mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 ```
 
+
+## Citation
+
+Kumar, K., Salmond, J., Kularathna, S., Wilkes, C., Tjung, E., Biscontin, G., & Soga, K. (2019). Scalable and modular material point method for large scale simulations. 2nd International Conference on the Material Point Method. Cambridge, UK.

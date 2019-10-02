@@ -15,7 +15,6 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
     properties_ = material_properties;
     // Set elastic tensor
     this->compute_elastic_tensor();
-    console_->error("Material error: {}\n", __LINE__);
   } catch (Json::exception& except) {
     console_->error("Material parameter not set: {} {}\n", except.what(),
                     except.id);
