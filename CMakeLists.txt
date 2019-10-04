@@ -94,6 +94,8 @@ endif()
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
   ${mpm_SOURCE_DIR}/include/elements/
+  ${mpm_SOURCE_DIR}/include/elements/2d
+  ${mpm_SOURCE_DIR}/include/elements/3d
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
