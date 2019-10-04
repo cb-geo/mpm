@@ -94,15 +94,13 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
-  // Matrix of nodal coordinates
-  Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(Tdim, indices.size());
 
-  for (unsigned j = 0; j < indices.size(); ++j)
-    nodal_coords.col(j) = nodes_[indices(j)]->coordinates();
+  // Matrix of nodal coordinates
+  const Eigen::MatrixXd nodal_coords = nodal_coordinates_.transpose();
 
   // Zeros
-  Eigen::Matrix<double, Tdim, 1> zeros = Eigen::Matrix<double, Tdim, 1>::Zero();
+  const Eigen::Matrix<double, Tdim, 1> zeros =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
 
   // Get local coordinates of gauss points and transform to global
   for (unsigned i = 0; i < quadratures.cols(); ++i) {
@@ -688,14 +686,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
 
   // Matrix of nodal coordinates
-  Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(2, indices.size());
-  for (unsigned j = 0; j < indices.size(); ++j) {
-    Eigen::Matrix<double, 2, 1> node = nodes_[indices(j)]->coordinates();
-    for (unsigned i = 0; i < 2; ++i) {
-      nodal_coords(i, j) = node[i];
-    }
-  }
+  const Eigen::MatrixXd nodal_coords = nodal_coordinates_.transpose();
 
   // Analytical xi
   Eigen::Matrix<double, 2, 1> analytical_xi;
@@ -884,14 +875,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
   Eigen::VectorXi indices = element_->corner_indices();
 
   // Matrix of nodal coordinates
-  Eigen::MatrixXd nodal_coords;
-  nodal_coords.resize(3, indices.size());
-  for (unsigned j = 0; j < indices.size(); ++j) {
-    Eigen::Matrix<double, 3, 1> node = nodes_[indices(j)]->coordinates();
-    for (unsigned i = 0; i < 3; ++i) {
-      nodal_coords(i, j) = node[i];
-    }
-  }
+  const Eigen::MatrixXd nodal_coords = nodal_coordinates_.transpose();
 
   // Affine transformation, using linear interpolation for the initial guess
   // Affine guess of xi
