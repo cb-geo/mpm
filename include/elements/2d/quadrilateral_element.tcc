@@ -510,6 +510,48 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
   }
 }
 
+//! Compute volume
+//! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+//! \retval volume Return the volume of cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline double mpm::QuadrilateralElement<Tdim, Tnfunctions>::compute_volume(
+  const Eigen::MatrixXd& nodal_coordinates) const {
+  //        b
+  // 3 0---------0 2
+  //   | \   q / |
+  // a |   \  /  | c
+  //   |   p \   |
+  //   |  /    \ |
+  // 0 0---------0 1
+  //         d
+  const double a = (nodal_coordinates.row(0) -
+                    nodal_coordinates.row(3))
+    .norm();
+  const double b = (nodal_coordinates.row(2) -
+                    nodal_coordinates.row(3))
+    .norm();
+  const double c = (nodal_coordinates.row(1) -
+                    nodal_coordinates.row(2))
+    .norm();
+  const double d = (nodal_coordinates.row(0) -
+                    nodal_coordinates.row(1))
+    .norm();
+  const double p = (nodal_coordinates.row(0) -
+                    nodal_coordinates.row(2))
+    .norm();
+  const double q = (nodal_coordinates.row(1) -
+                    nodal_coordinates.row(3))
+    .norm();
+
+  // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
+  double volume =
+    0.25 * std::sqrt(4 * p * p * q * q -
+                     std::pow((a * a + c * c - b * b - d * d), 2.0));
+
+  return volume;
+}
+
+
 
 //! Compute natural coordinates of a point (analytical)
 template <>
@@ -522,7 +564,6 @@ inline bool mpm::QuadrilateralElement<2, 8>::isvalid_natural_coordinates_analyti
 //! Compute natural coordinates of a point (analytical)
 template <>
 inline bool mpm::QuadrilateralElement<2, 9>::isvalid_natural_coordinates_analytical() const { return false; }
-
 
 //! Compute Natural coordinates of a point (analytical)
 //! Analytical solution based on A consistent point-searching algorithm for

@@ -602,6 +602,50 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
   }
 }
 
+//! Compute volume
+//! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+//! \retval volume Return the volume of cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline double mpm::HexahedronElement<Tdim, Tnfunctions>::compute_volume(
+    const Eigen::MatrixXd& nodal_coordinates) const {
+  // Node numbering as read in by mesh file
+  //        d               c
+  //          *_ _ _ _ _ _*
+  //         /|           /|
+  //        / |          / |
+  //     a *_ |_ _ _ _ _* b|
+  //       |  |         |  |
+  //       |  |         |  |
+  //       |  *_ _ _ _ _|_ *
+  //       | / h        | / g
+  //       |/           |/
+  //       *_ _ _ _ _ _ *
+  //     e               f
+  //
+  // Calculation of hexahedron volume from
+  // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
+
+  const Eigen::Matrix<double, Tdim, 1> a = nodal_coordinates.row(7);
+  const Eigen::Matrix<double, Tdim, 1> b = nodal_coordinates.row(6);
+  const Eigen::Matrix<double, Tdim, 1> c = nodal_coordinates.row(2);
+  const Eigen::Matrix<double, Tdim, 1> d = nodal_coordinates.row(3);
+  const Eigen::Matrix<double, Tdim, 1> e = nodal_coordinates.row(4);
+  const Eigen::Matrix<double, Tdim, 1> f = nodal_coordinates.row(5);
+  const Eigen::Matrix<double, Tdim, 1> g = nodal_coordinates.row(1);
+  const Eigen::Matrix<double, Tdim, 1> h = nodal_coordinates.row(0);
+
+  double volume_ =
+      (1.0 / 12) * (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
+                               ((d - e).cross(h - a))) +
+      (1.0 / 12) *
+          (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
+      (1.0 / 12) *
+          (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
+      (1.0 / 12) * (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
+
+  return volume_;
+}
+
 //! Compute natural coordinates of a point (analytical)
 template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::Matrix<double, Tdim, 1>
