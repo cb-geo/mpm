@@ -681,7 +681,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   // Indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
-  if(indices.size() == 3) {
+  if (indices.size() == 3) {
     // determine the local coordinates using barycentric coordinates conversion
 
     // initialize cartesian coordinates of point of interest and vertices of
@@ -900,18 +900,18 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
           xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
         } else {  // Case 4.2b Eq 29
           // There are two possible solutions
-          const double u2 =
-              (-(a2s * beta + a3s - alpha) +
-               std::sqrt((a2s * beta + a3s - alpha) * (a2s * beta + a3s - alpha) -
-                         (4 * beta * (c1s - a2s * alpha)))) /
-              (2. * beta);
+          const double u2 = (-(a2s * beta + a3s - alpha) +
+                             std::sqrt((a2s * beta + a3s - alpha) *
+                                           (a2s * beta + a3s - alpha) -
+                                       (4 * beta * (c1s - a2s * alpha)))) /
+                            (2. * beta);
           const double u1 = alpha - beta * u2;
           // Second solution of a quadratic equation
-          const double v2 =
-              (-(a2s * beta + a3s - alpha) -
-               std::sqrt((a2s * beta + a3s - alpha) * (a2s * beta + a3s - alpha) -
-                         (4 * beta * (c1s - a2s * alpha)))) /
-              (2. * beta);
+          const double v2 = (-(a2s * beta + a3s - alpha) -
+                             std::sqrt((a2s * beta + a3s - alpha) *
+                                           (a2s * beta + a3s - alpha) -
+                                       (4 * beta * (c1s - a2s * alpha)))) /
+                            (2. * beta);
           const double v1 = alpha - beta * v2;
           if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
             xi(0) = u1;
@@ -955,10 +955,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   if (!this->isoparametric_)
     return mpm::Cell<2>::local_coordinates_point(point);
 
-    // Get indices of corner nodes
+  // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
-  if(indices.size() == 3)
+  if (indices.size() == 3)
     return mpm::Cell<2>::local_coordinates_point_2d(point);
 
   // Local coordinates of a point in an unit cell
@@ -967,7 +967,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
 
   // Zeros
   const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
-
 
   // Matrix of nodal coordinates
   Eigen::MatrixXd nodal_coords;
