@@ -144,6 +144,17 @@ class Element {
   //! Return quadrature of the element
   virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
       unsigned nquadratures) const = 0;
+
+  //! Compute Natural coordinates of a point (analytical)
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] point Location of the point in cell
+  //! \retval xi Return the local coordinates
+  virtual VectorDim natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const = 0;
+
+  //! Return if natural coordinates can be evaluates
+  virtual bool isvalid_natural_coordinates_analytical() const = 0;
 };
 
 }  // namespace mpm

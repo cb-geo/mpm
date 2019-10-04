@@ -601,3 +601,18 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
       break;
   }
 }
+
+//! Compute natural coordinates of a point (analytical)
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::natural_coordinates_analytical(
+        const VectorDim& point,
+        const Eigen::MatrixXd& nodal_coordinates) const {
+  // Local point coordinates
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+  throw std::runtime_error(
+      "Analytical solution for Hex<Tdim, Tnfunctions> has not been "
+      "implemented");
+  return xi;
+}

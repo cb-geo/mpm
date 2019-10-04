@@ -128,6 +128,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
+    // Initialize cell
+    REQUIRE(cell1->initialise() == true);
+
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
@@ -395,8 +398,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Compute cell volume
-    cell1->compute_volume();
+    // Initialize cell
+    REQUIRE(cell1->initialise() == true);
 
     // Generate material points in cell
     auto points = mesh->generate_material_points(1);

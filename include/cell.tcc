@@ -667,10 +667,6 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point_2d(
 }
 
 //! Return the local coordinates of a point in a 2D cell
-//! Analytical solution based on A consistent point-searching algorithm for
-//! solution interpolation in unstructured meshes consisting of 4-node bilinear
-//! quadrilateral elements - Zhao et al., 1999
-
 template <>
 inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
     const Eigen::Matrix<double, 2, 1>& point) {
@@ -678,252 +674,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
   Eigen::Matrix<double, 2, 1> xi;
   xi.fill(std::numeric_limits<double>::max());
 
-  // Indices of corner nodes
-  Eigen::VectorXi indices = element_->corner_indices();
-
-  if (indices.size() == 3) {
-    // determine the local coordinates using barycentric coordinates conversion
-
-    // initialize cartesian coordinates of point of interest and vertices of
-    // the cell
-    const double xa = point(0);
-    const double ya = point(1);
-    const double x1 = nodes_[0]->coordinates()(0);
-    const double y1 = nodes_[0]->coordinates()(1);
-    const double x2 = nodes_[1]->coordinates()(0);
-    const double y2 = nodes_[1]->coordinates()(1);
-    const double x3 = nodes_[2]->coordinates()(0);
-    const double y3 = nodes_[2]->coordinates()(1);
-
-    // calculate matrix determinant of T
-    const double T = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
-
-    // determine the barycentric coordinates lambda1, lambda2 and lambda3
-    const double lambda1 = ((y2 - y3) * (xa - x3) + (x3 - x2) * (ya - y3)) / T;
-    const double lambda2 = ((y3 - y1) * (xa - x3) + (x1 - x3) * (ya - y3)) / T;
-    const double lambda3 = 1 - lambda1 - lambda2;
-
-    xi(0) = lambda2;
-    xi(1) = lambda3;
-  } else {
-
-    const double xa = point(0);
-    const double ya = point(1);
-    const double x1 = nodes_[0]->coordinates()(0);
-    const double y1 = nodes_[0]->coordinates()(1);
-    const double x2 = nodes_[1]->coordinates()(0);
-    const double y2 = nodes_[1]->coordinates()(1);
-    const double x3 = nodes_[2]->coordinates()(0);
-    const double y3 = nodes_[2]->coordinates()(1);
-    const double x4 = nodes_[3]->coordinates()(0);
-    const double y4 = nodes_[3]->coordinates()(1);
-
-    const double a1 = x1 + x2 + x3 + x4;
-    const double a2 = -x1 + x2 + x3 - x4;
-    const double a3 = -x1 - x2 + x3 + x4;
-    const double a4 = x1 - x2 + x3 - x4;
-
-    const double b1 = y1 + y2 + y3 + y4;
-    const double b2 = -y1 + y2 + y3 - y4;
-    const double b3 = -y1 - y2 + y3 + y4;
-    const double b4 = y1 - y2 + y3 - y4;
-
-    const double c1 = 4. * xa - a1;
-    const double c2 = 4. * ya - b1;
-
-    // General solution of xi and eta based on solving with Sympy
-    // a2 * xi(0) + a3 * xi(1) + a4 * xi(0) * xi(1) = 4 x_a - a1
-    // b2 * xi(0) + b3 * xi(1) + b4 * xi(0) * xi(1) = 4 y_a - b1
-    const double u1 =
-        (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
-         (-a3 * b4 + a4 * b3) *
-             ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
-               4 * b4 * xa) /
-                  (2 * (a3 * b4 - a4 * b3)) -
-              (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
-                         2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
-                         4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
-                         8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
-                         4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
-                         16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
-                         8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
-                         a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
-                         8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
-                         a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
-                         16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
-                         16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
-                         16 * b4 * b4 * xa * xa)) /
-                  (2 * (a3 * b4 - a4 * b3)))) /
-        (a2 * b4 - a4 * b2);
-
-    const double u2 =
-        (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
-            (2 * (a3 * b4 - a4 * b3)) -
-        (std::sqrt(
-            a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
-            2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
-            8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
-            4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
-            16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
-            8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
-            2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
-            8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
-            16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
-            16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
-            16 * b4 * b4 * xa * xa)) /
-            (2 * (a3 * b4 - a4 * b3));
-
-    // Second solution of a quadratic equation
-    const double v1 =
-        (-a1 * b4 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa +
-         (-a3 * b4 + a4 * b3) *
-             ((-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya +
-               4 * b4 * xa) /
-                  (2 * (a3 * b4 - a4 * b3)) +
-              (std::sqrt(a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 -
-                         2 * a1 * a3 * b2 * b4 - 2 * a1 * a4 * b1 * b4 +
-                         4 * a1 * a4 * b2 * b3 + 8 * a1 * a4 * b4 * ya -
-                         8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
-                         4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
-                         16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
-                         8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa +
-                         a3 * a3 * b2 * b2 - 2 * a3 * a4 * b1 * b2 +
-                         8 * a3 * a4 * b2 * ya + 8 * a3 * b2 * b4 * xa +
-                         a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
-                         16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
-                         16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
-                         16 * b4 * b4 * xa * xa)) /
-                  (2 * (a3 * b4 - a4 * b3)))) /
-        (a2 * b4 - a4 * b2);
-
-    const double v2 =
-        (-a1 * b4 + a2 * b3 - a3 * b2 + a4 * b1 - 4 * a4 * ya + 4 * b4 * xa) /
-            (2 * (a3 * b4 - a4 * b3)) +
-        (std::sqrt(
-            a1 * a1 * b4 * b4 - 2 * a1 * a2 * b3 * b4 - 2 * a1 * a3 * b2 * b4 -
-            2 * a1 * a4 * b1 * b4 + 4 * a1 * a4 * b2 * b3 +
-            8 * a1 * a4 * b4 * ya - 8 * a1 * b4 * b4 * xa + a2 * a2 * b3 * b3 +
-            4 * a2 * a3 * b1 * b4 - 2 * a2 * a3 * b2 * b3 -
-            16 * a2 * a3 * b4 * ya - 2 * a2 * a4 * b1 * b3 +
-            8 * a2 * a4 * b3 * ya + 8 * a2 * b3 * b4 * xa + a3 * a3 * b2 * b2 -
-            2 * a3 * a4 * b1 * b2 + 8 * a3 * a4 * b2 * ya +
-            8 * a3 * b2 * b4 * xa + a4 * a4 * b1 * b1 - 8 * a4 * a4 * b1 * ya +
-            16 * a4 * a4 * ya * ya + 8 * a4 * b1 * b4 * xa -
-            16 * a4 * b2 * b3 * xa - 32 * a4 * b4 * xa * ya +
-            16 * b4 * b4 * xa * xa)) /
-            (2 * (a3 * b4 - a4 * b3));
-
-    // Choosing a quadratic solution
-    if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
-      xi(0) = u1;
-      xi(1) = u2;
-      return xi;
-    } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
-      xi(0) = v1;
-      xi(1) = v2;
-      return xi;
-    }
-
-    // Case1: a4 == 0 and b4 != 0: Eq 10
-    if (a4 == 0 && b4 == 0) {
-      xi(0) = (b3 * c1 - a3 * c2) / (a2 * b3 - a3 * b2);
-      xi(1) = (-b2 * c1 + a2 * c2) / (a2 * b3 - a3 * b2);
-    } else if (a4 == 0 && b4 != 0) {  // Case 2: Eq 11
-      if (a2 == 0 && a3 != 0) {       // Case 2.1 Eq 12
-        xi(1) = c1 / a3;
-        xi(0) = (c2 - b3 * xi(1)) / (b2 + b4 * xi(1));
-      } else if (a2 != 0 && a3 == 0) {  // Case 2.2 Eq 13
-        xi(0) = c1 / a2;
-        xi(1) = (c2 - b2 * xi(0)) / (b3 + b4 * xi(0));
-      } else {  // a2 != 0 && a3 != 0 // Case 2.3 Eq 14
-        const double aa = b4 * a3 / a2;
-        const double bb = ((b2 * a3 - b4 * c1) / a2) - b3;
-        const double cc = -(b2 * c1 / a2) + c2;
-        // There are two possible solutions
-        const double u2 = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
-        const double u1 = (c1 - a3 * u2) / a2;
-        // Second solution of a quadratic equation
-        const double v2 = (-bb - std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
-        const double v1 = (c1 - a3 * v2) / a2;
-        if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
-          xi(0) = u1;
-          xi(1) = u2;
-        } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
-          xi(0) = v1;
-          xi(1) = v2;
-        }
-      }
-    } else if (a4 != 0 && b4 == 0) {  // Case 3 Eq 16
-      if (b2 == 0 && b3 != 0) {       // Case 3.1 Eq 17
-        xi(1) = c2 / b3;
-        xi(0) = (c1 - a3 * xi(1)) / (a2 + a4 * xi(1));
-      } else if (b2 != 0 && b3 == 0) {  // Case 3.2 Eq 18
-        xi(0) = c2 / b2;
-        xi(1) = (c1 - a2 * xi(0)) / (a3 + a4 * xi(0));
-      } else {  // b2 != 0 && b3 != 0  // Case 3.3 Eq 19
-        const double aa = a4 * b3 / b2;
-        const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
-        const double cc = -(a2 * c2 / b2) + c1;
-        // There are two possible solutions
-        const double u2 = (-bb + std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
-        const double u1 = (c2 - b3 * u2) / b2;
-        // Second solution of a quadratic equation
-        const double v2 = (-bb - std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
-        const double v1 = (c2 - b3 * v2) / b2;
-        if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
-          xi(0) = u1;
-          xi(1) = u2;
-        } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
-          xi(0) = v1;
-          xi(1) = v2;
-        }
-      }
-    } else {  // a4 != 0 && b4 != 0   // Case 4 Eq 21
-      const double a2s = a2 / a4;
-      const double a3s = a3 / a4;
-
-      const double b2s = b2 / b4;
-      const double b3s = b3 / b4;
-
-      const double c1s = c1 / a4;
-      const double c2s = c2 / b4;
-
-      if ((a2s - b2s) == 0) {  // Case 4.1 Eq 25
-        xi(1) = (c1s - c2s) / (a3s - b3s);
-        xi(0) = (c1s - a3s * xi(1)) / (a2s + xi(1));
-      } else {
-        const double alpha = (c1s - c2s) / (a2s - b2s);
-        const double beta = (a3s - b3s) / (a2s - b2s);
-
-        if (beta == 0) {  // Case 4.2a Eq 28
-          xi(0) = alpha;
-          xi(1) = (c1s - a2s * xi(0)) / (a3s + xi(0));
-        } else {  // Case 4.2b Eq 29
-          // There are two possible solutions
-          const double u2 = (-(a2s * beta + a3s - alpha) +
-                             std::sqrt((a2s * beta + a3s - alpha) *
-                                           (a2s * beta + a3s - alpha) -
-                                       (4 * beta * (c1s - a2s * alpha)))) /
-                            (2. * beta);
-          const double u1 = alpha - beta * u2;
-          // Second solution of a quadratic equation
-          const double v2 = (-(a2s * beta + a3s - alpha) -
-                             std::sqrt((a2s * beta + a3s - alpha) *
-                                           (a2s * beta + a3s - alpha) -
-                                       (4 * beta * (c1s - a2s * alpha)))) /
-                            (2. * beta);
-          const double v1 = alpha - beta * v2;
-          if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
-            xi(0) = u1;
-            xi(1) = u2;
-          } else if (v1 >= -1. && v1 <= 1. && v2 >= -1. && v2 <= 1.) {
-            xi(0) = v1;
-            xi(1) = v2;
-          }
-        }
-      }
-    }
-  }
+  if (element_->isvalid_natural_coordinates_analytical())
+    xi = element_->natural_coordinates_analytical(point,
+                                                  this->nodal_coordinates_);
   return xi;
 }
 
@@ -958,8 +711,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
-  if (indices.size() == 3)
-    return mpm::Cell<2>::local_coordinates_point_2d(point);
+  // Analytical solution for linear triangle element
+  if (indices.size() == 3) {
+    if (element_->isvalid_natural_coordinates_analytical())
+      return element_->natural_coordinates_analytical(point,
+                                                      this->nodal_coordinates_);
+  }
 
   // Local coordinates of a point in an unit cell
   Eigen::Matrix<double, 2, 1> xi;
@@ -979,8 +736,12 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Analytical xi
-  Eigen::Matrix<double, 2, 1> analytical_xi =
-      this->local_coordinates_point_2d(point);
+  Eigen::Matrix<double, 2, 1> analytical_xi;
+  analytical_xi.fill(std::numeric_limits<double>::max());
+
+  if (element_->isvalid_natural_coordinates_analytical())
+    analytical_xi = element_->natural_coordinates_analytical(
+        point, this->nodal_coordinates_);
 
   // Analytical tolerance
   const double tolerance = 1.0E-16 * mean_length_ * mean_length_;

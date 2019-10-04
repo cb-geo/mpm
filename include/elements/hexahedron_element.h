@@ -1,90 +1,126 @@
-#ifndef MPM_QUADRILATERAL_ELEMENT_H_
-#define MPM_QUADRILATERAL_ELEMENT_H_
+#ifndef MPM_HEXAHEDRON_ELEMENT_H_
+#define MPM_HEXAHEDRON_ELEMENT_H_
 
 #include "element.h"
 #include "logger.h"
 
+//! MPM namespace
 namespace mpm {
 
-//! Quadrilateral element class derived from Element class
-//! \brief Quadrilateral element
-//! \details 4-noded, 8-noded, and 9-noded quadrilateral element \n
+//! Hexahedron element class derived from Element class
+//! \brief Hexahedron element
+//! \details 8-noded and 20-noded hexahedron element \n
 //! Shape function, gradient shape function, B-matrix, indices \n
-//! 4-node Quadrilateral Element \n
+//! 8-node (Trilinear) Hexahedron Element \n
 //! <pre>
+//!        3               2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!       |  |         |  |
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/           |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
 //!
-//! 3 0----------0 2
-//!   |          |
-//!   |          |
-//!   |          |
-//!   |          |
-//! 0 0----------0 1
 //!
 //! </pre>
-//! 8-node Quadrilateral Element
+//! 20-node (Serendipity) Hexahedron Element \n
 //! <pre>
-//!
-//!  3      6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0           0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//! 0       4       1
+//!        3       13          2
+//!          0_ _ _ 0 _ _ _  0
+//!          /|             / |
+//!      15 0 |         14 0  |
+//!        /  0 9         /   |
+//!     7 0_ _| _ 0 _ _ _ 0 6 0 11
+//!       |   |   19     |    |
+//!       |   |      8   |    |
+//!       | 0 0_ _ _ 0 _ |_ _ 0  1
+//!    17 0  /           0 18 /
+//!       | 0 10         |  0 12
+//!       |/             | /
+//!       0_ _ _ 0 _ _ _ 0
+//!     4        16         5
 //!
 //! </pre>
-//! 9-node Quadrilateral Element
-//! <pre>
 //!
-//! 3       6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0   8 0     0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//!  0      4       1
+//! 27-node (Triquadratic) Hexahedron Element \n
+//! Check with GMSH \n
+//! <pre>
+//!          3           13             2
+//!            0_ _ _ _ _ 0 _ _ _ _ _ 0
+//!            /|                     /|
+//!           / |                    / |
+//!          /  |    24             /  |
+//!      15 0   |     0         14 0   |
+//!        /    |      20 0       /    |
+//!       /   9 0                /     0 11
+//!      /      |               /      |
+//!  7  0_ _ _ _|_ 0 _ _ _ _ _ 0 6     |
+//!     |       | 19           |       |
+//!     |  0 22 |              |   0 23|
+//!     |       |    0 26  8   |       |
+//!     |     0 0_ _ _ _ _ 0_ _|_ _ _  0  1
+//!     |      /               |      /
+//!  17 0     /    0 25        0 18  /
+//!     |    /                 |    /
+//!     |10 0         0        |   0 12
+//!     |  /         21        |  /
+//!     | /                    | /
+//!     |/                     |/
+//!     0_ _ _ _ _ 0 _ _ _ _ _ 0
+//!   4           16            5
+//!
 //!
 //! </pre>
-//! Face numbering for 4-node, 8-node and 9-node Quadrilateral Element \n
+//!
+//! Face numbering for 8-node, 20-node and 27-node Hexaheron Element \n
+//!
 //! <pre>
+//!            Behind: F4
+//!        3      F2       2
+//!          0_ _ _ _ _ _0
+//!         /|           /|
+//!        / |          / |
+//!     7 0_ |_ _ _ _ _0 6|
+//!       |  |         |  |
+//!    F3 |  |         |  |   F1
+//!       |  0_ _ _ _ _|_ 0
+//!       | / 0        | / 1
+//!       |/     F0    |/
+//!       0_ _ _ _ _ _ 0
+//!     4               5
+//!         Front: F5
 //!
-//!          F2
-//!   3 0----------0 2
-//!     |          |
-//!  F3 |          | F1
-//!     |          |
-//!     |          |
-//!   0 0----------0 1
-//!          F0
+//!
+//! Bottom face: F0, Right face: F1, Top face: F2,
+//! Left face: F3, Rear face: F4, Front face: F5
 //! </pre>
-//!
 //!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
-class QuadrilateralElement : public Element<Tdim> {
+class HexahedronElement : public Element<Tdim> {
 
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralElement() : mpm::Element<Tdim>() {
-    static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
+  HexahedronElement() : mpm::Element<Tdim>() {
+    static_assert(Tdim == 3, "Invalid dimension for a hexahedron element");
+    static_assert((Tnfunctions == 8 || Tnfunctions == 20),
                   "Specified number of shape functions is not defined");
-
     //! Logger
-    std::string logger = "quadrilateral::<" + std::to_string(Tdim) + ", " +
+    std::string logger = "hexahedron::<" + std::to_string(Tdim) + ", " +
                          std::to_string(Tnfunctions) + ">";
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
 
-  //! Return number of shape functions
+  //! Return number of functions
   unsigned nfunctions() const override { return Tnfunctions; }
 
   //! Evaluate shape functions at given local coordinates
@@ -95,7 +131,7 @@ class QuadrilateralElement : public Element<Tdim> {
   Eigen::VectorXd shapefn(const VectorDim& xi, const VectorDim& particle_size,
                           const VectorDim& deformation_gradient) const override;
 
-  //! Evaluate local shape functions at given coordinates
+  //! Evaluate local shape functions at given local coordinates
   //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
@@ -120,9 +156,10 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
-      const VectorDim& deformation_gradient) const override;
+      const Eigen::Matrix<double, 3, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates,
+      const Eigen::Matrix<double, 3, 1>& particle_size,
+      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
   //! Compute Jacobian local
   //! \param[in] xi given local coordinates
@@ -131,9 +168,10 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \param[in] deformation_gradient Deformation gradient
   //! \retval jacobian Jacobian matrix
   Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
-      const VectorDim& deformation_gradient) const override;
+      const Eigen::Matrix<double, 3, 1>& xi,
+      const Eigen::MatrixXd& nodal_coordinates,
+      const Eigen::Matrix<double, 3, 1>& particle_size,
+      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
@@ -189,8 +227,8 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval indices Indices that make the face
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
-  //! Return the number of faces in a quadrilateral
-  unsigned nfaces() const override { return 4; }
+  //! Return the number of faces in a hexahedron
+  unsigned nfaces() const override { return 6; }
 
   //! Return unit element length
   double unit_element_length() const override { return 2.; }
@@ -199,12 +237,23 @@ class QuadrilateralElement : public Element<Tdim> {
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
       unsigned nquadratures = 1) const override;
 
+  //! Return if natural coordinates can be evaluates
+  bool isvalid_natural_coordinates_analytical() const override { return false; }
+
+  //! Compute Natural coordinates of a point (analytical)
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] point Location of the point in cell
+  //! \retval xi Return the local coordinates
+  VectorDim natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
  private:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };
 
 }  // namespace mpm
-#include "quadrilateral_element.tcc"
+#include "hexahedron_element.tcc"
 
-#endif  // MPM_QUADRILATERAL_ELEMENT_H_
+#endif  // MPM_HEXAHEDRON_ELEMENT_H_
