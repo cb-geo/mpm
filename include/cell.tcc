@@ -654,44 +654,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   return xi;
 }
 
-//! Return the local coordinates of a point in a 2D cell
-template <>
-inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::local_coordinates_point_2d(
-    const Eigen::Matrix<double, 1, 1>& point) {
-  // Local point coordinates
-  Eigen::Matrix<double, 1, 1> xi;
-  xi << std::numeric_limits<double>::max();
-  console_->error("{} #{}: The analytical solution is valid only for 2D\n",
-                  __FILE__, __LINE__);
-  return xi;
-}
-
-//! Return the local coordinates of a point in a 2D cell
-template <>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point_2d(
-    const Eigen::Matrix<double, 2, 1>& point) {
-  // Local point coordinates
-  Eigen::Matrix<double, 2, 1> xi;
-  xi.fill(std::numeric_limits<double>::max());
-
-  if (element_->isvalid_natural_coordinates_analytical())
-    xi = element_->natural_coordinates_analytical(point,
-                                                  this->nodal_coordinates_);
-  return xi;
-}
-
-//! Return the local coordinates of a point in a 2D cell
-template <>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point_2d(
-    const Eigen::Matrix<double, 3, 1>& point) {
-  // Local point coordinates
-  Eigen::Matrix<double, 3, 1> xi;
-  xi.fill(std::numeric_limits<double>::max());
-  console_->error("{} #{}: The analytical solution is valid only for 2D\n",
-                  __FILE__, __LINE__);
-  return xi;
-}
-
 //! Return the local coordinates of a point in a 1D cell
 template <>
 inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
