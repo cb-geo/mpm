@@ -95,7 +95,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
     // Check volume before initialisation
     REQUIRE(cell->volume() ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+            Approx(std::numeric_limits<double>::lowest()).epsilon(Tolerance));
 
     // Initialise cell
     REQUIRE(cell->initialise() == true);
@@ -1020,7 +1020,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
     // Check volume before initialisation
     REQUIRE(cell->volume() ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+            Approx(std::numeric_limits<double>::lowest()).epsilon(Tolerance));
 
     // Initialise cell
     REQUIRE(cell->initialise() == true);

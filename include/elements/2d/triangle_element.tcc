@@ -378,6 +378,35 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
   }
 }
 
+//! Compute volume
+//! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+//! \retval volume Return the volume of cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline double mpm::TriangleElement<Tdim, Tnfunctions>::compute_volume(
+  const Eigen::MatrixXd& nodal_coordinates) const {
+  //   2 0
+  //     |`\
+  //     |  `\
+  //     |    `\
+  //     |      `\
+  //     |        `\
+  //   0 0----------0 1
+  //
+  auto node0 = nodal_coordinates.row(0);
+  auto node1 = nodal_coordinates.row(1);
+  auto node2 = nodal_coordinates.row(2);
+
+  // Area = 0.5 * [ (x1 * y2 - x2 * y1)
+  //              - (x0 * y2 - x2 * y0)
+  //              + (x0 * y1 - x1 * y0) ]
+  double volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
+                             ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
+                             ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
+    0.5;
+      
+  return volume_;
+}
+
 //! Compute natural coordinates of a point (analytical)
 template <>
 inline bool mpm::TriangleElement<2, 3>::isvalid_natural_coordinates_analytical() const { return true; }

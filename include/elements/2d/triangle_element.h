@@ -169,6 +169,12 @@ class TriangleElement : public Element<Tdim> {
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
       unsigned nquadratures = 1) const override;
 
+  //! Compute volume
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval volume Return the volume of cell
+  double compute_volume(
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
   //! Return if natural coordinates can be evaluates
   bool isvalid_natural_coordinates_analytical() const override;
 

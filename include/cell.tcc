@@ -15,6 +15,8 @@ mpm::Cell<Tdim>::Cell(Index id, unsigned nnodes,
   try {
     if (elementptr->nfunctions() == this->nnodes_) {
       element_ = elementptr;
+      // Create an empty nodal coordinates
+      nodal_coordinates_.resize(this->nnodes_, Tdim);
     } else {
       throw std::runtime_error(
           "Specified number of shape functions and nodes don't match");
@@ -32,10 +34,9 @@ bool mpm::Cell<Tdim>::initialise() {
     // Check if node pointers are present and are equal to the expected number
     if (this->nnodes_ == this->nodes_.size()) {
       // Initialise cell properties (volume, centroid, length)
-      this->compute_volume();
       this->compute_centroid();
       this->compute_mean_length();
-      this->compute_nodal_coordinates();
+      this->compute_volume();
 
       // Get centroid of a cell in natural coordinates which are zeros
       Eigen::Matrix<double, Tdim, 1> xi_centroid;
@@ -68,7 +69,7 @@ bool mpm::Cell<Tdim>::is_initialised() const {
           // Check if shape function is assigned
           this->nfunctions() != 0 &&
           // Check if volume of a cell is initialised
-          (std::fabs(this->volume_ - std::numeric_limits<double>::max()) >
+          (std::fabs(this->volume_ - std::numeric_limits<double>::lowest()) >
            1.0E-10) &&
           // Check if mean length of a cell is initialised
           (std::fabs(this->mean_length_ - std::numeric_limits<double>::max()) >
@@ -136,6 +137,9 @@ bool mpm::Cell<Tdim>::add_node(
     if (nodes_.size() < this->nnodes_ &&
         (local_id >= 0 && local_id < this->nnodes_)) {
       nodes_.emplace_back(node_ptr);
+      // Assign coordinates
+      nodal_coordinates_.row(local_id) =
+          nodes_[local_id]->coordinates().transpose();
       insertion_status = true;
     } else {
       throw std::runtime_error(
@@ -212,137 +216,16 @@ void mpm::Cell<Tdim>::remove_particle_id(Index id) {
                    particles_.end());
 }
 
-//! Compute volume of a 1D cell
-//! Computes the length of cell
-template <>
-inline void mpm::Cell<1>::compute_volume() {
-  this->volume_ =
-      std::fabs(nodes_[0]->coordinates()[0] - nodes_[1]->coordinates()[1]);
-}
-
 //! Compute volume of a 2D cell
 //! Computes the volume of a triangle and a quadrilateral
-template <>
-inline void mpm::Cell<2>::compute_volume() {
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::compute_volume() {
   try {
-    Eigen::VectorXi indices = element_->corner_indices();
-    // Triangle
-    if (indices.size() == 3) {
-
-      //   2 0
-      //     |`\
-      //     |  `\
-      //     |    `\
-      //     |      `\
-      //     |        `\
-      //   0 0----------0 1
-      //
-      auto node0 = nodes_[indices(0)]->coordinates();
-      auto node1 = nodes_[indices(1)]->coordinates();
-      auto node2 = nodes_[indices(2)]->coordinates();
-
-      // Area = 0.5 * [ (x1 * y2 - x2 * y1)
-      //              - (x0 * y2 - x2 * y0)
-      //              + (x0 * y1 - x1 * y0) ]
-      volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
-                          ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
-                          ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
-                0.5;
-      // Quadrilateral
-    } else if (indices.size() == 4) {
-
-      //        b
-      // 3 0---------0 2
-      //   | \   q / |
-      // a |   \  /  | c
-      //   |   p \   |
-      //   |  /    \ |
-      // 0 0---------0 1
-      //         d
-      const double a = (nodes_[indices(0)]->coordinates() -
-                        nodes_[indices(3)]->coordinates())
-                           .norm();
-      const double b = (nodes_[indices(2)]->coordinates() -
-                        nodes_[indices(3)]->coordinates())
-                           .norm();
-      const double c = (nodes_[indices(1)]->coordinates() -
-                        nodes_[indices(2)]->coordinates())
-                           .norm();
-      const double d = (nodes_[indices(0)]->coordinates() -
-                        nodes_[indices(1)]->coordinates())
-                           .norm();
-      const double p = (nodes_[indices(0)]->coordinates() -
-                        nodes_[indices(2)]->coordinates())
-                           .norm();
-      const double q = (nodes_[indices(1)]->coordinates() -
-                        nodes_[indices(3)]->coordinates())
-                           .norm();
-
-      // K = 1/4 * sqrt ( 4p^2q^2 - (a^2 + c^2 - b^2 -d^2)^2)
-      volume_ =
-          0.25 * std::sqrt(4 * p * p * q * q -
-                           std::pow((a * a + c * c - b * b - d * d), 2.0));
-    } else {
+    if (this->nnodes_ != this->nodes_.size())
       throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
-    }
-    // Check negative volume
-    if (this->volume_ <= 0)
-      throw std::runtime_error(
-          "Negative or zero volume cell, misconfigured cell!");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-}
-
-//! Compute volume of a 3D cell
-//! Computes the volume of a hexahedron
-template <>
-inline void mpm::Cell<3>::compute_volume() {
-  try {
-    Eigen::VectorXi indices = element_->corner_indices();
-    // Hexahedron
-    if (indices.size() == 8) {
-      // Node numbering as read in by mesh file
-      //        d               c
-      //          *_ _ _ _ _ _*
-      //         /|           /|
-      //        / |          / |
-      //     a *_ |_ _ _ _ _* b|
-      //       |  |         |  |
-      //       |  |         |  |
-      //       |  *_ _ _ _ _|_ *
-      //       | / h        | / g
-      //       |/           |/
-      //       *_ _ _ _ _ _ *
-      //     e               f
-      //
-      // Calculation of hexahedron volume from
-      // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
-
-      const auto a = nodes_[indices(7)]->coordinates();
-      const auto b = nodes_[indices(6)]->coordinates();
-      const auto c = nodes_[indices(2)]->coordinates();
-      const auto d = nodes_[indices(3)]->coordinates();
-      const auto e = nodes_[indices(4)]->coordinates();
-      const auto f = nodes_[indices(5)]->coordinates();
-      const auto g = nodes_[indices(1)]->coordinates();
-      const auto h = nodes_[indices(0)]->coordinates();
-
-      volume_ =
-          (1.0 / 12) *
-              (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
-                          ((d - e).cross(h - a))) +
-          (1.0 / 12) *
-              (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
-          (1.0 / 12) *
-              (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
-          (1.0 / 12) *
-              (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
-    } else {
-      throw std::runtime_error(
-          "Unable to compute volume, number of vertices is incorrect");
-    }
+          "Insufficient number of nodes to compute volume");
+    else
+      volume_ = element_->compute_volume(this->nodal_coordinates_);
     // Check negative volume
     if (this->volume_ <= 0)
       throw std::runtime_error(
@@ -378,24 +261,6 @@ void mpm::Cell<Tdim>::compute_mean_length() {
                            nodes_[indices(i, 1)]->coordinates())
                               .norm();
   this->mean_length_ /= indices.rows();
-}
-
-//! Return nodal coordinates
-template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_coordinates() {
-  nodal_coordinates_.resize(this->nnodes_, Tdim);
-  try {
-    // If cell is initialised
-    if (this->is_initialised()) {
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-        nodal_coordinates_.row(i) = nodes_[i]->coordinates().transpose();
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised to return nodal coordinates!");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
 }
 
 //! Check if a point is in a 1D cell by checking bounding box range
@@ -1244,10 +1109,10 @@ inline void mpm::Cell<3>::compute_normals() {
     // Compute two vectors to calculate normal
     // a = node(1) - node(0)
     // b = node(3) - node(0)
-    Eigen::Matrix<double, 3, 1> a = (this->nodes_[indices(1)])->coordinates() -
-                                    (this->nodes_[indices(0)])->coordinates();
-    Eigen::Matrix<double, 3, 1> b = (this->nodes_[indices(3)])->coordinates() -
-                                    (this->nodes_[indices(0)])->coordinates();
+    Eigen::Matrix<double, 3, 1> a =
+        nodal_coordinates_.row(1) - nodal_coordinates_.row(0);
+    Eigen::Matrix<double, 3, 1> b =
+        nodal_coordinates_.row(3) - nodal_coordinates_.row(0);
 
     // Compute normal and make unit vector
     // normal = a x b
