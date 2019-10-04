@@ -543,9 +543,9 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       //        a
       //
 
-      auto node0 = nodes_[indices(0)]->coordinates();
-      auto node1 = nodes_[indices(1)]->coordinates();
-      auto node2 = nodes_[indices(2)]->coordinates();
+      const auto node0 = nodal_coordinates_.row(0);
+      const auto node1 = nodal_coordinates_.row(1);
+      const auto node2 = nodal_coordinates_.row(2);
 
       const double area = ((node1(0) - node0(0)) * (node2(1) - node0(1)) -
                            (node2(0) - node0(0)) * (node1(1) - node0(1))) /
@@ -568,18 +568,14 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
       //   | /   \ |
       // 0 0---------0 1
       //         d
-      const double xlength = (nodes_[indices(0)]->coordinates() -
-                              nodes_[indices(1)]->coordinates())
-                                 .norm();
-      const double ylength = (nodes_[indices(1)]->coordinates() -
-                              nodes_[indices(2)]->coordinates())
-                                 .norm();
+      const double xlength =
+          (nodal_coordinates_.row(0) - nodal_coordinates_.row(1)).norm();
+      const double ylength =
+          (nodal_coordinates_.row(1) - nodal_coordinates_.row(2)).norm();
 
       const Eigen::Matrix<double, 2, 1> centre =
-          (nodes_[indices(0)]->coordinates() +
-           nodes_[indices(1)]->coordinates() +
-           nodes_[indices(2)]->coordinates() +
-           nodes_[indices(3)]->coordinates()) /
+          (nodal_coordinates_.row(0) + nodal_coordinates_.row(1) +
+           nodal_coordinates_.row(2) + nodal_coordinates_.row(3)) /
           4.0;
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
@@ -622,21 +618,18 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
       //     4               5
       //
 
-      const double xlength = (nodes_[indices(0)]->coordinates() -
-                              nodes_[indices(1)]->coordinates())
-                                 .norm();
-      const double ylength = (nodes_[indices(1)]->coordinates() -
-                              nodes_[indices(2)]->coordinates())
-                                 .norm();
-      const double zlength = (nodes_[indices(1)]->coordinates() -
-                              nodes_[indices(5)]->coordinates())
-                                 .norm();
+      const double xlength =
+          (nodal_coordinates_.row(0) - nodal_coordinates_.row(1)).norm();
+      const double ylength =
+          (nodal_coordinates_.row(1) - nodal_coordinates_.row(2)).norm();
+      const double zlength =
+          (nodal_coordinates_.row(1) - nodal_coordinates_.row(5)).norm();
 
       // Compute centre
       Eigen::Matrix<double, 3, 1> centre;
       centre.setZero();
       for (unsigned i = 0; i < indices.size(); ++i)
-        centre += nodes_[indices(i)]->coordinates();
+        centre += nodal_coordinates_.row(i);
       centre /= indices.size();
 
       xi(0) = 2. * (point(0) - centre(0)) / xlength;
