@@ -240,9 +240,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
 
     // Use analytical solution
-    local_point = cell->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
 
     // Coordinates of a point in real cell
     point << 0., 0.;
@@ -251,9 +256,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates of the point in an unit cell
     point_unit_cell << 0., 0.;
     // Use analytical solution
-    local_point = cell->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
 
     // Coordinates of a point in real cell
     point << -1.5, -1.5;
@@ -262,9 +272,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Coordinates of the point in an unit cell
     point_unit_cell << -0.75, -0.75;
     // Use analytical solution
-    local_point = cell->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
   }
 
   SECTION("Transform real to unit cell analytical solution") {
@@ -325,9 +340,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
 
     // Use analytical solution
-    local_point = cell->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
 
     // Coordinates of a point in real cell
     point << 3., 3.;
@@ -336,9 +356,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     // Test if point is in cell
     REQUIRE(cell->is_point_in_cell(point, &xi) == true);
     // Use analytical solution
-    local_point = cell->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
   }
 
   SECTION("Check point in unit cell analytical solution") {
@@ -421,10 +446,14 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
       REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
 
     // Use analytical solution
-    // REQUIRE(cell2->point_in_2d_cell(point) == true);
-    local_point = cell2->local_coordinates_point_2d(point);
-    for (unsigned i = 0; i < local_point.size(); ++i)
-      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+    REQUIRE(element->isvalid_natural_coordinates_analytical() == true);
+    if (element->isvalid_natural_coordinates_analytical()) {
+      local_point = element->natural_coordinates_analytical(
+          point, cell2->nodal_coordinates());
+      for (unsigned i = 0; i < local_point.size(); ++i)
+        REQUIRE(local_point[i] ==
+                Approx(point_unit_cell[i]).epsilon(Tolerance));
+    }
   }
 
   SECTION("Check point in unit cell overall solution") {
