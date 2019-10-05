@@ -25,16 +25,17 @@ double mpm::StepFunction::value(const double x_input) {
     throw std::runtime_error(
         "Cannot find the f(x); no linear function is defined");
   // If the given 'x' is less than x-begin, return f(x-begin)
-  if(x_input < (xvalues_.cbegin()->first))
-    return fxvalues_.cbegin()->first;
+  if(x_input < (xvalues_.cbegin()->second))
+    return fxvalues_.cbegin()->second;
   // If the given 'x' is greater than x-end, return f(x-end)
-  if(x_input > (xvalues_.rbegin()->first))
-    return fxvalues_.rbegin()->first;
+  if(x_input > (xvalues_.rbegin()->second))
+    return fxvalues_.rbegin()->second;
   // If the given 'x' is within the range, compute the relevant f(x)
   for (unsigned i = 0; i < (xvalues_.size() - 1); ++i) {
     double x_factor =
         (x_input - xvalues_.at(i)) / (xvalues_.at(i + 1) - xvalues_.at(i));
-    if (x_factor > (-std::numeric_limits<double>::epsilon()) && x_factor < 1.0)
+    if (x_factor > (-std::numeric_limits<double>::epsilon()) &&
+        x_factor < (1.0 + std::numeric_limits<double>::epsilon()))
       return (fxvalues_.at(i) +
               x_factor * (fxvalues_.at(i + 1) - fxvalues_.at(i)));
   }
