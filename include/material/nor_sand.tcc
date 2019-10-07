@@ -16,9 +16,9 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
     // Poisson ratio
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
-    // Critical Stress Ratio M
+    // Critical state coefficient M
     M_ = material_properties["M"].template get<double>();
-    // Dilatancy parameter N
+    // Volumetric coupling (dilatancy) parameter N
     N_ = material_properties["N"].template get<double>();
     // Minimum void ratio
     e_min_ =
@@ -32,7 +32,9 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
     chi_ = material_properties["chi"].template get<double>();
     // Hardening modulus
     hardening_modulus_ = material_properties["hardening_modulus"].template get<double>();
-
+    // Initial void ratio
+    void_ratio_initial_ = material_properties["void_ratio_initial"].template get<double>();
+    
     // Properties
     properties_ = material_properties;
 
@@ -104,7 +106,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   double D_min = chi_ * psi_image;
   // Estimate maximum image pressure
   double p_image_max = mean_p * pow((1 + D_min * N_ / M_), ((N_ - 1) / N_));
-
 
   // Compute derivatives
   double dF_dp = -M_ / N_ * (1 + (N_ -1) * (1 + (N_ / (1 - N_))) * pow(mean_p / p_image, (N_ / (1 - N_))));

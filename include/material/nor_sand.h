@@ -87,16 +87,14 @@ class NorSand : public Material<Tdim> {
   double shear_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Critical Stress Ratio M
+  //! Critical state coefficient M
   double M_{std::numeric_limits<double>::max()};
-  //! Dilatancy parameter N
+  //! Volumetric coupling (dilatancy) parameter N
   double N_{std::numeric_limits<double>::max()};
   //! Minimum void ratio
   double e_min_{std::numeric_limits<double>::max()};
   //! Maximum void ratio
   double e_max_{std::numeric_limits<double>::max()};
-  //! Residual dilation angle psi
-  double psi_residual_{std::numeric_limits<double>::max()};
   //! Crushing pressure
   double crushing_pressure_{std::numeric_limits<double>::max()};
   //! Dilatancy coefficient
