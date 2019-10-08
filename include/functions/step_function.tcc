@@ -21,6 +21,8 @@ mpm::StepFunction::StepFunction(unsigned id, const Json& function_properties)
 double mpm::StepFunction::value(const double x_input) {
   // Check if the linear relationship for the step function is defined, if not
   // return an error
+  double value = std::numeric_limits<double>::quiet_NaN();
+
   if (xvalues_.empty() || fxvalues_.empty())
     throw std::runtime_error(
         "Cannot find the f(x); no linear function is defined");
@@ -37,4 +39,5 @@ double mpm::StepFunction::value(const double x_input) {
       return (fxvalues_.at(i) +
               x_factor * (fxvalues_.at(i + 1) - fxvalues_.at(i)));
   }
+  return value;
 }
