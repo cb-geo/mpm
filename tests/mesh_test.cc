@@ -10,11 +10,11 @@
 #endif
 
 #include "element.h"
+#include "functions/function_base.h"
 #include "hexahedron_element.h"
 #include "mesh.h"
 #include "node.h"
 #include "quadrilateral_element.h"
-#include "functions/function_base.h"
 
 //! \brief Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
@@ -765,9 +765,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
             //   // When tractions fail
             //   nodes_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
-            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
-            //   nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) ==
+            //   false); nodes_tractions.emplace_back(std::make_tuple(300, 0,
+            //   0.0)); REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) ==
+            //   false);
             // }
 
             // Test assign particles stresses
@@ -1750,9 +1751,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
             //   // When tractions fail
             //   nodes_tractions.emplace_back(std::make_tuple(3, 4, 0.0));
-            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
-            //   nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+            //   REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) ==
+            //   false); nodes_tractions.emplace_back(std::make_tuple(300, 0,
+            //   0.0)); REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) ==
+            //   false);
             // }
 
             // Test assign particles stresses

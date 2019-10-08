@@ -56,7 +56,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
-  if(!loading_status) status = false;
+  if (!loading_status) status = false;
 
   // Assign material to particles
   // Get particle properties
@@ -201,7 +201,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, phase, (this->step_ * this->dt_)));
 
       // Iterate over each node to add concentrated node force to external force
-      if(set_node_concentrated_force_)
+      if (set_node_concentrated_force_)
         mesh_->iterate_over_nodes(
             std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
                       std::placeholders::_1, phase, (this->step_ * this->dt_)));

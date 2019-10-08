@@ -98,7 +98,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply concentrated force to external force
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] current time 
+  //! \param[in] current time
   void apply_concentrated_force(unsigned phase, double current_time) override;
 
   //! Update external force (body force / traction force)

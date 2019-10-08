@@ -23,11 +23,11 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "functions/function_base.h"
 #include "geometry.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
-#include "functions/function_base.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -241,7 +241,7 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, double>>& particle_volumes);
 
   //! Assign particles tractions
-  //! \param[in] mfunction Math function if defined 
+  //! \param[in] mfunction Math function if defined
   //! \param[in] particle_tractions Traction at dir on particle
   bool assign_particles_tractions(
       const std::shared_ptr<FunctionBase>& mfunction,
@@ -253,8 +253,7 @@ class Mesh {
   //! \param[in] node_forces Concentrated force at dir on nodes
   bool assign_nodal_concentrated_forces(
       const std::shared_ptr<FunctionBase>& mfunction,
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          node_forces);
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>& node_forces);
 
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle

@@ -1,9 +1,9 @@
 #ifndef MPM_FUNCTION_BASE_H_
 #define MPM_FUNCTION_BASE_H_
 
-#include <vector>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 #include "json.hpp"
 
@@ -40,13 +40,12 @@ class FunctionBase {
   //! \retval f(x)
   virtual double value(const double x_input) = 0;
 
-protected:
- //! function id
- unsigned id_{std::numeric_limits<unsigned>::max()};
- // Function properties
- Json properties_;
+ protected:
+  //! function id
+  unsigned id_{std::numeric_limits<unsigned>::max()};
+  // Function properties
+  Json properties_;
 };  // FunctionBase class
 }  // namespace mpm
-
 
 #endif  // MPM_FUNCTION_BASE_H_

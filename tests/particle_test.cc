@@ -4,10 +4,10 @@
 
 #include "cell.h"
 #include "element.h"
+#include "functions/function_base.h"
 #include "hdf5.h"
 #include "hexahedron_element.h"
 #include "material/material.h"
-#include "functions/function_base.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
@@ -175,7 +175,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Traction
     double traction = 65.32;
     const unsigned Direction = 0;
-    
+
     // Check traction
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction(Phase)(i) == Approx(0.).epsilon(Tolerance));

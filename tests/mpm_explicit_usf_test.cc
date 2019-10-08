@@ -113,53 +113,53 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
 //                   (char*)"-i",  (char*)"mpm-explicit-usf-3d.json"};
 //   // clang-format on
 
-  // SECTION("Check initialisation") {
-  //   // Create an IO object
-  //   auto io = std::make_unique<mpm::IO>(argc, argv);
-  //   // Run explicit MPM
-  //   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+// SECTION("Check initialisation") {
+//   // Create an IO object
+//   auto io = std::make_unique<mpm::IO>(argc, argv);
+//   // Run explicit MPM
+//   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-  //   // Initialise mesh and particles
-  //   REQUIRE(mpm->initialise_mesh() == true);
-  //   REQUIRE(mpm->initialise_particles() == true);
+//   // Initialise mesh and particles
+//   REQUIRE(mpm->initialise_mesh() == true);
+//   REQUIRE(mpm->initialise_particles() == true);
 
-  //   // Initialise materials
-  //   REQUIRE(mpm->initialise_materials() == true);
+//   // Initialise materials
+//   REQUIRE(mpm->initialise_materials() == true);
 
-  //   // Reinitialise mesh and particles
-  //   REQUIRE(mpm->initialise_mesh() == false);
-  //   REQUIRE(mpm->initialise_particles() == false);
+//   // Reinitialise mesh and particles
+//   REQUIRE(mpm->initialise_mesh() == false);
+//   REQUIRE(mpm->initialise_particles() == false);
 
-  //   // Renitialise materials
-  //   REQUIRE(mpm->initialise_materials() == false);
-  // }
+//   // Renitialise materials
+//   REQUIRE(mpm->initialise_materials() == false);
+// }
 
-  // SECTION("Check solver") {
-  //   // Create an IO object
-  //   auto io = std::make_unique<mpm::IO>(argc, argv);
-  //   // Run explicit MPM
-  //   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
-  //   // Solve
-  //   REQUIRE(mpm->solve() == true);
-  //   // Test check point restart
-  //   REQUIRE(mpm->checkpoint_resume() == false);
-  // }
+// SECTION("Check solver") {
+//   // Create an IO object
+//   auto io = std::make_unique<mpm::IO>(argc, argv);
+//   // Run explicit MPM
+//   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+//   // Solve
+//   REQUIRE(mpm->solve() == true);
+//   // Test check point restart
+//   REQUIRE(mpm->checkpoint_resume() == false);
+// }
 
-  // SECTION("Check resume") {
-  //   // Write JSON file
-  //   const std::string fname = "mpm-explicit-usf";
-  //   const std::string analysis = "MPMExplicitUSF3D";
-  //   bool resume = true;
-  //   REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
+// SECTION("Check resume") {
+//   // Write JSON file
+//   const std::string fname = "mpm-explicit-usf";
+//   const std::string analysis = "MPMExplicitUSF3D";
+//   bool resume = true;
+//   REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
 
-  //   // Create an IO object
-  //   auto io = std::make_unique<mpm::IO>(argc, argv);
-  //   // Run explicit MPM
-  //   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+//   // Create an IO object
+//   auto io = std::make_unique<mpm::IO>(argc, argv);
+//   // Run explicit MPM
+//   auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-  //   // Test check point restart
-  //   REQUIRE(mpm->checkpoint_resume() == true);
-  //   // Solve
-  //   REQUIRE(mpm->solve() == true);
-  // }
+//   // Test check point restart
+//   REQUIRE(mpm->checkpoint_resume() == true);
+//   // Solve
+//   REQUIRE(mpm->solve() == true);
+// }
 //}

@@ -432,8 +432,7 @@ std::vector<std::tuple<mpm::Index, double>>
 //! Return particles traction
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>
-    mpm::ReadMeshAscii<Tdim>::read_tractions(
-        const std::string& traction_file) {
+    mpm::ReadMeshAscii<Tdim>::read_tractions(const std::string& traction_file) {
 
   // particle tractions
   std::vector<std::tuple<mpm::Index, unsigned, double>> tractions;

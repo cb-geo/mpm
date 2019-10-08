@@ -7,9 +7,9 @@
 #include <vector>
 
 #include "cell.h"
+#include "functions/function_base.h"
 #include "hdf5.h"
 #include "material/material.h"
-#include "functions/function_base.h"
 
 namespace mpm {
 

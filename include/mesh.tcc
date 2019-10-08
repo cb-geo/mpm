@@ -704,8 +704,7 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
     const std::shared_ptr<FunctionBase>& mfunction,
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        node_forces) {
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>& node_forces) {
   bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;

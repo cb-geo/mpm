@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -5,9 +7,9 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "functions/function_base.h"
 #include "geometry.h"
 #include "node.h"
-#include "functions/function_base.h"
 
 // Check node class for 1D case
 TEST_CASE("Node is checked for 1D case", "[node][1D]") {
@@ -183,8 +185,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
         REQUIRE(node->assign_concentrated_force(
                     Nphase, Direction, concentrated_force, ffunction) == true);
+
         double current_time = 0.0;
-        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
+        node->apply_concentrated_force(Nphase, current_time);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
@@ -642,12 +645,13 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->assign_concentrated_force(
                     Nphase, Direction, concentrated_force, ffunction) == true);
         double current_time = 0.0;
-        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
+        node->apply_concentrated_force(Nphase, current_time);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(concentrated_force).epsilon(Tolerance));
+
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1179,8 +1183,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->assign_concentrated_force(
                     Nphase, Direction, concentrated_force, ffunction) == true);
         double current_time = 0.0;
-        REQUIRE(node->apply_concentrated_force(Nphase, current_time) == true);
-       
+        node->apply_concentrated_force(Nphase, current_time);
+
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==

@@ -26,6 +26,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
+  concentrated_force_.setZero();
   pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();

@@ -91,8 +91,8 @@ class ReadMesh {
 
   //! Read particles traction file
   //! \param[in] traction_files file name with particle tractions
-  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
-      read_tractions(const std::string& traction_file) = 0;
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_tractions(
+      const std::string& traction_file) = 0;
 
   //! Read particles cells file
   //! \param[in] particles_cells_file file name with particle cell ids

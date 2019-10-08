@@ -328,8 +328,7 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
       // Try to read constrtaints from a non-existant file
-      auto tractions =
-          read_mesh->read_tractions("tractions-missing.txt");
+      auto tractions = read_mesh->read_tractions("tractions-missing.txt");
       // Check number of tractions
       REQUIRE(tractions.size() == 0);
 
@@ -767,8 +766,7 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
       auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
 
       // Try to read constraints from a non-existant file
-      auto tractions =
-          read_mesh->read_tractions("tractions-missing.txt");
+      auto tractions = read_mesh->read_tractions("tractions-missing.txt");
       // Check number of tractions
       REQUIRE(tractions.size() == 0);
 
