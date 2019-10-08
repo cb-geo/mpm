@@ -95,7 +95,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
     // Check volume before initialisation
     REQUIRE(cell->volume() ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+            Approx(std::numeric_limits<double>::lowest()).epsilon(Tolerance));
 
     // Initialise cell
     REQUIRE(cell->initialise() == true);
@@ -219,12 +219,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         // Get local coordinates of the point
         auto local_point = cell->local_coordinates_point(point);
-        for (unsigned i = 0; i < local_point.size(); ++i)
-          REQUIRE(local_point[i] ==
-                  Approx(point_unit_cell[i]).epsilon(Tolerance));
-
-        // Get local coordinates of the point using analytical solution
-        local_point = cell->local_coordinates_point_2d(point);
         for (unsigned i = 0; i < local_point.size(); ++i)
           REQUIRE(local_point[i] ==
                   Approx(point_unit_cell[i]).epsilon(Tolerance));
@@ -1026,7 +1020,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->mean_length() == std::numeric_limits<double>::max());
     // Check volume before initialisation
     REQUIRE(cell->volume() ==
-            Approx(std::numeric_limits<double>::max()).epsilon(Tolerance));
+            Approx(std::numeric_limits<double>::lowest()).epsilon(Tolerance));
 
     // Initialise cell
     REQUIRE(cell->initialise() == true);
@@ -1664,6 +1658,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     REQUIRE(cell->nfunctions() == 8);
 
+    REQUIRE(cell->initialise() == true);
+
     Eigen::Vector3d xi;
     // Check point in cell
     Eigen::Vector3d point;
@@ -1736,6 +1732,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     REQUIRE(cell1->nfunctions() == 8);
 
+    // Initialise cell
+    REQUIRE(cell1->initialise() == true);
+
     Eigen::Vector3d xi;
     xi = cell1->transform_real_to_unit_cell(point);
 
@@ -1792,6 +1791,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell2->add_node(7, node17);
     REQUIRE(cell2->nnodes() == 8);
     REQUIRE(cell2->nfunctions() == 8);
+
+    // Initialise cell
+    REQUIRE(cell2->initialise() == true);
 
     // Point in cell fails to capture
     REQUIRE(cell2->point_in_cartesian_cell(point) == false);
