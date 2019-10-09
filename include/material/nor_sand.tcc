@@ -110,7 +110,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   double p_image_max = mean_p * pow((1 + D_min * N_ / M_), ((N_ - 1) / N_));
 
   // Compute derivatives
-  double dF_dp = -M_ / N_ * (1 + (N_ -1) * (1 + (N_ / (1 - N_))) * pow(mean_p / p_image, (N_ / (1 - N_))));
+  double dF_dp = -1. * M_ / N_ * (1 + (N_ - 1) / (1 - N_)) * pow((mean_p / p_image), (N_ / (1 - N_)));
   Vector6d dp_dsigma = Vector6d::Zero();
   dp_dsigma(0) = 1./3.;
   dp_dsigma(1) = 1./3.;
@@ -126,7 +126,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
 
-  double dF_dpi = M_ / N_ * (N_ - 1) * (N_ / (1 - N_)) * pow( mean_p / p_image, (N_ / (1 - N_) + 1));
+  double dF_dpi = M_ / N_ * (N_ - 1)  / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
   double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
 
   double dF_dsigma_ii = dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2);
