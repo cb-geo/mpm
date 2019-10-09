@@ -510,6 +510,7 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   return xi;
 }
 
+
 //! Return the local coordinates of a point in a 1D cell
 template <>
 inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
