@@ -1,3 +1,4 @@
+#include "step_function.h"
 // Constructor
 mpm::StepFunction::StepFunction(unsigned id, const Json& function_properties)
     : mpm::FunctionBase(id, function_properties) {

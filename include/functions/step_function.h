@@ -48,6 +48,4 @@ class StepFunction : public FunctionBase {
 };  // StepFunction class
 }  // namespace mpm
 
-#include "step_function.tcc"
-
 #endif  // MPM_STEP_TRACTION_H_

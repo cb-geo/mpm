@@ -96,6 +96,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
   ${mpm_SOURCE_DIR}/include/elements/3d
+  ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -104,6 +105,8 @@ include_directories(BEFORE
 SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
+  ${mpm_SOURCE_DIR}/src/element.cc
+  ${mpm_SOURCE_DIR}/src/function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
@@ -113,8 +116,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
-  ${mpm_SOURCE_DIR}/src/element.cc
-  ${mpm_SOURCE_DIR}/src/function.cc
+  ${mpm_SOURCE_DIR}/src/step_function.cc
 )
 
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
