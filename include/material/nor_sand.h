@@ -2,6 +2,7 @@
 #define MPM_MATERIAL_NOR_SAND_H_
 
 #include <limits>
+#include <iostream>
 
 #include <cmath>
 

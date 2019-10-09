@@ -78,23 +78,25 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
-  
-  // Compute the mean pressure (must not be zero)
-  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
-  // Compute deviatoric q
-  double deviatoric_q = sqrt(0.5 * (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) + pow((stress(2) - stress(0)), 2)));
 
-  // Shear modulus
-  shear_modulus_ = shear_modulus_constant_ * pow(mean_p, shear_modulus_exponent_) ;
-  // Bulk modulus
-  bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
-  // Set elastic tensor
-  this->compute_elastic_tensor();
+  // Compute the mean pressure (must not be zero, compression positive)
+  double mean_p = abs((stress(0) + stress(1) + stress(2)) / 3.);
+  // Compute deviatoric q
+  double deviatoric_q = sqrt(0.5 * (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) + pow((stress(2) - stress(0)), 2) +
+                             6 * (pow(stress(3), 2) + pow(stress(4), 2) + pow(stress(5), 2))));
 
   // Compute pressure image
   double p_image = mean_p * pow(1/(1 - N_) - ((N_ - 1)/N_) * deviatoric_q / M_ / mean_p, ((N_ - 1)/N_));
   // Compute void ratio image
   double e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
+
+  // Shear modulus
+  shear_modulus_ = shear_modulus_constant_ * pow(mean_p, shear_modulus_exponent_);
+  // Bulk modulus
+  bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
+  // Set elastic tensor
+  this->compute_elastic_tensor();
+
   // Get void ratio and update state variables
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2); 
   double void_ratio = (*state_vars).at("void_ratio") - (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
@@ -144,6 +146,9 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   // Update stress
   Vector6d updated_stress = stress + D_matrix * dstrain;
+
+  // std::cout << "Current stress: " << stress << '\n';
+  // std::cout << "Updated stress: " << updated_stress << '\n';
 
   return updated_stress;
 }
