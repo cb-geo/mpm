@@ -78,6 +78,8 @@ class NorSand : public Material<Tdim> {
   Matrix6x6 de_;
   //! Density
   double density_{std::numeric_limits<double>::max()};
+  //! Youngs modulus
+  double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Shear modulusc constant A
   double shear_modulus_constant_{std::numeric_limits<double>::max()};
   //! Shear modulus exponent Gn
@@ -86,6 +88,8 @@ class NorSand : public Material<Tdim> {
   double bulk_modulus_{std::numeric_limits<double>::max()};
   //! Shear modulus
   double shear_modulus_{std::numeric_limits<double>::max()};
+  //! Reference pressure pref
+  double reference_pressure_{std::numeric_limits<double>::max()};  
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Critical state coefficient M

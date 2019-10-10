@@ -7,12 +7,18 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
     // General parameters
     // Density
     density_ = material_properties["density"].template get<double>();
-    // Shear modulus constant A
+    // Youngs modulus E
+    youngs_modulus_ =
+        material_properties.at("youngs_modulus").template get<double>();
+    // Shear modulus constant An
     shear_modulus_constant_ =
         material_properties["shear_modulus_constant"].template get<double>();
     // Shear modulus exponent Gn
     shear_modulus_exponent_ =
         material_properties["shear_modulus_exponent"].template get<double>();
+    // Reference pressure pref
+    reference_pressure_ =
+        material_properties["reference_pressure"].template get<double>();
     // Poisson ratio
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
@@ -79,11 +85,14 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
+  // Compression positive
+  Vector6d stress_neg = -1 * stress;
+
   // Compute the mean pressure (must not be zero, compression positive)
-  double mean_p = abs((stress(0) + stress(1) + stress(2)) / 3.);
-  // Compute deviatoric q
-  double deviatoric_q = sqrt(0.5 * (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) + pow((stress(2) - stress(0)), 2) +
-                             6 * (pow(stress(3), 2) + pow(stress(4), 2) + pow(stress(5), 2))));
+  double mean_p = abs(stress_neg(0) + stress_neg(1) + stress_neg(2)) / 3.;
+  // Compute deviatoric q (must not be zero)
+  double deviatoric_q = sqrt(0.5 * (pow((stress_neg(0) - stress_neg(1)), 2) + pow((stress_neg(1) - stress_neg(2)), 2) + pow((stress_neg(2) - stress_neg(0)), 2) +
+                             6 * (pow(stress_neg(3), 2) + pow(stress_neg(4), 2) + pow(stress_neg(5), 2))));
 
   // Compute pressure image
   double p_image = mean_p * pow(1/(1 - N_) - ((N_ - 1)/N_) * deviatoric_q / M_ / mean_p, ((N_ - 1)/N_));
@@ -91,7 +100,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   double e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
 
   // Shear modulus
-  shear_modulus_ = shear_modulus_constant_ * pow(mean_p, shear_modulus_exponent_);
+  // shear_modulus_ = shear_modulus_constant_ * pow(mean_p / reference_pressure_, shear_modulus_exponent_);
+  shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
   // Bulk modulus
   bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
   // Set elastic tensor
@@ -101,6 +111,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2); 
   double void_ratio = (*state_vars).at("void_ratio") - (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
   (*state_vars).at("void_ratio") = void_ratio;
+
   // Compute psi
   double psi_image = void_ratio - e_image;
 
@@ -117,12 +128,12 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   dp_dsigma(2) = 1./3.;
   double dF_dq = 1.;
   Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma(0) = 3./2./deviatoric_q * (stress(0) - mean_p);
-  dq_dsigma(1) = 3./2./deviatoric_q * (stress(1) - mean_p);
-  dq_dsigma(2) = 3./2./deviatoric_q * (stress(2) - mean_p);  
-  dq_dsigma(3) = 3./2./deviatoric_q * stress(3);
-  dq_dsigma(4) = 3./2./deviatoric_q * stress(4);
-  dq_dsigma(5) = 3./2./deviatoric_q * stress(5);
+  dq_dsigma(0) = 3./2./deviatoric_q * (stress_neg(0) - mean_p);
+  dq_dsigma(1) = 3./2./deviatoric_q * (stress_neg(1) - mean_p);
+  dq_dsigma(2) = 3./2./deviatoric_q * (stress_neg(2) - mean_p);  
+  dq_dsigma(3) = 3./2./deviatoric_q * stress_neg(3);
+  dq_dsigma(4) = 3./2./deviatoric_q * stress_neg(4);
+  dq_dsigma(5) = 3./2./deviatoric_q * stress_neg(5);
 
   Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
 
@@ -138,7 +149,9 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
                                                   2 * pow(dF_dsigma(5), 2) );
   
   // Construct Dp matrix
-  Matrix6x6 Dp = ((de_ * dF_dsigma) * dF_dsigma.transpose()) * de_ / 
+  // Matrix6x6 Dp = de_ * (dF_dsigma.transpose() * de_ * dF_dsigma) / 
+  //                (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
+  Matrix6x6 Dp = de_ * (de_ * dF_dsigma * dF_dsigma.transpose()) / 
                  (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
 
   // Compute D matrix used in stress update
