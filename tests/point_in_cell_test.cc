@@ -13,7 +13,7 @@
 #include "quadrilateral_element.h"
 #include "quadrilateral_quadrature.h"
 
-TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
+TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -525,5 +525,87 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D]") {
     REQUIRE(cell2->initialise() == true);
     // Test if point is in cell
     REQUIRE(cell2->is_point_in_cell(point, &xi) == true);
+  }
+}
+
+TEST_CASE("Point in triangular cell 2D", "[PointInCell][2D][tri]") {
+  // Dimension
+  const unsigned Dim = 2;
+  // Degrees of freedom
+  const unsigned Dof = 2;
+  // Number of phases
+  const unsigned Nphases = 1;
+  // Number of nodes per cell
+  const unsigned Nnodes = 3;
+  // Tolerance
+  const double Tolerance = 1.E-7;
+
+  SECTION("Transform real to unit cell analytical solution") {
+    // Number of nodes in cell
+    const unsigned Nnodes = 3;
+
+    // Coordinates
+    Eigen::Vector2d coords;
+
+    coords << 1.0, 1.0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2.0, 2.0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 1.5, 3.0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    // 3-noded triangle shape functions
+    std::shared_ptr<mpm::Element<Dim>> element =
+        Factory<mpm::Element<Dim>>::instance()->create("ED2T3");
+
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
+
+    REQUIRE(cell->add_node(0, node0) == true);
+    REQUIRE(cell->add_node(1, node1) == true);
+    REQUIRE(cell->add_node(2, node2) == true);
+    REQUIRE(cell->nnodes() == 3);
+
+    // Initialise cell
+    REQUIRE(cell->initialise() == true);
+
+    Eigen::Vector2d xi;
+    // Coordinates of a point in real cell
+    Eigen::Vector2d point;
+    point << 1.5, 2.0;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+
+    // Coordinates of the point in an unit cell
+    Eigen::Matrix<double, 2, 1> point_unit_cell;
+    point_unit_cell << 0.3333333333333333, 0.3333333333333333;
+
+    // Use analytical solution
+    auto local_point = element->natural_coordinates_analytical(
+        point, cell->nodal_coordinates());
+    for (unsigned i = 0; i < local_point.size(); ++i)
+      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+    point << 1.45, 1.6;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+
+    // Coordinates of the point in an unit cell
+    point_unit_cell << 0.4, 0.1;
+
+    // Use analytical solution
+    local_point = element->natural_coordinates_analytical(
+        point, cell->nodal_coordinates());
+    for (unsigned i = 0; i < local_point.size(); ++i)
+      REQUIRE(local_point[i] == Approx(point_unit_cell[i]).epsilon(Tolerance));
+
+    point << 1.0, 2.0;
+    // Test if point is in cell
+    REQUIRE(cell->is_point_in_cell(point, &xi) == false);
   }
 }
