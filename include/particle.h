@@ -204,6 +204,13 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Return displacement of the particle
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  }
+
+
   //! Assign traction to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
@@ -273,6 +280,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::id_;
   //! coordinates
   using ParticleBase<Tdim>::coordinates_;
+  //! coordinates
+  using ParticleBase<Tdim>::original_coordinates_;
   //! Reference coordinates (in a cell)
   using ParticleBase<Tdim>::xi_;
   //! Cell
@@ -309,6 +318,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Displacements
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction

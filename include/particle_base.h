@@ -179,6 +179,9 @@ class ParticleBase {
   //! Return velocity
   virtual VectorDim velocity(unsigned phase) const = 0;
 
+  //! Return displacement
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
   //! Assign traction
   virtual bool assign_traction(unsigned phase, unsigned direction,
                                double traction) = 0;
@@ -213,6 +216,8 @@ class ParticleBase {
   Index id_{std::numeric_limits<Index>::max()};
   //! coordinates
   VectorDim coordinates_;
+  //! Original coordinates
+  VectorDim original_coordinates_;
   //! Cell id
   Index cell_id_{std::numeric_limits<Index>::max()};
   //! Status

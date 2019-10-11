@@ -480,15 +480,21 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
       // Strains
       else if (attribute == "strains") {
         auto pdata = (*pitr)->strain(phase);
-        // Fill stresses to the size of dimensions
+        // Fill strains to the size of dimensions
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
       }
       // Velocities
       else if (attribute == "velocities") {
         auto pdata = (*pitr)->velocity(phase);
-        // Fill stresses to the size of dimensions
+        // Fill velocities to the size of dimensions
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
       }
+      // Displacements
+      else if (attribute == "displacements") {
+        auto pdata = (*pitr)->displacement(phase);
+        // Fill displacements to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      }      
       // Error
       else
         throw std::runtime_error("Invalid particle vector data attribute: !");

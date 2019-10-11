@@ -5,6 +5,7 @@ mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord)
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
   coordinates_ = coord;
+  original_coordinates_ = coord;
   status_ = true;
 }
 
