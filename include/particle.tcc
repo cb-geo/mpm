@@ -94,7 +94,6 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   traction_.setZero();
   velocity_.setZero();
   displacement_.setZero();
-  original_coordinates_.setZero();
   volume_.fill(std::numeric_limits<double>::max());
   volumetric_strain_centroid_.setZero();
 }
