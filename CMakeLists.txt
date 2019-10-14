@@ -84,6 +84,7 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 # VTK
 find_package(VTK)
 if (VTK_FOUND)
+  include(${VTK_USE_FILE})
   include_directories(${VTK_INCLUDE_DIRS})
   link_libraries(${VTK_LIBRARIES})
   add_definitions("-DUSE_VTK")
