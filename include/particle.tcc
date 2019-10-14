@@ -575,7 +575,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
       // New position  current position + velocity * dt
-      this->coordinates_ += nodal_velocity * dt;
+      this->coordinates_ += this->velocity_.col(phase) * dt;
 
       // Update displacement
       this->displacement_ = this->coordinates_ - this->original_coordinates_;
@@ -611,7 +611,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
       this->apply_particle_velocity_constraints();
 
       // New position current position + velocity * dt
-      this->coordinates_ += nodal_velocity * dt;
+      this->coordinates_ += this->velocity_.col(phase) * dt;
 
       // Update displacement
       this->displacement_ = this->coordinates_ - this->original_coordinates_;
