@@ -52,8 +52,18 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
 //! Initialise state variables
 template <unsigned Tdim>
 mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
-  mpm::dense_map state_vars = { // Current void ratio
-                                {"void_ratio", void_ratio_initial_}
+  mpm::dense_map state_vars = { // Mean stress
+                                {"p", 0.},
+                                // Deviatoric stress
+                                {"q", 0.},
+                                // Current void ratio
+                                {"void_ratio", void_ratio_initial_},
+                                // Void ratio image
+                                {"e_image", e_min_},
+                                // Image pressure
+                                {"p_image", 0.001},
+                                // State variable psi
+                                {"psi_image", 0.001}
                               };
 
   return state_vars;
@@ -79,44 +89,105 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
   return true;
 }
 
-//! Compute stress
+//! Compute stress invariants
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
-    const Vector6d& stress, const Vector6d& dstrain,
-    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
+bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
+                                                   mpm::dense_map* state_vars) {
+  // Compute mean stress p 
+  // Note that compression is positive in the definition of p
+  double mean_p = -(stress(0) + stress(1) + stress(2)) / 3.;
+  (*state_vars).at("p") = mean_p;
 
-  // Compression positive
-  Vector6d stress_neg = -1 * stress;
+  // Compute the deviatoric stress
+  Vector6d dev_stress = Vector6d::Zero();
+  dev_stress(0) = stress(0) + mean_p;
+  dev_stress(1) = stress(1) + mean_p;
+  dev_stress(2) = stress(2) + mean_p;
+  dev_stress(3) = stress(3);
+  if (Tdim == 3) {
+    dev_stress(4) = stress(4);
+    dev_stress(5) = stress(5);
+  }
+  
+  // Compute J2
+  double j2 =
+      (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
+       pow((stress(0) - stress(2)), 2)) /
+          6.0 +
+      pow(stress(3), 2);
+  if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
+  
+  // Compute q
+  double deviatoric_q = sqrt(3 * j2);
+  (*state_vars).at("q") = deviatoric_q;
 
-  // Compute the mean pressure (must not be zero, compression positive)
-  double mean_p = abs(stress_neg(0) + stress_neg(1) + stress_neg(2)) / 3.;
-  // Compute deviatoric q (must not be zero)
-  double deviatoric_q = sqrt(0.5 * (pow((stress_neg(0) - stress_neg(1)), 2) + pow((stress_neg(1) - stress_neg(2)), 2) + pow((stress_neg(2) - stress_neg(0)), 2) +
-                             6 * (pow(stress_neg(3), 2) + pow(stress_neg(4), 2) + pow(stress_neg(5), 2))));
-
+  // Update state parameter
   // Compute pressure image
-  double p_image = mean_p * pow(1/(1 - N_) - ((N_ - 1)/N_) * deviatoric_q / M_ / mean_p, ((N_ - 1)/N_));
+  (*state_vars).at("p_image") = mean_p * pow(1/(1 - N_) - ((N_ - 1)/N_) * deviatoric_q / M_ / mean_p, ((N_ - 1)/N_));
+    
   // Compute void ratio image
-  double e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
+  (*state_vars).at("e_image") = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / (*state_vars).at("p_image"));
 
-  // Shear modulus
-  // shear_modulus_ = shear_modulus_constant_ * pow(mean_p / reference_pressure_, shear_modulus_exponent_);
-  shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
-  // Bulk modulus
-  bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
-  // Set elastic tensor
-  this->compute_elastic_tensor();
+  return true;
+}
 
-  // Get void ratio and update state variables
-  double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2); 
-  double void_ratio = (*state_vars).at("void_ratio") - (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
-  (*state_vars).at("void_ratio") = void_ratio;
+//! Compute yield function and yield state
+template <unsigned Tdim>
+typename mpm::NorSand<Tdim>::FailureState
+    mpm::NorSand<Tdim>::compute_yield_state(double* yield_function,
+                                            const mpm::dense_map* state_vars) {
+  // Get stress invariants
+  const double mean_p = (*state_vars).at("p");
+  const double deviatoric_q = (*state_vars).at("q");
+  
+  // Get image pressure
+  const double p_image = (*state_vars).at("p_image");
+  
+  // Initialise yield status (0: elastic, 1: yield)
+  auto yield_type = FailureState::Elastic;
+  
+  // Compute yield functions
+  (*yield_function) = deviatoric_q / mean_p - M_ / N_ * (1 + (N_ - 1) * pow((mean_p / p_image), (N_ / (1 - N_))));
+  
+  // Tension failure
+  if ((*yield_function) > 1.E-15) yield_type = FailureState::Yield;
+
+  // std::cout << "p: " << mean_p << "\t q: " << deviatoric_q << "\t p_image: " << p_image << "\t yield: " << yield_type << '\n';
+
+  return yield_type;
+}
+
+//! Compute plastic tensor
+template <unsigned Tdim>
+bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
+                                                mpm::dense_map* state_vars) {
+  // Get state variables
+  const double mean_p = (*state_vars).at("p");
+  const double deviatoric_q = (*state_vars).at("q");
+
+  // Get image pressure
+  const double p_image = (*state_vars).at("p_image");
+  const double e_image = (*state_vars).at("e_image");
+  const double void_ratio = (*state_vars).at("void_ratio");
+
+  // Compute the deviatoric stress
+  Vector6d dev_stress = Vector6d::Zero();
+  dev_stress(0) = stress(0) + mean_p;
+  dev_stress(1) = stress(1) + mean_p;
+  dev_stress(2) = stress(2) + mean_p;
+  dev_stress(3) = stress(3);
+  if (Tdim == 3) {
+    dev_stress(4) = stress(4);
+    dev_stress(5) = stress(5);
+  }
 
   // Compute psi
   double psi_image = void_ratio - e_image;
+  (*state_vars).at("psi_image") = psi_image;
 
   // Estimate dilatancy at peak
   double D_min = chi_ * psi_image;
+
   // Estimate maximum image pressure
   double p_image_max = mean_p * pow((1 + D_min * N_ / M_), ((N_ - 1) / N_));
 
@@ -128,12 +199,14 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   dp_dsigma(2) = 1./3.;
   double dF_dq = 1.;
   Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma(0) = 3./2./deviatoric_q * (stress_neg(0) - mean_p);
-  dq_dsigma(1) = 3./2./deviatoric_q * (stress_neg(1) - mean_p);
-  dq_dsigma(2) = 3./2./deviatoric_q * (stress_neg(2) - mean_p);  
-  dq_dsigma(3) = 3./2./deviatoric_q * stress_neg(3);
-  dq_dsigma(4) = 3./2./deviatoric_q * stress_neg(4);
-  dq_dsigma(5) = 3./2./deviatoric_q * stress_neg(5);
+  dq_dsigma(0) = 3./2./deviatoric_q * (stress(0) + mean_p);
+  dq_dsigma(1) = 3./2./deviatoric_q * (stress(1) + mean_p);
+  dq_dsigma(2) = 3./2./deviatoric_q * (stress(2) + mean_p);  
+  dq_dsigma(3) = 3./2./deviatoric_q * stress(3);
+  if (Tdim == 3) {
+    dq_dsigma(4) = 3./2./deviatoric_q * stress(4);
+    dq_dsigma(5) = 3./2./deviatoric_q * stress(5);
+  }
 
   Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
 
@@ -151,17 +224,57 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Construct Dp matrix
   // Matrix6x6 Dp = de_ * (dF_dsigma.transpose() * de_ * dF_dsigma) / 
   //                (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
-  Matrix6x6 Dp = de_ * (de_ * dF_dsigma * dF_dsigma.transpose()) / 
-                 (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
+  this->dp_ = (de_ * dF_dsigma * dF_dsigma.transpose()) * de_ / 
+              (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
 
+  return true;
+}
+
+//! Compute stress
+template <unsigned Tdim>
+Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
+    const Vector6d& stress, const Vector6d& dstrain,
+    const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
+
+  // Update void ratio
+  // Note that dstrain is in tension positive - depsv = de / (1 + e)
+  double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2); 
+  double void_ratio = (*state_vars).at("void_ratio") + (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
+  (*state_vars).at("void_ratio") = void_ratio;
+
+  // Elastic step
+  // --------------------------------------------------------------------------------------
+  // Shear modulus
+  // shear_modulus_ = shear_modulus_constant_ * pow(mean_p / reference_pressure_, shear_modulus_exponent_);
+  shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
+  // Bulk modulus
+  bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
+  // Set elastic tensor
+  this->compute_elastic_tensor();
+
+  // Trial stress - elastic
+  Vector6d trial_stress = stress + (this->de_ * dstrain);
+
+  // Compute trial stress invariants
+  this->compute_stress_invariants(trial_stress, state_vars);
+
+  // Initialise value for yield function
+  double yield_function;
+  auto yield_type = this->compute_yield_state(&yield_function, state_vars);
+  
+  // Return the updated stress in elastic state
+  if (yield_type == FailureState::Elastic) return trial_stress;
+  // --------------------------------------------------------------------------------------
+
+  // Set plastic tensor
+  this->compute_plastic_tensor(stress, state_vars);
+
+  // Plastic step
   // Compute D matrix used in stress update
-  Matrix6x6 D_matrix = de_ - Dp;
+  Matrix6x6 D_matrix = this->de_ - this->dp_;
 
   // Update stress
   Vector6d updated_stress = stress + D_matrix * dstrain;
-
-  // std::cout << "Current stress: " << stress << '\n';
-  // std::cout << "Updated stress: " << updated_stress << '\n';
 
   return updated_stress;
 }

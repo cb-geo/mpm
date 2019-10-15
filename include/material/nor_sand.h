@@ -25,7 +25,7 @@ class NorSand : public Material<Tdim> {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Failure state
-  enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
+  enum FailureState { Elastic = 0, Yield = 1 };
 
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties
@@ -62,6 +62,19 @@ class NorSand : public Material<Tdim> {
                           mpm::dense_map* state_vars) override;
 
 
+  //! Compute stress invariants (p, q, etc)
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval status of computation of stress invariants
+  bool compute_stress_invariants(const Vector6d& stress,
+                                 mpm::dense_map* state_vars);
+
+  //! Compute yield function and yield state
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval yield_type Yield type (elastic, shear or tensile)
+  FailureState compute_yield_state(double* yield_function,
+                                   const mpm::dense_map* state_vars);
+
  protected:
   //! material id
   using Material<Tdim>::id_;
@@ -74,8 +87,14 @@ class NorSand : public Material<Tdim> {
   //! Compute elastic tensor
   bool compute_elastic_tensor();
 
+  //! Compute plastic tensor
+  bool compute_plastic_tensor(const Vector6d& stress,
+                              mpm::dense_map* state_vars);
+
   //! Elastic stiffness matrix
   Matrix6x6 de_;
+  //! Plastic stiffness matrix
+  Matrix6x6 dp_;
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
