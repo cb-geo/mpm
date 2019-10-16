@@ -127,6 +127,8 @@ class NorSand : public Material<Tdim> {
   double hardening_modulus_{std::numeric_limits<double>::max()};
   //! Initial void ratio
   double void_ratio_initial_{std::numeric_limits<double>::max()};
+  //! Initial image pressure
+  double p_image_initial_{std::numeric_limits<double>::max()};
 
 };  // NorSand class
 }  // namespace mpm

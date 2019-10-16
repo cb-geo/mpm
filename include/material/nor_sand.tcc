@@ -14,24 +14,19 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
     shear_modulus_constant_ =
         material_properties["shear_modulus_constant"].template get<double>();
     // Shear modulus exponent Gn
-    shear_modulus_exponent_ =
-        material_properties["shear_modulus_exponent"].template get<double>();
+    shear_modulus_exponent_ = material_properties["shear_modulus_exponent"].template get<double>();
     // Reference pressure pref
-    reference_pressure_ =
-        material_properties["reference_pressure"].template get<double>();
+    reference_pressure_ = material_properties["reference_pressure"].template get<double>();
     // Poisson ratio
-    poisson_ratio_ =
-        material_properties["poisson_ratio"].template get<double>();
+    poisson_ratio_ = material_properties["poisson_ratio"].template get<double>();
     // Critical state coefficient M
     M_ = material_properties["M"].template get<double>();
     // Volumetric coupling (dilatancy) parameter N
     N_ = material_properties["N"].template get<double>();
     // Minimum void ratio
-    e_min_ =
-        material_properties["e_min"].template get<double>();
+    e_min_ = material_properties["e_min"].template get<double>();
     // Maximum void ratio
-    e_max_ =
-        material_properties["e_max"].template get<double>();
+    e_max_ = material_properties["e_max"].template get<double>();
     // Crushing pressure
     crushing_pressure_ = material_properties["crushing_pressure"].template get<double>();
     // Dilatancy coefficient chi
@@ -40,6 +35,8 @@ mpm::NorSand<Tdim>::NorSand(unsigned id,
     hardening_modulus_ = material_properties["hardening_modulus"].template get<double>();
     // Initial void ratio
     void_ratio_initial_ = material_properties["void_ratio_initial"].template get<double>();
+    // Initial image pressure
+    p_image_initial_ = material_properties["p_image_initial"].template get<double>();
     
     // Properties
     properties_ = material_properties;
@@ -59,11 +56,11 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
                                 // Current void ratio
                                 {"void_ratio", void_ratio_initial_},
                                 // Void ratio image
-                                {"e_image", e_min_},
+                                {"e_image", e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image_initial_)},
                                 // Image pressure
-                                {"p_image", 0.001},
+                                {"p_image", p_image_initial_},
                                 // State variable psi
-                                {"psi_image", 0.001}
+                                {"psi_image", void_ratio_initial_ - (e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image_initial_))}
                               };
 
   return state_vars;
@@ -98,35 +95,16 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   double mean_p = -(stress(0) + stress(1) + stress(2)) / 3.;
   (*state_vars).at("p") = mean_p;
 
-  // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) + mean_p;
-  dev_stress(1) = stress(1) + mean_p;
-  dev_stress(2) = stress(2) + mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
-  
   // Compute J2
   double j2 =
       (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
-       pow((stress(0) - stress(2)), 2)) /
-          6.0 +
+       pow((stress(0) - stress(2)), 2)) / 6.0 +
       pow(stress(3), 2);
   if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
   
   // Compute q
   double deviatoric_q = sqrt(3 * j2);
   (*state_vars).at("q") = deviatoric_q;
-
-  // Update state parameter
-  // Compute pressure image
-  (*state_vars).at("p_image") = mean_p * pow(1/(1 - N_) - ((N_ - 1)/N_) * deviatoric_q / M_ / mean_p, ((N_ - 1)/N_));
-    
-  // Compute void ratio image
-  (*state_vars).at("e_image") = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / (*state_vars).at("p_image"));
 
   return true;
 }
@@ -165,23 +143,14 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double mean_p = (*state_vars).at("p");
   const double deviatoric_q = (*state_vars).at("q");
 
-  // Get image pressure
-  const double p_image = (*state_vars).at("p_image");
-  const double e_image = (*state_vars).at("e_image");
+  // Compute and update pressure image
+  double p_image = mean_p * pow(((1 - N_ / M_ * deviatoric_q / mean_p) / (1 - N_)), ((N_ - 1)/N_)); 
+  (*state_vars).at("p_image") = p_image;
+  // Compute and update void ratio image
+  double e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
+  (*state_vars).at("e_image") = e_image;
+  // Compute and update psi
   const double void_ratio = (*state_vars).at("void_ratio");
-
-  // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) + mean_p;
-  dev_stress(1) = stress(1) + mean_p;
-  dev_stress(2) = stress(2) + mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
-
-  // Compute psi
   double psi_image = void_ratio - e_image;
   (*state_vars).at("psi_image") = psi_image;
 
@@ -192,39 +161,51 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   double p_image_max = mean_p * pow((1 + D_min * N_ / M_), ((N_ - 1) / N_));
 
   // Compute derivatives
-  double dF_dp = -1. * M_ / N_ * (1 + (N_ - 1) / (1 - N_)) * pow((mean_p / p_image), (N_ / (1 - N_)));
+  double dF_dp = -1. * M_ / N_ * (1 + (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (N_ / (1 - N_))));
+
   Vector6d dp_dsigma = Vector6d::Zero();
-  dp_dsigma(0) = 1./3.;
-  dp_dsigma(1) = 1./3.;
-  dp_dsigma(2) = 1./3.;
+  dp_dsigma(0) = -1./3.;
+  dp_dsigma(1) = -1./3.;
+  dp_dsigma(2) = -1./3.;
+  
   double dF_dq = 1.;
-  Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma(0) = 3./2./deviatoric_q * (stress(0) + mean_p);
-  dq_dsigma(1) = 3./2./deviatoric_q * (stress(1) + mean_p);
-  dq_dsigma(2) = 3./2./deviatoric_q * (stress(2) + mean_p);  
-  dq_dsigma(3) = 3./2./deviatoric_q * stress(3);
+
+  // Compute the deviatoric stress
+  Vector6d dev_stress = Vector6d::Zero();
+  dev_stress(0) = -stress(0) - mean_p;
+  dev_stress(1) = -stress(1) - mean_p;
+  dev_stress(2) = -stress(2) - mean_p;
+  dev_stress(3) = -stress(3);
   if (Tdim == 3) {
-    dq_dsigma(4) = 3./2./deviatoric_q * stress(4);
-    dq_dsigma(5) = 3./2./deviatoric_q * stress(5);
+    dev_stress(4) = -stress(4);
+    dev_stress(5) = -stress(5);
+  }
+
+  Vector6d dq_dsigma = Vector6d::Zero();
+  dq_dsigma(0) = 3./2./deviatoric_q * dev_stress(0);
+  dq_dsigma(1) = 3./2./deviatoric_q * dev_stress(1);
+  dq_dsigma(2) = 3./2./deviatoric_q * dev_stress(2);  
+  dq_dsigma(3) = 3./deviatoric_q * dev_stress(3);
+  if (Tdim == 3) {
+    dq_dsigma(4) = 3./deviatoric_q * dev_stress(4);
+    dq_dsigma(5) = 3./deviatoric_q * dev_stress(5);
   }
 
   Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
 
-  double dF_dpi = M_ / N_ * (N_ - 1)  / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
+  double dF_dpi = M_ * (N_ - 1)  / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
   double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
 
-  double dF_dsigma_ii = dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2);
-  double dF_dsigma_deviatoric = sqrt(2/3) * sqrt( pow(dF_dsigma(0) - dF_dsigma_ii/3, 2) + 
-                                                  pow(dF_dsigma(1) - dF_dsigma_ii/3, 2) + 
-                                                  pow(dF_dsigma(2) - dF_dsigma_ii/3, 2) + 
-                                                  2 * pow(dF_dsigma(3), 2) + 
-                                                  2 * pow(dF_dsigma(4), 2) + 
-                                                  2 * pow(dF_dsigma(5), 2) );
+  double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3;
+  double dF_dsigma_deviatoric = sqrt(2./3.) * sqrt( pow(dF_dsigma(0) - dF_dsigma_v, 2) + 
+                                                    pow(dF_dsigma(1) - dF_dsigma_v, 2) + 
+                                                    pow(dF_dsigma(2) - dF_dsigma_v, 2) + 
+                                                    2 * pow(dF_dsigma(3), 2) + 
+                                                    2 * pow(dF_dsigma(4), 2) + 
+                                                    2 * pow(dF_dsigma(5), 2) );
   
   // Construct Dp matrix
-  // Matrix6x6 Dp = de_ * (dF_dsigma.transpose() * de_ * dF_dsigma) / 
-  //                (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
-  this->dp_ = (de_ * dF_dsigma * dF_dsigma.transpose()) * de_ / 
+  this->dp_ = (de_ * dF_dsigma * dF_dsigma.transpose() * de_) / 
               (dF_dsigma.transpose() * de_ * dF_dsigma - dF_dpi * dpi_depsd * dF_dsigma_deviatoric);
 
   return true;
@@ -245,8 +226,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Elastic step
   // --------------------------------------------------------------------------------------
   // Shear modulus
-  // shear_modulus_ = shear_modulus_constant_ * pow(mean_p / reference_pressure_, shear_modulus_exponent_);
-  shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
+  shear_modulus_ = shear_modulus_constant_ * pow(((*state_vars).at("p") / reference_pressure_), shear_modulus_exponent_);
+  // shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
   // Bulk modulus
   bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
   // Set elastic tensor
