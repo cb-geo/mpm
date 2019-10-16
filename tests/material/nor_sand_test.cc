@@ -153,9 +153,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
     dstrain.setZero();
-    dstrain(0) = 0.00050000;
-    dstrain(1) = -0.0010000;
-    dstrain(2) = 0.0005000;
+    dstrain(0) = 0.00005000;
+    dstrain(1) = -0.0001000;
+    dstrain(2) = 0.0000500;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -163,11 +163,15 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Compute updated stress
     mpm::dense_map state_vars = material->initialise_state_variables();
     std::ofstream myfile;
+    std::ofstream myfile2;
     myfile.open("norsand_stress.txt");
-    for (unsigned i = 0; i < 400; ++i) {
+    myfile2.open("norsand_state.txt");
+
+    for (unsigned i = 0; i < 1000; ++i) {
       stress =
           material->compute_stress(stress, dstrain, particle.get(), &state_vars);
       myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t' << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';      
+      myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image") << '\t' << (state_vars).at("void_ratio") << '\n'; 
     }
     myfile.close();
 

@@ -90,9 +90,11 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
 template <unsigned Tdim>
 bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
                                                    mpm::dense_map* state_vars) {
+
+  // Note that in this subroutine, stress is compression positive
+
   // Compute mean stress p 
-  // Note that compression is positive in the definition of p
-  double mean_p = -(stress(0) + stress(1) + stress(2)) / 3.;
+  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
   (*state_vars).at("p") = mean_p;
 
   // Compute J2
@@ -114,6 +116,7 @@ template <unsigned Tdim>
 typename mpm::NorSand<Tdim>::FailureState
     mpm::NorSand<Tdim>::compute_yield_state(double* yield_function,
                                             const mpm::dense_map* state_vars) {
+
   // Get stress invariants
   const double mean_p = (*state_vars).at("p");
   const double deviatoric_q = (*state_vars).at("q");
@@ -139,6 +142,9 @@ typename mpm::NorSand<Tdim>::FailureState
 template <unsigned Tdim>
 bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
                                                 mpm::dense_map* state_vars) {
+
+  // Note that in this subroutine, stress is compression positive
+
   // Get state variables
   const double mean_p = (*state_vars).at("p");
   const double deviatoric_q = (*state_vars).at("q");
@@ -164,21 +170,21 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   double dF_dp = -1. * M_ / N_ * (1 + (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (N_ / (1 - N_))));
 
   Vector6d dp_dsigma = Vector6d::Zero();
-  dp_dsigma(0) = -1./3.;
-  dp_dsigma(1) = -1./3.;
-  dp_dsigma(2) = -1./3.;
+  dp_dsigma(0) = 1./3.;
+  dp_dsigma(1) = 1./3.;
+  dp_dsigma(2) = 1./3.;
   
   double dF_dq = 1.;
 
   // Compute the deviatoric stress
   Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = -stress(0) - mean_p;
-  dev_stress(1) = -stress(1) - mean_p;
-  dev_stress(2) = -stress(2) - mean_p;
-  dev_stress(3) = -stress(3);
+  dev_stress(0) = stress(0) - mean_p;
+  dev_stress(1) = stress(1) - mean_p;
+  dev_stress(2) = stress(2) - mean_p;
+  dev_stress(3) = stress(3);
   if (Tdim == 3) {
-    dev_stress(4) = -stress(4);
-    dev_stress(5) = -stress(5);
+    dev_stress(4) = stress(4);
+    dev_stress(5) = stress(5);
   }
 
   Vector6d dq_dsigma = Vector6d::Zero();
@@ -217,10 +223,13 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
+  Vector6d stress_neg = -1 * stress;
+  Vector6d dstrain_neg = -1 * dstrain;
+
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e)
-  double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2); 
-  double void_ratio = (*state_vars).at("void_ratio") + (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
+  double dvolumetric_strain = dstrain_neg(0) + dstrain_neg(1) + dstrain_neg(2); 
+  double void_ratio = (*state_vars).at("void_ratio") - (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;  
   (*state_vars).at("void_ratio") = void_ratio;
 
   // Elastic step
@@ -234,7 +243,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   this->compute_elastic_tensor();
 
   // Trial stress - elastic
-  Vector6d trial_stress = stress + (this->de_ * dstrain);
+  Vector6d trial_stress = stress_neg + (this->de_ * dstrain_neg);
 
   // Compute trial stress invariants
   this->compute_stress_invariants(trial_stress, state_vars);
@@ -244,18 +253,18 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   auto yield_type = this->compute_yield_state(&yield_function, state_vars);
   
   // Return the updated stress in elastic state
-  if (yield_type == FailureState::Elastic) return trial_stress;
+  if (yield_type == FailureState::Elastic) return -trial_stress;
   // --------------------------------------------------------------------------------------
 
   // Set plastic tensor
-  this->compute_plastic_tensor(stress, state_vars);
+  this->compute_plastic_tensor(stress_neg, state_vars);
 
   // Plastic step
   // Compute D matrix used in stress update
   Matrix6x6 D_matrix = this->de_ - this->dp_;
 
   // Update stress
-  Vector6d updated_stress = stress + D_matrix * dstrain;
+  Vector6d updated_stress = stress_neg + D_matrix * dstrain_neg;
 
-  return updated_stress;
+  return (-1 * updated_stress);
 }
