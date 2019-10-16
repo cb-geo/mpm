@@ -226,8 +226,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Elastic step
   // --------------------------------------------------------------------------------------
   // Shear modulus
-  // shear_modulus_ = shear_modulus_constant_ * pow(((*state_vars).at("p") / reference_pressure_), shear_modulus_exponent_);
-  shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
+  shear_modulus_ = shear_modulus_constant_ * pow(((*state_vars).at("p") / reference_pressure_), shear_modulus_exponent_);
+  // shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
   // Bulk modulus
   bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) / (3.0 * (1. - 2. * poisson_ratio_));
   // Set elastic tensor
