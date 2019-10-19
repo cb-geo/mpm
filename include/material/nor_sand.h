@@ -69,10 +69,18 @@ class NorSand : public Material<Tdim> {
   bool compute_stress_invariants(const Vector6d& stress,
                                  mpm::dense_map* state_vars);
 
+  //! Compute state variables (void ratio, p_image, e_image, etc)
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval status of computation of stress invariants
+  bool compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
+                                 mpm::dense_map* state_vars);
+
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
+  //! \param[in] stress Stress
   //! \retval yield_type Yield type (elastic, shear or tensile)
-  FailureState compute_yield_state(double* yield_function,
+  FailureState compute_yield_state(double* yield_function, const Vector6d& stress,
                                    const mpm::dense_map* state_vars);
 
  protected:

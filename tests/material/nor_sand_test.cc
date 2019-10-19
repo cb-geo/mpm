@@ -39,8 +39,8 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["crushing_pressure"] = 10000000.0;
   jmaterial["chi"] = 3.5;
   jmaterial["hardening_modulus"] = 200.0;
-  jmaterial["void_ratio_initial"] = 0.95;
-  jmaterial["p_image_initial"] = 8701.46;
+  jmaterial["void_ratio_initial"] = 0.85;
+  jmaterial["p_image_initial"] = 87014.6;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -143,9 +143,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
 
-    stress(0) = -20000;
-    stress(1) = -20000;
-    stress(2) = -20000;
+    stress(0) = -200000;
+    stress(1) = -200000;
+    stress(2) = -200000;
     stress(3) = 0;
     stress(4) = 0;
     stress(5) = 0;
@@ -153,9 +153,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
     dstrain.setZero();
-    dstrain(0) = 0.000005000;
-    dstrain(1) = -0.00001000;
-    dstrain(2) = 0.00000500;
+    dstrain(0) = 0.00025000;
+    dstrain(1) = -0.0005000;
+    dstrain(2) = 0.0002500;
     dstrain(3) = 0.0000000;
     dstrain(4) = 0.0000000;
     dstrain(5) = 0.0000000;
@@ -167,7 +167,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     myfile.open("norsand_stress.txt");
     myfile2.open("norsand_state.txt");
 
-    for (unsigned i = 0; i < 400; ++i) {
+    // Write initial states
+    myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t' << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';      
+    myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image") << '\t' << (state_vars).at("void_ratio") << '\n'; 
+
+    // Loop
+    for (unsigned i = 0; i < 1000 - 1; ++i) {
       stress =
           material->compute_stress(stress, dstrain, particle.get(), &state_vars);
       myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t' << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';      
