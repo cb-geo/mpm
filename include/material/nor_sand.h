@@ -1,8 +1,8 @@
 #ifndef MPM_MATERIAL_NOR_SAND_H_
 #define MPM_MATERIAL_NOR_SAND_H_
 
-#include <limits>
 #include <iostream>
+#include <limits>
 
 #include <cmath>
 
@@ -61,7 +61,6 @@ class NorSand : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
-
   //! Compute stress invariants (p, q, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
@@ -74,13 +73,14 @@ class NorSand : public Material<Tdim> {
   //! \param[in] state_vars History-dependent state variables
   //! \retval status of computation of stress invariants
   bool compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
-                                 mpm::dense_map* state_vars);
+                               mpm::dense_map* state_vars);
 
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
   //! \param[in] stress Stress
   //! \retval yield_type Yield type (elastic, shear or tensile)
-  FailureState compute_yield_state(double* yield_function, const Vector6d& stress,
+  FailureState compute_yield_state(double* yield_function,
+                                   const Vector6d& stress,
                                    const mpm::dense_map* state_vars);
 
  protected:
@@ -116,7 +116,7 @@ class NorSand : public Material<Tdim> {
   //! Shear modulus
   double shear_modulus_{std::numeric_limits<double>::max()};
   //! Reference pressure pref
-  double reference_pressure_{std::numeric_limits<double>::max()};  
+  double reference_pressure_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Critical state coefficient M

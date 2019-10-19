@@ -1,6 +1,6 @@
-#include <limits>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <limits>
 
 #include "Eigen/Dense"
 #include "catch.hpp"
@@ -114,14 +114,19 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
 
     // // Check if state variable is initialised
     // SECTION("State variable is initialised") {
-    //   mpm::dense_map state_variables = material->initialise_state_variables();
-    //   REQUIRE(state_variables.empty() == false);
-    //   REQUIRE(state_variables.at("p") == Approx(0.).epsilon(Tolerance));
-    //   REQUIRE(state_variables.at("q") == Approx(0.).epsilon(Tolerance));
-    //   REQUIRE(state_variables.at("void_ratio") == Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
-    //   REQUIRE(state_variables.at("e_image") == Approx(0.9350064171).epsilon(Tolerance));
-    //   REQUIRE(state_variables.at("p_image") == Approx(8701.46).epsilon(Tolerance));
-    //   REQUIRE(state_variables.at("psi_image") == Approx(-0.0850064171).epsilon(Tolerance));
+    //   mpm::dense_map state_variables =
+    //   material->initialise_state_variables(); REQUIRE(state_variables.empty()
+    //   == false); REQUIRE(state_variables.at("p") ==
+    //   Approx(0.).epsilon(Tolerance)); REQUIRE(state_variables.at("q") ==
+    //   Approx(0.).epsilon(Tolerance));
+    //   REQUIRE(state_variables.at("void_ratio") ==
+    //   Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
+    //   REQUIRE(state_variables.at("e_image") ==
+    //   Approx(0.9350064171).epsilon(Tolerance));
+    //   REQUIRE(state_variables.at("p_image") ==
+    //   Approx(8701.46).epsilon(Tolerance));
+    //   REQUIRE(state_variables.at("psi_image") ==
+    //   Approx(-0.0850064171).epsilon(Tolerance));
 
     // }
   }
@@ -168,15 +173,20 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     myfile2.open("norsand_state.txt");
 
     // Write initial states
-    myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t' << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';      
-    myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image") << '\t' << (state_vars).at("void_ratio") << '\n'; 
+    myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t'
+           << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';
+    myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image")
+            << '\t' << (state_vars).at("void_ratio") << '\n';
 
     // Loop
     for (unsigned i = 0; i < 1000 - 1; ++i) {
-      stress =
-          material->compute_stress(stress, dstrain, particle.get(), &state_vars);
-      myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t' << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';      
-      myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image") << '\t' << (state_vars).at("void_ratio") << '\n'; 
+      stress = material->compute_stress(stress, dstrain, particle.get(),
+                                        &state_vars);
+      myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t'
+             << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';
+      myfile2 << (state_vars).at("p_image") << '\t'
+              << (state_vars).at("e_image") << '\t'
+              << (state_vars).at("void_ratio") << '\n';
     }
     myfile.close();
 
@@ -201,7 +211,8 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
 
     // // Compute updated stress
     // stress =
-    //     material->compute_stress(stress, strain, particle.get(), &state_vars);
+    //     material->compute_stress(stress, strain, particle.get(),
+    //     &state_vars);
 
     // // Check stressees
     // REQUIRE(stress(0) == Approx(1.63461538461538e+04).epsilon(Tolerance));
@@ -212,5 +223,3 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // REQUIRE(stress(5) == Approx(0.00000000000000e+00).epsilon(Tolerance));
   }
 }
-
-

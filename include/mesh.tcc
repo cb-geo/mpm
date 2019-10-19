@@ -945,7 +945,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       HOFFSET(HDF5Particle, gamma_xz),   HOFFSET(HDF5Particle, epsilon_v),
       HOFFSET(HDF5Particle, status),     HOFFSET(HDF5Particle, cell_id),
       HOFFSET(HDF5Particle, p_image),    HOFFSET(HDF5Particle, e_image),
-      HOFFSET(HDF5Particle, void_ratio),   
+      HOFFSET(HDF5Particle, void_ratio),
   };
 
   size_t dst_sizes[NFIELDS] = {
@@ -964,7 +964,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       sizeof(particle_data[0].gamma_xz),   sizeof(particle_data[0].epsilon_v),
       sizeof(particle_data[0].status),     sizeof(particle_data[0].cell_id),
       sizeof(particle_data[0].p_image),    sizeof(particle_data[0].e_image),
-      sizeof(particle_data[0].void_ratio),                
+      sizeof(particle_data[0].void_ratio),
   };
 
   // Define particle field information
@@ -974,7 +974,8 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
       "velocity_x", "velocity_y", "velocity_z", "stress_xx", "stress_yy",
       "stress_zz",  "tau_xy",     "tau_yz",     "tau_xz",    "strain_xx",
       "strain_yy",  "strain_zz",  "gamma_xy",   "gamma_yz",  "gamma_xz",
-      "epsilon_v",  "status",     "cell_id",    "p_image",   "e_image",   "void_ratio"};
+      "epsilon_v",  "status",     "cell_id",    "p_image",   "e_image",
+      "void_ratio"};
 
   hid_t field_type[NFIELDS];
   hid_t string_type;
