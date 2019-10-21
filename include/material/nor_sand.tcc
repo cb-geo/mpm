@@ -160,20 +160,17 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   if (lode_angle_val > 1.0) lode_angle_val = 1.0;
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
-  // Compute Lode angle
-  double lode_angle = (1. / 3.) * acos(lode_angle_val);
-  if (lode_angle > M_PI / 3.) lode_angle = M_PI / 3.;
-  if (lode_angle < 0.0) lode_angle = 0.;
+  // Compute Lode angle (sin convention)
+  double lode_angle = (1. / 3.) * asin(lode_angle_val);
+  if (lode_angle > M_PI / 6.) lode_angle = M_PI / 6.;
+  if (lode_angle < -M_PI / 6.) lode_angle = -M_PI / 6.;
   (*state_vars)["lode_angle"] = lode_angle;
 
-  // Compute M_theta
-  const double sin_lode_angle = sin(lode_angle);
-  const double cos_lode_angle = cos(lode_angle);
+  // Compute M_theta (Jefferies and Shuttle, 2011)
+  const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
+  const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
   const double sqrt_3 = sqrt(3.);
-  double M_theta_denominator =
-      cos_lode_angle * (1. + 6. / Mtc_) - sin_lode_angle * sqrt_3;
-  if (fabs(M_theta_denominator) < 1.0E-15) M_theta_denominator = 1.0E-15;
-  double M_theta = 3. * sqrt_3 / M_theta_denominator;
+  double M_theta = Mtc_ - pow(Mtc_, 2) / (3. + Mtc_ * cos_lode_angle);
   (*state_vars)["M_theta"] = M_theta;
 
   return true;
@@ -279,15 +276,18 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
       mean_p * pow((1 + D_min * N_ / M_theta), ((N_ - 1) / N_));
 
   // Compute derivatives
+  // Compute dF / dp
   double dF_dp =
       -1. * M_theta / N_ *
       (1 + (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (N_ / (1 - N_))));
 
+  // Compute dp / dsigma
   Vector6d dp_dsigma = Vector6d::Zero();
   dp_dsigma(0) = 1. / 3.;
   dp_dsigma(1) = 1. / 3.;
   dp_dsigma(2) = 1. / 3.;
 
+  // Compute dF / dq
   double dF_dq = 1.;
 
   // Compute the deviatoric stress
@@ -301,6 +301,7 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dev_stress(5) = stress(5);
   }
 
+  // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
   dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
   dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
@@ -311,7 +312,49 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
   }
 
-  Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
+  const double lode_angle = (*state_vars)["lode_angle"];
+  const double j2 = (*state_vars)["j2"];
+  const double j3 = (*state_vars)["j3"];
+  const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
+  const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
+
+  // Compute dM / dtehta
+  double dM_dtheta = - 3. / 2. * pow(Mtc_, 3) * sin_lode_angle / pow((3. + Mtc_ * cos_lode_angle), 2);
+
+  // Compute dj2 / dsigma
+  Vector6d dj2_dsigma = dev_stress;
+  
+  // Compute dj3 / dsigma
+  Eigen::Matrix<double, 3, 1> dev1;
+  dev1(0) = dev_stress(0);
+  dev1(1) = dev_stress(3);
+  dev1(2) = dev_stress(5);
+  Eigen::Matrix<double, 3, 1> dev2;
+  dev2(0) = dev_stress(3);
+  dev2(1) = dev_stress(1);
+  dev2(2) = dev_stress(4);
+  Eigen::Matrix<double, 3, 1> dev3;
+  dev3(0) = dev_stress(5);
+  dev3(1) = dev_stress(4);
+  dev3(2) = dev_stress(2);
+  Vector6d dj3_dsigma = Vector6d::Zero();
+  dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
+  dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
+  dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
+  dj3_dsigma(3) = dev1.dot(dev2);
+  if (Tdim == 3) {
+    dj3_dsigma(4) = dev2.dot(dev3);
+    dj3_dsigma(5) = dev1.dot(dev3);
+  }
+
+  // Compute dtheta / dsigma
+  Vector6d dtheta_dsigma = sqrt(3.) / 2. / cos(3 * lode_angle) / pow(j2, 1.5) * (dj3_dsigma - 3. / 2. * j3 / j2 * dj2_dsigma);
+  if (Tdim == 2) {
+    dtheta_dsigma(4) = 0.;
+    dtheta_dsigma(5) = 0.;
+  }
+
+  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) + (dM_dtheta * dtheta_dsigma);
 
   double dF_dpi =
       M_theta * (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));

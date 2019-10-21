@@ -41,7 +41,7 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["crushing_pressure"] = 10000000.0;
   jmaterial["chi"] = 3.5;
   jmaterial["hardening_modulus"] = 200.0;
-  jmaterial["void_ratio_initial"] = 0.85;
+  jmaterial["void_ratio_initial"] = 0.91;
   jmaterial["p_image_initial"] = 87014.6;
 
   double pi_constant = M_PI;
