@@ -106,6 +106,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     auto pstress = particle->stress(phase);
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+
+    auto pstress_data = particle->vector_data(phase, "stresses");
+    for (unsigned i = 0; i < pstress_data.size(); ++i)
+      REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
   //! Test particles velocity constraints

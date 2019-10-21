@@ -257,6 +257,13 @@ class Particle : public ParticleBase<Tdim> {
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   double pressure(unsigned phase) const override { return pressure_(phase); }
 
+  //! Return vector data of particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle property
+  Eigen::VectorXd vector_data(unsigned phase,
+                              const std::string& property) override;
+
   //! Assign particle velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of particle velocity constraint

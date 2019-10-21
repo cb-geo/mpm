@@ -719,3 +719,17 @@ void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
     this->velocity_(direction, phase) = constraint.second;
   }
 }
+
+//! Apply particle velocity constraints
+template <unsigned Tdim, unsigned Tnphases>
+Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
+    unsigned phase, const std::string& property) {
+  //! Map of properties
+  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties;
+
+  properties["stresses"] = [&](unsigned phase) { return stress(phase); };
+  properties["strains"] = [&](unsigned phase) { return strain(phase); };
+  properties["velocities"] = [&](unsigned phase) { return velocity(phase); };
+
+  return properties.at(property)(phase);
+}
