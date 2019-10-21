@@ -119,8 +119,12 @@ class NorSand : public Material<Tdim> {
   double reference_pressure_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Critical state coefficient M
-  double M_{std::numeric_limits<double>::max()};
+  //! Critical state friction angle
+  double friction_cs_{std::numeric_limits<double>::max()};
+  //! Critical state coefficient M in triaxial compression
+  double Mtc_{std::numeric_limits<double>::max()};
+  //! Critical state coefficient M in triaxial extension
+  double Mte_{std::numeric_limits<double>::max()};
   //! Volumetric coupling (dilatancy) parameter N
   double N_{std::numeric_limits<double>::max()};
   //! Minimum void ratio

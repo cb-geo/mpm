@@ -21,8 +21,9 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     // Poisson ratio
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
-    // Critical state coefficient M
-    M_ = material_properties["M"].template get<double>();
+    // Critical state friction angle
+    friction_cs_ =
+        material_properties["friction_cs"].template get<double>() * M_PI / 180.;
     // Volumetric coupling (dilatancy) parameter N
     N_ = material_properties["N"].template get<double>();
     // Minimum void ratio
@@ -44,6 +45,10 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     p_image_initial_ =
         material_properties["p_image_initial"].template get<double>();
 
+    double sin_friction_cs = sin(friction_cs_);
+    Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
+    Mte_ = (6 * sin_friction_cs) / (3 + sin_friction_cs);
+
     // Properties
     properties_ = material_properties;
 
@@ -60,6 +65,14 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"p", 0.},
       // Deviatoric stress
       {"q", 0.},
+      // Lode angle
+      {"lode_angle", 0.},
+      // J2
+      {"j2", 0.},
+      // J3
+      {"j3", 0.},
+      // M_theta
+      {"M_theta", Mtc_},
       // Current void ratio
       {"void_ratio", void_ratio_initial_},
       // Void ratio image
@@ -107,6 +120,17 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   if (mean_p < 1.0E-15) mean_p = 1.0E-15;
   (*state_vars).at("p") = mean_p;
 
+  // Compute the deviatoric stress
+  Vector6d dev_stress = Vector6d::Zero();
+  dev_stress(0) = stress(0) - mean_p;
+  dev_stress(1) = stress(1) - mean_p;
+  dev_stress(2) = stress(2) - mean_p;
+  dev_stress(3) = stress(3);
+  if (Tdim == 3) {
+    dev_stress(4) = stress(4);
+    dev_stress(5) = stress(5);
+  }
+
   // Compute J2
   double j2 =
       (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
@@ -114,11 +138,43 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
           6.0 +
       pow(stress(3), 2);
   if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
+  if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
+  (*state_vars).at("j2") = j2;
+
+  // Compute J3
+  double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
+              (dev_stress(2) * pow(dev_stress(3), 2));
+  if (Tdim == 3)
+    j3 += ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+           (dev_stress(0) * pow(dev_stress(4), 2)) -
+           (dev_stress(1) * pow(dev_stress(5), 2)));
+  (*state_vars).at("j3") = j3;
 
   // Compute q
   double deviatoric_q = sqrt(3 * j2);
   if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
   (*state_vars).at("q") = deviatoric_q;
+
+  // Compute Lode angle value
+  double lode_angle_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
+  if (lode_angle_val > 1.0) lode_angle_val = 1.0;
+  if (lode_angle_val < -1.0) lode_angle_val = -1.0;
+
+  // Compute Lode angle
+  double lode_angle = (1. / 3.) * acos(lode_angle_val);
+  if (lode_angle > M_PI / 3.) lode_angle = M_PI / 3.;
+  if (lode_angle < 0.0) lode_angle = 0.;
+  (*state_vars)["lode_angle"] = lode_angle;
+
+  // Compute M_theta
+  const double sin_lode_angle = sin(lode_angle);
+  const double cos_lode_angle = cos(lode_angle);
+  const double sqrt_3 = sqrt(3.);
+  double M_theta_denominator =
+      cos_lode_angle * (1. + 6. / Mtc_) - sin_lode_angle * sqrt_3;
+  if (fabs(M_theta_denominator) < 1.0E-15) M_theta_denominator = 1.0E-15;
+  double M_theta = 3. * sqrt_3 / M_theta_denominator;
+  (*state_vars)["M_theta"] = M_theta;
 
   return true;
 }
@@ -132,11 +188,12 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   // Get state variables
   const double mean_p = (*state_vars).at("p");
   const double deviatoric_q = (*state_vars).at("q");
+  const double M_theta = (*state_vars).at("M_theta");
 
   // Compute and update pressure image
   double p_image =
-      mean_p *
-      pow(((1 - N_ / M_ * deviatoric_q / mean_p) / (1 - N_)), ((N_ - 1) / N_));
+      mean_p * pow(((1 - N_ / M_theta * deviatoric_q / mean_p) / (1 - N_)),
+                   ((N_ - 1) / N_));
   (*state_vars).at("p_image") = p_image;
 
   // Compute and update void ratio image
@@ -182,8 +239,9 @@ typename mpm::NorSand<Tdim>::FailureState
   double deviatoric_q = sqrt(3 * j2);
   if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
 
-  // Get image pressure
+  // Get image pressure and M_theta
   const double p_image = (*state_vars).at("p_image");
+  const double M_theta = (*state_vars).at("M_theta");
 
   // Initialise yield status (0: elastic, 1: yield)
   auto yield_type = FailureState::Elastic;
@@ -191,7 +249,7 @@ typename mpm::NorSand<Tdim>::FailureState
   // Compute yield functions
   (*yield_function) =
       deviatoric_q / mean_p -
-      M_ / N_ * (1 + (N_ - 1) * pow((mean_p / p_image), (N_ / (1 - N_))));
+      M_theta / N_ * (1 + (N_ - 1) * pow((mean_p / p_image), (N_ / (1 - N_))));
 
   // Tension failure
   if ((*yield_function) > 1.E-15) yield_type = FailureState::Yield;
@@ -209,20 +267,20 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Get state variables
   const double mean_p = (*state_vars).at("p");
   const double deviatoric_q = (*state_vars).at("q");
-
+  const double M_theta = (*state_vars).at("M_theta");
   const double p_image = (*state_vars).at("p_image");
-
   const double psi_image = (*state_vars).at("psi_image");
 
   // Estimate dilatancy at peak
   double D_min = chi_ * psi_image;
 
   // Estimate maximum image pressure
-  double p_image_max = mean_p * pow((1 + D_min * N_ / M_), ((N_ - 1) / N_));
+  double p_image_max =
+      mean_p * pow((1 + D_min * N_ / M_theta), ((N_ - 1) / N_));
 
   // Compute derivatives
   double dF_dp =
-      -1. * M_ / N_ *
+      -1. * M_theta / N_ *
       (1 + (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (N_ / (1 - N_))));
 
   Vector6d dp_dsigma = Vector6d::Zero();
@@ -256,7 +314,7 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   Vector6d dF_dsigma = dF_dp * dp_dsigma + dF_dq * dq_dsigma;
 
   double dF_dpi =
-      M_ * (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
+      M_theta * (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
   double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
 
   double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3;

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <limits>
 
+#include <cmath>
+
 #include "Eigen/Dense"
 #include "catch.hpp"
 #include "json.hpp"
@@ -32,7 +34,7 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["shear_modulus_constant"] = 2500000.;
   jmaterial["shear_modulus_exponent"] = 0.5;
   jmaterial["reference_pressure"] = 1000.;
-  jmaterial["M"] = 1.33;
+  jmaterial["friction_cs"] = 30;
   jmaterial["N"] = 0.3;
   jmaterial["e_min"] = 0.542;
   jmaterial["e_max"] = 1.000;
@@ -41,6 +43,8 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["hardening_modulus"] = 200.0;
   jmaterial["void_ratio_initial"] = 0.85;
   jmaterial["p_image_initial"] = 87014.6;
+
+  double pi_constant = M_PI;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -93,8 +97,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
             Approx(jmaterial["shear_modulus_exponent"]).epsilon(Tolerance));
     REQUIRE(material->property("reference_pressure") ==
             Approx(jmaterial["reference_pressure"]).epsilon(Tolerance));
-    REQUIRE(material->property("M") ==
-            Approx(jmaterial["M"]).epsilon(Tolerance));
+    // REQUIRE(material->property("friction_cs") ==
+    //         Approx(jmaterial["friction_cs"] * pi_constant /
+    //         180).epsilon(Tolerance));
     REQUIRE(material->property("N") ==
             Approx(jmaterial["N"]).epsilon(Tolerance));
     REQUIRE(material->property("e_min") ==
@@ -176,8 +181,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     myfile << stress(0) << '\t' << stress(1) << '\t' << stress(2) << '\t'
            << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';
     myfile2 << (state_vars).at("p_image") << '\t' << (state_vars).at("e_image")
-            << '\t' << (state_vars).at("void_ratio") << '\n';
-
+            << '\t' << (state_vars).at("void_ratio") << '\t'
+            << (state_vars).at("lode_angle") << '\t'
+            << (state_vars).at("M_theta") << '\n';
     // Loop
     for (unsigned i = 0; i < 1000 - 1; ++i) {
       stress = material->compute_stress(stress, dstrain, particle.get(),
@@ -186,7 +192,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
              << stress(3) << '\t' << stress(4) << '\t' << stress(5) << '\n';
       myfile2 << (state_vars).at("p_image") << '\t'
               << (state_vars).at("e_image") << '\t'
-              << (state_vars).at("void_ratio") << '\n';
+              << (state_vars).at("void_ratio") << '\t'
+              << (state_vars).at("lode_angle") << '\t'
+              << (state_vars).at("M_theta") << '\n';
     }
     myfile.close();
 
