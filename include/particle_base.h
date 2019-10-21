@@ -179,6 +179,9 @@ class ParticleBase {
   //! Return velocity
   virtual VectorDim velocity(unsigned phase) const = 0;
 
+  //! Return displacement of the particle
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
   //! Assign traction
   virtual bool assign_traction(unsigned phase, unsigned direction,
                                double traction) = 0;

@@ -82,12 +82,13 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
+  displacement_.setZero();
   dstrain_.setZero();
   mass_.setZero();
+  natural_size_.setZero();
   pressure_.setZero();
   set_traction_ = false;
   size_.setZero();
-  natural_size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
@@ -575,6 +576,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
 
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -607,6 +610,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
 
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -730,6 +735,9 @@ Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
   properties["stresses"] = [&](unsigned phase) { return stress(phase); };
   properties["strains"] = [&](unsigned phase) { return strain(phase); };
   properties["velocities"] = [&](unsigned phase) { return velocity(phase); };
+  properties["displacements"] = [&](unsigned phase) {
+    return displacement(phase);
+  };
 
   return properties.at(property)(phase);
 }
