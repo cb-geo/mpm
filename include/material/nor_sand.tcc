@@ -319,11 +319,12 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
 
   // Compute dM / dtehta
-  double dM_dtheta = - 3. / 2. * pow(Mtc_, 3) * sin_lode_angle / pow((3. + Mtc_ * cos_lode_angle), 2);
+  double dM_dtheta = -3. / 2. * pow(Mtc_, 3) * sin_lode_angle /
+                     pow((3. + Mtc_ * cos_lode_angle), 2);
 
   // Compute dj2 / dsigma
   Vector6d dj2_dsigma = dev_stress;
-  
+
   // Compute dj3 / dsigma
   Eigen::Matrix<double, 3, 1> dev1;
   dev1(0) = dev_stress(0);
@@ -348,13 +349,15 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   }
 
   // Compute dtheta / dsigma
-  Vector6d dtheta_dsigma = sqrt(3.) / 2. / cos(3 * lode_angle) / pow(j2, 1.5) * (dj3_dsigma - 3. / 2. * j3 / j2 * dj2_dsigma);
+  Vector6d dtheta_dsigma = sqrt(3.) / 2. / cos(3 * lode_angle) / pow(j2, 1.5) *
+                           (dj3_dsigma - 3. / 2. * j3 / j2 * dj2_dsigma);
   if (Tdim == 2) {
     dtheta_dsigma(4) = 0.;
     dtheta_dsigma(5) = 0.;
   }
 
-  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) + (dM_dtheta * dtheta_dsigma);
+  Vector6d dF_dsigma =
+      (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) + (dM_dtheta * dtheta_dsigma);
 
   double dF_dpi =
       M_theta * (N_ - 1) / (1 - N_) * pow((mean_p / p_image), (1 / (1 - N_)));
