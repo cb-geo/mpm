@@ -96,6 +96,16 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   velocity_.setZero();
   volume_.fill(std::numeric_limits<double>::max());
   volumetric_strain_centroid_.setZero();
+
+  // Initialize vector data properties
+  this->properties_["stresses"] = [&](unsigned phase) { return stress(phase); };
+  this->properties_["strains"] = [&](unsigned phase) { return strain(phase); };
+  this->properties_["velocities"] = [&](unsigned phase) {
+    return velocity(phase);
+  };
+  this->properties_["displacements"] = [&](unsigned phase) {
+    return displacement(phase);
+  };
 }
 
 // Assign a cell to particle
@@ -725,19 +735,9 @@ void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
   }
 }
 
-//! Apply particle velocity constraints
+//! Return particle vector data
 template <unsigned Tdim, unsigned Tnphases>
 Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
     unsigned phase, const std::string& property) {
-  //! Map of properties
-  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties;
-
-  properties["stresses"] = [&](unsigned phase) { return stress(phase); };
-  properties["strains"] = [&](unsigned phase) { return strain(phase); };
-  properties["velocities"] = [&](unsigned phase) { return velocity(phase); };
-  properties["displacements"] = [&](unsigned phase) {
-    return displacement(phase);
-  };
-
-  return properties.at(property)(phase);
+  return this->properties_.at(property)(phase);
 }
