@@ -204,6 +204,12 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Return displacement of the particle
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  }
+
   //! Assign traction to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
@@ -257,6 +263,13 @@ class Particle : public ParticleBase<Tdim> {
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   double pressure(unsigned phase) const override { return pressure_(phase); }
 
+  //! Return vector data of particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle property
+  Eigen::VectorXd vector_data(unsigned phase,
+                              const std::string& property) override;
+
   //! Assign particle velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of particle velocity constraint
@@ -309,6 +322,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
@@ -321,6 +336,9 @@ class Particle : public ParticleBase<Tdim> {
   std::vector<Eigen::MatrixXd> bmatrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! Map of vector properties
+  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties_;
+
 };  // Particle class
 }  // namespace mpm
 
