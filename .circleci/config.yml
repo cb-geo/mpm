@@ -1,7 +1,6 @@
 version: 2.0
 jobs:
-  build:
-    working_directory: /home/cbgeo/research/mpm
+  gcc:
     docker:
       - image: quay.io/cbgeo/mpm
     steps:
@@ -20,6 +19,11 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             make -j2
             ctest -VV
+  clang:
+    docker:
+      - image: quay.io/cbgeo/mpm
+    steps:
+      - checkout
       # Clang-6.0
       - run:
           name: Clang-6.0 + Static analysis
@@ -30,7 +34,11 @@ jobs:
             scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             scan-build make -j2 
             ctest -VV
-      # cppcheck
+  cppcheck:
+    docker:
+      - image: quay.io/cbgeo/mpm
+    steps:
+      - checkout
       - run:
           name: cppcheck
           command: |
@@ -41,6 +49,13 @@ jobs:
           name: clang-format
           command: |
             python3 ./clang-tools/run-clang-format.py -r include/* src/* tests/*
+
+  codecov:
+    docker:
+      - image: quay.io/cbgeo/mpm
+    steps:
+      - checkout
+
       # codecoverage
       - run:
           name: codecov.io
@@ -54,3 +69,12 @@ jobs:
             make gcov -j2  --ignore-errors
             make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov
+
+workflows:
+    version: 2
+    build:
+        jobs:
+            - gcc
+            - clang
+            - cppcheck
+            - codecov
