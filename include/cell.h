@@ -280,6 +280,9 @@ class Cell {
   //! Return sorted face node ids
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
+  //! Assign materials to nodes from the particles within this cell
+  void assign_material_ids_to_nodes(const Container<ParticleBase<Tdim>> particles);
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point

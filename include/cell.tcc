@@ -510,7 +510,6 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   return xi;
 }
 
-
 //! Return the local coordinates of a point in a 1D cell
 template <>
 inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
@@ -1146,4 +1145,17 @@ inline std::vector<std::vector<mpm::Index>>
     set_face_nodes.emplace_back(face_nodes);
   }
   return set_face_nodes;
+}
+
+//! Assign materials to nodes from the particles within this cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::assign_material_ids_to_nodes(
+    const Container<ParticleBase<Tdim>> particles) {
+  // Loop over all particles from this cell and add the material id to the node
+  for (auto itr = particles_.begin(); itr != < particles_.size(); ++itr) {
+    auto particle = std::find(particles.begin(), particles.end(), itr);
+    auto material_id = particle->get_material_id();
+    for (auto itr_node = nodes_.begin(); itr_node != nodes_.end(); ++itr_node)
+      itr_node->add_material_id_to_node(material_id);
+  }
 }
