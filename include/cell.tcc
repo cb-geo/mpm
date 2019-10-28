@@ -510,15 +510,21 @@ inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::local_coordinates_point(
   return xi;
 }
 
+//! Return the local coordinates of a point in a 1D cell
+template <>
+inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
+    const Eigen::Matrix<double, 1, 1>& point) {
+  return this->local_coordinates_point(point);
+}
+
 //! Return the local coordinates of a point in a cell
 template <unsigned Tdim>
 inline Eigen::Matrix<double, Tdim, 1>
     mpm::Cell<Tdim>::transform_real_to_unit_cell(
         const Eigen::Matrix<double, Tdim, 1>& point) {
 
-  // If regular cartesian grid or 1D element use cartesian transformation
-  if (!this->isoparametric_ || Tdim == 1)
-    return this->local_coordinates_point(point);
+  // If regular cartesian grid use cartesian transformation
+  if (!this->isoparametric_) return this->local_coordinates_point(point);
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();

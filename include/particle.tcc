@@ -365,7 +365,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     if (volume_(phase) != std::numeric_limits<double>::max() &&
         material_.at(phase) != nullptr) {
       // Mass = volume of particle * mass_density
-      mass_density_(phase) = material_.at(phase)->property("density");
+      mass_density_(phase) = material_.at(phase)->template property<double>(
+          std::string("density"));
       this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
