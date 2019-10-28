@@ -54,10 +54,11 @@ class Material {
   unsigned id() const { return id_; }
 
   //! Get material property
-  //! \param[in] key Material properties key
+  //! \tparam Ttype Return type for proerpty
+  //! \param[in] key Material property key
   //! \retval result Value of material property
-  template <typename Targ>
-  Targ property(const std::string& key);
+  template <typename Ttype>
+  Ttype property(const std::string& key);
 
   //! Initialise history variables
   virtual mpm::dense_map initialise_state_variables() = 0;

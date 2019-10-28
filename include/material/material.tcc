@@ -1,9 +1,9 @@
 //! Get material property
 template <unsigned Tdim>
-template <typename Targ>
-Targ mpm::Material<Tdim>::property(const std::string& key) {
+template <typename Ttype>
+Ttype mpm::Material<Tdim>::property(const std::string& key) {
   try {
-    return properties_[key].template get<Targ>();
+    return properties_[key].template get<Ttype>();
   } catch (std::exception& except) {
     console_->error("Property call to material parameter not found: {}",
                     except.what());
