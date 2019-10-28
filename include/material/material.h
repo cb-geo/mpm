@@ -56,7 +56,8 @@ class Material {
   //! Get material property
   //! \param[in] key Material properties key
   //! \retval result Value of material property
-  double property(const std::string& key);
+  template <typename Targ>
+  Targ property(const std::string& key);
 
   //! Initialise history variables
   virtual mpm::dense_map initialise_state_variables() = 0;
