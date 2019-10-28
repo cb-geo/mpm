@@ -218,6 +218,9 @@ class ParticleBase {
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
 
+  //! Get material id corresponding to this particle
+  virtual unsigned get_material_id() = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
