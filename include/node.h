@@ -208,6 +208,11 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Add material id from material points to list of materials in materials_
+  virtual void add_material_id_to_node(unsigned id) override{
+    material_ids_.emplace_back(id);
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -245,6 +250,8 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Material ids whose information was passed to this node
+  std::vector<unsigned> material_ids_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class
