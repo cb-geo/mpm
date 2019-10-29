@@ -588,7 +588,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -763,7 +763,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
@@ -1504,7 +1504,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1699,7 +1699,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
+    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(12.0).epsilon(Tolerance));
 
     // Compute stress

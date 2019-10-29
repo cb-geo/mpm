@@ -22,6 +22,27 @@
 
 namespace mpm {
 
+//! Qudrature rule
+//! (1) Standard MPM considers material points with mass and volume as
+//! integration points and quadrature weight is assumes as particle volume.
+//! (2) Gauss quadrature computes the polynomial integration at fixed Gauss
+//! points. This use is limited in MPM, however, it can be used when
+//! the code is used for simple FEM analysis.
+//! (3) Moving Gauss quadrature considers material points as moving
+//! integration points with no mass/volume. The quadrature weight
+//! is computed from Gauss qudrature rule.
+//! (4) Gauss_mpm integration takes two integration methods for interior and
+//! boundary elements. For interior elements, the integration is performaed at
+//! fixed Gauss locations whereas for boundary elements, the integration is
+//! performed at particle level.
+enum class QuadratureRule { Standard_mpm, Gauss, Moving_Gauss, Gauss_mpm };
+
+//! Stress update method
+//! usl: Update Stress Last
+//! usf: Update Stress First
+//! musl: Modified Stress Last
+enum class StressUpdate { usf, usl, musl };
+
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
 //! \details A Base MPM class
@@ -85,7 +106,8 @@ class MPMBase : public MPM {
   using mpm::MPM::post_process_;
   //! Logger
   using mpm::MPM::console_;
-
+  //! Stress update method (default usf = 0, usl = 1, musl = 2)
+  mpm::StressUpdate stress_update_{mpm::StressUpdate::usf};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
@@ -98,6 +120,12 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
+  //! Qudrature rule (default is standard mpm integration)
+  mpm::QuadratureRule quadrature_rule_{QuadratureRule::Standard_mpm};
+  //! Polynomial order for Approximate Gauss quadrature rule
+  unsigned quadrature_order_{2};
+  // Level set methods
+  bool ls_methods_{false};
 };  // MPMBase class
 }  // namespace mpm
 

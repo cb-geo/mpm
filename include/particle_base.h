@@ -105,8 +105,11 @@ class ParticleBase {
   //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
 
-  //! Update volume based on centre volumetric strain rate
-  virtual bool update_volume_strainrate(unsigned phase, double dt) = 0;
+  //! Update material point volume
+  virtual bool update_volume(unsigned phase, double dt) = 0;
+
+  //! Update material point volume by using the cell-centre strain rate
+  virtual bool update_volume_centre_strainrate(unsigned phase, double dt) = 0;
 
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
@@ -225,6 +228,10 @@ class ParticleBase {
   std::map<unsigned, std::shared_ptr<Material<Tdim>>> material_;
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Material point volume
+  double volume_{std::numeric_limits<double>::max()};
+  //! Material point porosity (volume of voids / total volume)
+  double porosity_{0.0};
 };  // ParticleBase class
 }  // namespace mpm
 

@@ -34,6 +34,29 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
+    // Get stress update method
+    try {
+      if (analysis_.find("stress_update") != analysis_.end()) {
+        switch (analysis_["stress_update"].template get<int>()) {
+          case (0):
+            stress_update_ = mpm::StressUpdate::usf;
+          case (1):
+            stress_update_ = mpm::StressUpdate::usl;
+          case (2):
+            stress_update_ = mpm::StressUpdate::musl;
+          default:
+            throw std::runtime_error(
+                "Stress update method is invalid, must be 0,1 or 2");
+        }
+      } else
+        console_->warn(
+            "{} #{}: Stress update method is not specified, using default as "
+            "USF",
+            __FILE__, __LINE__);
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    }
+
     // Velocity update
     try {
       velocity_update_ = analysis_["velocity_update"].template get<bool>();
@@ -383,7 +406,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_traction_end - particles_traction_begin)
                        .count());
 
-    // TODO: Read and assign particle sets
+    // Read and assign particle sets
+    if (!io_->file_name("entity_sets").empty()) {
+      bool particle_sets = mesh_->create_particle_sets(
+          (io_->entity_sets(io_->file_name("entity_sets"), "particle_sets")),
+          check_duplicates);
+    }
   } catch (std::exception& exception) {
     console_->error("#{}: Reading particles: {}", __LINE__, exception.what());
     status = false;
