@@ -26,6 +26,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
+  mixture_internal_force_.setZero();
+  drag_force_coefficient_.setZero();
   pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
@@ -120,6 +122,49 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     // Update/assign internal force
     std::lock_guard<std::mutex> guard(node_mutex_);
     internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update mixture internal force (body force / traction force)
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_mixture_internal_force(
+    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
+  bool status = false;
+  try {
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    // Update/assign internal force
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    mixture_internal_force_ = mixture_internal_force_ * factor + force;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update drag force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_drag_force_coefficient(
+    bool update, const Eigen::Matrix<double, Tdim, 1>& drag_force_coefficient) {
+  bool status = false;
+  try {
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    // Update/assign drag force coefficient
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    drag_force_coefficient_ =
+        drag_force_coefficient_ * factor + drag_force_coefficient_;
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -267,6 +312,67 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
           velocity_.col(phase)(i) = 0.;
         if (std::abs(acceleration_.col(phase)(i)) < tolerance)
           acceleration_.col(phase)(i) = 0.;
+      }
+    } else
+      throw std::runtime_error("Nodal mass is zero or below threshold");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute acceleration and velocity for two phase
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
+    unsigned solid_skeleton, unsigned pore_fluid, double dt) {
+  bool status = true;
+  const double tolerance = 1.0E-15;
+  try {
+    // Compute drag force
+    VectorDim drag_force;
+    drag_force.setZero();
+
+    for (unsigned i = 0; i < Tdim; ++i)
+      drag_force(i) = this->drag_force_coefficient_(i) *
+                      (this->velocity_.col(pore_fluid)(i) -
+                       this->velocity_.col(solid_skeleton)(i));
+
+    if (mass_(solid_skeleton) > tolerance && mass_(pore_fluid) > tolerance) {
+      // Acceleration of solid skeleton (unbalaced force / mass)
+      this->acceleration_.col(solid_skeleton) =
+          (this->external_force_.col(solid_skeleton) +
+           this->mixture_internal_force_ -
+           this->internal_force_.col(pore_fluid) + drag_force) /
+          this->mass_(solid_skeleton);
+
+      // Acceleration of pore fluid (unbalaced force / mass)
+      this->acceleration_.col(pore_fluid) =
+          (this->external_force_.col(pore_fluid) +
+           this->internal_force_.col(pore_fluid) - drag_force) /
+          this->mass_(pore_fluid);
+
+      // Apply friction constraints
+      this->apply_friction_constraints(dt);
+
+      // Velocity += acceleration * dt
+      this->velocity_ += this->acceleration_ * dt;
+
+      // Apply velocity constraints, which also sets acceleration to 0,
+      // when velocity is set.
+      this->apply_velocity_constraints();
+
+      // Set a threshold
+      for (unsigned i = 0; i < Tdim; ++i) {
+        if (std::abs(velocity_.col(solid_skeleton)(i)) < tolerance)
+          velocity_.col(solid_skeleton)(i) = 0.;
+        if (std::abs(acceleration_.col(solid_skeleton)(i)) < tolerance)
+          acceleration_.col(solid_skeleton)(i) = 0.;
+        if (std::abs(velocity_.col(pore_fluid)(i)) < tolerance)
+          velocity_.col(pore_fluid)(i) = 0.;
+        if (std::abs(acceleration_.col(pore_fluid)(i)) < tolerance)
+          acceleration_.col(pore_fluid)(i) = 0.;
       }
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");

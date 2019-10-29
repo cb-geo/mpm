@@ -265,7 +265,7 @@ class Cell {
   void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
                                     unsigned phase, const VectorDim& traction);
 
-  //! Compute the noal internal force  of a cell from particle stress and volume
+  //! Compute the noal internal force of a cell from particle stress and volume
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
@@ -273,6 +273,22 @@ class Cell {
   void compute_nodal_internal_force(const std::vector<Eigen::MatrixXd>& bmatrix,
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
+
+  //! Compute the nodal mixture internal force of a cell from stress and volume
+  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] pvolume Volume of particle
+  //! \param[in] pstress Stress of particle
+  void compute_nodal_mixture_internal_force(
+      const std::vector<Eigen::MatrixXd>& bmatrix, double pvolume,
+      const Eigen::Matrix<double, 6, 1>& pstress);
+
+  //! Compute the nodal drag force of a cell from particle drag force
+  //! \param[in] shapefn Shapefns at local coordinates of particle
+  //! \param[in] pvolume Volume of particle
+  //! \param[in] drag_force_coefficient Drag force coefficient
+  void compute_nodal_drag_force_coefficient(
+      const Eigen::VectorXd& shapefn, double pvolume,
+      const VectorDim drag_force_coefficient);
 
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint

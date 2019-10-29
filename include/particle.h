@@ -129,6 +129,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool update_volume(unsigned phase, double dt) override;
 
+  //! Update porosity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  bool update_porosity(unsigned phase, double dt) override;
+
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
   bool compute_mass(unsigned phase) override;
@@ -189,6 +194,13 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
+  //! Compute pore pressure
+  //! \param[in] solid_skeleton Index corresponding to solid phase
+  //! \param[in] pore_fluid Index corresponding to fluid phase
+  //! \param[in] dt Analysis time step
+  bool compute_pore_pressure(unsigned solid_skeleton, unsigned pore_fluid,
+                             double dt) override;
+
   //! Return stress of the particle
   //! \param[in] phase Index corresponding to the phase
   Eigen::Matrix<double, 6, 1> stress(unsigned phase) const override {
@@ -200,9 +212,16 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(unsigned phase, const VectorDim& pgravity) override;
 
+  //! Map drag force
+  //! \param[in] k_coefficient Permeability coefficient
+  bool map_drag_force_coefficient(unsigned phase) override;
+
   //! Map internal force
   //! \param[in] phase Index corresponding to the phase
   bool map_internal_force(unsigned phase) override;
+
+  //! Map mixture internal force
+  bool map_mixture_internal_force() override;
 
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase
@@ -243,6 +262,20 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(unsigned phase, double dt) override;
+
+  //! Compute updated position of the particle
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  //! \param[in] update_position Status of update position
+  bool update_position_acceleration(unsigned phase, double dt,
+                                    bool update_position) override;
+
+  //! Compute updated position of the particle based on nodal velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Analysis time step
+  //! \param[in] update_position Status of update position
+  bool update_position_velocity(unsigned phase, double dt,
+                                bool update_position) override;
 
   //! Return a state variable
   //! \param[in] var State variable

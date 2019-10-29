@@ -117,6 +117,9 @@ class ParticleBase {
   //! Update material point volume
   virtual bool update_volume(unsigned phase, double dt) = 0;
 
+  //! Update porosity
+  virtual bool update_porosity(unsigned phase, double dt) = 0;
+
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
 
@@ -164,14 +167,24 @@ class ParticleBase {
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
 
+  //! Compute pore pressure
+  virtual bool compute_pore_pressure(unsigned solid_skeleton,
+                                     unsigned pore_fluid, double dt) = 0;
+
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress(unsigned phase) const = 0;
 
   //! Map body force
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 
+  //! Map drag force
+  virtual bool map_drag_force_coefficient(unsigned phase) = 0;
+
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;
+
+  //! Map mixture internal force
+  virtual bool map_mixture_internal_force() = 0;
 
   //! Update pressure of the particles
   virtual bool update_pressure(unsigned phase, double dvolumetric_strain) = 0;
@@ -203,6 +216,14 @@ class ParticleBase {
 
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(unsigned phase, double dt) = 0;
+
+  //! Compute updated position
+  virtual bool update_position_acceleration(unsigned phase, double dt,
+                                            bool update_position) = 0;
+
+  //! Compute updated position based on nodal velocity
+  virtual bool update_position_velocity(unsigned phase, double dt,
+                                        bool update_position) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
