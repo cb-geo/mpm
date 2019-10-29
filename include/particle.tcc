@@ -82,12 +82,13 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
+  displacement_.setZero();
   dstrain_.setZero();
   mass_.setZero();
+  natural_size_.setZero();
   pressure_.setZero();
   set_traction_ = false;
   size_.setZero();
-  natural_size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
@@ -97,6 +98,16 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   material_density_.fill(std::numeric_limits<double>::max());
   volume_fraction_.setOnes(1, Tnphases);
   phase_volume_.fill(std::numeric_limits<double>::max());
+
+  // Initialize vector data properties
+  this->properties_["stresses"] = [&](unsigned phase) { return stress(phase); };
+  this->properties_["strains"] = [&](unsigned phase) { return strain(phase); };
+  this->properties_["velocities"] = [&](unsigned phase) {
+    return velocity(phase);
+  };
+  this->properties_["displacements"] = [&](unsigned phase) {
+    return displacement(phase);
+  };
 }
 
 // Assign a cell to particle
@@ -201,7 +212,8 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
     if (material != nullptr) {
       status = material_.emplace(std::make_pair(phase, material)).second;
       state_variables_ = material_.at(phase)->initialise_state_variables();
-      material_density_(phase) = material_.at(phase)->property("density");
+      material_density_(phase) =
+          material_.at(phase)->template property<double>("density");
     } else {
       throw std::runtime_error("Material is undefined!");
     }
@@ -606,6 +618,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
 
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -638,6 +652,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
 
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -749,4 +765,11 @@ void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
     const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
   }
+}
+
+//! Return particle vector data
+template <unsigned Tdim, unsigned Tnphases>
+Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
+    unsigned phase, const std::string& property) {
+  return this->properties_.at(property)(phase);
 }

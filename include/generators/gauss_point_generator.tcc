@@ -12,7 +12,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
   std::vector<Eigen::Matrix<double, Tdim, 1>> coordinates;
   // Get number of particles per cell
   unsigned nparticles_cell =
-        generator_["nparticles_cells"].template get<unsigned>();
+      generator_["nparticles_cells"].template get<unsigned>();
 
   if (nparticles_cell > 0)
     coordinates = mesh_->generate_material_points(nparticles_cell);

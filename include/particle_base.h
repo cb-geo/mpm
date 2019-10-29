@@ -182,6 +182,9 @@ class ParticleBase {
   //! Return velocity
   virtual VectorDim velocity(unsigned phase) const = 0;
 
+  //! Return displacement of the particle
+  virtual VectorDim displacement(unsigned phase) const = 0;
+
   //! Assign traction
   virtual bool assign_traction(unsigned phase, unsigned direction,
                                double traction) = 0;
@@ -200,6 +203,13 @@ class ParticleBase {
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
+
+  //! Return vector data of particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle property
+  virtual Eigen::VectorXd vector_data(unsigned phase,
+                                      const std::string& property) = 0;
 
   //! Assign particle velocity constraint
   //! Directions can take values between 0 and Dim * Nphases

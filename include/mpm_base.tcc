@@ -79,7 +79,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   }
 
   // Default VTK attributes
-  std::vector<std::string> vtk = {"velocities", "stresses", "strains"};
+  std::vector<std::string> vtk = {"velocities", "stresses", "strains",
+                                  "displacements"};
   try {
     if (post_process_.at("vtk").is_array() &&
         post_process_.at("vtk").size() > 0) {
@@ -627,7 +628,7 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
 
   try {
     const auto mesh_props = io_->json_object("mesh");
-    isoparametric = mesh_props["isoparametric"].template get<bool>();
+    isoparametric = mesh_props.at("isoparametric").template get<bool>();
   } catch (std::exception& exception) {
     console_->warn(
         "{} {} Isoparametric status of mesh: {}\n Setting mesh as "

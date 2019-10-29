@@ -33,7 +33,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>> generator_factory(
     // Generate material points at the Gauss location in all cells
     else if (generator_type == "gauss") {
       auto gen =
-             std::make_shared<mpm::GaussPointGenerator<Tdim>>(mesh, io, generator);
+          std::make_shared<mpm::GaussPointGenerator<Tdim>>(mesh, io, generator);
       coordinates = gen->generate_points();
     } else
       throw std::runtime_error(

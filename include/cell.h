@@ -141,9 +141,6 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
-  //! Compute nodal coordinates
-  void compute_nodal_coordinates();
-
   //! Return nodal coordinates
   Eigen::MatrixXd nodal_coordinates() const { return nodal_coordinates_; }
 
@@ -166,12 +163,6 @@ class Cell {
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
-      const Eigen::Matrix<double, Tdim, 1>& point);
-
-  //! Return the local coordinates of a point in a 2D cell
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, Tdim, 1> local_coordinates_point_2d(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a unit cell
@@ -304,7 +295,7 @@ class Cell {
   //! Number of nodes
   unsigned nnodes_{0};
   //! Volume
-  double volume_{std::numeric_limits<double>::max()};
+  double volume_{std::numeric_limits<double>::lowest()};
   //! Centroid
   VectorDim centroid_;
   //! mean_length of cell
