@@ -39,11 +39,11 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       if (analysis_.find("stress_update") != analysis_.end()) {
         switch (analysis_["stress_update"].template get<int>()) {
           case (0):
-            stress_update_ = mpm::StressUpdate::usf;
+            stress_update_ = mpm::StressUpdate::USF;
           case (1):
-            stress_update_ = mpm::StressUpdate::usl;
+            stress_update_ = mpm::StressUpdate::USF;
           case (2):
-            stress_update_ = mpm::StressUpdate::musl;
+            stress_update_ = mpm::StressUpdate::MUSL;
           default:
             throw std::runtime_error(
                 "Stress update method is invalid, must be 0,1 or 2");

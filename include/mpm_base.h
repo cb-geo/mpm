@@ -38,10 +38,10 @@ namespace mpm {
 enum class QuadratureRule { Standard_mpm, Gauss, Moving_Gauss, Gauss_mpm };
 
 //! Stress update method
-//! usl: Update Stress Last
-//! usf: Update Stress First
-//! musl: Modified Stress Last
-enum class StressUpdate { usf, usl, musl };
+//! USF: Update Stress First
+//! USL: Update Stress Last
+//! MUSL: Modified Stress Last
+enum class StressUpdate { USF, USL, MUSL };
 
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
@@ -106,8 +106,8 @@ class MPMBase : public MPM {
   using mpm::MPM::post_process_;
   //! Logger
   using mpm::MPM::console_;
-  //! Stress update method (default usf = 0, usl = 1, musl = 2)
-  mpm::StressUpdate stress_update_{mpm::StressUpdate::usf};
+  //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
+  mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity

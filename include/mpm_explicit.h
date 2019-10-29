@@ -52,8 +52,6 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::nodal_tractions_;
 
  private:
-  //! Boolean to switch between USL and USF
-  bool usl_{false};
   //! Pressure smoothing
   bool pressure_smoothing_{false};
 

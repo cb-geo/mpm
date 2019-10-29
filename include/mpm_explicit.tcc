@@ -14,7 +14,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Get analysis type USL/USF
   if (io_->analysis_type() == "MPMExplicitUSL2D" ||
       io_->analysis_type() == "MPMExplicitUSL3D")
-    this->usl_ = true;
+    this->stress_update_ = mpm::StressUpdate::USL;
 
   console_->error("Analysis{} {}", io_->analysis_type());
 
@@ -142,7 +142,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Update stress first
-    if (!usl_) {
+    if (this->stress_update_ == mpm::StressUpdate::USF) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -248,7 +248,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, phase, this->dt_));
 
     // Update Stress Last
-    if (usl_ == true) {
+    if (this->stress_update_ == mpm::StressUpdate::USL) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
@@ -306,8 +306,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 (this->usl_ ? "USL" : "USF"),
+  console_->info("Rank {}, Explicit solver duration: {} ms", mpi_rank,
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
