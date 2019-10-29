@@ -1,6 +1,7 @@
 #ifndef MPM_LEVELSET_H_
 #define MPM_LEVELSET_H_
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -87,7 +88,7 @@ class LevelSet {
   mpm::IntegrationDomain integration_domain_{
       mpm::IntegrationDomain::Integration_In};
   // polynomial order
-  unsigned poly_order_;
+  unsigned poly_order_{std::numeric_limits<unsigned>::max()};
   // polyomial coefficient vector
   std::vector<double> poly_coefficients_;
   // status (fixed or moving)
