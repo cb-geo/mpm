@@ -282,8 +282,8 @@ class Particle : public ParticleBase<Tdim> {
   void apply_particle_velocity_constraints() override;
 
   //! Get material id corresponding to this particle
-  unsigned get_material_id() override {
-    return material_.begin()->first();
+  unsigned material_id(unsigned phase) override {
+    return material_.at(phase);
   }
 
  private:

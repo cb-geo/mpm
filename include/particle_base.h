@@ -219,7 +219,7 @@ class ParticleBase {
   virtual void apply_particle_velocity_constraints() = 0;
 
   //! Get material id corresponding to this particle
-  virtual unsigned get_material_id() = 0;
+  virtual unsigned material_id(unsigned phase) = 0;
 
  protected:
   //! particleBase id
