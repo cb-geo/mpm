@@ -11,12 +11,12 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   std::vector<idx_t> vvwgt;
 
   //! There is no weight to adjwgt
-  this->adjwgt = {};
+  this->adjwgt_ = {};
   //! There is only one weight of one vertex
-  this->ncon = 1;
+  this->ncon_ = 1;
 
   //! Use default value to fill the options[1]
-  this->options[0] = 0;
+  this->options_[0] = 0;
 
   long sum = cells_.size();
 
@@ -56,7 +56,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
 
     if ((*stcl)->id() >= start && (*stcl)->id() < end) {
       if (counter == 0) {
-        this->ndims = (*stcl)->centroid().rows();
+        this->ndims_ = (*stcl)->centroid().rows();
       }
       //! Insert the offset of the size of cell's neighbour
       counter += (*stcl)->nneighbours();
@@ -96,21 +96,18 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   std::vector<idx_t>(vvtxdist).swap(vvtxdist);
   std::vector<idx_t>(vvwgt).swap(vvwgt);
 
-  //! assign ubvec
-  int nncon = 0;
+  //! assign ubvec (ParMETIS suggests 1.05)
+  for (int nncon = 0; nncon < MAXNCON; ++nncon) ubvec_[nncon] = 1.05;
 
-  //! The guide suggests 1.05
-  for (nncon = 0; nncon < MAXNCON; ++nncon) ubvec[nncon] = 1.05;
   //! assign nparts
   //! nparts is different from mpi_size, but here we can set them equal
   nparts_ = mpi_size;
 
   //! assign tpwgts
   std::vector<real_t> ttpwgts;
-  int ntpwgts;
   real_t sub_total = 0.0;
-  for (ntpwgts = 0; ntpwgts < ((nparts_) * this->ncon); ++ntpwgts) {
-    if (ntpwgts != (nparts_ * this->ncon) - 1) {
+  for (int ntpwgts = 0; ntpwgts < ((nparts_) * this->ncon_); ++ntpwgts) {
+    if (ntpwgts != (nparts_ * this->ncon_) - 1) {
       ttpwgts.push_back(1.0 / (real_t)nparts_);
       sub_total = sub_total + 1.0 / (real_t)nparts_;
     } else {
@@ -118,13 +115,13 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
     }
   }
   real_t* mtpwts = (real_t*)malloc(ttpwgts.size() * sizeof(real_t));
-  for (ntpwgts = 0; ntpwgts < ttpwgts.size(); ++ntpwgts)
+  for (int ntpwgts = 0; ntpwgts < ttpwgts.size(); ++ntpwgts)
     mtpwts[ntpwgts] = ttpwgts.at(ntpwgts);
-  this->tpwgts = mtpwts;
+  this->tpwgts_ = mtpwts;
   std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
-  this->nvtxs = vtxdist_[mpi_rank + 1] - vtxdist_[mpi_rank];
+  this->nvtxs_ = vtxdist_[mpi_rank + 1] - vtxdist_[mpi_rank];
 
   //! assign xyz
   std::vector<real_t> mxyz;
@@ -140,17 +137,17 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
 
   real_t* txyz = (real_t*)malloc(mxyz.size() * sizeof(real_t));
   for (long i = 0; i < mxyz.size(); ++i) txyz[i] = mxyz.at(i);
-  this->xyz = txyz;
+  this->xyz_ = txyz;
 
   std::vector<real_t>(mxyz).swap(mxyz);
 
   //! allocate space for part
-  this->part = (idx_t*)malloc(this->nvtxs * sizeof(idx_t));
-  for (int mpart = 0; mpart < this->nvtxs; ++mpart)
-    this->part[mpart] = mpi_rank % this->nparts_;
+  this->part_ = (idx_t*)malloc(this->nvtxs_ * sizeof(idx_t));
+  for (int mpart = 0; mpart < this->nvtxs_; ++mpart)
+    this->part_[mpart] = mpi_rank % this->nparts_;
 
   //! assign edgecut
-  this->edgecut = 0;
+  this->edgecut_ = 0;
 }
 
 //! Get the xadj
@@ -178,7 +175,7 @@ idx_t* mpm::Graph<Tdim>::vwgt() {
 
 template <unsigned Tdim>
 void mpm::Graph<Tdim>::assign_ndims(idx_t n) {
-  this->ndims = n;
+  this->ndims_ = n;
 }
 
 //! Return nparts
@@ -198,10 +195,10 @@ template <unsigned Tdim>
 bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
   //! assign part
   ParMETIS_V3_PartGeomKway(
-      this->vtxdist(), this->xadj(), this->adjncy(), this->vwgt(), this->adjwgt,
-      &this->wgtflag_, &this->numflag_, &this->ndims, this->xyz, &this->ncon,
-      &this->nparts_, this->tpwgts, this->ubvec, this->options, &this->edgecut,
-      this->part, comm);
+      this->vtxdist(), this->xadj(), this->adjncy(), this->vwgt(),
+      this->adjwgt_, &this->wgtflag_, &this->numflag_, &this->ndims_,
+      this->xyz_, &this->ncon_, &this->nparts_, this->tpwgts_, this->ubvec_,
+      this->options_, &this->edgecut_, this->part_, comm);
   return true;
 }
 
@@ -216,7 +213,7 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
   if (mpi_rank == 0) {
     int par = 0;
     for (int i = 0; i < this->vtxdist_[1]; ++i) {
-      this->partition_[par] = this->part[i];
+      this->partition_[par] = this->part_[i];
       par = par + 1;
     }
 
@@ -237,11 +234,11 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
       MPI_Send((void*)this->partition_, ncells, IDX_T, penum, 1, *comm);
 
   } else {
-    MPI_Send((void*)this->part,
+    MPI_Send((void*)this->part_,
              this->vtxdist_[mpi_rank + 1] - this->vtxdist_[mpi_rank], IDX_T, 0,
              1, *comm);
     //！ free space
-    free(this->part);
+    free(this->part_);
     MPI_Recv((void*)this->partition_, ncells, IDX_T, 0, 1, *comm, &status);
   }
 }
