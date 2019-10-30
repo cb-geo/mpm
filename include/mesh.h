@@ -350,7 +350,7 @@ class Mesh {
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
   //! Container of particles id
-  std::map<mpm::Index, mpm::Index> particles_id_set;
+  std::map<mpm::Index, mpm::Index> particles_id_set_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
@@ -376,9 +376,6 @@ class Mesh {
 
   // graph pass the address of the container of cell
   Graph<Tdim>* graph_;
-  // shared nodes
-  std::map<std::vector<mpm::Index>, std::vector<mpm::Index>> shared_node_cell;
-
 };  // Mesh class
 }  // namespace mpm
 
