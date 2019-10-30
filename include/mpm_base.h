@@ -15,6 +15,7 @@
 #include "tbb/task_group.h"
 
 #include "container.h"
+#include "graph.h"
 #include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
@@ -97,6 +98,8 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
+  // graph pass the address of the container of cell
+  std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 };  // MPMBase class
 }  // namespace mpm
 

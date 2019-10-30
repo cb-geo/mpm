@@ -38,6 +38,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
+  //! Graph
+  using mpm::MPMBase<Tdim>::graph_;
 
   //! velocity update
   using mpm::MPMBase<Tdim>::velocity_update_;

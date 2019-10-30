@@ -79,41 +79,42 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
 
-  // Check point resume
-
 #ifdef USE_MPI
-
   if (mpi_size > 1 && mesh_->ncells() > 1) {
 
     // Initialize MPI
-    int npes;
-    int mype;
+    int size;
+    int rank;
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-    MPI_Comm_size(comm, &npes);
-    MPI_Comm_rank(comm, &mype);
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
+
+    // Check if mesh has cells to partition
+    if (mesh_->ncells() == 0)
+      throw std::runtime_error("Container of cells is empty");
 
     // Create graph
-    bool graph_creation = mesh_->create_graph(npes, mype);
-    // Get graph
-    auto partition_graph = mesh_->graph();
+    graph_ =
+        std::make_shared<Graph<Tdim>>(mesh_->cells_container(), size, rank);
 
     // Create partition using ParMETIS
-    bool graph_partition = partition_graph->make_partition(&comm);
+    bool graph_partition = graph_->make_partition(&comm);
 
     // Collect the partitions
-    partition_graph->collect_partition(mesh_->ncells(), npes, mype, &comm);
+    graph_->collect_partition(mesh_->ncells(), size, rank, &comm);
 
     // Delete all the particles which is not in local task parititon
     for (auto stcl = mesh_->return_particle_id()->begin();
          stcl != mesh_->return_particle_id()->end(); ++stcl) {
-      if (partition_graph->get_partition()[stcl->second] != mype) {
+      if (graph_->get_partition()[stcl->second] != rank) {
         mesh_->remove_particle_by_id(stcl->first);
       }
     }
   }
 #endif
 
+  // Check point resume
   if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
@@ -133,13 +134,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-
-      // mesh_->find_active_nodes();
     });
-
-    // #ifdef USE_MPI
-    //     if (step_ == 0) mesh_->shared_node(partition_graph.partition);
-    // #endif
 
     // Spawn a task for particles
     task_group.run([&] {

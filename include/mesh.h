@@ -24,7 +24,6 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
-#include "graph.h"
 #include "hdf5.h"
 #include "logger.h"
 #include "material/material.h"
@@ -125,9 +124,6 @@ class Mesh {
   template <typename Tgetfunctor, typename Tsetfunctor>
   void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
-
-  //! Create graph from list of cells
-  bool create_graph(int num_threads, int mype);
 
   //! Create cells from list of nodes
   //! \param[in] gcid Global cell id
@@ -327,9 +323,6 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
-  //! Return the graph
-  std::shared_ptr<Graph<Tdim>> graph();
-
   //! Get the container of cell
   mpm::Container<Cell<Tdim>>* cells_container();
 
@@ -374,9 +367,6 @@ class Mesh {
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-
-  // graph pass the address of the container of cell
-  std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 };  // Mesh class
 }  // namespace mpm
 

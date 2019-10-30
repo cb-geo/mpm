@@ -159,28 +159,6 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
 }
 #endif
 
-//! Create graph from cells lists
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::create_graph(int num_threads, int mype) {
-  bool status = true;
-  try {
-    // Check if cells in Container is not empty
-    if (this->cells_.size() == 0) {
-      throw std::runtime_error("Container of cells is empty");
-    }
-    //! Create a graph
-    // Graph<Tdim> graph;
-    // graph = Graph<Tdim>(&(this->cells_), num_threads);
-    // graph.initialize(&(this->cells_), num_threads, mype);
-    graph_ = std::make_shared<Graph<Tdim>>(&(this->cells_), num_threads, mype);
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_cells(
@@ -1198,12 +1176,6 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
-}
-
-//! return the graph
-template <unsigned Tdim>
-std::shared_ptr<mpm::Graph<Tdim>> mpm::Mesh<Tdim>::graph() {
-  return graph_;
 }
 
 template <unsigned Tdim>
