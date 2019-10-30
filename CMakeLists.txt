@@ -90,6 +90,22 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
+# METIS
+find_package(METIS REQUIRED)
+if (METIS_FOUND)
+    include_directories(SYSTEM ${METIS_INCLUDE_DIR})
+    link_libraries(${METIS_LIBRARY})
+endif (METIS_FOUND)
+
+# ParMETIS
+find_package(ParMETIS)
+if (PARMETIS_FOUND)
+  add_definitions("-DUSE_PARMETIS")
+  include_directories(${PARMETIS_INCLUDE_DIRS})
+  link_libraries(${PARMETIS_LIBRARIES})
+endif()
+
+
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
@@ -136,6 +152,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc    
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
+    ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc

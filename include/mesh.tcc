@@ -327,12 +327,16 @@ bool mpm::Mesh<Tdim>::add_particle(
       // Add only if particle can be located in any cell of the mesh
       if (this->locate_particle_cells(particle)) {
         status = particles_.add(particle, checks);
+        particles_cell_ids_.insert(std::pair<mpm::Index, mpm::Index>(
+            particle->id(), particle->cell_id()));
         map_particles_.insert(particle->id(), particle);
       } else {
         throw std::runtime_error("Particle not found in mesh");
       }
     } else {
       status = particles_.add(particle, checks);
+      particles_cell_ids_.insert(std::pair<mpm::Index, mpm::Index>(
+          particle->id(), particle->cell_id()));
       map_particles_.insert(particle->id(), particle);
     }
     if (!status) throw std::runtime_error("Particle addition failed");
@@ -352,6 +356,15 @@ bool mpm::Mesh<Tdim>::remove_particle(
   map_particles_[id]->remove_cell();
   // Remove a particle if found in the container and map
   return (particles_.remove(particle) && map_particles_.remove(id));
+}
+
+//! Remove a particle by id
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
+  // Remove associated cell for the particle
+  map_particles_[id]->remove_cell();
+  bool result = particles_.remove(map_particles_[id]);
+  return (result && map_particles_.remove(id));
 }
 
 //! Locate particles in a cell
@@ -1147,13 +1160,24 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
             particles.add(map_particles_[pid], check_duplicates);
       }
       // Create the map of the container
-      this->particle_sets_.insert(
-          std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(sitr->first,
-                                                               particles));
-      status = true;
+      status = this->particle_sets_
+                   .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
+                       sitr->first, particles))
+                   .second;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
+}
+
+template <unsigned Tdim>
+mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
+  return this->cells_;
+}
+
+//! return particle_ptr
+template <unsigned Tdim>
+std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::particles_cell_ids() {
+  return &(this->particles_cell_ids_);
 }

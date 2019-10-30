@@ -130,7 +130,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 8>::unit_cell_coordinates()
                 0., -1.,
                 1.,  0.,
                 0.,  1.,
-    // cppcheck-suppress *
+  // cppcheck-suppress *
                -1.,  0.;
   // clang-format on
   return unit_cell;
@@ -214,7 +214,7 @@ inline Eigen::MatrixXd mpm::QuadrilateralElement<2, 9>::unit_cell_coordinates()
                 1.,  0.,
                 0.,  1.,
                -1.,  0.,
-    // cppcheck-suppress *
+  // cppcheck-suppress *
                 0.,  0.;
   // clang-format on
   return unit_cell;
@@ -408,7 +408,7 @@ inline Eigen::MatrixXi
   indices << 0, 1,
              1, 2,
              2, 3,
-    // cppcheck-suppress *
+  // cppcheck-suppress *
              3, 0;
   // clang-format on
   return indices;
@@ -434,7 +434,7 @@ inline Eigen::MatrixXi
   indices << 0, 1,
              1, 2,
              2, 3,
-    // cppcheck-suppress *
+  // cppcheck-suppress *
              3, 0;
   //clang-format on
   return indices;
