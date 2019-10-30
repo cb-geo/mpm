@@ -332,9 +332,6 @@ class Mesh {
   //! Get the container of cell
   mpm::Container<Cell<Tdim>>* cells_container();
 
-  //! Collect shared node
-  void shared_node(idx_t* partition);
-
   //! Return particle_ptr
   std::map<mpm::Index, mpm::Index>* return_particle_id();
 
