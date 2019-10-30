@@ -281,7 +281,14 @@ class Cell {
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
   //! Assign materials to nodes from the particles within this cell
-  void assign_material_ids_to_nodes(const Container<ParticleBase<Tdim>> particles);
+  void assign_material_ids_to_nodes();
+
+  //! Assign particles from the mesh to weak pointer to container of
+  //! particles
+  void assign_particle_container(
+      const Container<ParticleBase<Tdim>> particles) override {
+    particle_container_ = particles;
+  }
 
  private:
   //! Approximately check if a point is in a cell
@@ -305,6 +312,8 @@ class Cell {
   double mean_length_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
+  //! weak pointer to particle container
+  std::weak_ptr<const Container<ParticleBase<Tdim>>> particle_container_;
   //! Container of node pointers (local id, node pointer)
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates

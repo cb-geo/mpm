@@ -1149,12 +1149,12 @@ inline std::vector<std::vector<mpm::Index>>
 
 //! Assign materials to nodes from the particles within this cell
 template <unsigned Tdim>
-inline void mpm::Cell<Tdim>::assign_material_ids_to_nodes(
-    const Container<ParticleBase<Tdim>> particles) {
+inline void mpm::Cell<Tdim>::assign_material_ids_to_nodes() {
   // Loop over all particles from this cell and add the material id to the node
   for (auto itr = particles_.begin(); itr != < particles_.size(); ++itr) {
-    auto particle = std::find(particles.begin(), particles.end(), itr);
-    auto material_id = particle->get_material_id();
+    auto particle =
+        std::find(particle_container_.begin(), particle_container_.end(), itr);
+    auto material_id = particle->material_id(0);
     for (auto itr_node = nodes_.begin(); itr_node != nodes_.end(); ++itr_node)
       itr_node->add_material_id_to_node(material_id);
   }
