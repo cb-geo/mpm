@@ -24,19 +24,14 @@ const int MAXNCON = 1;
 template <unsigned Tdim>
 class Graph {
  public:
-  //! Constructor
-  Graph(Container<Cell<Tdim>>* cells, int num_threads, int mype);
+  //! Constructor with cells, n
+  Graph(Container<Cell<Tdim>>* cells, int size, int rank);
 
-  Graph& operator=(const Graph& graph);
+  //! Create graph partition
+  bool create_partitions(MPI_Comm* comm);
 
-  //! Initialize the graph
-  // void initialize(Container<Cell<Tdim>>* cells, int num_threads, int mype);
-
-  //! Do the partition
-  bool make_partition(MPI_Comm* comm);
-
-  //! Do the collection
-  void collect_partition(int ncells, int npes, int mype, MPI_Comm* comm);
+  //! Collect partitions
+  void collect_partitions(int ncells, int npes, int rank, MPI_Comm* comm);
 
   //! Get the xadj
   idx_t* get_xadj();

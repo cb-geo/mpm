@@ -99,10 +99,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::make_shared<Graph<Tdim>>(mesh_->cells_container(), size, rank);
 
     // Create partition using ParMETIS
-    bool graph_partition = graph_->make_partition(&comm);
+    bool graph_partition = graph_->create_partitions(&comm);
 
     // Collect the partitions
-    graph_->collect_partition(mesh_->ncells(), size, rank, &comm);
+    graph_->collect_partitions(mesh_->ncells(), size, rank, &comm);
 
     // Delete all the particles which is not in local task parititon
     for (auto stcl = mesh_->return_particle_id()->begin();

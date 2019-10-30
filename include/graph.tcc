@@ -1,56 +1,7 @@
-//! Operator = definition
-template <unsigned Tdim>
-mpm::Graph<Tdim>& mpm::Graph<Tdim>::operator=(const Graph& graph) {
-  adjncy = graph.adjncy;
-  xadj = graph.xadj;
-  vwgt = graph.vwgt;
-  vtxdist = graph.vtxdist;
-  numflag = graph.numflag;
-  wgtflag = graph.wgtflag;
-  ncon = graph.ncon;
-  nparts = graph.nparts;
-
-  //! assign ubvec
-  int i;
-  for (i = 0; i < MAXNCON; ++i) {
-    ubvec[i] = graph.ubvec[i];
-  }
-
-  //! assign option
-  for (i = 0; i < 1; ++i) {
-    options[i] = graph.options[i];
-  }
-  // options = graph.options;
-
-  xyz = graph.xyz;
-  ndims = graph.ndims;
-
-  tpwgts = graph.tpwgts;
-  adjwgt =
-      graph.adjwgt; /* Array that stores the weights of the adjacency lists */
-  cells_ = graph.cells_;
-  part = graph.part;
-  partition = graph.partition;
-  ipc2resit = graph.ipc2resit;
-  edgecut = graph.edgecut;
-  adptf = graph.adptf;
-  optype = graph.optype;
-  edgecut = graph.edgecut;
-  gnvtxs = graph.gnvtxs;
-  nvtxs = graph.nvtxs;
-  nedges = graph.nedges;
-  nobj = graph.nobj;
-  nvwgt = graph.nvwgt; /* Vertex weights */
-  vsize = graph.vsize; /* Vertex size */
-  home = graph.home;   /* The initial partition of the vertex */
-
-  return *this;
-}
-
 //! Initialize the graph
 template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
-                        int mype) {
+mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
+                        int mpi_rank) {
 
   this->cells_ = cells;
   //! Basic parameters used in ParMETIS
@@ -70,8 +21,8 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
   long sum = cells_->size();
 
   long part = 0;
-  part = sum / num_threads;
-  long rest = sum % num_threads;
+  part = sum / mpi_size;
+  long rest = sum % mpi_size;
   if (rest != 0) {
     part = part + 1;
   }
@@ -100,8 +51,8 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
   vxadj.push_back(0);
 
   long long counter = 0;
-  start = vvtxdist[mype];
-  idx_t end = vvtxdist[mype + 1];
+  start = vvtxdist[mpi_rank];
+  idx_t end = vvtxdist[mpi_rank + 1];
 
   for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
 
@@ -162,8 +113,8 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
   //! The guide suggests 1.05
   for (nncon = 0; nncon < MAXNCON; ++nncon) ubvec[nncon] = 1.05;
   //! assign nparts
-  //! nparts is different from num_threads, but here we can set them equal
-  nparts = num_threads;
+  //! nparts is different from mpi_size, but here we can set them equal
+  nparts = mpi_size;
 
   //! assign tpwgts
   std::vector<real_t> ttpwgts;
@@ -185,7 +136,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
   std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
-  this->nvtxs = vtxdist[mype + 1] - vtxdist[mype];
+  this->nvtxs = vtxdist[mpi_rank + 1] - vtxdist[mpi_rank];
 
   //! assign xyz
   std::vector<real_t> mxyz;
@@ -211,7 +162,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
   this->part = (idx_t*)malloc(this->nvtxs * sizeof(idx_t));
   int mpart = 0;
   for (mpart = 0; mpart < this->nvtxs; ++mpart) {
-    this->part[mpart] = mype % this->nparts;
+    this->part[mpart] = mpi_rank % this->nparts;
   }
 
   //! assign edgecut
@@ -260,7 +211,7 @@ idx_t* mpm::Graph<Tdim>::get_partition() {
 
 //! do the partition
 template <unsigned Tdim>
-bool mpm::Graph<Tdim>::make_partition(MPI_Comm* comm) {
+bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
   //! assign part
   ParMETIS_V3_PartGeomKway(
       this->get_vtxdist(), this->get_xadj(), this->get_adjncy(),
@@ -272,13 +223,13 @@ bool mpm::Graph<Tdim>::make_partition(MPI_Comm* comm) {
 
 //! collect the partition and store it in the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::collect_partition(int ncells, int npes, int mype,
-                                         MPI_Comm* comm) {
+void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
+                                          MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
   this->partition = (idx_t*)malloc(ncells * sizeof(idx_t));
   int penum;
-  if (mype == 0) {
+  if (mpi_rank == 0) {
     int par = 0;
     int i;
     for (i = 0; i < this->vtxdist[1]; ++i) {
@@ -303,8 +254,9 @@ void mpm::Graph<Tdim>::collect_partition(int ncells, int npes, int mype,
     }
 
   } else {
-    MPI_Send((void*)this->part, this->vtxdist[mype + 1] - this->vtxdist[mype],
-             IDX_T, 0, 1, *comm);
+    MPI_Send((void*)this->part,
+             this->vtxdist[mpi_rank + 1] - this->vtxdist[mpi_rank], IDX_T, 0, 1,
+             *comm);
     //！ free space
     free(this->part);
     MPI_Recv((void*)this->partition, ncells, IDX_T, 0, 1, *comm, &status);
