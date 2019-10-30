@@ -327,7 +327,7 @@ bool mpm::Mesh<Tdim>::add_particle(
       // Add only if particle can be located in any cell of the mesh
       if (this->locate_particle_cells(particle)) {
         status = particles_.add(particle, checks);
-        particles_id_set_.insert(std::pair<mpm::Index, mpm::Index>(
+        particles_cell_ids_.insert(std::pair<mpm::Index, mpm::Index>(
             particle->id(), particle->cell_id()));
         map_particles_.insert(particle->id(), particle);
       } else {
@@ -335,7 +335,7 @@ bool mpm::Mesh<Tdim>::add_particle(
       }
     } else {
       status = particles_.add(particle, checks);
-      particles_id_set_.insert(std::pair<mpm::Index, mpm::Index>(
+      particles_cell_ids_.insert(std::pair<mpm::Index, mpm::Index>(
           particle->id(), particle->cell_id()));
       map_particles_.insert(particle->id(), particle);
     }
@@ -1178,6 +1178,6 @@ mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
 
 //! return particle_ptr
 template <unsigned Tdim>
-std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::return_particle_id() {
-  return &(this->particles_id_set_);
+std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::particles_cell_ids() {
+  return &(this->particles_cell_ids_);
 }

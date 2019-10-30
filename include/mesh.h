@@ -326,8 +326,8 @@ class Mesh {
   //! Get the container of cell
   mpm::Container<Cell<Tdim>> cells();
 
-  //! Return particle_ptr
-  std::map<mpm::Index, mpm::Index>* return_particle_id();
+  //! Return particle cell ids
+  std::map<mpm::Index, mpm::Index>* particles_cell_ids();
 
  private:
   // Locate a particle in mesh cells
@@ -343,8 +343,8 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
-  //! Container of particles id
-  std::map<mpm::Index, mpm::Index> particles_id_set_;
+  //! Container of particles ids and cell ids
+  std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
