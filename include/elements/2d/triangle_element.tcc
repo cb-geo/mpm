@@ -377,3 +377,86 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
       break;
   }
 }
+
+//! Compute volume
+//! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+//! \retval volume Return the volume of cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline double mpm::TriangleElement<Tdim, Tnfunctions>::compute_volume(
+  const Eigen::MatrixXd& nodal_coordinates) const {
+  //   2 0
+  //     |`\
+  //     |  `\
+  //     |    `\
+  //     |      `\
+  //     |        `\
+  //   0 0----------0 1
+  //
+  auto node0 = nodal_coordinates.row(0);
+  auto node1 = nodal_coordinates.row(1);
+  auto node2 = nodal_coordinates.row(2);
+
+  // Area = 0.5 * [ (x1 * y2 - x2 * y1)
+  //              - (x0 * y2 - x2 * y0)
+  //              + (x0 * y1 - x1 * y0) ]
+  double volume_ = std::fabs(((node1(0) * node2(1)) - (node2(0) * node1(1))) -
+                             ((node0(0) * node2(1)) - (node2(0) * node0(1))) +
+                             ((node0(0) * node1(1)) - (node1(0) * node0(1)))) *
+    0.5;
+      
+  return volume_;
+}
+
+//! Compute natural coordinates of a point (analytical)
+template <>
+inline bool mpm::TriangleElement<2, 3>::isvalid_natural_coordinates_analytical() const { return true; }
+
+//! Compute natural coordinates of a point (analytical)
+template <>
+inline bool mpm::TriangleElement<2, 6>::isvalid_natural_coordinates_analytical() const { return false; }
+
+//! Compute Natural coordinates of a point (analytical)
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::TriangleElement<2, 3>::natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+
+  // initialize cartesian coordinates of point of interest and vertices of the cell
+  const double xa = point(0);
+  const double ya = point(1);
+  const double x1 = nodal_coordinates(0, 0);
+  const double y1 = nodal_coordinates(0, 1);
+  const double x2 = nodal_coordinates(1, 0);
+  const double y2 = nodal_coordinates(1, 1);
+  const double x3 = nodal_coordinates(2, 0);
+  const double y3 = nodal_coordinates(2, 1);
+  
+  // calculate matrix determinant of T
+  const double T = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+  
+  // determine the barycentric coordinates lambda1, lambda2 and lambda3
+  const double lambda1 = ((y2 - y3) * (xa - x3) + (x3 - x2) * (ya - y3)) / T;
+  const double lambda2 = ((y3 - y1) * (xa - x3) + (x1 - x3) * (ya - y3)) / T;
+  const double lambda3 = 1 - lambda1 - lambda2;
+  
+  xi(0) = lambda2;
+  xi(1) = lambda3;
+
+  return xi;
+}
+
+
+//! Compute natural coordinates of a point (analytical)
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::TriangleElement<2, 6>::natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+  throw std::runtime_error("Analytical solution for Triangle<2, 6> has not been implemented");
+  return xi;
+}

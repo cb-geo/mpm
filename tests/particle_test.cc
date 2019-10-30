@@ -106,6 +106,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     auto pstress = particle->stress(phase);
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+
+    auto pstress_data = particle->vector_data(phase, "stresses");
+    for (unsigned i = 0; i < pstress_data.size(); ++i)
+      REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
   //! Test particles velocity constraints
@@ -908,6 +912,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
+    // Check particle displacement
+    Eigen::Vector2d displacement;
+    displacement << 0., 0.0894;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
+
     // Updated particle coordinate
     coords << 0.75, .8394;
     // Check particle coordinates
@@ -922,6 +933,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check particle displacement
+    displacement << 0., 0.1788;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     coords << 0.75, .9288;
@@ -1864,6 +1881,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
+    // Check particle displacement
+    Eigen::Vector3d displacement;
+    displacement << 0.0, 0.5875, 1.0769;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
+
     // Updated particle coordinate
     coords << 1.5, 2.0875, 2.5769;
     // Check particle coordinates
@@ -1878,6 +1902,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check particle displacement
+    displacement << 0.0, 1.175, 2.1538;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     coords << 1.5, 2.675, 3.6538;

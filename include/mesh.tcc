@@ -514,27 +514,10 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       Eigen::Vector3d data;
       data.setZero();
-      // Stresses
-      if (attribute == "stresses") {
-        auto pdata = (*pitr)->stress(phase);
-        // Fill stresses to the size of dimensions
-        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
-      }
-      // Strains
-      else if (attribute == "strains") {
-        auto pdata = (*pitr)->strain(phase);
-        // Fill stresses to the size of dimensions
-        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
-      }
-      // Velocities
-      else if (attribute == "velocities") {
-        auto pdata = (*pitr)->velocity(phase);
-        // Fill stresses to the size of dimensions
-        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
-      }
-      // Error
-      else
-        throw std::runtime_error("Invalid particle vector data attribute: !");
+      auto pdata = (*pitr)->vector_data(phase, attribute);
+      // Fill stresses to the size of dimensions
+      for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+
       // Add to a vector of data
       vector_data.emplace_back(data);
     }
