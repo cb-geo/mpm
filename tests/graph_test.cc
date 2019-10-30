@@ -1,3 +1,5 @@
+#ifdef USE_PARMETIS
+
 #include <functional>
 #include <limits>
 #include <memory>
@@ -276,3 +278,4 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
     REQUIRE(graph3.adjncy()[12] == 13);
   }
 }
+#endif

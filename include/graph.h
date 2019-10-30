@@ -9,6 +9,7 @@
 #include "mpi.h"
 #endif
 
+#ifdef USE_PARMETIS
 #include "parmetis.h"
 
 #include "cell.h"
@@ -92,5 +93,6 @@ class Graph {
 }  // namespace mpm
 
 #include "graph.tcc"
+#endif
 
 #endif  // MPM_GRAPH_H_

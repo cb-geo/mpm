@@ -94,6 +94,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (mesh_->ncells() == 0)
       throw std::runtime_error("Container of cells is empty");
 
+#ifdef USE_PARMETIS
     // Create graph
     graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), size, rank);
 
@@ -110,6 +111,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         mesh_->remove_particle_by_id(stcl->first);
       }
     }
+#endif
   }
 #endif
 
