@@ -9,10 +9,11 @@
 #include "mpi.h"
 #endif
 
+#include "parmetis.h"
+
 #include "cell.h"
 #include "container.h"
 #include "particle.h"
-#include <parmetis.h>
 
 namespace mpm {
 const int MAXNCON = 1;
@@ -24,12 +25,12 @@ template <unsigned Tdim>
 class Graph {
  public:
   //! Constructor
-  Graph();
+  Graph(Container<Cell<Tdim>>* cells, int num_threads, int mype);
 
   Graph& operator=(const Graph& graph);
 
   //! Initialize the graph
-  void initialize(Container<Cell<Tdim>>* cells, int num_threads, int mype);
+  // void initialize(Container<Cell<Tdim>>* cells, int num_threads, int mype);
 
   //! Do the partition
   bool make_partition(MPI_Comm* comm);

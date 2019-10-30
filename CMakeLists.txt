@@ -153,6 +153,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc    
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
+    ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc

@@ -9,7 +9,6 @@ mpm::Mesh<Tdim>::Mesh(unsigned id, bool isoparametric)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 
   particles_.clear();
-  graph_ = nullptr;
 }
 
 //! Create nodes from coordinates
@@ -170,10 +169,10 @@ bool mpm::Mesh<Tdim>::create_graph(int num_threads, int mype) {
       throw std::runtime_error("Container of cells is empty");
     }
     //! Create a graph
-    Graph<Tdim> graph;
+    // Graph<Tdim> graph;
     // graph = Graph<Tdim>(&(this->cells_), num_threads);
-    graph.initialize(&(this->cells_), num_threads, mype);
-    graph_ = &graph;
+    // graph.initialize(&(this->cells_), num_threads, mype);
+    graph_ = std::make_shared<Graph<Tdim>>(&(this->cells_), num_threads, mype);
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1201,10 +1200,10 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
   return status;
 }
 
+//! return the graph
 template <unsigned Tdim>
-mpm::Graph<Tdim> mpm::Mesh<Tdim>::graph() {
-  //! return the graph
-  return *(this->graph_);
+std::shared_ptr<mpm::Graph<Tdim>> mpm::Mesh<Tdim>::graph() {
+  return graph_;
 }
 
 template <unsigned Tdim>

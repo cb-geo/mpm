@@ -191,18 +191,13 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   cellcontainer->add(cell13);
   cellcontainer->add(cell14);
 
-  // simulate parallel graphs
-  mpm::Graph<Dim> graph1;
-  mpm::Graph<Dim> graph2;
-  mpm::Graph<Dim> graph3;
-
   // simluate number of tasks
   int num_threads = 3;
 
   // initialize graph
-  graph1.initialize(cellcontainer.get(), num_threads, 0);
-  graph2.initialize(cellcontainer.get(), num_threads, 1);
-  graph3.initialize(cellcontainer.get(), num_threads, 2);
+  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 0);
+  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 1);
+  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 2);
 
   // Check graph structure
   SECTION("Check graph initialize function") {

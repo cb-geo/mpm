@@ -49,8 +49,8 @@ mpm::Graph<Tdim>& mpm::Graph<Tdim>::operator=(const Graph& graph) {
 
 //! Initialize the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::initialize(Container<Cell<Tdim>>* cells, int num_threads,
-                                  int mype) {
+mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int num_threads,
+                        int mype) {
 
   this->cells_ = cells;
   //! Basic parameters used in ParMETIS
@@ -239,23 +239,6 @@ idx_t* mpm::Graph<Tdim>::get_vtxdist() {
 template <unsigned Tdim>
 idx_t* mpm::Graph<Tdim>::get_vwgt() {
   return this->vwgt;
-}
-
-template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph() {
-  //! Add something to ameliorate
-  //! We can add some more codes here
-  this->adjwgt = nullptr;
-  this->xadj = nullptr;
-  this->vwgt = nullptr;
-  this->nvwgt = nullptr;
-  this->vsize = nullptr;
-  this->adjncy = nullptr;
-  this->vtxdist = nullptr;
-  this->home = nullptr;
-  this->part = nullptr;
-  this->partition = nullptr;
-  this->edgecut = 0;
 }
 
 template <unsigned Tdim>
