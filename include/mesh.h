@@ -355,8 +355,6 @@ class Mesh {
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
   Container<NodeBase<Tdim>> active_nodes_;
-  //! Set of active nodes
-  std::set<mpm::Index> active_nodes_id;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Map of cells for fast retrieval

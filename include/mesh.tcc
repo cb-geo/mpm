@@ -87,14 +87,9 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_active_nodes() {
   // Clear existing list of active nodes
   this->active_nodes_.clear();
-  this->active_nodes_id.clear();
 
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
-    if ((*nitr)->status()) {
-      this->active_nodes_.add(*nitr);
-      this->active_nodes_id.insert((*nitr)->id());
-    }
-  }
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
 //! Iterate over active nodes
@@ -246,7 +241,6 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 
   // Iterate through all unique keys in faces_cells_
-
   for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
        itr = faces_cells_.upper_bound(itr->first)) {
     // Returns a pair representing the range of elements with key

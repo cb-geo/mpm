@@ -23,14 +23,12 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   long part = 0;
   part = sum / mpi_size;
   long rest = sum % mpi_size;
-  if (rest != 0) {
-    part = part + 1;
-  }
+  if (rest != 0) part = part + 1;
 
   long start = 0;
   vvtxdist.push_back(start);
   start = start + part;
-  //! Insert the loal cells for each processor
+  //! Insert the local cells for each processor
   if (sum != 1 && part != 0) {
     while (start < sum) {
       vvtxdist.push_back(start);
@@ -84,18 +82,13 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   idx_t* final_vwgt = (idx_t*)malloc(vvwgt.size() * sizeof(idx_t));
   long i;
   //! Assign the value
-  for (i = 0; i < vxadj.size(); ++i) {
-    final_xadj[i] = vxadj.at(i);
-  }
-  for (i = 0; i < vadjncy.size(); ++i) {
-    final_adjncy[i] = vadjncy.at(i);
-  }
-  for (i = 0; i < vvtxdist.size(); ++i) {
-    final_vtxdist[i] = vvtxdist.at(i);
-  }
-  for (i = 0; i < vvwgt.size(); ++i) {
-    final_vwgt[i] = vvwgt.at(i);
-  }
+  for (i = 0; i < vxadj.size(); ++i) final_xadj[i] = vxadj.at(i);
+
+  for (i = 0; i < vadjncy.size(); ++i) final_adjncy[i] = vadjncy.at(i);
+
+  for (i = 0; i < vvtxdist.size(); ++i) final_vtxdist[i] = vvtxdist.at(i);
+
+  for (i = 0; i < vvwgt.size(); ++i) final_vwgt[i] = vvwgt.at(i);
 
   //! Assign the pointer
   this->adjncy = final_adjncy;
@@ -249,9 +242,8 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
       }
       free(rpart);
     }
-    for (penum = 1; penum < npes; ++penum) {
+    for (penum = 1; penum < npes; ++penum)
       MPI_Send((void*)this->partition, ncells, IDX_T, penum, 1, *comm);
-    }
 
   } else {
     MPI_Send((void*)this->part,
