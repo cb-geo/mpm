@@ -106,7 +106,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Delete all the particles which is not in local task parititon
     for (auto stcl = mesh_->return_particle_id()->begin();
          stcl != mesh_->return_particle_id()->end(); ++stcl) {
-      if (graph_->partition()[stcl->second] != rank) {
+      if (graph_->partition(stcl->second) != rank) {
         mesh_->remove_particle_by_id(stcl->first);
       }
     }

@@ -364,8 +364,7 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   // Remove associated cell for the particle
   map_particles_[id]->remove_cell();
   bool result = particles_.remove(map_particles_[id]);
-  result = result && map_particles_.remove(id);
-  return result;
+  return (result && map_particles_.remove(id));
 }
 
 //! Locate particles in a cell

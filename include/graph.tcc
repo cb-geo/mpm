@@ -55,9 +55,8 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   for (auto stcl = cells_.cbegin(); stcl != cells_.cend(); ++stcl) {
 
     if ((*stcl)->id() >= start && (*stcl)->id() < end) {
-      if (counter == 0) {
-        this->ndims_ = (*stcl)->centroid().rows();
-      }
+      if (counter == 0) this->ndims_ = (*stcl)->centroid().rows();
+
       //! Insert the offset of the size of cell's neighbour
       counter += (*stcl)->nneighbours();
 
@@ -67,10 +66,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
       auto neighbours = (*stcl)->neighbours();
 
       //! get the id of neighbours
-      for (auto neigh = neighbours.cbegin(); neigh != neighbours.cend();
-           ++neigh) {
-        vadjncy.push_back((*neigh));
-      }
+      for (auto neighbour : neighbours) vadjncy.push_back(neighbour);
 
       vvwgt.push_back((*stcl)->nparticles());
     }
@@ -186,8 +182,8 @@ idx_t mpm::Graph<Tdim>::nparts() {
 
 //! Return partition
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::partition() {
-  return this->partition_;
+idx_t mpm::Graph<Tdim>::partition(idx_t id) {
+  return this->partition_[id];
 }
 
 //! Create partition
@@ -204,8 +200,8 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
 
 //! Collect the partitions and store it in the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
-                                          MPI_Comm* comm) {
+void mpm::Graph<Tdim>::collect_partitions(int ncells, int mpi_size,
+                                          int mpi_rank, MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
   this->partition_ = (idx_t*)malloc(ncells * sizeof(idx_t));
@@ -217,7 +213,7 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
       par = par + 1;
     }
 
-    for (int penum = 1; penum < npes; ++penum) {
+    for (int penum = 1; penum < mpi_size; ++penum) {
       idx_t rnvtxs = this->vtxdist_[penum + 1] - this->vtxdist_[penum];
       idx_t* rpart = (idx_t*)malloc(rnvtxs * sizeof(idx_t));
       //! penum is the source process
@@ -230,7 +226,7 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
       free(rpart);
     }
 
-    for (int penum = 1; penum < npes; ++penum)
+    for (int penum = 1; penum < mpi_size; ++penum)
       MPI_Send((void*)this->partition_, ncells, IDX_T, penum, 1, *comm);
 
   } else {

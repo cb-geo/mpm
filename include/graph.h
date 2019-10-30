@@ -52,7 +52,7 @@ class Graph {
   idx_t nparts();
 
   //! partition
-  idx_t* partition();
+  idx_t partition(idx_t id);
 
  private:
   // Container of cells
