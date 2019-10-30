@@ -24,7 +24,7 @@ const int MAXNCON = 1;
 template <unsigned Tdim>
 class Graph {
  public:
-  //! Constructor with cells, n
+  //! Constructor with cells, size and rank
   Graph(Container<Cell<Tdim>> cells, int size, int rank);
 
   //! Create graph partition

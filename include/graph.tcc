@@ -1,4 +1,4 @@
-//! Initialize the graph
+  //! Constructor with cells, size and rank
 template <unsigned Tdim>
 mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
                         int mpi_rank) {
