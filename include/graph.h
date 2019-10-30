@@ -33,37 +33,36 @@ class Graph {
   //! Collect partitions
   void collect_partitions(int ncells, int npes, int rank, MPI_Comm* comm);
 
-  //! Get the xadj
-  idx_t* get_xadj();
+  //! Return xadj
+  idx_t* xadj();
 
-  //! Get the adjncy
-  idx_t* get_adjncy();
+  //! Return adjncy
+  idx_t* adjncy();
 
-  //! Get the vtxdist
-  idx_t* get_vtxdist();
+  //! Return vtxdist
+  idx_t* vtxdist();
 
-  //! Get the vwgt
-  idx_t* get_vwgt();
+  //! Return vwgt
+  idx_t* vwgt();
 
   //! Tdim
   void assign_ndims(idx_t a);
 
-  //! Get nparts
-  idx_t get_nparts();
+  //! Return nparts
+  idx_t nparts();
 
-  //! Get partition
-  idx_t* get_partition();
+  //! partition
+  idx_t* partition();
 
  private:
   // Container of cells
   Container<Cell<Tdim>> cells_;
 
-  real_t ipc2resit;
-  idx_t numflag = 0;
-  idx_t wgtflag = 2;
+  idx_t numflag_ = 0;
+  idx_t wgtflag_ = 2;
 
   idx_t ncon;
-  idx_t nparts;
+  idx_t nparts_;
   real_t ubvec[MAXNCON];
   idx_t options[1];
   real_t* xyz = nullptr;
@@ -75,23 +74,23 @@ class Graph {
   idx_t* adjwgt;
   idx_t nvtxs;
   idx_t* part = nullptr;
-  idx_t* partition = nullptr;
+  idx_t* partition_ = nullptr;
 
   idx_t adptf;
   idx_t optype;
   idx_t gnvtxs, nedges, nobj;
   // Pointers to the locally stored vertices
-  idx_t* xadj;
+  idx_t* xadj_;
   // Vertex weights
-  idx_t* vwgt;
+  idx_t* vwgt_;
   // Vertex weights
   real_t* nvwgt;
   // Vertex size
   idx_t* vsize;
   // Array that stores the adjacency lists of nvtxs
-  idx_t* adjncy;
+  idx_t* adjncy_;
   // Distribution of vertices
-  idx_t* vtxdist;
+  idx_t* vtxdist_;
   // The initial partition of the vertex
   idx_t* home;
 };  // namespace graph

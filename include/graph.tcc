@@ -87,10 +87,10 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   for (long i = 0; i < vvwgt.size(); ++i) final_vwgt[i] = vvwgt.at(i);
 
   //! Assign the pointer
-  this->adjncy = final_adjncy;
-  this->xadj = final_xadj;
-  this->vtxdist = final_vtxdist;
-  this->vwgt = final_vwgt;
+  this->adjncy_ = final_adjncy;
+  this->xadj_ = final_xadj;
+  this->vtxdist_ = final_vtxdist;
+  this->vwgt_ = final_vwgt;
   std::vector<idx_t>(vadjncy).swap(vadjncy);
   std::vector<idx_t>(vxadj).swap(vxadj);
   std::vector<idx_t>(vvtxdist).swap(vvtxdist);
@@ -103,29 +103,28 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   for (nncon = 0; nncon < MAXNCON; ++nncon) ubvec[nncon] = 1.05;
   //! assign nparts
   //! nparts is different from mpi_size, but here we can set them equal
-  nparts = mpi_size;
+  nparts_ = mpi_size;
 
   //! assign tpwgts
   std::vector<real_t> ttpwgts;
   int ntpwgts;
   real_t sub_total = 0.0;
-  for (ntpwgts = 0; ntpwgts < ((nparts) * this->ncon); ++ntpwgts) {
-    if (ntpwgts != (nparts * this->ncon) - 1) {
-      ttpwgts.push_back(1.0 / (real_t)nparts);
-      sub_total = sub_total + 1.0 / (real_t)nparts;
+  for (ntpwgts = 0; ntpwgts < ((nparts_) * this->ncon); ++ntpwgts) {
+    if (ntpwgts != (nparts_ * this->ncon) - 1) {
+      ttpwgts.push_back(1.0 / (real_t)nparts_);
+      sub_total = sub_total + 1.0 / (real_t)nparts_;
     } else {
       ttpwgts.push_back(1.0 - sub_total);
     }
   }
   real_t* mtpwts = (real_t*)malloc(ttpwgts.size() * sizeof(real_t));
-  for (ntpwgts = 0; ntpwgts < ttpwgts.size(); ++ntpwgts) {
+  for (ntpwgts = 0; ntpwgts < ttpwgts.size(); ++ntpwgts)
     mtpwts[ntpwgts] = ttpwgts.at(ntpwgts);
-  }
   this->tpwgts = mtpwts;
   std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
-  this->nvtxs = vtxdist[mpi_rank + 1] - vtxdist[mpi_rank];
+  this->nvtxs = vtxdist_[mpi_rank + 1] - vtxdist_[mpi_rank];
 
   //! assign xyz
   std::vector<real_t> mxyz;
@@ -148,7 +147,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   //! allocate space for part
   this->part = (idx_t*)malloc(this->nvtxs * sizeof(idx_t));
   for (int mpart = 0; mpart < this->nvtxs; ++mpart)
-    this->part[mpart] = mpi_rank % this->nparts;
+    this->part[mpart] = mpi_rank % this->nparts_;
 
   //! assign edgecut
   this->edgecut = 0;
@@ -156,25 +155,25 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
 
 //! Get the xadj
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_xadj() {
-  return this->xadj;
+idx_t* mpm::Graph<Tdim>::xadj() {
+  return this->xadj_;
 }
 
 //! Get the adjncy
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_adjncy() {
-  return this->adjncy;
+idx_t* mpm::Graph<Tdim>::adjncy() {
+  return this->adjncy_;
 }
 //! Get the vtxdist
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_vtxdist() {
-  return this->vtxdist;
+idx_t* mpm::Graph<Tdim>::vtxdist() {
+  return this->vtxdist_;
 }
 
 //! Get the vwgt
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_vwgt() {
-  return this->vwgt;
+idx_t* mpm::Graph<Tdim>::vwgt() {
+  return this->vwgt_;
 }
 
 template <unsigned Tdim>
@@ -182,67 +181,67 @@ void mpm::Graph<Tdim>::assign_ndims(idx_t n) {
   this->ndims = n;
 }
 
-//! get nparts
+//! Return nparts
 template <unsigned Tdim>
-idx_t mpm::Graph<Tdim>::get_nparts() {
-  return this->nparts;
+idx_t mpm::Graph<Tdim>::nparts() {
+  return this->nparts_;
 }
 
-//! get partition
+//! Return partition
 template <unsigned Tdim>
-idx_t* mpm::Graph<Tdim>::get_partition() {
-  return this->partition;
+idx_t* mpm::Graph<Tdim>::partition() {
+  return this->partition_;
 }
 
-//! do the partition
+//! Create partition
 template <unsigned Tdim>
 bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
   //! assign part
   ParMETIS_V3_PartGeomKway(
-      this->get_vtxdist(), this->get_xadj(), this->get_adjncy(),
-      this->get_vwgt(), this->adjwgt, &this->wgtflag, &this->numflag,
-      &this->ndims, this->xyz, &this->ncon, &this->nparts, this->tpwgts,
-      this->ubvec, this->options, &this->edgecut, this->part, comm);
+      this->vtxdist(), this->xadj(), this->adjncy(), this->vwgt(), this->adjwgt,
+      &this->wgtflag_, &this->numflag_, &this->ndims, this->xyz, &this->ncon,
+      &this->nparts_, this->tpwgts, this->ubvec, this->options, &this->edgecut,
+      this->part, comm);
   return true;
 }
 
-//! collect the partition and store it in the graph
+//! Collect the partitions and store it in the graph
 template <unsigned Tdim>
 void mpm::Graph<Tdim>::collect_partitions(int ncells, int npes, int mpi_rank,
                                           MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
-  this->partition = (idx_t*)malloc(ncells * sizeof(idx_t));
-  int penum;
+  this->partition_ = (idx_t*)malloc(ncells * sizeof(idx_t));
+
   if (mpi_rank == 0) {
     int par = 0;
-    int i;
-    for (i = 0; i < this->vtxdist[1]; ++i) {
-      this->partition[par] = this->part[i];
+    for (int i = 0; i < this->vtxdist_[1]; ++i) {
+      this->partition_[par] = this->part[i];
       par = par + 1;
     }
-    for (penum = 1; penum < npes; ++penum) {
-      idx_t rnvtxs = this->vtxdist[penum + 1] - this->vtxdist[penum];
-      idx_t* rpart;
-      rpart = (idx_t*)malloc(rnvtxs * sizeof(idx_t));
+
+    for (int penum = 1; penum < npes; ++penum) {
+      idx_t rnvtxs = this->vtxdist_[penum + 1] - this->vtxdist_[penum];
+      idx_t* rpart = (idx_t*)malloc(rnvtxs * sizeof(idx_t));
       //! penum is the source process
       MPI_Recv((void*)rpart, rnvtxs, IDX_T, penum, 1, *comm, &status);
-      int i;
-      for (i = 0; i < rnvtxs; ++i) {
-        this->partition[par] = rpart[i];
+
+      for (int i = 0; i < rnvtxs; ++i) {
+        this->partition_[par] = rpart[i];
         par = par + 1;
       }
       free(rpart);
     }
-    for (penum = 1; penum < npes; ++penum)
-      MPI_Send((void*)this->partition, ncells, IDX_T, penum, 1, *comm);
+
+    for (int penum = 1; penum < npes; ++penum)
+      MPI_Send((void*)this->partition_, ncells, IDX_T, penum, 1, *comm);
 
   } else {
     MPI_Send((void*)this->part,
-             this->vtxdist[mpi_rank + 1] - this->vtxdist[mpi_rank], IDX_T, 0, 1,
-             *comm);
+             this->vtxdist_[mpi_rank + 1] - this->vtxdist_[mpi_rank], IDX_T, 0,
+             1, *comm);
     //！ free space
     free(this->part);
-    MPI_Recv((void*)this->partition, ncells, IDX_T, 0, 1, *comm, &status);
+    MPI_Recv((void*)this->partition_, ncells, IDX_T, 0, 1, *comm, &status);
   }
 }

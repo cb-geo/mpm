@@ -202,77 +202,77 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   // Check graph structure
   SECTION("Check graph initialize function") {
     // check element in xadj in graph1
-    REQUIRE(graph1.get_xadj()[0] == 0);
-    REQUIRE(graph1.get_xadj()[1] == 2);
-    REQUIRE(graph1.get_xadj()[2] == 5);
-    REQUIRE(graph1.get_xadj()[3] == 8);
-    REQUIRE(graph1.get_xadj()[4] == 11);
-    REQUIRE(graph1.get_xadj()[5] == 13);
+    REQUIRE(graph1.xadj()[0] == 0);
+    REQUIRE(graph1.xadj()[1] == 2);
+    REQUIRE(graph1.xadj()[2] == 5);
+    REQUIRE(graph1.xadj()[3] == 8);
+    REQUIRE(graph1.xadj()[4] == 11);
+    REQUIRE(graph1.xadj()[5] == 13);
 
     // check element in xadj in graph2
-    REQUIRE(graph2.get_xadj()[0] == 0);
-    REQUIRE(graph2.get_xadj()[1] == 3);
-    REQUIRE(graph2.get_xadj()[2] == 7);
-    REQUIRE(graph2.get_xadj()[3] == 11);
-    REQUIRE(graph2.get_xadj()[4] == 15);
-    REQUIRE(graph2.get_xadj()[5] == 18);
+    REQUIRE(graph2.xadj()[0] == 0);
+    REQUIRE(graph2.xadj()[1] == 3);
+    REQUIRE(graph2.xadj()[2] == 7);
+    REQUIRE(graph2.xadj()[3] == 11);
+    REQUIRE(graph2.xadj()[4] == 15);
+    REQUIRE(graph2.xadj()[5] == 18);
 
     // check element in xadj in graph3
-    REQUIRE(graph3.get_xadj()[0] == 0);
-    REQUIRE(graph3.get_xadj()[1] == 2);
-    REQUIRE(graph3.get_xadj()[2] == 5);
-    REQUIRE(graph3.get_xadj()[3] == 8);
-    REQUIRE(graph3.get_xadj()[4] == 11);
-    REQUIRE(graph3.get_xadj()[5] == 13);
+    REQUIRE(graph3.xadj()[0] == 0);
+    REQUIRE(graph3.xadj()[1] == 2);
+    REQUIRE(graph3.xadj()[2] == 5);
+    REQUIRE(graph3.xadj()[3] == 8);
+    REQUIRE(graph3.xadj()[4] == 11);
+    REQUIRE(graph3.xadj()[5] == 13);
 
     // check element in adjncy in graph1
-    REQUIRE(graph1.get_adjncy()[0] == 1);
-    REQUIRE(graph1.get_adjncy()[1] == 5);
-    REQUIRE(graph1.get_adjncy()[2] == 0);
-    REQUIRE(graph1.get_adjncy()[3] == 2);
-    REQUIRE(graph1.get_adjncy()[4] == 6);
-    REQUIRE(graph1.get_adjncy()[5] == 1);
-    REQUIRE(graph1.get_adjncy()[6] == 3);
-    REQUIRE(graph1.get_adjncy()[7] == 7);
-    REQUIRE(graph1.get_adjncy()[8] == 2);
-    REQUIRE(graph1.get_adjncy()[9] == 4);
-    REQUIRE(graph1.get_adjncy()[10] == 8);
-    REQUIRE(graph1.get_adjncy()[11] == 3);
-    REQUIRE(graph1.get_adjncy()[12] == 9);
+    REQUIRE(graph1.adjncy()[0] == 1);
+    REQUIRE(graph1.adjncy()[1] == 5);
+    REQUIRE(graph1.adjncy()[2] == 0);
+    REQUIRE(graph1.adjncy()[3] == 2);
+    REQUIRE(graph1.adjncy()[4] == 6);
+    REQUIRE(graph1.adjncy()[5] == 1);
+    REQUIRE(graph1.adjncy()[6] == 3);
+    REQUIRE(graph1.adjncy()[7] == 7);
+    REQUIRE(graph1.adjncy()[8] == 2);
+    REQUIRE(graph1.adjncy()[9] == 4);
+    REQUIRE(graph1.adjncy()[10] == 8);
+    REQUIRE(graph1.adjncy()[11] == 3);
+    REQUIRE(graph1.adjncy()[12] == 9);
 
     // check element in adjncy in graph1
-    REQUIRE(graph2.get_adjncy()[0] == 0);
-    REQUIRE(graph2.get_adjncy()[1] == 6);
-    REQUIRE(graph2.get_adjncy()[2] == 10);
-    REQUIRE(graph2.get_adjncy()[3] == 1);
-    REQUIRE(graph2.get_adjncy()[4] == 5);
-    REQUIRE(graph2.get_adjncy()[5] == 7);
-    REQUIRE(graph2.get_adjncy()[6] == 11);
-    REQUIRE(graph2.get_adjncy()[7] == 2);
-    REQUIRE(graph2.get_adjncy()[8] == 6);
-    REQUIRE(graph2.get_adjncy()[9] == 8);
-    REQUIRE(graph2.get_adjncy()[10] == 12);
-    REQUIRE(graph2.get_adjncy()[11] == 3);
-    REQUIRE(graph2.get_adjncy()[12] == 7);
-    REQUIRE(graph2.get_adjncy()[13] == 9);
-    REQUIRE(graph2.get_adjncy()[14] == 13);
-    REQUIRE(graph2.get_adjncy()[15] == 4);
-    REQUIRE(graph2.get_adjncy()[16] == 8);
-    REQUIRE(graph2.get_adjncy()[17] == 14);
+    REQUIRE(graph2.adjncy()[0] == 0);
+    REQUIRE(graph2.adjncy()[1] == 6);
+    REQUIRE(graph2.adjncy()[2] == 10);
+    REQUIRE(graph2.adjncy()[3] == 1);
+    REQUIRE(graph2.adjncy()[4] == 5);
+    REQUIRE(graph2.adjncy()[5] == 7);
+    REQUIRE(graph2.adjncy()[6] == 11);
+    REQUIRE(graph2.adjncy()[7] == 2);
+    REQUIRE(graph2.adjncy()[8] == 6);
+    REQUIRE(graph2.adjncy()[9] == 8);
+    REQUIRE(graph2.adjncy()[10] == 12);
+    REQUIRE(graph2.adjncy()[11] == 3);
+    REQUIRE(graph2.adjncy()[12] == 7);
+    REQUIRE(graph2.adjncy()[13] == 9);
+    REQUIRE(graph2.adjncy()[14] == 13);
+    REQUIRE(graph2.adjncy()[15] == 4);
+    REQUIRE(graph2.adjncy()[16] == 8);
+    REQUIRE(graph2.adjncy()[17] == 14);
 
     // check element in adjncy in graph1
-    REQUIRE(graph3.get_adjncy()[0] == 5);
-    REQUIRE(graph3.get_adjncy()[1] == 11);
-    REQUIRE(graph3.get_adjncy()[2] == 6);
-    REQUIRE(graph3.get_adjncy()[3] == 10);
-    REQUIRE(graph3.get_adjncy()[4] == 12);
-    REQUIRE(graph3.get_adjncy()[5] == 7);
-    REQUIRE(graph3.get_adjncy()[6] == 11);
-    REQUIRE(graph3.get_adjncy()[7] == 13);
-    REQUIRE(graph3.get_adjncy()[8] == 8);
-    REQUIRE(graph3.get_adjncy()[9] == 12);
-    REQUIRE(graph3.get_adjncy()[10] == 14);
-    REQUIRE(graph3.get_adjncy()[11] == 9);
-    REQUIRE(graph3.get_adjncy()[12] == 13);
+    REQUIRE(graph3.adjncy()[0] == 5);
+    REQUIRE(graph3.adjncy()[1] == 11);
+    REQUIRE(graph3.adjncy()[2] == 6);
+    REQUIRE(graph3.adjncy()[3] == 10);
+    REQUIRE(graph3.adjncy()[4] == 12);
+    REQUIRE(graph3.adjncy()[5] == 7);
+    REQUIRE(graph3.adjncy()[6] == 11);
+    REQUIRE(graph3.adjncy()[7] == 13);
+    REQUIRE(graph3.adjncy()[8] == 8);
+    REQUIRE(graph3.adjncy()[9] == 12);
+    REQUIRE(graph3.adjncy()[10] == 14);
+    REQUIRE(graph3.adjncy()[11] == 9);
+    REQUIRE(graph3.adjncy()[12] == 13);
   }
 }
