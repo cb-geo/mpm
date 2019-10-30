@@ -67,11 +67,11 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->property("youngs_modulus") ==
+    REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->property("poisson_ratio") ==
+    REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Check if state variable is initialised
@@ -90,7 +90,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
     // Calculate modulus values
@@ -228,11 +228,11 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->property("youngs_modulus") ==
+    REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->property("poisson_ratio") ==
+    REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Check if state variable is initialised
@@ -251,7 +251,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
     // Calculate modulus values

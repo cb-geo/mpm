@@ -64,7 +64,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
     // Calculate modulus values
@@ -219,7 +219,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
     // Calculate modulus values
