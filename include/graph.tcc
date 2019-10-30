@@ -1,6 +1,6 @@
 //! Initialize the graph
 template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
+mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
                         int mpi_rank) {
 
   this->cells_ = cells;
@@ -18,7 +18,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   //! Use default value to fill the options[1]
   this->options[0] = 0;
 
-  long sum = cells_->size();
+  long sum = cells_.size();
 
   long part = 0;
   part = sum / mpi_size;
@@ -52,7 +52,7 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   start = vvtxdist[mpi_rank];
   idx_t end = vvtxdist[mpi_rank + 1];
 
-  for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
+  for (auto stcl = cells_.cbegin(); stcl != cells_.cend(); ++stcl) {
 
     if ((*stcl)->id() >= start && (*stcl)->id() < end) {
       if (counter == 0) {
@@ -80,15 +80,11 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   idx_t* final_adjncy = (idx_t*)malloc(vadjncy.size() * sizeof(idx_t));
   idx_t* final_vtxdist = (idx_t*)malloc(vvtxdist.size() * sizeof(idx_t));
   idx_t* final_vwgt = (idx_t*)malloc(vvwgt.size() * sizeof(idx_t));
-  long i;
   //! Assign the value
-  for (i = 0; i < vxadj.size(); ++i) final_xadj[i] = vxadj.at(i);
-
-  for (i = 0; i < vadjncy.size(); ++i) final_adjncy[i] = vadjncy.at(i);
-
-  for (i = 0; i < vvtxdist.size(); ++i) final_vtxdist[i] = vvtxdist.at(i);
-
-  for (i = 0; i < vvwgt.size(); ++i) final_vwgt[i] = vvwgt.at(i);
+  for (long i = 0; i < vxadj.size(); ++i) final_xadj[i] = vxadj.at(i);
+  for (long i = 0; i < vadjncy.size(); ++i) final_adjncy[i] = vadjncy.at(i);
+  for (long i = 0; i < vvtxdist.size(); ++i) final_vtxdist[i] = vvtxdist.at(i);
+  for (long i = 0; i < vvwgt.size(); ++i) final_vwgt[i] = vvwgt.at(i);
 
   //! Assign the pointer
   this->adjncy = final_adjncy;
@@ -134,29 +130,25 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>>* cells, int mpi_size,
   //! assign xyz
   std::vector<real_t> mxyz;
 
-  for (auto stcl = cells_->cbegin(); stcl != cells_->cend(); ++stcl) {
+  for (auto stcl = cells_.cbegin(); stcl != cells_.cend(); ++stcl) {
     if ((*stcl)->id() >= start && (*stcl)->id() < end) {
-      int dimension = 0;
-      for (dimension = 0; dimension < (*stcl)->centroid().rows(); dimension++) {
+      for (int dimension = 0; dimension < (*stcl)->centroid().rows();
+           dimension++) {
         mxyz.push_back(((*stcl)->centroid())(dimension, 0));
       }
     }
   }
 
   real_t* txyz = (real_t*)malloc(mxyz.size() * sizeof(real_t));
-  for (i = 0; i < mxyz.size(); ++i) {
-    txyz[i] = mxyz.at(i);
-  }
+  for (long i = 0; i < mxyz.size(); ++i) txyz[i] = mxyz.at(i);
   this->xyz = txyz;
 
   std::vector<real_t>(mxyz).swap(mxyz);
 
   //! allocate space for part
   this->part = (idx_t*)malloc(this->nvtxs * sizeof(idx_t));
-  int mpart = 0;
-  for (mpart = 0; mpart < this->nvtxs; ++mpart) {
+  for (int mpart = 0; mpart < this->nvtxs; ++mpart)
     this->part[mpart] = mpi_rank % this->nparts;
-  }
 
   //! assign edgecut
   this->edgecut = 0;

@@ -324,7 +324,7 @@ class Mesh {
       bool check_duplicates);
 
   //! Get the container of cell
-  mpm::Container<Cell<Tdim>>* cells_container();
+  mpm::Container<Cell<Tdim>> cells();
 
   //! Return particle_ptr
   std::map<mpm::Index, mpm::Index>* return_particle_id();

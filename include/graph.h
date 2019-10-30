@@ -25,7 +25,7 @@ template <unsigned Tdim>
 class Graph {
  public:
   //! Constructor with cells, n
-  Graph(Container<Cell<Tdim>>* cells, int size, int rank);
+  Graph(Container<Cell<Tdim>> cells, int size, int rank);
 
   //! Create graph partition
   bool create_partitions(MPI_Comm* comm);
@@ -55,7 +55,8 @@ class Graph {
   idx_t* get_partition();
 
  private:
-  Container<Cell<Tdim>>* cells_;
+  // Container of cells
+  Container<Cell<Tdim>> cells_;
 
   real_t ipc2resit;
   idx_t numflag = 0;
@@ -70,7 +71,8 @@ class Graph {
   idx_t edgecut = 0;
 
   real_t* tpwgts = nullptr;
-  idx_t* adjwgt; /* Array that stores the weights of the adjacency lists */
+  // Array that stores the weights of the adjacency lists
+  idx_t* adjwgt;
   idx_t nvtxs;
   idx_t* part = nullptr;
   idx_t* partition = nullptr;
@@ -78,14 +80,21 @@ class Graph {
   idx_t adptf;
   idx_t optype;
   idx_t gnvtxs, nedges, nobj;
-  idx_t* xadj;    /* Pointers to the locally stored vertices */
-  idx_t* vwgt;    /* Vertex weights */
-  real_t* nvwgt;  /* Vertex weights */
-  idx_t* vsize;   /* Vertex size */
-  idx_t* adjncy;  /* Array that stores the adjacency lists of nvtxs */
-  idx_t* vtxdist; /* Distribution of vertices */
-  idx_t* home;    /* The initial partition of the vertex */
-};                // namespace graph
+  // Pointers to the locally stored vertices
+  idx_t* xadj;
+  // Vertex weights
+  idx_t* vwgt;
+  // Vertex weights
+  real_t* nvwgt;
+  // Vertex size
+  idx_t* vsize;
+  // Array that stores the adjacency lists of nvtxs
+  idx_t* adjncy;
+  // Distribution of vertices
+  idx_t* vtxdist;
+  // The initial partition of the vertex
+  idx_t* home;
+};  // namespace graph
 }  // namespace mpm
 
 #include "graph.tcc"

@@ -95,8 +95,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       throw std::runtime_error("Container of cells is empty");
 
     // Create graph
-    graph_ =
-        std::make_shared<Graph<Tdim>>(mesh_->cells_container(), size, rank);
+    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), size, rank);
 
     // Create partition using ParMETIS
     bool graph_partition = graph_->create_partitions(&comm);

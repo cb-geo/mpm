@@ -1173,8 +1173,8 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
 }
 
 template <unsigned Tdim>
-mpm::Container<mpm::Cell<Tdim>>* mpm::Mesh<Tdim>::cells_container() {
-  return &(this->cells_);
+mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
+  return this->cells_;
 }
 
 //! return particle_ptr

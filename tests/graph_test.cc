@@ -195,9 +195,9 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   int num_threads = 3;
 
   // initialize graph
-  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 0);
-  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 1);
-  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(cellcontainer.get(), num_threads, 2);
+  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellcontainer, num_threads, 0);
+  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellcontainer, num_threads, 1);
+  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellcontainer, num_threads, 2);
 
   // Check graph structure
   SECTION("Check graph initialize function") {
