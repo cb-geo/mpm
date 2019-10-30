@@ -117,6 +117,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1, phase));
 
+    // Assign material ids to nodes
+    mesh_->iterate_over_cells(std::bind(
+        &mpm::Cell<Tdim>::assign_material_ids_to_nodes, std::placeholders::_1));
+
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
