@@ -93,7 +93,7 @@ endif()
 # METIS
 find_package(METIS)
 if (METIS_FOUND)
-    include_directories(${METIS_INCLUDE_DIR})
+    include_directories(SYSTEM ${METIS_INCLUDE_DIR})
     link_libraries(${METIS_LIBRARY})
 endif (METIS_FOUND)
 
