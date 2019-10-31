@@ -91,7 +91,7 @@ if (VTK_FOUND)
 endif()
 
 # METIS
-find_package(METIS REQUIRED)
+find_package(METIS)
 if (METIS_FOUND)
     include_directories(SYSTEM ${METIS_INCLUDE_DIR})
     link_libraries(${METIS_LIBRARY})
@@ -146,10 +146,10 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc  
+    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
-    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc    
+    ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
@@ -174,7 +174,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
-  )   
+  )
   add_executable(mpmtest ${test_src})
   target_link_libraries(mpmtest lmpm)
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
