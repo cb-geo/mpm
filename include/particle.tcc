@@ -52,6 +52,14 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i)
     this->coordinates_(i, phase) = coordinates(i);
 
+  // Displacement
+  Eigen::Vector3d displacement;
+  displacement << particle.displacement_x, particle.displacement_y,
+      particle.displacement_z;
+  // Initialise displacement
+  for (unsigned i = 0; i < Tdim; ++i)
+    this->displacement_(i, phase) = displacement(i);
+
   // Velocity
   Eigen::Vector3d velocity;
   velocity << particle.velocity_x, particle.velocity_y, particle.velocity_z;
