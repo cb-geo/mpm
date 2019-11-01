@@ -1,6 +1,10 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
+#ifdef USE_PARMETIS
+#include "graph.h"
+#endif
+
 #include "mpm_base.h"
 
 namespace mpm {
@@ -37,6 +41,11 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
+
+#ifdef USE_PARMETIS
+  //! Graph
+  using mpm::MPMBase<Tdim>::graph_;
+#endif
 
   //! velocity update
   using mpm::MPMBase<Tdim>::velocity_update_;

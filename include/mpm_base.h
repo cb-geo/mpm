@@ -14,6 +14,10 @@
 #endif
 #include "tbb/task_group.h"
 
+#ifdef USE_PARMETIS
+#include "graph.h"
+#endif
+
 #include "container.h"
 #include "generators/generator_factory.h"
 #include "mpi_wrapper.h"
@@ -126,6 +130,11 @@ class MPMBase : public MPM {
   unsigned quadrature_order_{2};
   // Level set methods
   bool ls_methods_{false};
+
+#ifdef USE_PARMETIS
+  // graph pass the address of the container of cell
+  std::shared_ptr<Graph<Tdim>> graph_{nullptr};
+#endif
 };  // MPMBase class
 }  // namespace mpm
 

@@ -220,6 +220,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -269,6 +275,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();
@@ -1066,6 +1078,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -1115,6 +1133,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(coordinates.size() == Dim);
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();
@@ -2033,6 +2057,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -2083,6 +2113,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();
