@@ -4,7 +4,11 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   cell_ = nullptr;
+
+  //! Set material pointer to null
   material_.clear();
+  for (unsigned i = 0; i < Tnphases; ++i) material_[i] = nullptr;
+
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -216,8 +220,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      status = material_.emplace(std::make_pair(phase, material)).second;
+      material_.at(phase) = material;
       state_variables_ = material_.at(phase)->initialise_state_variables();
+      status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
     }
