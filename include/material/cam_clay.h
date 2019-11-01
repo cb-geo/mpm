@@ -64,7 +64,7 @@ class CamClay : public Material<Tdim> {
   //! \param[in] direction of deviatoric stress
   //! \param[in] state_vars History-dependent state variables
   //! \retval status of computation of stress invariants
-  bool compute_stress_invariants(const Vector6d& stress,Vector6d& n,
+  bool compute_stress_invariants(const Vector6d& stress, Vector6d& n,
                                  mpm::dense_map* state_vars);
 
   //! Compute yield function and yield state
@@ -88,8 +88,7 @@ class CamClay : public Material<Tdim> {
   //! \param[in] stress Stress
   //! \param[in] df_dsigma dF/dSigma
   void compute_df_dsigma(const mpm::dense_map* state_vars,
-                         const Vector6d& stress,
-                         Vector6d* df_dsigma);
+                         const Vector6d& stress, Vector6d* df_dsigma);
 
   //! Compute G and dG/dpc
   //! \param[in] state_vars History-dependent state variables

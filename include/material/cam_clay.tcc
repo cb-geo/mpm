@@ -243,7 +243,10 @@ bool mpm::CamClay<Tdim>::compute_stress_invariants(const Vector6d& stress,
   if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
   // Compute q
   (*state_vars).at("q") = sqrt(3. * j2);
-  if (bonding_) {
+  // Compute vector n
+  if ((*state_vars).at("q") > std::numeric_limits<double>::min())
+    n = dev_stress / (*state_vars).at("q");
+  if (three_invariants_) {
     // Compute J3
     (*state_vars).at("j3") = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
                              (dev_stress(2) * pow(dev_stress(3), 2));
@@ -266,9 +269,6 @@ bool mpm::CamClay<Tdim>::compute_stress_invariants(const Vector6d& stress,
     if ((*state_vars).at("theta") > M_PI / 3.)
       (*state_vars).at("theta") = M_PI / 3.;
     if ((*state_vars).at("theta") < 0.0) (*state_vars).at("theta") = 0.;
-    // Compute vector n
-    if (fabs((*state_vars).at("q")) > std::numeric_limits<double>::min())
-    n = dev_stress / (*state_vars).at("q");
   }
 
   return true;
@@ -459,7 +459,7 @@ void mpm::CamClay<Tdim>::compute_df_dsigma(const mpm::dense_map* state_vars,
     // Compute r
     double r_val = 0.;
     // Compute j2
-    double& j2 = 3*pow(q,2);
+    double j2 = 3 * pow(q, 2);
     if (fabs(j2) > 1.E-22) r_val = (3. * sqrt(3.) / 2.) * (j3 / pow(j2, 1.5));
     // Compute dTheta / dr
     double divider = 1 - (r_val * r_val);
