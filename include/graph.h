@@ -62,33 +62,31 @@ class Graph {
   idx_t numflag_ = 0;
   idx_t wgtflag_ = 2;
 
-  idx_t ncon_;
-  idx_t nparts_;
+  idx_t ncon_ = 0;
+  idx_t nparts_ = 0;
   real_t ubvec_[MAXNCON];
   idx_t options_[1];
   real_t* xyz_ = nullptr;
-  idx_t ndims_;
+  idx_t ndims_ = 0;
   idx_t edgecut_ = 0;
 
   real_t* tpwgts_ = nullptr;
   // Array that stores the weights of the adjacency lists
-  idx_t* adjwgt_;
-  idx_t nvtxs_;
+  idx_t* adjwgt_ = nullptr;
+  idx_t nvtxs_ = 0;
   idx_t* part_ = nullptr;
   idx_t* partition_ = nullptr;
 
   // Pointers to the locally stored vertices
-  idx_t* xadj_;
+  idx_t* xadj_ = nullptr;
   // Vertex weights
-  idx_t* vwgt_;
+  idx_t* vwgt_ = nullptr;
   // Vertex weights
-  real_t* nvwgt;
-  // Vertex size
-  idx_t* vsize;
+  real_t* nvwgt = nullptr;
   // Array that stores the adjacency lists of nvtxs
-  idx_t* adjncy_;
+  idx_t* adjncy_ = nullptr;
   // Distribution of vertices
-  idx_t* vtxdist_;
+  idx_t* vtxdist_ = nullptr;
 };  // namespace graph
 }  // namespace mpm
 

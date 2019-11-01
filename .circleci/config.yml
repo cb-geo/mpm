@@ -32,7 +32,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            scan-build make -j2 
+            scan-build -k -V make -j2
             ctest -VV
   cppcheck:
     docker:

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #ifdef USE_MPI
@@ -10,11 +11,6 @@
 #include "mpm.h"
 
 int main(int argc, char** argv) {
-  // Logger level (trace, debug, info, warn, error, critical, off)
-  spdlog::set_level(spdlog::level::trace);
-
-  // Initialise logger
-  auto console = spdlog::stdout_color_mt("main");
 
 #ifdef USE_MPI
   // Initialise MPI
@@ -27,6 +23,12 @@ int main(int argc, char** argv) {
 #endif
 
   try {
+    // Logger level (trace, debug, info, warn, error, critical, off)
+    spdlog::set_level(spdlog::level::trace);
+
+    // Initialise logger
+    auto console = spdlog::stdout_color_mt("main");
+
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
 
@@ -47,7 +49,7 @@ int main(int argc, char** argv) {
     mpm->solve();
 
   } catch (std::exception& exception) {
-    console->error("MPM main: {}", exception.what());
+    std::cerr << "MPM main: " << exception.what() << std::endl;
 #ifdef USE_MPI
     MPI_Abort(MPI_COMM_WORLD, 1);
 #endif
