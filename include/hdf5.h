@@ -19,6 +19,8 @@ typedef struct HDF5Particle {
   double pressure;
   // Coordinates
   double coord_x, coord_y, coord_z;
+  // Displacement
+  double displacement_x, displacement_y, displacement_z;
   // Natural particle size
   double nsize_x, nsize_y, nsize_z;
   // Velocity
