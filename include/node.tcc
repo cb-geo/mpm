@@ -616,3 +616,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
     }
   }
 }
+
+//! Assign pore pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pore_pressure_constraint(
+    double pore_pressure) {
+  bool status = true;
+  try {
+    this->pore_pressure_constraint_ = pore_pressure;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

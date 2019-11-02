@@ -191,6 +191,12 @@ class Particle : public ParticleBase<Tdim> {
     this->stress_.col(phase) = stress;
   }
 
+  //! Initial pore pressure
+  //! \param[in] pore pressure Initial pore pressure
+  void initial_pore_pressure(const double& pore_pressure) override {
+    this->pore_pressure_ = pore_pressure;
+  }
+
   //! Compute stress
   bool compute_stress(unsigned phase) override;
 
@@ -310,6 +316,11 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_particle_velocity_constraint(unsigned dir,
                                            double velocity) override;
 
+  //! Assign particle pore pressure constraints
+  //! \param[in] pore_pressure Applied particle pore pressure constraint
+  //! \retval status Assignment status
+  bool assign_particle_pore_pressure_constraint(double pore_pressure) override;
+
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
 
@@ -353,6 +364,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
+  //! Pore pressure
+  double pore_pressure_;
+  //! Pore pressure constraint
+  double particle_pore_pressure_constraint_{std::numeric_limits<double>::max()};
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
   //! Volumetric strain at centroid

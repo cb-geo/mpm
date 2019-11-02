@@ -66,6 +66,19 @@ class ReadMesh {
   virtual std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
       const std::string& particles_stresses) = 0;
 
+  //! Read particle pore pressure
+  //! \param[in] particles_pore_pressures file name with particle pore pressure
+  //! \retval Vector of particles pore pressures
+  virtual std::vector<double> read_particles_pore_pressures(
+      const std::string& particles_pore_pressures) = 0;
+
+  //! Read pore pressure constraints file
+  //! \param[in] pore_pressure_constraints_files file name with pore pressure
+  //! constraints
+  virtual std::vector<std::tuple<mpm::Index, double>>
+      read_pore_pressure_constraints(
+          const std::string& pore_pressure_constraints_file) = 0;
+
   //! Read velocity constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>>

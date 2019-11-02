@@ -164,6 +164,9 @@ class ParticleBase {
   virtual void initial_stress(unsigned phase,
                               const Eigen::Matrix<double, 6, 1>&) = 0;
 
+  //! Initial pore pressure
+  virtual void initial_pore_pressure(const double&) = 0;
+
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
 
@@ -229,11 +232,11 @@ class ParticleBase {
   virtual double state_variable(const std::string& var) const = 0;
 
   //! Assign particle velocity constraint
-  //! Directions can take values between 0 and Dim * Nphases
-  //! \param[in] dir Direction of particle velocity constraint
-  //! \param[in] velocity Applied particle velocity constraint
   virtual bool assign_particle_velocity_constraint(unsigned dir,
                                                    double velocity) = 0;
+  //! Assign particle pore pressure constraints
+  virtual bool assign_particle_pore_pressure_constraint(
+      double pore_pressure) = 0;
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;

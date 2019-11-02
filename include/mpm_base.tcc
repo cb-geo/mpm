@@ -189,6 +189,16 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Friction constraints are not properly assigned");
     }
 
+    // Read and assign pore pressure constraints
+    if (!io_->file_name("pore_pressure_constraints").empty()) {
+      bool pore_pressure_constraints = mesh_->assign_pore_pressure_constraints(
+          mesh_reader->read_pore_pressure_constraints(
+              io_->file_name("pore_pressure_constraints")));
+      if (!pore_pressure_constraints)
+        throw std::runtime_error(
+            "Pore pressure constraints are not properly assigned");
+    }
+
     // Set nodal traction as false if file is empty
     if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
 
@@ -368,6 +378,16 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error("Particles volumes are not properly assigned");
     }
 
+    // Read and assign particles pore pressure
+    if (!io_->file_name("particles_pore_pressures").empty()) {
+      bool particles_pore_pressures = mesh_->assign_particles_pore_pressures(
+          particle_reader->read_particles_pore_pressures(
+              io_->file_name("particles_pore_pressures")));
+      if (!particles_pore_pressures)
+        throw std::runtime_error(
+            "Particles pore pressures are not properly assigned");
+    }
+
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
       bool particles_tractions = mesh_->assign_particles_tractions(
@@ -387,6 +407,17 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       if (!particles_velocity_constraints)
         throw std::runtime_error(
             "Particles velocity constraints are not properly assigned");
+    }
+
+    // Read and assign particles pore pressure constraints
+    if (!io_->file_name("particles_pore_pressure_constraints").empty()) {
+      bool particles_pore_pressure_constraints =
+          mesh_->assign_particles_pore_pressure_constraints(
+              particle_reader->read_pore_pressure_constraints(
+                  io_->file_name("particles_pore_pressure_constraints")));
+      if (!particles_pore_pressure_constraints)
+        throw std::runtime_error(
+            "Particles pore pressure constraints are not properly assigned");
     }
 
     // Read and assign particles stresses

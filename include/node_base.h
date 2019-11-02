@@ -213,6 +213,10 @@ class NodeBase {
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
+  //! Assign pore pressure constraint
+  //! \param[in] pore_pressure Applied pore pressure constraint
+  virtual bool assign_pore_pressure_constraint(double pore_pressure) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 

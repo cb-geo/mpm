@@ -54,6 +54,18 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
   std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
       const std::string& particles_stresses) override;
 
+  //! Read particle pore pressure
+  //! \param[in] particles_pore_pressures file name with particle pore pressure
+  //! \retval Vector of particles pore pressures
+  std::vector<double> read_particles_pore_pressures(
+      const std::string& particles_pore_pressures) override;
+
+  //! Read pore pressure constraints file
+  //! \param[in] pore_pressure_constraints_files file name with pore pressure
+  //! constraints
+  std::vector<std::tuple<mpm::Index, double>> read_pore_pressure_constraints(
+      const std::string& pore_pressure_constraints_file) override;
+
   //! Read constraints file
   //! \param[in] velocity_constraints_files file name with constraints
   std::vector<std::tuple<mpm::Index, unsigned, double>>

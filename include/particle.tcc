@@ -559,16 +559,23 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
       Eigen::VectorXd strain_rate_fluid =
           cell_->compute_strain_rate(bmatrix_, pore_fluid);
       // Calculate pore pressure
-      double dpressure = -K / porosity_ *
-                         (volume_fraction_(solid_skeleton) * dt *
-                              strain_rate_solid.head(Tdim).sum() +
-                          volume_fraction_(pore_fluid) * dt *
-                              strain_rate_fluid.head(Tdim).sum());
+      double dpore_pressure = -K / porosity_ *
+                              (volume_fraction_(solid_skeleton) * dt *
+                                   strain_rate_solid.head(Tdim).sum() +
+                               volume_fraction_(pore_fluid) * dt *
+                                   strain_rate_fluid.head(Tdim).sum());
 
       // Update stresses of pore fluid phase
-      for (unsigned i = 0; i < Tdim; ++i)
-        this->stress_.col(pore_fluid)(i) =
-            this->stress_.col(pore_fluid)(i) + dpressure;
+      this->pore_pressure_ += dpore_pressure;
+      // for (unsigned i = 0; i < Tdim; ++i)
+      //  this->stress_.col(pore_fluid)(i) =
+      //      this->stress_.col(pore_fluid)(i) + dpore_pressure;
+
+      // Apply pore pressure constraint
+      if (particle_pore_pressure_constraint_ !=
+          std::numeric_limits<double>::max())
+        this->pore_pressure_ = this->particle_pore_pressure_constraint_;
+
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -963,6 +970,20 @@ bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
       throw std::runtime_error(
           "Particle velocity constraint direction is out of bounds");
 
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle pore pressure constraints
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::assign_particle_pore_pressure_constraint(
+    double pore_pressure) {
+  bool status = true;
+  try {
+    this->particle_pore_pressure_constraint_ = pore_pressure;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
