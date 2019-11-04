@@ -549,7 +549,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
                                                     double traction) {
   bool status = false;
   try {
-    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim ||
+    if (phase >= Tnphases || direction >= Tdim ||
         this->volume_(phase) == std::numeric_limits<double>::max()) {
       throw std::runtime_error(
           "Particle traction property: volume / direction / phase is invalid");
@@ -719,7 +719,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < (Tdim * Tnphases))
+    if (dir < (Tdim * Tnphases))
       this->particle_velocity_constraints_.insert(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));

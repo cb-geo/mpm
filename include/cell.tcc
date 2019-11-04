@@ -134,8 +134,7 @@ bool mpm::Cell<Tdim>::add_node(
     // If number of node ptrs in a cell is less than the maximum number of nodes
     // per cell
     // The local id should be between 0 and maximum number of nodes
-    if (nodes_.size() < this->nnodes_ &&
-        (local_id >= 0 && local_id < this->nnodes_)) {
+    if (nodes_.size() < this->nnodes_ && local_id < this->nnodes_) {
       nodes_.emplace_back(node_ptr);
       // Assign coordinates
       nodal_coordinates_.row(local_id) =
@@ -914,7 +913,7 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   bool status = true;
   try {
     //! Constraint directions can take values between 0 and Dim * Nphases - 1
-    if (dir >= 0 && face_id < element_->nfaces()) {
+    if (face_id < element_->nfaces()) {
       this->velocity_constraints_[face_id].emplace_back(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));
