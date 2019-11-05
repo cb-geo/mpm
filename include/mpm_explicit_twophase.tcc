@@ -82,11 +82,10 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     bool set_material_status = this->apply_properties_to_particles_sets();
   }
 
-  // Read and assign porosity (volume fraction and phase volume)
-  const double porosity = particle_props["porosity"].template get<double>();
+  // Assign porosity
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_porosity,
-                std::placeholders::_1, porosity));
+                std::placeholders::_1, solid_skeleton));
 
   // Compute mass for each phase
   mesh_->iterate_over_particles(

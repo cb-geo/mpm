@@ -102,8 +102,8 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_volume(unsigned phase, double volume) override;
 
   //! Assign porosity
-  //! \param[in] porosity Porosity of particle
-  bool assign_porosity(double porosity) override;
+  //! \param[in] solid_skeleton Index corresponding to solid phase
+  bool assign_porosity(const unsigned solid_skeleton) override;
 
   //! Return volume of specified phase
   //! \param[in] phase Index corresponding to the phase
@@ -192,9 +192,11 @@ class Particle : public ParticleBase<Tdim> {
   }
 
   //! Initial pore pressure
+  //! \param[in] pore_fluid Index corresponding to fluid phase
   //! \param[in] pore pressure Initial pore pressure
-  void initial_pore_pressure(const double& pore_pressure) override {
-    this->pore_pressure_ = pore_pressure;
+  void initial_pore_pressure(const unsigned pore_fluid,
+                             const double& pore_pressure) override {
+    this->pressure_(pore_fluid) = pore_pressure;
   }
 
   //! Compute stress
@@ -316,10 +318,12 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_particle_velocity_constraint(unsigned dir,
                                            double velocity) override;
 
-  //! Assign particle pore pressure constraints
-  //! \param[in] pore_pressure Applied particle pore pressure constraint
+  //! Assign particle pressure constraints
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied particle pressure constraint
   //! \retval status Assignment status
-  bool assign_particle_pore_pressure_constraint(double pore_pressure) override;
+  bool assign_particle_pressure_constraint(const unsigned phase,
+                                           const double pressure) override;
 
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
@@ -362,12 +366,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tdim> natural_size_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
+  //! Pore pressure constraint
+  std::map<unsigned, double> pressure_constraint_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
-  //! Pore pressure
-  double pore_pressure_;
-  //! Pore pressure constraint
-  double particle_pore_pressure_constraint_{std::numeric_limits<double>::max()};
   //! Strains
   Eigen::Matrix<double, 6, Tnphases> strain_;
   //! Volumetric strain at centroid

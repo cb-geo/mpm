@@ -97,7 +97,7 @@ class ParticleBase {
   virtual bool assign_volume(unsigned phase, double volume) = 0;
 
   //! Assign porosity
-  virtual bool assign_porosity(double porosity) = 0;
+  virtual bool assign_porosity(const unsigned solid_skeleton) = 0;
 
   //! Return volume of specified phase
   virtual double volume(unsigned phase) const = 0;
@@ -165,7 +165,8 @@ class ParticleBase {
                               const Eigen::Matrix<double, 6, 1>&) = 0;
 
   //! Initial pore pressure
-  virtual void initial_pore_pressure(const double&) = 0;
+  virtual void initial_pore_pressure(const unsigned pore_fluid,
+                                     const double& pore_pressure) = 0;
 
   //! Compute stress
   virtual bool compute_stress(unsigned phase) = 0;
@@ -234,9 +235,9 @@ class ParticleBase {
   //! Assign particle velocity constraint
   virtual bool assign_particle_velocity_constraint(unsigned dir,
                                                    double velocity) = 0;
-  //! Assign particle pore pressure constraints
-  virtual bool assign_particle_pore_pressure_constraint(
-      double pore_pressure) = 0;
+  //! Assign particle pressure constraints
+  virtual bool assign_particle_pressure_constraint(const unsigned phase,
+                                                   const double pressure) = 0;
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;

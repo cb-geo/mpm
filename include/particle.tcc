@@ -311,19 +311,26 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
 
 // Assign porosity to the particle
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_porosity(double porosity) {
+bool mpm::Particle<Tdim, Tnphases>::assign_porosity(
+    const unsigned solid_skeleton) {
   bool status = true;
   try {
-    if (porosity < 0. || porosity > 1.)
-      throw std::runtime_error(
-          "Particle porosity is negative or larger than one");
-    // Assign porosity
-    porosity_ = porosity;
-    // Update volume fraction for each phase
-    volume_fraction_[0] = 1. - porosity_;
-    volume_fraction_[1] = porosity_;
-    // Update phase volume for each phase
-    phase_volume_ = volume_fraction_ * volume_;
+    if (material_.at(solid_skeleton) != nullptr) {
+      const double porosity =
+          material_.at(solid_skeleton)->property("porosity");
+      if (porosity < 0. || porosity > 1.)
+        throw std::runtime_error(
+            "Particle porosity is negative or larger than one");
+      // Assign porosity
+      porosity_ = porosity;
+      // Update volume fraction for each phase
+      volume_fraction_[0] = 1. - porosity_;
+      volume_fraction_[1] = porosity_;
+      // Update phase volume for each phase
+      phase_volume_ = volume_fraction_ * volume_;
+    } else {
+      throw std::runtime_error("Fluid material is invalid");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -546,9 +553,12 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
     unsigned solid_skeleton, unsigned pore_fluid, double dt) {
   bool status = true;
   try {
+    // Apply pore pressure constraint
+    if (pressure_constraint_.find(pore_fluid) != pressure_constraint_.end())
+      this->pressure_(pore_fluid) = this->pressure_constraint_.at(pore_fluid);
     // Check if material ptr is valid
-    if (material_.at(solid_skeleton) != nullptr &&
-        material_.at(pore_fluid) != nullptr) {
+    else if (material_.at(solid_skeleton) != nullptr &&
+             material_.at(pore_fluid) != nullptr) {
       // Bulk modulus of fluid
       double K = material_.at(pore_fluid)->property("bulk_modulus");
       // Compute strain rate of the particle
@@ -566,18 +576,10 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
                                    strain_rate_fluid.head(Tdim).sum());
 
       // Update stresses of pore fluid phase
-      this->pore_pressure_ += dpore_pressure;
-      // for (unsigned i = 0; i < Tdim; ++i)
-      //  this->stress_.col(pore_fluid)(i) =
-      //      this->stress_.col(pore_fluid)(i) + dpore_pressure;
-
-      // Apply pore pressure constraint
-      if (particle_pore_pressure_constraint_ !=
-          std::numeric_limits<double>::max())
-        this->pore_pressure_ = this->particle_pore_pressure_constraint_;
+      this->pressure_(pore_fluid) += dpore_pressure;
 
     } else {
-      throw std::runtime_error("Material is invalid");
+      throw std::runtime_error("Solid or fluid material is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -977,13 +979,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
   return status;
 }
 
-//! Assign particle pore pressure constraints
+//! Assign particle pressure constraints
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_particle_pore_pressure_constraint(
-    double pore_pressure) {
+bool mpm::Particle<Tdim, Tnphases>::assign_particle_pressure_constraint(
+    const unsigned phase, const double pressure) {
   bool status = true;
   try {
-    this->particle_pore_pressure_constraint_ = pore_pressure;
+    this->pressure_constraint_.insert(std::make_pair<unsigned, double>(
+        static_cast<unsigned>(phase), static_cast<double>(pressure)));
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

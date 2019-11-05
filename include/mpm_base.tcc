@@ -105,8 +105,10 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
+  // Phase index
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
+
   bool status = true;
 
   try {
@@ -191,9 +193,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 
     // Read and assign pore pressure constraints
     if (!io_->file_name("pore_pressure_constraints").empty()) {
-      bool pore_pressure_constraints = mesh_->assign_pore_pressure_constraints(
-          mesh_reader->read_pore_pressure_constraints(
-              io_->file_name("pore_pressure_constraints")));
+      bool pore_pressure_constraints = mesh_->assign_pressure_constraints(
+          pore_fluid, mesh_reader->read_pressure_constraints(
+                          io_->file_name("pore_pressure_constraints")));
       if (!pore_pressure_constraints)
         throw std::runtime_error(
             "Pore pressure constraints are not properly assigned");
@@ -236,8 +238,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
+  // Phase index
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
+
   bool status = true;
 
   try {
@@ -367,7 +371,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Compute volume
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+                  std::placeholders::_1, solid_skeleton));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
@@ -378,11 +382,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error("Particles volumes are not properly assigned");
     }
 
-    // Read and assign particles pore pressure
+    // Read and assign particles initial pore pressure
     if (!io_->file_name("particles_pore_pressures").empty()) {
       bool particles_pore_pressures = mesh_->assign_particles_pore_pressures(
-          particle_reader->read_particles_pore_pressures(
-              io_->file_name("particles_pore_pressures")));
+          pore_fluid, particle_reader->read_particles_pressures(
+                          io_->file_name("particles_pore_pressures")));
       if (!particles_pore_pressures)
         throw std::runtime_error(
             "Particles pore pressures are not properly assigned");
@@ -412,8 +416,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Read and assign particles pore pressure constraints
     if (!io_->file_name("particles_pore_pressure_constraints").empty()) {
       bool particles_pore_pressure_constraints =
-          mesh_->assign_particles_pore_pressure_constraints(
-              particle_reader->read_pore_pressure_constraints(
+          mesh_->assign_particles_pressure_constraints(
+              pore_fluid,
+              particle_reader->read_pressure_constraints(
                   io_->file_name("particles_pore_pressure_constraints")));
       if (!particles_pore_pressure_constraints)
         throw std::runtime_error(

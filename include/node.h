@@ -240,9 +240,11 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
-  //! Assign pore pressure constraint
-  //! \param[in] pore_pressure Applied pore pressure constraint
-  bool assign_pore_pressure_constraint(double pore_pressure) override;
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  bool assign_pressure_constraint(const unsigned phase,
+                                  const double pressure) override;
 
  private:
   //! Mutex
@@ -285,8 +287,6 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
-  //! Pore pressure constraint
-  double pore_pressure_constraint_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class

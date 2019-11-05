@@ -247,14 +247,14 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   return stresses;
 }
 
-//! Return pore pressures of particles
+//! Return pressures of particles
 template <unsigned Tdim>
-std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pore_pressures(
-    const std::string& particles_pore_pressures) {
+std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pressures(
+    const std::string& particles_pressures) {
 
-  // Particles pore pressures
-  std::vector<double> pore_pressures;
-  pore_pressures.clear();
+  // Particles pressures
+  std::vector<double> pressures;
+  pressures.clear();
 
   // Expected number of particles
   mpm::Index nparticles;
@@ -264,7 +264,7 @@ std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pore_pressures(
 
   // input file stream
   std::fstream file;
-  file.open(particles_pore_pressures.c_str(), std::ios::in);
+  file.open(particles_pressures.c_str(), std::ios::in);
 
   try {
     if (file.is_open() && file.good()) {
@@ -280,15 +280,15 @@ std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pore_pressures(
             if (!read_first_line) {
               // Read number of nodes and cells
               istream >> nparticles;
-              pore_pressures.reserve(nparticles);
+              pressures.reserve(nparticles);
               read_first_line = true;
               break;
             }
-            // Pore pressure
-            double pore_pressure;
-            // Read to pore pressure
-            istream >> pore_pressure;
-            pore_pressures.emplace_back(pore_pressure);
+            // Pressure
+            double pressure;
+            // Read to pressure
+            istream >> pressure;
+            pressures.emplace_back(pressure);
             break;
           }
         }
@@ -296,24 +296,24 @@ std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pore_pressures(
     }
     file.close();
   } catch (std::exception& exception) {
-    console_->error("Read particle pore pressure: {}", exception.what());
+    console_->error("Read particle pressure: {}", exception.what());
     file.close();
   }
-  return pore_pressures;
+  return pressures;
 }
 
-//! Read pore pressure constraints file
+//! Read pressure constraints file
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, double>>
-    mpm::ReadMeshAscii<Tdim>::read_pore_pressure_constraints(
-        const std::string& pore_pressure_constraints_file) {
-  // Particle pore pressure constraints
+    mpm::ReadMeshAscii<Tdim>::read_pressure_constraints(
+        const std::string& pressure_constraints_file) {
+  // Particle pressure constraints
   std::vector<std::tuple<mpm::Index, double>> constraints;
   constraints.clear();
 
   // input file stream
   std::fstream file;
-  file.open(pore_pressure_constraints_file.c_str(), std::ios::in);
+  file.open(pressure_constraints_file.c_str(), std::ios::in);
 
   try {
     if (file.is_open() && file.good()) {
@@ -328,18 +328,18 @@ std::vector<std::tuple<mpm::Index, double>>
           while (istream.good()) {
             // ID
             mpm::Index id;
-            // Pore pressure
-            double pore_pressure;
+            // Pressure
+            double pressure;
             // Read stream
-            istream >> id >> pore_pressure;
-            constraints.emplace_back(std::make_tuple(id, pore_pressure));
+            istream >> id >> pressure;
+            constraints.emplace_back(std::make_tuple(id, pressure));
           }
         }
       }
     }
     file.close();
   } catch (std::exception& exception) {
-    console_->error("Read pore pressure constraints: {}", exception.what());
+    console_->error("Read pressure constraints: {}", exception.what());
     file.close();
   }
   return constraints;
