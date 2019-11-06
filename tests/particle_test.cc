@@ -106,6 +106,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     auto pstress = particle->stress(phase);
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+
+    auto pstress_data = particle->vector_data(phase, "stresses");
+    for (unsigned i = 0; i < pstress_data.size(); ++i)
+      REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
   //! Test particles velocity constraints
@@ -216,6 +220,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -265,6 +275,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(coordinates.size() == Dim);
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();
@@ -908,6 +924,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
+    // Check particle displacement
+    Eigen::Vector2d displacement;
+    displacement << 0., 0.0894;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
+
     // Updated particle coordinate
     coords << 0.75, .8394;
     // Check particle coordinates
@@ -922,6 +945,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check particle displacement
+    displacement << 0., 0.1788;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     coords << 0.75, .9288;
@@ -1049,6 +1078,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -1098,6 +1133,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(coordinates.size() == Dim);
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();
@@ -1864,6 +1905,13 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
 
+    // Check particle displacement
+    Eigen::Vector3d displacement;
+    displacement << 0.0, 0.5875, 1.0769;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
+
     // Updated particle coordinate
     coords << 1.5, 2.0875, 2.5769;
     // Check particle coordinates
@@ -1878,6 +1926,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity(Phase)(i) ==
               Approx(velocity(i)).epsilon(Tolerance));
+
+    // Check particle displacement
+    displacement << 0.0, 1.175, 2.1538;
+    for (unsigned i = 0; i < displacement.size(); ++i)
+      REQUIRE(particle->displacement(Phase)(i) ==
+              Approx(displacement(i)).epsilon(Tolerance));
 
     // Updated particle coordinate
     coords << 1.5, 2.675, 3.6538;
@@ -2003,6 +2057,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
+    Eigen::Vector3d displacement;
+    displacement << 0.01, 0.02, 0.03;
+    h5_particle.displacement_x = displacement[0];
+    h5_particle.displacement_y = displacement[1];
+    h5_particle.displacement_z = displacement[2];
+
     Eigen::Vector3d lsize;
     lsize << 0.25, 0.5, 0.75;
     h5_particle.nsize_x = lsize[0];
@@ -2053,6 +2113,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
     REQUIRE(coordinates.size() == Dim);
+
+    // Check for displacement
+    auto pdisplacement = particle->displacement(Phase);
+    REQUIRE(pdisplacement.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pdisplacement(i) == Approx(displacement(i)).epsilon(Tolerance));
 
     // Check for size
     auto size = particle->natural_size();

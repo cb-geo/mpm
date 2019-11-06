@@ -14,6 +14,10 @@
 #endif
 #include "tbb/task_group.h"
 
+#ifdef USE_PARMETIS
+#include "graph.h"
+#endif
+
 #include "container.h"
 #include "mpi_wrapper.h"
 #include "mpm.h"
@@ -97,6 +101,11 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Bool nodal tractions
   bool nodal_tractions_{true};
+
+#ifdef USE_PARMETIS
+  // graph pass the address of the container of cell
+  std::shared_ptr<Graph<Tdim>> graph_{nullptr};
+#endif
 };  // MPMBase class
 }  // namespace mpm
 

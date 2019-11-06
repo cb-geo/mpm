@@ -180,6 +180,9 @@ class Mesh {
   bool remove_particle(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
+  //! Remove a particle by id
+  bool remove_particle_by_id(mpm::Index id);
+
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
@@ -320,6 +323,12 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Get the container of cell
+  mpm::Container<Cell<Tdim>> cells();
+
+  //! Return particle cell ids
+  std::map<mpm::Index, mpm::Index>* particles_cell_ids();
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -334,6 +343,8 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Container of particles ids and cell ids
+  std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
