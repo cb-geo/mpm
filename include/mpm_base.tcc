@@ -57,7 +57,8 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
   }
 
   // Default VTK attributes
-  std::vector<std::string> vtk = {"velocities", "stresses", "strains"};
+  std::vector<std::string> vtk = {"velocities", "stresses", "strains",
+                                  "displacements"};
   try {
     if (post_process_.at("vtk").is_array() &&
         post_process_.at("vtk").size() > 0) {
@@ -273,23 +274,15 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     std::vector<mpm::Index> all_particles_ids(all_particles.size());
     std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
 
-    // Get local particles chunk
-    std::vector<Eigen::Matrix<double, Tdim, 1>> particles;
-    chunk_vector_quantities(all_particles, particles);
-
-    // Get local particles ids chunks
-    std::vector<mpm::Index> particles_ids;
-    chunk_scalar_quantities(all_particles_ids, particles_ids);
-
     // Particle type
     const auto particle_type =
         particle_props["particle_type"].template get<std::string>();
 
     // Create particles from file
     bool particle_status =
-        mesh_->create_particles(particles_ids,      // global id
+        mesh_->create_particles(all_particles_ids,  // global id
                                 particle_type,      // particle type
-                                particles,          // coordinates
+                                all_particles,      // coordinates
                                 check_duplicates);  // Check duplicates
 
     if (!particle_status)
@@ -376,12 +369,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       const auto all_particles_stresses =
           particle_reader->read_particles_stresses(
               io_->file_name("particles_stresses"));
-      // Chunked stresses
-      std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
-      chunk_vector_quantities(all_particles_stresses, particles_stresses);
 
       // Read and assign particles stresses
-      if (!mesh_->assign_particles_stresses(particles_stresses))
+      if (!mesh_->assign_particles_stresses(all_particles_stresses))
         throw std::runtime_error(
             "Particles stresses are not properly assigned");
     }
@@ -614,7 +604,7 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
 
   try {
     const auto mesh_props = io_->json_object("mesh");
-    isoparametric = mesh_props["isoparametric"].template get<bool>();
+    isoparametric = mesh_props.at("isoparametric").template get<bool>();
   } catch (std::exception& exception) {
     console_->warn(
         "{} {} Isoparametric status of mesh: {}\n Setting mesh as "

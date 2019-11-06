@@ -1,85 +1,55 @@
-#ifndef MPM_QUADRILATERAL_ELEMENT_H_
-#define MPM_QUADRILATERAL_ELEMENT_H_
+#ifndef MPM_TRIANGLE_ELEMENT_H_
+#define MPM_TRIANGLE_ELEMENT_H_
 
 #include "element.h"
 #include "logger.h"
 
 namespace mpm {
 
-//! Quadrilateral element class derived from Element class
-//! \brief Quadrilateral element
-//! \details 4-noded, 8-noded, and 9-noded quadrilateral element \n
-//! Shape function, gradient shape function, B-matrix, indices \n
-//! 4-node Quadrilateral Element \n
+//! Triangle element class derived from Element class
+//! \brief Triangle element
+//! \details 3-noded and 6-noded triangle element \n
+//! Shapte function, gradient shape function, B-matrix, indices \n
+//! 3-node Triangle ELement \n
 //! <pre>
-//!
-//! 3 0----------0 2
-//!   |          |
-//!   |          |
-//!   |          |
-//!   |          |
-//! 0 0----------0 1
-//!
-//! </pre>
-//! 8-node Quadrilateral Element
-//! <pre>
-//!
-//!  3      6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0           0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//! 0       4       1
-//!
-//! </pre>
-//! 9-node Quadrilateral Element
-//! <pre>
-//!
-//! 3       6       2
-//!   0-----0-----0
-//!   |           |
-//!   |           |
-//! 7 0   8 0     0 5
-//!   |           |
-//!   |           |
-//!   0-----0-----0
-//!  0      4       1
-//!
-//! </pre>
-//! Face numbering for 4-node, 8-node and 9-node Quadrilateral Element \n
-//! <pre>
-//!
-//!          F2
-//!   3 0----------0 2
-//!     |          |
-//!  F3 |          | F1
-//!     |          |
-//!     |          |
+//!   2 0
+//!     |`\
+//!     |  `\
+//!     |    `\
+//!     |      `\
+//!     |        `\
 //!   0 0----------0 1
-//!          F0
+//! </pre>
+//! 6-node Triangle Element
+//! <pre>
+//!   2 0
+//!     |`\
+//!     |  `\
+//!   5 0    `0 4
+//!     |      `\
+//!     |        `\
+//!   0 0-----0----0 1
+//!           3
 //! </pre>
 //!
 //!
 //! \tparam Tdim Dimension
 //! \tparam Tnfunctions Number of functions
 template <unsigned Tdim, unsigned Tnfunctions>
-class QuadrilateralElement : public Element<Tdim> {
+class TriangleElement : public Element<Tdim> {
 
  public:
-  //! Define a vector of size dimension
+  //! Define vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! constructor with number of shape functions
-  QuadrilateralElement() : mpm::Element<Tdim>() {
-    static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
-    static_assert((Tnfunctions == 4 || Tnfunctions == 8 || Tnfunctions == 9),
-                  "Specified number of shape functions is not defined");
+  TriangleElement() : mpm::Element<Tdim>() {
+    static_assert(Tdim == 2, "Invalid dimension for a triangular element");
+    static_assert((Tnfunctions == 3 || Tnfunctions == 6),
+                  "Specified number of shape funcions is not defined");
 
     //! Logger
-    std::string logger = "quadrilateral::<" + std::to_string(Tdim) + ", " +
+    std::string logger = "triangular::<" + std::to_string(Tdim) + ", " +
                          std::to_string(Tnfunctions) + ">";
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   }
@@ -99,7 +69,7 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \param[in] xi given local coordinates
   //! \param[in] particle_size Particle size
   //! \param[in] deformation_gradient Deformation gradient
-  //! \retval shapefn Shape function of a given cell
+  //! \retval shapefn_local Shape function of a given cell
   Eigen::VectorXd shapefn_local(
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
@@ -189,15 +159,32 @@ class QuadrilateralElement : public Element<Tdim> {
   //! \retval indices Indices that make the face
   Eigen::VectorXi face_indices(unsigned face_id) const override;
 
-  //! Return the number of faces in a quadrilateral
-  unsigned nfaces() const override { return 4; }
+  //! Return the number of faces in a triangle
+  unsigned nfaces() const override { return 3; }
 
   //! Return unit element length
-  double unit_element_length() const override { return 2.; }
+  double unit_element_length() const override { return 1.; }
 
   //! Return quadrature of the element
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
       unsigned nquadratures = 1) const override;
+
+  //! Compute volume
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \retval volume Return the volume of cell
+  double compute_volume(
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
+  //! Return if natural coordinates can be evaluates
+  bool isvalid_natural_coordinates_analytical() const override;
+
+  //! Compute Natural coordinates of a point (analytical)
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] point Location of the point in cell
+  //! \retval xi Return the local coordinates
+  VectorDim natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
 
  private:
   //! Logger
@@ -205,6 +192,6 @@ class QuadrilateralElement : public Element<Tdim> {
 };
 
 }  // namespace mpm
-#include "quadrilateral_element.tcc"
+#include "triangle_element.tcc"
 
-#endif  // MPM_QUADRILATERAL_ELEMENT_H_
+#endif  // MPM_TRIANGLE_ELEMENT_H_

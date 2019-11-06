@@ -4,19 +4,20 @@ mpm::LinearElastic<Tdim>::LinearElastic(unsigned id,
                                         const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
-    density_ = material_properties["density"].template get<double>();
+    density_ = material_properties.at("density").template get<double>();
     youngs_modulus_ =
-        material_properties["youngs_modulus"].template get<double>();
+        material_properties.at("youngs_modulus").template get<double>();
     poisson_ratio_ =
-        material_properties["poisson_ratio"].template get<double>();
+        material_properties.at("poisson_ratio").template get<double>();
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
     properties_ = material_properties;
     // Set elastic tensor
     this->compute_elastic_tensor();
-  } catch (std::exception& except) {
-    console_->error("Material parameter not set: {}\n", except.what());
+  } catch (Json::exception& except) {
+    console_->error("Material parameter not set: {} {}\n", except.what(),
+                    except.id);
   }
 }
 

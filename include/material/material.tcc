@@ -1,11 +1,13 @@
 //! Get material property
 template <unsigned Tdim>
-double mpm::Material<Tdim>::property(const std::string& key) {
-  double result = std::numeric_limits<double>::max();
+template <typename Ttype>
+Ttype mpm::Material<Tdim>::property(const std::string& key) {
   try {
-    result = properties_[key].template get<double>();
+    return properties_[key].template get<Ttype>();
   } catch (std::exception& except) {
-    console_->error("Material parameter not found: {}", except.what());
+    console_->error("Property call to material parameter not found: {}",
+                    except.what());
+    throw std::runtime_error(
+        "Property call to material parameter not found or invalid type");
   }
-  return result;
 }

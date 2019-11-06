@@ -257,3 +257,18 @@ inline Eigen::Matrix<double, Tdim, Tdim>
   return mpm::QuadrilateralElement<2, 4>::jacobian(
       xi, nodal_coordinates, particle_size, deformation_gradient);
 }
+
+//! Compute natural coordinates of a point (analytical)
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, 1> mpm::
+    QuadrilateralGIMPElement<Tdim, Tnfunctions>::natural_coordinates_analytical(
+        const VectorDim& point,
+        const Eigen::MatrixXd& nodal_coordinates) const {
+  // Local point coordinates
+  Eigen::Matrix<double, 2, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+  throw std::runtime_error(
+      "Analytical solution for QuadGIMP<Tdim, Tnfunctions> has not been "
+      "implemented");
+  return xi;
+}
