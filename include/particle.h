@@ -228,8 +228,15 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool map_internal_force(unsigned phase) override;
 
+  //! Map internal pressure
+  //! \param[in] phase Index corresponding to the phase
+  bool map_internal_pressure(unsigned phase) override;
+
   //! Map mixture internal force
-  bool map_mixture_internal_force() override;
+  //! \param[in] solid_skeleton Index corresponding to solid phase
+  //! \param[in] pore_fluid Index corresponding to fluid phase
+  bool map_mixture_internal_force(const unsigned solid_skeleton,
+                                  const unsigned pore_fluid) override;
 
   //! Assign velocity to the particle
   //! \param[in] phase Index corresponding to the phase

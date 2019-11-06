@@ -651,7 +651,6 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(unsigned phase) {
 }
 
 //! Map internal force
-//! \param[in] phase Index corresponding to the phase
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
   bool status = true;
@@ -660,9 +659,8 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     if (material_.at(phase) != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(
-          this->bmatrix_, phase, this->volume_ * this->volume_fraction_(phase),
-          -1. * this->stress_.col(phase));
+      cell_->compute_nodal_internal_force(this->bmatrix_, phase, this->volume_,
+                                          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -673,24 +671,38 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
   return status;
 }
 
-//! Map mixture internal force
-//! \param[in] phase Index corresponding to the phase
+//! Map internal pressure
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::map_mixture_internal_force() {
+bool mpm::Particle<Tdim, Tnphases>::map_internal_pressure(unsigned phase) {
+  bool status = true;
+  try {
+    // Initialise nodal internal pressure vector
+    Eigen::Matrix<double, 6, 1> pressure;
+    pressure.setZero();
+    for (int i = 0; i < 3; ++i)
+      pressure(i) = this->porosity_ * this->pressure_(phase);
+    // -pstress * volume
+    cell_->compute_nodal_internal_force(this->bmatrix_, phase, this->volume_,
+                                        pressure);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map mixture internal force
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::map_mixture_internal_force(
+    const unsigned solid_skeleton, const unsigned pore_fluid) {
   bool status = true;
   try {
     // Initialise mixture internal force
-    Eigen::Matrix<double, 6, 1> mixture_internal_force;
-    mixture_internal_force.setZero();
-    // Iterate over each phase
-    for (unsigned phase = 0; phase < Tnphases; ++phase) {
-      // Check if material ptr is valid
-      if (material_.at(phase) != nullptr)
-        mixture_internal_force += this->stress_.col(phase);
-      else {
-        throw std::runtime_error("Material is invalid");
-      }
-    }
+    Eigen::Matrix<double, 6, 1> mixture_internal_force =
+        this->stress_.col(solid_skeleton);
+    // Add pressure
+    for (int i = 0; i < 3; ++i)
+      mixture_internal_force(i) -= this->pressure_(pore_fluid);
     // -pstress * volume
     cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
                                                 -1. * mixture_internal_force);

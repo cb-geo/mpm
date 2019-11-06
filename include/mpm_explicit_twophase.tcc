@@ -270,12 +270,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // Iterate over each particle to compute mixture nodal internal
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_mixture_internal_force,
-                    std::placeholders::_1));
+                    std::placeholders::_1, solid_skeleton, pore_fluid));
 
-      // Iterate over each particle to compute nodal internal force of pore
-      // fluid
+      // Iterate over each particle to compute fluid nodal internal force
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+          std::bind(&mpm::ParticleBase<Tdim>::map_internal_pressure,
                     std::placeholders::_1, pore_fluid));
 
       // Iterate over each particle to compute nodal drag force
