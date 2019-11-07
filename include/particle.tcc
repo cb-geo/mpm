@@ -208,7 +208,13 @@ bool mpm::Particle<Tdim, Tnphases>::assign_cell_id(mpm::Index id) {
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::remove_cell() {
   // if a cell is not nullptr
-  // if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+  if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
+  cell_id_ = std::numeric_limits<Index>::max();
+}
+
+// set cell id after remove cell
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::set_cell() {
   cell_id_ = std::numeric_limits<Index>::max();
 }
 

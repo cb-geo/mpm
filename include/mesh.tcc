@@ -380,7 +380,7 @@ bool mpm::Mesh<Tdim>::remove_all_particles(mpm::Index id) {
   }
   for (i = 0; i != m->particles().size(); ++i) {
     auto ii = m->particles()[i];
-    map_particles_[ii]->remove_cell();
+    map_particles_[ii]->set_cell();
     result = result && particles_.remove(map_particles_[ii]);
     result = result && map_particles_.remove(ii);
   }
