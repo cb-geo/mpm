@@ -212,7 +212,7 @@ void mpm::Particle<Tdim, Tnphases>::remove_cell() {
   cell_id_ = std::numeric_limits<Index>::max();
 }
 
-// set cell id after remove cell
+// Set cell id after remove cell
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::set_cell() {
   cell_id_ = std::numeric_limits<Index>::max();
