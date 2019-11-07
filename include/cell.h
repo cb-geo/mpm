@@ -76,6 +76,9 @@ class Cell {
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
+  //! Return particles_
+  std::vector<Index> particles() { return particles_; }
+
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
