@@ -208,6 +208,7 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
                                bool check_duplicates) {
   bool insertion_status = cells_.add(cell, check_duplicates);
+  cells_id_.push_back(cell->id());
   // Add cell to map
   if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
@@ -365,6 +366,26 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   map_particles_[id]->remove_cell();
   bool result = particles_.remove(map_particles_[id]);
   return (result && map_particles_.remove(id));
+}
+
+//! Remove all particles in a cell given cell id
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::remove_all_particles(mpm::Index id) {
+  // Remove associated cell for the particle
+  bool result = true;
+  auto m = map_cells_[id];
+  int i = 0;
+  if (m->particles().size() == 0) {
+    return true;
+  }
+  for (i = 0; i != m->particles().size(); ++i) {
+    auto ii = m->particles()[i];
+    map_particles_[ii]->set_cell();
+    result = result && particles_.remove(map_particles_[ii]);
+    result = result && map_particles_.remove(ii);
+  }
+  m->clear_particle_ids();
+  return result;
 }
 
 //! Locate particles in a cell
@@ -1278,6 +1299,11 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
 template <unsigned Tdim>
 mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
+}
+
+template <unsigned Tdim>
+std::vector<mpm::Index> mpm::Mesh<Tdim>::cells_ids() {
+  return this->cells_id_;
 }
 
 //! return particle_ptr

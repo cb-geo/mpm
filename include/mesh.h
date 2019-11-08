@@ -183,6 +183,9 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
+  //! Remove all particles in a cell given cell id
+  bool remove_all_particles(mpm::Index id);
+
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
@@ -326,6 +329,9 @@ class Mesh {
   //! Get the container of cell
   mpm::Container<Cell<Tdim>> cells();
 
+  //! Get the container of cell id
+  std::vector<mpm::Index> cells_ids();
+
   //! Return particle cell ids
   std::map<mpm::Index, mpm::Index>* particles_cell_ids();
 
@@ -361,6 +367,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Container of cells id
+  std::vector<mpm::Index> cells_id_;
   //! Faces and cells
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger

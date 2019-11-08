@@ -90,6 +90,9 @@ class ParticleBase {
   //! Remove cell
   virtual void remove_cell() = 0;
 
+  //! Set cell
+  virtual void set_cell() = 0;
+
   //! Compute shape functions
   virtual bool compute_shapefn() = 0;
 
