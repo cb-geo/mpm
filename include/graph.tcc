@@ -180,12 +180,6 @@ idx_t mpm::Graph<Tdim>::nparts() {
   return this->nparts_;
 }
 
-//! Return partition
-template <unsigned Tdim>
-idx_t mpm::Graph<Tdim>::partition(idx_t id) {
-  return this->partition_[id];
-}
-
 //! Create partition
 template <unsigned Tdim>
 bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
@@ -237,4 +231,8 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int mpi_size,
     free(this->part_);
     MPI_Recv((void*)this->partition_, ncells, IDX_T, 0, 1, *comm, &status);
   }
+
+  // Assign partition to cells
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->rank(this->partition_[(*citr)->id()]);
 }

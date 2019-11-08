@@ -209,10 +209,7 @@ bool mpm::Mesh<Tdim>::add_cell(const std::shared_ptr<mpm::Cell<Tdim>>& cell,
                                bool check_duplicates) {
   bool insertion_status = cells_.add(cell, check_duplicates);
   // Add cell to map
-  if (insertion_status) {
-    map_cells_.insert(cell->id(), cell);
-    cells_id_.emplace_back(cell->id());
-  }
+  if (insertion_status) map_cells_.insert(cell->id(), cell);
   return insertion_status;
 }
 
@@ -221,9 +218,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_cell(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
   const mpm::Index id = cell->id();
-  // Remove cell id from a list of ids
-  cells_id_.erase(std::remove(cells_id_.begin(), cells_id_.end(), id),
-                  cells_id_.end());
   // Remove a cell if found in the container
   return (cells_.remove(cell) && map_cells_.remove(id));
 }
@@ -375,20 +369,19 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
 
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::remove_all_particles_in_cell(mpm::Index id) {
+void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
   // Remove associated cell for the particle
-  bool result = false;
-  auto cell = map_cells_[id];
-  // If cell is empty return true
-  if (cell->particles().size() == 0) return true;
-
-  auto particles = cell->particles();
-  for (auto& id : particles) {
-    map_particles_[id]->remove_cell();
-    result = particles_.remove(map_particles_[id]) && map_particles_.remove(id);
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
+    // If cell is non empty
+    if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
+      auto particles = (*citr)->particles();
+      for (auto& id : particles) {
+        map_particles_[id]->remove_cell();
+        particles_.remove(map_particles_[id]) && map_particles_.remove(id);
+      }
+      (*citr)->clear_particle_ids();
+    }
   }
-  cell->clear_particle_ids();
-  return result;
 }
 
 //! Locate particles in a cell
@@ -1302,11 +1295,6 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
 template <unsigned Tdim>
 mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
-}
-
-template <unsigned Tdim>
-std::vector<mpm::Index> mpm::Mesh<Tdim>::cells_ids() const {
-  return this->cells_id_;
 }
 
 //! return particle_ptr

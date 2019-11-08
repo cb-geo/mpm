@@ -283,6 +283,13 @@ class Cell {
   //! Return sorted face node ids
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
+  //! Assign ranks
+  //! \param[in] Rank of cell
+  void rank(unsigned mpi_rank);
+
+  //! Return rank
+  unsigned rank() const;
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -293,6 +300,8 @@ class Cell {
   std::mutex cell_mutex_;
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
+  //! MPI Rank
+  unsigned rank_{0};
   //! Isoparametric
   bool isoparametric_{true};
   //! Number of nodes

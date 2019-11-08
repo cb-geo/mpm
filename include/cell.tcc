@@ -1003,3 +1003,15 @@ inline std::vector<std::vector<mpm::Index>>
   }
   return set_face_nodes;
 }
+
+//! Assign MPI rank to cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::rank(unsigned rank) {
+  this->rank_ = rank;
+}
+
+//! Return MPI rank of the cell
+template <unsigned Tdim>
+inline unsigned mpm::Cell<Tdim>::rank() const {
+  return this->rank_;
+}
