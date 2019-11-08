@@ -367,6 +367,24 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   return (result && map_particles_.remove(id));
 }
 
+//! Remove all particles in a cell given cell id
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
+    // If cell is non empty
+    if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
+      auto particle_ids = (*citr)->particles();
+      for (auto& id : particle_ids) {
+        map_particles_[id]->remove_cell();
+        particles_.remove(map_particles_[id]);
+        map_particles_.remove(id);
+      }
+      (*citr)->clear_particle_ids();
+    }
+  }
+}
+
 //! Locate particles in a cell
 template <unsigned Tdim>
 std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
