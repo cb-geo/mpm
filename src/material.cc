@@ -2,6 +2,7 @@
 #include "material/bingham.h"
 #include "material/linear_elastic.h"
 #include "material/newtonian.h"
+#include "material/nor_sand.h"
 
 // Bingham 2D
 static Register<mpm::Material<2>, mpm::Bingham<2>, unsigned, const Json&>
@@ -26,3 +27,11 @@ static Register<mpm::Material<2>, mpm::Newtonian<2>, unsigned, const Json&>
 // Newtonian 3D
 static Register<mpm::Material<3>, mpm::Newtonian<3>, unsigned, const Json&>
     newtonian_3d("Newtonian3D");
+
+// Norsand 2D
+static Register<mpm::Material<2>, mpm::NorSand<2>, unsigned, const Json&>
+    nor_sand_2d("NorSand2D");
+
+// Norsand 3D
+static Register<mpm::Material<3>, mpm::NorSand<3>, unsigned, const Json&>
+    nor_sand_3d("NorSand3D");
