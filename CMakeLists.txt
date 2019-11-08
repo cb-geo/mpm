@@ -157,6 +157,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
+    ${mpm_SOURCE_DIR}/tests/material/nor_sand_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc

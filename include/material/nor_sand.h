@@ -1,9 +1,6 @@
 #ifndef MPM_MATERIAL_NOR_SAND_H_
 #define MPM_MATERIAL_NOR_SAND_H_
 
-#include <iostream>
-#include <limits>
-
 #include <cmath>
 
 #include "Eigen/Dense"
@@ -13,8 +10,8 @@
 namespace mpm {
 
 //! NorSand class
-//! \brief Mohr Coulomb material model
-//! \details Mohr Coulomb material model with softening
+//! \brief NorSand material model
+//! \details NorSand material model with softening
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class NorSand : public Material<Tdim> {

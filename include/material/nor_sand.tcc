@@ -546,11 +546,11 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Update stress
   Vector6d updated_stress = stress_neg + D_matrix * dstrain_neg;
 
-  // Update state variables
-  this->compute_state_variables(-1 * updated_stress, dstrain_neg, state_vars);
-
   // Update stress invariants
   this->compute_stress_invariants(updated_stress, state_vars);
+
+  // Update state variables
+  this->compute_state_variables(-1 * updated_stress, dstrain_neg, state_vars);
 
   // Compute incremental plastic strain
   Vector6d dstress = updated_stress - stress;
