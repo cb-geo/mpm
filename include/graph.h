@@ -28,6 +28,9 @@ class Graph {
   //! Constructor with cells, size and rank
   Graph(Container<Cell<Tdim>> cells, int size, int rank);
 
+  //! Destructor
+  ~Graph();
+
   //! Create graph partition
   bool create_partitions(MPI_Comm* comm);
 
