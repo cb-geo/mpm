@@ -331,7 +331,7 @@ class Mesh {
   mpm::Container<Cell<Tdim>> cells();
 
   //! Get the container of cell id
-  std::vector<mpm::Index> cells_ids();
+  std::vector<mpm::Index> cells_ids() const;
 
   //! Return particle cell ids
   std::map<mpm::Index, mpm::Index>* particles_cell_ids();

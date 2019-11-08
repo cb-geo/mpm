@@ -483,14 +483,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   SECTION("Test particle addition deletion") {
     mpm::Index pid = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-    REQUIRE(cell->nparticles() == 0);
     REQUIRE(cell->status() == false);
+    REQUIRE(cell->nparticles() == 0);
     REQUIRE(cell->add_particle_id(pid) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(cell->nparticles() == 1);
+    REQUIRE(cell->particles().size() == 1);
+    REQUIRE(cell->particles().at(0) == pid);
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
     REQUIRE(cell->nparticles() == 0);
+    REQUIRE(cell->particles().size() == 0);
   }
 
   SECTION("Test node status") {
@@ -1549,9 +1552,12 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->add_particle_id(pid) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(cell->nparticles() == 1);
+    REQUIRE(cell->particles().size() == 1);
+    REQUIRE(cell->particles().at(0) == pid);
     cell->remove_particle_id(pid);
     REQUIRE(cell->status() == false);
     REQUIRE(cell->nparticles() == 0);
+    REQUIRE(cell->particles().size() == 0);
   }
 
   SECTION("Test node status") {

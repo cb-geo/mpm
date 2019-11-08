@@ -1300,7 +1300,7 @@ mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
 }
 
 template <unsigned Tdim>
-std::vector<mpm::Index> mpm::Mesh<Tdim>::cells_ids() {
+std::vector<mpm::Index> mpm::Mesh<Tdim>::cells_ids() const {
   return this->cells_id_;
 }
 
