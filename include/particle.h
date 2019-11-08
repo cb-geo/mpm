@@ -93,9 +93,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Remove cell associated with the particle
   void remove_cell() override;
 
-  //! Set cell after removing cell
-  void set_cell() override;
-
   //! Compute shape functions of a particle, based on local coordinates
   bool compute_shapefn() override;
 
