@@ -180,6 +180,15 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(0);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(1);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
   }
 
   // Check add / remove node
@@ -1073,6 +1082,15 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(0);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(1);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
   }
 
   // Check add / remove node

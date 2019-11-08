@@ -66,6 +66,15 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     }
   }
 
+  //! Check cell rank
+  SECTION("Check cell rank") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element, true);
+    REQUIRE(cell->rank() == 0);
+    cell->rank(1);
+    REQUIRE(cell->rank() == 1);
+  }
+
   SECTION("Add nodes") {
     mpm::Index id = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element, true);
@@ -986,6 +995,15 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element);
       REQUIRE(cell->id() == std::numeric_limits<mpm::Index>::max());
     }
+  }
+
+  //! Check cell rank
+  SECTION("Check cell rank") {
+    mpm::Index id = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(id, Nnodes, element, true);
+    REQUIRE(cell->rank() == 0);
+    cell->rank(1);
+    REQUIRE(cell->rank() == 1);
   }
 
   // Check node additions
