@@ -2,7 +2,7 @@
 #include "material/bingham.h"
 #include "material/linear_elastic.h"
 #include "material/newtonian.h"
-#include "material/nor_sand.h"
+#include "material/norsand.h"
 
 // Bingham 2D
 static Register<mpm::Material<2>, mpm::Bingham<2>, unsigned, const Json&>
