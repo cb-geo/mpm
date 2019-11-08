@@ -77,7 +77,7 @@ class Cell {
   bool status() const { return particles_.size(); }
 
   //! Return particles_
-  std::vector<Index> particles() { return particles_; }
+  std::vector<Index> particles() const { return particles_; }
 
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }

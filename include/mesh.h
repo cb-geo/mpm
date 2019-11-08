@@ -184,7 +184,8 @@ class Mesh {
   bool remove_particle_by_id(mpm::Index id);
 
   //! Remove all particles in a cell given cell id
-  bool remove_all_particles(mpm::Index id);
+  //! \param[in] id Cell id in which to remove particles
+  bool remove_all_particles_in_cell(mpm::Index id);
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }

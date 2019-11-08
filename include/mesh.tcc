@@ -370,21 +370,19 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
 
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::remove_all_particles(mpm::Index id) {
+bool mpm::Mesh<Tdim>::remove_all_particles_in_cell(mpm::Index id) {
   // Remove associated cell for the particle
-  bool result = true;
-  auto m = map_cells_[id];
-  int i = 0;
-  if (m->particles().size() == 0) {
-    return true;
+  bool result = false;
+  auto cell = map_cells_[id];
+  // If cell is empty return true
+  if (cell->particles().size() == 0) return true;
+
+  auto particles = cell->particles();
+  for (auto& id : particles) {
+    map_particles_[id]->remove_cell();
+    result = particles_.remove(map_particles_[id]) && map_particles_.remove(id);
   }
-  for (i = 0; i != m->particles().size(); ++i) {
-    auto ii = m->particles()[i];
-    map_particles_[ii]->set_cell();
-    result = result && particles_.remove(map_particles_[ii]);
-    result = result && map_particles_.remove(ii);
-  }
-  m->clear_particle_ids();
+  cell->clear_particle_ids();
   return result;
 }
 

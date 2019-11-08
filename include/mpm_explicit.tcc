@@ -107,13 +107,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Delete all the particles which is not in local task parititon
     for (auto stcl = mesh_->cells_ids()[0]; stcl != mesh_->cells_ids().size();
          ++stcl) {
-      if (graph_->partition(stcl) != rank) {
-        mesh_->remove_all_particles(stcl);
-      }
+      if (graph_->partition(stcl) != rank)
+        mesh_->remove_all_particles_in_cell(stcl);
     }
-#endif
+#endif  // PARMETIS
   }
-#endif
+#endif  // MPI
 
   // Check point resume
   if (resume) this->checkpoint_resume();
