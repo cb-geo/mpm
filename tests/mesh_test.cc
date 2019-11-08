@@ -338,6 +338,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
+    REQUIRE(mesh->cells_ids().size() == 2);
+    REQUIRE(mesh->cells_ids().at(0) == id1);
+    REQUIRE(mesh->cells_ids().at(1) == id2);
 
     // Check iterate over functionality
     mesh->iterate_over_cells(
@@ -347,6 +350,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->remove_cell(cell2) == true);
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 1);
+    REQUIRE(mesh->cells_ids().size() == 1);
+    REQUIRE(mesh->cells_ids().at(0) == id1);
   }
 
   SECTION("Check particle is in cell") {
@@ -1272,6 +1277,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Check number of cells in mesh
     REQUIRE(mesh->ncells() == 2);
+    REQUIRE(mesh->cells_ids().size() == 2);
+    REQUIRE(mesh->cells_ids().at(0) == id1);
+    REQUIRE(mesh->cells_ids().at(1) == id2);
 
     // Check iterate over functionality
     mesh->iterate_over_cells(
