@@ -374,10 +374,11 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
     // If cell is non empty
     if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
-      auto particles = (*citr)->particles();
-      for (auto& id : particles) {
+      auto particle_ids = (*citr)->particles();
+      for (auto& id : particle_ids) {
         map_particles_[id]->remove_cell();
-        particles_.remove(map_particles_[id]) && map_particles_.remove(id);
+        particles_.remove(map_particles_[id]);
+        map_particles_.remove(id);
       }
       (*citr)->clear_particle_ids();
     }
