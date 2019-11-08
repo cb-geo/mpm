@@ -46,8 +46,7 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
           case (2):
             stress_update_ = mpm::StressUpdate::musl;
           default:
-            throw std::runtime_error(
-                "Stress update method is invalid, must be 0,1 or 2");
+            stress_update_ = mpm::StressUpdate::usf;
         }
       } else
         console_->warn(

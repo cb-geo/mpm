@@ -442,7 +442,7 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
       }
       // Pressure
-      if (attribute == "pressures") {
+      else if (attribute == "pressures") {
         auto pdata = (*pitr)->pressure(phase + 1);
         // Fill stresses to the size of dimensions
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata;
