@@ -182,7 +182,8 @@ class ParticleBase {
   virtual void map_body_force(unsigned phase, const VectorDim& pgravity) = 0;
 
   //! Map drag force
-  virtual bool map_drag_force_coefficient(unsigned phase) = 0;
+  virtual bool map_drag_force_coefficient(const unsigned soild_skeleton,
+                                          const unsigned pore_fluid) = 0;
 
   //! Map internal force
   virtual bool map_internal_force(unsigned phase) = 0;

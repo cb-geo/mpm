@@ -79,8 +79,9 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
   }
 
   // Default VTK attributes
-  std::vector<std::string> vtk = {"velocities", "stresses", "strains",
-                                  "pressures"};
+  std::vector<std::string> vtk = {"velocities",    "velocities_fluid",
+                                  "stresses",      "strains",
+                                  "strains_fluid", "pressures"};
   try {
     if (post_process_.at("vtk").is_array() &&
         post_process_.at("vtk").size() > 0) {

@@ -221,8 +221,10 @@ class Particle : public ParticleBase<Tdim> {
   void map_body_force(unsigned phase, const VectorDim& pgravity) override;
 
   //! Map drag force
-  //! \param[in] k_coefficient Permeability coefficient
-  bool map_drag_force_coefficient(unsigned phase) override;
+  //! \param[in] soild_skeleton Index corresponding to the solid phase
+  //! \param[in] pore_fluid Index corresponding to the fluid phase
+  bool map_drag_force_coefficient(const unsigned soild_skeleton,
+                                  const unsigned pore_fluid) override;
 
   //! Map internal force
   //! \param[in] phase Index corresponding to the phase

@@ -452,10 +452,18 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
         auto pdata = (*pitr)->strain(phase);
         // Fill stresses to the size of dimensions
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      } else if (attribute == "strains_fluid") {
+        auto pdata = (*pitr)->strain(phase + 1);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
       }
       // Velocities
       else if (attribute == "velocities") {
         auto pdata = (*pitr)->velocity(phase);
+        // Fill stresses to the size of dimensions
+        for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      } else if (attribute == "velocities_fluid") {
+        auto pdata = (*pitr)->velocity(phase + 1);
         // Fill stresses to the size of dimensions
         for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
       }

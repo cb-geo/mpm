@@ -280,7 +280,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // Iterate over each particle to compute nodal drag force
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_drag_force_coefficient,
-                    std::placeholders::_1, pore_fluid));
+                    std::placeholders::_1, solid_skeleton, pore_fluid));
     });
     task_group.wait();
 

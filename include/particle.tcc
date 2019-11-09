@@ -96,7 +96,6 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   volumetric_strain_centroid_.setZero();
   material_density_.fill(std::numeric_limits<double>::max());
   volume_fraction_.setOnes(1, Tnphases);
-  phase_volume_.fill(std::numeric_limits<double>::max());
 }
 
 // Assign a cell to particle
@@ -326,8 +325,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_porosity(
       // Update volume fraction for each phase
       volume_fraction_[0] = 1. - porosity_;
       volume_fraction_[1] = porosity_;
-      // Update phase volume for each phase
-      phase_volume_ = volume_fraction_ * volume_;
     } else {
       throw std::runtime_error("Fluid material is invalid");
     }
@@ -392,8 +389,7 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
     // Check if particle has a valid cell ptr and a valid volume
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
-      Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-      this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
+      this->volume_ *= (1. + dt * strain_rate_.col(phase).head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -413,10 +409,10 @@ bool mpm::Particle<Tdim, Tnphases>::update_porosity(unsigned phase, double dt) {
     // Check if particle has a valid cell ptr and a valid volume
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
 
-      Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
       // Update particle volume
       this->porosity_ =
-          1 - (1 - this->porosity_) / (1 + dt * strain_rate.head(Tdim).sum());
+          1 - (1 - this->porosity_) /
+                  (1 + dt * strain_rate_.col(phase).head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle porosity");
@@ -561,19 +557,13 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
              material_.at(pore_fluid) != nullptr) {
       // Bulk modulus of fluid
       double K = material_.at(pore_fluid)->property("bulk_modulus");
-      // Compute strain rate of the particle
-      // Solid skeleton
-      Eigen::VectorXd strain_rate_solid =
-          cell_->compute_strain_rate(bmatrix_, solid_skeleton);
-      // Pore fluid
-      Eigen::VectorXd strain_rate_fluid =
-          cell_->compute_strain_rate(bmatrix_, pore_fluid);
-      // Calculate pore pressure
-      double dpore_pressure = -K / porosity_ *
-                              (volume_fraction_(solid_skeleton) * dt *
-                                   strain_rate_solid.head(Tdim).sum() +
-                               volume_fraction_(pore_fluid) * dt *
-                                   strain_rate_fluid.head(Tdim).sum());
+      // Compute pore pressure
+      double dpore_pressure =
+          -K / porosity_ *
+          (volume_fraction_(solid_skeleton) * dt *
+               strain_rate_.col(solid_skeleton).head(Tdim).sum() +
+           volume_fraction_(pore_fluid) * dt *
+               strain_rate_.col(pore_fluid).head(Tdim).sum());
 
       // Update stresses of pore fluid phase
       this->pressure_(pore_fluid) += dpore_pressure;
@@ -601,26 +591,27 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
 
 //! Map drag force
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(unsigned phase) {
+bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(
+    const unsigned soild_skeleton, const unsigned pore_fluid) {
   bool status = true;
   try {
     // Check if material ptr is valid
-    if (material_.at(phase) != nullptr) {
+    if (material_.at(soild_skeleton) != nullptr) {
       VectorDim k_coefficient;
       switch (Tdim) {
         case (1): {
-          k_coefficient(0) = material_.at(phase)->property("k_x");
+          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
           break;
         }
         case (2): {
-          k_coefficient(0) = material_.at(phase)->property("k_x");
-          k_coefficient(1) = material_.at(phase)->property("k_y");
+          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
+          k_coefficient(1) = material_.at(soild_skeleton)->property("k_y");
           break;
         }
         default: {
-          k_coefficient(0) = material_.at(phase)->property("k_x");
-          k_coefficient(1) = material_.at(phase)->property("k_y");
-          k_coefficient(2) = material_.at(phase)->property("k_z");
+          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
+          k_coefficient(1) = material_.at(soild_skeleton)->property("k_y");
+          k_coefficient(2) = material_.at(soild_skeleton)->property("k_z");
           break;
         }
       }
@@ -632,7 +623,7 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(unsigned phase) {
       for (unsigned i = 0; i < Tdim; ++i) {
         if (k_coefficient[i] > 0.)
           drag_force_coefficient[i] = porosity_ * porosity_ * 9.81 *
-                                      material_density_(phase) /
+                                      material_density_(pore_fluid) /
                                       k_coefficient[i];
         else
           throw std::runtime_error("Permeability coefficient is invalid");
