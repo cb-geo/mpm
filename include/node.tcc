@@ -340,18 +340,19 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
                        this->velocity_.col(solid_skeleton)(i));
 
     if (mass_(solid_skeleton) > tolerance && mass_(pore_fluid) > tolerance) {
-      // Acceleration of solid skeleton (unbalaced force / mass)
-      this->acceleration_.col(solid_skeleton) =
-          (this->external_force_.col(solid_skeleton) +
-           this->mixture_internal_force_ -
-           this->internal_force_.col(pore_fluid) + drag_force) /
-          this->mass_(solid_skeleton);
-
-      // Acceleration of pore fluid (unbalaced force / mass)
+      // Acceleration of pore fluid (momentume balance of fluid phase)
       this->acceleration_.col(pore_fluid) =
           (this->external_force_.col(pore_fluid) +
            this->internal_force_.col(pore_fluid) - drag_force) /
           this->mass_(pore_fluid);
+
+      // Acceleration of solid skeleton (momentume balance of mixture)
+      this->acceleration_.col(solid_skeleton) =
+          (this->external_force_.col(solid_skeleton) +
+           this->external_force_.col(pore_fluid) +
+           this->mixture_internal_force_ -
+           this->mass_(pore_fluid) * this->acceleration_.col(pore_fluid)) /
+          this->mass_(solid_skeleton);
 
       // Apply friction constraints
       this->apply_friction_constraints(dt);
