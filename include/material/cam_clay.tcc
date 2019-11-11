@@ -24,7 +24,7 @@ mpm::CamClay<Tdim>::CamClay(unsigned id, const Json& material_properties)
     pc0_ = material_properties["pc0"].template get<double>();
     // OCR
     ocr_ = material_properties["ocr"].template get<double>();
-    // M (or Mtc in "Three invariants type")
+    // M (or triaxial compression M (Mtc) in "Three invariants type")
     m_ = material_properties["m"].template get<double>();
     // Lambda
     lambda_ = material_properties["lambda"].template get<double>();
@@ -41,17 +41,17 @@ mpm::CamClay<Tdim>::CamClay(unsigned id, const Json& material_properties)
     // Bonding material constants
     if (bonding_) {
       // Hydrate saturation
-      s_h_ = material_properties["s_h"].template get<bool>();
+      s_h_ = material_properties["s_h"].template get<double>();
       // Material constants a
-      mc_a_ = material_properties["mc_a"].template get<bool>();
+      mc_a_ = material_properties["mc_a"].template get<double>();
       // Material constants a
-      mc_b_ = material_properties["mc_b"].template get<bool>();
+      mc_b_ = material_properties["mc_b"].template get<double>();
       // Material constants a
-      mc_c_ = material_properties["mc_c"].template get<bool>();
+      mc_c_ = material_properties["mc_c"].template get<double>();
       // Material constants a
-      mc_d_ = material_properties["mc_d"].template get<bool>();
+      mc_d_ = material_properties["mc_d"].template get<double>();
       // Degradation
-      degradation_ = material_properties["degradation"].template get<bool>();
+      degradation_ = material_properties["degradation"].template get<double>();
     }
   } catch (std::exception& except) {
     console_->error("Material parameter not set: {}\n", except.what());
@@ -305,6 +305,7 @@ void mpm::CamClay<Tdim>::compute_bonding_parameters(
   // Compute chi
   (*state_vars).at("chi") =
       (*chi) - degradation_ * (*chi) * (*state_vars).at("dpdstrain");
+  if ((*state_vars).at("chi") < 0.) (*state_vars).at("chi") = 0.;
   // Compute mechanical hydrate saturation
   const double s_h_mec = (*state_vars).at("chi") * s_h_;
   // Compute pcd
@@ -542,7 +543,7 @@ Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
   // Update Mtheta
   if (three_invariants_)
     (*state_vars).at("m_theta") =
-        m_ - pow(m_, 2) / (3 + m_ * cos(1.5 * (*state_vars).at("theta")));
+        m_ - pow(m_, 2) / (3 + m_) * cos(1.5 * (*state_vars).at("theta"));
   // Check yield status
   auto yield_type = this->compute_yield_state(state_vars);
   // Return the updated stress in elastic state
@@ -560,6 +561,8 @@ Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
   const double q_trial = (*state_vars).at("q");
   // Lode angle of trial stress
   const double theta_trial = (*state_vars).at("theta");
+  // M_theta of trial stress
+  const double m_theta_trial = (*state_vars).at("m_theta");
   // Preconsolidation pressure of last step
   const double pc_n = (*state_vars).at("pc");
   // Initialise dF / dmul
@@ -569,6 +572,8 @@ Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
   // Iteration for consistency parameter
   while (fabs((*state_vars).at("f_function")) > Ftolerance &&
          counter_f < itrstep) {
+    // Get back the m_theta of trial_stress
+    (*state_vars).at("m_theta") = m_theta_trial;
     // Compute dF / dmul
     this->compute_df_dmul(state_vars, &df_dmul);
     // Update consistency parameter
@@ -614,7 +619,7 @@ Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
     // Compute plastic deviatoric strain
     (*state_vars).at("dpdstrain") =
         (*state_vars).at("delta_phi") *
-        (2 * (*state_vars).at("q") / pow((*state_vars).at("m_theta"), 2));
+        (sqrt(6) * (*state_vars).at("q") / pow((*state_vars).at("m_theta"), 2));
     // Update bonding parameters
     if (bonding_) this->compute_bonding_parameters(&chi_n, state_vars);
     // Compute three invariants parameters
@@ -627,7 +632,7 @@ Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
       this->compute_stress_invariants(updated_stress, n_trial, state_vars);
       // Update Mtheta
       (*state_vars).at("m_theta") =
-          m_ - pow(m_, 2) / (3 + m_ * cos(1.5 * (*state_vars).at("theta")));
+          m_ - pow(m_, 2) / (3 + m_) * cos(1.5 * (*state_vars).at("theta"));
     }
     // Update yield function
     yield_type = this->compute_yield_state(state_vars);
