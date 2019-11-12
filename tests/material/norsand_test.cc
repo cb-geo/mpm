@@ -46,7 +46,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["p_image_initial"] = 87014.6;
   jmaterial["bond_model"] = true;
   jmaterial["p_cohesion_initial"] = 10000.0;
-  jmaterial["m"] = 2.0;
+  jmaterial["p_dilation_initial"] = 20000.0;
+  jmaterial["m_cohesion"] = 2.0;
+  jmaterial["m_dilation"] = 0.5;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -107,8 +109,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
             Approx(jmaterial["p_image_initial"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("p_cohesion_initial") ==
             Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("m") ==
-            Approx(jmaterial["m"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("p_dilation_initial") ==
+            Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("m_cohesion") ==
+            Approx(jmaterial["m_cohesion"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("m_dilation") ==
+            Approx(jmaterial["m_dilation"]).epsilon(Tolerance));
     REQUIRE(material->template property<bool>("bond_model") ==
             jmaterial["bond_model"]);
 

@@ -1,5 +1,8 @@
-#ifndef MPM_MATERIAL_NORSAND_H_
-#define MPM_MATERIAL_NORSAND_H_
+#ifndef MPM_MATERIAL_NOR_SAND_H_
+#define MPM_MATERIAL_NOR_SAND_H_
+
+#include <iostream>
+#include <limits>
 
 #include <cmath>
 
@@ -10,8 +13,8 @@
 namespace mpm {
 
 //! NorSand class
-//! \brief NorSand material model
-//! \details NorSand material model with softening
+//! \brief Mohr Coulomb material model
+//! \details Mohr Coulomb material model with softening
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class NorSand : public Material<Tdim> {
@@ -65,10 +68,10 @@ class NorSand : public Material<Tdim> {
   bool compute_stress_invariants(const Vector6d& stress,
                                  mpm::dense_map* state_vars);
 
-  //! Compute p_cohesion
+  //! Compute p_cohesion and p_dilation
   //! \param[in] state_vars History-dependent state variables
   //! \retval status of computation of stress invariants
-  bool compute_p_cohesion(mpm::dense_map* state_vars);
+  bool compute_p_bond(mpm::dense_map* state_vars);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
@@ -147,12 +150,16 @@ class NorSand : public Material<Tdim> {
   bool bond_model_{false};
   //! Initial p_cohesion
   double p_cohesion_initial_{std::numeric_limits<double>::max()};
-  //! Degradation parameter m upon shearing
-  double m_{std::numeric_limits<double>::max()};
+  //! Initial p_dilation
+  double p_dilation_initial_{std::numeric_limits<double>::max()};
+  //! Cohesion degradation parameter m upon shearing
+  double m_cohesion_{std::numeric_limits<double>::max()};
+  //! Dilation degradation parameter m upon shearing
+  double m_dilation_{std::numeric_limits<double>::max()};
 
 };  // NorSand class
 }  // namespace mpm
 
-#include "norsand.tcc"
+#include "nor_sand.tcc"
 
-#endif  // MPM_MATERIAL_NORSAND_H_
+#endif  // MPM_MATERIAL_NOR_SAND_H_
