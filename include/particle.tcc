@@ -621,10 +621,10 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(
 
       // Check if permeability coefficient is valid
       for (unsigned i = 0; i < Tdim; ++i) {
-        if (k_coefficient[i] > 0.)
-          drag_force_coefficient[i] = porosity_ * porosity_ * 9.81 *
+        if (k_coefficient(i) > 0.)
+          drag_force_coefficient(i) = porosity_ * porosity_ * 9.81 *
                                       material_density_(pore_fluid) /
-                                      k_coefficient[i];
+                                      k_coefficient(i);
         else
           throw std::runtime_error("Permeability coefficient is invalid");
       }

@@ -164,7 +164,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_drag_force_coefficient(
     // Update/assign drag force coefficient
     std::lock_guard<std::mutex> guard(node_mutex_);
     drag_force_coefficient_ =
-        drag_force_coefficient_ * factor + drag_force_coefficient_;
+        drag_force_coefficient_ * factor + drag_force_coefficient;
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
