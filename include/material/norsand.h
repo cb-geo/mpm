@@ -1,8 +1,5 @@
-#ifndef MPM_MATERIAL_NOR_SAND_H_
-#define MPM_MATERIAL_NOR_SAND_H_
-
-#include <iostream>
-#include <limits>
+#ifndef MPM_MATERIAL_NORSAND_H_
+#define MPM_MATERIAL_NORSAND_H_
 
 #include <cmath>
 
@@ -162,4 +159,4 @@ class NorSand : public Material<Tdim> {
 
 #include "nor_sand.tcc"
 
-#endif  // MPM_MATERIAL_NOR_SAND_H_
+#endif  // MPM_MATERIAL_NORSAND_H_
