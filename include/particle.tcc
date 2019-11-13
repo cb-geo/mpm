@@ -93,6 +93,7 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
 //! Return particle data in HDF5 format
 template <unsigned Tdim, unsigned Tnphases>
+// cppcheck-suppress *
 mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::hdf5(unsigned phase) const {
 
   mpm::HDF5Particle particle_data;
