@@ -71,13 +71,20 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
 
   // Stress
-  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
-      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+  this->stress_.col(phase)[0] = particle.stress_xx;
+  this->stress_.col(phase)[1] = particle.stress_yy;
+  this->stress_.col(phase)[2] = particle.stress_zz;
+  this->stress_.col(phase)[3] = particle.tau_xy;
+  this->stress_.col(phase)[4] = particle.tau_yz;
+  this->stress_.col(phase)[5] = particle.tau_xz;
 
   // Strain
-  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
-      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
-      particle.gamma_xz;
+  this->strain_.col(phase)[0] = particle.strain_xx;
+  this->strain_.col(phase)[1] = particle.strain_yy;
+  this->strain_.col(phase)[2] = particle.strain_zz;
+  this->strain_.col(phase)[3] = particle.gamma_xy;
+  this->strain_.col(phase)[4] = particle.gamma_yz;
+  this->strain_.col(phase)[5] = particle.gamma_xz;
 
   // Volumetric strain
   this->volumetric_strain_centroid_(phase) = particle.epsilon_v;
