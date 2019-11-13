@@ -309,6 +309,45 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check particle volumetric strain centroid
     REQUIRE(particle->volumetric_strain_centroid(Phase) ==
             h5_particle.epsilon_v);
+
+    // Write Particle HDF5 data
+    const auto h5_test = particle->hdf5(Phase);
+
+    REQUIRE(h5_particle.id == h5_test.id);
+    REQUIRE(h5_particle.mass == h5_test.mass);
+
+    REQUIRE(h5_particle.coord_x == h5_test.coord_x);
+    REQUIRE(h5_particle.coord_y == h5_test.coord_y);
+    REQUIRE(h5_particle.coord_z == h5_test.coord_z);
+
+    REQUIRE(h5_particle.displacement_x == h5_test.displacement_x);
+    REQUIRE(h5_particle.displacement_y == h5_test.displacement_y);
+    REQUIRE(h5_particle.displacement_z == h5_test.displacement_z);
+
+    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+
+    REQUIRE(h5_particle.velocity_x == h5_test.velocity_x);
+    REQUIRE(h5_particle.velocity_y == h5_test.velocity_y);
+    REQUIRE(h5_particle.velocity_z == h5_test.velocity_z);
+
+    REQUIRE(h5_particle.stress_xx == h5_test.stress_xx);
+    REQUIRE(h5_particle.stress_yy == h5_test.stress_yy);
+    REQUIRE(h5_particle.stress_zz == h5_test.stress_zz);
+    REQUIRE(h5_particle.tau_xy == h5_test.tau_xy);
+    REQUIRE(h5_particle.tau_yz == h5_test.tau_yz);
+    REQUIRE(h5_particle.tau_xz == h5_test.tau_xz);
+
+    REQUIRE(h5_particle.strain_xx == h5_test.strain_xx);
+    REQUIRE(h5_particle.strain_yy == h5_test.strain_yy);
+    REQUIRE(h5_particle.strain_zz == h5_test.strain_zz);
+    REQUIRE(h5_particle.gamma_xy == h5_test.gamma_xy);
+    REQUIRE(h5_particle.gamma_yz == h5_test.gamma_yz);
+    REQUIRE(h5_particle.gamma_xz == h5_test.gamma_xz);
+
+    REQUIRE(h5_particle.epsilon_v == h5_test.epsilon_v);
+    REQUIRE(h5_particle.status == h5_test.status);
   }
 }
 
@@ -1167,6 +1206,45 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle volumetric strain centroid
     REQUIRE(particle->volumetric_strain_centroid(Phase) ==
             h5_particle.epsilon_v);
+
+    // Write Particle HDF5 data
+    const auto h5_test = particle->hdf5(Phase);
+
+    REQUIRE(h5_particle.id == h5_test.id);
+    REQUIRE(h5_particle.mass == h5_test.mass);
+
+    REQUIRE(h5_particle.coord_x == h5_test.coord_x);
+    REQUIRE(h5_particle.coord_y == h5_test.coord_y);
+    REQUIRE(h5_particle.coord_z == h5_test.coord_z);
+
+    REQUIRE(h5_particle.displacement_x == h5_test.displacement_x);
+    REQUIRE(h5_particle.displacement_y == h5_test.displacement_y);
+    REQUIRE(h5_particle.displacement_z == h5_test.displacement_z);
+
+    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+
+    REQUIRE(h5_particle.velocity_x == h5_test.velocity_x);
+    REQUIRE(h5_particle.velocity_y == h5_test.velocity_y);
+    REQUIRE(h5_particle.velocity_z == h5_test.velocity_z);
+
+    REQUIRE(h5_particle.stress_xx == h5_test.stress_xx);
+    REQUIRE(h5_particle.stress_yy == h5_test.stress_yy);
+    REQUIRE(h5_particle.stress_zz == h5_test.stress_zz);
+    REQUIRE(h5_particle.tau_xy == h5_test.tau_xy);
+    REQUIRE(h5_particle.tau_yz == h5_test.tau_yz);
+    REQUIRE(h5_particle.tau_xz == h5_test.tau_xz);
+
+    REQUIRE(h5_particle.strain_xx == h5_test.strain_xx);
+    REQUIRE(h5_particle.strain_yy == h5_test.strain_yy);
+    REQUIRE(h5_particle.strain_zz == h5_test.strain_zz);
+    REQUIRE(h5_particle.gamma_xy == h5_test.gamma_xy);
+    REQUIRE(h5_particle.gamma_yz == h5_test.gamma_yz);
+    REQUIRE(h5_particle.gamma_xz == h5_test.gamma_xz);
+
+    REQUIRE(h5_particle.epsilon_v == h5_test.epsilon_v);
+    REQUIRE(h5_particle.status == h5_test.status);
   }
 }
 

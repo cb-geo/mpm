@@ -57,7 +57,7 @@ class ParticleBase {
   //! Retrun particle data as HDF5
   //! \param[in] phase Properties of a given phase
   //! \retval particle HDF5 data of the particle
-  virtual HDF5Particle particle_hdf5(unsigned phase) const = 0;
+  virtual HDF5Particle hdf5(unsigned phase) const = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }

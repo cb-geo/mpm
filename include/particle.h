@@ -58,7 +58,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Retrun particle data as HDF5
   //! \param[in] phase Properties of a given phase
   //! \retval particle HDF5 data of the particle
-  HDF5Particle particle_hdf5(unsigned phase) const override;
+  HDF5Particle hdf5(unsigned phase) const override;
 
   //! Initialise properties
   void initialise() override;

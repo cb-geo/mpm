@@ -872,7 +872,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->particle_hdf5(phase));
+    particle_data.emplace_back((*pitr)->hdf5(phase));
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
