@@ -99,13 +99,12 @@ mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::hdf5(unsigned phase) const {
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();
-  Eigen::VectorXd coords = this->coordinates();
-  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = coords[j];
+  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = this->coordinates()[j];
 
   Eigen::Vector3d displacement;
   displacement.setZero();
-  Eigen::VectorXd disp = this->displacement(phase);
-  for (unsigned j = 0; j < Tdim; ++j) displacement[j] = disp[j];
+  for (unsigned j = 0; j < Tdim; ++j)
+    displacement[j] = this->displacement(phase)[j];
 
   Eigen::Vector3d velocity;
   velocity.setZero();
