@@ -93,8 +93,10 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
 
 //! Return particle data in HDF5 format
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::get_particle_data(unsigned phase,
-    HDF5Particle& particle_data) {
+mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::particle_hdf5(
+    unsigned phase) const {
+
+  mpm::HDF5Particle particle_data;
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();
@@ -108,8 +110,7 @@ bool mpm::Particle<Tdim, Tnphases>::get_particle_data(unsigned phase,
 
   Eigen::Vector3d velocity;
   velocity.setZero();
-  for (unsigned j = 0; j < Tdim; ++j)
-    velocity[j] = this->velocity(phase)[j];
+  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity(phase)[j];
 
   // Particle local size
   Eigen::Vector3d nsize;
@@ -162,7 +163,7 @@ bool mpm::Particle<Tdim, Tnphases>::get_particle_data(unsigned phase,
 
   particle_data.cell_id = this->cell_id();
 
-  return true;
+  return particle_data;
 }
 
 // Initialise particle properties

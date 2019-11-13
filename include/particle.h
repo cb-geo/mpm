@@ -55,10 +55,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(const HDF5Particle& particle) override;
 
-  //! Output particle as HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of writing HDF5 particle
-  bool get_particle_data(unsigned phase, HDF5Particle& particle_data) override;
+  //! Retrun particle data as HDF5
+  //! \param[in] phase Properties of a given phase
+  //! \retval particle HDF5 data of the particle
+  HDF5Particle particle_hdf5(unsigned phase) const override;
 
   //! Initialise properties
   void initialise() override;
