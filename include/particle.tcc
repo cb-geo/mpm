@@ -91,6 +91,80 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   return true;
 }
 
+//! Return particle data in HDF5 format
+template <unsigned Tdim, unsigned Tnphases>
+bool mpm::Particle<Tdim, Tnphases>::get_particle_data(unsigned phase,
+    HDF5Particle& particle_data) {
+
+  Eigen::Vector3d coordinates;
+  coordinates.setZero();
+  Eigen::VectorXd coords = this->coordinates();
+  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = coords[j];
+
+  Eigen::Vector3d displacement;
+  displacement.setZero();
+  Eigen::VectorXd disp = this->displacement(phase);
+  for (unsigned j = 0; j < Tdim; ++j) displacement[j] = disp[j];
+
+  Eigen::Vector3d velocity;
+  velocity.setZero();
+  for (unsigned j = 0; j < Tdim; ++j)
+    velocity[j] = this->velocity(phase)[j];
+
+  // Particle local size
+  Eigen::Vector3d nsize;
+  nsize.setZero();
+  Eigen::VectorXd size = this->natural_size();
+  for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
+
+  Eigen::Matrix<double, 6, 1> stress = this->stress(phase);
+
+  Eigen::Matrix<double, 6, 1> strain = this->strain(phase);
+
+  particle_data.id = this->id();
+  particle_data.mass = this->mass(phase);
+  particle_data.volume = this->volume(phase);
+  particle_data.pressure = this->pressure(phase);
+
+  particle_data.coord_x = coordinates[0];
+  particle_data.coord_y = coordinates[1];
+  particle_data.coord_z = coordinates[2];
+
+  particle_data.displacement_x = displacement[0];
+  particle_data.displacement_y = displacement[1];
+  particle_data.displacement_z = displacement[2];
+
+  particle_data.nsize_x = nsize[0];
+  particle_data.nsize_y = nsize[1];
+  particle_data.nsize_z = nsize[2];
+
+  particle_data.velocity_x = velocity[0];
+  particle_data.velocity_y = velocity[1];
+  particle_data.velocity_z = velocity[2];
+
+  particle_data.stress_xx = stress[0];
+  particle_data.stress_yy = stress[1];
+  particle_data.stress_zz = stress[2];
+  particle_data.tau_xy = stress[3];
+  particle_data.tau_yz = stress[4];
+  particle_data.tau_xz = stress[5];
+
+  particle_data.strain_xx = strain[0];
+  particle_data.strain_yy = strain[1];
+  particle_data.strain_zz = strain[2];
+  particle_data.gamma_xy = strain[3];
+  particle_data.gamma_yz = strain[4];
+  particle_data.gamma_xz = strain[5];
+
+  particle_data.epsilon_v = this->volumetric_strain_centroid(phase);
+
+  particle_data.status = this->status();
+
+  particle_data.cell_id = this->cell_id();
+
+  return true;
+}
+
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
