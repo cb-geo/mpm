@@ -73,14 +73,16 @@ class NorSand : public Material<Tdim> {
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
+  //! \param[in] yield_type Yild type (elastic or yield)
   //! \retval status of computation of stress invariants
   bool compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
-                               mpm::dense_map* state_vars);
+                               mpm::dense_map* state_vars,
+                               FailureState yield_type);
 
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
   //! \param[in] stress Stress
-  //! \retval yield_type Yield type (elastic, shear or tensile)
+  //! \retval yield_type Yield type (elastic or yield)
   FailureState compute_yield_state(double* yield_function,
                                    const Vector6d& stress,
                                    const mpm::dense_map* state_vars);
@@ -157,6 +159,6 @@ class NorSand : public Material<Tdim> {
 };  // NorSand class
 }  // namespace mpm
 
-#include "nor_sand.tcc"
+#include "norsand.tcc"
 
 #endif  // MPM_MATERIAL_NORSAND_H_

@@ -206,7 +206,8 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
 template <unsigned Tdim>
 bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
                                                  const Vector6d& dstrain,
-                                                 mpm::dense_map* state_vars) {
+                                                 mpm::dense_map* state_vars,
+                                                 FailureState yield_type) {
 
   // Get state variables
   const double mean_p = (*state_vars).at("p");
@@ -214,38 +215,45 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   const double M_theta = (*state_vars).at("M_theta");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
-
-  // Compute and update pressure image
   double p_image;
-  if (bond_model_) {
-    p_image =
-        (mean_p + p_cohesion) *
-            std::pow(
-                ((1 - N_ / M_theta * deviatoric_q / (mean_p + p_cohesion)) /
-                 (1 - N_)),
-                ((N_ - 1) / N_)) -
-        p_cohesion - p_dilation;
-  } else {
-    p_image = mean_p *
-              std::pow(((1 - N_ / M_theta * deviatoric_q / mean_p) / (1 - N_)),
-                       ((N_ - 1) / N_));
-  }
-
-  (*state_vars).at("p_image") = p_image;
-
-  // Compute and update void ratio image
   double e_image;
-  if (bond_model_) {
-    e_image = e_max_ -
-              (e_max_ - e_min_) /
-                  log(crushing_pressure_ / (p_image + p_cohesion + p_dilation));
+
+  if (yield_type == FailureState::Elastic) {
+    // Keep the same pressure image and void ratio image at critical state
+    p_image = (*state_vars).at("p_image");
+    e_image = (*state_vars).at("e_image");
   } else {
-    e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
+    // Compute and update pressure image
+    if (bond_model_) {
+      p_image =
+          (mean_p + p_cohesion) *
+              std::pow(
+                  ((1 - N_ / M_theta * deviatoric_q / (mean_p + p_cohesion)) /
+                   (1 - N_)),
+                  ((N_ - 1) / N_)) -
+          p_cohesion - p_dilation;
+    } else {
+      p_image =
+          mean_p *
+          std::pow(((1 - N_ / M_theta * deviatoric_q / mean_p) / (1 - N_)),
+                   ((N_ - 1) / N_));
+    }
+
+    (*state_vars).at("p_image") = p_image;
+
+    // Compute and update void ratio image
+    if (bond_model_) {
+      e_image =
+          e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ /
+                                           (p_image + p_cohesion + p_dilation));
+    } else {
+      e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
+    }
+
+    if (e_image < 1.0E-15) e_image = 1.0E-15;
+
+    (*state_vars).at("e_image") = e_image;
   }
-
-  if (e_image < 1.0E-15) e_image = 1.0E-15;
-
-  (*state_vars).at("e_image") = e_image;
 
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e)
@@ -593,7 +601,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     this->compute_stress_invariants(trial_stress, state_vars);
 
     // Update state variables
-    this->compute_state_variables(-1 * trial_stress, dstrain_neg, state_vars);
+    this->compute_state_variables(-1 * trial_stress, dstrain_neg, state_vars,
+                                  yield_type);
 
     // Update p_cohesion
     this->compute_p_bond(state_vars);
@@ -617,7 +626,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   this->compute_stress_invariants(updated_stress, state_vars);
 
   // Update state variables
-  this->compute_state_variables(-1 * updated_stress, dstrain_neg, state_vars);
+  this->compute_state_variables(-1 * updated_stress, dstrain_neg, state_vars,
+                                yield_type);
 
   // Compute incremental plastic strain
   Vector6d dstress = updated_stress - stress;
