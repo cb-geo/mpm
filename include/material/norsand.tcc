@@ -587,7 +587,20 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
       this->compute_yield_state(&yield_function, trial_stress, state_vars);
 
   // Return the updated stress in elastic state
-  if (yield_type == FailureState::Elastic) return -trial_stress;
+  if (yield_type == FailureState::Elastic) {
+
+    // Update stress invariants
+    this->compute_stress_invariants(trial_stress, state_vars);
+
+    // Update state variables
+    this->compute_state_variables(-1 * trial_stress, dstrain_neg, state_vars);
+
+    // Update p_cohesion
+    this->compute_p_bond(state_vars);
+
+    // Return elastic stress
+    return -trial_stress;
+  }
   // --------------------------------------------------------------------------------------
 
   // Set plastic tensor
@@ -639,5 +652,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Update p_cohesion
   this->compute_p_bond(state_vars);
 
+  // Return updated stress
   return (-updated_stress);
 }
