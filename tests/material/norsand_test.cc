@@ -134,7 +134,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
               Approx(-0.053462379).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_cohesion") ==
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("zeta") == Approx(1.0).epsilon(Tolerance));
+      REQUIRE(state_variables.at("zeta_cohesion") ==
+              Approx(1.0).epsilon(Tolerance));
+      REQUIRE(state_variables.at("p_dilation") ==
+              Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
+      REQUIRE(state_variables.at("zeta_dilation") ==
+              Approx(1.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("epds") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
@@ -270,13 +275,17 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") == Approx(0.894729559).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
-            Approx(1.189779406052336E+05).epsilon(Tolerance));
+            Approx(9.8977940460966E+04).epsilon(Tolerance));
     REQUIRE(state_vars.at("psi_image") ==
             Approx(-0.044729559).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") ==
             Approx(9.607894391523232E+03).epsilon(Tolerance));
-    REQUIRE(state_vars.at("zeta") ==
+    REQUIRE(state_vars.at("zeta_cohesion") ==
             Approx(0.960789439152323).epsilon(Tolerance));
+    REQUIRE(state_vars.at("p_dilation") ==
+            Approx(1.98009966749834E+04).epsilon(Tolerance));
+    REQUIRE(state_vars.at("zeta_dilation") ==
+            Approx(0.990049833749168).epsilon(Tolerance));
     REQUIRE(state_vars.at("epds") == Approx(0.020).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
             Approx(-0.036).epsilon(Tolerance));
