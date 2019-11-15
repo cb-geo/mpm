@@ -367,6 +367,24 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   return (result && map_particles_.remove(id));
 }
 
+//! Remove all particles in a cell given cell id
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
+    // If cell is non empty
+    if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
+      auto particle_ids = (*citr)->particles();
+      for (auto& id : particle_ids) {
+        map_particles_[id]->remove_cell();
+        particles_.remove(map_particles_[id]);
+        map_particles_.remove(id);
+      }
+      (*citr)->clear_particle_ids();
+    }
+  }
+}
+
 //! Locate particles in a cell
 template <unsigned Tdim>
 std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
@@ -853,77 +871,9 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
   particle_data.reserve(nparticles);
 
-  mpm::Index i = 0;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    particle_data.emplace_back((*pitr)->hdf5(phase));
 
-    Eigen::Vector3d coordinates;
-    coordinates.setZero();
-    Eigen::VectorXd coords = (*pitr)->coordinates();
-    for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = coords[j];
-
-    Eigen::Vector3d displacement;
-    displacement.setZero();
-    Eigen::VectorXd disp = (*pitr)->displacement(phase);
-    for (unsigned j = 0; j < Tdim; ++j) displacement[j] = disp[j];
-
-    Eigen::Vector3d velocity;
-    velocity.setZero();
-    for (unsigned j = 0; j < Tdim; ++j)
-      velocity[j] = (*pitr)->velocity(phase)[j];
-
-    // Particle local size
-    Eigen::Vector3d nsize;
-    nsize.setZero();
-    Eigen::VectorXd size = (*pitr)->natural_size();
-    for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
-
-    Eigen::Matrix<double, 6, 1> stress = (*pitr)->stress(phase);
-
-    Eigen::Matrix<double, 6, 1> strain = (*pitr)->strain(phase);
-
-    particle_data[i].id = (*pitr)->id();
-    particle_data[i].mass = (*pitr)->mass(phase);
-    particle_data[i].volume = (*pitr)->volume(phase);
-    particle_data[i].pressure = (*pitr)->pressure(phase);
-
-    particle_data[i].coord_x = coordinates[0];
-    particle_data[i].coord_y = coordinates[1];
-    particle_data[i].coord_z = coordinates[2];
-
-    particle_data[i].displacement_x = displacement[0];
-    particle_data[i].displacement_y = displacement[1];
-    particle_data[i].displacement_z = displacement[2];
-
-    particle_data[i].nsize_x = nsize[0];
-    particle_data[i].nsize_y = nsize[1];
-    particle_data[i].nsize_z = nsize[2];
-
-    particle_data[i].velocity_x = velocity[0];
-    particle_data[i].velocity_y = velocity[1];
-    particle_data[i].velocity_z = velocity[2];
-
-    particle_data[i].stress_xx = stress[0];
-    particle_data[i].stress_yy = stress[1];
-    particle_data[i].stress_zz = stress[2];
-    particle_data[i].tau_xy = stress[3];
-    particle_data[i].tau_yz = stress[4];
-    particle_data[i].tau_xz = stress[5];
-
-    particle_data[i].strain_xx = strain[0];
-    particle_data[i].strain_yy = strain[1];
-    particle_data[i].strain_zz = strain[2];
-    particle_data[i].gamma_xy = strain[3];
-    particle_data[i].gamma_yz = strain[4];
-    particle_data[i].gamma_xz = strain[5];
-
-    particle_data[i].epsilon_v = (*pitr)->volumetric_strain_centroid(phase);
-
-    particle_data[i].status = (*pitr)->status();
-
-    particle_data[i].cell_id = (*pitr)->cell_id();
-    // Counter
-    ++i;
-  }
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 

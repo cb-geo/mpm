@@ -54,6 +54,11 @@ class ParticleBase {
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(const HDF5Particle& particle) = 0;
 
+  //! Retrun particle data as HDF5
+  //! \param[in] phase Properties of a given phase
+  //! \retval particle HDF5 data of the particle
+  virtual HDF5Particle hdf5(unsigned phase) const = 0;
+
   //! Return id of the particleBase
   Index id() const { return id_; }
 

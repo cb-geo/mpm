@@ -146,6 +146,13 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   this->edgecut_ = 0;
 }
 
+//! Destructor
+template <unsigned Tdim>
+mpm::Graph<Tdim>::~Graph() {
+  //！ free space
+  free(this->part_);
+}
+
 //! Get the xadj
 template <unsigned Tdim>
 idx_t* mpm::Graph<Tdim>::xadj() {
@@ -178,12 +185,6 @@ void mpm::Graph<Tdim>::assign_ndims(idx_t n) {
 template <unsigned Tdim>
 idx_t mpm::Graph<Tdim>::nparts() {
   return this->nparts_;
-}
-
-//! Return partition
-template <unsigned Tdim>
-idx_t mpm::Graph<Tdim>::partition(idx_t id) {
-  return this->partition_[id];
 }
 
 //! Create partition
@@ -233,8 +234,12 @@ void mpm::Graph<Tdim>::collect_partitions(int ncells, int mpi_size,
     MPI_Send((void*)this->part_,
              this->vtxdist_[mpi_rank + 1] - this->vtxdist_[mpi_rank], IDX_T, 0,
              1, *comm);
-    //！ free space
-    free(this->part_);
     MPI_Recv((void*)this->partition_, ncells, IDX_T, 0, 1, *comm, &status);
   }
+
+  // Assign partition to cells
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->rank(this->partition_[(*citr)->id()]);
+
+  free(this->partition_);
 }
