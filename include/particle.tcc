@@ -71,13 +71,20 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
 
   // Stress
-  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
-      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+  this->stress_.col(phase)[0] = particle.stress_xx;
+  this->stress_.col(phase)[1] = particle.stress_yy;
+  this->stress_.col(phase)[2] = particle.stress_zz;
+  this->stress_.col(phase)[3] = particle.tau_xy;
+  this->stress_.col(phase)[4] = particle.tau_yz;
+  this->stress_.col(phase)[5] = particle.tau_xz;
 
   // Strain
-  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
-      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
-      particle.gamma_xz;
+  this->strain_.col(phase)[0] = particle.strain_xx;
+  this->strain_.col(phase)[1] = particle.strain_yy;
+  this->strain_.col(phase)[2] = particle.strain_zz;
+  this->strain_.col(phase)[3] = particle.gamma_xy;
+  this->strain_.col(phase)[4] = particle.gamma_yz;
+  this->strain_.col(phase)[5] = particle.gamma_xz;
 
   // Volumetric strain
   this->volumetric_strain_centroid_(phase) = particle.epsilon_v;
@@ -89,6 +96,80 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
   return true;
+}
+
+//! Return particle data in HDF5 format
+template <unsigned Tdim, unsigned Tnphases>
+// cppcheck-suppress *
+mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::hdf5(unsigned phase) const {
+
+  mpm::HDF5Particle particle_data;
+
+  Eigen::Vector3d coordinates;
+  coordinates.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = this->coordinates()[j];
+
+  Eigen::Vector3d displacement;
+  displacement.setZero();
+  for (unsigned j = 0; j < Tdim; ++j)
+    displacement[j] = this->displacement(phase)[j];
+
+  Eigen::Vector3d velocity;
+  velocity.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity(phase)[j];
+
+  // Particle local size
+  Eigen::Vector3d nsize;
+  nsize.setZero();
+  Eigen::VectorXd size = this->natural_size();
+  for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
+
+  Eigen::Matrix<double, 6, 1> stress = this->stress(phase);
+
+  Eigen::Matrix<double, 6, 1> strain = this->strain(phase);
+
+  particle_data.id = this->id();
+  particle_data.mass = this->mass(phase);
+  particle_data.volume = this->volume(phase);
+  particle_data.pressure = this->pressure(phase);
+
+  particle_data.coord_x = coordinates[0];
+  particle_data.coord_y = coordinates[1];
+  particle_data.coord_z = coordinates[2];
+
+  particle_data.displacement_x = displacement[0];
+  particle_data.displacement_y = displacement[1];
+  particle_data.displacement_z = displacement[2];
+
+  particle_data.nsize_x = nsize[0];
+  particle_data.nsize_y = nsize[1];
+  particle_data.nsize_z = nsize[2];
+
+  particle_data.velocity_x = velocity[0];
+  particle_data.velocity_y = velocity[1];
+  particle_data.velocity_z = velocity[2];
+
+  particle_data.stress_xx = stress[0];
+  particle_data.stress_yy = stress[1];
+  particle_data.stress_zz = stress[2];
+  particle_data.tau_xy = stress[3];
+  particle_data.tau_yz = stress[4];
+  particle_data.tau_xz = stress[5];
+
+  particle_data.strain_xx = strain[0];
+  particle_data.strain_yy = strain[1];
+  particle_data.strain_zz = strain[2];
+  particle_data.gamma_xy = strain[3];
+  particle_data.gamma_yz = strain[4];
+  particle_data.gamma_xz = strain[5];
+
+  particle_data.epsilon_v = this->volumetric_strain_centroid(phase);
+
+  particle_data.status = this->status();
+
+  particle_data.cell_id = this->cell_id();
+
+  return particle_data;
 }
 
 // Initialise particle properties
