@@ -382,7 +382,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
                     std::placeholders::_1, pore_fluid, dt_));
 
-      // Iterate over each particle to update particle volume of solid_skeleton
+      // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume,
                     std::placeholders::_1, solid_skeleton, dt_));
@@ -399,6 +399,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
             std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
                       std::placeholders::_1, solid_skeleton));
 
+        // Assign pressure to nodes
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
                       std::placeholders::_1, pore_fluid));
@@ -413,6 +414,13 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
               std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
                         std::placeholders::_1, solid_skeleton,
                         std::placeholders::_2));
+
+          mesh_->allreduce_nodal_scalar_property(
+              std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
+                        solid_skeleton),
+              std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
+                        std::placeholders::_1, pore_fluid,
+                        std::placeholders::_2));
         }
 #endif
 
@@ -420,9 +428,13 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
                       std::placeholders::_1, solid_skeleton));
+
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                      std::placeholders::_1, pore_fluid));
       }
 
-      // Iterate over each particle to compute stress
+      // Iterate over each particle to compute stress of solid skeleton
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
                     std::placeholders::_1, solid_skeleton));

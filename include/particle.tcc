@@ -519,7 +519,7 @@ void mpm::Particle<Tdim, Tnphases>::compute_strain(unsigned phase, double dt) {
   volumetric_strain_centroid_(phase) += dvolumetric_strain;
 
   // Update thermodynamic pressure
-  this->update_pressure(phase, dvolumetric_strain);
+  if (phase = 0) this->update_pressure(phase, dvolumetric_strain);
 }
 
 // Compute stress
@@ -558,12 +558,20 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
       // Bulk modulus of fluid
       double K = material_.at(pore_fluid)->property("bulk_modulus");
       // Compute pore pressure
+      // double dpore_pressure =
+      //     -K / porosity_ *
+      //     (volume_fraction_(solid_skeleton) * dt *
+      //          strain_rate_.col(solid_skeleton).head(Tdim).sum() +
+      //      volume_fraction_(pore_fluid) * dt *
+      //          strain_rate_.col(pore_fluid).head(Tdim).sum());
       double dpore_pressure =
           -K / porosity_ *
           (volume_fraction_(solid_skeleton) * dt *
                strain_rate_.col(solid_skeleton).head(Tdim).sum() +
            volume_fraction_(pore_fluid) * dt *
-               strain_rate_.col(pore_fluid).head(Tdim).sum());
+               cell_->compute_strain_rate_centroid(pore_fluid)
+                   .head(Tdim)
+                   .sum());
 
       // Update stresses of pore fluid phase
       this->pressure_(pore_fluid) += dpore_pressure;
