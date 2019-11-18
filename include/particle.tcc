@@ -439,6 +439,7 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume_strainrate(unsigned phase,
       Eigen::VectorXd strain_rate_centroid =
           cell_->compute_strain_rate_centroid(phase);
       this->volume_(phase) *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
+      this->mass_density_(phase) = this->mass_(phase) / this->volume(phase);
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
