@@ -113,6 +113,16 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"plastic_strain4", 0.},
       {"plastic_strain5", 0.}};
 
+  // Check for bond model e_image
+  double e_image;
+  if (bond_model_) {
+    e_image =
+        e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ /
+                                         (p_image_initial_ + p_cohesion_initial_ + p_dilation_initial_));
+    if (e_image < 1.0E-15) e_image = 1.0E-15;
+    state_vars.at("e_image") = e_image;
+  }
+
   return state_vars;
 }
 
@@ -238,7 +248,6 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
           std::pow(((1 - N_ / M_theta * deviatoric_q / mean_p) / (1 - N_)),
                    ((N_ - 1) / N_));
     }
-
     (*state_vars).at("p_image") = p_image;
 
     // Compute and update void ratio image
@@ -260,6 +269,7 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
   double void_ratio = (*state_vars).at("void_ratio") -
                       (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;
+  if (void_ratio < 1.0E-15) void_ratio = 1.0E-15;
   (*state_vars).at("void_ratio") = void_ratio;
 
   // Compute and update psi
@@ -372,7 +382,7 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double psi_image = (*state_vars).at("psi_image");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
-
+ 
   // Estimate dilatancy at peak
   const double D_min = chi_ * psi_image;
 
@@ -517,34 +527,36 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
                 2 * std::pow(dF_dsigma(3), 2) + 2 * std::pow(dF_dsigma(4), 2) +
                 2 * std::pow(dF_dsigma(5), 2));
 
-  // Derivatives in respect to p_cohesion
-  const double dF_dpcohesion =
-      M_theta / N_ *
-      (1 -
-       (N_ - 1) * std::pow(((mean_p + p_cohesion) /
-                            (p_image + p_cohesion + p_dilation)),
-                           (N_ / (1 - N_))) -
-       N_ * (p_image + p_cohesion - mean_p) /
-           (p_image + p_cohesion + p_dilation) *
-           std::pow(
-               ((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
-               (N_ / (1 - N_))));
-
-  const double dpcohesion_depsd = -p_cohesion_initial_ * m_cohesion_ *
-                                  exp(-m_cohesion_ * (*state_vars).at("epds"));
-
-  // Derivatives in respect to p_dilation
-  const double dF_dpdilation =
-      -1. * M_theta *
-      std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
-               (1 / (1 - N_)));
-
-  const double dpdilation_depsd = -p_dilation_initial_ * m_dilation_ *
-                                  exp(-m_dilation_ * (*state_vars).at("epds"));
-
   // Compute hardering term
   double hardening_term;
   if (bond_model_) {
+    // Derivatives in respect to p_cohesion
+    const double dF_dpcohesion =
+        M_theta / N_ *
+        (1 -
+         (N_ - 1) * std::pow(((mean_p + p_cohesion) /
+                              (p_image + p_cohesion + p_dilation)),
+                             (N_ / (1 - N_))) -
+         N_ * (p_image + p_cohesion - mean_p) /
+             (p_image + p_cohesion + p_dilation) *
+             std::pow(
+                 ((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
+                 (N_ / (1 - N_))));
+
+    const double dpcohesion_depsd =
+        -p_cohesion_initial_ * m_cohesion_ *
+        exp(-m_cohesion_ * (*state_vars).at("epds"));
+
+    // Derivatives in respect to p_dilation
+    const double dF_dpdilation =
+        -1. * M_theta *
+        std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
+                 (1 / (1 - N_)));
+
+    const double dpdilation_depsd =
+        -p_dilation_initial_ * m_dilation_ *
+        exp(-m_dilation_ * (*state_vars).at("epds"));
+
     hardening_term = dF_dpi * dpi_depsd * dF_dsigma_deviatoric +
                      dF_dpcohesion * dpcohesion_depsd * dF_dsigma_deviatoric +
                      dF_dpdilation * dpdilation_depsd * dF_dsigma_deviatoric;
@@ -594,6 +606,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   auto yield_type =
       this->compute_yield_state(&yield_function, trial_stress, state_vars);
 
+  // --------------------------------------------------------------------------------------
   // Return the updated stress in elastic state
   if (yield_type == FailureState::Elastic) {
 
@@ -608,7 +621,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     this->compute_p_bond(state_vars);
 
     // Return elastic stress
-    return -trial_stress;
+    return (-trial_stress);
   }
   // --------------------------------------------------------------------------------------
 
