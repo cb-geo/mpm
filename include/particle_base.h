@@ -113,6 +113,9 @@ class ParticleBase {
   //! Update volume based on centre volumetric strain rate
   virtual bool update_volume_strainrate(unsigned phase, double dt) = 0;
 
+  //! Return mass density
+  virtual double mass_density(unsigned phase) const = 0;
+
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
 
