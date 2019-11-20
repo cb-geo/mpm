@@ -904,7 +904,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
       // Update displacement (displacement is initialized from zero)
-      this->displacement_ += nodal_velocity * dt;
+      this->displacement_.col(phase) += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -938,7 +938,7 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
       // Update displacement (displacement is initialized from zero)
-      this->displacement_ += nodal_velocity * dt;
+      this->displacement_.col(phase) += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
