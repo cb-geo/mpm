@@ -117,8 +117,10 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
   double e_image;
   if (bond_model_) {
     e_image =
-        e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ /
-                                         (p_image_initial_ + p_cohesion_initial_ + p_dilation_initial_));
+        e_max_ -
+        (e_max_ - e_min_) /
+            log(crushing_pressure_ /
+                (p_image_initial_ + p_cohesion_initial_ + p_dilation_initial_));
     if (e_image < 1.0E-15) e_image = 1.0E-15;
     state_vars.at("e_image") = e_image;
   }
@@ -382,7 +384,7 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double psi_image = (*state_vars).at("psi_image");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
- 
+
   // Estimate dilatancy at peak
   const double D_min = chi_ * psi_image;
 

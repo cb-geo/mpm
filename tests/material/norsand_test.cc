@@ -127,7 +127,7 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
       REQUIRE(state_variables.at("void_ratio") ==
               Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("e_image") ==
-              Approx(0.903462379).epsilon(Tolerance));
+              Approx(0.8970333385).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_image") ==
               Approx(87014.6).epsilon(Tolerance));
       REQUIRE(state_variables.at("psi_image") ==
