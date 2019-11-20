@@ -248,8 +248,10 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
     // A face is shared only by 2 cells (distance between the range is 2)
     if (std::distance(range.first, range.second) == 2) {
       // Add cell as neighbours to each other
-      map_cells_[range.first->second]->add_neighbour(range.second->second);
-      map_cells_[range.second->second]->add_neighbour(range.first->second);
+      map_cells_[range.first->second]->add_neighbour(
+          std::prev(range.second)->second);
+      map_cells_[std::prev(range.second)->second]->add_neighbour(
+          range.first->second);
     }
   }
 }
