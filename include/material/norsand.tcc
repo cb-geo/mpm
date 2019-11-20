@@ -270,7 +270,7 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   // Note that dstrain is in tension positive - depsv = de / (1 + e)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
   double void_ratio = (*state_vars).at("void_ratio") -
-                      (1 + (*state_vars).at("void_ratio")) * dvolumetric_strain;
+                      (1 + void_ratio_initial_) * dvolumetric_strain;
   if (void_ratio < 1.0E-15) void_ratio = 1.0E-15;
   (*state_vars).at("void_ratio") = void_ratio;
 
