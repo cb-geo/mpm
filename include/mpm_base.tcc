@@ -33,7 +33,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
-    // Get stress update method
+    // Stress update method (USF/USL/MUSL)
     try {
       if (analysis_.find("stress_update") != analysis_.end())
         stress_update_ = mpm::stress_update.at(

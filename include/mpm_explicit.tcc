@@ -11,13 +11,6 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
-  // Get analysis type USL/USF
-  if (io_->analysis_type() == "MPMExplicitUSL2D" ||
-      io_->analysis_type() == "MPMExplicitUSL3D")
-    this->stress_update_ = mpm::StressUpdate::USL;
-
-  console_->error("Analysis{} {}", io_->analysis_type());
-
   // Initialise MPI rank and size
   int mpi_rank = 0;
   int mpi_size = 1;
@@ -336,7 +329,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit solver duration: {} ms", mpi_rank,
+  console_->info("Rank {}, Explicit solver {} duration: {} ms", mpi_rank,
+                 int(this->stress_update_),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());
