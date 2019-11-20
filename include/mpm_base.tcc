@@ -27,34 +27,22 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == gravity_.size()) {
-      for (unsigned i = 0; i < gravity_.size(); ++i) {
+      for (unsigned i = 0; i < gravity_.size(); ++i)
         gravity_[i] = analysis_.at("gravity").at(i);
-      }
     } else {
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
     // Get stress update method
     try {
-      if (analysis_.find("stress_update") != analysis_.end()) {
-        switch (analysis_["stress_update"].template get<int>()) {
-          case (0):
-            stress_update_ = mpm::StressUpdate::USF;
-          case (1):
-            stress_update_ = mpm::StressUpdate::USF;
-          case (2):
-            stress_update_ = mpm::StressUpdate::MUSL;
-          default:
-            throw std::runtime_error(
-                "Stress update method is invalid, must be 0,1 or 2");
-        }
-      } else
-        console_->warn(
-            "{} #{}: Stress update method is not specified, using default as "
-            "USF",
-            __FILE__, __LINE__);
+      if (analysis_.find("stress_update") != analysis_.end())
+        stress_update_ = mpm::stress_update.at(
+            analysis_["stress_update"].template get<std::string>());
     } catch (std::exception& exception) {
-      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+      console_->warn(
+          "{} #{}: {}. Stress update method is not specified, using USF as "
+          "default\n",
+          __FILE__, __LINE__, exception.what());
     }
 
     // Velocity update

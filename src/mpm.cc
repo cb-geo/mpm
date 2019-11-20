@@ -5,6 +5,14 @@
 #include "mpm.h"
 #include "mpm_explicit.h"
 
+namespace mpm {
+// Stress update method
+std::map<std::string, StressUpdate> stress_update = {
+    {"usf", StressUpdate::USF},
+    {"usl", StressUpdate::USL},
+    {"musl", StressUpdate::MUSL}};
+}  // namespace mpm
+
 // 2D Explicit MPM USF
 static Register<mpm::MPM, mpm::MPMExplicit<2>, std::shared_ptr<mpm::IO>&>
     mpm_explicit_usf_2d("MPMExplicitUSF2D");

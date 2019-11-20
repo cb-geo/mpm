@@ -26,15 +26,6 @@ class PointGenerator {
       : mesh_{mesh}, io_{io} {
     generator_ = generator;
     console_ = spdlog::get("PointGenerator");
-    // Dump JSON as an input file to be read
-    std::ofstream file;
-    file.open("generator.json");
-    file << generator.dump(2);
-    file.close();
-
-    file.open("generator_.json");
-    file << generator_.dump(2);
-    file.close();
   }
 
   //! Generate material points
