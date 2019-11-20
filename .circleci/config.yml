@@ -16,8 +16,8 @@ jobs:
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            make -j2
+            cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            ninja -j2
             ctest -VV
   clang:
     docker:
@@ -31,8 +31,8 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            scan-build cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            scan-build -k -V make -j2
+            scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
+            scan-build -k -V ninja -j2
             ctest -VV
   cppcheck:
     docker:
