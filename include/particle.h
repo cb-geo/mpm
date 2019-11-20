@@ -55,6 +55,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(const HDF5Particle& particle) override;
 
+  //! Retrun particle data as HDF5
+  //! \param[in] phase Properties of a given phase
+  //! \retval particle HDF5 data of the particle
+  HDF5Particle hdf5(unsigned phase) const override;
+
   //! Initialise properties
   void initialise() override;
 
@@ -103,9 +108,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return volume
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override {
-    return volume_ * volume_fraction_(phase);
-  }
+  double volume(unsigned phase) const override { return volume_(phase); }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -114,15 +117,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   bool compute_volume(unsigned phase) override;
 
-  //! Update material point volume
+  //! Update volume based on centre volumetric strain rate
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool update_volume(unsigned phase, double dt) override;
-
-  //! Update material point volume by using the cell-centre strain rate
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Analysis time step
-  bool update_volume_centre_strainrate(unsigned phase, double dt) override;
+  bool update_volume_strainrate(unsigned phase, double dt) override;
 
   //! Compute mass as volume * density
   //! \param[in] phase Index corresponding to the phase
@@ -305,21 +303,12 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
-  //! Material point volume
-  using ParticleBase<Tdim>::volume_;
-  //! Material point porosity
-  using ParticleBase<Tdim>::porosity_;
-
-  //! Degree of saturation in porous media
-  double saturation_degree_{1.0};
-  //! Material density (intrinsic/real density of each phase material)
-  Eigen::Matrix<double, 1, Tnphases> material_density_;
-  //! Phase mass
+  //! Volumetric mass density (mass / volume)
+  Eigen::Matrix<double, 1, Tnphases> mass_density_;
+  //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Phae volume
-  Eigen::Matrix<double, 1, Tnphases> phase_volume_;
-  //! Phase volume fraction
-  Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
+  //! Volume
+  Eigen::Matrix<double, 1, Tnphases> volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates

@@ -4,7 +4,11 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   cell_ = nullptr;
+
+  //! Set material pointer to null
   material_.clear();
+  for (unsigned i = 0; i < Tnphases; ++i) material_[i] = nullptr;
+
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -67,13 +71,20 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
 
   // Stress
-  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
-      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+  this->stress_.col(phase)[0] = particle.stress_xx;
+  this->stress_.col(phase)[1] = particle.stress_yy;
+  this->stress_.col(phase)[2] = particle.stress_zz;
+  this->stress_.col(phase)[3] = particle.tau_xy;
+  this->stress_.col(phase)[4] = particle.tau_yz;
+  this->stress_.col(phase)[5] = particle.tau_xz;
 
   // Strain
-  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
-      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
-      particle.gamma_xz;
+  this->strain_.col(phase)[0] = particle.strain_xx;
+  this->strain_.col(phase)[1] = particle.strain_yy;
+  this->strain_.col(phase)[2] = particle.strain_zz;
+  this->strain_.col(phase)[3] = particle.gamma_xy;
+  this->strain_.col(phase)[4] = particle.gamma_yz;
+  this->strain_.col(phase)[5] = particle.gamma_xz;
 
   // Volumetric strain
   this->volumetric_strain_centroid_(phase) = particle.epsilon_v;
@@ -85,6 +96,80 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
   return true;
+}
+
+//! Return particle data in HDF5 format
+template <unsigned Tdim, unsigned Tnphases>
+// cppcheck-suppress *
+mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::hdf5(unsigned phase) const {
+
+  mpm::HDF5Particle particle_data;
+
+  Eigen::Vector3d coordinates;
+  coordinates.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = this->coordinates()[j];
+
+  Eigen::Vector3d displacement;
+  displacement.setZero();
+  for (unsigned j = 0; j < Tdim; ++j)
+    displacement[j] = this->displacement(phase)[j];
+
+  Eigen::Vector3d velocity;
+  velocity.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity(phase)[j];
+
+  // Particle local size
+  Eigen::Vector3d nsize;
+  nsize.setZero();
+  Eigen::VectorXd size = this->natural_size();
+  for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
+
+  Eigen::Matrix<double, 6, 1> stress = this->stress(phase);
+
+  Eigen::Matrix<double, 6, 1> strain = this->strain(phase);
+
+  particle_data.id = this->id();
+  particle_data.mass = this->mass(phase);
+  particle_data.volume = this->volume(phase);
+  particle_data.pressure = this->pressure(phase);
+
+  particle_data.coord_x = coordinates[0];
+  particle_data.coord_y = coordinates[1];
+  particle_data.coord_z = coordinates[2];
+
+  particle_data.displacement_x = displacement[0];
+  particle_data.displacement_y = displacement[1];
+  particle_data.displacement_z = displacement[2];
+
+  particle_data.nsize_x = nsize[0];
+  particle_data.nsize_y = nsize[1];
+  particle_data.nsize_z = nsize[2];
+
+  particle_data.velocity_x = velocity[0];
+  particle_data.velocity_y = velocity[1];
+  particle_data.velocity_z = velocity[2];
+
+  particle_data.stress_xx = stress[0];
+  particle_data.stress_yy = stress[1];
+  particle_data.stress_zz = stress[2];
+  particle_data.tau_xy = stress[3];
+  particle_data.tau_yz = stress[4];
+  particle_data.tau_xz = stress[5];
+
+  particle_data.strain_xx = strain[0];
+  particle_data.strain_yy = strain[1];
+  particle_data.strain_zz = strain[2];
+  particle_data.gamma_xy = strain[3];
+  particle_data.gamma_yz = strain[4];
+  particle_data.gamma_xz = strain[5];
+
+  particle_data.epsilon_v = this->volumetric_strain_centroid(phase);
+
+  particle_data.status = this->status();
+
+  particle_data.cell_id = this->cell_id();
+
+  return particle_data;
 }
 
 // Initialise particle properties
@@ -102,10 +187,8 @@ void mpm::Particle<Tdim, Tnphases>::initialise() {
   stress_.setZero();
   traction_.setZero();
   velocity_.setZero();
+  volume_.fill(std::numeric_limits<double>::max());
   volumetric_strain_centroid_.setZero();
-  material_density_.fill(std::numeric_limits<double>::max());
-  volume_fraction_.setOnes(1, Tnphases);
-  phase_volume_.fill(std::numeric_limits<double>::max());
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&](unsigned phase) { return stress(phase); };
@@ -218,10 +301,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      status = material_.emplace(std::make_pair(phase, material)).second;
+      material_.at(phase) = material;
       state_variables_ = material_.at(phase)->initialise_state_variables();
-      material_density_(phase) =
-          material_.at(phase)->template property<double>("density");
+      status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
     }
@@ -291,8 +373,6 @@ bool mpm::Particle<Tdim, Tnphases>::compute_shapefn() {
 }
 
 // Assign volume to the particle
-// Volume is the material point volume
-// Note: \param[in] phase is not used
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
                                                   double volume) {
@@ -301,14 +381,10 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
     if (volume <= 0.)
       throw std::runtime_error("Particle volume cannot be negative");
 
-    // Assign material poiint volume.
-    // For porous media, this is the volume of the solid skeleton
-    volume_ = volume;
-    // TODO: Compute size of particle in each direction: This is okay for square
-    // element, but won't work for irregular elements when applying traction at
-    // particles.
+    this->volume_(phase) = volume;
+    // Compute size of particle in each direction
     const double length =
-        std::pow(this->volume_, static_cast<double>(1. / Tdim));
+        std::pow(this->volume_(phase), static_cast<double>(1. / Tdim));
     // Set particle size as length on each side
     this->size_.fill(length);
 
@@ -329,9 +405,6 @@ bool mpm::Particle<Tdim, Tnphases>::assign_volume(unsigned phase,
 }
 
 // Compute volume of the particle
-// Note 1: \param[in] phase is not used
-// Note 2: This method of computing the particle volume only works for
-//         rectilinear grid with fully filled elements
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
   bool status = true;
@@ -352,39 +425,20 @@ bool mpm::Particle<Tdim, Tnphases>::compute_volume(unsigned phase) {
   return status;
 }
 
-// Update material point volume
+// Update volume based on the central strain rate
 template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
+bool mpm::Particle<Tdim, Tnphases>::update_volume_strainrate(unsigned phase,
+                                                             double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
-
-      Eigen::VectorXd strain_rate = cell_->compute_strain_rate(bmatrix_, phase);
-      this->volume_ *= (1. + dt * strain_rate.head(Tdim).sum());
-    } else {
-      throw std::runtime_error(
-          "Cell or volume is not initialised! cannot update particle volume");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-// Update material point volume by using the cell-centre strain rate
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_volume_centre_strainrate(
-    unsigned phase, double dt) {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
-
+    if (cell_ != nullptr &&
+        volume_(phase) != std::numeric_limits<double>::max()) {
+      // Compute at centroid
+      // Strain rate for reduced integration
       Eigen::VectorXd strain_rate_centroid =
           cell_->compute_strain_rate_centroid(phase);
-      this->volume_ *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
+      this->volume_(phase) *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -401,15 +455,16 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
   bool status = true;
   try {
-    // Check if particle volume and material density are set
-    if (volume_ != std::numeric_limits<double>::max() &&
-        material_density_(phase) != std::numeric_limits<double>::max()) {
-      this->mass_(phase) =
-          volume_fraction_(phase) * material_density_(phase) * volume_;
+    // Check if particle volume is set and material ptr is valid
+    if (volume_(phase) != std::numeric_limits<double>::max() &&
+        material_.at(phase) != nullptr) {
+      // Mass = volume of particle * mass_density
+      mass_density_(phase) = material_.at(phase)->template property<double>(
+          std::string("density"));
+      this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(
-          "Particle volume or density is invalid! cannot compute mass for the "
-          "particle");
+          "Cell or material is invalid! cannot compute mass for the particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -536,9 +591,9 @@ bool mpm::Particle<Tdim, Tnphases>::map_internal_force(unsigned phase) {
     if (material_.at(phase) != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(
-          this->bmatrix_, phase, this->volume_fraction_(phase) * this->volume_,
-          -1. * this->stress_.col(phase));
+      cell_->compute_nodal_internal_force(this->bmatrix_, phase,
+                                          this->volume_(phase),
+                                          -1. * this->stress_.col(phase));
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -575,14 +630,14 @@ bool mpm::Particle<Tdim, Tnphases>::assign_traction(unsigned phase,
                                                     double traction) {
   bool status = false;
   try {
-    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim ||
-        this->volume_ == std::numeric_limits<double>::max()) {
+    if (phase >= Tnphases || direction >= Tdim ||
+        this->volume_(phase) == std::numeric_limits<double>::max()) {
       throw std::runtime_error(
           "Particle traction property: volume / direction / phase is invalid");
     }
     // Assign traction
     traction_(direction, phase) =
-        traction * this->volume_ / this->size_(direction);
+        traction * this->volume_(phase) / this->size_(direction);
     status = true;
     this->set_traction_ = true;
   } catch (std::exception& exception) {
@@ -745,7 +800,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < (Tdim * Tnphases))
+    if (dir < (Tdim * Tnphases))
       this->particle_velocity_constraints_.insert(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));

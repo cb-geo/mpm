@@ -105,15 +105,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     graph_->collect_partitions(mesh_->ncells(), size, rank, &comm);
 
     // Delete all the particles which is not in local task parititon
-    for (auto stcl = mesh_->particles_cell_ids()->begin();
-         stcl != mesh_->particles_cell_ids()->end(); ++stcl) {
-      if (graph_->partition(stcl->second) != rank) {
-        mesh_->remove_particle_by_id(stcl->first);
-      }
-    }
-#endif
+    mesh_->remove_all_nonrank_particles(rank);
+
+#endif  // PARMETIS
   }
-#endif
+#endif  // MPI
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -184,7 +180,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
                     std::placeholders::_1, phase, this->dt_));
 
       // Pressure smoothing
@@ -290,7 +286,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
                     std::placeholders::_1, phase, this->dt_));
 
       // Pressure smoothing

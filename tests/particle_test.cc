@@ -215,25 +215,25 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     h5_particle.mass = 501.5;
 
     Eigen::Vector3d coords;
-    coords << 1., 2., 3.;
+    coords << 1., 0., 0.;
     h5_particle.coord_x = coords[0];
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
     Eigen::Vector3d displacement;
-    displacement << 0.01, 0.02, 0.03;
+    displacement << 0.01, 0.0, 0.0;
     h5_particle.displacement_x = displacement[0];
     h5_particle.displacement_y = displacement[1];
     h5_particle.displacement_z = displacement[2];
 
     Eigen::Vector3d lsize;
-    lsize << 0.25, 0.5, 0.75;
+    lsize << 0.25, 0.0, 0.0;
     h5_particle.nsize_x = lsize[0];
     h5_particle.nsize_y = lsize[1];
     h5_particle.nsize_z = lsize[2];
 
     Eigen::Vector3d velocity;
-    velocity << 1.5, 2.5, 3.5;
+    velocity << 1.5, 0., 0.;
     h5_particle.velocity_x = velocity[0];
     h5_particle.velocity_y = velocity[1];
     h5_particle.velocity_z = velocity[2];
@@ -259,6 +259,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     h5_particle.epsilon_v = strain.head(Dim).sum();
 
     h5_particle.status = true;
+
+    h5_particle.cell_id = 1;
 
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
@@ -309,6 +311,65 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check particle volumetric strain centroid
     REQUIRE(particle->volumetric_strain_centroid(Phase) ==
             h5_particle.epsilon_v);
+
+    // Check cell id
+    REQUIRE(particle->cell_id() == h5_particle.cell_id);
+
+    // Write Particle HDF5 data
+    const auto h5_test = particle->hdf5(Phase);
+
+    REQUIRE(h5_particle.id == h5_test.id);
+    REQUIRE(h5_particle.mass == h5_test.mass);
+
+    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.displacement_x ==
+            Approx(h5_test.displacement_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_y ==
+            Approx(h5_test.displacement_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_z ==
+            Approx(h5_test.displacement_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+
+    REQUIRE(h5_particle.velocity_x ==
+            Approx(h5_test.velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_y ==
+            Approx(h5_test.velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_z ==
+            Approx(h5_test.velocity_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.stress_xx ==
+            Approx(h5_test.stress_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_yy ==
+            Approx(h5_test.stress_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_zz ==
+            Approx(h5_test.stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.strain_xx ==
+            Approx(h5_test.strain_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_yy ==
+            Approx(h5_test.strain_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_zz ==
+            Approx(h5_test.strain_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xy ==
+            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_yz ==
+            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xz ==
+            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.epsilon_v ==
+            Approx(h5_test.epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test.status);
+    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
   }
 }
 
@@ -604,7 +665,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -779,7 +840,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
@@ -1073,25 +1134,25 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     h5_particle.mass = 501.5;
 
     Eigen::Vector3d coords;
-    coords << 1., 2., 3.;
+    coords << 1., 2., 0.;
     h5_particle.coord_x = coords[0];
     h5_particle.coord_y = coords[1];
     h5_particle.coord_z = coords[2];
 
     Eigen::Vector3d displacement;
-    displacement << 0.01, 0.02, 0.03;
+    displacement << 0.01, 0.02, 0.0;
     h5_particle.displacement_x = displacement[0];
     h5_particle.displacement_y = displacement[1];
     h5_particle.displacement_z = displacement[2];
 
     Eigen::Vector3d lsize;
-    lsize << 0.25, 0.5, 0.75;
+    lsize << 0.25, 0.5, 0.;
     h5_particle.nsize_x = lsize[0];
     h5_particle.nsize_y = lsize[1];
     h5_particle.nsize_z = lsize[2];
 
     Eigen::Vector3d velocity;
-    velocity << 1.5, 2.5, 3.5;
+    velocity << 1.5, 2.5, 0.0;
     h5_particle.velocity_x = velocity[0];
     h5_particle.velocity_y = velocity[1];
     h5_particle.velocity_z = velocity[2];
@@ -1117,6 +1178,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     h5_particle.epsilon_v = strain.head(Dim).sum();
 
     h5_particle.status = true;
+
+    h5_particle.cell_id = 1;
 
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
@@ -1167,6 +1230,65 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check particle volumetric strain centroid
     REQUIRE(particle->volumetric_strain_centroid(Phase) ==
             h5_particle.epsilon_v);
+
+    // Check cell id
+    REQUIRE(particle->cell_id() == h5_particle.cell_id);
+
+    // Write Particle HDF5 data
+    const auto h5_test = particle->hdf5(Phase);
+
+    REQUIRE(h5_particle.id == h5_test.id);
+    REQUIRE(h5_particle.mass == h5_test.mass);
+
+    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.displacement_x ==
+            Approx(h5_test.displacement_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_y ==
+            Approx(h5_test.displacement_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_z ==
+            Approx(h5_test.displacement_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+
+    REQUIRE(h5_particle.velocity_x ==
+            Approx(h5_test.velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_y ==
+            Approx(h5_test.velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_z ==
+            Approx(h5_test.velocity_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.stress_xx ==
+            Approx(h5_test.stress_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_yy ==
+            Approx(h5_test.stress_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_zz ==
+            Approx(h5_test.stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.strain_xx ==
+            Approx(h5_test.strain_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_yy ==
+            Approx(h5_test.strain_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_zz ==
+            Approx(h5_test.strain_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xy ==
+            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_yz ==
+            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xz ==
+            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.epsilon_v ==
+            Approx(h5_test.epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test.status);
+    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
   }
 }
 
@@ -1545,7 +1667,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == false);
     // Update volume should fail
-    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == false);
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -1740,7 +1862,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_centre_strainrate(phase, dt) == true);
+    REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(12.0).epsilon(Tolerance));
 
     // Compute stress
@@ -2097,6 +2219,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     h5_particle.status = true;
 
+    h5_particle.cell_id = 1;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -2147,5 +2271,64 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check particle volumetric strain centroid
     REQUIRE(particle->volumetric_strain_centroid(Phase) ==
             h5_particle.epsilon_v);
+
+    // Check cell id
+    REQUIRE(particle->cell_id() == h5_particle.cell_id);
+
+    // Write Particle HDF5 data
+    const auto h5_test = particle->hdf5(Phase);
+
+    REQUIRE(h5_particle.id == h5_test.id);
+    REQUIRE(h5_particle.mass == h5_test.mass);
+
+    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.displacement_x ==
+            Approx(h5_test.displacement_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_y ==
+            Approx(h5_test.displacement_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.displacement_z ==
+            Approx(h5_test.displacement_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+
+    REQUIRE(h5_particle.velocity_x ==
+            Approx(h5_test.velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_y ==
+            Approx(h5_test.velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.velocity_z ==
+            Approx(h5_test.velocity_z).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.stress_xx ==
+            Approx(h5_test.stress_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_yy ==
+            Approx(h5_test.stress_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.stress_zz ==
+            Approx(h5_test.stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.strain_xx ==
+            Approx(h5_test.strain_xx).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_yy ==
+            Approx(h5_test.strain_yy).epsilon(Tolerance));
+    REQUIRE(h5_particle.strain_zz ==
+            Approx(h5_test.strain_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xy ==
+            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_yz ==
+            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.gamma_xz ==
+            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+
+    REQUIRE(h5_particle.epsilon_v ==
+            Approx(h5_test.epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test.status);
+    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
   }
 }

@@ -54,6 +54,11 @@ class ParticleBase {
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(const HDF5Particle& particle) = 0;
 
+  //! Retrun particle data as HDF5
+  //! \param[in] phase Properties of a given phase
+  //! \retval particle HDF5 data of the particle
+  virtual HDF5Particle hdf5(unsigned phase) const = 0;
+
   //! Return id of the particleBase
   Index id() const { return id_; }
 
@@ -105,11 +110,8 @@ class ParticleBase {
   //! Compute volume of particle
   virtual bool compute_volume(unsigned phase) = 0;
 
-  //! Update material point volume
-  virtual bool update_volume(unsigned phase, double dt) = 0;
-
-  //! Update material point volume by using the cell-centre strain rate
-  virtual bool update_volume_centre_strainrate(unsigned phase, double dt) = 0;
+  //! Update volume based on centre volumetric strain rate
+  virtual bool update_volume_strainrate(unsigned phase, double dt) = 0;
 
   //! Compute mass of particle
   virtual bool compute_mass(unsigned phase) = 0;
@@ -238,10 +240,6 @@ class ParticleBase {
   std::map<unsigned, std::shared_ptr<Material<Tdim>>> material_;
   //! Material state history variables
   mpm::dense_map state_variables_;
-  //! Material point volume
-  double volume_{std::numeric_limits<double>::max()};
-  //! Material point porosity (volume of voids / total volume)
-  double porosity_{0.0};
 };  // ParticleBase class
 }  // namespace mpm
 

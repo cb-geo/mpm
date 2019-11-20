@@ -184,6 +184,10 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
+  //! Remove all particles in a cell given cell id
+  //! \param[in] rank MPI rank of the mesh
+  void remove_all_nonrank_particles(unsigned rank);
+
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
