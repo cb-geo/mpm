@@ -208,6 +208,12 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  virtual void add_material_id_to_node(unsigned id) override{
+    material_ids_.emplace_back(id);
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -239,6 +245,8 @@ class Node : public NodeBase<Tdim> {
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! Material ids whose information was passed to this node
+  std::vector<unsigned> material_ids_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};

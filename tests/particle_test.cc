@@ -719,6 +719,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Assign material properties
     REQUIRE(particle->assign_material(phase, material) == true);
 
+    // Check material id from particle
+    REQUIRE(particle->material_id(phase) == 0);
+
     // Compute volume
     REQUIRE(particle->compute_volume(Phase) == true);
 
@@ -1044,6 +1047,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Assign material to particle
     REQUIRE(particle->assign_material(Phase, material) == true);
+
+    // Check material id from particle
+    REQUIRE(particle->material_id(Phase) == 0);
   }
 
   SECTION("Check particle properties") {
@@ -1721,6 +1727,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Assign material properties
     REQUIRE(particle->assign_material(Phase, material) == true);
 
+    // Check material id from particle
+    REQUIRE(particle->material_id(phase) == 0);
+
     // Compute volume
     REQUIRE(particle->compute_volume(phase) == true);
 
@@ -2083,8 +2092,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check if particle can be assigned a null material
     REQUIRE(particle->assign_material(Phase, nullptr) == false);
+
     // Assign material to particle
     REQUIRE(particle->assign_material(Phase, material) == true);
+
+    // Check material id from particle
+    REQUIRE(particle->material_id(Phase) == 0);
   }
 
   SECTION("Check particle properties") {

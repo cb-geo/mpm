@@ -223,6 +223,10 @@ class ParticleBase {
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
 
+  //! Return material id corresponding to this particle and its given phase
+  //! \param[in] phase Phase of the material
+  virtual unsigned material_id(unsigned phase) { return material_.at(phase)->id(); }
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};

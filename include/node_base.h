@@ -185,6 +185,10 @@ class NodeBase {
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  virtual void add_material_id_to_node(unsigned id) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
