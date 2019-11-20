@@ -180,6 +180,13 @@ class Mesh {
   bool remove_particle(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
+  //! Remove a particle by id
+  bool remove_particle_by_id(mpm::Index id);
+
+  //! Remove all particles in a cell given cell id
+  //! \param[in] rank MPI rank of the mesh
+  void remove_all_nonrank_particles(unsigned rank);
+
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
@@ -300,6 +307,9 @@ class Mesh {
   //! \retval point Material point coordinates
   std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
 
+  //! Find cell neighbours
+  void compute_cell_neighbours();
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
@@ -337,6 +347,12 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Get the container of cell
+  mpm::Container<Cell<Tdim>> cells();
+
+  //! Return particle cell ids
+  std::map<mpm::Index, mpm::Index>* particles_cell_ids();
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -351,6 +367,8 @@ class Mesh {
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Container of particles
   Container<ParticleBase<Tdim>> particles_;
+  //! Container of particles ids and cell ids
+  std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Container of particle sets
   tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
   //! Map of particles for fast retrieval
@@ -367,6 +385,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Faces and cells
+  std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class

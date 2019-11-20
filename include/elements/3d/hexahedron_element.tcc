@@ -87,6 +87,7 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 8>::unit_cell_coordinates()
                -1., -1.,  1.,
                 1., -1.,  1.,
                 1.,  1.,  1.,
+    // cppcheck-suppress *
                -1.,  1.,  1.;
   // clang-format on
   return unit_cell;
@@ -445,6 +446,7 @@ inline Eigen::MatrixXd mpm::HexahedronElement<3, 20>::unit_cell_coordinates()
                 0., -1.,  1.,
                -1.,  0.,  1.,
                 1.,  0.,  1.,
+    // cppcheck-suppress *
                 0.,  1.,  1.;
   // clang-format on
   return unit_cell;
@@ -496,6 +498,7 @@ inline Eigen::MatrixXi
              0, 4,
              1, 5,
              2, 6,
+    // cppcheck-suppress *
              3, 7;
   // clang-format on
   return indices;
@@ -509,6 +512,7 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::VectorXi
     mpm::HexahedronElement<Tdim, Tnfunctions>::corner_indices() const {
   Eigen::Matrix<int, 8, 1> indices;
+  // cppcheck-suppress *
   indices << 0, 1, 2, 3, 4, 5, 6, 7;
   return indices;
 }
@@ -533,6 +537,7 @@ inline Eigen::MatrixXi
              7, 4, 0,
              7, 0, 3,
              3, 0, 1,
+    // cppcheck-suppress *
              3, 1, 2;
   //clang-format on
   return indices;
@@ -595,4 +600,63 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QH1");
       break;
   }
+}
+
+//! Compute volume
+//! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+//! \retval volume Return the volume of cell
+template <unsigned Tdim, unsigned Tnfunctions>
+inline double mpm::HexahedronElement<Tdim, Tnfunctions>::compute_volume(
+    const Eigen::MatrixXd& nodal_coordinates) const {
+  // Node numbering as read in by mesh file
+  //        d               c
+  //          *_ _ _ _ _ _*
+  //         /|           /|
+  //        / |          / |
+  //     a *_ |_ _ _ _ _* b|
+  //       |  |         |  |
+  //       |  |         |  |
+  //       |  *_ _ _ _ _|_ *
+  //       | / h        | / g
+  //       |/           |/
+  //       *_ _ _ _ _ _ *
+  //     e               f
+  //
+  // Calculation of hexahedron volume from
+  // https://arc.aiaa.org/doi/pdf/10.2514/3.9013
+
+  const Eigen::Matrix<double, Tdim, 1> a = nodal_coordinates.row(7);
+  const Eigen::Matrix<double, Tdim, 1> b = nodal_coordinates.row(6);
+  const Eigen::Matrix<double, Tdim, 1> c = nodal_coordinates.row(2);
+  const Eigen::Matrix<double, Tdim, 1> d = nodal_coordinates.row(3);
+  const Eigen::Matrix<double, Tdim, 1> e = nodal_coordinates.row(4);
+  const Eigen::Matrix<double, Tdim, 1> f = nodal_coordinates.row(5);
+  const Eigen::Matrix<double, Tdim, 1> g = nodal_coordinates.row(1);
+  const Eigen::Matrix<double, Tdim, 1> h = nodal_coordinates.row(0);
+
+  double volume_ =
+      (1.0 / 12) * (a - g).dot(((b - d).cross(c - a)) + ((e - b).cross(f - a)) +
+                               ((d - e).cross(h - a))) +
+      (1.0 / 12) *
+          (b - g).dot(((b - d).cross(c - a)) + ((c - g).cross(c - f))) +
+      (1.0 / 12) *
+          (e - g).dot(((e - b).cross(f - a)) + ((f - g).cross(h - f))) +
+      (1.0 / 12) * (d - g).dot(((d - e).cross(h - a)) + ((h - g).cross(h - c)));
+
+  return volume_;
+}
+
+//! Compute natural coordinates of a point (analytical)
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::HexahedronElement<Tdim, Tnfunctions>::natural_coordinates_analytical(
+        const VectorDim& point,
+        const Eigen::MatrixXd& nodal_coordinates) const {
+  // Local point coordinates
+  Eigen::Matrix<double, Tdim, 1> xi;
+  xi.fill(std::numeric_limits<double>::max());
+  throw std::runtime_error(
+      "Analytical solution for Hex<Tdim, Tnfunctions> has not been "
+      "implemented");
+  return xi;
 }

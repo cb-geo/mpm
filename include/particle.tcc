@@ -4,7 +4,11 @@ mpm::Particle<Tdim, Tnphases>::Particle(Index id, const VectorDim& coord)
     : mpm::ParticleBase<Tdim>(id, coord) {
   this->initialise();
   cell_ = nullptr;
+
+  //! Set material pointer to null
   material_.clear();
+  for (unsigned i = 0; i < Tnphases; ++i) material_[i] = nullptr;
+
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -52,6 +56,14 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i)
     this->coordinates_(i, phase) = coordinates(i);
 
+  // Displacement
+  Eigen::Vector3d displacement;
+  displacement << particle.displacement_x, particle.displacement_y,
+      particle.displacement_z;
+  // Initialise displacement
+  for (unsigned i = 0; i < Tdim; ++i)
+    this->displacement_(i, phase) = displacement(i);
+
   // Velocity
   Eigen::Vector3d velocity;
   velocity << particle.velocity_x, particle.velocity_y, particle.velocity_z;
@@ -59,13 +71,20 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i, phase) = velocity(i);
 
   // Stress
-  this->stress_.col(phase) << particle.stress_xx, particle.stress_yy,
-      particle.stress_zz, particle.tau_xy, particle.tau_yz, particle.tau_xz;
+  this->stress_.col(phase)[0] = particle.stress_xx;
+  this->stress_.col(phase)[1] = particle.stress_yy;
+  this->stress_.col(phase)[2] = particle.stress_zz;
+  this->stress_.col(phase)[3] = particle.tau_xy;
+  this->stress_.col(phase)[4] = particle.tau_yz;
+  this->stress_.col(phase)[5] = particle.tau_xz;
 
   // Strain
-  this->strain_.col(phase) << particle.strain_xx, particle.strain_yy,
-      particle.strain_zz, particle.gamma_xy, particle.gamma_yz,
-      particle.gamma_xz;
+  this->strain_.col(phase)[0] = particle.strain_xx;
+  this->strain_.col(phase)[1] = particle.strain_yy;
+  this->strain_.col(phase)[2] = particle.strain_zz;
+  this->strain_.col(phase)[3] = particle.gamma_xy;
+  this->strain_.col(phase)[4] = particle.gamma_yz;
+  this->strain_.col(phase)[5] = particle.gamma_xz;
 
   // Volumetric strain
   this->volumetric_strain_centroid_(phase) = particle.epsilon_v;
@@ -79,23 +98,111 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   return true;
 }
 
+//! Return particle data in HDF5 format
+template <unsigned Tdim, unsigned Tnphases>
+// cppcheck-suppress *
+mpm::HDF5Particle mpm::Particle<Tdim, Tnphases>::hdf5(unsigned phase) const {
+
+  mpm::HDF5Particle particle_data;
+
+  Eigen::Vector3d coordinates;
+  coordinates.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) coordinates[j] = this->coordinates()[j];
+
+  Eigen::Vector3d displacement;
+  displacement.setZero();
+  for (unsigned j = 0; j < Tdim; ++j)
+    displacement[j] = this->displacement(phase)[j];
+
+  Eigen::Vector3d velocity;
+  velocity.setZero();
+  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity(phase)[j];
+
+  // Particle local size
+  Eigen::Vector3d nsize;
+  nsize.setZero();
+  Eigen::VectorXd size = this->natural_size();
+  for (unsigned j = 0; j < Tdim; ++j) nsize[j] = size[j];
+
+  Eigen::Matrix<double, 6, 1> stress = this->stress(phase);
+
+  Eigen::Matrix<double, 6, 1> strain = this->strain(phase);
+
+  particle_data.id = this->id();
+  particle_data.mass = this->mass(phase);
+  particle_data.volume = this->volume(phase);
+  particle_data.pressure = this->pressure(phase);
+
+  particle_data.coord_x = coordinates[0];
+  particle_data.coord_y = coordinates[1];
+  particle_data.coord_z = coordinates[2];
+
+  particle_data.displacement_x = displacement[0];
+  particle_data.displacement_y = displacement[1];
+  particle_data.displacement_z = displacement[2];
+
+  particle_data.nsize_x = nsize[0];
+  particle_data.nsize_y = nsize[1];
+  particle_data.nsize_z = nsize[2];
+
+  particle_data.velocity_x = velocity[0];
+  particle_data.velocity_y = velocity[1];
+  particle_data.velocity_z = velocity[2];
+
+  particle_data.stress_xx = stress[0];
+  particle_data.stress_yy = stress[1];
+  particle_data.stress_zz = stress[2];
+  particle_data.tau_xy = stress[3];
+  particle_data.tau_yz = stress[4];
+  particle_data.tau_xz = stress[5];
+
+  particle_data.strain_xx = strain[0];
+  particle_data.strain_yy = strain[1];
+  particle_data.strain_zz = strain[2];
+  particle_data.gamma_xy = strain[3];
+  particle_data.gamma_yz = strain[4];
+  particle_data.gamma_xz = strain[5];
+
+  particle_data.epsilon_v = this->volumetric_strain_centroid(phase);
+
+  particle_data.status = this->status();
+
+  particle_data.cell_id = this->cell_id();
+
+  return particle_data;
+}
+
 // Initialise particle properties
 template <unsigned Tdim, unsigned Tnphases>
 void mpm::Particle<Tdim, Tnphases>::initialise() {
+  displacement_.setZero();
   dstrain_.setZero();
   mass_.setZero();
+  natural_size_.setZero();
   pressure_.setZero();
   set_traction_ = false;
   size_.setZero();
-  natural_size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
   traction_.setZero();
   velocity_.setZero();
   volumetric_strain_centroid_.setZero();
-  material_density_.fill(std::numeric_limits<double>::max());
   volume_fraction_.setOnes(1, Tnphases);
+
+  // Initialize vector data properties
+  this->properties_["stresses"] = [&](unsigned phase) { return stress(phase); };
+  this->properties_["strains"] = [&](unsigned phase) { return strain(phase); };
+  this->properties_["velocities"] = [&](unsigned phase) {
+    return velocity(phase);
+  };
+  this->properties_["displacements"] = [&](unsigned phase) {
+    return displacement(phase);
+  };
+  // FIXME: NEED TO BE SOLVED
+  // this->properties_["pressure"] = [&](unsigned phase) {
+  //  return pressure(phase);
+  //};
 }
 
 // Assign a cell to particle
@@ -198,9 +305,9 @@ bool mpm::Particle<Tdim, Tnphases>::assign_material(
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      status = material_.emplace(std::make_pair(phase, material)).second;
+      material_.at(phase) = material;
       state_variables_ = material_.at(phase)->initialise_state_variables();
-      material_density_(phase) = material_.at(phase)->property("density");
+      status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
     }
@@ -315,13 +422,11 @@ bool mpm::Particle<Tdim, Tnphases>::assign_porosity(
   bool status = true;
   try {
     if (material_.at(solid_skeleton) != nullptr) {
-      const double porosity =
-          material_.at(solid_skeleton)->property("porosity");
-      if (porosity < 0. || porosity > 1.)
+      porosity_ = material_.at(solid_skeleton)
+                      ->template property<double>(std::string("porosity"));
+      if (porosity_ < 0. || porosity_ > 1.)
         throw std::runtime_error(
             "Particle porosity is negative or larger than one");
-      // Assign porosity
-      porosity_ = porosity;
       // Update volume fraction for each phase
       volume_fraction_[0] = 1. - porosity_;
       volume_fraction_[1] = porosity_;
@@ -429,11 +534,14 @@ template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
   bool status = true;
   try {
-    // Check if particle volume and material density are set
+    // Check if particle volume is set and material ptr is valid
     if (volume_ != std::numeric_limits<double>::max() &&
-        material_density_(phase) != std::numeric_limits<double>::max()) {
+        material_.at(phase) != nullptr) {
+      // Mass = volume of particle * mass_density
+      mass_density_(phase) = material_.at(phase)->template property<double>(
+          std::string("density"));
       this->mass_(phase) =
-          volume_fraction_(phase) * material_density_(phase) * volume_;
+          volume_fraction_(phase) * volume_ * mass_density_(phase);
     } else {
       throw std::runtime_error(
           "Particle volume or density is invalid! cannot compute mass for the "
@@ -556,7 +664,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_pore_pressure(
     else if (material_.at(solid_skeleton) != nullptr &&
              material_.at(pore_fluid) != nullptr) {
       // Bulk modulus of fluid
-      double K = material_.at(pore_fluid)->property("bulk_modulus");
+      double K = material_.at(pore_fluid)
+                     ->template property<double>(std::string("bulk_modulus"));
       // Compute pore pressure
       // double dpore_pressure =
       //     -K / porosity_ *
@@ -600,26 +709,29 @@ void mpm::Particle<Tdim, Tnphases>::map_body_force(unsigned phase,
 //! Map drag force
 template <unsigned Tdim, unsigned Tnphases>
 bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(
-    const unsigned soild_skeleton, const unsigned pore_fluid) {
+    const unsigned solid_skeleton, const unsigned pore_fluid) {
   bool status = true;
   try {
     // Check if material ptr is valid
-    if (material_.at(soild_skeleton) != nullptr) {
+    if (material_.at(solid_skeleton) != nullptr) {
       VectorDim k_coefficient;
       switch (Tdim) {
-        case (1): {
-          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
-          break;
-        }
         case (2): {
-          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
-          k_coefficient(1) = material_.at(soild_skeleton)->property("k_y");
+          k_coefficient(1) =
+              material_.at(solid_skeleton)->template property<double>("k_y");
+        }
+        case (1): {
+          k_coefficient(0) =
+              material_.at(solid_skeleton)->template property<double>("k_x");
           break;
         }
         default: {
-          k_coefficient(0) = material_.at(soild_skeleton)->property("k_x");
-          k_coefficient(1) = material_.at(soild_skeleton)->property("k_y");
-          k_coefficient(2) = material_.at(soild_skeleton)->property("k_z");
+          k_coefficient(0) =
+              material_.at(solid_skeleton)->template property<double>("k_x");
+          k_coefficient(1) =
+              material_.at(solid_skeleton)->template property<double>("k_y");
+          k_coefficient(2) =
+              material_.at(solid_skeleton)->template property<double>("k_z");
           break;
         }
       }
@@ -630,9 +742,11 @@ bool mpm::Particle<Tdim, Tnphases>::map_drag_force_coefficient(
       // Check if permeability coefficient is valid
       for (unsigned i = 0; i < Tdim; ++i) {
         if (k_coefficient(i) > 0.)
-          drag_force_coefficient(i) = porosity_ * porosity_ * 9.81 *
-                                      material_density_(pore_fluid) /
-                                      k_coefficient(i);
+          drag_force_coefficient(i) =
+              porosity_ * porosity_ * 9.81 *
+              material_.at(pore_fluid)
+                  ->template property<double>(std::string("density")) /
+              k_coefficient(i);
         else
           throw std::runtime_error("Permeability coefficient is invalid");
       }
@@ -789,6 +903,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position(unsigned phase,
 
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -821,6 +937,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_updated_position_velocity(
 
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
+      // Update displacement (displacement is initialized from zero)
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -975,7 +1093,7 @@ bool mpm::Particle<Tdim, Tnphases>::assign_particle_velocity_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < (Tdim * Tnphases))
+    if (dir < (Tdim * Tnphases))
       this->particle_velocity_constraints_.insert(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));
@@ -1018,4 +1136,11 @@ void mpm::Particle<Tdim, Tnphases>::apply_particle_velocity_constraints() {
     const auto phase = static_cast<unsigned>(dir / Tdim);
     this->velocity_(direction, phase) = constraint.second;
   }
+}
+
+//! Return particle vector data
+template <unsigned Tdim, unsigned Tnphases>
+Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
+    unsigned phase, const std::string& property) {
+  return this->properties_.at(property)(phase);
 }

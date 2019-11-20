@@ -294,8 +294,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Apply friction constraints
       REQUIRE(node->assign_friction_constraint(-1, 1., 0.5) == false);
       REQUIRE(node->assign_friction_constraint(3, 1., 0.5) == false);
+
       // Test acceleration with constraints
-      acceleration[1] = 0.5 * acceleration[1];
+      acceleration[0] = 0.5 * acceleration[0];
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));

@@ -3,13 +3,15 @@ template <unsigned Tdim>
 mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
-    density_ = material_properties["density"].template get<double>();
-    bulk_modulus_ = material_properties["bulk_modulus"].template get<double>();
-    mu_ = material_properties["mu"].template get<double>();
+    density_ = material_properties.at("density").template get<double>();
+    bulk_modulus_ =
+        material_properties.at("bulk_modulus").template get<double>();
+    mu_ = material_properties.at("mu").template get<double>();
 
     properties_ = material_properties;
-  } catch (std::exception& except) {
-    console_->error("Material parameter not set: {}\n", except.what());
+  } catch (Json::exception& except) {
+    console_->error("Material parameter not set: {} {}\n", except.what(),
+                    except.id);
   }
 }
 

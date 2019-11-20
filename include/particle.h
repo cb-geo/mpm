@@ -55,6 +55,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(const HDF5Particle& particle) override;
 
+  //! Retrun particle data as HDF5
+  //! \param[in] phase Properties of a given phase
+  //! \retval particle HDF5 data of the particle
+  HDF5Particle hdf5(unsigned phase) const override;
+
   //! Initialise properties
   void initialise() override;
 
@@ -107,7 +112,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return volume of specified phase
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return phase_volume_(phase); }
+  double volume(unsigned phase) const override {
+    return volume_ * volume_fraction_(phase);
+  }
 
   //! Return total volume
   double volume() const override { return volume_; }
@@ -252,6 +259,12 @@ class Particle : public ParticleBase<Tdim> {
     return velocity_.col(phase);
   }
 
+  //! Return displacement of the particle
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim displacement(unsigned phase) const override {
+    return displacement_.col(phase);
+  }
+
   //! Assign traction to the particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
@@ -319,6 +332,13 @@ class Particle : public ParticleBase<Tdim> {
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   double pressure(unsigned phase) const override { return pressure_(phase); }
 
+  //! Return vector data of particles
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle property
+  Eigen::VectorXd vector_data(unsigned phase,
+                              const std::string& property) override;
+
   //! Assign particle velocity constraints
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of particle velocity constraint
@@ -361,21 +381,19 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Degree of saturation in porous media
   double saturation_degree_{1.0};
-  //! Material density (intrinsic/real density of each phase material)
-  Eigen::Matrix<double, 1, Tnphases> material_density_;
+  //! Mass density ( mass / current volume)
+  Eigen::Matrix<double, 1, Tnphases> mass_density_;
   //! Phase mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Phae volume
-  Eigen::Matrix<double, 1, Tnphases> phase_volume_;
   //! Phase volume fraction
   Eigen::Matrix<double, 1, Tnphases> volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
   Eigen::Matrix<double, 1, Tdim> natural_size_;
-  //! Pressure
+  //! Pressure (0: effective mean pressure, 1: pore pressure)
   Eigen::Matrix<double, 1, Tnphases> pressure_;
-  //! Pore pressure constraint
+  //! Pore pressure constraint (0: solid, 1: fluid)
   std::map<unsigned, double> pressure_constraint_;
   //! Stresses
   Eigen::Matrix<double, 6, Tnphases> stress_;
@@ -389,6 +407,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, Tnphases> dstrain_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
@@ -401,6 +421,9 @@ class Particle : public ParticleBase<Tdim> {
   std::vector<Eigen::MatrixXd> bmatrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! Map of vector properties
+  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties_;
+
 };  // Particle class
 }  // namespace mpm
 
