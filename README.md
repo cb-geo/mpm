@@ -115,7 +115,7 @@ wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz &&
 
 ### Compile without tests [Editing CMake options]
 
-To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off  -DCMAKE_CXX_COMPILER=g++ -DMETIS_DIR=~/workspace/metis/ -DPARMETIS_DIR=~/workspace/parmetis/ ..`.
+To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off  -DCMAKE_CXX_COMPILER=g++ ..`.
 
 ## Compile with Ninja build system
 
