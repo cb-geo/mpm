@@ -17,7 +17,7 @@ jobs:
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
             cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            ninja
+            ninja -j2
             ctest -VV
   clang:
     docker:
@@ -32,7 +32,7 @@ jobs:
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
             scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
-            scan-build -k -V ninja
+            scan-build -k -V ninja -j2
             ctest -VV
   cppcheck:
     docker:
