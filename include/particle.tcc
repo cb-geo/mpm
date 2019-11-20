@@ -474,8 +474,8 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
 }
 
 //! Map particle mass and momentum to nodes
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::map_mass_momentum_to_nodes(unsigned phase) {
+template <unsigned Tdim, unsigned Tnphase>
+bool mpm::Particle<Tdim, Tnphase>::map_mass_momentum_to_nodes(unsigned phase) {
   bool status = true;
   try {
     // Check if particle mass is set
@@ -835,4 +835,10 @@ template <unsigned Tdim, unsigned Tnphases>
 Eigen::VectorXd mpm::Particle<Tdim, Tnphases>::vector_data(
     unsigned phase, const std::string& property) {
   return this->properties_.at(property)(phase);
+}
+
+//! Assign material id of this particle to nodes
+template <unsigned Tdim, unsigned Tnphases>
+void mpm::Particle<Tdim, Tnphases>::map_material_id_to_node() {
+  cell_->assign_material_id_to_nodes(this->material_id(0));
 }

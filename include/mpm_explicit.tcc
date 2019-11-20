@@ -142,6 +142,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     task_group.wait();
 
+    // Assign material ids to node
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_material_id_to_node,
+                  std::placeholders::_1));
+
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,

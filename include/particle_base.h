@@ -225,7 +225,12 @@ class ParticleBase {
 
   //! Return material id corresponding to this particle and its given phase
   //! \param[in] phase Phase of the material
-  virtual unsigned material_id(unsigned phase) { return material_.at(phase)->id(); }
+  virtual unsigned material_id(unsigned phase) {
+    return material_.at(phase)->id();
+  }
+
+  //! Assign material id of this particle to nodes
+  virtual void map_material_id_to_node() = 0;
 
  protected:
   //! particleBase id

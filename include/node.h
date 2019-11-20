@@ -210,7 +210,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Add material id from material points to list of materials in materials_
   //! \param[in] id Material id to be stored at the node
-  virtual void add_material_id_to_node(unsigned id) override{
+  void insert_material_id(unsigned id) override {
     material_ids_.emplace_back(id);
   }
 

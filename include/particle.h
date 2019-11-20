@@ -286,6 +286,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
 
+  //! Assign material id of this particle to nodes
+  void map_material_id_to_node() override;
+
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;

@@ -187,7 +187,7 @@ class NodeBase {
 
   //! Add material id from material points to list of materials in materials_
   //! \param[in] id Material id to be stored at the node
-  virtual void add_material_id_to_node(unsigned id) = 0;
+  virtual void insert_material_id(unsigned id) = 0;
 
 };  // NodeBase class
 }  // namespace mpm
