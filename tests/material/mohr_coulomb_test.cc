@@ -84,21 +84,21 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->property("youngs_modulus") ==
+    REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->property("poisson_ratio") ==
+    REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
-    REQUIRE(material->property("friction") ==
+    REQUIRE(material->template property<double>("friction") ==
             Approx(jmaterial["friction"]).epsilon(Tolerance));
-    REQUIRE(material->property("dilation") ==
+    REQUIRE(material->template property<double>("dilation") ==
             Approx(jmaterial["dilation"]).epsilon(Tolerance));
-    REQUIRE(material->property("cohesion") ==
+    REQUIRE(material->template property<double>("cohesion") ==
             Approx(jmaterial["cohesion"]).epsilon(Tolerance));
-    REQUIRE(material->property("tension_cutoff") ==
+    REQUIRE(material->template property<double>("tension_cutoff") ==
             Approx(jmaterial["tension_cutoff"]).epsilon(Tolerance));
-    REQUIRE(material->property("tolerance") ==
+    REQUIRE(material->template property<double>("tolerance") ==
             Approx(jmaterial["tolerance"]).epsilon(Tolerance));
 
     // Check if state variable is initialised
@@ -140,7 +140,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
     // Calculate modulus values
@@ -175,10 +175,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     stress(3) = -1000.;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -464,10 +467,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     stress(2) = -6000.;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -699,10 +705,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     stress(3) = -1000.;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -987,10 +996,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     stress(2) = -9928.20323028;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -1221,10 +1233,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     stress(3) = -1000.;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -1508,10 +1523,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     stress(2) = -9928.20323028;
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -1733,10 +1751,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
     REQUIRE(material->id() == 0);
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -2320,10 +2341,13 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
     REQUIRE(material->id() == 0);
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -2943,10 +2967,13 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
     REQUIRE(material->id() == 0);
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor
@@ -3550,10 +3577,13 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
     REQUIRE(material->id() == 0);
 
     // Calculate modulus values
-    const double K = material->property("youngs_modulus") /
-                     (3.0 * (1. - 2. * material->property("poisson_ratio")));
-    const double G = material->property("youngs_modulus") /
-                     (2.0 * (1. + material->property("poisson_ratio")));
+    const double K =
+        material->template property<double>("youngs_modulus") /
+        (3.0 *
+         (1. - 2. * material->template property<double>("poisson_ratio")));
+    const double G =
+        material->template property<double>("youngs_modulus") /
+        (2.0 * (1. + material->template property<double>("poisson_ratio")));
     const double a1 = K + (4.0 / 3.0) * G;
     const double a2 = K - (2.0 / 3.0) * G;
     // Compute elastic tensor

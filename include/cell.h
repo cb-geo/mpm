@@ -76,6 +76,9 @@ class Cell {
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
+  //! Return particles_
+  std::vector<Index> particles() const { return particles_; }
+
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
@@ -141,9 +144,6 @@ class Cell {
   //! Return the mean_length
   double mean_length() const { return mean_length_; }
 
-  //! Compute nodal coordinates
-  void compute_nodal_coordinates();
-
   //! Return nodal coordinates
   Eigen::MatrixXd nodal_coordinates() const { return nodal_coordinates_; }
 
@@ -166,12 +166,6 @@ class Cell {
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
-      const Eigen::Matrix<double, Tdim, 1>& point);
-
-  //! Return the local coordinates of a point in a 2D cell
-  //! \param[in] point Coordinates of a point
-  //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, Tdim, 1> local_coordinates_point_2d(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a unit cell
@@ -289,6 +283,13 @@ class Cell {
   //! Return sorted face node ids
   std::vector<std::vector<mpm::Index>> sorted_face_node_ids();
 
+  //! Assign ranks
+  //! \param[in] Rank of cell
+  void rank(unsigned mpi_rank);
+
+  //! Return rank
+  unsigned rank() const;
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -299,12 +300,14 @@ class Cell {
   std::mutex cell_mutex_;
   //! cell id
   Index id_{std::numeric_limits<Index>::max()};
+  //! MPI Rank
+  unsigned rank_{0};
   //! Isoparametric
   bool isoparametric_{true};
   //! Number of nodes
   unsigned nnodes_{0};
   //! Volume
-  double volume_{std::numeric_limits<double>::max()};
+  double volume_{std::numeric_limits<double>::lowest()};
   //! Centroid
   VectorDim centroid_;
   //! mean_length of cell

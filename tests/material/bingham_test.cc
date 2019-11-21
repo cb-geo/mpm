@@ -69,11 +69,11 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->property("youngs_modulus") ==
+    REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->property("poisson_ratio") ==
+    REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values
@@ -409,11 +409,11 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(material->id() == 0);
 
     // Get material properties
-    REQUIRE(material->property("density") ==
+    REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->property("youngs_modulus") ==
+    REQUIRE(material->template property<double>("youngs_modulus") ==
             Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
-    REQUIRE(material->property("poisson_ratio") ==
+    REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
 
     // Calculate modulus values

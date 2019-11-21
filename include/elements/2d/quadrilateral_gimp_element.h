@@ -119,6 +119,17 @@ class QuadrilateralGIMPElement : public QuadrilateralElement<2, 4> {
   //! Return number of shape functions
   unsigned nfunctions() const override { return Tnfunctions; }
 
+  //! Return if natural coordinates can be evaluates
+  bool isvalid_natural_coordinates_analytical() const override { return false; }
+
+  //! Compute Natural coordinates of a point (analytical)
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] point Location of the point in cell
+  //! \retval xi Return the local coordinates
+  VectorDim natural_coordinates_analytical(
+      const VectorDim& point,
+      const Eigen::MatrixXd& nodal_coordinates) const override;
+
  private:
   //! Return natural nodal coordinates
   Eigen::MatrixXd natural_nodal_coordinates() const;

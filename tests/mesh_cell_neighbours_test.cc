@@ -323,6 +323,9 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
       for (auto n : cell0->neighbours()) REQUIRE(n == 1);
       for (auto n : cell1->neighbours()) REQUIRE(n == 0);
 
+      REQUIRE(cell0->initialise() == true);
+      REQUIRE(cell1->initialise() == true);
+
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5, 1.5;
         std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =

@@ -3,21 +3,22 @@ template <unsigned Tdim>
 mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
-    density_ = material_properties["density"].template get<double>();
+    density_ = material_properties.at("density").template get<double>();
     youngs_modulus_ =
-        material_properties["youngs_modulus"].template get<double>();
+        material_properties.at("youngs_modulus").template get<double>();
     poisson_ratio_ =
-        material_properties["poisson_ratio"].template get<double>();
-    tau0_ = material_properties["tau0"].template get<double>();
-    mu_ = material_properties["mu"].template get<double>();
+        material_properties.at("poisson_ratio").template get<double>();
+    tau0_ = material_properties.at("tau0").template get<double>();
+    mu_ = material_properties.at("mu").template get<double>();
     critical_shear_rate_ =
         material_properties["critical_shear_rate"].template get<double>();
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
     properties_ = material_properties;
-  } catch (std::exception& except) {
-    console_->error("Material parameter not set: {}\n", except.what());
+  } catch (Json::exception& except) {
+    console_->error("Material parameter not set: {} {}\n", except.what(),
+                    except.id);
   }
 }
 

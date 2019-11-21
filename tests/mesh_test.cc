@@ -128,6 +128,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
+    // Initialize cell
+    REQUIRE(cell1->initialise() == true);
+
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
@@ -177,6 +180,15 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(0);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(1);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
   }
 
   // Check add / remove node
@@ -395,8 +407,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Compute cell volume
-    cell1->compute_volume();
+    // Initialize cell
+    REQUIRE(cell1->initialise() == true);
 
     // Generate material points in cell
     auto points = mesh->generate_material_points(1);
@@ -1047,6 +1059,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     REQUIRE(mesh->add_cell(cell1) == true);
 
+    REQUIRE(cell1->initialise() == true);
+
     // Check nodal coordinates size
     REQUIRE(mesh->nodal_coordinates().size() == 8);
     // Check node pairs size
@@ -1068,6 +1082,15 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->remove_particle(particle2) == true);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
+
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(0);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 1);
+    // Remove all non-rank particles in mesh
+    mesh->remove_all_nonrank_particles(1);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
   }
 
   // Check add / remove node
@@ -1340,8 +1363,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     REQUIRE(cell1->nnodes() == 8);
 
-    // Compute cell volume
-    cell1->compute_volume();
+    // Initialise cell and compute volume
+    REQUIRE(cell1->initialise() == true);
 
     // Generate material points in cell
     auto points = mesh->generate_material_points(1);

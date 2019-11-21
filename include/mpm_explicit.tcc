@@ -39,7 +39,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Pressure smoothing
   if (analysis_.find("pressure_smoothing") != analysis_.end())
-    pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
+    pressure_smoothing_ =
+        analysis_.at("pressure_smoothing").template get<bool>();
 
   // Initialise material
   bool mat_status = this->initialise_materials();
@@ -58,7 +59,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   auto particle_props = io_->json_object("particle");
   // Material id
   const auto material_id =
-      particle_props["material_id"].template get<unsigned>();
+      particle_props.at("material_id").template get<unsigned>();
 
   // Get material from list of materials
   auto material = materials_.at(material_id);
@@ -77,6 +78,38 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Compute mass
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    // Initialize MPI
+    int size;
+    int rank;
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
+
+    // Check if mesh has cells to partition
+    if (mesh_->ncells() == 0)
+      throw std::runtime_error("Container of cells is empty");
+
+#ifdef USE_PARMETIS
+    // Create graph
+    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), size, rank);
+
+    // Create partition using ParMETIS
+    bool graph_partition = graph_->create_partitions(&comm);
+
+    // Collect the partitions
+    graph_->collect_partitions(mesh_->ncells(), size, rank, &comm);
+
+    // Delete all the particles which is not in local task parititon
+    mesh_->remove_all_nonrank_particles(rank);
+
+#endif  // PARMETIS
+  }
+#endif  // MPI
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -98,8 +131,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-
-      // mesh_->find_active_nodes();
     });
 
     // Spawn a task for particles
