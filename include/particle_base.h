@@ -225,7 +225,7 @@ class ParticleBase {
 
   //! Return material id corresponding to this particle and its given phase
   //! \param[in] phase Phase of the material
-  virtual unsigned material_id(unsigned phase) {
+  virtual unsigned material_id(unsigned phase) const {
     return material_.at(phase)->id();
   }
 
