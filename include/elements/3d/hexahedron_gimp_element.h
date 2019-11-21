@@ -1,7 +1,7 @@
 #ifndef MPM_GIMP_HEX_ELEMENT_H_
 #define MPM_GIMP_HEX_ELEMENT_H_
 
-#include "hexahedron_gimp_element.h"
+#include "hexahedron_element.h"
 
 namespace mpm {
 

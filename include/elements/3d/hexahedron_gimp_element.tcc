@@ -3,7 +3,6 @@ template <unsigned Tdim, unsigned Tnfunctions>
 inline Eigen::MatrixXd mpm::HexahedronGIMPElement<
     Tdim, Tnfunctions>::natural_nodal_coordinates() const {
   //! Natural coordinates of nodes
-  // clang-format on
   const Eigen::Matrix<double, Tnfunctions, Tdim> local_nodes =
       (Eigen::Matrix<double, Tnfunctions, Tdim>() << -1., 1., -1, 1., 1., -1,
        1., 1., 1, -1., 1., 1, -1., -1., -1, 1., -1., -1, 1., -1., 1, -1., -1.,
@@ -18,7 +17,6 @@ inline Eigen::MatrixXd mpm::HexahedronGIMPElement<
        -3., -1, -3., -3., 1, -1., -3., 1, 1., -3., 1, 3., -3., 1, -3., -3., 3,
        -1., -3., 3, 1., -3., 3, 3., -3., 3)
           .finished();
-  // clang-format on
   return local_nodes;
 }
 
@@ -77,6 +75,7 @@ inline Eigen::VectorXd mpm::HexahedronGIMPElement<Tdim, Tnfunctions>::shapefn(
           sni(0) * sni(1) * sni(2);  // See: Pruijn, N.S., 2016. Eq(4.30)
     }
   } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     return shapefn;
   }
   return shapefn;
@@ -146,8 +145,8 @@ inline Eigen::MatrixXd
       }
       // see: Pruijn, N.S., 2016. Eq(4.32)
       grad_shapefn(n, 0) = dni(0) * sni(1) * sni(2);
-      grad_shapefn(n, 1) = dni(1) * sni(0) * sni(2);
-      grad_shapefn(n, 2) = dni(2) * sni(1) * sni(0);
+      grad_shapefn(n, 1) = sni(0) * dni(1) * sni(2);
+      grad_shapefn(n, 2) = sni(0) * sni(1) * dni(2);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
