@@ -230,7 +230,7 @@ class ParticleBase {
   }
 
   //! Assign material id of this particle to nodes
-  virtual void map_material_id_to_node() = 0;
+  virtual void map_material_id_to_node() const = 0;
 
  protected:
   //! particleBase id
