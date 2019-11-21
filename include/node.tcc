@@ -66,7 +66,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_traction_force(unsigned phase,
                                                             double traction) {
   bool status = false;
   try {
-    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
+    if (phase >= Tnphases || direction >= Tdim) {
       throw std::runtime_error(
           "Nodal traction property: Direction / phase is invalid");
     }
@@ -155,23 +155,33 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
-                                                      unsigned phase,
-                                                      double mass_pressure) {
+void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
+    unsigned phase, double mass_pressure) {
   try {
     const double tolerance = 1.E-16;
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
-
-    // Update/assign pressure
+    // Compute pressure from mass*pressure
     if (mass_(phase) > tolerance) {
       std::lock_guard<std::mutex> guard(node_mutex_);
-      pressure_(phase) =
-          (pressure_(phase) * factor) + mass_pressure / mass_(phase);
+      pressure_(phase) += mass_pressure / mass_(phase);
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+}
+
+//! Assign pressure at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
+                                                      double pressure) {
+  try {
+    const double tolerance = 1.E-16;
+
+    // Compute pressure from mass*pressure
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    pressure_(phase) = pressure;
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
@@ -260,7 +270,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
       }
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -276,7 +285,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < (Tdim * Tnphases))
+    if (dir < (Tdim * Tnphases))
       this->velocity_constraints_.insert(std::make_pair<unsigned, double>(
           static_cast<unsigned>(dir), static_cast<double>(velocity)));
     else
@@ -334,7 +343,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_friction_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < Tdim) {
+    if (dir < Tdim) {
       this->friction_constraint_ =
           std::make_tuple(static_cast<unsigned>(dir), static_cast<int>(sign_n),
                           static_cast<double>(friction));
