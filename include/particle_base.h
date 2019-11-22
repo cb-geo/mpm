@@ -232,7 +232,7 @@ class ParticleBase {
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
-  std::map<unsigned, std::shared_ptr<Material<Tdim>>> material_;
+  std::shared_ptr<Material<Tdim>> material_;
   //! Material state history variables
   mpm::dense_map state_variables_;
 };  // ParticleBase class

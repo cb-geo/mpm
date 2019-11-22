@@ -366,9 +366,9 @@ void mpm::Node<Tdim, Tdof>::apply_friction_constraints(double dt) {
         const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
             rotation_matrix_.inverse();
         // Transform to local coordinate
-        Eigen::Matrix<double, Tdim> local_acceleration =
+        Eigen::Matrix<double, Tdim, 1> local_acceleration =
             inverse_rotation_matrix * this->acceleration_;
-        Eigen::Matrix<double, Tdim> local_velocity =
+        Eigen::Matrix<double, Tdim, 1> local_velocity =
             inverse_rotation_matrix * this->velocity_;
         // Normal and tangential acceleration
         acc_n = local_acceleration(dir_n);
@@ -397,7 +397,7 @@ void mpm::Node<Tdim, Tdof>::apply_friction_constraints(double dt) {
           this->acceleration_(dir_t) = acc_t;
         } else {
           // Local acceleration in terms of tangential and normal
-          Eigen::Matrix<double, Tdim> acc;
+          Eigen::Matrix<double, Tdim, 1> acc;
           acc(dir_t) = acc_t;
           acc(dir_n) = acc_n;
 

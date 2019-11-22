@@ -181,10 +181,10 @@ void mpm::Particle<Tdim>::initialise() {
   volumetric_strain_centroid_ = 0.;
 
   // Initialize vector data properties
-  this->properties_["stresses"] = [&]() { return stress_; };
-  this->properties_["strains"] = [&]() { return strain_; };
-  this->properties_["velocities"] = [&]() { return velocity_; };
-  this->properties_["displacements"] = [&]() { return displacement_; };
+  this->properties_["stresses"] = [&]() { return stress(); };
+  this->properties_["strains"] = [&]() { return strain(); };
+  this->properties_["velocities"] = [&]() { return velocity(); };
+  this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
 // Assign a cell to particle
@@ -792,5 +792,5 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints() {
 //! Return particle vector data
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Particle<Tdim>::vector_data(const std::string& property) {
-  return this->properties_.at(property);
+  return this->properties_.at(property)();
 }
