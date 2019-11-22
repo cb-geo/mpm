@@ -561,9 +561,9 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < force_bad.size(); ++i) force_bad(i) = 10.;
 
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(true, 1, force_bad) == false);
+      REQUIRE(node->update_external_force(true, force_bad) == false);
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(false, 1, force_bad) == false);
+      REQUIRE(node->update_external_force(false, force_bad) == false);
 
       SECTION("Check traction") {
         // External force
