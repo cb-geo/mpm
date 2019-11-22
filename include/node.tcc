@@ -293,9 +293,9 @@ void mpm::Node<Tdim, Tdof>::apply_velocity_constraints() {
       const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
           rotation_matrix_.inverse();
       // Transform to local coordinate
-      Eigen::Matrix<double, Tdim> local_velocity =
+      Eigen::Matrix<double, Tdim, 1> local_velocity =
           inverse_rotation_matrix * this->velocity_;
-      Eigen::Matrix<double, Tdim> local_acceleration =
+      Eigen::Matrix<double, Tdim, 1> local_acceleration =
           inverse_rotation_matrix * this->acceleration_;
       // Apply boundary condition in local coordinate
       local_velocity(direction) = constraint.second;

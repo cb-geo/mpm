@@ -167,9 +167,9 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::initialise() {
   displacement_.setZero();
   dstrain_.setZero();
-  mass_.setZero();
+  mass_ = 0.;
   natural_size_.setZero();
-  pressure_.setZero();
+  pressure_ = 0.;
   set_traction_ = false;
   size_.setZero();
   strain_rate_.setZero();
@@ -177,8 +177,8 @@ void mpm::Particle<Tdim>::initialise() {
   stress_.setZero();
   traction_.setZero();
   velocity_.setZero();
-  volume_.fill(std::numeric_limits<double>::max());
-  volumetric_strain_centroid_.setZero();
+  volume_ = std::numeric_limits<double>::max();
+  volumetric_strain_centroid_ = 0.;
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress_; };
@@ -476,7 +476,7 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
 
 // Compute strain of the particle
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_strain(, double dt) {
+void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Strain rate
   const auto strain_rate = cell_->compute_strain_rate(bmatrix_);
   // particle_strain_rate
@@ -792,5 +792,5 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints() {
 //! Return particle vector data
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Particle<Tdim>::vector_data(const std::string& property) {
-  return this->properties_.at(property)();
+  return this->properties_.at(property);
 }

@@ -23,9 +23,6 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   const unsigned Dof = 2;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
-  // Number of phases
-  const unsigned Nphases = 1;
-
   // Tolerance
   const double Tolerance = 1.E-7;
 
