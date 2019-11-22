@@ -697,7 +697,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
             // Test HDF5
             SECTION("Write particles HDF5") {
-              REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
+              REQUIRE(mesh->write_particles_hdf5("particles-2d.h5") == true);
             }
 
             // Test assign particles volumes
@@ -1213,7 +1213,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     }
 
     mesh->iterate_over_nodes(std::bind(&mpm::NodeBase<Dim>::update_mass,
-                                       std::placeholders::_1, false, 0, 10.0));
+                                       std::placeholders::_1, false, 10.0));
 
 #ifdef USE_MPI
     // Get number of MPI ranks
@@ -1223,9 +1223,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       // Run if there is more than a single MPI task
       // MPI all reduce nodal mass
       mesh->allreduce_nodal_scalar_property(
-          std::bind(&mpm::NodeBase<Dim>::mass, std::placeholders::_1, 0),
+          std::bind(&mpm::NodeBase<Dim>::mass, std::placeholders::_1),
           std::bind(&mpm::NodeBase<Dim>::update_mass, std::placeholders::_1,
-                    false, 0, std::placeholders::_2));
+                    false, std::placeholders::_2));
       // MPI all reduce nodal momentum
       mesh->allreduce_nodal_vector_property(
           std::bind(&mpm::NodeBase<Dim>::coordinates, std::placeholders::_1),
@@ -1236,7 +1236,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Node 1
     {
       // Check mass
-      REQUIRE(node1->mass(0) == Approx(10.).epsilon(Tolerance));
+      REQUIRE(node1->mass() == Approx(10.).epsilon(Tolerance));
       // Check if nodal coordinate update has gone through
       auto check_coords = node1->coordinates();
       // Check if coordinates for each node is zero
@@ -1246,7 +1246,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Node 2
     {
       // Check mass
-      REQUIRE(node2->mass(0) == Approx(10.).epsilon(Tolerance));
+      REQUIRE(node2->mass() == Approx(10.).epsilon(Tolerance));
       // Check if nodal coordinate update has gone through
       auto check_coords = node2->coordinates();
       // Check if coordinates for each node is zero
@@ -1688,7 +1688,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             }
             // Test HDF5
             SECTION("Write particles HDF5") {
-              REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+              REQUIRE(mesh->write_particles_hdf5("particles-3d.h5") == true);
             }
 
             // Test assign particles volumes

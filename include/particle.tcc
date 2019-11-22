@@ -19,7 +19,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
-  material_.clear();
+  material_ = nullptr;
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
