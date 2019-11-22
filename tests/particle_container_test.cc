@@ -15,20 +15,18 @@ TEST_CASE("Particle container is checked for 2D case",
   const unsigned Dim = 2;
   // Tolerance
   const double Tolerance = 1.E-7;
-  // Phases
-  const unsigned Nphases = 1;
 
   // Particle 1
   mpm::Index id1 = 0;
   Eigen::Vector2d coords;
   coords.setZero();
   std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-      std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+      std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
   std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-      std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+      std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
   // Particle container
   auto particlecontainer =
@@ -122,8 +120,6 @@ TEST_CASE("Particle container is checked for 3D case",
           "[particlecontainer][3D]") {
   // Dimension
   const unsigned Dim = 3;
-  // Phases
-  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -132,12 +128,12 @@ TEST_CASE("Particle container is checked for 3D case",
   Eigen::Vector3d coords;
   coords.setZero();
   std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-      std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+      std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
   std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-      std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+      std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
   // Particle container
   auto particlecontainer =
