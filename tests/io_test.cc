@@ -44,7 +44,8 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
            {"youngs_modulus", 1.5E+6},
            {"poisson_ratio", 0.25}}}},
         {"analysis",
-         {{"type", "MPMExplicitUSF3D"},
+         {{"type", "MPMExplicit3D"},
+          {"stress_update", "usf"},
           {"dt", 0.001},
           {"nsteps", 1000},
           {"gravity", true},
@@ -87,7 +88,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(io->nthreads() == 8);
 
     // Check analysis type
-    REQUIRE(io->analysis_type() == "MPMExplicitUSF3D");
+    REQUIRE(io->analysis_type() == "MPMExplicit3D");
 
     // Check cmake JSON object
     REQUIRE(io->file_name("config") == "./mpm.json");

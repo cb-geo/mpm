@@ -4,6 +4,7 @@ namespace mpm_test {
 
 // Write JSON Configuration file
 bool write_json_unitcell(unsigned dim, const std::string& analysis,
+                         const std::string& stress_update,
                          const std::string& file_name) {
   // Make json object with input files
   // 2D
@@ -55,6 +56,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
          {"poisson_ratio", 0.25}}}},
       {"analysis",
        {{"type", analysis},
+        {"stress_update", stress_update},
         {"dt", 0.001},
         {"nsteps", 10},
         {"gravity", gravity},
