@@ -250,6 +250,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     h5_particle.cell_id = 1;
 
+    h5_particle.volume = 2.;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -257,6 +259,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->id() == h5_particle.id);
     // Check particle mass
     REQUIRE(particle->mass() == h5_particle.mass);
+    // Check particle volume
+    REQUIRE(particle->volume() == h5_particle.volume);
+    // Check particle mass density
+    REQUIRE(particle->mass_density() == h5_particle.mass / h5_particle.volume);
     // Check particle status
     REQUIRE(particle->status() == h5_particle.status);
 
@@ -1150,6 +1156,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     h5_particle.cell_id = 1;
 
+    h5_particle.volume = 2.;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -1157,6 +1165,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->id() == h5_particle.id);
     // Check particle mass
     REQUIRE(particle->mass() == h5_particle.mass);
+    // Check particle volume
+    REQUIRE(particle->volume() == h5_particle.volume);
+    // Check particle mass density
+    REQUIRE(particle->mass_density() == h5_particle.mass / h5_particle.volume);
     // Check particle status
     REQUIRE(particle->status() == h5_particle.status);
 
@@ -2173,6 +2185,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     h5_particle.cell_id = 1;
 
+    h5_particle.volume = 2.;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -2180,6 +2194,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->id() == h5_particle.id);
     // Check particle mass
     REQUIRE(particle->mass() == h5_particle.mass);
+    // Check particle volume
+    REQUIRE(particle->volume() == h5_particle.volume);
+    // Check particle mass density
+    REQUIRE(particle->mass_density() == h5_particle.mass / h5_particle.volume);
     // Check particle status
     REQUIRE(particle->status() == h5_particle.status);
 

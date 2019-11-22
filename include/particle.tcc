@@ -36,6 +36,8 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->mass_ = particle.mass;
   // Volume
   this->assign_volume(particle.volume);
+  // Mass Density
+  this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
   Eigen::Vector3d psize;
   psize << particle.nsize_x, particle.nsize_y, particle.nsize_z;
@@ -422,6 +424,8 @@ bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
       Eigen::VectorXd strain_rate_centroid =
           cell_->compute_strain_rate_centroid();
       this->volume_ *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
+      this->mass_density_ = this->mass_density_ /
+                            (1. + dt * strain_rate_centroid.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -441,7 +445,7 @@ bool mpm::Particle<Tdim>::compute_mass() {
     // Check if particle volume is set and material ptr is valid
     if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
       // Mass = volume of particle * mass_density
-      mass_density_ =
+      this->mass_density_ =
           material_->template property<double>(std::string("density"));
       this->mass_ = volume_ * mass_density_;
     } else {

@@ -116,6 +116,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool update_volume_strainrate(double dt) override;
 
+  //! Return mass density
+  //! \param[in] phase Index corresponding to the phase
+  double mass_density() const override { return mass_density_; }
+
   //! Compute mass as volume * density
   bool compute_mass() override;
 
