@@ -211,6 +211,7 @@ class Node : public NodeBase<Tdim> {
   //! Add material id from material points to list of materials in materials_
   //! \param[in] id Material id to be stored at the node
   void append_material_id(unsigned id) override {
+    std::lock_guard<std::mutex> guard(node_mutex_);
     material_ids_.emplace_back(id);
   }
 
