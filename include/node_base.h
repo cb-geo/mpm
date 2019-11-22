@@ -61,106 +61,87 @@ class NodeBase {
 
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  virtual void update_mass(bool update, unsigned phase, double mass) = 0;
+  virtual void update_mass(bool update, double mass) = 0;
 
-  //! Return mass at a given node for a given phase
-  virtual double mass(unsigned phase) const = 0;
+  //! Return mass at a given node
+  virtual double mass() const = 0;
 
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  virtual void update_volume(bool update, unsigned phase, double volume) = 0;
+  virtual void update_volume(bool update, double volume) = 0;
 
-  //! Return volume at a given node for a given phase
-  virtual double volume(unsigned phase) const = 0;
+  //! Return volume at a given node
+  virtual double volume() const = 0;
 
   //! Assign traction force to the node
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Nodal traction in specified direction
   //! \retval status Assignment status
-  virtual bool assign_traction_force(unsigned phase, unsigned direction,
-                                     double traction) = 0;
+  virtual bool assign_traction_force(unsigned direction, double traction) = 0;
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
   //! \retval status Update status
-  virtual bool update_external_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual bool update_external_force(bool update, const VectorDim& force) = 0;
 
   //! Return external force
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim external_force(unsigned phase) const = 0;
+  virtual VectorDim external_force() const = 0;
 
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
-  virtual bool update_internal_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual bool update_internal_force(bool update, const VectorDim& force) = 0;
 
   //! Return internal force
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim internal_force(unsigned phase) const = 0;
+  virtual VectorDim internal_force() const = 0;
 
   //! Update pressure at the nodes from particle
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(unsigned phase, double mass_pressure) = 0;
+  virtual void update_mass_pressure(double mass_pressure) = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void assign_pressure(unsigned phase, double mass_pressure) = 0;
+  virtual void assign_pressure(double mass_pressure) = 0;
 
-  //! Return pressure at a given node for a given phase
-  //! \param[in] phase Index corresponding to the phase
-  virtual double pressure(unsigned phase) const = 0;
+  //! Return pressure at a given node
+  virtual double pressure() const = 0;
 
   //! Update nodal momentum
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
   //! \retval status Update status
-  virtual bool update_momentum(bool update, unsigned phase,
-                               const VectorDim& momentum) = 0;
+  virtual bool update_momentum(bool update, const VectorDim& momentum) = 0;
 
   //! Return momentum
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim momentum(unsigned phase) const = 0;
+  virtual VectorDim momentum() const = 0;
 
   //! Compute velocity from the momentum
   virtual void compute_velocity() = 0;
 
   //! Return velocity
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim velocity(unsigned phase) const = 0;
+  virtual VectorDim velocity() const = 0;
 
   //! Update nodal acceleration
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
   //! \retval status Update status
-  virtual bool update_acceleration(bool update, unsigned phase,
+  virtual bool update_acceleration(bool update,
                                    const VectorDim& acceleration) = 0;
 
   //! Return acceleration
-  //! \param[in] phase Index corresponding to the phase
-  virtual VectorDim acceleration(unsigned phase) const = 0;
+  virtual VectorDim acceleration() const = 0;
 
   //! Compute acceleration
   //! \param[in] dt Time-step
-  virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
+  virtual bool compute_acceleration_velocity(double dt) = 0;
 
   //! Assign velocity constraint
-  //! Directions can take values between 0 and Dim * Nphases
+  //! Directions can take values between 0 and Dim
   //! \param[in] dir Direction of velocity constraint
   //! \param[in] velocity Applied velocity constraint
   virtual bool assign_velocity_constraint(unsigned dir, double velocity) = 0;
@@ -169,7 +150,7 @@ class NodeBase {
   virtual void apply_velocity_constraints() = 0;
 
   //! Assign friction constraint
-  //! Directions can take values between 0 and Dim * Nphases
+  //! Directions can take values between 0 and Dim
   //! \param[in] dir Direction of friction constraint
   //! \param[in] sign Sign of normal wrt coordinate system for friction
   //! \param[in] friction Applied friction constraint

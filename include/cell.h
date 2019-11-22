@@ -177,97 +177,81 @@ class Cell {
 
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass mass of particle
-  void map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
-                                  unsigned phase, double pmass);
+  void map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn, double pmass);
 
   //! Map particle volume to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume volume of particle
   void map_particle_volume_to_nodes(const Eigen::VectorXd& shapefn,
-                                    unsigned phase, double pvolume);
+                                    double pvolume);
 
-  //! Compute the nodal momentum with particle mass & velocity for a phase
+  //! Compute the nodal momentum with particle mass & velocity
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pvelocity velocity of a particle
-  void compute_nodal_momentum(const Eigen::VectorXd& shapefn, unsigned phase,
-                              double pmass, const Eigen::VectorXd& pvelocity);
+  void compute_nodal_momentum(const Eigen::VectorXd& shapefn, double pmass,
+                              const Eigen::VectorXd& pvelocity);
 
-  //! Map particle mass and momentum to nodes for a phase
+  //! Map particle mass and momentum to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass mass of a particle
   //! \param[in] velocity velocity of a particle
-  void map_mass_momentum_to_nodes(const Eigen::VectorXd& shapefn,
-                                  unsigned phase, double pmass,
+  void map_mass_momentum_to_nodes(const Eigen::VectorXd& shapefn, double pmass,
                                   const Eigen::VectorXd& pvelocity);
 
   //! Map particle pressure to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] ppressure Pressure of particle
   //! $$p_i = \frac{\sum_{p = 1}^{n_p} N_i (x_p) M_p p_p}{m_i}$$
-  void map_pressure_to_nodes(const Eigen::VectorXd& shapefn, unsigned phase,
-                             double pmass, double ppressure);
+  void map_pressure_to_nodes(const Eigen::VectorXd& shapefn, double pmass,
+                             double ppressure);
 
   //! Return velocity at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \retval velocity Interpolated velocity at xi
   Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity(
-      const Eigen::VectorXd& shapefn, unsigned phase);
+      const Eigen::VectorXd& shapefn);
 
   //! Return acceleration at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \retval acceleration Interpolated acceleration at xi
   Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
-      const Eigen::VectorXd& shapefn, unsigned phase);
+      const Eigen::VectorXd& shapefn);
 
   //! Return pressure at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \retval pressure Interpolated pressure at xi
-  double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
-                                    unsigned phase);
+  double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn);
 
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   Eigen::VectorXd compute_strain_rate(
-      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
+      const std::vector<Eigen::MatrixXd>& bmatrix);
 
   //! Compute strain rate for reduced integration at the centroid of cell
-  //! \param[in] phase Phase associate to the particle
-  Eigen::VectorXd compute_strain_rate_centroid(unsigned phase);
+  Eigen::VectorXd compute_strain_rate_centroid();
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pgravity Gravity of a particle
-  void compute_nodal_body_force(const Eigen::VectorXd& shapefn, unsigned phase,
-                                double pmass, const VectorDim& pgravity);
+  void compute_nodal_body_force(const Eigen::VectorXd& shapefn, double pmass,
+                                const VectorDim& pgravity);
 
   //! Compute the nodal traction force of a cell from the particle
   //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] traction Traction force from the particle
   void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
-                                    unsigned phase, const VectorDim& traction);
+                                    const VectorDim& traction);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle
   //! \param[in] pstress Stress of particle
   void compute_nodal_internal_force(const std::vector<Eigen::MatrixXd>& bmatrix,
-                                    unsigned phase, double pvolume,
+                                    double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
   //! Assign velocity constraint
