@@ -94,9 +94,7 @@ class Node : public NodeBase<Tdim> {
   bool update_external_force(bool update, const VectorDim& force) override;
 
   //! Return external force at a given node
-  VectorDim external_force() const override {
-    return external_force_;
-  }
+  VectorDim external_force() const override { return external_force_; }
 
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -116,7 +114,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] mass_pressure Product of mass x pressure of a particle
   void assign_pressure(double mass_pressure) override;
 
-  //! Return pressure at a given node 
+  //! Return pressure at a given node
   double pressure() const override { return pressure_; }
 
   //! Update momentum at the nodes

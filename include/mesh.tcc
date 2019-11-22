@@ -497,14 +497,14 @@ std::vector<Eigen::Matrix<double, 3, 1>>
 //! Return particle vector data
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
-    const std::string& attribute, unsigned phase) {
+    const std::string& attribute) {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
   try {
     // Iterate over particles
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       Eigen::Vector3d data;
       data.setZero();
-      auto pdata = (*pitr)->vector_data(phase, attribute);
+      auto pdata = (*pitr)->vector_data(attribute);
       // Fill stresses to the size of dimensions
       for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
 
@@ -592,7 +592,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
     const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
   bool status = true;
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -605,7 +604,7 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
       double volume = std::get<1>(particle_volume);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_volume(phase, volume);
+        status = map_particles_[pid]->assign_volume(volume);
 
       if (!status)
         throw std::runtime_error("Cannot assign invalid particle volume");
@@ -654,8 +653,6 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -669,7 +666,7 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       double traction = std::get<2>(particle_traction);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_traction(phase, dir, traction);
+        status = map_particles_[pid]->assign_traction(dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
     }
@@ -686,8 +683,6 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_velocity_constraints) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -720,8 +715,6 @@ bool mpm::Mesh<Tdim>::assign_nodal_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         node_tractions) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!nodes_.size())
       throw std::runtime_error(
@@ -735,7 +728,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_tractions(
       double traction = std::get<2>(node_traction);
 
       if (map_nodes_.find(pid) != map_nodes_.end())
-        status = map_nodes_[pid]->assign_traction_force(phase, dir, traction);
+        status = map_nodes_[pid]->assign_traction_force(dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for node");
     }
@@ -751,8 +744,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_stresses(
     const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -764,7 +755,7 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
 
     unsigned i = 0;
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      (*pitr)->initial_stress(phase, particle_stresses.at(i));
+      (*pitr)->initial_stress(particle_stresses.at(i));
       ++i;
     }
   } catch (std::exception& exception) {
@@ -866,15 +857,14 @@ bool mpm::Mesh<Tdim>::assign_cell_velocity_constraints(
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
-                                           const std::string& filename) {
+bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename) {
   const unsigned nparticles = this->nparticles();
 
   std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->hdf5(phase));
+    particle_data.emplace_back((*pitr)->hdf5());
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
@@ -1038,8 +1028,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
-                                          const std::string& filename) {
+bool mpm::Mesh<Tdim>::read_particles_hdf5(const std::string& filename) {
 
   // Create a new file using default properties.
   hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);

@@ -10,7 +10,7 @@
 namespace mpm {
 
 //! MPMExplicit class
-//! \brief A class that implements the fully explicit one phase mpm
+//! \brief A class that implements the fully explicit single phase mpm
 //! \details A single-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>

@@ -212,9 +212,8 @@ class Mesh {
 
   //! Return particles vector data
   //! \param[in] attribute Name of the vector data attribute
-  //! \param[in] phase Index corresponding to the phase
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
-      const std::string& attribute, unsigned phase);
+      const std::string& attribute);
 
   //! Assign velocity constraints to nodes
   //! \param[in] velocity_constraints Constraint at node, dir, and velocity
@@ -302,16 +301,14 @@ class Mesh {
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
   //! Write HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of writing HDF5 output
-  bool write_particles_hdf5(unsigned phase, const std::string& filename);
+  bool write_particles_hdf5(const std::string& filename);
 
   //! Read HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5(unsigned phase, const std::string& filename);
+  bool read_particles_hdf5(const std::string& filename);
 
   //! Return nodal coordinates
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;

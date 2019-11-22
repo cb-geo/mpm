@@ -1,7 +1,7 @@
 //! Constructor with id, coordinates and dof
 template <unsigned Tdim, unsigned Tdof>
-mpm::Node<Tdim, Tdof>::Node(
-    Index id, const Eigen::Matrix<double, Tdim, 1>& coord)
+mpm::Node<Tdim, Tdof>::Node(Index id,
+                            const Eigen::Matrix<double, Tdim, 1>& coord)
     : NodeBase<Tdim>(id, coord) {
   // Check if the dimension is between 1 & 3
   static_assert((Tdim >= 1 && Tdim <= 3), "Invalid global dimension");
@@ -35,8 +35,7 @@ void mpm::Node<Tdim, Tdof>::initialise() {
 
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof>
-void mpm::Node<Tdim, Tdof>::update_mass(bool update, 
-                                                  double mass) {
+void mpm::Node<Tdim, Tdof>::update_mass(bool update, double mass) {
   // Decide to update or assign
   double factor = 1.0;
   if (!update) factor = 0.;
@@ -48,8 +47,7 @@ void mpm::Node<Tdim, Tdof>::update_mass(bool update,
 
 //! Update volume at the nodes from particle
 template <unsigned Tdim, unsigned Tdof>
-void mpm::Node<Tdim, Tdof>::update_volume(bool update, 
-                                                    double volume) {
+void mpm::Node<Tdim, Tdof>::update_volume(bool update, double volume) {
   // Decide to update or assign
   double factor = 1.0;
   if (!update) factor = 0.;
@@ -61,9 +59,8 @@ void mpm::Node<Tdim, Tdof>::update_volume(bool update,
 
 // Assign traction force to the node
 template <unsigned Tdim, unsigned Tdof>
-bool mpm::Node<Tdim, Tdof>::assign_traction_force(
-                                                            unsigned direction,
-                                                            double traction) {
+bool mpm::Node<Tdim, Tdof>::assign_traction_force(unsigned direction,
+                                                  double traction) {
   bool status = false;
   try {
     if (direction >= Tdim)
@@ -82,7 +79,7 @@ bool mpm::Node<Tdim, Tdof>::assign_traction_force(
 //! Update external force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof>
 bool mpm::Node<Tdim, Tdof>::update_external_force(
-    bool update,  const Eigen::Matrix<double, Tdim, 1>& force) {
+    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
   bool status = false;
   try {
     // Decide to update or assign
@@ -103,7 +100,7 @@ bool mpm::Node<Tdim, Tdof>::update_external_force(
 //! Update internal force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof>
 bool mpm::Node<Tdim, Tdof>::update_internal_force(
-    bool update,  const Eigen::Matrix<double, Tdim, 1>& force) {
+    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
   bool status = false;
   try {
     // Decide to update or assign
@@ -124,8 +121,7 @@ bool mpm::Node<Tdim, Tdof>::update_internal_force(
 //! Assign nodal momentum
 template <unsigned Tdim, unsigned Tdof>
 bool mpm::Node<Tdim, Tdof>::update_momentum(
-    bool update, 
-    const Eigen::Matrix<double, Tdim, 1>& momentum) {
+    bool update, const Eigen::Matrix<double, Tdim, 1>& momentum) {
   bool status = false;
   try {
     // Decide to update or assign
@@ -145,8 +141,7 @@ bool mpm::Node<Tdim, Tdof>::update_momentum(
 
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof>
-void mpm::Node<Tdim, Tdof>::update_mass_pressure(
-     double mass_pressure) {
+void mpm::Node<Tdim, Tdof>::update_mass_pressure(double mass_pressure) {
   try {
     const double tolerance = 1.E-16;
 
@@ -163,8 +158,7 @@ void mpm::Node<Tdim, Tdof>::update_mass_pressure(
 
 //! Assign pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof>
-void mpm::Node<Tdim, Tdof>::assign_pressure(
-                                                      double pressure) {
+void mpm::Node<Tdim, Tdof>::assign_pressure(double pressure) {
   try {
     const double tolerance = 1.E-16;
 
@@ -192,7 +186,6 @@ void mpm::Node<Tdim, Tdof>::compute_velocity() {
         if (std::abs(velocity_(i)) < 1.E-15) velocity_(i) = 0.;
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
-    
 
     // Apply velocity constraints, which also sets acceleration to 0,
     // when velocity is set.
@@ -205,8 +198,7 @@ void mpm::Node<Tdim, Tdof>::compute_velocity() {
 //! Update nodal acceleration
 template <unsigned Tdim, unsigned Tdof>
 bool mpm::Node<Tdim, Tdof>::update_acceleration(
-    bool update, 
-    const Eigen::Matrix<double, Tdim, 1>& acceleration) {
+    bool update, const Eigen::Matrix<double, Tdim, 1>& acceleration) {
   bool status = false;
   try {
     // Decide to update or assign
@@ -226,16 +218,14 @@ bool mpm::Node<Tdim, Tdof>::update_acceleration(
 
 //! Compute acceleration and velocity
 template <unsigned Tdim, unsigned Tdof>
-bool mpm::Node<Tdim, Tdof>::compute_acceleration_velocity(
-     double dt) {
+bool mpm::Node<Tdim, Tdof>::compute_acceleration_velocity(double dt) {
   bool status = true;
   const double tolerance = 1.0E-15;
   try {
     if (mass_ > tolerance) {
       // acceleration (unbalaced force / mass)
-      this->acceleration_ = (this->external_force_ +
-                                        this->internal_force_) /
-                                       this->mass_;
+      this->acceleration_ =
+          (this->external_force_ + this->internal_force_) / this->mass_;
 
       // Apply friction constraints
       this->apply_friction_constraints(dt);
@@ -248,10 +238,8 @@ bool mpm::Node<Tdim, Tdof>::compute_acceleration_velocity(
 
       // Set a threshold
       for (unsigned i = 0; i < Tdim; ++i) {
-        if (std::abs(velocity_(i)) < tolerance)
-          velocity_(i) = 0.;
-        if (std::abs(acceleration_(i)) < tolerance)
-          acceleration_(i) = 0.;
+        if (std::abs(velocity_(i)) < tolerance) velocity_(i) = 0.;
+        if (std::abs(acceleration_(i)) < tolerance) acceleration_(i) = 0.;
       }
     } else
       throw std::runtime_error("Nodal mass is zero or below threshold");
@@ -266,8 +254,8 @@ bool mpm::Node<Tdim, Tdof>::compute_acceleration_velocity(
 //! Assign velocity constraint
 //! Constrain directions can take values between 0 and Dim
 template <unsigned Tdim, unsigned Tdof>
-bool mpm::Node<Tdim, Tdof>::assign_velocity_constraint(
-    unsigned dir, double velocity) {
+bool mpm::Node<Tdim, Tdof>::assign_velocity_constraint(unsigned dir,
+                                                       double velocity) {
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim
@@ -322,8 +310,8 @@ void mpm::Node<Tdim, Tdof>::apply_velocity_constraints() {
 //! Assign friction constraint
 //! Constrain directions can take values between 0 and Dim
 template <unsigned Tdim, unsigned Tdof>
-bool mpm::Node<Tdim, Tdof>::assign_friction_constraint(
-    unsigned dir, int sign_n, double friction) {
+bool mpm::Node<Tdim, Tdof>::assign_friction_constraint(unsigned dir, int sign_n,
+                                                       double friction) {
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim

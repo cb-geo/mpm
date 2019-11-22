@@ -83,8 +83,6 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
 
   try {
@@ -207,8 +205,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
 
   try {
@@ -328,9 +324,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
@@ -469,8 +464,6 @@ bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
   bool status = false;
-  // Set phase to zero
-  unsigned phase = 0;
   // Assign material to particle sets
   try {
     // Get particle properties
@@ -487,7 +480,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, phase, set_material));
+                            std::placeholders::_1, set_material));
       }
     }
     status = true;
@@ -503,9 +496,6 @@ template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::checkpoint_resume() {
   bool checkpoint = true;
   try {
-    // TODO: Set phase
-    const unsigned phase = 0;
-
     if (!analysis_["resume"]["resume"].template get<bool>())
       throw std::runtime_error("Resume analysis option is disabled!");
 
@@ -522,7 +512,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
     // Load particle information from file
-    mesh_->read_particles_hdf5(phase, particles_file);
+    mesh_->read_particles_hdf5(particles_file);
 
     // Clear all particle ids
     mesh_->iterate_over_cells(
@@ -559,8 +549,7 @@ void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
   auto particles_file =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
-  const unsigned phase = 0;
-  mesh_->write_particles_hdf5(phase, particles_file);
+  mesh_->write_particles_hdf5(particles_file);
 }
 
 #ifdef USE_VTK
@@ -584,15 +573,12 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
 
-  // TODO fix phase
-  unsigned phase = 0;
-
   for (const auto& attribute : vtk_attributes_) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
-        file, mesh_->particles_vector_data(attribute, phase), attribute);
+        file, mesh_->particles_vector_data(attribute), attribute);
   }
 }
 #endif

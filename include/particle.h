@@ -114,7 +114,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Update volume based on centre volumetric strain rate
   //! \param[in] dt Analysis time step
-  bool update_volume_strainrate( double dt) override;
+  bool update_volume_strainrate(double dt) override;
 
   //! Compute mass as volume * density
   bool compute_mass() override;
@@ -133,16 +133,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
-       const std::shared_ptr<Material<Tdim>>& material) override;
+      const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
   //! \param[in] dt Analysis time step
-  void compute_strain( double dt) override;
+  void compute_strain(double dt) override;
 
   //! Return strain of the particle
-  Eigen::Matrix<double, 6, 1> strain() const override {
-    return strain_;
-  }
+  Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
 
   //! Return strain rate of the particle
   Eigen::Matrix<double, 6, 1> strain_rate() const override {
@@ -157,8 +155,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Initial stress
   //! \param[in] stress Initial sress
-  void initial_stress(
-                      const Eigen::Matrix<double, 6, 1>& stress) override {
+  void initial_stress(const Eigen::Matrix<double, 6, 1>& stress) override {
     this->stress_ = stress;
   }
 
@@ -166,13 +163,11 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_stress() override;
 
   //! Return stress of the particle
-  Eigen::Matrix<double, 6, 1> stress() const override {
-    return stress_;
-  }
+  Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
 
   //! Map body force
   //! \param[in] pgravity Gravity of a particle
-  void map_body_force( const VectorDim& pgravity) override;
+  void map_body_force(const VectorDim& pgravity) override;
 
   //! Map internal force
   bool map_internal_force() override;
@@ -180,40 +175,33 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity( const VectorDim& velocity) override;
+  bool assign_velocity(const VectorDim& velocity) override;
 
   //! Return velocity of the particle
-  VectorDim velocity() const override {
-    return velocity_;
-  }
+  VectorDim velocity() const override { return velocity_; }
 
   //! Return displacement of the particle
-  VectorDim displacement() const override {
-    return displacement_;
-  }
+  VectorDim displacement() const override { return displacement_; }
 
   //! Assign traction to the particle
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
-  bool assign_traction( unsigned direction,
-                       double traction) override;
+  bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
-  VectorDim traction() const override {
-    return traction_;
-  }
+  VectorDim traction() const override { return traction_; }
 
   //! Map traction force
   void map_traction_force() override;
 
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
-  bool compute_updated_position( double dt) override;
+  bool compute_updated_position(double dt) override;
 
   //! Compute updated position of the particle based on nodal velocity
   //! \param[in] dt Analysis time step
-  bool compute_updated_position_velocity( double dt) override;
+  bool compute_updated_position_velocity(double dt) override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -224,7 +212,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Update pressure of the particles
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure( double dvolumetric_strain) override;
+  bool update_pressure(double dvolumetric_strain) override;
 
   //! Map particle pressure to nodes
   bool map_pressure_to_nodes() override;
@@ -239,8 +227,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Return vector data of particles
   //! \param[in] property Property string
   //! \retval vecdata Vector data of particle property
-  Eigen::VectorXd vector_data(
-                              const std::string& property) override;
+  Eigen::VectorXd vector_data(const std::string& property) override;
 
   //! Assign particle velocity constraints
   //! Directions can take values between 0 and Dim
