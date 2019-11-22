@@ -19,8 +19,6 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -39,27 +37,27 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
 
     coords << 0., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 4., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 4., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -141,7 +139,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5;
         std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-            std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+            std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
 
@@ -163,8 +161,6 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -184,42 +180,42 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     Eigen::Vector3d coords;
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
     REQUIRE(mesh->add_node(node3) == true);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     REQUIRE(mesh->add_node(node4) == true);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
     REQUIRE(mesh->add_node(node5) == true);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
     REQUIRE(mesh->add_node(node6) == true);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
     REQUIRE(mesh->add_node(node7) == true);
 
     // Create cell0
@@ -242,22 +238,22 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     // Cell 1
     coords << 4, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node8 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(8, coords);
     REQUIRE(mesh->add_node(node8) == true);
 
     coords << 4, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node9 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(9, coords);
     REQUIRE(mesh->add_node(node9) == true);
 
     coords << 4, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node10 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(10, coords);
     REQUIRE(mesh->add_node(node10) == true);
 
     coords << 4, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node11 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(11, coords);
     REQUIRE(mesh->add_node(node11) == true);
 
     // Create cell0
@@ -329,7 +325,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5, 1.5;
         std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-            std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+            std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
 

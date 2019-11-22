@@ -19,10 +19,6 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   const unsigned Dim = 2;
   // Degree of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
-  // Phase
-  const unsigned Phase = 0;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -44,27 +40,27 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Add nodes to cell
   coords << 0.0, 0.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
   coords << 1.0, 0.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
   coords << 1.0, 1.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
   coords << 0.0, 1.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
   coords << 2.0, 0.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
   coords << 2.0, 1.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
   cell0->add_node(0, node0);
   cell0->add_node(1, node1);
@@ -106,22 +102,22 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Add particle
   id = 0;
   coords << 0.25, 0.25;
-  auto particle0 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle0 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 1;
   coords << 0.75, 0.25;
-  auto particle1 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle1 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 2;
   coords << 0.75, 0.75;
-  auto particle2 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle2 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 3;
   coords << 0.25, 0.75;
-  auto particle3 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle3 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particles and check status
   REQUIRE(mesh->add_particle(particle0) == true);
@@ -162,15 +158,15 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                Phase, material));
+                material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1, Phase));
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(std::bind(&mpm::ParticleBase<Dim>::compute_mass,
-                                         std::placeholders::_1, Phase));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -192,18 +188,18 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Assign mass and momentum to nodes
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1, Phase));
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Dim>::compute_acceleration_velocity,
-                std::placeholders::_1, Phase, dt),
+                std::placeholders::_1, dt),
       std::bind(&mpm::NodeBase<Dim>::status, std::placeholders::_1));
 
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
-                std::placeholders::_1, Phase, dt));
+                std::placeholders::_1, dt));
 
   // Locate particles in a mesh
   particles = mesh->locate_particles_mesh();
@@ -223,10 +219,6 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   const unsigned Dim = 3;
   // Degree of freedom
   const unsigned Dof = 3;
-  // Number of phases
-  const unsigned Nphases = 1;
-  // Phase
-  const unsigned Phase = 0;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -249,35 +241,35 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Define nodes
   coords << 0, 0, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
   coords << 1, 0, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
   coords << 1, 1, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
   coords << 0, 1, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
   coords << 0, 0, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
   coords << 1, 0, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
   coords << 1, 1, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
   coords << 0, 1, 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
   // Add nodes to cell
   cell0->add_node(0, node0);
@@ -294,19 +286,19 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Cell 1
   coords << 2.0, 0., 0.;
   std::shared_ptr<mpm::NodeBase<Dim>> node8 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(8, coords);
 
   coords << 2.0, 1.0, 0.;
   std::shared_ptr<mpm::NodeBase<Dim>> node9 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(9, coords);
 
   coords << 2.0, 0., 1.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node10 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(10, coords);
 
   coords << 2.0, 1.0, 1.0;
   std::shared_ptr<mpm::NodeBase<Dim>> node11 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(11, coords);
 
   // Add nodes to cell
   cell1->add_node(0, node1);
@@ -353,28 +345,28 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
 
   // Add particle
   coords << 0.25, 0.25, 0.25;
-  auto particle0 = std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+  auto particle0 = std::make_shared<mpm::Particle<Dim>>(0, coords);
 
   coords << 0.75, 0.25, 0.25;
-  auto particle1 = std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+  auto particle1 = std::make_shared<mpm::Particle<Dim>>(1, coords);
 
   coords << 0.25, 0.75, 0.25;
-  auto particle2 = std::make_shared<mpm::Particle<Dim, Nphases>>(2, coords);
+  auto particle2 = std::make_shared<mpm::Particle<Dim>>(2, coords);
 
   coords << 0.75, 0.75, 0.25;
-  auto particle3 = std::make_shared<mpm::Particle<Dim, Nphases>>(3, coords);
+  auto particle3 = std::make_shared<mpm::Particle<Dim>>(3, coords);
 
   coords << 0.25, 0.25, 0.75;
-  auto particle4 = std::make_shared<mpm::Particle<Dim, Nphases>>(4, coords);
+  auto particle4 = std::make_shared<mpm::Particle<Dim>>(4, coords);
 
   coords << 0.25, 0.25, 0.75;
-  auto particle5 = std::make_shared<mpm::Particle<Dim, Nphases>>(5, coords);
+  auto particle5 = std::make_shared<mpm::Particle<Dim>>(5, coords);
 
   coords << 0.75, 0.75, 0.75;
-  auto particle6 = std::make_shared<mpm::Particle<Dim, Nphases>>(6, coords);
+  auto particle6 = std::make_shared<mpm::Particle<Dim>>(6, coords);
 
   coords << 0.75, 0.75, 0.75;
-  auto particle7 = std::make_shared<mpm::Particle<Dim, Nphases>>(7, coords);
+  auto particle7 = std::make_shared<mpm::Particle<Dim>>(7, coords);
 
   // Add particles and check status
   REQUIRE(mesh->add_particle(particle0) == true);
@@ -418,15 +410,15 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                Phase, material));
+                material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1, Phase));
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(std::bind(&mpm::ParticleBase<Dim>::compute_mass,
-                                         std::placeholders::_1, Phase));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -452,18 +444,18 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Assign mass and momentum to nodes
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1, Phase));
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
       std::bind(&mpm::NodeBase<Dim>::compute_acceleration_velocity,
-                std::placeholders::_1, Phase, dt),
+                std::placeholders::_1, dt),
       std::bind(&mpm::NodeBase<Dim>::status, std::placeholders::_1));
 
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
-                std::placeholders::_1, Phase, dt));
+                std::placeholders::_1, dt));
 
   // Locate particles in a mesh
   particles = mesh->locate_particles_mesh();

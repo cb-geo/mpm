@@ -19,8 +19,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -35,19 +33,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   coords.setZero();
 
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(10, coords);
 
   coords << 2., 0.;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(11, coords);
 
   coords << 2., 2.;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(12, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(12, coords);
 
   coords << 0., 2.;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(13, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(13, coords);
 
   //! Check Cell IDs
   SECTION("Check cell ids") {
@@ -93,7 +91,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Test failing add node
     coords << 1., 1.;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     // Fail add node
     REQUIRE(cell->add_node(4, node4) == false);
 
@@ -248,19 +246,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         coords << 2.0, 1.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 4.0, 2.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 2.0, 4.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 1.0, 3.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -323,19 +321,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         coords << 0., 0.5;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 2., 0.5;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 3., 1.5;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 1., 1.5;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -377,19 +375,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
         coords << 2.0, 1.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 4.0, 2.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 2.0, 4.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 1.0, 3.0;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         // 4-noded quadrilateral shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -575,8 +573,6 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Particle gravity
     Eigen::Vector2d pgravity;
     pgravity << 0., 9.814;
-    // Phase
-    unsigned phase = 0;
     // Nodal coordinates
     Eigen::Matrix<double, 4, Dim> coords;
     // clang-format off
@@ -594,43 +590,43 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
                          Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(1.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, pvolume);
       for (const auto& node : nodes)
-        REQUIRE(node->volume(phase) == Approx(2.0).epsilon(Tolerance));
+        REQUIRE(node->volume() == Approx(2.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle momentum and pressure mapping") {
       // Map particle mass to nodes
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(1.0).epsilon(Tolerance));
 
       // Map momentum to nodes
-      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(1.0).epsilon(Tolerance));
       }
 
       // Update mass and momentum
-      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      cell->map_mass_momentum_to_nodes(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(2.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(2.0).epsilon(Tolerance));
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(2.0).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(2.0).epsilon(Tolerance));
       }
 
       // Map particle pressure to nodes
-      cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
+      cell->map_pressure_to_nodes(shapefns_xi, pmass, ppressure);
       for (const auto& node : nodes)
-        REQUIRE(node->pressure(phase) == Approx(6.0).epsilon(Tolerance));
+        REQUIRE(node->pressure() == Approx(6.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
@@ -638,47 +634,47 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       pmass = 40.;
 
       // Map particle mass to nodes
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(10.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(10.0).epsilon(Tolerance));
 
       // Map momentum to nodes
-      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(10.0).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(10.0).epsilon(Tolerance));
       }
 
       // Update mass and momentum
-      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      cell->map_mass_momentum_to_nodes(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(20.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(20.0).epsilon(Tolerance));
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(20.0).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(20.0).epsilon(Tolerance));
       }
 
       // Update particle mass
       pmass = 80;
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
 
       // Compute nodal velocity
       for (const auto& node : nodes) {
         node->compute_velocity();
         for (unsigned i = 0; i < pvelocity.size(); ++i) {
-          REQUIRE(node->momentum(phase)(i) == Approx(20.0).epsilon(Tolerance));
-          REQUIRE(node->mass(phase) == Approx(40.0).epsilon(Tolerance));
-          REQUIRE(node->velocity(phase)(i) == Approx(0.5).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(20.0).epsilon(Tolerance));
+          REQUIRE(node->mass() == Approx(40.0).epsilon(Tolerance));
+          REQUIRE(node->velocity()(i) == Approx(0.5).epsilon(Tolerance));
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix);
       REQUIRE(strain_rate.size() == 3);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
-          cell->compute_strain_rate_centroid(phase);
+          cell->compute_strain_rate_centroid();
       REQUIRE(strain_rate_centroid.size() == 3);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
@@ -686,12 +682,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
     SECTION("Check particle body force mapping") {
       // Calculate body force at nodes
-      cell->compute_nodal_body_force(shapefns_xi, phase, pmass, pgravity);
+      cell->compute_nodal_body_force(shapefns_xi, pmass, pgravity);
       Eigen::Vector2d bodyforce;
       bodyforce << 0., 9.814;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < bodyforce.size(); ++i)
-          REQUIRE(node->external_force(phase)(i) ==
+          REQUIRE(node->external_force()(i) ==
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
@@ -700,20 +696,19 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       // Check external force at nodes
       for (const auto& node : nodes)
         for (unsigned i = 0; i < Dim; ++i)
-          REQUIRE(node->external_force(phase)(i) ==
-                  Approx(0.).epsilon(Tolerance));
+          REQUIRE(node->external_force()(i) == Approx(0.).epsilon(Tolerance));
 
       // Apply traction force
       Eigen::Vector2d tractionforce;
       tractionforce << 1.5, 2.5;
       // Calculate traction force at nodes
-      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+      cell->compute_nodal_traction_force(shapefns_xi, tractionforce);
 
       // Check traction force
       tractionforce *= 0.25;  // traction force * shapefn value (0.25)
       for (const auto& node : nodes)
         for (unsigned i = 0; i < tractionforce.size(); ++i)
-          REQUIRE(node->external_force(phase)(i) ==
+          REQUIRE(node->external_force()(i) ==
                   Approx(tractionforce(i)).epsilon(Tolerance));
     }
 
@@ -723,8 +718,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(bmatrix, pvolume, pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector2d> internal_forces;
@@ -745,7 +739,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       unsigned j = 0;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < intforce.size(); ++i)
-          REQUIRE(node->internal_force(phase)(i) ==
+          REQUIRE(node->internal_force()(i) ==
                   Approx(internal_forces.at(j)(i)).epsilon(Tolerance));
         ++j;
       }
@@ -764,30 +758,29 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           momentum(i) = 10. * static_cast<double>(j);
 
         // Nodal mass
-        node->update_mass(false, phase, mass);
-        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+        node->update_mass(false, mass);
+        REQUIRE(node->mass() == Approx(100.0).epsilon(Tolerance));
 
         // Nodal momentum
-        node->update_momentum(false, phase, momentum);
+        node->update_momentum(false, momentum);
         for (unsigned i = 0; i < momentum.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) ==
+          REQUIRE(node->momentum()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
 
         for (unsigned i = 0; i < momentum.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) ==
+          REQUIRE(node->momentum()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
 
         // Compute and check velocity
         node->compute_velocity();
         for (unsigned i = 0; i < Dim; ++i)
-          REQUIRE(node->velocity(phase)(i) ==
+          REQUIRE(node->velocity()(i) ==
                   Approx(0.1 * static_cast<double>(j)).epsilon(Tolerance));
         // Increment j
         ++j;
       }
       // Check interpolate velocity (0, 0)
-      Eigen::Vector2d velocity =
-          cell->interpolate_nodal_velocity(shapefns_xi, phase);
+      Eigen::Vector2d velocity = cell->interpolate_nodal_velocity(shapefns_xi);
 
       Eigen::Vector2d interpolated_velocity;
       interpolated_velocity << 0.25, 0.25;
@@ -800,7 +793,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi);
 
       interpolated_velocity << 0.2875, 0.2875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -811,7 +804,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       xi << -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi);
 
       interpolated_velocity << 0.1875, 0.1875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -830,16 +823,16 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           acceleration(i) = 10. * static_cast<double>(j);
 
         // Nodal acceleration
-        node->update_acceleration(false, phase, acceleration);
+        node->update_acceleration(false, acceleration);
         for (unsigned i = 0; i < acceleration.size(); ++i)
-          REQUIRE(node->acceleration(phase)(i) ==
+          REQUIRE(node->acceleration()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
         // Increment j
         ++j;
       }
       // Check interpolate acceleration (0, 0)
       Eigen::Vector2d check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefns_xi, phase);
+          cell->interpolate_nodal_acceleration(shapefns_xi);
 
       Eigen::Vector2d interpolated_acceleration;
       interpolated_acceleration << 25., 25.;
@@ -852,8 +845,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
+      check_acceleration = cell->interpolate_nodal_acceleration(shapefn_xi);
 
       interpolated_acceleration << 28.75, 28.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -864,8 +856,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       xi << -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
+      check_acceleration = cell->interpolate_nodal_acceleration(shapefn_xi);
 
       interpolated_acceleration << 18.75, 18.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -886,18 +877,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         pressure = 10. * static_cast<double>(node_counter);
 
         // Nodal mass
-        node->update_mass(false, phase, mass);
-        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+        node->update_mass(false, mass);
+        REQUIRE(node->mass() == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_mass_pressure(phase, mass * pressure);
-        REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
+        node->update_mass_pressure(mass * pressure);
+        REQUIRE(node->pressure() == Approx(pressure).epsilon(Tolerance));
         // Increment node_counter
         ++node_counter;
       }
       // Check interpolate pressure (0, 0)
-      double check_pressure =
-          cell->interpolate_nodal_pressure(shapefns_xi, phase);
+      double check_pressure = cell->interpolate_nodal_pressure(shapefns_xi);
 
       double interpolated_pressure;
       interpolated_pressure = 25.;
@@ -909,7 +899,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi);
 
       interpolated_pressure = 28.75;
       REQUIRE(check_pressure ==
@@ -919,7 +909,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       xi << -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi);
 
       interpolated_pressure = 18.75;
       REQUIRE(check_pressure ==
@@ -934,8 +924,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -946,35 +934,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   coords << 0, 0, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
   coords << 2, 0, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
   coords << 2, 2, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
   coords << 0, 2, 0;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
   coords << 0, 0, 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
   coords << 2, 0, 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
   coords << 2, 2, 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
   coords << 0, 2, 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
   // 8-noded hexahedron shape functions
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -1030,7 +1018,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Test failing add node
     coords << 1., 1., 1.;
     std::shared_ptr<mpm::NodeBase<Dim>> node100 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(100, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(100, coords);
     // Fail add node
     REQUIRE(cell->add_node(8, node100) == false);
 
@@ -1190,35 +1178,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         coords << 2, 1, -1;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 4, 2, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 2, 4, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 1, 3, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         coords << 2, 1, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
         coords << 4, 2, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
         coords << 2, 4, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
         coords << 1, 3, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
         // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -1264,52 +1252,52 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         coords << 0, 0., 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 2, 0., 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 2, .5, 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 0, .5, 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         coords << 1., 0., 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
         coords << 3., 0., 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
         coords << 3., .5, 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
         coords << 1., .5, 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
         // Cell 2
         coords << 2, 1.5, 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node8 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(8, coords);
 
         coords << 0, 1.5, 0;
         std::shared_ptr<mpm::NodeBase<Dim>> node9 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(9, coords);
 
         coords << 3., 1.5, 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node10 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(10, coords);
 
         coords << 1., 1.5, 2.;
         std::shared_ptr<mpm::NodeBase<Dim>> node11 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(11, coords);
 
         // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -1436,35 +1424,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         coords << 2, 1, -1;
         std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
         coords << 4, 2, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
         coords << 2, 4, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
         coords << 1, 3, -1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
         coords << 2, 1, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
         coords << 4, 2, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
         coords << 2, 4, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
         coords << 1, 3, 1.;
         std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+            std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
         // 8-noded hexahedron shape functions
         std::shared_ptr<mpm::Element<Dim>> element =
@@ -1629,35 +1617,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     Eigen::Vector3d coords;
     coords << 812481.0000000000, 815877.0000000001, 158.0900000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 812482.9999999999, 815877.0000000001, 159.1500000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 812482.9999999999, 815879.0000000000, 160.3900000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 812481.0000000000, 815879.0000000000, 159.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 812481.0000000000, 815877.0000000001, 160.0900000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 812482.9999999999, 815877.0000000001, 161.1500000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     coords << 812482.9999999999, 815879.0000000000, 162.3900000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
     coords << 812481.0000000000, 815879.0000000000, 161.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -1703,35 +1691,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 812499.0000000000, 815870.9999999999, 166.7800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 812499.0000000000, 815873.0000000000, 168.0800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 812496.9999999999, 815873.0000000000, 166.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 812496.9999999999, 815870.9999999999, 167.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 812499.0000000000, 815870.9999999999, 168.7800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     coords << 812499.0000000000, 815873.0000000000, 170.0800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
     coords << 812496.9999999999, 815873.0000000000, 168.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     // 8-noded hexahedron shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -1775,35 +1763,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Element 1
     coords << 812496.9999999999, 815870.9999999999, 163.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node10 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 812499.0000000000, 815870.9999999999, 164.7800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node11 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 812499.0000000000, 815873.0000000000, 166.0800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node12 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 812496.9999999999, 815873.0000000000, 164.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node13 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 812496.9999999999, 815870.9999999999, 165.4800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node14 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 812499.0000000000, 815870.9999999999, 166.7800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node15 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     coords << 812499.0000000000, 815873.0000000000, 168.0800000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node16 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
     coords << 812496.9999999999, 815873.0000000000, 166.8400000000;
     std::shared_ptr<mpm::NodeBase<Dim>> node17 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     cell2->add_node(0, node10);
     cell2->add_node(1, node11);
@@ -1864,8 +1852,6 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Particle gravity
     Eigen::Vector3d pgravity;
     pgravity << 0., 0., 9.814;
-    // Phase
-    unsigned phase = 0;
 
     // Nodal coords
     Eigen::Matrix<double, 8, Dim> coords;
@@ -1888,44 +1874,44 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
                          Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(0.5).epsilon(Tolerance));
     }
 
     SECTION("Check particle volume mapping") {
-      cell->map_particle_volume_to_nodes(shapefns_xi, phase, pvolume);
+      cell->map_particle_volume_to_nodes(shapefns_xi, pvolume);
       REQUIRE(nodes.size() == 8);
       for (const auto& node : nodes)
-        REQUIRE(node->volume(phase) == Approx(1.0).epsilon(Tolerance));
+        REQUIRE(node->volume() == Approx(1.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle momentum and pressure mapping") {
       // Map particle mass to nodes
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(0.5).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(0.5).epsilon(Tolerance));
 
       // Map momentum to nodes
-      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(0.5).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(0.5).epsilon(Tolerance));
       }
 
       // Update mass and momentum
-      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      cell->map_mass_momentum_to_nodes(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(1.0).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(1.0).epsilon(Tolerance));
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(1.0).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(1.0).epsilon(Tolerance));
       }
 
       // Map particle pressure to nodes
-      cell->map_pressure_to_nodes(shapefns_xi, phase, pmass, ppressure);
+      cell->map_pressure_to_nodes(shapefns_xi, pmass, ppressure);
       for (const auto& node : nodes)
-        REQUIRE(node->pressure(phase) == Approx(6.0).epsilon(Tolerance));
+        REQUIRE(node->pressure() == Approx(6.0).epsilon(Tolerance));
     }
 
     SECTION("Check particle strain") {
@@ -1933,47 +1919,47 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       pmass = 40.;
 
       // Map particle mass to nodes
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(5.).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(5.).epsilon(Tolerance));
 
       // Map momentum to nodes
-      cell->compute_nodal_momentum(shapefns_xi, phase, pmass, pvelocity);
+      cell->compute_nodal_momentum(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(5.).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(5.).epsilon(Tolerance));
       }
 
       // Update mass and momentum
-      cell->map_mass_momentum_to_nodes(shapefns_xi, phase, pmass, pvelocity);
+      cell->map_mass_momentum_to_nodes(shapefns_xi, pmass, pvelocity);
       for (const auto& node : nodes)
-        REQUIRE(node->mass(phase) == Approx(10.).epsilon(Tolerance));
+        REQUIRE(node->mass() == Approx(10.).epsilon(Tolerance));
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < pvelocity.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) == Approx(10.).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(10.).epsilon(Tolerance));
       }
 
       // Update particle mass
       pmass = 80.;
-      cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
+      cell->map_particle_mass_to_nodes(shapefns_xi, pmass);
 
       // Compute nodal velocity
       for (const auto& node : nodes) {
         node->compute_velocity();
         for (unsigned i = 0; i < pvelocity.size(); ++i) {
-          REQUIRE(node->momentum(phase)(i) == Approx(10.0).epsilon(Tolerance));
-          REQUIRE(node->mass(phase) == Approx(20.0).epsilon(Tolerance));
-          REQUIRE(node->velocity(phase)(i) == Approx(0.5).epsilon(Tolerance));
+          REQUIRE(node->momentum()(i) == Approx(10.0).epsilon(Tolerance));
+          REQUIRE(node->mass() == Approx(20.0).epsilon(Tolerance));
+          REQUIRE(node->velocity()(i) == Approx(0.5).epsilon(Tolerance));
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
+      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix);
       REQUIRE(strain_rate.size() == 6);
       for (unsigned i = 0; i < strain_rate.size(); ++i)
         REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
-          cell->compute_strain_rate_centroid(phase);
+          cell->compute_strain_rate_centroid();
       REQUIRE(strain_rate_centroid.size() == 6);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
@@ -1981,12 +1967,12 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     SECTION("Check particle body force mapping") {
       // Compute body force at nodes
-      cell->compute_nodal_body_force(shapefns_xi, phase, pmass, pgravity);
+      cell->compute_nodal_body_force(shapefns_xi, pmass, pgravity);
       Eigen::Vector3d bodyforce;
       bodyforce << 0., 0., 0.5 * 9.814;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < bodyforce.size(); ++i)
-          REQUIRE(node->external_force(phase)(i) ==
+          REQUIRE(node->external_force()(i) ==
                   Approx(bodyforce(i)).epsilon(Tolerance));
       }
     }
@@ -1995,20 +1981,19 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       // Check external force at nodes
       for (const auto& node : nodes)
         for (unsigned i = 0; i < Dim; ++i)
-          REQUIRE(node->external_force(phase)(i) ==
-                  Approx(0.).epsilon(Tolerance));
+          REQUIRE(node->external_force()(i) == Approx(0.).epsilon(Tolerance));
 
       // Apply traction force
       Eigen::Vector3d tractionforce;
       tractionforce << 1.5, 2.5, 3.7;
       // Calculate traction force at nodes
-      cell->compute_nodal_traction_force(shapefns_xi, phase, tractionforce);
+      cell->compute_nodal_traction_force(shapefns_xi, tractionforce);
 
       // Check traction force
       tractionforce *= 0.125;  // traction force * shapefn value (0.25)
       for (const auto& node : nodes)
         for (unsigned i = 0; i < tractionforce.size(); ++i)
-          REQUIRE(node->external_force(phase)(i) ==
+          REQUIRE(node->external_force()(i) ==
                   Approx(tractionforce(i)).epsilon(Tolerance));
     }
 
@@ -2018,8 +2003,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(bmatrix, pvolume, pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector3d> internal_forces;
@@ -2052,7 +2036,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       unsigned j = 0;
       for (const auto& node : nodes) {
         for (unsigned i = 0; i < intforce.size(); ++i)
-          REQUIRE(node->internal_force(phase)(i) ==
+          REQUIRE(node->internal_force()(i) ==
                   Approx(internal_forces.at(j)(i)).epsilon(Tolerance));
         ++j;
       }
@@ -2071,31 +2055,30 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
           momentum(i) = 10. * static_cast<double>(j);
 
         // Nodal mass
-        node->update_mass(false, phase, mass);
-        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+        node->update_mass(false, mass);
+        REQUIRE(node->mass() == Approx(100.0).epsilon(Tolerance));
 
         // Nodal momentum
-        node->update_momentum(false, phase, momentum);
+        node->update_momentum(false, momentum);
         for (unsigned i = 0; i < momentum.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) ==
+          REQUIRE(node->momentum()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
 
         for (unsigned i = 0; i < momentum.size(); ++i)
-          REQUIRE(node->momentum(phase)(i) ==
+          REQUIRE(node->momentum()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
 
         // Compute and check velocity
         node->compute_velocity();
         for (unsigned i = 0; i < Dim; ++i)
-          REQUIRE(node->velocity(phase)(i) ==
+          REQUIRE(node->velocity()(i) ==
                   Approx(0.1 * static_cast<double>(j)).epsilon(Tolerance));
         // Increment j
         ++j;
       }
       // Check interpolate velocity (0, 0)
       xi.setZero();
-      Eigen::Vector3d velocity =
-          cell->interpolate_nodal_velocity(shapefns_xi, phase);
+      Eigen::Vector3d velocity = cell->interpolate_nodal_velocity(shapefns_xi);
 
       Eigen::Vector3d interpolated_velocity;
       interpolated_velocity << 0.45, 0.45, 0.45;
@@ -2108,7 +2091,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi);
 
       interpolated_velocity << 0.5875, 0.5875, 0.5875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -2119,7 +2102,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       xi << -0.5, -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      velocity = cell->interpolate_nodal_velocity(shapefn_xi, phase);
+      velocity = cell->interpolate_nodal_velocity(shapefn_xi);
 
       interpolated_velocity << 0.2875, 0.2875, 0.2875;
       for (unsigned i = 0; i < velocity.size(); ++i)
@@ -2137,9 +2120,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
           acceleration(i) = 10. * static_cast<double>(j);
 
         // Nodal acceleration
-        node->update_acceleration(false, phase, acceleration);
+        node->update_acceleration(false, acceleration);
         for (unsigned i = 0; i < acceleration.size(); ++i)
-          REQUIRE(node->acceleration(phase)(i) ==
+          REQUIRE(node->acceleration()(i) ==
                   Approx(10. * static_cast<double>(j)).epsilon(Tolerance));
 
         // Increment j
@@ -2149,7 +2132,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       xi.setZero();
       // Check interpolate acceleration (0, 0, 0)
       Eigen::Vector3d check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefns_xi, phase);
+          cell->interpolate_nodal_acceleration(shapefns_xi);
 
       Eigen::Vector3d interpolated_acceleration;
       interpolated_acceleration << 45.0, 45.0, 45.0;
@@ -2162,8 +2145,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
+      check_acceleration = cell->interpolate_nodal_acceleration(shapefn_xi);
 
       interpolated_acceleration << 58.75, 58.75, 58.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -2174,8 +2156,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       xi << -0.5, -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      check_acceleration =
-          cell->interpolate_nodal_acceleration(shapefn_xi, phase);
+      check_acceleration = cell->interpolate_nodal_acceleration(shapefn_xi);
 
       interpolated_acceleration << 28.75, 28.75, 28.75;
       for (unsigned i = 0; i < check_acceleration.size(); ++i)
@@ -2195,18 +2176,17 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         pressure = 10. * static_cast<double>(j);
 
         // Nodal mass
-        node->update_mass(false, phase, mass);
-        REQUIRE(node->mass(phase) == Approx(100.0).epsilon(Tolerance));
+        node->update_mass(false, mass);
+        REQUIRE(node->mass() == Approx(100.0).epsilon(Tolerance));
 
         // Nodal pressure
-        node->update_mass_pressure(phase, mass * pressure);
-        REQUIRE(node->pressure(phase) == Approx(pressure).epsilon(Tolerance));
+        node->update_mass_pressure(mass * pressure);
+        REQUIRE(node->pressure() == Approx(pressure).epsilon(Tolerance));
         // Increment j
         ++j;
       }
       // Check interpolate acceleration (0, 0, 0)
-      double check_pressure =
-          cell->interpolate_nodal_pressure(shapefns_xi, phase);
+      double check_pressure = cell->interpolate_nodal_pressure(shapefns_xi);
 
       double interpolated_pressure;
       interpolated_pressure = 45.;
@@ -2218,7 +2198,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       auto shapefn_xi =
           element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                            Eigen::Matrix<double, Dim, 1>::Zero());
-      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi);
 
       interpolated_pressure = 58.75;
       REQUIRE(check_pressure ==
@@ -2228,7 +2208,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       xi << -0.5, -0.5, -0.5;
       shapefn_xi = element->shapefn(xi, Eigen::Matrix<double, Dim, 1>::Zero(),
                                     Eigen::Matrix<double, Dim, 1>::Zero());
-      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi, phase);
+      check_pressure = cell->interpolate_nodal_pressure(shapefn_xi);
 
       interpolated_pressure = 28.75;
       REQUIRE(check_pressure ==

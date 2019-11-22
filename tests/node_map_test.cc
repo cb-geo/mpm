@@ -15,8 +15,6 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -25,17 +23,17 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
   Eigen::Vector2d coords;
   coords.setZero();
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id1, coords);
 
   // Node 2
   mpm::Index id2 = 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id2, coords);
 
   // Node 3
   mpm::Index id3 = 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id3, coords);
 
   // Node map
   auto nodemap = std::make_shared<mpm::Map<mpm::NodeBase<Dim>>>();
@@ -136,8 +134,6 @@ TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Tolerance
   const double Tolerance = 1.E-7;
 
@@ -146,17 +142,17 @@ TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
   Eigen::Vector3d coords;
   coords.setZero();
   std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id1, coords);
 
   // Node 2
   mpm::Index id2 = 1;
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id2, coords);
 
   // Node 3
   mpm::Index id3 = 2;
   std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-      std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id3, coords);
+      std::make_shared<mpm::Node<Dim, Dof>>(id3, coords);
 
   // Node map
   auto nodemap = std::make_shared<mpm::Map<mpm::NodeBase<Dim>>>();

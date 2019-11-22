@@ -18,8 +18,6 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -34,19 +32,19 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 0.656514162228664, 0.448587131356584;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 0.609997617675458, 0.448995487014756;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 0.612187210083002, 0.414580484205138;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0.651629357356265, 0.391627886274249;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -85,19 +83,19 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 0.049340385470457, 0.546167667109886;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 0.049008570276153, 0.497592363325129;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 0.097545161257934, 0.490392640151913;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0.098928337700656, 0.541016130614386;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -132,19 +130,19 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 0.899835351184034, 2.41201458730691;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 0.900000000003745, 2.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 0.800000000003329, 2.5;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0.804253384820319, 2.41407134328757;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -191,19 +189,19 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << -2.0, -2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 2.0, -2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 2.0, 2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << -2.0, 2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -291,19 +289,19 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 2.0, 1.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 4.0, 2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 2.0, 4.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 1.0, 3.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -375,27 +373,27 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 0.375, 0.1063;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 0.38, 0.10325;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 0.38, 0.10825;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0.375, 0.1113;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 0.375, 0.1013;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 0.38, 0.098247997;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -466,27 +464,27 @@ TEST_CASE("Point in cell 2D", "[PointInCell][2D][quad]") {
 
     coords << 0.499732, 0.00661057;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 0.501049, 0.0062308;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 0.499732, 0.00911057;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0.501049, 0.0087308;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 0.499732, 0.0116106;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 0.501049, 0.0112308;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     // 4-noded quadrilateral shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
@@ -533,8 +531,6 @@ TEST_CASE("Point in triangular cell 2D", "[PointInCell][2D][tri]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 3;
   // Tolerance
@@ -549,15 +545,15 @@ TEST_CASE("Point in triangular cell 2D", "[PointInCell][2D][tri]") {
 
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 2.0, 2.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 1.5, 3.0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     // 3-noded triangle shape functions
     std::shared_ptr<mpm::Element<Dim>> element =
