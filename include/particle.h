@@ -309,7 +309,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
-  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties_;
+  std::map<std::string, std::function<Eigen::VectorXd>> properties_;
 
 };  // Particle class
 }  // namespace mpm
