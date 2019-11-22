@@ -21,8 +21,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Dim = 2;
   // Degrees of freedom
   const unsigned Dof = 2;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 4;
   // Tolerance
@@ -72,13 +70,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     Eigen::Vector2d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -92,28 +90,28 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Define nodes
     coords << 0., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     // Add node 0 and check
     REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     // Add node 1 and check
     REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     // Add node 2 and check
     REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // Add node 3 and check
     REQUIRE(mesh->add_node(node3) == true);
@@ -198,12 +196,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     Eigen::Vector2d coords;
     coords.setZero();
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(id1, coords);
 
     // Node 2
     mpm::Index id2 = 1;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(id2, coords);
 
     // Create a mesh
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
@@ -371,28 +369,28 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Define nodes
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     // Add node 0 and check
     REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     // Add node 1 and check
     REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     // Add node 2 and check
     REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0., 2.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     // Add node 3 and check
     REQUIRE(mesh->add_node(node3) == true);
@@ -430,12 +428,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -654,24 +652,23 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             mesh->create_particles(gpid, particle_type, coordinates);
             REQUIRE(mesh->nparticles() == nparticles);
 
-            const unsigned phase = 0;
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
             std::string attribute = "stresses";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle strains
             attribute = "strains";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle invalid data
             attribute = "invalid";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
+            REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
 
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
@@ -687,7 +684,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -742,7 +739,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
@@ -933,8 +930,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Dim = 3;
   // Degrees of freedom
   const unsigned Dof = 6;
-  // Number of phases
-  const unsigned Nphases = 1;
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Tolerance
@@ -984,13 +979,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     Eigen::Vector3d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -1004,42 +999,42 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Define nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     REQUIRE(mesh->add_node(node0) == true);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     REQUIRE(mesh->add_node(node1) == true);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     REQUIRE(mesh->add_node(node2) == true);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
     REQUIRE(mesh->add_node(node3) == true);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     REQUIRE(mesh->add_node(node4) == true);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
     REQUIRE(mesh->add_node(node5) == true);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
     REQUIRE(mesh->add_node(node6) == true);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
     REQUIRE(mesh->add_node(node7) == true);
 
     // Create cell1
@@ -1100,12 +1095,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     Eigen::Vector3d coords;
     coords.setZero();
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(id1, coords);
 
     // Node 2
     mpm::Index id2 = 1;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -1317,35 +1312,35 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Define nodes
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     // Create cell1
     coords.setZero();
@@ -1386,12 +1381,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Particle 1
     coords << 1.0, 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     // Particle 2
     coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1613,24 +1608,23 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               REQUIRE(mesh->assign_particles_cells(particles_cells) == false);
             }
 
-            const unsigned phase = 0;
             // Particles coordinates
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
             std::string attribute = "stresses";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle strains
             attribute = "strains";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
             // Particle invalid data
             attribute = "invalid";
-            REQUIRE(mesh->particles_vector_data(attribute, phase).size() == 0);
+            REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
@@ -1644,7 +1638,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -1734,7 +1728,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);

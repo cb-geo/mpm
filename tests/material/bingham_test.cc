@@ -107,23 +107,21 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index cell_id = 0;
     const unsigned Dim = 2;
     const unsigned Dof = 2;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> element =
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
@@ -141,9 +139,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -189,23 +187,21 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index mesh_id = 0;
     const unsigned Dim = 2;
     const unsigned Dof = 2;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
@@ -227,9 +223,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -284,23 +280,21 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index mesh_id = 0;
     const unsigned Dim = 2;
     const unsigned Dof = 2;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
@@ -322,9 +316,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -448,35 +442,33 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index cell_id = 0;
     const unsigned Dim = 3;
     const unsigned Dof = 3;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
     coords << -2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     coords << 2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
     coords << 2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
     coords << -2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
         Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
@@ -498,9 +490,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -546,35 +538,33 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index cell_id = 0;
     const unsigned Dim = 3;
     const unsigned Dof = 3;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
     coords << -2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     coords << 2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
     coords << 2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
     coords << -2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
         Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
@@ -601,9 +591,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -657,35 +647,33 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index cell_id = 0;
     const unsigned Dim = 3;
     const unsigned Dof = 3;
-    const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
-    const unsigned phase = 0;
     const double dt = 1;
 
     coords << -2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(0, coords);
     coords << 2, 2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(1, coords);
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(2, coords);
     coords << -2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(3, coords);
     coords << -2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(4, coords);
     coords << 2, -2, -2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(5, coords);
     coords << 2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(6, coords);
     coords << -2, -2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
-        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+        std::make_shared<mpm::Node<Dim, Dof>>(7, coords);
 
     std::shared_ptr<mpm::Element<Dim>> shapefn =
         Factory<mpm::Element<Dim>>::instance()->create("ED3H8");
@@ -712,9 +700,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
