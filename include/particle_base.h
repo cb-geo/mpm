@@ -19,6 +19,9 @@ class Material;
 //! Global index type for the particleBase
 using Index = unsigned long long;
 
+//! Particle phases
+enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
+
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
 //! \details ParticleBase class: id_ and coordinates.

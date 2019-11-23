@@ -422,7 +422,7 @@ bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
       // Compute at centroid
       // Strain rate for reduced integration
       Eigen::VectorXd strain_rate_centroid =
-          cell_->compute_strain_rate_centroid(phase_);
+          cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
       this->volume_ *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
       this->mass_density_ = this->mass_density_ /
                             (1. + dt * strain_rate_centroid.head(Tdim).sum());
@@ -467,8 +467,8 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
       // Map particle mass and momentum to nodes
-      this->cell_->map_mass_momentum_to_nodes(this->shapefn_, phase_, mass_,
-                                              velocity_);
+      this->cell_->map_mass_momentum_to_nodes(
+          this->shapefn_, mpm::ParticlePhase::Solid, mass_, velocity_);
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -483,7 +483,8 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Strain rate
-  const auto strain_rate = cell_->compute_strain_rate(bmatrix_, phase_);
+  const auto strain_rate =
+      cell_->compute_strain_rate(bmatrix_, mpm::ParticlePhase::Solid);
   // particle_strain_rate
   Eigen::Matrix<double, 6, 1> particle_strain_rate;
   particle_strain_rate.setZero();
@@ -520,7 +521,7 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Compute at centroid
   // Strain rate for reduced integration
   Eigen::VectorXd strain_rate_centroid =
-      cell_->compute_strain_rate_centroid(phase_);
+      cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
 
   // Check to see if value is below threshold
   for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
@@ -561,8 +562,8 @@ bool mpm::Particle<Tdim>::compute_stress() {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
-  cell_->compute_nodal_body_force(this->shapefn_, phase_, this->mass_,
-                                  pgravity);
+  cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Solid,
+                                  this->mass_, pgravity);
 }
 
 //! Map internal force
@@ -574,8 +575,9 @@ bool mpm::Particle<Tdim>::map_internal_force() {
     if (material_ != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(this->bmatrix_, phase_, this->volume_,
-                                          -1. * this->stress_);
+      cell_->compute_nodal_internal_force(this->bmatrix_,
+                                          mpm::ParticlePhase::Solid,
+                                          this->volume_, -1. * this->stress_);
     } else {
       throw std::runtime_error("Material is invalid");
     }
@@ -628,8 +630,8 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_)
     // Map particle traction forces to nodes
-    cell_->compute_nodal_traction_force(this->shapefn_, phase_,
-                                        this->traction_);
+    cell_->compute_nodal_traction_force(
+        this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
 }
 
 // Compute updated position of the particle
@@ -641,7 +643,8 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt) {
     if (cell_ != nullptr) {
       // Get interpolated nodal acceleration
       const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-          cell_->interpolate_nodal_acceleration(this->shapefn_, phase_);
+          cell_->interpolate_nodal_acceleration(this->shapefn_,
+                                                mpm::ParticlePhase::Solid);
 
       // Update particle velocity from interpolated nodal acceleration
       this->velocity_ += nodal_acceleration * dt;
@@ -651,7 +654,8 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt) {
 
       // Get interpolated nodal velocity
       const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_, phase_);
+          cell_->interpolate_nodal_velocity(this->shapefn_,
+                                            mpm::ParticlePhase::Solid);
 
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
@@ -678,7 +682,8 @@ bool mpm::Particle<Tdim>::compute_updated_position_velocity(double dt) {
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
       const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_, phase_);
+          cell_->interpolate_nodal_velocity(this->shapefn_,
+                                            mpm::ParticlePhase::Solid);
 
       // Update particle velocity to interpolated nodal velocity
       this->velocity_ = nodal_velocity;
@@ -729,8 +734,8 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
       // Map particle mass and momentum to nodes
-      this->cell_->map_pressure_to_nodes(this->shapefn_, phase_, mass_,
-                                         pressure_);
+      this->cell_->map_pressure_to_nodes(
+          this->shapefn_, mpm::ParticlePhase::Solid, mass_, pressure_);
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -749,8 +754,8 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr)
       // Update particle pressure to interpolated nodal pressure
-      this->pressure_ =
-          cell_->interpolate_nodal_pressure(this->shapefn_, phase_);
+      this->pressure_ = cell_->interpolate_nodal_pressure(
+          this->shapefn_, mpm::ParticlePhase::Solid);
     else
       throw std::runtime_error(
           "Cell is not initialised! "

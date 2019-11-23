@@ -267,8 +267,6 @@ class Particle : public ParticleBase<Tdim> {
   double mass_;
   //! Volume
   double volume_;
-  //! Phase
-  unsigned phase_{0};
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
