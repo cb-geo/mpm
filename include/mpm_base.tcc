@@ -328,9 +328,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
@@ -487,7 +486,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, phase, set_material));
+                            std::placeholders::_1, set_material));
       }
     }
     status = true;

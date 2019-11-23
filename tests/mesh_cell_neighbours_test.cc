@@ -141,7 +141,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5;
         std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-            std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+            std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
 
@@ -329,7 +329,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5, 1.5;
         std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-            std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+            std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
 
