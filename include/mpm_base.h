@@ -24,7 +24,7 @@
 #include "particle.h"
 
 namespace mpm {
-  
+
 //! Stress update method
 //! USF: Update Stress First
 //! USL: Update Stress Last
