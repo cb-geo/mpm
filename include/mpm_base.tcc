@@ -35,6 +35,18 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
+    // Stress update method (USF/USL/MUSL)
+    try {
+      if (analysis_.find("stress_update") != analysis_.end())
+        stress_update_ = mpm::stress_update.at(
+            analysis_["stress_update"].template get<std::string>());
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: {}. Stress update method is not specified, using USF as "
+          "default\n",
+          __FILE__, __LINE__, exception.what());
+    }
+
     // Velocity update
     try {
       velocity_update_ = analysis_["velocity_update"].template get<bool>();
