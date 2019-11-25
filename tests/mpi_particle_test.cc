@@ -1,13 +1,12 @@
 #include <limits>
 
+#include <iostream>
+
 #include "catch.hpp"
-// MPI
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
 
 #include "data_types.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
+#include "mpi_datatypes.h"
 #include "particle.h"
 
 //! \brief Check particle class for 1D case
@@ -82,6 +81,55 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
     h5_particle.cell_id = 1;
 
     h5_particle.volume = 2.;
+
+    // Check send and receive particle with HDF5
+    SECTION("Check send and receive particle with HDF5") {
+#ifdef USE_MPI
+      // Get number of MPI ranks
+      int mpi_size;
+      MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+      // MPI size should be 2
+      if (mpi_size == 2) {
+        // Initialize MPI datatypes
+        mpm::init_mpi_datatypes();
+
+        // Get my rank and do the corresponding job
+        enum rank_roles { SENDER, RECEIVER };
+        int mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+        switch (mpi_rank) {
+          case SENDER: {
+            // Send the message
+            struct mpm::HDF5Particle buffer;
+            buffer.id = 20;
+            buffer.mass = 1.83;
+            buffer.volume = 5.6;
+            std::cout << "MPI process " << mpi_rank
+                      << " sends particle:\n\t- id = " << buffer.id
+                      << "\n\t- mass = " << buffer.mass
+                      << "\n\t- volume = " << buffer.volume << "\n";
+            MPI_Send(&buffer, 1, mpm::hdf5particle_type, RECEIVER, 0,
+                     MPI_COMM_WORLD);
+            break;
+          }
+          case RECEIVER: {
+            // Receive the messid
+            struct mpm::HDF5Particle received;
+            MPI_Recv(&received, 1, mpm::hdf5particle_type, SENDER, 0,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            std::cout << "MPI process " << mpi_rank
+                      << " received particle:\n\t- id = " << received.id
+                      << "\n\t- mass = " << received.mass
+                      << "\n\t- volume = " << received.volume << "\n";
+
+            break;
+          }
+        }
+      }
+#endif
+    }
 
     // Check initialise particle from HDF5 file
     SECTION("Check initialise particle HDF5") {

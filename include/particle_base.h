@@ -8,7 +8,7 @@
 
 #include "cell.h"
 #include "data_types.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
 #include "material/material.h"
 
 namespace mpm {

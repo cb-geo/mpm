@@ -24,7 +24,7 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
 #include "logger.h"
 #include "material/material.h"
 #include "node.h"

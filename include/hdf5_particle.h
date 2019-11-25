@@ -5,6 +5,8 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "data_types.h"
+
 namespace mpm {
 
 // Define a struct of particle
