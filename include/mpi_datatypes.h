@@ -8,17 +8,28 @@
 #include "hdf5_particle.h"
 
 namespace mpm {
-// Create the datatype
-MPI_Datatype hdf5particle_type;
+// Create the Particle datatype
+MPI_Datatype MPIParticle;
 
-void init_mpi_datatypes() {
-  int lengths[3] = {1, 1, 1};
-  const MPI_Aint displacements[3] = {
-      0, sizeof(unsigned long long),
+void init_mpi_particle_datatypes() {
+  // Number of blocks to create
+  const unsigned nblocks = 3;
+  // Array containing the length of each block
+  int lengths[nblocks] = {1, 1, 1};
+  // Array containing the displacement for each block, expressed in bytes. The
+  // displacement is the distance between the start of the MPI datatype created
+  // and the start of the block
+  const MPI_Aint displacements[nblocks] = {
+      0,                           // id
+      sizeof(unsigned long long),  // mass
       sizeof(unsigned long long) + sizeof(double)};
-  MPI_Datatype types[3] = {MPI_UNSIGNED_LONG_LONG, MPI_DOUBLE, MPI_DOUBLE};
-  MPI_Type_create_struct(3, lengths, displacements, types, &hdf5particle_type);
-  MPI_Type_commit(&hdf5particle_type);
+  // Array containing the MPI datatypes to replicate to make each block.
+  MPI_Datatype types[nblocks] = {MPI_UNSIGNED_LONG_LONG,  // id
+                                 MPI_DOUBLE,              // mass
+                                 MPI_DOUBLE};
+  // Create particle data types
+  MPI_Type_create_struct(nblocks, lengths, displacements, types, &MPIParticle);
+  MPI_Type_commit(&MPIParticle);
 }
 }  // namespace mpm
 

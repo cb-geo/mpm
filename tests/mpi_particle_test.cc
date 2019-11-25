@@ -92,7 +92,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
       // MPI size should be 2
       if (mpi_size == 2) {
         // Initialize MPI datatypes
-        mpm::init_mpi_datatypes();
+        mpm::init_mpi_particle_datatypes();
 
         // Get my rank and do the corresponding job
         enum rank_roles { SENDER, RECEIVER };
@@ -102,23 +102,19 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         switch (mpi_rank) {
           case SENDER: {
             // Send the message
-            struct mpm::HDF5Particle buffer;
-            buffer.id = 20;
-            buffer.mass = 1.83;
-            buffer.volume = 5.6;
             std::cout << "MPI process " << mpi_rank
-                      << " sends particle:\n\t- id = " << buffer.id
-                      << "\n\t- mass = " << buffer.mass
-                      << "\n\t- volume = " << buffer.volume << "\n";
-            MPI_Send(&buffer, 1, mpm::hdf5particle_type, RECEIVER, 0,
+                      << " sends particle:\n\t- id = " << h5_particle.id
+                      << "\n\t- mass = " << h5_particle.mass
+                      << "\n\t- volume = " << h5_particle.volume << "\n";
+            MPI_Send(&h5_particle, 1, mpm::MPIParticle, RECEIVER, 0,
                      MPI_COMM_WORLD);
             break;
           }
           case RECEIVER: {
             // Receive the messid
             struct mpm::HDF5Particle received;
-            MPI_Recv(&received, 1, mpm::hdf5particle_type, SENDER, 0,
-                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&received, 1, mpm::MPIParticle, SENDER, 0, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
             std::cout << "MPI process " << mpi_rank
                       << " received particle:\n\t- id = " << received.id
                       << "\n\t- mass = " << received.mass

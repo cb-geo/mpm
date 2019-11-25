@@ -19,6 +19,7 @@ jobs:
             cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             ninja -j2
             ctest -VV
+            mpirun -n 2 ./mpmtest [hdf5]
   clang:
     docker:
       - image: quay.io/cbgeo/mpm
