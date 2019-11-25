@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "data_types.h"
 #include "hdf5.h"
 #include "material/material.h"
 
@@ -15,9 +16,6 @@ namespace mpm {
 // Forward declaration of Material
 template <unsigned Tdim>
 class Material;
-
-//! Global index type for the particleBase
-using Index = unsigned long long;
 
 //! Particle phases
 enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
