@@ -213,6 +213,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::HDF5Particle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
+    h5_particle.volume = 1.0;
 
     Eigen::Vector3d coords;
     coords << 1., 0., 0.;
@@ -269,6 +270,11 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->id() == h5_particle.id);
     // Check particle mass
     REQUIRE(particle->mass(Phase) == h5_particle.mass);
+    // Check particle volume
+    REQUIRE(particle->volume(Phase) == h5_particle.volume);
+    // Check particle mass density
+    REQUIRE(particle->mass_density(Phase) ==
+            h5_particle.mass / h5_particle.volume);
     // Check particle status
     REQUIRE(particle->status() == h5_particle.status);
 
@@ -840,8 +846,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(1.0).epsilon(Tolerance));
+    REQUIRE(particle->mass_density(phase) == Approx(1000).epsilon(Tolerance));
     REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(1.2).epsilon(Tolerance));
+    REQUIRE(particle->mass_density(phase) ==
+            Approx(833.333333333).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
@@ -1862,8 +1871,11 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume(phase) == Approx(8.0).epsilon(Tolerance));
+    REQUIRE(particle->mass_density(phase) == Approx(1000).epsilon(Tolerance));
     REQUIRE(particle->update_volume_strainrate(phase, dt) == true);
     REQUIRE(particle->volume(phase) == Approx(12.0).epsilon(Tolerance));
+    REQUIRE(particle->mass_density(phase) ==
+            Approx(666.666667).epsilon(Tolerance));
 
     // Compute stress
     REQUIRE(particle->compute_stress(phase) == true);
