@@ -91,7 +91,8 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
        gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_)},
       // {"e_image",
       //  e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ /
-      //  p_image_initial_)},      // Image pressure
+      //  p_image_initial_)},      
+      // Image pressure
       {"p_image", p_image_initial_},
       // State variable psi
       {"psi_image",
@@ -99,8 +100,7 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
            (gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_))},
       // {"psi_image", void_ratio_initial_ -
       //                   (e_max_ - (e_max_ - e_min_) / log(crushing_pressure_
-      //                   /
-      //                                                     p_image_initial_))},
+      //                   / p_image_initial_))},
       // p_cohesion
       {"p_cohesion", p_cohesion_initial_},
       // p_cohesion degradation function
@@ -601,10 +601,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   // Set elastic tensor
   this->compute_elastic_tensor();
-
-  // Drained check
-  dstrain_neg(0) = -1 * de_(0, 2) / (de_(0, 0) + de_(0, 1)) * dstrain_neg(2);
-  dstrain_neg(1) = -1 * de_(1, 2) / (de_(1, 0) + de_(1, 1)) * dstrain_neg(2);
 
   // Trial stress - elastic
   Vector6d trial_stress = stress_neg + (this->de_ * dstrain_neg);
