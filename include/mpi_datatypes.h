@@ -51,9 +51,8 @@ void init_mpi_particle_datatypes() {
       sizeof(unsigned long long) + 25 * sizeof(double),  // gamma_yz
       sizeof(unsigned long long) + 26 * sizeof(double),  // gamma_zx
       sizeof(unsigned long long) + 27 * sizeof(double),  // epsv
-      sizeof(unsigned long long) + 28 * sizeof(double),  // status
-      sizeof(unsigned long long) + 28 * sizeof(double) +
-      sizeof(bool)                                        // cellid
+      sizeof(unsigned long long) + 28 * sizeof(double),  // cellid
+      2 * sizeof(unsigned long long) + 28 * sizeof(double) // status
   };
   // Array containing the MPI datatypes to replicate to make each block.
   MPI_Datatype types[nblocks] = {
@@ -86,8 +85,8 @@ void init_mpi_particle_datatypes() {
     MPI_DOUBLE,              // gamma_yz
     MPI_DOUBLE,              // gamma_zx
     MPI_DOUBLE,              // epsv
-    MPI_C_BOOL,              // status
-    MPI_UNSIGNED_LONG_LONG   // cell_id
+    MPI_UNSIGNED_LONG_LONG,  // cell_id
+    MPI_C_BOOL               // status
   };
   // clang-format on
   // Create particle data types
