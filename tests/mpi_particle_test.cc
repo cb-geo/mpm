@@ -194,7 +194,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         int mpi_rank;
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-        // Initial particle coordinates
+        // Initial particle
         Eigen::Matrix<double, 3, 1> pcoordinates;
         pcoordinates.setZero();
 
