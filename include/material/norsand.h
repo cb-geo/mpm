@@ -10,8 +10,8 @@
 namespace mpm {
 
 //! NorSand class
-//! \brief Mohr Coulomb material model
-//! \details Mohr Coulomb material model with softening
+//! \brief NorSand material model
+//! \details NorSand material model with softening
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class NorSand : public Material<Tdim> {
@@ -111,18 +111,14 @@ class NorSand : public Material<Tdim> {
   double density_{std::numeric_limits<double>::max()};
   //! Youngs modulus
   double youngs_modulus_{std::numeric_limits<double>::max()};
-  //! Shear modulusc constant A
-  double shear_modulus_constant_{std::numeric_limits<double>::max()};
-  //! Shear modulus exponent Gn
-  double shear_modulus_exponent_{std::numeric_limits<double>::max()};
+  //! Poisson ratio
+  double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Bulk modulus
   double bulk_modulus_{std::numeric_limits<double>::max()};
   //! Shear modulus
   double shear_modulus_{std::numeric_limits<double>::max()};
   //! Reference pressure pref
   double reference_pressure_{std::numeric_limits<double>::max()};
-  //! Poisson ratio
-  double poisson_ratio_{std::numeric_limits<double>::max()};
   //! Critical state friction angle
   double friction_cs_{std::numeric_limits<double>::max()};
   //! Critical state coefficient M in triaxial compression
@@ -137,6 +133,12 @@ class NorSand : public Material<Tdim> {
   double e_max_{std::numeric_limits<double>::max()};
   //! Crushing pressure
   double crushing_pressure_{std::numeric_limits<double>::max()};
+  //! Lambda volumetric
+  double lambda_{std::numeric_limits<double>::max()};
+  //! Kappa swelling volumetric
+  double kappa_{std::numeric_limits<double>::max()};
+  //! Gamma void ratio at reference pressure
+  double gamma_{std::numeric_limits<double>::max()};
   //! Dilatancy coefficient
   double chi_{std::numeric_limits<double>::max()};
   //! Hardening modulus

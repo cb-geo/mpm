@@ -40,6 +40,9 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   jmaterial["e_min"] = 0.542;
   jmaterial["e_max"] = 1.000;
   jmaterial["crushing_pressure"] = 10000000.0;
+  jmaterial["lambda"] = 0.1;
+  jmaterial["kappa"] = 0.03;
+  jmaterial["gamma"] = 1.3;
   jmaterial["chi"] = 3.5;
   jmaterial["hardening_modulus"] = 200.0;
   jmaterial["void_ratio_initial"] = 0.85;
@@ -99,6 +102,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
             Approx(jmaterial["e_max"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("crushing_pressure") ==
             Approx(jmaterial["crushing_pressure"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("lambda") ==
+            Approx(jmaterial["lambda"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("kappa") ==
+            Approx(jmaterial["kappa"]).epsilon(Tolerance));
+    REQUIRE(material->template property<double>("gamma") ==
+            Approx(jmaterial["gamma"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("chi") ==
             Approx(jmaterial["chi"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("hardening_modulus") ==
@@ -131,7 +140,7 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
       REQUIRE(state_variables.at("p_image") ==
               Approx(87014.6).epsilon(Tolerance));
       REQUIRE(state_variables.at("psi_image") ==
-              Approx(-0.053462379).epsilon(Tolerance));
+              Approx(-0.0033924079).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_cohesion") ==
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("zeta_cohesion") ==
@@ -166,9 +175,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Initialise stress
     mpm::Material<Dim>::Vector6d stress;
     stress.setZero();
-    REQUIRE(stress(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(0.).epsilon(Tolerance));
+    stress(0) = -200000.;
+    stress(1) = -200000.;
+    stress(2) = -200000.;
+    REQUIRE(stress(0) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-200000.).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
@@ -176,12 +188,12 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
     dstrain.setZero();
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000000;
-    dstrain(4) = 0.0000000;
-    dstrain(5) = 0.0000000;
+    dstrain(0) = -0.0010000;
+    dstrain(1) = -0.0005000;
+    dstrain(2) = -0.0005000;
+    dstrain(3) = -0.0000000;
+    dstrain(4) = -0.0000000;
+    dstrain(5) = -0.0000000;
 
     // Compute updated stress
     mpm::dense_map state_vars = material->initialise_state_variables();
@@ -189,20 +201,20 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stresses
-    REQUIRE(stress(0) == Approx(1.923076923076923E+04).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(1.538461538461539E+04).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(1.538461538461539E+04).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(-1.923076923076923E+04).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-1.538461538461539E+04).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-1.538461538461539E+04).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
 
     // Initialise dstrain
-    dstrain(0) = 0.0010000;
-    dstrain(1) = 0.0005000;
-    dstrain(2) = 0.0005000;
-    dstrain(3) = 0.0000100;
-    dstrain(4) = 0.0000200;
-    dstrain(5) = 0.0000300;
+    dstrain(0) = -0.0010000;
+    dstrain(1) = -0.0005000;
+    dstrain(2) = -0.0005000;
+    dstrain(3) = -0.0000100;
+    dstrain(4) = -0.0000200;
+    dstrain(5) = -0.0000300;
 
     // Reset stress
     stress.setZero();
