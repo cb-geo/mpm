@@ -13,9 +13,6 @@
 
 namespace mpm {
 
-//! Global index type for the particle
-using Index = unsigned long long;
-
 //! Particle class
 //! \brief Base class that stores the information about particles
 //! \details Particle class: id_ and coordinates.

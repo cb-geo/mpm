@@ -20,12 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace mpm {
-
-//! Global index type for the cell
-using Index = unsigned long long;
-
-}  // namespace mpm
+#include "data_types.h"
 
 //! VTK Writer class
 //! \brief VTK writer class
