@@ -21,9 +21,6 @@
 
 namespace mpm {
 
-//! Global index type for the cell
-using Index = unsigned long long;
-
 //! Cell class
 //! \brief Base class that stores the information about cells
 //! \tparam Tdim Dimension
