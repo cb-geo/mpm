@@ -101,7 +101,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -141,9 +141,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -182,7 +182,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -227,9 +227,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -277,7 +277,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -322,9 +322,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -442,7 +442,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -498,9 +498,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -540,7 +540,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -601,9 +601,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -651,7 +651,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -712,9 +712,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;

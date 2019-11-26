@@ -175,6 +175,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
+    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
   )
   add_executable(mpmtest ${test_src})
   target_link_libraries(mpmtest lmpm)
