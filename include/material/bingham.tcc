@@ -36,10 +36,8 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
-  const unsigned phase = 0;
-
   // Get strain rate
-  auto strain_rate = ptr->strain_rate(phase);
+  auto strain_rate = ptr->strain_rate();
 
   // Convert strain rate to rate of deformation tensor
   strain_rate.tail(3) *= 0.5;
@@ -81,7 +79,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -ptr->pressure(phase) * this->dirac_delta() + tau;
+      -ptr->pressure() * this->dirac_delta() + tau;
 
   return updated_stress;
 }
