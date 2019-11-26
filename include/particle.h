@@ -20,8 +20,7 @@ using Index = unsigned long long;
 //! \brief Base class that stores the information about particles
 //! \details Particle class: id_ and coordinates.
 //! \tparam Tdim Dimension
-//! \tparam Tnphases Number of phases
-template <unsigned Tdim, unsigned Tnphases>
+template <unsigned Tdim>
 class Particle : public ParticleBase<Tdim> {
  public:
   //! Define a vector of size dimension
@@ -45,10 +44,10 @@ class Particle : public ParticleBase<Tdim> {
   ~Particle() override{};
 
   //! Delete copy constructor
-  Particle(const Particle<Tdim, Tnphases>&) = delete;
+  Particle(const Particle<Tdim>&) = delete;
 
   //! Delete assignment operator
-  Particle& operator=(const Particle<Tdim, Tnphases>&) = delete;
+  Particle& operator=(const Particle<Tdim>&) = delete;
 
   //! Initialise particle from HDF5 data
   //! \param[in] particle HDF5 data of particle
@@ -56,9 +55,8 @@ class Particle : public ParticleBase<Tdim> {
   bool initialise_particle(const HDF5Particle& particle) override;
 
   //! Retrun particle data as HDF5
-  //! \param[in] phase Properties of a given phase
   //! \retval particle HDF5 data of the particle
-  HDF5Particle hdf5(unsigned phase) const override;
+  HDF5Particle hdf5() const override;
 
   //! Initialise properties
   void initialise() override;
@@ -102,146 +100,112 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_shapefn() override;
 
   //! Assign volume
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] volume Volume of particle for the phase
-  bool assign_volume(unsigned phase, double volume) override;
+  //! \param[in] volume Volume of particle
+  bool assign_volume(double volume) override;
 
   //! Return volume
-  //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return volume_(phase); }
+  double volume() const override { return volume_; }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
   //! Compute volume as cell volume / nparticles
-  //! \param[in] phase Index corresponding to the phase
-  bool compute_volume(unsigned phase) override;
+  bool compute_volume() override;
 
   //! Update volume based on centre volumetric strain rate
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool update_volume_strainrate(unsigned phase, double dt) override;
+  bool update_volume_strainrate(double dt) override;
+
+  //! Return mass density
+  //! \param[in] phase Index corresponding to the phase
+  double mass_density() const override { return mass_density_; }
 
   //! Compute mass as volume * density
-  //! \param[in] phase Index corresponding to the phase
-  bool compute_mass(unsigned phase) override;
+  bool compute_mass() override;
 
   //! Map particle mass and momentum to nodes
-  //! \param[in] phase Index corresponding to the phase
-  bool map_mass_momentum_to_nodes(unsigned phase) override;
+  bool map_mass_momentum_to_nodes() override;
 
   //! Assign nodal mass to particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
-  void assign_mass(unsigned phase, double mass) override {
-    mass_(phase) = mass;
-  }
+  void assign_mass(double mass) override { mass_ = mass; }
 
   //! Return mass of the particles
-  //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const override { return mass_(phase); }
+  double mass() const override { return mass_; }
 
   //! Assign material
   //! \param[in] material Pointer to a material
   bool assign_material(
-      unsigned phase, const std::shared_ptr<Material<Tdim>>& material) override;
+      const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Compute strain
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  void compute_strain(unsigned phase, double dt) override;
+  void compute_strain(double dt) override;
 
   //! Return strain of the particle
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> strain(unsigned phase) const override {
-    return strain_.col(phase);
-  }
+  Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
 
   //! Return strain rate of the particle
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> strain_rate(unsigned phase) const override {
-    return strain_rate_.col(phase);
+  Eigen::Matrix<double, 6, 1> strain_rate() const override {
+    return strain_rate_;
   };
 
   //! Return volumetric strain of centroid
-  //! \param[in] phase Index corresponding to the phase
   //! \retval volumetric strain at centroid
-  double volumetric_strain_centroid(unsigned phase) const override {
-    return volumetric_strain_centroid_(phase);
+  double volumetric_strain_centroid() const override {
+    return volumetric_strain_centroid_;
   }
 
   //! Initial stress
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] stress Initial sress corresponding to the phase
-  void initial_stress(unsigned phase,
-                      const Eigen::Matrix<double, 6, 1>& stress) override {
-    this->stress_.col(phase) = stress;
+  //! \param[in] stress Initial sress
+  void initial_stress(const Eigen::Matrix<double, 6, 1>& stress) override {
+    this->stress_ = stress;
   }
 
   //! Compute stress
-  bool compute_stress(unsigned phase) override;
+  bool compute_stress() override;
 
   //! Return stress of the particle
-  //! \param[in] phase Index corresponding to the phase
-  Eigen::Matrix<double, 6, 1> stress(unsigned phase) const override {
-    return stress_.col(phase);
-  }
+  Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
 
   //! Map body force
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] pgravity Gravity of a particle
-  void map_body_force(unsigned phase, const VectorDim& pgravity) override;
+  void map_body_force(const VectorDim& pgravity) override;
 
   //! Map internal force
-  //! \param[in] phase Index corresponding to the phase
-  bool map_internal_force(unsigned phase) override;
+  bool map_internal_force() override;
 
   //! Assign velocity to the particle
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(unsigned phase, const VectorDim& velocity) override;
+  bool assign_velocity(const VectorDim& velocity) override;
 
   //! Return velocity of the particle
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim velocity(unsigned phase) const override {
-    return velocity_.col(phase);
-  }
+  VectorDim velocity() const override { return velocity_; }
 
   //! Return displacement of the particle
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim displacement(unsigned phase) const override {
-    return displacement_.col(phase);
-  }
+  VectorDim displacement() const override { return displacement_; }
 
   //! Assign traction to the particle
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
-  bool assign_traction(unsigned phase, unsigned direction,
-                       double traction) override;
+  bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
-  //! \param[in] phase Index corresponding to the phase
-  VectorDim traction(unsigned phase) const override {
-    return traction_.col(phase);
-  }
+  VectorDim traction() const override { return traction_; }
 
   //! Map traction force
-  //! \param[in] phase Index corresponding to the phase
-  void map_traction_force(unsigned phase) override;
+  void map_traction_force() override;
 
   //! Compute updated position of the particle
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool compute_updated_position(unsigned phase, double dt) override;
+  bool compute_updated_position(double dt) override;
 
   //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool compute_updated_position_velocity(unsigned phase, double dt) override;
+  bool compute_updated_position_velocity(double dt) override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -251,32 +215,26 @@ class Particle : public ParticleBase<Tdim> {
   }
 
   //! Update pressure of the particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(unsigned phase, double dvolumetric_strain) override;
+  bool update_pressure(double dvolumetric_strain) override;
 
   //! Map particle pressure to nodes
-  //! \param[in] phase Index corresponding to the phase
-  bool map_pressure_to_nodes(unsigned phase) override;
+  bool map_pressure_to_nodes() override;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
-  //! \param[in] phase Index corresponding to the phase
-  bool compute_pressure_smoothing(unsigned phase) override;
+  bool compute_pressure_smoothing() override;
 
   //! Return pressure of the particles
-  //! \param[in] phase Index corresponding to the phase
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  double pressure(unsigned phase) const override { return pressure_(phase); }
+  double pressure() const override { return pressure_; }
 
   //! Return vector data of particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] property Property string
   //! \retval vecdata Vector data of particle property
-  Eigen::VectorXd vector_data(unsigned phase,
-                              const std::string& property) override;
+  Eigen::VectorXd vector_data(const std::string& property) override;
 
   //! Assign particle velocity constraints
-  //! Directions can take values between 0 and Dim * Nphases
+  //! Directions can take values between 0 and Dim
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
   //! \retval status Assignment status
@@ -304,37 +262,37 @@ class Particle : public ParticleBase<Tdim> {
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Volumetric mass density (mass / volume)
-  Eigen::Matrix<double, 1, Tnphases> mass_density_;
+  double mass_density_;
   //! Mass
-  Eigen::Matrix<double, 1, Tnphases> mass_;
+  double mass_;
   //! Volume
-  Eigen::Matrix<double, 1, Tnphases> volume_;
+  double volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
   Eigen::Matrix<double, 1, Tdim> natural_size_;
   //! Pressure
-  Eigen::Matrix<double, 1, Tnphases> pressure_;
+  double pressure_;
   //! Stresses
-  Eigen::Matrix<double, 6, Tnphases> stress_;
+  Eigen::Matrix<double, 6, 1> stress_;
   //! Strains
-  Eigen::Matrix<double, 6, Tnphases> strain_;
+  Eigen::Matrix<double, 6, 1> strain_;
   //! Volumetric strain at centroid
-  Eigen::Matrix<double, Tnphases, 1> volumetric_strain_centroid_;
+  double volumetric_strain_centroid_;
   //! Strain rate
-  Eigen::Matrix<double, 6, Tnphases> strain_rate_;
+  Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains
-  Eigen::Matrix<double, 6, Tnphases> dstrain_;
+  Eigen::Matrix<double, 6, 1> dstrain_;
   //! Velocity
-  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
+  Eigen::Matrix<double, Tdim, 1> velocity_;
   //! Displacement
-  Eigen::Matrix<double, Tdim, Tnphases> displacement_;
+  Eigen::Matrix<double, Tdim, 1> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
   bool set_traction_{false};
   //! Traction
-  Eigen::Matrix<double, Tdim, Tnphases> traction_;
+  Eigen::Matrix<double, Tdim, 1> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! B-Matrix
@@ -342,7 +300,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
-  std::map<std::string, std::function<Eigen::VectorXd(unsigned)>> properties_;
+  std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
 
 };  // Particle class
 }  // namespace mpm
