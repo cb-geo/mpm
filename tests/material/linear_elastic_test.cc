@@ -20,7 +20,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -181,7 +181,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;

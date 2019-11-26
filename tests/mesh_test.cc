@@ -72,13 +72,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     Eigen::Vector2d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -430,12 +430,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -687,7 +687,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -742,7 +742,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
@@ -984,13 +984,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     Eigen::Vector3d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -1386,12 +1386,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Particle 1
     coords << 1.0, 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     // Particle 2
     coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1644,7 +1644,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -1734,7 +1734,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);

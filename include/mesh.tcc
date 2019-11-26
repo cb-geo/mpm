@@ -504,7 +504,7 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       Eigen::Vector3d data;
       data.setZero();
-      auto pdata = (*pitr)->vector_data(phase, attribute);
+      auto pdata = (*pitr)->vector_data(attribute);
       // Fill stresses to the size of dimensions
       for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
 
@@ -605,7 +605,7 @@ bool mpm::Mesh<Tdim>::assign_particles_volumes(
       double volume = std::get<1>(particle_volume);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_volume(phase, volume);
+        status = map_particles_[pid]->assign_volume(volume);
 
       if (!status)
         throw std::runtime_error("Cannot assign invalid particle volume");
@@ -669,7 +669,7 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
       double traction = std::get<2>(particle_traction);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_traction(phase, dir, traction);
+        status = map_particles_[pid]->assign_traction(dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
     }
@@ -764,7 +764,7 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
 
     unsigned i = 0;
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      (*pitr)->initial_stress(phase, particle_stresses.at(i));
+      (*pitr)->initial_stress(particle_stresses.at(i));
       ++i;
     }
   } catch (std::exception& exception) {
@@ -874,7 +874,7 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->hdf5(phase));
+    particle_data.emplace_back((*pitr)->hdf5());
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
