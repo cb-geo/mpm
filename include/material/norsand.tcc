@@ -55,6 +55,8 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     m_cohesion_ = material_properties["m_cohesion"].template get<double>();
     // Dilation degradation parameter m upon shearing
     m_dilation_ = material_properties["m_dilation"].template get<double>();
+    // Parameter for shear modulus
+    m_shear_ = material_properties["m_shear"].template get<double>();
 
     const double sin_friction_cs = sin(friction_cs_);
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
@@ -589,8 +591,15 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   bulk_modulus_ =
       (1. + (*state_vars).at("void_ratio")) / kappa_ * (*state_vars).at("p");
   // Shear modulus
-  shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
-                   (2.0 * (1. + poisson_ratio_));
+  if (bond_model_) {
+    shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
+                         (2.0 * (1. + poisson_ratio_)) +
+                     m_shear_ * ((*state_vars).at("p_cohesion") +
+                                 (*state_vars).at("p_dilation"));
+  } else {
+    shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
+                     (2.0 * (1. + poisson_ratio_));
+  }
 
   // Using Young's Modulus
   // Shear modulus
