@@ -35,6 +35,18 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
 
+    // Stress update method (USF/USL/MUSL)
+    try {
+      if (analysis_.find("stress_update") != analysis_.end())
+        stress_update_ = mpm::stress_update.at(
+            analysis_["stress_update"].template get<std::string>());
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: {}. Stress update method is not specified, using USF as "
+          "default\n",
+          __FILE__, __LINE__, exception.what());
+    }
+
     // Velocity update
     try {
       velocity_update_ = analysis_["velocity_update"].template get<bool>();
@@ -328,9 +340,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
@@ -487,7 +498,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, phase, set_material));
+                            std::placeholders::_1, set_material));
       }
     }
     status = true;
