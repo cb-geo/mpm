@@ -25,7 +25,7 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
