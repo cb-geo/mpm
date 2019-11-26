@@ -43,6 +43,8 @@ bool mpm::Particle<Tdim, Tnphases>::initialise_particle(
   this->mass_(phase) = particle.mass;
   // Volume
   this->assign_volume(phase, particle.volume);
+  // Mass Density
+  this->mass_density_(phase) = particle.mass / particle.volume;
   // Set local size of particle
   Eigen::Vector3d psize;
   psize << particle.nsize_x, particle.nsize_y, particle.nsize_z;
@@ -439,6 +441,9 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume_strainrate(unsigned phase,
       Eigen::VectorXd strain_rate_centroid =
           cell_->compute_strain_rate_centroid(phase);
       this->volume_(phase) *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
+      this->mass_density_(phase) =
+          this->mass_density_(phase) /
+          (1. + dt * strain_rate_centroid.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -459,8 +464,9 @@ bool mpm::Particle<Tdim, Tnphases>::compute_mass(unsigned phase) {
     if (volume_(phase) != std::numeric_limits<double>::max() &&
         material_.at(phase) != nullptr) {
       // Mass = volume of particle * mass_density
-      mass_density_(phase) = material_.at(phase)->template property<double>(
-          std::string("density"));
+      this->mass_density_(phase) =
+          material_.at(phase)->template property<double>(
+              std::string("density"));
       this->mass_(phase) = volume_(phase) * mass_density_(phase);
     } else {
       throw std::runtime_error(

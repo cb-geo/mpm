@@ -13,8 +13,6 @@
 #                          (set only if different from ${PARMETIS_DIR}/include)
 #  PARMETIS_LIB_DIR      - Library directory of the ParMETIS installation
 #                          (set only if different from ${PARMETIS_DIR}/lib)
-#  PARMETIS_TEST_RUNS    - Skip tests building and running a test
-#                          executable linked against ParMETIS libraries
 #  PARMETIS_LIB_SUFFIX   - Also search for non-standard library names with the
 #                          given suffix appended
 
@@ -103,7 +101,7 @@ if(NOT PARMETIS_VERSION_STRING AND PARMETIS_INCLUDE_DIR AND EXISTS "${PARMETIS_I
   unset(version_pattern)
 endif()
 
-# Try compiling and running test program
+# Try compiling
 if(PARMETIS_INCLUDE_DIR AND METIS_INCLUDE_DIR AND
    PARMETIS_LIBRARY AND METIS_LIBRARY)
 
@@ -119,21 +117,6 @@ if(PARMETIS_INCLUDE_DIR AND METIS_INCLUDE_DIR AND
   set(CMAKE_REQUIRED_LIBRARIES
     ${PARMETIS_LIBRARY} ${METIS_LIBRARY} ${MPI_C_LIBRARIES})
 
-  # Build and run test program
-  include(CheckCSourceRuns)
-  check_c_source_runs("
-#include \"mpi.h\"
-#define METIS_EXPORT
-#include \"parmetis.h\"
-int main( int argc, char* argv[] )
-{
-  // FIXME: Find a simple but sensible test for ParMETIS
-  MPI_Init( &argc, &argv );
-  MPI_Finalize();
-  return 0;
-}
-" PARMETIS_TEST_RUNS)
-
   unset(CMAKE_REQUIRED_FLAGS)
   #unset(CMAKE_REQUIRED_LINKER_FLAGS)
   unset(CMAKE_REQUIRED_INCLUDES)
@@ -144,11 +127,11 @@ endif()
 include(FindPackageHandleStandardArgs)
 if(CMAKE_VERSION VERSION_GREATER 2.8.2)
   find_package_handle_standard_args(ParMETIS
-    REQUIRED_VARS PARMETIS_LIBRARY PARMETIS_INCLUDE_DIR PARMETIS_TEST_RUNS
+    REQUIRED_VARS PARMETIS_LIBRARY PARMETIS_INCLUDE_DIR
     VERSION_VAR PARMETIS_VERSION_STRING)
 else()
   find_package_handle_standard_args(ParMETIS
-    REQUIRED_VARS PARMETIS_LIBRARY PARMETIS_INCLUDE_DIR PARMETIS_TEST_RUNS)
+    REQUIRED_VARS PARMETIS_LIBRARY PARMETIS_INCLUDE_DIR)
 endif()
 
 if(PARMETIS_FOUND)
