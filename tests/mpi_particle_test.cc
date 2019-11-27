@@ -23,6 +23,8 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
+    h5_particle.pressure = 125.75;
+
     Eigen::Vector3d coords;
     coords << 1., 2., 3.;
     h5_particle.coord_x = coords[0];
