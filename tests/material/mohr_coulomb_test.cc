@@ -25,7 +25,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -666,7 +666,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -1194,7 +1194,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -1720,7 +1720,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -2936,7 +2936,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
