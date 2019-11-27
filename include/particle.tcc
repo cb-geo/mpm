@@ -88,6 +88,9 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   // Cell id
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
+
+  // Material id
+  this->material_id_ = particle.material_id;
   return true;
 }
 
@@ -160,6 +163,8 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   particle_data.status = this->status();
 
   particle_data.cell_id = this->cell_id();
+
+  particle_data.material_id = this->material_id();
 
   return particle_data;
 }

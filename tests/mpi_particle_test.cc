@@ -73,6 +73,8 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
     h5_particle.volume = 2.;
 
+    h5_particle.material_id = 2.;
+
     // Check send and receive particle with HDF5
     SECTION("Check send and receive particle with HDF5") {
       // Get number of MPI ranks

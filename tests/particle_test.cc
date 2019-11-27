@@ -256,6 +256,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     h5_particle.volume = 2.;
 
+    h5_particle.material_id = 1;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -312,6 +314,9 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check cell id
     REQUIRE(particle->cell_id() == h5_particle.cell_id);
 
+    // Check material id
+    REQUIRE(particle->material_id() == h5_particle.material_id);
+
     // Write Particle HDF5 data
     const auto h5_test = particle->hdf5();
 
@@ -367,6 +372,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
             Approx(h5_test.epsilon_v).epsilon(Tolerance));
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
+    REQUIRE(h5_particle.material_id == h5_test.material_id);
   }
 }
 
@@ -1176,6 +1182,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     h5_particle.volume = 2.;
 
+    h5_particle.material_id = 1;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -1232,6 +1240,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check cell id
     REQUIRE(particle->cell_id() == h5_particle.cell_id);
 
+    // Check material id
+    REQUIRE(particle->material_id() == h5_particle.material_id);
+
     // Write Particle HDF5 data
     const auto h5_test = particle->hdf5();
 
@@ -1287,6 +1298,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
             Approx(h5_test.epsilon_v).epsilon(Tolerance));
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
+    REQUIRE(h5_particle.material_id == h5_test.material_id);
   }
 }
 
@@ -2215,6 +2227,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     h5_particle.volume = 2.;
 
+    h5_particle.material_id = 1;
+
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
@@ -2272,6 +2286,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check cell id
     REQUIRE(particle->cell_id() == h5_particle.cell_id);
 
+    // Check material id
+    REQUIRE(particle->material_id() == h5_particle.material_id);
+
     // Write Particle HDF5 data
     const auto h5_test = particle->hdf5();
 
@@ -2327,5 +2344,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
             Approx(h5_test.epsilon_v).epsilon(Tolerance));
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
+    REQUIRE(h5_particle.material_id == h5_test.material_id);
   }
 }

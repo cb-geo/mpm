@@ -33,6 +33,7 @@ const size_t dst_offset[NFIELDS] = {
     HOFFSET(HDF5Particle, epsilon_v),
     HOFFSET(HDF5Particle, status),
     HOFFSET(HDF5Particle, cell_id),
+    HOFFSET(HDF5Particle, material_id),
 };
 
 // Get size of particle
@@ -69,6 +70,7 @@ const size_t dst_sizes[NFIELDS] = {
     sizeof(particle.epsilon_v),
     sizeof(particle.status),
     sizeof(particle.cell_id),
+    sizeof(particle.material_id),
 };
 
 // Define particle field information
@@ -102,7 +104,8 @@ const char* field_names[NFIELDS] = {"id",
                                     "gamma_xz",
                                     "epsilon_v",
                                     "status",
-                                    "cell_id"};
+                                    "cell_id",
+                                    "material_id"};
 
 // Initialize field types
 const hid_t field_type[NFIELDS] = {
@@ -113,6 +116,6 @@ const hid_t field_type[NFIELDS] = {
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
-    H5T_NATIVE_DOUBLE, H5T_NATIVE_HBOOL,  H5T_NATIVE_LLONG};
+    H5T_NATIVE_DOUBLE, H5T_NATIVE_HBOOL,  H5T_NATIVE_LLONG,  H5T_NATIVE_UINT};
 }  // namespace hdf5::particle
 }  // namespace mpm

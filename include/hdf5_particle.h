@@ -38,10 +38,12 @@ typedef struct HDF5Particle {
   mpm::Index cell_id;
   // Status
   bool status;
+  // Material id
+  unsigned material_id;
 } HDF5Particle;
 
 namespace hdf5::particle {
-const hsize_t NFIELDS = 31;
+const hsize_t NFIELDS = 32;
 
 const size_t dst_size = sizeof(HDF5Particle);
 
