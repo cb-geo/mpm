@@ -167,6 +167,8 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
         REQUIRE(h5_particle.cell_id == received.cell_id);
       }
+      // Free MPI datatypes
+      mpm::free_mpi_particle_datatypes();
     }
 
     // Check initialise particle from HDF5 file
@@ -189,10 +191,10 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
       Eigen::Matrix<double, 3, 1> pcoordinates;
       pcoordinates.setZero();
 
-      if (mpi_rank == sender) {
-        // Initialize MPI datatypes
-        mpm::init_mpi_particle_datatypes();
+      // Initialize MPI datatypes
+      mpm::init_mpi_particle_datatypes();
 
+      if (mpi_rank == sender) {
         // Create and initialzie particle with HDF5 data
         std::shared_ptr<mpm::ParticleBase<Dim>> particle =
             std::make_shared<mpm::Particle<Dim>>(id, pcoordinates);
@@ -333,6 +335,8 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         // Check cell id
         REQUIRE(rparticle->cell_id() == h5_particle.cell_id);
       }
+      // Free MPI datatypes
+      mpm::free_mpi_particle_datatypes();
     }
   }
 }
