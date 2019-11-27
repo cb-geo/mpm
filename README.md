@@ -18,11 +18,13 @@ Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for
 
 If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://forum.cb-geo.com/c/mpm). 
 
-## Install dependencies
+## Running code on Docker
 
 * Docker image for CB-Geo mpm code [https://hub.docker.com/r/cbgeo/mpm](https://hub.docker.com/r/cbgeo/mpm)
 
 * Instructions for running mpm docker container: [https://github.com/cb-geo/docker-mpm/blob/master/README.md](https://github.com/cb-geo/mpm-container/blob/master/README.md).
+
+## Running code locally
 
 ### Prerequisite packages
 > The following prerequisite packages can be found in the docker image:
@@ -105,7 +107,7 @@ wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz &&
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
 
-0. Run `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ ..`.
+0. Run `mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
@@ -115,11 +117,32 @@ wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz &&
 
 ### Compile without tests [Editing CMake options]
 
-To compile without tests run: `mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DMPM_BUILD_TESTING=Off  -DCMAKE_CXX_COMPILER=g++ ..`.
+To compile without tests run: `mkdir build && cd build && cmake -DMPM_BUILD_TESTING=Off  -DCMAKE_CXX_COMPILER=g++ ..`.
 
-## Compile with Ninja build system
+## Compile with MPI (Running on a cluster)
 
-0. Run `mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ ..`.
+The CB-Geo mpm code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
+
+Additional steps to load `OpenMPI` on Fedora:
+
+```
+source /etc/profile.d/modules.sh
+export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+module load mpi/openmpi-x86_64
+```
+
+Compile with OpenMPI:
+
+```
+mkdir build && cd build 
+export CXX_COMPILER=mpicxx
+cmake -DCMAKE_BUILD_TYPE=Release -DMETIS_DIR=~/workspace/metis/ -DPARMETIS_DIR=~/workspace/parmetis/ ..
+make -jN
+```
+
+### Compile with Ninja build system [Alternative to Make]
+
+0. Run `mkdir build && cd build && cmake -GNinja -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `ninja`
 
@@ -164,27 +187,6 @@ Where:
 
    -h,  --help
      Displays usage information and exits.
-```
-
-## Compile with MPI (Running on a cluster)
-
-The CB-Geo mpm code can be compiled with `MPI` to distribute the workload across compute nodes in a cluster.
-
-Additional steps to load `OpenMPI` on Fedora:
-
-```
-source /etc/profile.d/modules.sh
-export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
-module load mpi/openmpi-x86_64
-```
-
-Compile with OpenMPI:
-
-```
-mkdir build && cd build 
-export CXX_COMPILER=mpicxx
-cmake -DCMAKE_BUILD_TYPE=Release -DMETIS_DIR=~/workspace/metis/ -DPARMETIS_DIR=~/workspace/parmetis/ ..
-make -jN
 ```
 
 ### Running the code with MPI
