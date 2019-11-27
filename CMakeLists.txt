@@ -160,6 +160,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc

@@ -5,6 +5,8 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include "data_types.h"
+
 namespace mpm {
 
 // Define a struct of particle
@@ -33,10 +35,10 @@ typedef struct HDF5Particle {
   double gamma_xy, gamma_yz, gamma_xz;
   // Volumetric strain centroid
   double epsilon_v;
-  // Status
-  bool status;
   // Index
   mpm::Index cell_id;
+  // Status
+  bool status;
 } HDF5Particle;
 
 }  // namespace mpm

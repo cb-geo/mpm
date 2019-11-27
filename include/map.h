@@ -6,10 +6,9 @@
 #include <sparsepp/spp.h>
 #include <tsl/robin_map.h>
 
-namespace mpm {
+#include "data_types.h"
 
-// Global index type for the map
-using Index = unsigned long long;
+namespace mpm {
 
 // Global dense hash map type
 using dense_map = tsl::robin_map<std::string, double>;
