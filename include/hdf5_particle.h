@@ -35,10 +35,10 @@ typedef struct HDF5Particle {
   double gamma_xy, gamma_yz, gamma_xz;
   // Volumetric strain centroid
   double epsilon_v;
-  // Index
-  mpm::Index cell_id;
   // Status
   bool status;
+  // Index
+  mpm::Index cell_id;
 } HDF5Particle;
 
 }  // namespace mpm
