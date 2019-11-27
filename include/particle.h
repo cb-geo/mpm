@@ -256,6 +256,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! Material id
+  using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Volumetric mass density (mass / volume)

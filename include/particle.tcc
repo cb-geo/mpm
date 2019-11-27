@@ -290,6 +290,7 @@ bool mpm::Particle<Tdim>::assign_material(
     // Check if material is valid and properties are set
     if (material != nullptr) {
       material_ = material;
+      material_id_ = material_->id();
       state_variables_ = material_->initialise_state_variables();
       status = true;
     } else {

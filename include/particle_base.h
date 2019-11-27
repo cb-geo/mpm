@@ -122,9 +122,12 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual bool map_mass_momentum_to_nodes() = 0;
 
-  // Assign material
+  //! Assign material
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
+
+  //! Return material id
+  unsigned material_id() const { return material_id_; }
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -237,6 +240,8 @@ class ParticleBase {
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
+  //! Unsigned material id
+  unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
 };  // ParticleBase class
