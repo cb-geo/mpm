@@ -38,37 +38,37 @@ const size_t dst_offset[NFIELDS] = {
 // Get size of particle
 HDF5Particle particle;
 const size_t dst_sizes[NFIELDS] = {
-    sizeof(unsigned long long),  // id
-    sizeof(double),              // mass
-    sizeof(double),              // volume
-    sizeof(double),              // pressure
-    sizeof(double),              // coord_x
-    sizeof(double),              // coord_y
-    sizeof(double),              // coord_z
-    sizeof(double),              // disp_x
-    sizeof(double),              // disp_y
-    sizeof(double),              // disp_z
-    sizeof(double),              // nsize_x
-    sizeof(double),              // nsize_y
-    sizeof(double),              // nsize_z
-    sizeof(double),              // vel_x
-    sizeof(double),              // vel_y
-    sizeof(double),              // vel_z
-    sizeof(double),              // stress_xx
-    sizeof(double),              // stress_yy
-    sizeof(double),              // stress_zz
-    sizeof(double),              // tau_xx
-    sizeof(double),              // tau_yy
-    sizeof(double),              // tau_zz
-    sizeof(double),              // strain_xx
-    sizeof(double),              // strain_yy
-    sizeof(double),              // strain_zz
-    sizeof(double),              // gamma_xy
-    sizeof(double),              // gamma_yz
-    sizeof(double),              // gamma_zx
-    sizeof(double),              // epsv
-    sizeof(bool),                // status
-    sizeof(unsigned long long)   // cellid
+    sizeof(particle.id),
+    sizeof(particle.mass),
+    sizeof(particle.volume),
+    sizeof(particle.pressure),
+    sizeof(particle.coord_x),
+    sizeof(particle.coord_y),
+    sizeof(particle.coord_z),
+    sizeof(particle.displacement_x),
+    sizeof(particle.displacement_y),
+    sizeof(particle.displacement_z),
+    sizeof(particle.nsize_x),
+    sizeof(particle.nsize_y),
+    sizeof(particle.nsize_z),
+    sizeof(particle.velocity_x),
+    sizeof(particle.velocity_y),
+    sizeof(particle.velocity_z),
+    sizeof(particle.stress_xx),
+    sizeof(particle.stress_yy),
+    sizeof(particle.stress_zz),
+    sizeof(particle.tau_xy),
+    sizeof(particle.tau_yz),
+    sizeof(particle.tau_xz),
+    sizeof(particle.strain_xx),
+    sizeof(particle.strain_yy),
+    sizeof(particle.strain_zz),
+    sizeof(particle.gamma_xy),
+    sizeof(particle.gamma_yz),
+    sizeof(particle.gamma_xz),
+    sizeof(particle.epsilon_v),
+    sizeof(particle.status),
+    sizeof(particle.cell_id),
 };
 
 // Define particle field information
