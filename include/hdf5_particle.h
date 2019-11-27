@@ -8,7 +8,6 @@
 #include "data_types.h"
 
 namespace mpm {
-
 // Define a struct of particle
 typedef struct HDF5Particle {
   // Index
@@ -40,6 +39,25 @@ typedef struct HDF5Particle {
   // Status
   bool status;
 } HDF5Particle;
+
+namespace hdf5::particle {
+const hsize_t NFIELDS = 31;
+
+const size_t dst_size = sizeof(HDF5Particle);
+
+// Destination offset
+extern const size_t dst_offset[NFIELDS];
+
+// Destination size
+extern const size_t dst_sizes[NFIELDS];
+
+// Define particle field information
+extern const char* field_names[NFIELDS];
+
+// Initialize field types
+extern const hid_t field_type[NFIELDS];
+
+}  // namespace hdf5::particle
 
 }  // namespace mpm
 

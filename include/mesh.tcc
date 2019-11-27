@@ -879,158 +879,24 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 31;
+  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
 
-  size_t dst_size = sizeof(HDF5Particle);
-  size_t dst_offset[NFIELDS] = {
-      HOFFSET(HDF5Particle, id),
-      HOFFSET(HDF5Particle, mass),
-      HOFFSET(HDF5Particle, volume),
-      HOFFSET(HDF5Particle, pressure),
-      HOFFSET(HDF5Particle, coord_x),
-      HOFFSET(HDF5Particle, coord_y),
-      HOFFSET(HDF5Particle, coord_z),
-      HOFFSET(HDF5Particle, displacement_x),
-      HOFFSET(HDF5Particle, displacement_y),
-      HOFFSET(HDF5Particle, displacement_z),
-      HOFFSET(HDF5Particle, nsize_x),
-      HOFFSET(HDF5Particle, nsize_y),
-      HOFFSET(HDF5Particle, nsize_z),
-      HOFFSET(HDF5Particle, velocity_x),
-      HOFFSET(HDF5Particle, velocity_y),
-      HOFFSET(HDF5Particle, velocity_z),
-      HOFFSET(HDF5Particle, stress_xx),
-      HOFFSET(HDF5Particle, stress_yy),
-      HOFFSET(HDF5Particle, stress_zz),
-      HOFFSET(HDF5Particle, tau_xy),
-      HOFFSET(HDF5Particle, tau_yz),
-      HOFFSET(HDF5Particle, tau_xz),
-      HOFFSET(HDF5Particle, strain_xx),
-      HOFFSET(HDF5Particle, strain_yy),
-      HOFFSET(HDF5Particle, strain_zz),
-      HOFFSET(HDF5Particle, gamma_xy),
-      HOFFSET(HDF5Particle, gamma_yz),
-      HOFFSET(HDF5Particle, gamma_xz),
-      HOFFSET(HDF5Particle, epsilon_v),
-      HOFFSET(HDF5Particle, status),
-      HOFFSET(HDF5Particle, cell_id),
-  };
-
-  size_t dst_sizes[NFIELDS] = {
-      sizeof(particle_data[0].id),
-      sizeof(particle_data[0].mass),
-      sizeof(particle_data[0].volume),
-      sizeof(particle_data[0].pressure),
-      sizeof(particle_data[0].coord_x),
-      sizeof(particle_data[0].coord_y),
-      sizeof(particle_data[0].coord_z),
-      sizeof(particle_data[0].displacement_x),
-      sizeof(particle_data[0].displacement_y),
-      sizeof(particle_data[0].displacement_z),
-      sizeof(particle_data[0].nsize_x),
-      sizeof(particle_data[0].nsize_y),
-      sizeof(particle_data[0].nsize_z),
-      sizeof(particle_data[0].velocity_x),
-      sizeof(particle_data[0].velocity_y),
-      sizeof(particle_data[0].velocity_z),
-      sizeof(particle_data[0].stress_xx),
-      sizeof(particle_data[0].stress_yy),
-      sizeof(particle_data[0].stress_zz),
-      sizeof(particle_data[0].tau_xy),
-      sizeof(particle_data[0].tau_yz),
-      sizeof(particle_data[0].tau_xz),
-      sizeof(particle_data[0].strain_xx),
-      sizeof(particle_data[0].strain_yy),
-      sizeof(particle_data[0].strain_zz),
-      sizeof(particle_data[0].gamma_xy),
-      sizeof(particle_data[0].gamma_yz),
-      sizeof(particle_data[0].gamma_xz),
-      sizeof(particle_data[0].epsilon_v),
-      sizeof(particle_data[0].status),
-      sizeof(particle_data[0].cell_id),
-  };
-
-  // Define particle field information
-  const char* field_names[NFIELDS] = {"id",
-                                      "mass",
-                                      "volume",
-                                      "pressure",
-                                      "coord_x",
-                                      "coord_y",
-                                      "coord_z",
-                                      "displacement_x",
-                                      "displacement_y",
-                                      "displacement_z",
-                                      "nsize_x",
-                                      "nsize_y",
-                                      "nsize_z",
-                                      "velocity_x",
-                                      "velocity_y",
-                                      "velocity_z",
-                                      "stress_xx",
-                                      "stress_yy",
-                                      "stress_zz",
-                                      "tau_xy",
-                                      "tau_yz",
-                                      "tau_xz",
-                                      "strain_xx",
-                                      "strain_yy",
-                                      "strain_zz",
-                                      "gamma_xy",
-                                      "gamma_yz",
-                                      "gamma_xz",
-                                      "epsilon_v",
-                                      "status",
-                                      "cell_id"};
-
-  hid_t field_type[NFIELDS];
   hid_t string_type;
   hid_t file_id;
   hsize_t chunk_size = 10000;
   int* fill_data = NULL;
   int compress = 0;
 
-  // Initialize the field_type
-  field_type[0] = H5T_NATIVE_LLONG;
-  field_type[1] = H5T_NATIVE_DOUBLE;
-  field_type[2] = H5T_NATIVE_DOUBLE;
-  field_type[3] = H5T_NATIVE_DOUBLE;
-  field_type[4] = H5T_NATIVE_DOUBLE;
-  field_type[5] = H5T_NATIVE_DOUBLE;
-  field_type[6] = H5T_NATIVE_DOUBLE;
-  field_type[7] = H5T_NATIVE_DOUBLE;
-  field_type[8] = H5T_NATIVE_DOUBLE;
-  field_type[9] = H5T_NATIVE_DOUBLE;
-  field_type[10] = H5T_NATIVE_DOUBLE;
-  field_type[11] = H5T_NATIVE_DOUBLE;
-  field_type[12] = H5T_NATIVE_DOUBLE;
-  field_type[13] = H5T_NATIVE_DOUBLE;
-  field_type[14] = H5T_NATIVE_DOUBLE;
-  field_type[15] = H5T_NATIVE_DOUBLE;
-  field_type[16] = H5T_NATIVE_DOUBLE;
-  field_type[17] = H5T_NATIVE_DOUBLE;
-  field_type[18] = H5T_NATIVE_DOUBLE;
-  field_type[19] = H5T_NATIVE_DOUBLE;
-  field_type[20] = H5T_NATIVE_DOUBLE;
-  field_type[21] = H5T_NATIVE_DOUBLE;
-  field_type[22] = H5T_NATIVE_DOUBLE;
-  field_type[23] = H5T_NATIVE_DOUBLE;
-  field_type[24] = H5T_NATIVE_DOUBLE;
-  field_type[25] = H5T_NATIVE_DOUBLE;
-  field_type[26] = H5T_NATIVE_DOUBLE;
-  field_type[27] = H5T_NATIVE_DOUBLE;
-  field_type[28] = H5T_NATIVE_DOUBLE;
-  field_type[29] = H5T_NATIVE_HBOOL;
-  field_type[30] = H5T_NATIVE_LLONG;
-
   // Create a new file using default properties.
   file_id =
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   // make a table
-  H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS, dst_size,
-                 field_names, dst_offset, field_type, chunk_size, fill_data,
-                 compress, particle_data.data());
+  H5TBmake_table(
+      "Table Title", file_id, "table", NFIELDS, NRECORDS,
+      mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
+      mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
+      chunk_size, fill_data, compress, particle_data.data());
 
   H5Fclose(file_id);
   return true;
@@ -1050,89 +916,18 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   const unsigned nparticles = this->nparticles();
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = 31;
-
-  size_t dst_size = sizeof(HDF5Particle);
-  size_t dst_offset[NFIELDS] = {
-      HOFFSET(HDF5Particle, id),
-      HOFFSET(HDF5Particle, mass),
-      HOFFSET(HDF5Particle, volume),
-      HOFFSET(HDF5Particle, pressure),
-      HOFFSET(HDF5Particle, coord_x),
-      HOFFSET(HDF5Particle, coord_y),
-      HOFFSET(HDF5Particle, coord_z),
-      HOFFSET(HDF5Particle, displacement_x),
-      HOFFSET(HDF5Particle, displacement_y),
-      HOFFSET(HDF5Particle, displacement_z),
-      HOFFSET(HDF5Particle, nsize_x),
-      HOFFSET(HDF5Particle, nsize_y),
-      HOFFSET(HDF5Particle, nsize_z),
-      HOFFSET(HDF5Particle, velocity_x),
-      HOFFSET(HDF5Particle, velocity_y),
-      HOFFSET(HDF5Particle, velocity_z),
-      HOFFSET(HDF5Particle, stress_xx),
-      HOFFSET(HDF5Particle, stress_yy),
-      HOFFSET(HDF5Particle, stress_zz),
-      HOFFSET(HDF5Particle, tau_xy),
-      HOFFSET(HDF5Particle, tau_yz),
-      HOFFSET(HDF5Particle, tau_xz),
-      HOFFSET(HDF5Particle, strain_xx),
-      HOFFSET(HDF5Particle, strain_yy),
-      HOFFSET(HDF5Particle, strain_zz),
-      HOFFSET(HDF5Particle, gamma_xy),
-      HOFFSET(HDF5Particle, gamma_yz),
-      HOFFSET(HDF5Particle, gamma_xz),
-      HOFFSET(HDF5Particle, epsilon_v),
-      HOFFSET(HDF5Particle, status),
-      HOFFSET(HDF5Particle, cell_id),
-  };
-
-  // To get size
-  HDF5Particle particle;
-
-  size_t dst_sizes[NFIELDS] = {
-      sizeof(particle.id),
-      sizeof(particle.mass),
-      sizeof(particle.volume),
-      sizeof(particle.pressure),
-      sizeof(particle.coord_x),
-      sizeof(particle.coord_y),
-      sizeof(particle.coord_z),
-      sizeof(particle.displacement_x),
-      sizeof(particle.displacement_y),
-      sizeof(particle.displacement_z),
-      sizeof(particle.nsize_x),
-      sizeof(particle.nsize_y),
-      sizeof(particle.nsize_z),
-      sizeof(particle.velocity_x),
-      sizeof(particle.velocity_y),
-      sizeof(particle.velocity_z),
-      sizeof(particle.stress_xx),
-      sizeof(particle.stress_yy),
-      sizeof(particle.stress_zz),
-      sizeof(particle.tau_xy),
-      sizeof(particle.tau_yz),
-      sizeof(particle.tau_xz),
-      sizeof(particle.strain_xx),
-      sizeof(particle.strain_yy),
-      sizeof(particle.strain_zz),
-      sizeof(particle.gamma_xy),
-      sizeof(particle.gamma_yz),
-      sizeof(particle.gamma_xz),
-      sizeof(particle.epsilon_v),
-      sizeof(particle.status),
-      sizeof(particle.cell_id),
-  };
+  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
 
   std::vector<HDF5Particle> dst_buf;
   dst_buf.reserve(nparticles);
   // Read the table
-  H5TBread_table(file_id, "table", dst_size, dst_offset, dst_sizes,
-                 dst_buf.data());
+  H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
+                 mpm::hdf5::particle::dst_offset,
+                 mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    particle = dst_buf[i];
+    HDF5Particle particle = dst_buf[i];
     // Initialise particle with HDF5 data
     (*pitr)->initialise_particle(particle);
     ++i;
