@@ -73,7 +73,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
     h5_particle.volume = 2.;
 
-    h5_particle.material_id = 2.;
+    h5_particle.material_id = 1;
 
     // Check send and receive particle with HDF5
     SECTION("Check send and receive particle with HDF5") {
@@ -168,6 +168,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         REQUIRE(h5_particle.status == received.status);
 
         REQUIRE(h5_particle.cell_id == received.cell_id);
+        REQUIRE(h5_particle.material_id == received.cell_id);
       }
       // Free MPI datatypes
       mpm::free_mpi_particle_datatypes();
@@ -261,6 +262,9 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         // Check cell id
         REQUIRE(particle->cell_id() == h5_particle.cell_id);
 
+        // Check material id
+        REQUIRE(particle->material_id() == h5_particle.material_id);
+
         // Write Particle HDF5 data
         const auto h5_send = particle->hdf5();
 
@@ -336,6 +340,9 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
         // Check cell id
         REQUIRE(rparticle->cell_id() == h5_particle.cell_id);
+
+        // Check material id
+        REQUIRE(rparticle->material_id() == h5_particle.material_id);
       }
       // Free MPI datatypes
       mpm::free_mpi_particle_datatypes();
