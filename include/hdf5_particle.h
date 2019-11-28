@@ -40,7 +40,7 @@ typedef struct HDF5Particle {
   bool status;
   // Material id
   unsigned material_id;
-  // Number of state variabales
+  // Number of state variables
   unsigned nstate_vars;
   // State variables (init to zero)
   double svars[20] = {0};
