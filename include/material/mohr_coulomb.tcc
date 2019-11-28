@@ -517,11 +517,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     p_multiplier = lambda_trial;
     dp_dsigma_final = dp_dsigma_trial;
   }
-  // Check plastic multiplier
-  if (p_multiplier < 0.) {
-    throw std::runtime_error(
-        "Plastic multiplier of Mohr-Coulomb model is negative!");
-  }
   // Correct stress back to the yield surface
   Vector6d updated_stress =
       trial_stress - (p_multiplier * this->de_ * dp_dsigma_final);
@@ -552,11 +547,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
         yield_trial /
         ((df_dsigma_trial.transpose() * de_).dot(dp_dsigma_trial.transpose()) +
          softening_trial);
-    // Check plastic multiplier
-    if (p_multiplier < 0.) {
-      throw std::runtime_error(
-          "Plastic multiplier of Mohr-Coulomb model is negative!");
-    }
     // Correct stress back to the yield surface
     updated_stress -= (lambda_trial * this->de_ * dp_dsigma_trial);
     // Compute stress invariants based on updated stress
@@ -566,11 +556,6 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
         this->compute_yield_state(&yield_function_trial, state_vars);
     // Count the iteration step
     itr++;
-    // Check plastic multiplier
-    if (itr == itr_max) {
-      throw std::runtime_error(
-          "Iteration step of plastic correction is not enough!");
-    }
   }
   // Compute incremental of plastic strain
   Vector6d dstress = updated_stress - stress;

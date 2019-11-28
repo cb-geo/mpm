@@ -787,10 +787,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
     // Check dP/dSigma
-    REQUIRE(dp_dsigma(0) == Approx(0.39671222).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(-0.05157114).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(-0.34514108).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(3) == Approx(-0.44828335).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(0) == Approx(0.39868466).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(-0.04368136).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(-0.35500330).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(3) == Approx(-0.44236602).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -866,10 +866,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.21883386).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(0.08262485).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.30145871).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.51522540).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.20717328).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(0.07007866).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.27725194).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.51857529).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -877,10 +877,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-6491.90864415).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-6494.64090848).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-2513.45044738).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(3351.32138956).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-6407.76056895).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-6354.61905705).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-2737.62037400).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(3245.64707365).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
     }
@@ -1081,9 +1081,9 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
     // Check dP/dSigma
-    REQUIRE(dp_dsigma(0) == Approx(0.67187026).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(-0.30786798).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(-0.36400229).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(0) == Approx(0.66416840).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(-0.28438471).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(-0.37978369).epsilon(Tolerance));
     REQUIRE(dp_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
@@ -1160,10 +1160,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.50315689).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.1607794).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.34237749).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.37723653).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.50383165).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.15419846).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.34963318).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.37388074).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -1171,10 +1171,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-2358.37307729).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-5535.40840205).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-7534.42175094).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(3066.34734064).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-2338.18735971).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5584.28169800).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-7505.73417257).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(3082.28247439).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
     }
@@ -1314,10 +1314,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
     // Check dP/dSigma
-    REQUIRE(dp_dsigma(0) == Approx(0.48581658).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(0.03777283).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(-0.25564021).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(3) == Approx(-0.44804375).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(0) == Approx(0.48778797).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(0.04565839).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(-0.26549716).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(3) == Approx(-0.44212958).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -1393,10 +1393,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.30814480).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(0.17193919).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.21213479).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.51521254).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.29648451).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(0.15939331).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.18792863).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.51856235).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -1404,10 +1404,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-7573.14655485).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-8293.81378005).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-6337.06362775).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(4709.15490250).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-7539.56145810).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-8237.92839685).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-6524.88400618).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(4666.97827380).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
     }
@@ -1607,9 +1607,9 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
     // Check dP/dSigma
-    REQUIRE(dp_dsigma(0) == Approx(0.76114953).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(-0.21853457).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(-0.27466577).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(0) == Approx(0.75344809).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(-0.19505260).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(-0.29044631).epsilon(Tolerance));
     REQUIRE(dp_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
@@ -1686,10 +1686,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.59245977).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.07145868).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.25305189).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.37722639).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.59313451).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.06487792).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.26030739).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.37387070).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -1697,10 +1697,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-2791.76726194).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-6838.46782671).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-9129.41035445).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(3306.91731143).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-2772.75156703).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-6871.75961451).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-9096.95001014).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(3316.45096866).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
     }
@@ -1860,10 +1860,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.47388304).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(0.03580579).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.25505488).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.43807725).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.47570740).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.04310326).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.26417672).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.43260415).epsilon(Tolerance));
       REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -1938,10 +1938,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.29664754).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(0.16277439).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.20478799).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.50638973).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.28593455).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(0.15124777).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.18254838).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.50946739).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -1950,27 +1950,27 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
                                        &state_variables);
       // Check update stress
       REQUIRE(updated_stress(0) ==
-              Approx(-10642.32149186).epsilon(Tolerance_stress));
+              Approx(-10646.24178657).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(1) ==
-              Approx(-10492.92006243).epsilon(Tolerance_stress));
+              Approx(-10440.71162247).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(2) ==
-              Approx(-6225.11965155).epsilon(Tolerance_stress));
+              Approx(-6546.63361927).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(3) ==
-              Approx(3063.5902731).epsilon(Tolerance_stress));
+              Approx(2957.43375319).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00080550198218).epsilon(Tolerance));
+              Approx(0.00079891425543).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00060269).epsilon(Tolerance));
+              Approx(0.00059500).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(0.00036327).epsilon(Tolerance));
+              Approx(0.00034828).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.00031155).epsilon(Tolerance));
+              Approx(-0.00027795).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00102347).epsilon(Tolerance));
+              Approx(0.00105107).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
               Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
@@ -2044,10 +2044,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.48581658).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(0.03777283).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.25564021).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.44804375).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.48778797).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.04565839).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.26549716).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.44212958).epsilon(Tolerance));
       REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -2102,10 +2102,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.3081448).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(0.17193919).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.21213479).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.51521254).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.29648451).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(0.15939331).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.18792863).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.51856235).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -2113,24 +2113,24 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-7573.14655485).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-8293.81378005).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-6337.06362775).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(4709.1549025).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-7539.56145810).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-8237.92839685).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-6524.88400618).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(4666.97827380).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00043108).epsilon(Tolerance));
+              Approx(0.00042208124206).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00030839).epsilon(Tolerance));
+              Approx(0.00030107).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(0.00017208).epsilon(Tolerance));
+              Approx(0.00016186).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.0002123).epsilon(Tolerance));
+              Approx(-0.00019084).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00051562).epsilon(Tolerance));
+              Approx(0.00052659).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
               Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
@@ -2452,10 +2452,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.28406168).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(0.16523414).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.20676947).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.4974834).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.27456889).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.15490510).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.18694764).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.50098440).epsilon(Tolerance));
       REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -2531,10 +2531,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.59829333).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.15988784).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.19587913).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(-0.33162576).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.59002858).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.17216973).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.17533250).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(-0.33338284).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -2543,27 +2543,27 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
                                        &state_variables);
       // Check update stress
       REQUIRE(updated_stress(0) ==
-              Approx(-3309.71699019).epsilon(Tolerance_stress));
+              Approx(-3198.04616002).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(1) ==
-              Approx(-11067.2682187).epsilon(Tolerance_stress));
+              Approx(-11097.07485074).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(2) ==
-              Approx(-6931.40841882).epsilon(Tolerance_stress));
+              Approx(-6999.45467417).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(3) ==
-              Approx(-2820.47296506).epsilon(Tolerance_stress));
+              Approx(-2798.16071594).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00022948).epsilon(Tolerance));
+              Approx(0.00022227288873).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00028101).epsilon(Tolerance));
+              Approx(0.00026691).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(0.00025949).epsilon(Tolerance));
+              Approx(0.00026378).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.00003817).epsilon(Tolerance));
+              Approx(-0.00002891).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(-0.00017519).epsilon(Tolerance));
+              Approx(-0.00018099).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
               Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
@@ -2639,10 +2639,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(0.).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.72452524).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(-0.17541555).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.28116049).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.17998816).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.71673988).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(-0.15232546).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.29646522).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.17381307).epsilon(Tolerance));
       REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
@@ -2697,10 +2697,10 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.61938609).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.09026886).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.26116803).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.35009644).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.61875527).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.07639146).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.27441462).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.34293905).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(dp_dsigma_trial(5) == Approx(0.).epsilon(Tolerance));
       // Check compute stress
@@ -2708,24 +2708,24 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-1909.04417786).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-5722.13370553).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-8601.25290489).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(2466.78909344).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-1891.81195500).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5758.50111177).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-8566.38672322).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(2477.64202856).epsilon(Tolerance));
       REQUIRE(updated_stress(4) == Approx(0.).epsilon(Tolerance));
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00020144).epsilon(Tolerance));
+              Approx(0.00020052699393).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00022171).epsilon(Tolerance));
+              Approx(0.00021995).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(-0.00003258).epsilon(Tolerance));
+              Approx(-0.00002738).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.00009385).epsilon(Tolerance));
+              Approx(-0.00009791).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00009863).epsilon(Tolerance));
+              Approx(0.00009581).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
               Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
@@ -3081,12 +3081,12 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(-0.17569850).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(-0.50403985).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.26439178).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(-0.05019585).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(0.02834732).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.02629171).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(4) == Approx(-0.18362703).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(5) == Approx(-0.41958850).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.28435720).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(-0.09012669).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(0.04831274).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(0.00165987).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(-0.16765469).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(-0.43955392).epsilon(Tolerance));
 
       // Initialise incremental of strain
       mpm::Material<Dim>::Vector6d dstrain;
@@ -3161,45 +3161,45 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.30524021).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.45418703).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.16028946).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.02562468).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(0.10787847).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.25542365).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(4) == Approx(0.27700484).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(5) == Approx(0.40193862).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.15987109).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.01440272).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(0.09707488).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.24193193).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.27805767).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.40514467).epsilon(Tolerance));
       // Check compute stress
       mpm::Material<Dim>::Vector6d updated_stress =
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
       REQUIRE(updated_stress(0) ==
-              Approx(-13816.79303382).epsilon(Tolerance_stress));
+              Approx(-13818.08070571).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(1) ==
-              Approx(-10064.53749485).epsilon(Tolerance_stress));
+              Approx(-10404.54054640).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(2) ==
-              Approx(-15029.46363051).epsilon(Tolerance_stress));
+              Approx(-14719.79985131).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(3) ==
-              Approx(-946.77500721).epsilon(Tolerance_stress));
+              Approx(-751.28240913).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(4) ==
-              Approx(1578.90765959).epsilon(Tolerance_stress));
+              Approx(1557.69536810).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(5) ==
-              Approx(2569.84977417).epsilon(Tolerance_stress));
+              Approx(2514.11370494).epsilon(Tolerance_stress));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00138442327267).epsilon(Tolerance));
+              Approx(0.00136884760877).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00066886).epsilon(Tolerance));
+              Approx(0.00066808).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(-0.00003893).epsilon(Tolerance));
+              Approx(0.00000432).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(0.00048651).epsilon(Tolerance));
+              Approx(0.00044530).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00106616).epsilon(Tolerance));
+              Approx(0.00101533).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
-              Approx(0.00115948).epsilon(Tolerance));
+              Approx(0.00116500).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
-              Approx(0.00165184).epsilon(Tolerance));
+              Approx(0.00166633).epsilon(Tolerance));
     }
 
     //! Check for shear failure (epds < epde_peak)
@@ -3272,12 +3272,12 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(-0.17437140).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(-0.51998947).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.28430075).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(-0.05889172).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(0.04254016).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.01713462).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(4) == Approx(-0.18247735).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(5) == Approx(-0.43674495).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.30645560).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(-0.10320141).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(0.06469501).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(0.01388217).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(-0.16475347).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(-0.45889980).epsilon(Tolerance));
 
       // Initialise incremental of strain
       mpm::Material<Dim>::Vector6d dstrain;
@@ -3332,39 +3332,39 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.31387747).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.46578947).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.17190241).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.02726585).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(0.12331263).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.27225035).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(4) == Approx(0.28657977).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(5) == Approx(0.41490387).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.17141044).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.01406976).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(0.11060851).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.25638521).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.28781782).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.41867392).epsilon(Tolerance));
       // Check compute stress
       mpm::Material<Dim>::Vector6d updated_stress =
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-12089.22993724).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-9352.637182).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-13759.20444956).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(-233.43318327).epsilon(Tolerance));
-      REQUIRE(updated_stress(4) == Approx(2450.63195319).epsilon(Tolerance));
-      REQUIRE(updated_stress(5) == Approx(3845.23486933).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-12096.03407440).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-9660.17613721).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-13486.80215820).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(-60.14706270).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(2429.69676984).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(3792.50758943).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00103498231261).epsilon(Tolerance));
+              Approx(0.00102043239115).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00050557).epsilon(Tolerance));
+              Approx(0.00050519).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(-0.00008019).epsilon(Tolerance));
+              Approx(-0.00004147).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(0.00036266).epsilon(Tolerance));
+              Approx(0.00032599).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00080069).epsilon(Tolerance));
+              Approx(0.00075564).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
-              Approx(0.00084284).epsilon(Tolerance));
+              Approx(0.00084828).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
-              Approx(0.00122024).epsilon(Tolerance));
+              Approx(0.00123395).epsilon(Tolerance));
     }
 
     //! Check for shear failure (epds > epde_residual)
@@ -3692,12 +3692,12 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(0.01495318).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(-0.22036225).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.26599949).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(0.07577706).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.10716467).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.44822991).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(4) == Approx(0.02828069).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(5) == Approx(-0.194181).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.26805725).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(0.07640756).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.10985293).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.44892570).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(0.03081729).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(-0.19365653).epsilon(Tolerance));
 
       // Initialise incremental of strain
       mpm::Material<Dim>::Vector6d dstrain;
@@ -3773,45 +3773,45 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.00151934).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(-0.10123189).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.59241349).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.20240707).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.15539455).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(-0.29614518).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(4) == Approx(0.02002309).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(5) == Approx(-0.10287453).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.58476919).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.21114283).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.13901448).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(-0.29693668).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.01666924).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(-0.10091892).epsilon(Tolerance));
       // Check compute stress
       mpm::Material<Dim>::Vector6d updated_stress =
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
       REQUIRE(updated_stress(0) ==
-              Approx(-3395.22090704).epsilon(Tolerance_stress));
+              Approx(-3371.92471691).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(1) ==
-              Approx(-11122.82300722).epsilon(Tolerance_stress));
+              Approx(-11106.84816005).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(2) ==
-              Approx(-6348.88730146).epsilon(Tolerance_stress));
+              Approx(-6330.23181861).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(3) ==
-              Approx(-2153.29437423).epsilon(Tolerance_stress));
+              Approx(-2168.58256913).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(4) ==
-              Approx(-302.48144492).epsilon(Tolerance_stress));
+              Approx(-307.74297378).epsilon(Tolerance_stress));
       REQUIRE(updated_stress(5) ==
-              Approx(-353.76316647).epsilon(Tolerance_stress));
+              Approx(-362.44916664).epsilon(Tolerance_stress));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00022519).epsilon(Tolerance));
+              Approx(0.00022395846847).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00027537).epsilon(Tolerance));
+              Approx(0.00027408).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(0.00024996).epsilon(Tolerance));
+              Approx(0.00024962).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.00000065).epsilon(Tolerance));
+              Approx(-0.00000134).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(-0.00021551).epsilon(Tolerance));
+              Approx(-0.00021154).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
-              Approx(0.00010865).epsilon(Tolerance));
+              Approx(0.00011001).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
-              Approx(-0.00002802).epsilon(Tolerance));
+              Approx(-0.00002576).epsilon(Tolerance));
     }
 
     //! Check for shear failure (epds < epde_peak)
@@ -3884,12 +3884,12 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma(4) == Approx(-0.05137356).epsilon(Tolerance));
       REQUIRE(df_dsigma(5) == Approx(-0.10302998).epsilon(Tolerance));
       // Check dP/dSigma
-      REQUIRE(dp_dsigma(0) == Approx(0.73684682).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(1) == Approx(-0.19070895).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(2) == Approx(-0.27818867).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(3) == Approx(-0.10038015).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(4) == Approx(-0.01064698).epsilon(Tolerance));
-      REQUIRE(dp_dsigma(5) == Approx(-0.09021470).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(0) == Approx(0.72719051).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(1) == Approx(-0.16927182).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(2) == Approx(-0.28996950).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(3) == Approx(-0.09776988).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(4) == Approx(-0.01852365).epsilon(Tolerance));
+      REQUIRE(dp_dsigma(5) == Approx(-0.09120985).epsilon(Tolerance));
 
       // Initialise incremental of strain
       mpm::Material<Dim>::Vector6d dstrain;
@@ -3944,39 +3944,39 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(df_dsigma_trial(4) == Approx(0.00413022).epsilon(Tolerance));
       REQUIRE(df_dsigma_trial(5) == Approx(0.04028029).epsilon(Tolerance));
       // Check dPtrial/dSigma
-      REQUIRE(dp_dsigma_trial(0) == Approx(0.59444420).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(1) == Approx(-0.06961261).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(2) == Approx(-0.25688239).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(3) == Approx(0.37321721).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(4) == Approx(0.01308097).epsilon(Tolerance));
-      REQUIRE(dp_dsigma_trial(5) == Approx(0.03140661).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(0) == Approx(0.59469771).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(1) == Approx(-0.05840592).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(2) == Approx(-0.26834260).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(3) == Approx(0.36711838).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(4) == Approx(0.01217858).epsilon(Tolerance));
+      REQUIRE(dp_dsigma_trial(5) == Approx(0.03214063).epsilon(Tolerance));
       // Check compute stress
       mpm::Material<Dim>::Vector6d updated_stress =
           mohr_coulomb->compute_stress(stress, dstrain, particle.get(),
                                        &state_variables);
       // Check update stress
-      REQUIRE(updated_stress(0) == Approx(-2235.5144269).epsilon(Tolerance));
-      REQUIRE(updated_stress(1) == Approx(-5826.89283264).epsilon(Tolerance));
-      REQUIRE(updated_stress(2) == Approx(-8527.02067774).epsilon(Tolerance));
-      REQUIRE(updated_stress(3) == Approx(2756.70095041).epsilon(Tolerance));
-      REQUIRE(updated_stress(4) == Approx(51.93306254).epsilon(Tolerance));
-      REQUIRE(updated_stress(5) == Approx(333.0817301).epsilon(Tolerance));
+      REQUIRE(updated_stress(0) == Approx(-2218.61038534).epsilon(Tolerance));
+      REQUIRE(updated_stress(1) == Approx(-5861.06612694).epsilon(Tolerance));
+      REQUIRE(updated_stress(2) == Approx(-8492.92599128).epsilon(Tolerance));
+      REQUIRE(updated_stress(3) == Approx(2768.93111333).epsilon(Tolerance));
+      REQUIRE(updated_stress(4) == Approx(55.69887830).epsilon(Tolerance));
+      REQUIRE(updated_stress(5) == Approx(332.52895913).epsilon(Tolerance));
 
       // Check plastic strain
       REQUIRE(state_variables.at("epds") ==
-              Approx(0.00023103795421).epsilon(Tolerance));
+              Approx(0.00023014058518).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
-              Approx(0.00025172).epsilon(Tolerance));
+              Approx(0.00025003).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
-              Approx(-0.00003140).epsilon(Tolerance));
+              Approx(-0.00002645).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain2") ==
-              Approx(-0.00010847).epsilon(Tolerance));
+              Approx(-0.00011240).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain3") ==
-              Approx(0.00012726).epsilon(Tolerance));
+              Approx(0.00012408).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain4") ==
-              Approx(0.0000045).epsilon(Tolerance));
+              Approx(0.00000352).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
-              Approx(0.0000054).epsilon(Tolerance));
+              Approx(0.00000554).epsilon(Tolerance));
     }
 
     //! Check for shear failure (epds > epde_residual)
