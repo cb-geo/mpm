@@ -109,8 +109,10 @@ bool mpm::Particle<Tdim>::initialise_particle(
       auto mat_state_vars = material_->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
         unsigned i = 0;
-        for (const auto& mat_state_var : mat_state_vars)
+        for (const auto& mat_state_var : mat_state_vars) {
           this->state_variables_[mat_state_var.first] = particle.svars[i];
+          ++i;
+        }
       }
     } else {
       status = false;
@@ -196,8 +198,10 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   if (material_ != nullptr) {
     particle_data.nstate_vars = state_variables_.size();
     unsigned i = 0;
-    for (const auto& state_var : this->state_variables_)
+    for (const auto& state_var : this->state_variables_) {
       particle_data.svars[i] = state_var.second;
+      ++i;
+    }
   }
 
   return particle_data;

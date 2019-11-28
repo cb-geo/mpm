@@ -928,8 +928,10 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     HDF5Particle particle = dst_buf[i];
+    // Get particle's material from list of materials
+    auto material = materials_.at(particle.material_id);
     // Initialise particle with HDF5 data
-    (*pitr)->initialise_particle(particle);
+    (*pitr)->initialise_particle(particle, material);
     ++i;
   }
   // close the file
