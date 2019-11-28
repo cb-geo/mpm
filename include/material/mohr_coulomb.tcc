@@ -121,24 +121,25 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
     dev_stress(5) = stress(5);
   }
   // Compute J2
-  double j2 =
-      (pow((stress(0) - stress(1)), 2) + pow((stress(1) - stress(2)), 2) +
-       pow((stress(0) - stress(2)), 2)) /
-          6.0 +
-      pow(stress(3), 2);
-  if (Tdim == 3) j2 += pow(stress(4), 2) + pow(stress(5), 2);
+  double j2 = (std::pow((stress(0) - stress(1)), 2) +
+               std::pow((stress(1) - stress(2)), 2) +
+               std::pow((stress(0) - stress(2)), 2)) /
+                  6.0 +
+              std::pow(stress(3), 2);
+  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
   // Compute J3
   (*state_vars).at("j3") = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-                           (dev_stress(2) * pow(dev_stress(3), 2));
+                           (dev_stress(2) * std::pow(dev_stress(3), 2));
   if (Tdim == 3)
     (*state_vars).at("j3") +=
         ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-         (dev_stress(0) * pow(dev_stress(4), 2)) -
-         (dev_stress(1) * pow(dev_stress(5), 2)));
+         (dev_stress(0) * std::pow(dev_stress(4), 2)) -
+         (dev_stress(1) * std::pow(dev_stress(5), 2)));
   // Compute theta value (Lode angle)
   double theta_val = 0.;
   if (fabs(j2) > 0.0)
-    theta_val = (3. * sqrt(3.) / 2.) * ((*state_vars).at("j3") / pow(j2, 1.5));
+    theta_val =
+        (1.5 * std::sqrt(3.)) * ((*state_vars).at("j3") / std::pow(j2, 1.5));
   // Check theta value
   if (theta_val > 1.0) theta_val = 1.0;
   if (theta_val < -1.0) theta_val = -1.0;
@@ -148,10 +149,10 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   if ((*state_vars).at("theta") > M_PI / 3.) (*state_vars)["theta"] = M_PI / 3.;
   if ((*state_vars).at("theta") < 0.0) (*state_vars)["theta"] = 0.;
   // Compute rho
-  (*state_vars)["rho"] = sqrt(2 * (j2));
+  (*state_vars)["rho"] = std::sqrt(2. * (j2));
   // Compute epsilon
   (*state_vars)["epsilon"] =
-      (1. / sqrt(3.)) * (stress(0) + stress(1) + stress(2));
+      (1. / std::sqrt(3.)) * (stress(0) + stress(1) + stress(2));
 
   return true;
 }
@@ -165,33 +166,35 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
   // Tolerance for yield function
   const double Tolerance = -1E-1;
   // Get stress invariants
-  const double epsilon = (*state_vars).at("epsilon");
-  const double rho = (*state_vars).at("rho");
-  const double theta = (*state_vars).at("theta");
+  const double& epsilon = (*state_vars).at("epsilon");
+  const double& rho = (*state_vars).at("rho");
+  const double& theta = (*state_vars).at("theta");
   // Get MC parameters
-  const double phi = (*state_vars).at("phi");
-  const double cohesion = (*state_vars).at("cohesion");
+  const double& phi = (*state_vars).at("phi");
+  const double& cohesion = (*state_vars).at("cohesion");
   // Compute yield functions (tension & shear)
   // Tension
-  (*yield_function)(0) =
-      sqrt(2. / 3.) * cos(theta) * rho + epsilon / sqrt(3.) - tension_cutoff_;
+  (*yield_function)(0) = std::sqrt(2. / 3.) * cos(theta) * rho +
+                         epsilon / std::sqrt(3.) - tension_cutoff_;
   // Shear
-  (*yield_function)(1) = sqrt(3. / 2.) * rho *
-                             ((sin(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) +
-                              (cos(theta + M_PI / 3.) * tan(phi) / 3.)) +
-                         (epsilon / sqrt(3.)) * tan(phi) - cohesion;
+  (*yield_function)(1) =
+      std::sqrt(1.5) * rho *
+          ((sin(theta + M_PI / 3.) / (std::sqrt(3.) * cos(phi))) +
+           (cos(theta + M_PI / 3.) * tan(phi) / 3.)) +
+      (epsilon / std::sqrt(3.)) * tan(phi) - cohesion;
   // Initialise yield status (0: elastic, 1: tension failure, 2: shear failure)
   auto yield_type = FailureState::Elastic;
   // Check for tension and shear
   if ((*yield_function)(0) > Tolerance && (*yield_function)(1) > Tolerance) {
     // Compute tension and shear edge parameters
     double n_phi = (1. + sin(phi)) / (1. - sin(phi));
-    double sigma_p = tension_cutoff_ * n_phi - 2. * cohesion * sqrt(n_phi);
-    double alpha_p = sqrt(1. + n_phi * n_phi) + n_phi;
+    double sigma_p = tension_cutoff_ * n_phi - 2. * cohesion * std::sqrt(n_phi);
+    double alpha_p = std::sqrt(1. + n_phi * n_phi) + n_phi;
     // Compute the shear-tension edge
-    double h = (*yield_function)(0) +
-               alpha_p * (sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
-                          epsilon / sqrt(3.) - sigma_p);
+    double h =
+        (*yield_function)(0) +
+        alpha_p * (std::sqrt(2. / 3.) * cos(theta - 4. * M_PI / 3.) * rho +
+                   epsilon / std::sqrt(3.) - sigma_p);
     // Tension
     if (h > 1.E-22) yield_type = FailureState::Tensile;
     // Shear
@@ -215,15 +218,15 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     const mpm::dense_map* state_vars, const Vector6d& stress,
     Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
   // Get stress invariants
-  const double j3 = (*state_vars).at("j3");
-  const double rho = (*state_vars).at("rho");
-  const double theta = (*state_vars).at("theta");
+  const double& j3 = (*state_vars).at("j3");
+  const double& rho = (*state_vars).at("rho");
+  const double& theta = (*state_vars).at("theta");
   // Get MC parameters
-  const double phi = (*state_vars).at("phi");
-  const double psi = (*state_vars).at("psi");
-  const double cohesion = (*state_vars).at("cohesion");
+  const double& phi = (*state_vars).at("phi");
+  const double& psi = (*state_vars).at("psi");
+  const double& cohesion = (*state_vars).at("cohesion");
   // Get equivalent plastic deviatoric strain
-  const double epds = (*state_vars).at("epds");
+  const double& epds = (*state_vars).at("epds");
   // Compute the mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
   // Compute deviatoric stress
@@ -240,25 +243,24 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   double df_depsilon, df_drho, df_dtheta;
   // Values in tension yield
   if (yield_type == FailureState::Tensile) {
-    df_depsilon = 1. / sqrt(3.);
-    df_drho = sqrt(2. / 3.) * cos(theta);
-    df_dtheta = -sqrt(2. / 3.) * rho * sin(theta);
+    df_depsilon = 1. / std::sqrt(3.);
+    df_drho = std::sqrt(2. / 3.) * cos(theta);
+    df_dtheta = -std::sqrt(2. / 3.) * rho * sin(theta);
   }
   // Values in shear yield / elastic
   else {
-    df_depsilon = tan(phi) / sqrt(3.);
-    df_drho =
-        sqrt(3. / 2.) * ((sin(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) +
-                         (cos(theta + M_PI / 3.) * tan(phi) / 3.));
-    df_dtheta = sqrt(3. / 2.) * rho *
-                ((cos(theta + M_PI / 3.) / (sqrt(3.) * cos(phi))) -
+    df_depsilon = tan(phi) / std::sqrt(3.);
+    df_drho = std::sqrt(1.5) *
+              ((sin(theta + M_PI / 3.) / (std::sqrt(3.) * cos(phi))) +
+               (cos(theta + M_PI / 3.) * tan(phi) / 3.));
+    df_dtheta = std::sqrt(1.5) * rho *
+                ((cos(theta + M_PI / 3.) / (std::sqrt(3.) * cos(phi))) -
                  (sin(theta + M_PI / 3.) * tan(phi) / 3.));
   }
   // Compute dEpsilon / dSigma
   Vector6d depsilon_dsigma = Vector6d::Zero();
-  depsilon_dsigma(0) = 1. / sqrt(3.);
-  depsilon_dsigma(1) = 1. / sqrt(3.);
-  depsilon_dsigma(2) = 1. / sqrt(3.);
+  depsilon_dsigma(0) = depsilon_dsigma(1) = depsilon_dsigma(2) =
+      1. / std::sqrt(3.);
   // Compute dRho / dSigma
   Vector6d drho_dsigma = Vector6d::Zero();
   double multiplier = 1.;
@@ -271,17 +273,18 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Compute dTheta / dSigma
   // Compute r
   double r_val = 0.;
-  if (fabs(rho) > 1.E-22) r_val = (3. * sqrt(6.)) * (j3 / pow(rho, 3.));
+  if (fabs(rho) > 1.E-22)
+    r_val = (3. * std::sqrt(6.)) * (j3 / std::pow(rho, 3));
   // Compute dTheta / dr
   double divider = 1 - (r_val * r_val);
   if (divider <= 0.) divider = 1.E-3;
-  double dtheta_dr = -1 / (3. * sqrt(divider));
+  double dtheta_dr = -1 / (3. * std::sqrt(divider));
   // Compute dr / dJ2
-  double dr_dj2 = (-9 * sqrt(6.)) * j3;
-  if (fabs(rho) > 1.E-22) dr_dj2 /= pow(rho, 5.);
+  double dr_dj2 = (-9 * std::sqrt(6.)) * j3;
+  if (fabs(rho) > 1.E-22) dr_dj2 /= std::pow(rho, 5);
   // Compute dr / dJ3
-  double dr_dj3 = 3. * sqrt(6.);
-  if (fabs(rho) > 1.E-22) dr_dj3 /= pow(rho, 3.);
+  double dr_dj3 = 3. * std::sqrt(6.);
+  if (fabs(rho) > 1.E-22) dr_dj3 /= std::pow(rho, 3);
   // Compute dJ2 / dSigma
   Vector6d dj2_dsigma = dev_stress;
   // Compute dJ3 / dSigma
@@ -333,28 +336,28 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
                     5. * et_value * et_value - 4. * et_value;
     if (sqpart < 1.E-22) sqpart = 1.E-5;
     double rt_den = 2. * (1 - et_value * et_value) * cos(theta) +
-                    (2. * et_value - 1) * sqrt(sqpart);
+                    (2. * et_value - 1) * std::sqrt(sqpart);
     double rt_num = 4. * (1 - et_value * et_value) * cos(theta) * cos(theta) +
                     (2. * et_value - 1) * (2. * et_value - 1);
     if (fabs(rt_den) < 1.E-22) rt_den = 1.E-5;
     double rt = rt_num / (3. * rt_den);
     // Compute dP/dRt
     double dp_drt = 1.5 * rho * rho * rt /
-                    sqrt(xit * xit * tension_cutoff_ * tension_cutoff_ +
-                         1.5 * rt * rt * rho * rho);
+                    std::sqrt(xit * xit * tension_cutoff_ * tension_cutoff_ +
+                              1.5 * rt * rt * rho * rho);
     // Compute dP/dRho
     double dp_drho = 1.5 * rho * rt * rt /
-                     sqrt(xit * xit * tension_cutoff_ * tension_cutoff_ +
-                          1.5 * rt * rt * rho * rho);
+                     std::sqrt(xit * xit * tension_cutoff_ * tension_cutoff_ +
+                               1.5 * rt * rt * rho * rho);
     // Compute dP/dEpsilon
-    double dp_depsilon = 1. / sqrt(3.);
+    double dp_depsilon = 1. / std::sqrt(3.);
     // Compute dRt/dThera
     double drtden_dtheta =
         -2. * (1 - et_value * et_value) * sin(theta) -
         (2. * et_value - 1) * 4. * (1 - et_value * et_value) * cos(theta) *
             sin(theta) /
-            sqrt(4. * (1 - et_value * et_value) * cos(theta) * cos(theta) +
-                 5. * et_value * et_value - 4. * et_value);
+            std::sqrt(4. * (1 - et_value * et_value) * cos(theta) * cos(theta) +
+                      5. * et_value * et_value - 4. * et_value);
     double drtnum_dtheta =
         -8. * (1 - et_value * et_value) * cos(theta) * sin(theta);
     double drt_dtheta = (drtnum_dtheta * rt_den - drtden_dtheta * rt_num) /
@@ -363,7 +366,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     (*dp_dsigma) = (dp_depsilon * depsilon_dsigma) + (dp_drho * drho_dsigma) +
                    (dp_drt * drt_dtheta * dtheta_dsigma);
     // Compute dP/dJ
-    dp_dq = dp_drho * sqrt(2. / 3.);
+    dp_dq = dp_drho * std::sqrt(2. / 3.);
   }
   // Compute dp/dsigma and dp/dj in shear yield
   else {
@@ -374,32 +377,33 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
     if (e_val <= 0.5) e_val = 0.5 + 1.E-10;
     if (e_val > 1.) e_val = 1.;
     // Compute Rmw
-    double sqpart = (4. * (1 - e_val * e_val) * pow(cos(theta), 2)) +
+    double sqpart = (4. * (1 - e_val * e_val) * std::pow(cos(theta), 2)) +
                     (5 * e_val * e_val) - (4. * e_val);
     if (sqpart < 1.E-22) sqpart = 1.E-5;
     double m = (2. * (1 - e_val * e_val) * cos(theta)) +
-               ((2. * e_val - 1) * sqrt(sqpart));
+               ((2. * e_val - 1) * std::sqrt(sqpart));
     if (fabs(m) < 1.E-22) m = 1.E-5;
-    double l = (4. * (1. - e_val * e_val) * pow(cos(theta), 2)) +
-               pow((2. * e_val - 1.), 2);
+    double l = (4. * (1. - e_val * e_val) * std::pow(cos(theta), 2)) +
+               std::pow((2. * e_val - 1.), 2);
     double r_mw = (l / m) * r_mc;
     // Initialise meridional eccentricity
     double xi = 0.1;
-    double omega = pow((xi * cohesion_peak_ * tan(psi)), 2) +
-                   pow((r_mw * sqrt(3. / 2.) * rho), 2);
+    double omega = std::pow((xi * cohesion_peak_ * tan(psi)), 2) +
+                   std::pow((r_mw * std::sqrt(1.5) * rho), 2);
     if (omega < 1.E-22) omega = 1.E-5;
     double dl_dtheta = -8. * (1. - e_val * e_val) * cos(theta) * sin(theta);
-    double dm_dtheta = (-2. * (1. - e_val * e_val) * sin(theta)) +
-                       (0.5 * (2. * e_val - 1.) * dl_dtheta) / sqrt(sqpart);
+    double dm_dtheta =
+        (-2. * (1. - e_val * e_val) * sin(theta)) +
+        (0.5 * (2. * e_val - 1.) * dl_dtheta) / std::sqrt(sqpart);
     double drmw_dtheta = ((m * dl_dtheta) - (l * dm_dtheta)) / (m * m);
-    double dp_depsilon = tan(psi) / sqrt(3.);
-    double dp_drho = 3. * rho * r_mw * r_mw / (2. * sqrt(omega));
+    double dp_depsilon = tan(psi) / std::sqrt(3.);
+    double dp_drho = 3. * rho * r_mw * r_mw / (2. * std::sqrt(omega));
     double dp_dtheta =
-        (3. * rho * rho * r_mw * r_mc * drmw_dtheta) / (2. * sqrt(omega));
+        (3. * rho * rho * r_mw * r_mc * drmw_dtheta) / (2. * std::sqrt(omega));
     // compute the value of dp/dsigma and dp/dj in shear yield
     (*dp_dsigma) = (dp_depsilon * depsilon_dsigma) + (dp_drho * drho_dsigma) +
                    (dp_dtheta * dtheta_dsigma);
-    dp_dq = dp_drho * sqrt(2. / 3.);
+    dp_dq = dp_drho * std::sqrt(2. / 3.);
   }
   // Compute softening part
   double dphi_dpstrain = 0.;
@@ -413,9 +417,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
         (cohesion_residual_ - cohesion_peak_) / (epds_residual_ - epds_peak_);
     // Compute dF/dPstrain
     double df_dphi =
-        sqrt(3. / 2.) * rho *
+        std::sqrt(1.5) * rho *
             ((sin(phi) * sin(theta + M_PI / 3.) /
-              (sqrt(3.) * cos(phi) * cos(phi))) +
+              (std::sqrt(3.) * cos(phi) * cos(phi))) +
              (cos(theta + M_PI / 3.) / (3. * cos(phi) * cos(phi)))) +
         (mean_p / (cos(phi) * cos(phi)));
     double df_dc = -1.;
@@ -430,7 +434,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
   // Get equivalent plastic deviatoric strain
-  const double epds = (*state_vars).at("epds");
+  const double& epds = (*state_vars).at("epds");
   // Update MC parameters using a linear softening rule
   if (softening_ && (epds - epds_peak_) > 0. && (epds_residual_ - epds) > 0.) {
     (*state_vars)["phi"] =
@@ -562,18 +566,21 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   (*state_vars).at("pstrain4") += dpstrain(4);
   (*state_vars).at("pstrain5") += dpstrain(5);
   // Update equivalent plastic deviatoric strain
-  (*state_vars).at("epds") = sqrt(
+  (*state_vars).at("epds") = std::sqrt(
       2. / 9. *
-          (pow(((*state_vars).at("pstrain0") - (*state_vars).at("pstrain1")),
+          (std::pow(
+               ((*state_vars).at("pstrain0") - (*state_vars).at("pstrain1")),
                2.) +
-           pow(((*state_vars).at("pstrain1") - (*state_vars).at("pstrain2")),
+           std::pow(
+               ((*state_vars).at("pstrain1") - (*state_vars).at("pstrain2")),
                2.) +
-           pow(((*state_vars).at("pstrain2") - (*state_vars).at("pstrain0")),
+           std::pow(
+               ((*state_vars).at("pstrain2") - (*state_vars).at("pstrain0")),
                2.)) +
       1. / 3. *
-          (pow(((*state_vars).at("pstrain3")), 2.) +
-           pow(((*state_vars).at("pstrain4")), 2.) +
-           pow(((*state_vars).at("pstrain5")), 2.)));
+          (std::pow(((*state_vars).at("pstrain3")), 2.) +
+           std::pow(((*state_vars).at("pstrain4")), 2.) +
+           std::pow(((*state_vars).at("pstrain5")), 2.)));
 
   return updated_stress;
 }
