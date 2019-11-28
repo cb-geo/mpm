@@ -126,8 +126,6 @@ class MohrCoulomb : public Material<Tdim> {
   double epds_residual_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
-  //! Tolerance of yield function
-  double tolerance_{std::numeric_limits<double>::max()};
   //! softening
   bool softening_{false};
 };  // MohrCoulomb class
