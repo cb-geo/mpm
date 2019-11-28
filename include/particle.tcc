@@ -91,7 +91,33 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
 
   // Material id
   this->material_id_ = particle.material_id;
+
   return true;
+}
+
+//! Initialise particle data from HDF5
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::initialise_particle(
+    const HDF5Particle& particle,
+    const std::shared_ptr<mpm::Material<Tdim>>& material) {
+  bool status = this->initialise_particle(particle);
+  if (material != nullptr) {
+    if (this->material_id_ == material->id() ||
+        this->material_id_ == std::numeric_limits<unsigned>::max()) {
+      material_ = material;
+      // Reinitialize state variables
+      auto mat_state_vars = material_->initialise_state_variables();
+      if (mat_state_vars.size() == particle.nstate_vars) {
+        unsigned i = 0;
+        for (const auto& mat_state_var : mat_state_vars)
+          this->state_variables_[mat_state_var.first] = particle.svars[i];
+      }
+    } else {
+      status = false;
+      throw std::runtime_error("Material is invalid to assign to particle!");
+    }
+  }
+  return status;
 }
 
 //! Return particle data in HDF5 format
@@ -165,6 +191,14 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   particle_data.cell_id = this->cell_id();
 
   particle_data.material_id = this->material_id();
+
+  // Write state variables
+  if (material_ != nullptr) {
+    particle_data.nstate_vars = state_variables_.size();
+    unsigned i = 0;
+    for (const auto& state_var : this->state_variables_)
+      particle_data.svars[i] = state_var.second;
+  }
 
   return particle_data;
 }

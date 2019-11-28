@@ -141,7 +141,7 @@ add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
 else()
-add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})  
+add_executable(mpm ${mpm_src} ${mpm_vtk} ${mpm_SOURCE_DIR}/src/main.cc)  
 endif()
 
 # Unit test

@@ -55,6 +55,14 @@ class ParticleBase {
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(const HDF5Particle& particle) = 0;
 
+  //! Initialise particle HDF5 data and material
+  //! \param[in] particle HDF5 data of particle
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(
+      const HDF5Particle& particle,
+      const std::shared_ptr<Material<Tdim>>& material) = 0;
+
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
   virtual HDF5Particle hdf5() const = 0;

@@ -4,6 +4,7 @@
 
 #include "data_types.h"
 #include "hdf5_particle.h"
+#include "material/material.h"
 #include "mpi_datatypes.h"
 #include "particle.h"
 
@@ -76,6 +77,11 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
     h5_particle.volume = 2.;
 
     h5_particle.material_id = 1;
+
+    h5_particle.nstate_vars = 0;
+
+    for (unsigned i = 0; i < h5_particle.nstate_vars; ++i)
+      h5_particle.svars[i] = 0.;
 
     // Check send and receive particle with HDF5
     SECTION("Check send and receive particle with HDF5") {
@@ -171,6 +177,11 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
         REQUIRE(h5_particle.cell_id == received.cell_id);
         REQUIRE(h5_particle.material_id == received.cell_id);
+
+        REQUIRE(h5_particle.nstate_vars == received.nstate_vars);
+        for (unsigned i = 0; i < h5_particle.nstate_vars; ++i)
+          REQUIRE(h5_particle.svars[i] ==
+                  Approx(h5_particle.svars[i]).epsilon(Tolerance));
       }
       // Free MPI datatypes
       mpm::free_mpi_particle_datatypes();
@@ -204,8 +215,20 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         std::shared_ptr<mpm::ParticleBase<Dim>> particle =
             std::make_shared<mpm::Particle<Dim>>(id, pcoordinates);
 
+        // Assign material
+        unsigned mid = 1;
+        // Initialise material
+        Json jmaterial;
+        jmaterial["density"] = 1000.;
+        jmaterial["youngs_modulus"] = 1.0E+7;
+        jmaterial["poisson_ratio"] = 0.3;
+
+        auto material =
+            Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                ->create("LinearElastic3D", std::move(mid), jmaterial);
+
         // Reinitialise particle from HDF5 data
-        REQUIRE(particle->initialise_particle(h5_particle) == true);
+        REQUIRE(particle->initialise_particle(h5_particle, material) == true);
 
         // Check particle id
         REQUIRE(particle->id() == h5_particle.id);
@@ -283,8 +306,20 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
             std::make_shared<mpm::Particle<Dim>>(id, pcoordinates);
 
+        // Assign material
+        unsigned mid = 1;
+        // Initialise material
+        Json jmaterial;
+        jmaterial["density"] = 1000.;
+        jmaterial["youngs_modulus"] = 1.0E+7;
+        jmaterial["poisson_ratio"] = 0.3;
+
+        auto material =
+            Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                ->create("LinearElastic3D", std::move(mid), jmaterial);
+
         // Reinitialise particle from HDF5 data
-        REQUIRE(rparticle->initialise_particle(received) == true);
+        REQUIRE(rparticle->initialise_particle(received, material) == true);
 
         // Check particle id
         REQUIRE(rparticle->id() == h5_particle.id);
@@ -345,6 +380,15 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
         // Check material id
         REQUIRE(rparticle->material_id() == h5_particle.material_id);
+
+        // Get Particle HDF5 data
+        const auto h5_received = rparticle->hdf5();
+        // State variables
+        REQUIRE(h5_received.nstate_vars == h5_particle.nstate_vars);
+        // State variables
+        for (unsigned i = 0; i < h5_particle.nstate_vars; ++i)
+          REQUIRE(h5_received.svars[i] ==
+                  Approx(h5_particle.svars[i]).epsilon(Tolerance));
       }
       // Free MPI datatypes
       mpm::free_mpi_particle_datatypes();
