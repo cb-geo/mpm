@@ -71,7 +71,7 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] state_vars History-dependent state variables
   //! \retval yield_type Yield type (elastic, shear or tensile)
   FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
-                                   const mpm::dense_map* state_vars);
+                                   const mpm::dense_map& state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
   //! \param[in] yield_type Yield type (elastic, shear or tensile)

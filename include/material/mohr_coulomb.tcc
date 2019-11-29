@@ -152,16 +152,16 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
 template <unsigned Tdim>
 typename mpm::FailureState mpm::MohrCoulomb<Tdim>::compute_yield_state(
     Eigen::Matrix<double, 2, 1>* yield_function,
-    const mpm::dense_map* state_vars) {
+    const mpm::dense_map& state_vars) {
   // Tolerance for yield function
   const double Tolerance = -1E-1;
   // Get stress invariants
-  const double& epsilon = (*state_vars).at("epsilon");
-  const double& rho = (*state_vars).at("rho");
-  const double& theta = (*state_vars).at("theta");
+  const double& epsilon = state_vars.at("epsilon");
+  const double& rho = state_vars.at("rho");
+  const double& theta = state_vars.at("theta");
   // Get MC parameters
-  const double& phi = (*state_vars).at("phi");
-  const double& cohesion = (*state_vars).at("cohesion");
+  const double& phi = state_vars.at("phi");
+  const double& cohesion = state_vars.at("cohesion");
   // Compute yield functions (tension & shear)
   // Tension
   (*yield_function)(0) = std::sqrt(2. / 3.) * cos(theta) * rho +
@@ -444,7 +444,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Compute yield function based on the trial stress
   Eigen::Matrix<double, 2, 1> yield_function_trial;
   auto yield_type_trial =
-      this->compute_yield_state(&yield_function_trial, state_vars);
+      this->compute_yield_state(&yield_function_trial, (*state_vars));
   // Return the updated stress in elastic state
   if (yield_type_trial == FailureState::Elastic) return trial_stress;
   //-------------------------------------------------------------------------
@@ -470,7 +470,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_stress_invariants(stress, state_vars);
   // Compute yield function based on stress input
   Eigen::Matrix<double, 2, 1> yield_function;
-  auto yield_type = this->compute_yield_state(&yield_function, state_vars);
+  auto yield_type = this->compute_yield_state(&yield_function, (*state_vars));
   // Initialise value of yield function based on stress
   double yield{std::numeric_limits<double>::max()};
   if (yield_type == FailureState::Tensile) yield = yield_function(0);
@@ -506,7 +506,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   this->compute_stress_invariants(updated_stress, state_vars);
   // Compute yield function based on updated stress
   yield_type_trial =
-      this->compute_yield_state(&yield_function_trial, state_vars);
+      this->compute_yield_state(&yield_function_trial, (*state_vars));
   // Define the maximum iteration step
   int itr_max = 100;
   // Initialise counter of iteration step
@@ -533,7 +533,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     this->compute_stress_invariants(updated_stress, state_vars);
     // Compute yield function based on updated stress
     yield_type_trial =
-        this->compute_yield_state(&yield_function_trial, state_vars);
+        this->compute_yield_state(&yield_function_trial, (*state_vars));
     // Count the iteration step
     itr++;
   }

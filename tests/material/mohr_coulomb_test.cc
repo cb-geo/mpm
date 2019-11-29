@@ -221,7 +221,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-690.98300563).epsilon(Tolerance));
@@ -289,7 +289,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(-11623.00067857).epsilon(Tolerance));
@@ -372,7 +372,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(8575.09909665).epsilon(Tolerance));
@@ -492,7 +492,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-2000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
@@ -560,7 +560,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(11461.53846154).epsilon(Tolerance));
@@ -711,7 +711,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
@@ -779,7 +779,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2212.05893238).epsilon(Tolerance));
@@ -862,7 +862,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(8575.09909665).epsilon(Tolerance));
@@ -981,7 +981,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-1000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
@@ -1049,7 +1049,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2084.86947857).epsilon(Tolerance));
@@ -1199,7 +1199,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
@@ -1267,7 +1267,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2212.05893238).epsilon(Tolerance));
@@ -1350,7 +1350,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(8575.09909665).epsilon(Tolerance));
@@ -1468,7 +1468,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     // Initialise values of yield functions
     Eigen::Matrix<double, 2, 1> yield_function;
     auto yield_type =
-        mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+        mohr_coulomb->compute_yield_state(&yield_function, state_variables);
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-1000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
@@ -1536,7 +1536,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2084.86947857).epsilon(Tolerance));
@@ -1706,7 +1706,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-3561.03580708).epsilon(Tolerance));
@@ -1777,7 +1777,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2212.05893238).epsilon(Tolerance));
@@ -1877,7 +1877,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
@@ -1930,7 +1930,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(2212.05893238).epsilon(Tolerance));
@@ -2038,7 +2038,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-5000.).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-250.).epsilon(Tolerance));
@@ -2107,7 +2107,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(3204.54446772).epsilon(Tolerance));
@@ -2259,7 +2259,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-1283.64854880).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.00464538).epsilon(Tolerance));
@@ -2331,7 +2331,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(274.43852423).epsilon(Tolerance));
@@ -2432,7 +2432,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-807.41759643).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-0.01617146).epsilon(Tolerance));
@@ -2485,7 +2485,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(1513.89550814).epsilon(Tolerance));
@@ -2592,7 +2592,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-5000.).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
@@ -2661,7 +2661,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(3204.54446772).epsilon(Tolerance));
@@ -2850,7 +2850,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-2785.3725926).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-1054.08171963).epsilon(Tolerance));
@@ -2925,7 +2925,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(6551.16818741).epsilon(Tolerance));
@@ -3032,7 +3032,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-2785.37259260).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-1438.89947208).epsilon(Tolerance));
@@ -3087,7 +3087,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(6551.16818741).epsilon(Tolerance));
@@ -3201,7 +3201,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4915.13437757).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-324.84658240).epsilon(Tolerance));
@@ -3274,7 +3274,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(10638.75879839).epsilon(Tolerance));
@@ -3432,7 +3432,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-1603.69045498).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.05571368).epsilon(Tolerance));
@@ -3508,7 +3508,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(39.14507588).epsilon(Tolerance));
@@ -3615,7 +3615,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-867.93424523).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-0.02983913).epsilon(Tolerance));
@@ -3670,7 +3670,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(1815.88679617).epsilon(Tolerance));
@@ -3783,7 +3783,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions
       Eigen::Matrix<double, 2, 1> yield_function;
       auto yield_type =
-          mohr_coulomb->compute_yield_state(&yield_function, &state_variables);
+          mohr_coulomb->compute_yield_state(&yield_function, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4948.19884736).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.09047424).epsilon(Tolerance));
@@ -3856,7 +3856,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Initialise values of yield functions based on trial stress
       Eigen::Matrix<double, 2, 1> yield_function_trial;
       auto yield_type_trial = mohr_coulomb->compute_yield_state(
-          &yield_function_trial, &state_variables);
+          &yield_function_trial, state_variables);
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function_trial(0) ==
               Approx(-3307.99391393).epsilon(Tolerance));
