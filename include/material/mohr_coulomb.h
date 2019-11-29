@@ -1,15 +1,18 @@
 #ifndef MPM_MATERIAL_MOHR_COULOMB_H_
 #define MPM_MATERIAL_MOHR_COULOMB_H_
 
-#include <limits>
-
 #include <cmath>
+
+#include <limits>
 
 #include "Eigen/Dense"
 
 #include "material.h"
 
 namespace mpm {
+
+//! Failure state
+enum FailureState { Elastic, Tensile, Shear };
 
 //! MohrCoulomb class
 //! \brief Mohr Coulomb material model
@@ -22,9 +25,6 @@ class MohrCoulomb : public Material<Tdim> {
   using Vector6d = Eigen::Matrix<double, 6, 1>;
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
-
-  //! Failure state
-  enum FailureState { Elastic = 0, Tensile = 1, Shear = 2 };
 
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties

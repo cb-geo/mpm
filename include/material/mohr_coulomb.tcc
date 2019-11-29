@@ -111,30 +111,21 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   // Compute the mean pressure
   const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
   // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) - mean_p;
-  dev_stress(1) = stress(1) - mean_p;
-  dev_stress(2) = stress(2) - mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
+  Vector6d dev_stress = stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
   // Compute J2
   double j2 = (std::pow((stress(0) - stress(1)), 2) +
                std::pow((stress(1) - stress(2)), 2) +
                std::pow((stress(0) - stress(2)), 2)) /
                   6.0 +
-              std::pow(stress(3), 2);
-  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
+              std::pow(stress(3), 2) + std::pow(stress(4), 2) +
+              std::pow(stress(5), 2);
   // Compute J3
-  (*state_vars).at("j3") = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-                           (dev_stress(2) * std::pow(dev_stress(3), 2));
-  if (Tdim == 3)
-    (*state_vars).at("j3") +=
-        ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-         (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-         (dev_stress(1) * std::pow(dev_stress(5), 2)));
+  (*state_vars).at("j3") = dev_stress(0) * dev_stress(1) * dev_stress(2) -
+                           dev_stress(2) * std::pow(dev_stress(3), 2) +
+                           2 * dev_stress(3) * dev_stress(4) * dev_stress(5) -
+                           dev_stress(0) * std::pow(dev_stress(4), 2) -
+                           dev_stress(1) * std::pow(dev_stress(5), 2);
   // Compute theta value (Lode angle)
   double theta_val = 0.;
   if (fabs(j2) > 0.0)
@@ -159,10 +150,9 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
 
 //! Compute yield function and yield state
 template <unsigned Tdim>
-typename mpm::MohrCoulomb<Tdim>::FailureState
-    mpm::MohrCoulomb<Tdim>::compute_yield_state(
-        Eigen::Matrix<double, 2, 1>* yield_function,
-        const mpm::dense_map* state_vars) {
+typename mpm::FailureState mpm::MohrCoulomb<Tdim>::compute_yield_state(
+    Eigen::Matrix<double, 2, 1>* yield_function,
+    const mpm::dense_map* state_vars) {
   // Tolerance for yield function
   const double Tolerance = -1E-1;
   // Get stress invariants
@@ -213,10 +203,12 @@ typename mpm::MohrCoulomb<Tdim>::FailureState
 
 //! Compute dF/dSigma and dP/dSigma
 template <unsigned Tdim>
-void mpm::MohrCoulomb<Tdim>::compute_df_dp(
-    mpm::MohrCoulomb<Tdim>::FailureState yield_type,
-    const mpm::dense_map* state_vars, const Vector6d& stress,
-    Vector6d* df_dsigma, Vector6d* dp_dsigma, double* softening) {
+void mpm::MohrCoulomb<Tdim>::compute_df_dp(mpm::FailureState yield_type,
+                                           const mpm::dense_map* state_vars,
+                                           const Vector6d& stress,
+                                           Vector6d* df_dsigma,
+                                           Vector6d* dp_dsigma,
+                                           double* softening) {
   // Get stress invariants
   const double& j3 = (*state_vars).at("j3");
   const double& rho = (*state_vars).at("rho");
@@ -230,15 +222,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Compute the mean stress
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
   // Compute deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) - mean_p;
-  dev_stress(1) = stress(1) - mean_p;
-  dev_stress(2) = stress(2) - mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
+  Vector6d dev_stress = stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
   // Compute dF / dEpsilon,  dF / dRho, dF / dTheta
   double df_depsilon, df_drho, df_dtheta;
   // Values in tension yield
@@ -305,10 +290,8 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   dj3_dsigma(1) = dev2.dot(dev2) - (1. / 3.) * rho * rho;
   dj3_dsigma(2) = dev3.dot(dev3) - (1. / 3.) * rho * rho;
   dj3_dsigma(3) = dev1.dot(dev2);
-  if (Tdim == 3) {
-    dj3_dsigma(4) = dev2.dot(dev3);
-    dj3_dsigma(5) = dev1.dot(dev3);
-  }
+  dj3_dsigma(4) = dev2.dot(dev3);
+  dj3_dsigma(5) = dev1.dot(dev3);
   // Compute dtheta / dsigma
   Vector6d dtheta_dsigma = Vector6d::Zero();
   dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
