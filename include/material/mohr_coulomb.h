@@ -10,8 +10,9 @@
 #include "material.h"
 
 namespace mohrcoulomb {
+//! Failure state
 enum FailureState { Elastic, Tensile, Shear };
-}
+}  // namespace mohrcoulomb
 
 namespace mpm {
 
