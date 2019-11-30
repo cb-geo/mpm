@@ -225,7 +225,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-690.98300563).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Elastic);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -295,7 +295,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
               Approx(-11623.00067857).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(1492.38393682).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -378,7 +378,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
               Approx(8575.09909665).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(2902.93416371).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Tensile);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Tensile);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -496,7 +496,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-2000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Shear);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -566,7 +566,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
               Approx(11461.53846154).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(3846.15384615).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Tensile);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Tensile);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -715,7 +715,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Elastic);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -785,7 +785,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
               Approx(2212.05893238).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(3174.54763108).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -868,7 +868,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
               Approx(8575.09909665).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(5781.54613102).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Tensile);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Tensile);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -985,7 +985,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-1000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Shear);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -1055,7 +1055,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
               Approx(2084.86947857).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(2505.03198892).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -1203,7 +1203,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Elastic);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -1273,7 +1273,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
               Approx(2212.05893238).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(3174.54763108).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -1356,7 +1356,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
               Approx(8575.09909665).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(5781.54613102).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Tensile);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Tensile);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -1472,7 +1472,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     // Check if yield function and yield state is computed correctly
     REQUIRE(yield_function(0) == Approx(-1000.).epsilon(Tolerance));
     REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(yield_type == mpm::FailureState::Shear);
+    REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
     // Initialise plastic correction components
     mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -1542,7 +1542,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
               Approx(2084.86947857).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(2505.03198892).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -1710,7 +1710,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-3561.03580708).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -1783,7 +1783,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(2212.05893238).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(3262.66672836).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -1881,7 +1881,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4381.96601125).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-3774.1679421).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -1936,7 +1936,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(2212.05893238).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(3174.54763108).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -2042,7 +2042,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-5000.).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-250.).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -2113,7 +2113,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(3204.54446772).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(6743.00600619).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -2263,7 +2263,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-1283.64854880).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.00464538).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -2337,7 +2337,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(274.43852423).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(1752.8367834).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -2436,7 +2436,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-807.41759643).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-0.01617146).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -2491,7 +2491,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(1513.89550814).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(1843.75660036).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -2596,7 +2596,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-5000.).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -2667,7 +2667,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
               Approx(3204.54446772).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(6743.00600619).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -2854,7 +2854,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-2785.3725926).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-1054.08171963).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -2931,7 +2931,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(6551.16818741).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(7898.08532474).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -3036,7 +3036,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-2785.37259260).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-1438.89947208).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -3093,7 +3093,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(6551.16818741).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(7872.57466925).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -3205,7 +3205,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4915.13437757).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-324.84658240).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Elastic);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Elastic);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -3280,7 +3280,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(10638.75879839).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(12723.94688137).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -3436,7 +3436,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-1603.69045498).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.05571368).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -3514,7 +3514,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(39.14507588).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(1560.72384677).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -3619,7 +3619,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-867.93424523).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(-0.02983913).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -3676,7 +3676,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(1815.88679617).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(2093.14192205).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();
@@ -3787,7 +3787,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       // Check if yield function and yield state is computed correctly
       REQUIRE(yield_function(0) == Approx(-4948.19884736).epsilon(Tolerance));
       REQUIRE(yield_function(1) == Approx(0.09047424).epsilon(Tolerance));
-      REQUIRE(yield_type == mpm::FailureState::Shear);
+      REQUIRE(yield_type == mohrcoulomb::FailureState::Shear);
 
       // Initialise plastic correction components
       mpm::Material<Dim>::Vector6d df_dsigma, dp_dsigma;
@@ -3862,7 +3862,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(-3307.99391393).epsilon(Tolerance));
       REQUIRE(yield_function_trial(1) ==
               Approx(698.89632011).epsilon(Tolerance));
-      REQUIRE(yield_type_trial == mpm::FailureState::Shear);
+      REQUIRE(yield_type_trial == mohrcoulomb::FailureState::Shear);
       // Initialise plastic correction components based on trial stress
       mpm::Material<Dim>::Vector6d df_dsigma_trial, dp_dsigma_trial;
       df_dsigma_trial.setZero();

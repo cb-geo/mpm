@@ -9,10 +9,11 @@
 
 #include "material.h"
 
-namespace mpm {
-
-//! Failure state
+namespace mohrcoulomb {
 enum FailureState { Elastic, Tensile, Shear };
+}
+
+namespace mpm {
 
 //! MohrCoulomb class
 //! \brief Mohr Coulomb material model
@@ -70,8 +71,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
   //! \retval yield_type Yield type (elastic, shear or tensile)
-  FailureState compute_yield_state(Eigen::Matrix<double, 2, 1>* yield_function,
-                                   const mpm::dense_map& state_vars);
+  mohrcoulomb::FailureState compute_yield_state(
+      Eigen::Matrix<double, 2, 1>* yield_function,
+      const mpm::dense_map& state_vars);
 
   //! Compute dF/dSigma and dP/dSigma
   //! \param[in] yield_type Yield type (elastic, shear or tensile)
@@ -80,9 +82,10 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] df_dsigma dF/dSigma
   //! \param[in] dp_dsigma dP/dSigma
   //! \param[in] softening Softening parameter
-  void compute_df_dp(FailureState yield_type, const mpm::dense_map* state_vars,
-                     const Vector6d& stress, Vector6d* df_dsigma,
-                     Vector6d* dp_dsigma, double* softening);
+  void compute_df_dp(mohrcoulomb::FailureState yield_type,
+                     const mpm::dense_map* state_vars, const Vector6d& stress,
+                     Vector6d* df_dsigma, Vector6d* dp_dsigma,
+                     double* softening);
 
  protected:
   //! material id
