@@ -442,6 +442,25 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
     }
+
+    SECTION("Check node material ids") {
+      // Check addition of material ids
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(2);
+      node->append_material_id(0);
+      node->append_material_id(2);
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
+      REQUIRE(node->material_ids()[3] == 0);
+      REQUIRE(node->material_ids()[4] == 2);
+
+      // Check removal of duplicates
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
+    }
   }
 }
 
@@ -1000,6 +1019,26 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
     }
+
+    SECTION("Check node material ids") {
+      // Check addition of material ids
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(2);
+      node->append_material_id(0);
+
+      node->append_material_id(2);
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
+      REQUIRE(node->material_ids()[3] == 0);
+      REQUIRE(node->material_ids()[4] == 2);
+
+      // Check removal of duplicates
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
+    }
   }
 }
 
@@ -1533,6 +1572,25 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
           REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check node material ids") {
+      // Check addition of material ids
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(2);
+      node->append_material_id(0);
+      node->append_material_id(2);
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
+      REQUIRE(node->material_ids()[3] == 0);
+      REQUIRE(node->material_ids()[4] == 2);
+
+      // Check removal of duplicates
+      REQUIRE(node->material_ids()[0] == 0);
+      REQUIRE(node->material_ids()[1] == 1);
+      REQUIRE(node->material_ids()[2] == 2);
     }
   }
 }

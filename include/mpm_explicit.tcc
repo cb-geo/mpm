@@ -147,6 +147,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
                   std::placeholders::_1));
 
+    // Delete duplicate material ids in nodes
+    mesh_->iterate_over_nodes(
+        std::bind(&mpm::NodeBase<Tdim>::remove_duplicate_material_ids,
+                  std::placeholders::_1));
+
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,

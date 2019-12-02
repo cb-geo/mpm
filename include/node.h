@@ -215,6 +215,9 @@ class Node : public NodeBase<Tdim> {
   //! Remove duplicate material ids from material_ids_
   void remove_duplicate_material_ids() override;
 
+  //! Return material ids in node
+  std::vector<unsigned> material_ids() const override { return material_ids_; }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
