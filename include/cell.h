@@ -291,7 +291,7 @@ class Cell {
   unsigned rank() const;
 
   //! Assign material to nodes from the particles within this cell
-  void assign_material_id_to_nodes(unsigned material_id);
+  void append_material_id_to_nodes(unsigned material_id);
 
  private:
   //! Approximately check if a point is in a cell
