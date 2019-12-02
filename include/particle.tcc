@@ -197,6 +197,8 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   // Write state variables
   if (material_ != nullptr) {
     particle_data.nstate_vars = state_variables_.size();
+    if (state_variables_.size() > 20)
+      throw std::runtime_error("# of state variables cannot be more than 20");
     unsigned i = 0;
     for (const auto& state_var : this->state_variables_) {
       particle_data.svars[i] = state_var.second;
