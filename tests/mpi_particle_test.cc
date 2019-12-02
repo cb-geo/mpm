@@ -89,9 +89,6 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
       int mpi_size;
       MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-      // Initialize MPI datatypes
-      mpm::init_mpi_particle_datatypes();
-
       // If on same rank
       int sender = 0;
       int receiver = 0;
@@ -102,16 +99,22 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
       MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
       // Send particle
-      if (mpi_rank == sender)
-        MPI_Send(&h5_particle, 1, mpm::MPIParticle, receiver, 0,
-                 MPI_COMM_WORLD);
+      if (mpi_rank == sender) {
+        // Initialize MPI datatypes
+        MPI_Datatype particle_type =
+            mpm::register_mpi_particle_type(h5_particle);
+        MPI_Send(&h5_particle, 1, particle_type, receiver, 0, MPI_COMM_WORLD);
+        mpm::deregister_mpi_particle_type(particle_type);
+      }
 
       // Receive particle
       if (mpi_rank == receiver) {
         // Receive the messid
         struct mpm::HDF5Particle received;
-        MPI_Recv(&received, 1, mpm::MPIParticle, sender, 0, MPI_COMM_WORLD,
+        MPI_Datatype particle_type = mpm::register_mpi_particle_type(received);
+        MPI_Recv(&received, 1, particle_type, sender, 0, MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
+        mpm::deregister_mpi_particle_type(particle_type);
 
         REQUIRE(h5_particle.id == received.id);
         REQUIRE(h5_particle.mass == received.mass);
@@ -183,8 +186,6 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
           REQUIRE(h5_particle.svars[i] ==
                   Approx(h5_particle.svars[i]).epsilon(Tolerance));
       }
-      // Free MPI datatypes
-      mpm::free_mpi_particle_datatypes();
     }
 
     // Check initialise particle from HDF5 file
@@ -206,9 +207,6 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
       // Initial particle coordinates
       Eigen::Matrix<double, 3, 1> pcoordinates;
       pcoordinates.setZero();
-
-      // Initialize MPI datatypes
-      mpm::init_mpi_particle_datatypes();
 
       if (mpi_rank == sender) {
         // Create and initialzie particle with HDF5 data
@@ -294,13 +292,17 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         const auto h5_send = particle->hdf5();
 
         // Send MPI particle
-        MPI_Send(&h5_send, 1, mpm::MPIParticle, receiver, 0, MPI_COMM_WORLD);
+        MPI_Datatype paritcle_type = mpm::register_mpi_particle_type(h5_send);
+        MPI_Send(&h5_send, 1, paritcle_type, receiver, 0, MPI_COMM_WORLD);
+        mpm::deregister_mpi_particle_type(paritcle_type);
       }
       if (mpi_rank == receiver) {
         // Receive the messid
         struct mpm::HDF5Particle received;
-        MPI_Recv(&received, 1, mpm::MPIParticle, sender, 0, MPI_COMM_WORLD,
+        MPI_Datatype paritcle_type = mpm::register_mpi_particle_type(received);
+        MPI_Recv(&received, 1, paritcle_type, sender, 0, MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
+        mpm::deregister_mpi_particle_type(paritcle_type);
 
         // Received particle
         std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
@@ -390,8 +392,6 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
           REQUIRE(h5_received.svars[i] ==
                   Approx(h5_particle.svars[i]).epsilon(Tolerance));
       }
-      // Free MPI datatypes
-      mpm::free_mpi_particle_datatypes();
     }
   }
 }

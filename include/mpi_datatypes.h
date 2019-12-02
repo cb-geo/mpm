@@ -1,6 +1,7 @@
 #ifndef MPM_MPI_HDF5_PARTICLE_H_
 #define MPM_MPI_HDF5_PARTICLE_H_
 
+// Offset macro
 #include <cstddef>
 
 // MPI
@@ -10,11 +11,8 @@
 #include "hdf5_particle.h"
 
 namespace mpm {
-// Create the Particle datatype
-MPI_Datatype MPIParticle;
-
 //! Initialize MPI particle data types
-void init_mpi_particle_datatypes() {
+MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
   // Number of blocks to create
   const unsigned nblocks = 34;
   // Array containing the length of each block
@@ -26,42 +24,40 @@ void init_mpi_particle_datatypes() {
   const std::size_t size_ull = sizeof(unsigned long long);
 
   const MPI_Aint displacements[nblocks] = {
-      0,                                                 // id
-      size_ull,                                          // mass
-      size_ull + 1 * sizeof(double),                     // volume
-      size_ull + 2 * sizeof(double),                     // pressure
-      size_ull + 3 * sizeof(double),                     // coord_x
-      size_ull + 4 * sizeof(double),                     // coord_y
-      size_ull + 5 * sizeof(double),                     // coord_z
-      size_ull + 6 * sizeof(double),                     // disp_x
-      size_ull + 7 * sizeof(double),                     // disp_y
-      size_ull + 8 * sizeof(double),                     // disp_z
-      size_ull + 9 * sizeof(double),                     // nsize_x
-      size_ull + 10 * sizeof(double),                    // nsize_y
-      size_ull + 11 * sizeof(double),                    // nsize_z
-      size_ull + 12 * sizeof(double),                    // vel_x
-      size_ull + 13 * sizeof(double),                    // vel_y
-      size_ull + 14 * sizeof(double),                    // vel_z
-      size_ull + 15 * sizeof(double),                    // stress_xx
-      size_ull + 16 * sizeof(double),                    // stress_yy
-      size_ull + 17 * sizeof(double),                    // stress_zz
-      size_ull + 18 * sizeof(double),                    // tau_xx
-      size_ull + 19 * sizeof(double),                    // tau_yy
-      size_ull + 20 * sizeof(double),                    // tau_zz
-      size_ull + 21 * sizeof(double),                    // strain_xx
-      size_ull + 22 * sizeof(double),                    // strain_yy
-      size_ull + 23 * sizeof(double),                    // strain_zz
-      size_ull + 24 * sizeof(double),                    // gamma_xy
-      size_ull + 25 * sizeof(double),                    // gamma_yz
-      size_ull + 26 * sizeof(double),                    // gamma_zx
-      size_ull + 27 * sizeof(double),                    // epsv
-      size_ull + 28 * sizeof(double),                    // cellid
-      2 * size_ull + 28 * sizeof(double),                // status
-      2 * size_ull + 28 * sizeof(double) + sizeof(int),  // material_id
-      2 * size_ull + 28 * sizeof(double) + sizeof(int) +
-          sizeof(unsigned),  // nstate_vars
-      2 * size_ull + 28 * sizeof(double) + sizeof(int) +
-          2 * sizeof(unsigned)  // state_vars
+      offsetof(HDF5Particle, id),              // id
+      offsetof(HDF5Particle, mass),            // mass
+      offsetof(HDF5Particle, volume),          // volume
+      offsetof(HDF5Particle, pressure),        // pressure
+      offsetof(HDF5Particle, coord_x),         // coord_x
+      offsetof(HDF5Particle, coord_y),         // coord_y
+      offsetof(HDF5Particle, coord_z),         // coord_z
+      offsetof(HDF5Particle, displacement_x),  // disp_x
+      offsetof(HDF5Particle, displacement_y),  // disp_y
+      offsetof(HDF5Particle, displacement_z),  // disp_z
+      offsetof(HDF5Particle, nsize_x),         // nsize_x
+      offsetof(HDF5Particle, nsize_y),         // nsize_y
+      offsetof(HDF5Particle, nsize_z),         // nsize_z
+      offsetof(HDF5Particle, velocity_x),      // vel_x
+      offsetof(HDF5Particle, velocity_y),      // vel_y
+      offsetof(HDF5Particle, velocity_z),      // vel_z
+      offsetof(HDF5Particle, stress_xx),       // stress_xx
+      offsetof(HDF5Particle, stress_yy),       // stress_yy
+      offsetof(HDF5Particle, stress_zz),       // stress_zz
+      offsetof(HDF5Particle, tau_xy),          // tau_xy
+      offsetof(HDF5Particle, tau_yz),          // tau_yz
+      offsetof(HDF5Particle, tau_xz),          // tau_xz
+      offsetof(HDF5Particle, strain_xx),       // strain_xx
+      offsetof(HDF5Particle, strain_yy),       // strain_yy
+      offsetof(HDF5Particle, strain_zz),       // strain_zz
+      offsetof(HDF5Particle, gamma_xy),        // gamma_xy
+      offsetof(HDF5Particle, gamma_yz),        // gamma_yz
+      offsetof(HDF5Particle, gamma_xz),        // gamma_xz
+      offsetof(HDF5Particle, epsilon_v),       // epsv
+      offsetof(HDF5Particle, cell_id),         // cellid
+      offsetof(HDF5Particle, status),          // status
+      offsetof(HDF5Particle, material_id),     // material_id
+      offsetof(HDF5Particle, nstate_vars),     // nstate_vars
+      offsetof(HDF5Particle, svars)            // state_vars
   };
 
   // Array containing the MPI datatypes to replicate to make each block.
@@ -102,13 +98,19 @@ void init_mpi_particle_datatypes() {
       MPI_DOUBLE,              // state variables
   };
 
+  // Create the Particle datatype
+  MPI_Datatype MPIParticle;
+
   // Create particle data types
   MPI_Type_create_struct(nblocks, lengths, displacements, types, &MPIParticle);
   MPI_Type_commit(&MPIParticle);
+  return MPIParticle;
 }
 
-//! Free MPI particle data types
-void free_mpi_particle_datatypes() { MPI_Type_free(&MPIParticle); }
+//! Deregister MPI particle data type
+void deregister_mpi_particle_type(MPI_Datatype& particle_type) {
+  MPI_Type_free(&particle_type);
+}
 }  // namespace mpm
 
 #endif  // MPI
