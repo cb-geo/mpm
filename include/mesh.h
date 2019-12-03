@@ -298,6 +298,43 @@ class Mesh {
   //! Find cell neighbours
   void compute_cell_neighbours();
 
+<<<<<<< HEAD
+=======
+  //! Find cell map to obtain surrounding cell neighbours
+  void compute_node_cell_maps();
+
+  //! Assign neighbours to all particles
+  bool assign_particle_neighbours();
+
+  //! Assign neighbours to specific particle
+  bool assign_particle_neighbours(const mpm::Index particle_id);
+
+  //! Compute particle normal from surrounding neighbours
+  bool compute_particle_normal(const mpm::Index particle_id);
+
+  //! Interpolate state variables
+  bool interpolate_particle_quantities(const mpm::Index particle_id);
+
+  //! Interpolate state variables
+  bool interpolate_particle_material(const mpm::Index particle_id);
+
+  //! Temporary Radial Basis Function
+  double cubic_radial_basis_function(const double& smoothing_length,
+                                     const double& distance,
+                                     const double& scaling_factor = 2.0);
+
+  unsigned u_power(unsigned x, unsigned p);
+
+  //! Temporary Zone identification
+  unsigned compute_cell_zone(const Eigen::Matrix<double, Tdim, 1>& xi);
+
+  //! Temporary Zone center
+  Eigen::Matrix<double, Tdim, 1> cell_zone_center(const unsigned zone_id);
+
+  //! Populate cell with material points
+  bool populate_cells_with_material_points(const mpm::Index cell_id);
+
+>>>>>>> 5142e31... rename cell maps
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh

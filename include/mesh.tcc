@@ -234,7 +234,7 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   // Check if node_cell_maps is empty
   if (node_cell_maps_.empty()) {
-    compute_surrounding_cell_neighbours();
+    compute_node_cell_maps();
   }
 
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
@@ -253,6 +253,568 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 }
 
+<<<<<<< HEAD
+=======
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_node_cell_maps() {
+  // Loop over the cells
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Get cell id and nodes id
+    const auto cell_id = (*citr)->id();
+    const auto nodes_id_list = (*citr)->nodes_id();
+    // Populate node_cell_maps_ with the node_id and multiple cell_id
+    for (const auto& id : nodes_id_list) node_cell_maps_[id].insert(cell_id);
+  }
+}
+
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particle_neighbours() {
+  bool status = true;
+
+  try {
+    // Check if node_cell_maps is empty, this should only be performed at the
+    // beginning of the simulation
+    if (node_cell_maps_.empty()) {
+      compute_node_cell_maps();
+    }
+
+    // Loop over cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      // Initiate set of neighbouring cells
+      std::set<mpm::Index> neighbouring_cell_sets;
+      neighbouring_cell_sets.insert((*citr)->id());
+
+      // Loop over the current cell nodes and add ids of the initiated set
+      const auto nodes_id_list = (*citr)->nodes_id();
+      for (const auto& id : nodes_id_list)
+        neighbouring_cell_sets.insert(node_cell_maps_[id].begin(),
+                                      node_cell_maps_[id].end());
+
+      // Loop over the neighbouring cell particles
+      std::vector<mpm::Index> neighbouring_particle_sets;
+      for (const auto& neighbour_cell_id : neighbouring_cell_sets)
+        neighbouring_particle_sets.push_back(
+            map_cells_[neighbour_cell_id]->particles());
+
+      // Loop over the particles in the current cells and assign particle
+      // neighbours
+      const auto particles_id_list = (*citr)->particles();
+      for (const auto& id : particles_id_list) {
+        status = map_particles_[id]->assign_particle_neighbours(
+            neighbouring_particle_sets);
+        if (!status)
+          throw std::runtime_error("Cannot assign valid particle neighbours");
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particle_neighbours(const mpm::Index particle_id) {
+  bool status = true;
+
+  try {
+    std::shared_ptr<mpm::ParticleBase<Tdim>>& particle =
+        map_particles_[particle_id];
+
+    // Check if node_cell_maps is empty, this should only be performed at the
+    // beginning of the simulation
+    if (node_cell_maps_.empty()) {
+      compute_node_cell_maps();
+    }
+
+    // Get the current particle's cell
+    const auto current_cell_id = (*particle)->cell_id();
+    const auto& current_cell = map_cells_[current_cell_id];
+
+    // Initiate set of neighbouring cells
+    std::set<mpm::Index> neighbouring_cell_sets;
+    neighbouring_cell_sets.insert(current_cell_id);
+
+    // Loop over the current cell nodes and add ids of the initiated set
+    const auto nodes_id_list = (*current_cell)->nodes_id();
+    for (const auto& id : nodes_id_list)
+      neighbouring_cell_sets.insert(node_cell_maps_[id].begin(),
+                                    node_cell_maps_[id].end());
+
+    // Loop over the neighbouring cell particles
+    std::vector<mpm::Index> neighbouring_particle_sets;
+    for (const auto& neighbour_cell_id : neighbouring_cell_sets)
+      neighbouring_particle_sets.push_back(
+          map_cells_[neighbour_cell_id]->particles());
+
+    // Loop over the particles in the current cells and assign particle
+    // neighbours
+    status =
+        (*particle)->assign_particle_neighbours(neighbouring_particle_sets);
+
+    if (!status)
+      throw std::runtime_error("Cannot assign valid particle neighbours");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::compute_particle_normal(const mpm::Index particle_id) {
+  bool status = true;
+
+  try {
+    std::shared_ptr<mpm::ParticleBase<Tdim>>& particle =
+        map_particles_[particle_id];
+
+    // Check whether neighbour is empty
+    if ((*particle)->nneighbour_particles() == 0)
+      throw std::runtime_error(
+          "No neighbour particles have been assigned to particle, cannot "
+          "compute particle normal");
+
+    Eigen::Matrix<double, Tdim, 1> normal_vector;
+    normal_vector.setZero();
+    const auto& current_coordinates = (*particle)->coordinates();
+    const auto& neighbour_particles = (*particle)->neighbour_particles();
+    for (const auto& neighbour_id : neighbour_particles) {
+      normal_vector -=
+          (map_particles_[neighbour_id]->coordinates() - current_coordinates);
+    }
+    normal_vector = normal_vector.normalized();
+
+    // Assign normal_vector to particles
+    status = (*particle)->assign_particle_normal(normal_vector);
+
+    if (!status)
+      throw std::runtime_error("Cannot assign valid particle normal vector");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Clone particle quantities
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::interpolate_particle_quantities(
+    const mpm::Index particle_id) {
+  status = true;
+  try {
+    std::shared_ptr<mpm::ParticleBase<Tdim>>& particle =
+        map_particles_[particle_id];
+
+    // Check whether neighbour is empty
+    if ((*particle)->nneighbour_particles() == 0)
+      throw std::runtime_error(
+          "No neighbour particles have been assigned to particle, cannot "
+          "interpolate particle quantities");
+
+    const auto& current_coordinates = (*particle)->coordinates();
+    const auto& mean_cell_length =
+        map_cells_[(*particle)->cell_id()]->mean_length();
+    const auto& neighbour_particles = (*particle)->neighbour_particles();
+
+    // Current particle data
+    mpm::HDF5Particle particle_data = (*particle)->hdf5();
+
+    // Reinitialise variables which necessary for interpolation
+    particle_data.pressure = 0.0;
+
+    particle_data.displacement_x = 0.0;
+    particle_data.displacement_y = 0.0;
+    particle_data.displacement_z = 0.0;
+
+    particle_data.velocity_x = 0.0;
+    particle_data.velocity_y = 0.0;
+    particle_data.velocity_z = 0.0;
+
+    particle_data.stress_xx = 0.0;
+    particle_data.stress_yy = 0.0;
+    particle_data.stress_zz = 0.0;
+    particle_data.tau_xy = 0.0;
+    particle_data.tau_yz = 0.0;
+    particle_data.tau_xz = 0.0;
+
+    particle_data.strain_xx = 0.0;
+    particle_data.strain_yy = 0.0;
+    particle_data.strain_zz = 0.0;
+    particle_data.gamma_xy = 0.0;
+    particle_data.gamma_yz = 0.0;
+    particle_data.gamma_xz = 0.0;
+
+    particle_data.epsilon_v = 0.0;
+
+    for (const auto& neighbour_id : neighbour_particles) {
+      // Get Basis function
+      const auto relative_coordinates =
+          (map_particles_[neighbour_id]->coordinates() - current_coordinates);
+      const double norm_distance = relative_coordinates.squaredNorm();
+      const double RBF3 =
+          cubic_radial_basis_function(mean_cell_length, norm_distance);
+
+      // Get Neighbour volume
+      const double neighbour_volume = map_particles_[neighbour_id]->volume();
+
+      // Get neighbours quantities
+      const auto& neighbour_particle_data =
+          map_particles_[neighbour_id]->hdf5();
+
+      // Interpolate necessary quantities
+      particle_data.pressure =
+          neighbour_particle_data.pressure * neighbour_volume * RBF3;
+
+      particle_data.displacement_x +=
+          neighbour_particle_data.displacement_x * neighbour_volume * RBF3;
+      particle_data.displacement_y +=
+          neighbour_particle_data.displacement_y * neighbour_volume * RBF3;
+      particle_data.displacement_z +=
+          neighbour_particle_data.displacement_z * neighbour_volume * RBF3;
+
+      particle_data.velocity_x +=
+          neighbour_particle_data.velocity_x * neighbour_volume * RBF3;
+      particle_data.velocity_y +=
+          neighbour_particle_data.velocity_y * neighbour_volume * RBF3;
+      particle_data.velocity_z +=
+          neighbour_particle_data.velocity_z * neighbour_volume * RBF3;
+
+      particle_data.stress_xx +=
+          neighbour_particle_data.stress_xx * neighbour_volume * RBF3;
+      particle_data.stress_yy +=
+          neighbour_particle_data.stress_yy * neighbour_volume * RBF3;
+      particle_data.stress_zz +=
+          neighbour_particle_data.stress_zz * neighbour_volume * RBF3;
+      particle_data.tau_xy +=
+          neighbour_particle_data.tau_xy * neighbour_volume * RBF3;
+      particle_data.tau_yz +=
+          neighbour_particle_data.tau_yz * neighbour_volume * RBF3;
+      particle_data.tau_xz +=
+          neighbour_particle_data.tau_xz * neighbour_volume * RBF3;
+
+      particle_data.strain_xx +=
+          neighbour_particle_data.strain_xx * neighbour_volume * RBF3;
+      particle_data.strain_yy +=
+          neighbour_particle_data.strain_yy * neighbour_volume * RBF3;
+      particle_data.strain_zz +=
+          neighbour_particle_data.strain_zz * neighbour_volume * RBF3;
+      particle_data.gamma_xy +=
+          neighbour_particle_data.gamma_xy * neighbour_volume * RBF3;
+      particle_data.gamma_yz +=
+          neighbour_particle_data.gamma_yz * neighbour_volume * RBF3;
+      particle_data.gamma_xz +=
+          neighbour_particle_data.gamma_xz * neighbour_volume * RBF3;
+
+      particle_data.epsilon_v +=
+          neighbour_particle_data.epsilon_v * neighbour_volume * RBF3;
+    }
+
+    // Assign particle quantities to particle
+    status = (*particle)->initialise_particle(particle_data);
+
+    if (!status)
+      throw std::runtime_error("Cannot assign valid particle state variables");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Clone material and state variables
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::interpolate_particle_material(
+    const mpm::Index particle_id) {
+  status = true;
+  try {
+    std::shared_ptr<mpm::ParticleBase<Tdim>>& particle =
+        map_particles_[particle_id];
+
+    // Check whether neighbour is empty
+    if ((*particle)->nneighbour_particles() == 0)
+      throw std::runtime_error(
+          "No neighbour particles have been assigned to particle, cannot "
+          "interpolate particle material");
+
+    const auto& current_coordinates = (*particle)->coordinates();
+    const auto& mean_cell_length =
+        map_cells_[(*particle)->cell_id()]->mean_length();
+    const auto& neighbour_particles = (*particle)->neighbour_particles();
+
+    // Check whether all material id are the same otherwise throw error
+    // if all the same, then clone from begin()
+    const unsigned material_id =
+        map_particles_[(*neighbour_particles.cbegin())]->material()->id();
+    for (const auto& neighbour_id : neighbour_particles) {
+      const auto neighbour_mat_id =
+          map_particles_[neighbour_id]->material()->id();
+      if (material_id != neighbour_mat_id) {
+        std::string error_mssg =
+            "Neighbour particles have different material id. ";
+        error_mssg += "Currently interpolate_particle_state_variable ";
+        error_mssg += "only support single material id.";
+        throw std::runtime_error(error_mssg);
+      }
+    }
+
+    // Assign particle material (clone it from the first neighbour)
+    status = (*particle)->assign_material(
+        map_particles_[(*neighbour_particles.cbegin())]->material());
+    auto particle_state_vars =
+        (*particle)->material()->initialise_state_variables();
+
+    if (!status) throw std::runtime_error("Cannot assign valid material");
+
+    for (const auto& neighbour_id : neighbour_particles) {
+      // Get Basis function
+      const auto relative_coordinates =
+          (map_particles_[neighbour_id]->coordinates() - current_coordinates);
+      const double norm_distance = relative_coordinates.squaredNorm();
+      const double RBF3 =
+          cubic_radial_basis_function(mean_cell_length, norm_distance);
+
+      // Get Neighbour volume
+      const double neighbour_volume = map_particles_[neighbour_id]->volume();
+
+      // Get neighbours state variables
+      const auto& neighbour_state_vars =
+          map_particles_[neighbour_id]->state_variables();
+
+      // Loop over neighbours state variables
+      for (const auto& state_vars : neighbour_state_vars) {
+        // Interpolate value for given key
+        const auto var_name = state_vars.key();
+        const auto var_value = state_vars.value();
+        particle_state_vars.at(var_name) += var_value * neighbour_volume * RBF3;
+      }
+    }
+
+    // Assign state variable to particle
+    status = (*particle)->assign_state_variables(particle_state_vars);
+
+    if (!status)
+      throw std::runtime_error("Cannot assign valid particle state variables");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// FIXME: Move to a separate file
+//! Temporary Radial Basis Function
+template <unsigned Tdim>
+double mpm::Mesh<Tdim>::cubic_radial_basis_function(
+    const double& smoothing_length, const double& norm_distance,
+    const double& scaling_factor) {
+
+  // Assign multiplier depends on dimension
+  double multiplier;
+  if (Tdim == 2)
+    multiplier = 15.0 / (7.0 * M_PI * std::pow(smoothing_length, 2));
+  else if (Tdim == 3)
+    multiplier = 3.0 / (2.0 * M_PI * std::pow(smoothing_length, 3));
+  else
+    throw std::runtime_error("Tdim is invalid");
+
+  // Compute basis function
+  double basis_function = multiplier;
+  const double radius = norm_distance / smoothing_length;
+  if (radius >= 0.0 && radius < 1.0)
+    basis_function *=
+        2.0 / 3.0 - std::pow(radius, 2) + 0.5 * std::pow(radius, 3);
+  else if (radius >= 1.0 && radius < 2.0)
+    basis_function *= 1.0 / 6.0 * std::pow((2.0 - radius), 3);
+  else
+    basis_function = 0.0;
+
+  return basis_function;
+}
+
+// FIXME: Remove this temporary function
+template <unsigned Tdim>
+unsigned mpm::Mesh<Tdim>::u_power(unsigned x, unsigned p) {
+  if (p == 0) return 1;
+  if (p == 1) return x;
+  return x * this->u_power(x, p - 1);
+}
+
+// FIXME: Currently only working for quad4N and quad8N elements
+template <unsigned Tdim>
+unsigned mpm::Mesh<Tdim>::compute_cell_zone(
+    const Eigen::Matrix<double, Tdim, 1>& xi) {
+  unsigned zone_id = 0;
+  if (Tdim == 2) {
+    Eigen::Matrix<double, Tdim, 1> max, min, median;
+    max << 1.0, 1.0;
+    min << -1.0, -1.0;
+    median = 0.5 * (max + min);
+
+    std::vector<bool> exponent(4, false);
+    if (xi[0] > median[0]) exponent[0] = true;
+    if (xi[1] > median[1]) exponent[1] = true;
+
+    max = median;
+    if (exponent[0]) {
+      max[0] += 1.0;
+      min[0] += 1.0;
+    }
+    if (exponent[1]) {
+      max[1] += 1.0;
+      min[1] += 1.0;
+    }
+
+    median = 0.5 * (max + min);
+    if (xi[0] > median[0]) exponent[2] = true;
+    if (xi[1] > median[1]) exponent[3] = true;
+
+    // Loop over exponents and check
+    for (unsigned i = 0; i < 4; i++)
+      if (exponent[i]) zone_id += u_power(2, (3 - i));
+
+  } else {
+    throw std::runtime_error("Tdim is invalid");
+  }
+  return zone_id;
+}
+
+// FIXME: Currently only working for quad4N and quad8N elements (nzones==16)
+template <unsigned Tdim>
+Eigen::Matrix<double, Tdim, 1> mpm::Mesh<Tdim>::cell_zone_center(
+    const unsigned zone_id) {
+  Eigen::Matrix<double, Tdim, 1> center_xi;
+  switch (zone_id) {
+    // Quadrant 0
+    case (0):
+      center_xi << -0.75, -0.75;
+      break;
+    case (1):
+      center_xi << -0.25, -0.75;
+      break;
+    case (2):
+      center_xi << -0.75, -0.25;
+      break;
+    case (3):
+      center_xi << -0.25, -0.25;
+      break;
+    // Quadrant 1
+    case (4):
+      center_xi << 0.25, -0.75;
+      break;
+    case (5):
+      center_xi << 0.75, -0.75;
+      break;
+    case (6):
+      center_xi << 0.25, -0.25;
+      break;
+    case (7):
+      center_xi << 0.75, -0.25;
+      break;
+    // Quadrant 2
+    case (8):
+      center_xi << -0.75, 0.25;
+      break;
+    case (9):
+      center_xi << -0.25, 0.25;
+      break;
+    case (10):
+      center_xi << -0.75, 0.75;
+      break;
+    case (11):
+      center_xi << -0.25, 0.75;
+      break;
+    // Quadrant 3
+    case (12):
+      center_xi << 0.25, 0.25;
+      break;
+    case (13):
+      center_xi << 0.75, 0.25;
+      break;
+    case (14):
+      center_xi << 0.25, 0.75;
+      break;
+    case (15):
+      center_xi << 0.75, 0.75;
+      break;
+  }
+  return center_xi;
+}
+
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::populate_cells_with_material_points(
+    const mpm::Index cell_id) {
+  status = true;
+  try {
+    std::shared_ptr<mpm::Cell<Tdim>>& cell = map_cells_[cell_id];
+
+    // Check whether we need refinement or not
+    bool refine = (*cell)->particle_refinement();
+    if (refine) {
+      // Partition elements (natural coordinates) to smaller zones
+      const auto& element = (*cell)->element_ptr();
+      const auto nzone = (*element)->nzones();
+      std::vector<bool> zones(nzone, true);
+
+      // Loop over particles inside cell
+      for (const auto particle_id : (*cell)->particles()) {
+        // Locate particle location and color zones
+        const auto& particle = map_particles_[particle_id];
+        Eigen::Matrix<double, Tdim, 1> xi;
+        xi.setZero();
+        if ((*particle)->compute_reference_location())
+          xi = (*particle)->reference_location();
+
+        // Check where particle lies in
+        const unsigned zone_id = this->compute_cell_zone(xi);
+        zones[zone_id] = false;
+      }
+
+      // Prepare particle neighbour set for Jacobi-style interpolation
+      auto neighbouring_particle_sets =
+          map_particles_[(*(*cell)->particles().cbegin())]
+              ->neighbour_particles();
+      neighbouring_particle_sets.push_back((*(*cell)->particles().cbegin()));
+
+      // Loop over zones
+      for (unsigned i = 0; i < nzone; i++) {
+        // Check zone colors
+        if (zones[i]) {
+          // Create particles at the center of the zone
+          const auto center_xi = this->cell_zone_center(i);
+          // Add particle to mesh and check
+          mpm::Index particle_id = this->nparticles();
+          bool insert_status = this->add_particle(
+              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                  ->create("P2D", particle_id, center_xi),
+              true);
+
+          // Assign particle neighbour
+          auto& particle = map_particles_[particle_id];
+          status = (*particle)->assign_particle_neighbours(
+              neighbouring_particle_sets);
+
+          // Interpolate particle quantities
+          this->interpolate_particle_quantities(particle_id);
+
+          // Interpolate particle material
+          this->interpolate_particle_material(particle_id);
+        }
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+>>>>>>> 5142e31... rename cell maps
 //! Create cells from node lists
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>

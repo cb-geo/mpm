@@ -870,7 +870,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           check_maps[4].insert(1);
           check_maps[5].insert(1);
 
-          mesh->compute_surrounding_cell_neighbours();
+          mesh->compute_node_cell_maps();
           const auto& node_cell_map = mesh->node_cell_maps();
 
           for (auto iter = node_cell_map.begin(); iter != node_cell_map.end();
@@ -1979,7 +1979,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           check_maps[10].insert(1);
           check_maps[11].insert(1);
 
-          mesh->compute_surrounding_cell_neighbours();
+          mesh->compute_node_cell_maps();
           const auto& node_cell_map = mesh->node_cell_maps();
 
           for (auto iter = node_cell_map.begin(); iter != node_cell_map.end();
