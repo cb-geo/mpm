@@ -79,6 +79,14 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Return nodes id in a cell
+  std::vector<mpm::Index> nodes_id() {
+    std::vector<mpm::Index> nodes_id_lists;
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodes_id_lists.push_back(nodes_[i]->id());
+    return nodes_id_lists;
+  }
+
   //! Side node pair ids
   std::vector<std::array<mpm::Index, 2>> side_node_pairs() const;
 
