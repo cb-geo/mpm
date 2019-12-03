@@ -734,6 +734,13 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
 
+    // Map particle material id to nodes
+    particle->append_material_id_to_nodes();
+    REQUIRE(node0->material_ids()[0] == 0);
+    REQUIRE(node1->material_ids()[0] == 0);
+    REQUIRE(node2->material_ids()[0] == 0);
+    REQUIRE(node3->material_ids()[0] == 0);
+
     // Check velocity
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
@@ -1734,6 +1741,17 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
+
+    // Map particle material id to nodes
+    particle->append_material_id_to_nodes();
+    REQUIRE(node0->material_ids()[0] == 0);
+    REQUIRE(node1->material_ids()[0] == 0);
+    REQUIRE(node2->material_ids()[0] == 0);
+    REQUIRE(node3->material_ids()[0] == 0);
+    REQUIRE(node4->material_ids()[0] == 0);
+    REQUIRE(node5->material_ids()[0] == 0);
+    REQUIRE(node6->material_ids()[0] == 0);
+    REQUIRE(node7->material_ids()[0] == 0);
 
     // Check velocity
     Eigen::VectorXd velocity;
