@@ -124,6 +124,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
@@ -140,7 +141,7 @@ add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
 else()
-add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})  
+add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
 endif()
 
 # Unit test

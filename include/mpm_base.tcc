@@ -438,6 +438,8 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
             "New material cannot be added, insertion failed");
       }
     }
+    // Copy materials to mesh
+    mesh_->initialise_material_models(this->materials_);
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
