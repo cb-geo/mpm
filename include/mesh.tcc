@@ -232,27 +232,24 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 //! Create cells from node lists
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_cell_neighbours() {
-  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    const auto faces = (*citr)->sorted_face_node_ids();
-    for (const auto& face : faces) {
-      faces_cells_.insert(
-          std::pair<std::vector<mpm::Index>, mpm::Index>(face, (*citr)->id()));
-    }
+  // Check if node_cell_maps is empty
+  if (node_cell_maps_.empty()) {
+    compute_surrounding_cell_neighbours();
   }
 
-  // Iterate through all unique keys in faces_cells_
-  for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
-       itr = faces_cells_.upper_bound(itr->first)) {
-    // Returns a pair representing the range of elements with key
-    auto range = faces_cells_.equal_range(itr->first);
-    // A face is shared only by 2 cells (distance between the range is 2)
-    if (std::distance(range.first, range.second) == 2) {
-      // Add cell as neighbours to each other
-      map_cells_[range.first->second]->add_neighbour(
-          std::prev(range.second)->second);
-      map_cells_[std::prev(range.second)->second]->add_neighbour(
-          range.first->second);
-    }
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Initiate set of neighbouring cells
+    std::set<mpm::Index> neighbouring_cell_sets;
+
+    // Loop over the current cell nodes and add ids of the initiated set
+    const auto nodes_id_list = (*citr)->nodes_id();
+    for (const auto& id : nodes_id_list)
+      neighbouring_cell_sets.insert(node_cell_maps_[id].begin(),
+                                    node_cell_maps_[id].end());
+
+    for (const auto& neighbour_id : neighbouring_cell_sets)
+      if (neighbour_id != (*citr)->id())
+        map_cells_[(*citr)->id()]->add_neighbour(neighbour_id);
   }
 }
 
