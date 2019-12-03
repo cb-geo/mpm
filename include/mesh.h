@@ -309,6 +309,11 @@ class Mesh {
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
+  //! Node cell maps
+  std::map<mpm::Index, std::set<mpm::Index>> node_cell_maps() const {
+    return node_cell_maps_;
+  }
+
   //! Write HDF5 particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
