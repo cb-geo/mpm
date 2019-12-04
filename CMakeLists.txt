@@ -115,6 +115,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
   ${mpm_SOURCE_DIR}/include/elements/3d
+  ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -126,6 +127,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/element.cc
   ${mpm_SOURCE_DIR}/src/function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc

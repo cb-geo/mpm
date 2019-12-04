@@ -201,9 +201,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return traction of the particle
   //! \param[in] phase Index corresponding to the phase
-  VectorDim traction() const override {
-    return traction_;
-  }
+  VectorDim traction() const override { return traction_; }
 
   //! Map traction force
   void map_traction_force(double current_time) override;

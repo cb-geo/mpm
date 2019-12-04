@@ -177,8 +177,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
     // Try with a null math fuction ptr
-    REQUIRE(particle->assign_traction(Direction, traction, mfunction) ==
-            true);
+    REQUIRE(particle->assign_traction(Direction, traction, mfunction) == true);
 
     for (unsigned i = 0; i < Dim; ++i) {
       if (i == Direction)
@@ -189,8 +188,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     // Check for incorrect direction
     const unsigned wrong_dir = 4;
-    REQUIRE(particle->assign_traction(wrong_dir, traction, mfunction) ==
-            false);
+    REQUIRE(particle->assign_traction(wrong_dir, traction, mfunction) == false);
 
     // Check again to ensure value hasn't been updated
     for (unsigned i = 0; i < Dim; ++i) {
@@ -1104,8 +1102,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(particle->assign_traction(Direction, traction, mfunction) ==
-            true);
+    REQUIRE(particle->assign_traction(Direction, traction, mfunction) == true);
 
     // Calculate traction force = traction * volume / spacing
     traction *= 2.0 / (std::pow(2.0, 1. / Dim));
@@ -2156,8 +2153,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(particle->assign_traction(Direction, traction, mfunction) ==
-            true);
+    REQUIRE(particle->assign_traction(Direction, traction, mfunction) == true);
 
     // Calculate traction force = traction * volume / spacing
     traction *= 2.0 / (std::pow(2.0, 1. / Dim));
@@ -2171,8 +2167,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Check for incorrect direction
     const unsigned wrong_dir = 4;
-    REQUIRE(particle->assign_traction(wrong_dir, traction, mfunction) ==
-            false);
+    REQUIRE(particle->assign_traction(wrong_dir, traction, mfunction) == false);
 
     // Check again to ensure value hasn't been updated
     for (unsigned i = 0; i < Dim; ++i) {

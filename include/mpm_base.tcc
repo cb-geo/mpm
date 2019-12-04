@@ -26,15 +26,6 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
-    if (analysis_.at("gravity").is_array() &&
-        analysis_.at("gravity").size() == gravity_.size()) {
-      for (unsigned i = 0; i < gravity_.size(); ++i) {
-        gravity_[i] = analysis_.at("gravity").at(i);
-      }
-    } else {
-      throw std::runtime_error("Specified gravity dimension is invalid");
-    }
-
     // Stress update method (USF/USL/MUSL)
     try {
       if (analysis_.find("stress_update") != analysis_.end())
@@ -356,16 +347,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
               io_->file_name("particles_volumes")));
       if (!particles_volumes)
         throw std::runtime_error("Particles volumes are not properly assigned");
-    }
-
-    // Read and assign particles tractions
-    if (!io_->file_name("particles_tractions").empty()) {
-      bool particles_tractions = mesh_->assign_particles_tractions(
-          particle_reader->read_particles_tractions(
-              io_->file_name("particles_tractions")));
-      if (!particles_tractions)
-        throw std::runtime_error(
-            "Particles tractions are not properly assigned");
     }
 
     // Read and assign particles velocity constraints
