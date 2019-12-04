@@ -858,8 +858,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                   false);
         }
 
-        // Test assign velocity constraints to nodes
-        SECTION("Check compute surrounding cell neighbours") {
+        // Test constructing node cell maps
+        SECTION("Check node cell maps construction") {
           std::map<mpm::Index, std::set<mpm::Index>> check_maps;
           check_maps[0].insert(0);
           check_maps[1].insert(0);
@@ -1959,8 +1959,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                       velocity_constraints) == false);
         }
 
-        // Test assign velocity constraints to nodes
-        SECTION("Check compute surrounding cell neighbours") {
+        // Test constructing node cell maps
+        SECTION("Check node cell maps construction") {
           std::map<mpm::Index, std::set<mpm::Index>> check_maps;
           check_maps[0].insert(0);
           check_maps[1].insert(0);
