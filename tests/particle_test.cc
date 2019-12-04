@@ -742,10 +742,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Map particle material id to nodes
     particle->append_material_id_to_nodes();
-    REQUIRE(node0->material_ids()[0] == 0);
-    REQUIRE(node1->material_ids()[0] == 0);
-    REQUIRE(node2->material_ids()[0] == 0);
-    REQUIRE(node3->material_ids()[0] == 0);
+    REQUIRE(node0->material_ids()[0] == 1);
+    REQUIRE(node1->material_ids()[0] == 1);
+    REQUIRE(node2->material_ids()[0] == 1);
+    REQUIRE(node3->material_ids()[0] == 1);
 
     // Check velocity
     Eigen::VectorXd velocity;

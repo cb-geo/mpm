@@ -233,9 +233,6 @@ class ParticleBase {
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
 
-  //! Return material id corresponding to this particle
-  virtual unsigned material_id() const { return material_->id(); }
-
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
