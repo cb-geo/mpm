@@ -10,8 +10,8 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # General compile settings
 IF (NOT CMAKE_BUILD_TYPE)
- SET(CMAKE_BUILD_TYPE "Debug")
- #SET(CMAKE_BUILD_TYPE "Release")
+ #SET(CMAKE_BUILD_TYPE "Debug")
+ SET(CMAKE_BUILD_TYPE "Release")
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # GNU specific settings
@@ -32,6 +32,9 @@ endif()
 # CMake seems to have no way to enable/disable testing per subproject,
 # so we provide an option similar to BUILD_TESTING, but just for MPM.
 option(MPM_BUILD_TESTING "enable testing for mpm" ON)
+
+# CMake option for building mpm as a shared library for CI
+option(MPM_BUILD_LIB "enable libmpm" OFF)
 
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -121,6 +124,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
@@ -132,10 +136,13 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/element.cc
 )
 
+if(MPM_BUILD_LIB)
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
-
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
+else()
+add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
+endif()
 
 # Unit test
 if(MPM_BUILD_TESTING)
@@ -159,6 +166,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
@@ -176,10 +184,16 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
   )
-  add_executable(mpmtest ${test_src})
-  target_link_libraries(mpmtest lmpm)
-  add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-  enable_testing()
+  if(MPM_BUILD_LIB)
+    add_executable(mpmtest ${test_src})
+    target_link_libraries(mpmtest lmpm)
+    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+    enable_testing()
+  else()
+    add_executable(mpmtest ${test_src} ${mpm_src} ${mpm_vtk})
+    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+    enable_testing()
+  endif()
 endif()
 
 # Coverage

@@ -7,10 +7,9 @@
 // TBB
 #include <tbb/concurrent_vector.h>
 
-namespace mpm {
+#include "data_types.h"
 
-// Global index type for the node
-using Index = unsigned long long;
+namespace mpm {
 
 // container class
 //! \brief A class that offers a container and iterators

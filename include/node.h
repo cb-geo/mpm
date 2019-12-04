@@ -12,9 +12,6 @@
 
 namespace mpm {
 
-//! Global index type for the node
-using Index = unsigned long long;
-
 // Node base class
 //! \brief Base class that stores the information about nodes
 //! \details Node class: id_ and coordinates.

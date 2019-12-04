@@ -13,9 +13,6 @@
 
 namespace mpm {
 
-//! Global index type for the particle
-using Index = unsigned long long;
-
 //! Particle class
 //! \brief Base class that stores the information about particles
 //! \details Particle class: id_ and coordinates.
@@ -53,6 +50,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(const HDF5Particle& particle) override;
+
+  //! Initialise particle HDF5 data and material
+  //! \param[in] particle HDF5 data of particle
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(
+      const HDF5Particle& particle,
+      const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
@@ -262,6 +267,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! Material id
+  using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Volumetric mass density (mass / volume)

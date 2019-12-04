@@ -24,7 +24,7 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
 #include "logger.h"
 #include "material/material.h"
 #include "node.h"
@@ -287,6 +287,14 @@ class Mesh {
   //! \retval point Material point coordinates
   std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
 
+  //! Initialise material models
+  //! \param[in] materials Material models
+  void initialise_material_models(
+      const std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>>&
+          materials) {
+    materials_ = materials;
+  }
+
   //! Find cell neighbours
   void compute_cell_neighbours();
 
@@ -367,6 +375,8 @@ class Mesh {
   Container<Cell<Tdim>> cells_;
   //! Faces and cells
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
+  //! Materials
+  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Mesh class

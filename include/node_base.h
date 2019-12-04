@@ -8,10 +8,9 @@
 
 #include <Eigen/Dense>
 
-namespace mpm {
+#include "data_types.h"
 
-//! Global index type for the node_base
-using Index = unsigned long long;
+namespace mpm {
 
 //! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
