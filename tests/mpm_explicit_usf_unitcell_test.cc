@@ -15,8 +15,10 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  const std::string analysis = "MPMExplicitUSF2D";
-  REQUIRE(mpm_test::write_json_unitcell(2, analysis, fname) == true);
+  const std::string analysis = "MPMExplicit2D";
+  const std::string stress_update = "usf";
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_2d_unitcell() == true);
@@ -74,8 +76,10 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  const std::string analysis = "MPMExplicitUSF3D";
-  REQUIRE(mpm_test::write_json_unitcell(3, analysis, fname) == true);
+  const std::string analysis = "MPMExplicit3D";
+  const std::string stress_update = "usf";
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_3d_unitcell() == true);

@@ -134,8 +134,7 @@ bool mpm::Cell<Tdim>::add_node(
     // If number of node ptrs in a cell is less than the maximum number of nodes
     // per cell
     // The local id should be between 0 and maximum number of nodes
-    if (nodes_.size() < this->nnodes_ &&
-        (local_id >= 0 && local_id < this->nnodes_)) {
+    if (nodes_.size() < this->nnodes_ && local_id < this->nnodes_) {
       nodes_.emplace_back(node_ptr);
       // Assign coordinates
       nodal_coordinates_.row(local_id) =
@@ -517,63 +516,70 @@ inline Eigen::Matrix<double, 1, 1> mpm::Cell<1>::transform_real_to_unit_cell(
   return this->local_coordinates_point(point);
 }
 
-//! Return the local coordinates of a point in a 2D cell
-template <>
-inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
-    const Eigen::Matrix<double, 2, 1>& point) {
+//! Return the local coordinates of a point in a cell
+template <unsigned Tdim>
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::transform_real_to_unit_cell(
+        const Eigen::Matrix<double, Tdim, 1>& point) {
 
-  // If not isoparametric then use cartesian transformation
-  if (!this->isoparametric_)
-    return mpm::Cell<2>::local_coordinates_point(point);
+  // If regular cartesian grid use cartesian transformation
+  if (!this->isoparametric_) return this->local_coordinates_point(point);
 
   // Get indices of corner nodes
   Eigen::VectorXi indices = element_->corner_indices();
 
-  // Analytical solution for linear triangle element
-  if (indices.size() == 3) {
+  // Analytical solution for 2D linear triangle element
+  if (Tdim == 2 && indices.size() == 3) {
     if (element_->isvalid_natural_coordinates_analytical())
       return element_->natural_coordinates_analytical(point,
                                                       this->nodal_coordinates_);
   }
 
   // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, 2, 1> xi;
+  Eigen::Matrix<double, Tdim, 1> xi;
   xi.fill(std::numeric_limits<double>::max());
 
   // Zeros
-  const Eigen::Matrix<double, 2, 1> zero = Eigen::Matrix<double, 2, 1>::Zero();
+  const Eigen::Matrix<double, Tdim, 1> zero =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
 
   // Matrix of nodal coordinates
   const Eigen::MatrixXd nodal_coords = nodal_coordinates_.transpose();
 
   // Analytical xi
-  Eigen::Matrix<double, 2, 1> analytical_xi;
+  Eigen::Matrix<double, Tdim, 1> analytical_xi;
   analytical_xi.fill(std::numeric_limits<double>::max());
 
-  if (element_->isvalid_natural_coordinates_analytical())
-    analytical_xi = element_->natural_coordinates_analytical(
-        point, this->nodal_coordinates_);
+  Eigen::Matrix<double, Tdim, 1> analytical_residual;
+  analytical_residual.fill(std::numeric_limits<double>::max());
 
-  // Analytical tolerance
-  const double tolerance = 1.0E-16 * mean_length_ * mean_length_;
+  if (Tdim == 2) {
+    if (element_->isvalid_natural_coordinates_analytical())
+      analytical_xi = element_->natural_coordinates_analytical(
+          point, this->nodal_coordinates_);
 
-  bool analytical_xi_in_cell = true;
-  // Check if analytical_xi is within the cell and is not nan
-  for (unsigned i = 0; i < analytical_xi.size(); ++i)
-    if (analytical_xi(i) < -1. || analytical_xi(i) > 1. ||
-        std::isnan(analytical_xi(i)))
-      analytical_xi_in_cell = false;
+    // Analytical tolerance
+    const double analytical_tolerance = 1.0E-16 * mean_length_ * mean_length_;
 
-  // Local shape function
-  const auto sf = element_->shapefn_local(analytical_xi, zero, zero);
-  // f(x) = p(x) - p, where p is the real point
-  const auto analytical_residual = (nodal_coords * sf) - point;
-  // Early exit
-  if ((analytical_residual.squaredNorm() < tolerance) && analytical_xi_in_cell)
-    return analytical_xi;
+    bool analytical_xi_in_cell = true;
+    // Check if analytical_xi is within the cell and is not nan
+    for (unsigned i = 0; i < analytical_xi.size(); ++i)
+      if (analytical_xi(i) < -1. || analytical_xi(i) > 1. ||
+          std::isnan(analytical_xi(i)))
+        analytical_xi_in_cell = false;
+
+    // Local shape function
+    const auto sf = element_->shapefn_local(analytical_xi, zero, zero);
+    // f(x) = p(x) - p, where p is the real point
+    analytical_residual = (nodal_coords * sf) - point;
+    // Early exit
+    if ((analytical_residual.squaredNorm() < analytical_tolerance) &&
+        analytical_xi_in_cell)
+      return analytical_xi;
+  }
 
   // Affine guess of xi
-  Eigen::Matrix<double, 2, 1> affine_xi;
+  Eigen::Matrix<double, Tdim, 1> affine_xi;
   // Boolean to check if affine is nan
   bool affine_nan = false;
 
@@ -584,20 +590,23 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   const auto unit_cell = element_->unit_cell_coordinates();
 
   // Affine residual
-  Eigen::Matrix<double, 2, 1> affine_residual;
+  Eigen::Matrix<double, Tdim, 1> affine_residual;
+
+  // Set the size of KA and Kb matrices
+  const unsigned KA = (Tdim == 2 ? 4 : 8);
 
   // Affine transformation, using linear interpolation for the initial guess
   if (element_->degree() == mpm::ElementDegree::Linear) {
     // A = vertex * KA
-    const Eigen::Matrix<double, 2, 2> A =
-        nodal_coords * mpm::TransformR2UAffine<2, 4>::KA;
+    const Eigen::Matrix<double, Tdim, Tdim> A =
+        nodal_coords * mpm::TransformR2UAffine<Tdim, KA>::KA;
 
     // b = vertex * Kb
-    const Eigen::Matrix<double, 2, 1> b =
-        point - (nodal_coords * mpm::TransformR2UAffine<2, 4>::Kb);
+    const Eigen::Matrix<double, Tdim, 1> b =
+        point - (nodal_coords * mpm::TransformR2UAffine<Tdim, KA>::Kb);
 
     // Affine transform: A^-1 * b
-    // const Eigen::Matrix<double, 2, 1>
+    // const Eigen::Matrix<double, Tdim, 1>
     affine_xi = A.inverse() * b;
 
     // Check for nan
@@ -617,8 +626,8 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     }
   }
   // Use the best of analytical and affine transformation
-  Eigen::Matrix<double, 2, 1> geometry_xi;
-  Eigen::Matrix<double, 2, 1> geometry_residual;
+  Eigen::Matrix<double, Tdim, 1> geometry_xi;
+  Eigen::Matrix<double, Tdim, 1> geometry_residual;
   geometry_residual.fill(std::numeric_limits<double>::max());
 
   // Analytical solution is a better initial guess
@@ -635,7 +644,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   }
 
   // Trial guess for NR
-  Eigen::Matrix<double, 2, 1> nr_xi = geometry_xi;
+  Eigen::Matrix<double, Tdim, 1> nr_xi = geometry_xi;
   // Check if the first trial xi is just outside the box
   for (unsigned i = 0; i < nr_xi.size(); ++i) {
     if (nr_xi(i) < -1. && nr_xi(i) > -1.001)
@@ -654,11 +663,11 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   // x_{n+1} = x_n - f(x)/f'(x)
   // f(x) = p(x) - p, where p is the real point
   // p(x) is the computed point.
-  Eigen::Matrix<double, 2, 1> nr_residual;
+  Eigen::Matrix<double, Tdim, 1> nr_residual;
   unsigned iter = 0;
   for (; iter < max_iterations; ++iter) {
     // Calculate local Jacobian
-    const Eigen::Matrix<double, 2, 2> jacobian =
+    const Eigen::Matrix<double, Tdim, Tdim> jacobian =
         element_->jacobian_local(nr_xi, unit_cell, zero, zero);
 
     // Set guess nr_xi to zero
@@ -672,21 +681,22 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
     nr_residual = (nodal_coords * sf) - point;
 
     // f(x)/f'(x)
-    const Eigen::Matrix<double, 2, 1> delta = jacobian.inverse() * nr_residual;
+    const Eigen::Matrix<double, Tdim, 1> delta =
+        jacobian.inverse() * nr_residual;
 
     // Line search
     double step_length = 1.;
     for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
       // Trial nr_xi
       // x_{n+1} = x_n - f(x)/f'(x)
-      const Eigen::Matrix<double, 2, 1> xi_trial =
+      const Eigen::Matrix<double, Tdim, 1> xi_trial =
           nr_xi - (step_length * delta);
 
       // Trial shape function
       const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
 
       // Trial residual: f(x) = p(x) - p, where p is the real point
-      const Eigen::Matrix<double, 2, 1> nr_residual_trial =
+      const Eigen::Matrix<double, Tdim, 1> nr_residual_trial =
           (nodal_coords * sf_trial) - point;
 
       if (nr_residual_trial.norm() < nr_residual.norm()) {
@@ -711,159 +721,6 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::transform_real_to_unit_cell(
   xi = geometry_residual.norm() < nr_residual.norm() ? geometry_xi : nr_xi;
 
   if (std::isnan(xi(0)) || std::isnan(xi(1)))
-    throw std::runtime_error("Local coordinates of xi is NAN");
-
-  return xi;
-}
-
-//! Return the local coordinates of a point in a 2D/3D cell
-template <>
-inline Eigen::Matrix<double, 3, 1> mpm::Cell<3>::transform_real_to_unit_cell(
-    const Eigen::Matrix<double, 3, 1>& point) {
-
-  // If not isoparametric then use cartesian transformation
-  if (!this->isoparametric_)
-    return mpm::Cell<3>::local_coordinates_point(point);
-
-  // Local coordinates of a point in an unit cell
-  Eigen::Matrix<double, 3, 1> xi;
-  xi.fill(std::numeric_limits<double>::max());
-
-  // Get indices of corner nodes
-  Eigen::VectorXi indices = element_->corner_indices();
-
-  // Matrix of nodal coordinates
-  const Eigen::MatrixXd nodal_coords = nodal_coordinates_.transpose();
-
-  // Affine transformation, using linear interpolation for the initial guess
-  // Affine guess of xi
-  Eigen::Matrix<double, 3, 1> affine_xi;
-  affine_xi.setZero();
-
-  // Boolean to check if affine is nan
-  bool affine_nan = false;
-  // Zeros
-  const Eigen::Matrix<double, 3, 1> zero = Eigen::Matrix<double, 3, 1>::Zero();
-
-  // Affine tolerance
-  const double affine_tolerance = 1.0E-16 * mean_length_ * mean_length_;
-
-  // Coordinates of a unit cell
-  const auto unit_cell = element_->unit_cell_coordinates();
-
-  // Affine residual
-  Eigen::Matrix<double, 3, 1> affine_residual;
-
-  // Affine transformation, using linear interpolation for the initial guess
-  if (element_->degree() == mpm::ElementDegree::Linear) {
-    // A = vertex * KA
-    const Eigen::Matrix<double, 3, 3> A =
-        nodal_coords * mpm::TransformR2UAffine<3, 8>::KA;
-
-    // b = vertex * Kb
-    const Eigen::Matrix<double, 3, 1> b =
-        point - (nodal_coords * mpm::TransformR2UAffine<3, 8>::Kb);
-
-    // Affine transform: A^-1 * b
-    // const Eigen::Matrix<double, 3, 1>
-    affine_xi = A.inverse() * b;
-
-    // Check for nan
-    for (unsigned i = 0; i < affine_xi.size(); ++i)
-      if (std::isnan(affine_xi(i))) affine_nan = true;
-
-    // Set xi to affine guess
-    if (!affine_nan) {
-
-      // Local shape function
-      const auto sf = element_->shapefn_local(xi, zero, zero);
-
-      // f(x) = p(x) - p, where p is the real point
-      affine_residual = (nodal_coords * sf) - point;
-
-      // Early exit
-      if ((affine_residual.squaredNorm() < affine_tolerance) && !affine_nan)
-        return affine_xi;
-    }
-  }
-
-  // Newton Raphson
-  // Maximum iterations of newton raphson
-  const unsigned max_iterations = 10000;
-
-  // Tolerance for newton raphson
-  const double Tolerance = 1.0E-10;
-
-  // Trial initial guess for NR
-  Eigen::Matrix<double, 3, 1> nr_xi = affine_xi;
-  // Check if the first trial xi is just outside the box
-  for (unsigned i = 0; i < nr_xi.size(); ++i) {
-    if (nr_xi(i) < -1. && nr_xi(i) > -1.001)
-      nr_xi(i) = -0.999999999999;
-    else if (nr_xi(i) > 1. && nr_xi(i) < 1.001)
-      nr_xi(i) = 0.999999999999;
-  }
-
-  // Newton Raphson iteration to solve for x
-  // x_{n+1} = x_n - f(x)/f'(x)
-  // f(x) = p(x) - p, where p is the real point
-  // p(x) is the computed point.
-  Eigen::Matrix<double, 3, 1> nr_residual;
-  unsigned iter = 0;
-  for (; iter < max_iterations; ++iter) {
-    // Calculate local Jacobian
-    const Eigen::Matrix<double, 3, 3> jacobian =
-        element_->jacobian_local(nr_xi, unit_cell, zero, zero);
-
-    // Set guess xi to zero
-    if (std::abs(jacobian.determinant()) < 1.0E-10) nr_xi.setZero();
-
-    // Local shape function
-    const auto sf = element_->shapefn_local(nr_xi, zero, zero);
-
-    // Residual (f(x))
-    // f(x) = p(x) - p, where p is the real point
-    nr_residual = (nodal_coords * sf) - point;
-
-    // f(x)/f'(x)
-    const Eigen::Matrix<double, 3, 1> delta = jacobian.inverse() * nr_residual;
-
-    // Line search
-    double step_length = 1.;
-    for (unsigned line_trials = 0; line_trials < 10; ++line_trials) {
-      // Trial xi
-      // x_{n+1} = x_n - f(x)/f'(x)
-      const Eigen::Matrix<double, 3, 1> xi_trial =
-          nr_xi - (step_length * delta);
-
-      // Trial shape function
-      const auto sf_trial = element_->shapefn_local(xi_trial, zero, zero);
-
-      // Trial residual: f(x) = p(x) - p, where p is the real point
-      const Eigen::Matrix<double, 3, 1> nr_residual_trial =
-          (nodal_coords * sf_trial) - point;
-
-      if (nr_residual_trial.norm() < nr_residual.norm()) {
-        nr_xi = xi_trial;
-        nr_residual = nr_residual_trial;
-        break;
-      } else if (step_length > 0.05)
-        step_length /= 2.;
-      else {
-        // Line search failed
-        break;
-      }
-    }
-    // Convergence criteria
-    if ((step_length * delta).norm() < Tolerance) break;
-
-    // Check for nan and set to a trial xi
-    if (std::isnan(nr_xi(0)) || std::isnan(nr_xi(1))) nr_xi.setZero();
-  }
-
-  // At end of iteration return affine or xi based on lowest norm
-  xi = (affine_residual.norm() < nr_residual.norm()) ? affine_xi : nr_xi;
-  if (std::isnan(xi(0)) || std::isnan(xi(1)) || std::isnan(xi(2)))
     throw std::runtime_error("Local coordinates of xi is NAN");
 
   return xi;
@@ -1056,7 +913,7 @@ bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
   bool status = true;
   try {
     //! Constraint directions can take values between 0 and Dim * Nphases - 1
-    if (dir >= 0 && face_id < element_->nfaces()) {
+    if (face_id < element_->nfaces()) {
       this->velocity_constraints_[face_id].emplace_back(
           std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
                                            static_cast<double>(velocity)));
@@ -1145,4 +1002,16 @@ inline std::vector<std::vector<mpm::Index>>
     set_face_nodes.emplace_back(face_nodes);
   }
   return set_face_nodes;
+}
+
+//! Assign MPI rank to cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::rank(unsigned rank) {
+  this->rank_ = rank;
+}
+
+//! Return MPI rank of the cell
+template <unsigned Tdim>
+inline unsigned mpm::Cell<Tdim>::rank() const {
+  return this->rank_;
 }

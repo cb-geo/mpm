@@ -15,9 +15,11 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
-  const std::string analysis = "MPMExplicitUSL2D";
+  const std::string analysis = "MPMExplicit2D";
+  const std::string stress_update = "usl";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json(2, resume, analysis, fname) == true);
+  REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_2d() == true);
@@ -68,9 +70,11 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
   SECTION("Check resume") {
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
-    const std::string analysis = "MPMExplicitUSL2D";
+    const std::string analysis = "MPMExplicit2D";
+    const std::string stress_update = "usl";
     bool resume = true;
-    REQUIRE(mpm_test::write_json(2, resume, analysis, fname) == true);
+    REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
+            true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);
@@ -92,9 +96,11 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
-  const std::string analysis = "MPMExplicitUSL3D";
+  const std::string analysis = "MPMExplicit3D";
+  const std::string stress_update = "usl";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
+  REQUIRE(mpm_test::write_json(3, resume, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_3d() == true);
@@ -145,9 +151,11 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
   SECTION("Check resume") {
     // Write JSON file
     const std::string fname = "mpm-explicit-usl";
-    const std::string analysis = "MPMExplicitUSL3D";
+    const std::string analysis = "MPMExplicit3D";
+    const std::string stress_update = "usl";
     bool resume = true;
-    REQUIRE(mpm_test::write_json(3, resume, analysis, fname) == true);
+    REQUIRE(mpm_test::write_json(3, resume, analysis, stress_update, fname) ==
+            true);
 
     // Create an IO object
     auto io = std::make_unique<mpm::IO>(argc, argv);

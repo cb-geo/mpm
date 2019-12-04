@@ -9,7 +9,7 @@
 
 #include "tclap/CmdLine.h"
 
-#include <tsl/robin_map.h>
+#include "tsl/robin_map.h"
 //! Alias for JSON
 #include "json.hpp"
 using Json = nlohmann::json;
@@ -20,11 +20,10 @@ using Json = nlohmann::json;
 #include "mpi.h"
 #endif
 
+#include "data_types.h"
+
 namespace mpm {
 //! \brief Input/Output handler
-
-//! MPM Index
-using Index = unsigned long long;
 
 class IO {
  public:

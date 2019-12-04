@@ -14,12 +14,23 @@
 #endif
 #include "tbb/task_group.h"
 
+#ifdef USE_PARMETIS
+#include "graph.h"
+#endif
+
 #include "container.h"
 #include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
 
 namespace mpm {
+
+//! Stress update method
+//! USF: Update Stress First
+//! USL: Update Stress Last
+//! MUSL: Modified Stress Last
+enum class StressUpdate { USF, USL, MUSL };
+extern std::map<std::string, StressUpdate> stress_update;
 
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
@@ -88,6 +99,8 @@ class MPMBase : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
+  //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
+  mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
@@ -102,6 +115,12 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Set node concentrated force
   bool set_node_concentrated_force_{false};
+
+#ifdef USE_PARMETIS
+  // graph pass the address of the container of cell
+  std::shared_ptr<Graph<Tdim>> graph_{nullptr};
+#endif
+
 };  // MPMBase class
 }  // namespace mpm
 

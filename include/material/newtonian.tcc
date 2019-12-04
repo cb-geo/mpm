@@ -29,9 +29,7 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
     mpm::dense_map* state_vars) {
 
-  const unsigned phase = 0;
-
-  const double pressure = ptr->pressure(phase);
+  const double pressure = ptr->pressure();
 
   const double volumetric_strain = dstrain(0) + dstrain(1);
 
@@ -55,9 +53,7 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
     mpm::dense_map* state_vars) {
 
-  const unsigned phase = 0;
-
-  const double pressure = ptr->pressure(phase);
+  const double pressure = ptr->pressure();
 
   const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
 

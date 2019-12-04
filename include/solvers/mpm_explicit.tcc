@@ -71,7 +71,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Iterate over each particle to assign material
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, phase, material));
+                std::placeholders::_1, material));
 
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
@@ -80,8 +80,40 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   }
 
   // Compute mass
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1, phase));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+
+#ifdef USE_MPI
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    // Initialize MPI
+    int size;
+    int rank;
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    MPI_Comm_size(comm, &size);
+    MPI_Comm_rank(comm, &rank);
+
+    // Check if mesh has cells to partition
+    if (mesh_->ncells() == 0)
+      throw std::runtime_error("Container of cells is empty");
+
+#ifdef USE_PARMETIS
+    // Create graph
+    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), size, rank);
+
+    // Create partition using ParMETIS
+    bool graph_partition = graph_->create_partitions(&comm);
+
+    // Collect the partitions
+    graph_->collect_partitions(mesh_->ncells(), size, rank, &comm);
+
+    // Delete all the particles which is not in local task parititon
+    mesh_->remove_all_nonrank_particles(rank);
+
+#endif  // PARMETIS
+  }
+#endif  // MPI
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -103,8 +135,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-
-      // mesh_->find_active_nodes();
     });
 
     // Spawn a task for particles
@@ -119,7 +149,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                  std::placeholders::_1, phase));
+                  std::placeholders::_1));
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -146,23 +176,23 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Update stress first
-    if (!usl_) {
+    if (this->stress_update_ == mpm::StressUpdate::USF) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, dt_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, this->dt_));
 
       // Pressure smoothing
       if (pressure_smoothing_) {
         // Assign pressure to nodes
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
-                      std::placeholders::_1, phase));
+                      std::placeholders::_1));
 
 #ifdef USE_MPI
         // Run if there is more than a single MPI task
@@ -179,13 +209,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         // Smooth pressure over particles
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                      std::placeholders::_1, phase));
+                      std::placeholders::_1));
       }
 
       // Iterate over each particle to compute stress
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
-                    std::placeholders::_1, phase));
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
     }
 
     // Spawn a task for external force
@@ -193,12 +222,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to compute nodal body force
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, phase, this->gravity_));
+                    std::placeholders::_1, this->gravity_));
 
       // Iterate over each particle to map traction force to nodes
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                    std::placeholders::_1, phase, (this->step_ * this->dt_)));
+                    std::placeholders::_1, (this->step_ * this->dt_)));
 
       // Iterate over each node to add concentrated node force to external force
       if (set_node_concentrated_force_)
@@ -210,9 +239,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Spawn a task for internal force
     task_group.run([&] {
       // Iterate over each particle to compute nodal internal force
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                    std::placeholders::_1, phase));
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
 
@@ -247,31 +275,31 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Iterate over each particle to compute updated position
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, this->dt_));
     else
       // Iterate over each particle to compute updated position
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, this->dt_));
 
     // Update Stress Last
-    if (usl_ == true) {
+    if (this->stress_update_ == mpm::StressUpdate::USL) {
       // Iterate over each particle to calculate strain
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::compute_strain,
-                    std::placeholders::_1, phase, dt_));
+                    std::placeholders::_1, dt_));
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-                    std::placeholders::_1, phase, this->dt_));
+                    std::placeholders::_1, this->dt_));
 
       // Pressure smoothing
       if (pressure_smoothing_) {
         // Assign pressure to nodes
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
-                      std::placeholders::_1, phase));
+                      std::placeholders::_1));
 
 #ifdef USE_MPI
         // Run if there is more than a single MPI task
@@ -288,13 +316,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         // Smooth pressure over particles
         mesh_->iterate_over_particles(
             std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                      std::placeholders::_1, phase));
+                      std::placeholders::_1));
       }
 
       // Iterate over each particle to compute stress
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_stress,
-                    std::placeholders::_1, phase));
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
     }
 
     // Locate particles
@@ -313,11 +340,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 (this->usl_ ? "USL" : "USF"),
-                 std::chrono::duration_cast<std::chrono::milliseconds>(
-                     solver_end - solver_begin)
-                     .count());
+  console_->info(
+      "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+      (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
+      std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
+                                                            solver_begin)
+          .count());
 
   return status;
 }

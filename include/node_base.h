@@ -8,12 +8,10 @@
 
 #include <Eigen/Dense>
 
+#include "data_types.h"
 #include "functions/function_base.h"
 
 namespace mpm {
-
-//! Global index type for the node_base
-using Index = unsigned long long;
 
 //! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
@@ -80,7 +78,6 @@ class NodeBase {
   virtual double volume(unsigned phase) const = 0;
 
   //! Assign concentrated force to the node
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Nodal concentrated force in specified direction
   //! \param[in] function math function

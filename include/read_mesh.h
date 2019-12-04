@@ -9,18 +9,15 @@
 #include <tuple>
 #include <vector>
 
-// Boost string algorithm
 #include "Eigen/Dense"
 #include <boost/algorithm/string.hpp>
-// Speed log
+
 #include "spdlog/spdlog.h"
 
+#include "data_types.h"
 #include "logger.h"
 
 namespace mpm {
-
-//! Global index type for the cell
-using Index = unsigned long long;
 
 //! ReadMesh class
 //! \brief Abstract Base class that returns mesh and particles locataions

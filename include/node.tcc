@@ -67,7 +67,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_concentrated_force(
     const std::shared_ptr<FunctionBase>& function) {
   bool status = false;
   try {
-    if (phase < 0 || phase >= Tnphases || direction < 0 || direction >= Tdim) {
+    if (phase >= Tnphases || direction >= Tdim) {
       throw std::runtime_error(
           "Cannot assign nodal concentrated forcey: Direction / phase is "
           "invalid");
@@ -299,7 +299,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_velocity_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < (Tdim * Tnphases))
+    if (dir < (Tdim * Tnphases))
       this->velocity_constraints_.insert(std::make_pair<unsigned, double>(
           static_cast<unsigned>(dir), static_cast<double>(velocity)));
     else
@@ -357,7 +357,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_friction_constraint(
   bool status = true;
   try {
     //! Constrain directions can take values between 0 and Dim * Nphases
-    if (dir >= 0 && dir < Tdim) {
+    if (dir < Tdim) {
       this->friction_constraint_ =
           std::make_tuple(static_cast<unsigned>(dir), static_cast<int>(sign_n),
                           static_cast<double>(friction));
