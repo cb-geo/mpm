@@ -232,27 +232,30 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 //! Create cells from node lists
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_cell_neighbours() {
+  // Initialize and compute node cell map
+  tsl::robin_map<mpm::Index, std::set<mpm::Index>> node_cell_map;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    const auto faces = (*citr)->sorted_face_node_ids();
-    for (const auto& face : faces) {
-      faces_cells_.insert(
-          std::pair<std::vector<mpm::Index>, mpm::Index>(face, (*citr)->id()));
-    }
+    // Get cell id and nodes id
+    auto cell_id = (*citr)->id();
+    const auto nodes_id_list = (*citr)->nodes_id();
+    // Populate node_cell_map with the node_id and multiple cell_id
+    for (const auto& id : nodes_id_list) node_cell_map[id].insert(cell_id);
   }
 
-  // Iterate through all unique keys in faces_cells_
-  for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
-       itr = faces_cells_.upper_bound(itr->first)) {
-    // Returns a pair representing the range of elements with key
-    auto range = faces_cells_.equal_range(itr->first);
-    // A face is shared only by 2 cells (distance between the range is 2)
-    if (std::distance(range.first, range.second) == 2) {
-      // Add cell as neighbours to each other
-      map_cells_[range.first->second]->add_neighbour(
-          std::prev(range.second)->second);
-      map_cells_[std::prev(range.second)->second]->add_neighbour(
-          range.first->second);
-    }
+  // Assign neighbour to cells
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Initiate set of neighbouring cells
+    std::set<mpm::Index> neighbouring_cell_sets;
+
+    // Loop over the current cell nodes and add ids of the initiated set
+    const auto nodes_id_list = (*citr)->nodes_id();
+    for (const auto& id : nodes_id_list)
+      neighbouring_cell_sets.insert(node_cell_map[id].begin(),
+                                    node_cell_map[id].end());
+
+    for (const auto& neighbour_id : neighbouring_cell_sets)
+      if (neighbour_id != (*citr)->id())
+        map_cells_[(*citr)->id()]->add_neighbour(neighbour_id);
   }
 }
 
