@@ -858,30 +858,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                   false);
         }
 
-        // Test constructing node cell maps
-        SECTION("Check node cell maps construction") {
-          std::map<mpm::Index, std::set<mpm::Index>> check_maps;
-          check_maps[0].insert(0);
-          check_maps[1].insert(0);
-          check_maps[1].insert(1);
-          check_maps[2].insert(0);
-          check_maps[2].insert(1);
-          check_maps[3].insert(0);
-          check_maps[4].insert(1);
-          check_maps[5].insert(1);
-
-          mesh->compute_node_cell_maps();
-          const auto& node_cell_map = mesh->node_cell_maps();
-
-          for (auto iter = node_cell_map.begin(); iter != node_cell_map.end();
-               iter++) {
-            auto iter1 = check_maps.find(iter->first);
-            if (iter1 != check_maps.end()) {
-              REQUIRE(iter->second == iter1->second);
-            }
-          }
-        }
-
         // Test assign rotation matrices to nodes
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
@@ -1957,38 +1933,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           velocity_constraints.emplace_back(std::make_tuple(1, 10, 1, -10.5));
           REQUIRE(mesh->assign_cell_velocity_constraints(
                       velocity_constraints) == false);
-        }
-
-        // Test constructing node cell maps
-        SECTION("Check node cell maps construction") {
-          std::map<mpm::Index, std::set<mpm::Index>> check_maps;
-          check_maps[0].insert(0);
-          check_maps[1].insert(0);
-          check_maps[1].insert(1);
-          check_maps[2].insert(0);
-          check_maps[2].insert(1);
-          check_maps[3].insert(0);
-          check_maps[4].insert(0);
-          check_maps[5].insert(0);
-          check_maps[5].insert(1);
-          check_maps[6].insert(0);
-          check_maps[6].insert(1);
-          check_maps[7].insert(0);
-          check_maps[8].insert(1);
-          check_maps[9].insert(1);
-          check_maps[10].insert(1);
-          check_maps[11].insert(1);
-
-          mesh->compute_node_cell_maps();
-          const auto& node_cell_map = mesh->node_cell_maps();
-
-          for (auto iter = node_cell_map.begin(); iter != node_cell_map.end();
-               iter++) {
-            auto iter1 = check_maps.find(iter->first);
-            if (iter1 != check_maps.end()) {
-              REQUIRE(iter->second == iter1->second);
-            }
-          }
         }
       }
     }

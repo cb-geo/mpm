@@ -232,11 +232,17 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 //! Create cells from node lists
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_cell_neighbours() {
-  // Check if node_cell_maps is empty
-  if (node_cell_maps_.empty()) {
-    compute_node_cell_maps();
+  // Initialize and compute node cell map
+  tsl::robin_map<mpm::Index, std::set<mpm::Index>> node_cell_map;
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Get cell id and nodes id
+    auto cell_id = (*citr)->id();
+    const auto nodes_id_list = (*citr)->nodes_id();
+    // Populate node_cell_map with the node_id and multiple cell_id
+    for (const auto& id : nodes_id_list) node_cell_map[id].insert(cell_id);
   }
 
+  // Assign neighbour to cells
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Initiate set of neighbouring cells
     std::set<mpm::Index> neighbouring_cell_sets;
@@ -244,8 +250,8 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
     // Loop over the current cell nodes and add ids of the initiated set
     const auto nodes_id_list = (*citr)->nodes_id();
     for (const auto& id : nodes_id_list)
-      neighbouring_cell_sets.insert(node_cell_maps_[id].begin(),
-                                    node_cell_maps_[id].end());
+      neighbouring_cell_sets.insert(node_cell_map[id].begin(),
+                                    node_cell_map[id].end());
 
     for (const auto& neighbour_id : neighbouring_cell_sets)
       if (neighbour_id != (*citr)->id())
@@ -253,17 +259,6 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 }
 
-template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_node_cell_maps() {
-  // Loop over the cells
-  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    // Get cell id and nodes id
-    const auto cell_id = (*citr)->id();
-    const auto nodes_id_list = (*citr)->nodes_id();
-    // Populate node_cell_maps_ with the node_id and multiple cell_id
-    for (const auto& id : nodes_id_list) node_cell_maps_[id].insert(cell_id);
-  }
-}
 //! Create cells from node lists
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>

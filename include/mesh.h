@@ -298,9 +298,6 @@ class Mesh {
   //! Find cell neighbours
   void compute_cell_neighbours();
 
-  //! Find cell map to obtain surrounding cell neighbours
-  void compute_node_cell_maps();
-
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
@@ -311,11 +308,6 @@ class Mesh {
 
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
-
-  //! Node cell maps
-  std::map<mpm::Index, std::set<mpm::Index>> node_cell_maps() const {
-    return node_cell_maps_;
-  }
 
   //! Write HDF5 particles
   //! \param[in] phase Index corresponding to the phase
@@ -387,8 +379,6 @@ class Mesh {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  //! Neighbouring node-cell ids map
-  std::map<mpm::Index, std::set<mpm::Index>> node_cell_maps_;
 };  // Mesh class
 }  // namespace mpm
 

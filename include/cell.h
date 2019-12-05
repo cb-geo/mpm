@@ -80,10 +80,9 @@ class Cell {
   unsigned nnodes() const { return nodes_.size(); }
 
   //! Return nodes id in a cell
-  std::vector<mpm::Index> nodes_id() {
-    std::vector<mpm::Index> nodes_id_lists;
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_id_lists.push_back(nodes_[i]->id());
+  std::set<mpm::Index> nodes_id() const {
+    std::set<mpm::Index> nodes_id_lists;
+    for (const auto& node : nodes_) nodes_id_lists.insert(node->id());
     return nodes_id_lists;
   }
 
