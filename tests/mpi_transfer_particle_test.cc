@@ -39,6 +39,21 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
     int sender = 0;
     int receiver = 1;
 
+    // Assign material
+    unsigned mid = 1;
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid), jmaterial);
+
+    std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
+    materials[mid] = material;
+
     // 4-noded quadrilateral element
     std::shared_ptr<mpm::Element<Dim>> element =
         Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
@@ -97,6 +112,9 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
 
+    // Initialize material models
+    mesh->initialise_material_models(materials);
+
     if (mpi_rank == 0) {
       // Add cell 1 and check
       REQUIRE(mesh->add_cell(cell1) == true);
@@ -105,11 +123,13 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
       coords << 1.0, 1.0;
       std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
           std::make_shared<mpm::Particle<Dim>>(0, coords);
+      particle1->assign_material(material);
 
       // Particle 2
       coords << 1.5, 1.5;
       std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
           std::make_shared<mpm::Particle<Dim>>(1, coords);
+      particle2->assign_material(material);
 
       // Add particle 1 and check
       REQUIRE(mesh->add_particle(particle1) == true);
@@ -146,7 +166,7 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
     if (mpi_rank == 1) {
       std::cout << "Rank: 1\n";
       // Number of particles in cell 1 is 0 for rank 2
-      REQUIRE(mesh->nparticles() == 0);
+      REQUIRE(mesh->nparticles() == 2);
     }
   }
 }
