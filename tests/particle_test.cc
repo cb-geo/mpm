@@ -695,7 +695,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Assign material
-    unsigned mid = 1;
+    unsigned mid = 0;
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -719,7 +719,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Check material id
-    REQUIRE(particle->material_id() == 1);
+    REQUIRE(particle->material_id() == 0);
 
     // Compute volume
     REQUIRE(particle->compute_volume() == true);
@@ -739,13 +739,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
-
-    // Map particle material id to nodes
-    particle->append_material_id_to_nodes();
-    REQUIRE(node0->material_ids()[0] == 1);
-    REQUIRE(node1->material_ids()[0] == 1);
-    REQUIRE(node2->material_ids()[0] == 1);
-    REQUIRE(node3->material_ids()[0] == 1);
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -1307,6 +1300,112 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
     REQUIRE(h5_particle.material_id == h5_test.material_id);
   }
+
+  // Check particle's material id maping to nodes
+  SECTION("Check particle's material id maping to nodes") {
+    // Add particle
+    mpm::Index id1 = 0;
+    coords << 0.75, 0.75;
+    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+
+    // Add particle
+    mpm::Index id2 = 1;
+    coords << 0.25, 0.25;
+    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+
+    // Element
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::QuadrilateralElement<Dim, 4>>();
+
+    // Create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
+    // Add nodes to cell
+    coords << 0., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 1., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 0., 1.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 1., 1.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node3);
+    cell->add_node(3, node2);
+
+    // Initialise cell properties and assign cell to particle
+    cell->initialise();
+    particle1->assign_cell(cell);
+    particle2->assign_cell(cell);
+
+    // Assign material 1
+    unsigned mid1 = 0;
+    // Initialise material 1
+    Json jmaterial1;
+    jmaterial1["density"] = 1000.;
+    jmaterial1["youngs_modulus"] = 1.0E+7;
+    jmaterial1["poisson_ratio"] = 0.3;
+
+    auto material1 =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid1), jmaterial1);
+
+    particle1->assign_material(material1);
+
+    // Assign material 2
+    unsigned mid2 = 1;
+    // Initialise material 2
+    Json jmaterial2;
+    jmaterial2["density"] = 2000.;
+    jmaterial2["youngs_modulus"] = 2.0E+7;
+    jmaterial2["poisson_ratio"] = 0.25;
+
+    auto material2 =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid2), jmaterial2);
+
+    particle2->assign_material(material2);
+
+    // Append particle's material id to nodes in cell
+    particle1->append_material_id_to_nodes();
+    particle2->append_material_id_to_nodes();
+
+    // Check size of material_ids set at each node
+    REQUIRE(node0->material_ids().size() == 2);
+    REQUIRE(node1->material_ids().size() == 2);
+    REQUIRE(node2->material_ids().size() == 2);
+    REQUIRE(node3->material_ids().size() == 2);
+
+    // Check the material ids appended to nodes
+    unsigned id_check = 0;
+    for (auto id_itr : node0->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node1->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node2->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node3->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+  }
 }
 
 //! \brief Check particle class for 3D case
@@ -1756,17 +1855,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
     REQUIRE(particle->compute_shapefn() == true);
-
-    // Map particle material id to nodes
-    particle->append_material_id_to_nodes();
-    REQUIRE(node0->material_ids()[0] == 0);
-    REQUIRE(node1->material_ids()[0] == 0);
-    REQUIRE(node2->material_ids()[0] == 0);
-    REQUIRE(node3->material_ids()[0] == 0);
-    REQUIRE(node4->material_ids()[0] == 0);
-    REQUIRE(node5->material_ids()[0] == 0);
-    REQUIRE(node6->material_ids()[0] == 0);
-    REQUIRE(node7->material_ids()[0] == 0);
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -2366,5 +2454,155 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
     REQUIRE(h5_particle.material_id == h5_test.material_id);
+  }
+
+  // Check particle's material id maping to nodes
+  SECTION("Check particle's material id maping to nodes") {
+    // Add particle
+    mpm::Index id1 = 0;
+    coords << 1.5, 1.5, 1.5;
+    auto particle1 = std::make_shared<mpm::Particle<Dim>>(id1, coords);
+
+    // Add particle
+    mpm::Index id2 = 1;
+    coords << 0.5, 0.5, 0.5;
+    auto particle2 = std::make_shared<mpm::Particle<Dim>>(id2, coords);
+
+    // Element
+    std::shared_ptr<mpm::Element<Dim>> element =
+        std::make_shared<mpm::HexahedronElement<Dim, 8>>();
+
+    // Create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
+    // Add nodes to cell
+    coords << 0, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 0, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 2, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    coords << 2, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+    coords << 0, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+    cell->add_node(0, node0);
+    cell->add_node(1, node1);
+    cell->add_node(2, node2);
+    cell->add_node(3, node3);
+    cell->add_node(4, node4);
+    cell->add_node(5, node5);
+    cell->add_node(6, node6);
+    cell->add_node(7, node7);
+
+    // Initialise cell properties and assign cell to particle
+    cell->initialise();
+    particle1->assign_cell(cell);
+    particle2->assign_cell(cell);
+
+    // Assign material 1
+    unsigned mid1 = 0;
+    // Initialise material 1
+    Json jmaterial1;
+    jmaterial1["density"] = 1000.;
+    jmaterial1["youngs_modulus"] = 1.0E+7;
+    jmaterial1["poisson_ratio"] = 0.3;
+
+    auto material1 =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid1), jmaterial1);
+
+    particle1->assign_material(material1);
+
+    // Assign material 2
+    unsigned mid2 = 1;
+    // Initialise material 2
+    Json jmaterial2;
+    jmaterial2["density"] = 2000.;
+    jmaterial2["youngs_modulus"] = 2.0E+7;
+    jmaterial2["poisson_ratio"] = 0.25;
+
+    auto material2 =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid2), jmaterial2);
+
+    particle2->assign_material(material2);
+
+    // Append particle's material id to nodes in cell
+    particle1->append_material_id_to_nodes();
+    particle2->append_material_id_to_nodes();
+
+    // Check size of material_ids set at each node
+    REQUIRE(node0->material_ids().size() == 2);
+    REQUIRE(node1->material_ids().size() == 2);
+    REQUIRE(node2->material_ids().size() == 2);
+    REQUIRE(node3->material_ids().size() == 2);
+    REQUIRE(node4->material_ids().size() == 2);
+    REQUIRE(node5->material_ids().size() == 2);
+    REQUIRE(node6->material_ids().size() == 2);
+    REQUIRE(node7->material_ids().size() == 2);
+
+    // Check the material ids appended to nodes
+    unsigned id_check = 0;
+    for (auto id_itr : node0->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node1->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node2->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node3->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node4->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node5->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node6->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 0;
+    for (auto id_itr : node7->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
   }
 }
