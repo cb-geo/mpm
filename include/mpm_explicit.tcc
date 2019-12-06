@@ -147,7 +147,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     task_group.wait();
 
     // Assign material ids to node
-    if (interface_ == true)
+    if (interface_)
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
                     std::placeholders::_1));
