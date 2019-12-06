@@ -444,22 +444,22 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     }
 
     SECTION("Check node material ids") {
-      // Check addition of material ids
+      // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(2);
+      node->append_material_id(3);
       node->append_material_id(0);
       node->append_material_id(2);
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
-      REQUIRE(node->material_ids()[3] == 0);
-      REQUIRE(node->material_ids()[4] == 2);
 
-      // Check removal of duplicates
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      int id_check = 0;
+      for (auto id_itr : node->material_ids()) {
+        REQUIRE(id_itr == id_check);
+        id_check++;
+      }
     }
   }
 }
@@ -1021,23 +1021,22 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     }
 
     SECTION("Check node material ids") {
-      // Check addition of material ids
+      // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(2);
+      node->append_material_id(3);
       node->append_material_id(0);
-
       node->append_material_id(2);
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
-      REQUIRE(node->material_ids()[3] == 0);
-      REQUIRE(node->material_ids()[4] == 2);
 
-      // Check removal of duplicates
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      int id_check = 0;
+      for (auto id_itr : node->material_ids()) {
+        REQUIRE(id_itr == id_check);
+        id_check++;
+      }
     }
   }
 }
@@ -1575,22 +1574,22 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     }
 
     SECTION("Check node material ids") {
-      // Check addition of material ids
+      // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(2);
+      node->append_material_id(3);
       node->append_material_id(0);
       node->append_material_id(2);
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
-      REQUIRE(node->material_ids()[3] == 0);
-      REQUIRE(node->material_ids()[4] == 2);
 
-      // Check removal of duplicates
-      REQUIRE(node->material_ids()[0] == 0);
-      REQUIRE(node->material_ids()[1] == 1);
-      REQUIRE(node->material_ids()[2] == 2);
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      int id_check = 0;
+      for (auto id_itr : node->material_ids()) {
+        REQUIRE(id_itr == id_check);
+        id_check++;
+      }
     }
   }
 }

@@ -492,22 +492,44 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
   // Check material adddition to nodes
   SECTION("Check material id addition to nodes") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-
+    // add nodes to cell
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
     cell->add_node(3, node3);
 
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
     cell->append_material_id_to_nodes(1);
-    cell->append_material_id_to_nodes(3);
-    REQUIRE(node0->material_ids()[0] == 1);
-    REQUIRE(node1->material_ids()[0] == 1);
-    REQUIRE(node2->material_ids()[0] == 1);
-    REQUIRE(node3->material_ids()[0] == 1);
-    REQUIRE(node0->material_ids()[1] == 3);
-    REQUIRE(node1->material_ids()[1] == 3);
-    REQUIRE(node2->material_ids()[1] == 3);
-    REQUIRE(node3->material_ids()[1] == 3);
+    cell->append_material_id_to_nodes(1);
+
+    // check amount of material ids added to each node
+    REQUIRE(node0->material_ids().size() == 2);
+    REQUIRE(node1->material_ids().size() == 2);
+    REQUIRE(node2->material_ids().size() == 2);
+    REQUIRE(node3->material_ids().size() == 2);
+
+    // check which material ids were added to each node
+    int id_check = 1;
+    for (auto id_itr : node0->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node1->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node2->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node3->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
   }
 
   SECTION("Test particle addition deletion") {
@@ -1586,7 +1608,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
   // Check material adddition to nodes
   SECTION("Check material id addition to nodes") {
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-
+    // add nodes to cell
     cell->add_node(0, node0);
     cell->add_node(1, node1);
     cell->add_node(2, node2);
@@ -1596,24 +1618,62 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     cell->add_node(6, node6);
     cell->add_node(7, node7);
 
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
     cell->append_material_id_to_nodes(1);
-    cell->append_material_id_to_nodes(3);
-    REQUIRE(node0->material_ids()[0] == 1);
-    REQUIRE(node1->material_ids()[0] == 1);
-    REQUIRE(node2->material_ids()[0] == 1);
-    REQUIRE(node3->material_ids()[0] == 1);
-    REQUIRE(node4->material_ids()[0] == 1);
-    REQUIRE(node5->material_ids()[0] == 1);
-    REQUIRE(node6->material_ids()[0] == 1);
-    REQUIRE(node7->material_ids()[0] == 1);
-    REQUIRE(node0->material_ids()[1] == 3);
-    REQUIRE(node1->material_ids()[1] == 3);
-    REQUIRE(node2->material_ids()[1] == 3);
-    REQUIRE(node3->material_ids()[1] == 3);
-    REQUIRE(node4->material_ids()[1] == 3);
-    REQUIRE(node5->material_ids()[1] == 3);
-    REQUIRE(node6->material_ids()[1] == 3);
-    REQUIRE(node7->material_ids()[1] == 3);
+    cell->append_material_id_to_nodes(1);
+
+    // check amount of material ids added to each node
+    REQUIRE(node0->material_ids().size() == 2);
+    REQUIRE(node1->material_ids().size() == 2);
+    REQUIRE(node2->material_ids().size() == 2);
+    REQUIRE(node3->material_ids().size() == 2);
+    REQUIRE(node4->material_ids().size() == 2);
+    REQUIRE(node5->material_ids().size() == 2);
+    REQUIRE(node6->material_ids().size() == 2);
+    REQUIRE(node7->material_ids().size() == 2);
+
+    // check which material ids were added to each node
+    int id_check = 1;
+    for (auto id_itr : node0->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node1->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node2->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node3->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node4->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node5->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node6->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
+    id_check = 1;
+    for (auto id_itr : node7->material_ids()) {
+      REQUIRE(id_itr == id_check);
+      id_check++;
+    }
   }
 
   SECTION("Test particle addition deletion") {
