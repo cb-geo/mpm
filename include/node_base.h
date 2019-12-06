@@ -188,11 +188,8 @@ class NodeBase {
   //! \param[in] id Material id to be stored at the node
   virtual void append_material_id(unsigned id) = 0;
 
-  //! Remove duplicate material ids from material_ids_
-  virtual void remove_duplicate_material_ids() = 0;
-
   //! Return material ids in node
-  virtual std::vector<unsigned> material_ids() const = 0;
+  virtual std::set<unsigned> material_ids() const = 0;
 
 };  // NodeBase class
 }  // namespace mpm

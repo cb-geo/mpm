@@ -516,14 +516,5 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::append_material_id(unsigned id) {
   std::lock_guard<std::mutex> guard(node_mutex_);
-  material_ids_.emplace_back(id);
-}
-
-//! Remove duplicate material ids from material_ids_
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::remove_duplicate_material_ids() {
-  // sort the vector, get the unique values and remove the duplicates
-  std::sort(material_ids_.begin(), material_ids_.end());
-  auto last = std::unique(material_ids_.begin(), material_ids_.end());
-  material_ids_.erase(last, material_ids_.end());
+  material_ids_.emplace(id);
 }

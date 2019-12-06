@@ -4,6 +4,7 @@
 #include <array>
 #include <limits>
 #include <mutex>
+#include <set>
 #include <tuple>
 #include <vector>
 
@@ -209,11 +210,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] id Material id to be stored at the node
   void append_material_id(unsigned id) override;
 
-  //! Remove duplicate material ids from material_ids_
-  void remove_duplicate_material_ids() override;
-
   //! Return material ids in node
-  std::vector<unsigned> material_ids() const override { return material_ids_; }
+  std::set<unsigned> material_ids() const override { return material_ids_; }
 
  private:
   //! Mutex
@@ -247,7 +245,7 @@ class Node : public NodeBase<Tdim> {
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
-  std::vector<unsigned> material_ids_;
+  std::set<unsigned> material_ids_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};
