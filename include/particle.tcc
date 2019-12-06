@@ -859,5 +859,5 @@ Eigen::VectorXd mpm::Particle<Tdim>::vector_data(const std::string& property) {
 //! Assign material id of this particle to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
-  cell_->append_material_id_to_nodes(material_->id());
+  cell_->append_material_id_to_nodes(material_id_);
 }
