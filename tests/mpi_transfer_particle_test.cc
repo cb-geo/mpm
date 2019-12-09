@@ -3,6 +3,8 @@
 
 #include "catch.hpp"
 
+#include <iostream>
+
 #include "data_types.h"
 #include "element.h"
 #include "hdf5_particle.h"
@@ -106,19 +108,16 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
-    // Assign a MPI rank of 1 to cell
-    cell1->rank(mpi_rank);
-
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
 
     // Initialize material models
     mesh->initialise_material_models(materials);
 
-    if (mpi_rank == 0) {
-      // Add cell 1 and check
-      REQUIRE(mesh->add_cell(cell1) == true);
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell1) == true);
 
+    if (mpi_rank == 0) {
       // Particle 1
       coords << 1.0, 1.0;
       std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
@@ -152,8 +151,14 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
 
       // Number of particles in cell 1 is 2
       REQUIRE(cell1->nparticles() == 2);
+    }
+    // Assign a MPI rank of 1 to cell
+    cell1->rank(1);
 
-      if (mpi_size > 1) {
+    std::cout << "MPI size: " << mpi_size << std::endl;
+    if (mpi_size > 1) {
+      if (mpi_rank == sender) {
+        std::cout << "MPI sender rank: " << mpi_rank << std::endl;
         // Transfer particle to the correct MPI rank
         mesh->transfer_nonrank_particles(sender);
 
@@ -161,12 +166,13 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
 
         REQUIRE(mesh->nparticles() == 0);
       }
-    }
-
-    if (mpi_rank == 1) {
-      std::cout << "Rank: 1\n";
-      // Number of particles in cell 1 is 0 for rank 2
-      REQUIRE(mesh->nparticles() == 2);
+      if (mpi_rank == receiver) {
+        std::cout << "MPI receiver rank: " << mpi_rank << std::endl;
+        // Number of particles in cell 1 is 0 for rank 2
+        REQUIRE(mesh->nparticles() == 2);
+        std::cout << "Required number of particles: " << mesh->nparticles()
+                  << " rank: " << mpi_rank << std::endl;
+      }
     }
   }
 }

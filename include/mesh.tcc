@@ -419,7 +419,6 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(unsigned rank) {
             MPI_Isend(&h5_particle, 1, particle_type, (*citr)->rank(), 0,
                       MPI_COMM_WORLD, &request);
             mpm::deregister_mpi_particle_type(particle_type);
-            console_->error("Receive material: {}", h5_particle.material_id);
 
             send_particle->remove_cell();
             particles_.remove(send_particle);
