@@ -65,9 +65,10 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
+            mpirun -n 4 ./mpmtest_coverage [transfer]
             make gcov -j2  --ignore-errors
             make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov
