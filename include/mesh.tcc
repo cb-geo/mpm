@@ -392,25 +392,23 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
 
 //! Transfer all particles in cells that are not in local rank
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::transfer_nonrank_particles(unsigned rank) {
+void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 #ifdef USE_MPI
   // Get number of MPI ranks
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   int mpi_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  MPI_Request request;
-  MPI_Status status;
 
   if (mpi_size > 1) {
-    // Remove associated cell for the particle
+    // Iterate through all the cells
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
+      // If sender ranks
       if ((*citr)->rank() != mpi_rank) {
+        // Send number of particles to receiver rank
         int nparticles = (*citr)->particles().size();
-        // Send number of particles
         MPI_Send(&nparticles, 1, MPI_INT, (*citr)->rank(), 0, MPI_COMM_WORLD);
-
         // If cell is non empty
         if ((*citr)->particles().size() != 0) {
           auto particle_ids = (*citr)->particles();
@@ -434,7 +432,7 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(unsigned rank) {
       }
       // Receive particle
       if (mpi_rank == (*citr)->rank()) {
-        // Iterate through all MPI ranks
+        // Iterate through all MPI ranks to get particles
         for (int sender = 0; sender < mpi_size; ++sender) {
           // If sender rank is not the same as receiver rank
           if (sender != mpi_rank) {

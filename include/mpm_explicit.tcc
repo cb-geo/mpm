@@ -320,7 +320,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
 #ifdef USE_MPI
 #ifdef USE_PARMETIS
-    mesh_->transfer_nonrank_particles(mpi_rank);
+    mesh_->transfer_nonrank_particles();
 #endif
 #endif
 

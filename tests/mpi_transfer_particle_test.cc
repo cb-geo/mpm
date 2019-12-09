@@ -3,8 +3,6 @@
 
 #include "catch.hpp"
 
-#include <iostream>
-
 #include "data_types.h"
 #include "element.h"
 #include "hdf5_particle.h"
@@ -18,7 +16,7 @@
 
 #ifdef USE_MPI
 //! \brief Check transfer of particles across MPI tasks
-TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
+TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][transfer]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -152,26 +150,23 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
       // Number of particles in cell 1 is 2
       REQUIRE(cell1->nparticles() == 2);
     }
-    // Assign a MPI rank of 1 to cell
+
+    // Assign a MPI rank of 1 to cell in all MPI ranks
     cell1->rank(1);
 
-    std::cout << "MPI size: " << mpi_size << std::endl;
     if (mpi_size > 1) {
       // Transfer particle to the correct MPI rank
-      mesh->transfer_nonrank_particles(mpi_rank);
-
-      if (mpi_rank == sender) {
-        std::cout << "MPI sender rank: " << mpi_rank << std::endl;
+      mesh->transfer_nonrank_particles();
+      // Check all non receiver ranks
+      if (mpi_rank != receiver) {
         REQUIRE(cell1->nparticles() == 0);
         REQUIRE(mesh->nparticles() == 0);
       }
+      // Number of particles in cell 1 is 0 for rank 2
       if (mpi_rank == receiver) {
-        // Transfer particle to the correct MPI rank
-        std::cout << "MPI receiver rank: " << mpi_rank << std::endl;
-        // Number of particles in cell 1 is 0 for rank 2
+        auto particles = mesh->locate_particles_mesh();
         REQUIRE(mesh->nparticles() == 2);
-        std::cout << "Required number of particles: " << mesh->nparticles()
-                  << " rank: " << mpi_rank << std::endl;
+        REQUIRE(cell1->nparticles() == 2);
       }
     }
   }

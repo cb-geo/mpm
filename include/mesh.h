@@ -190,7 +190,7 @@ class Mesh {
 
   //! Transfer particles to different ranks in nonlocal rank cells
   //! \param[in] rank MPI rank of the mesh
-  void transfer_nonrank_particles(unsigned rank);
+  void transfer_nonrank_particles();
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }

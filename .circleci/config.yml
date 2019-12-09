@@ -20,6 +20,8 @@ jobs:
             ninja -j2
             ctest -VV
             mpirun -n 2 ./mpmtest [hdf5]
+            mpirun -n 2 ./mpmtest [transfer]
+            mpirun -n 4 ./mpmtest [transfer]
   clang:
     docker:
       - image: quay.io/cbgeo/mpm
