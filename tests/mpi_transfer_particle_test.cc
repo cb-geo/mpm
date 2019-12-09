@@ -139,6 +139,32 @@ TEST_CASE("MPI transfer particle is checked in 2D",
 
       // Number of particles in cell 1 is 2
       REQUIRE(cell1->nparticles() == 1);
+
+      if (mpi_size == 2) {
+        // Particle 2
+        coords << 1.5, 1.5;
+        std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+            std::make_shared<mpm::Particle<Dim>>(1, coords);
+        particle2->assign_material(material);
+
+        // Add particle 2 and check
+        REQUIRE(mesh->add_particle(particle2) == true);
+
+        // Check mesh is active
+        REQUIRE(mesh->status() == true);
+
+        // Locate particles in a mesh
+        auto particles = mesh->locate_particles_mesh();
+
+        // Should find all particles in mesh
+        REQUIRE(particles.size() == 0);
+
+        // Check location of particle 2
+        REQUIRE(particle2->cell_id() == 0);
+
+        // Number of particles in cell 1 is 2
+        REQUIRE(cell1->nparticles() == 2);
+      }
     }
 
     // Add 1 particle to rank 2
@@ -168,10 +194,10 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       REQUIRE(cell1->nparticles() == 1);
     }
 
-    // Assign a MPI rank of 1 to cell in all MPI ranks
-    cell1->rank(1);
+    if (mpi_size > 1) {
+      // Assign a MPI rank of 1 to cell in all MPI ranks
+      cell1->rank(1);
 
-    if (mpi_size == 4) {
       // Transfer particle to the correct MPI rank
       mesh->transfer_nonrank_particles();
       // Check all non receiver ranks
