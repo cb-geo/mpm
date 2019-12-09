@@ -400,66 +400,66 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(unsigned rank) {
   int mpi_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Request request;
+  MPI_Status status;
 
   if (mpi_size > 1) {
+    console_->error("MPI rank: {} cell size: {}", mpi_rank,
+                    this->cells_.size());
     // Remove associated cell for the particle
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
       // If cell is non empty
-      if ((*citr)->particles().size() != 0) {
+      if ((*citr)->particles().size() != 0 && (*citr)->rank() != mpi_rank) {
         auto particle_ids = (*citr)->particles();
         for (auto& id : particle_ids) {
           // Send and delete particle
-          if (mpi_rank == rank && (*citr)->rank() != rank) {
-            auto send_particle = map_particles_[id];
-            mpm::HDF5Particle h5_particle = send_particle->hdf5();
-            // Initialize MPI datatypes
-            MPI_Datatype particle_type =
-                mpm::register_mpi_particle_type(h5_particle);
-            MPI_Isend(&h5_particle, 1, particle_type, (*citr)->rank(), 0,
-                      MPI_COMM_WORLD, &request);
-            mpm::deregister_mpi_particle_type(particle_type);
+          auto send_particle = map_particles_[id];
+          mpm::HDF5Particle h5_particle = send_particle->hdf5();
+          // Initialize MPI datatypes
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(h5_particle);
+          MPI_Send(&h5_particle, 1, particle_type, (*citr)->rank(), 0,
+                   MPI_COMM_WORLD);
+          mpm::deregister_mpi_particle_type(particle_type);
 
-            send_particle->remove_cell();
-            particles_.remove(send_particle);
-            map_particles_.remove(id);
-          }
-
-          // Receive particle
-          if (mpi_rank == (*citr)->rank()) {
-            console_->error("Receive rank: {}", mpi_rank);
-            // Receive the messid
-            mpm::HDF5Particle received;
-            MPI_Datatype particle_type =
-                mpm::register_mpi_particle_type(received);
-            MPI_Recv(&received, 1, particle_type, rank, 0, MPI_COMM_WORLD,
-                     MPI_STATUS_IGNORE);
-            mpm::deregister_mpi_particle_type(particle_type);
-
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-            mpm::Index id = 0;
-            // Initial particle coordinates
-            Eigen::Matrix<double, Tdim, 1> pcoordinates;
-            pcoordinates.setZero();
-
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-            // Received particle
-            auto received_particle =
-                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
-
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-            console_->error("Receive material: {}", received.material_id);
-            auto material = materials_.at(received.material_id);
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-            // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(received, material);
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-            // Add particle to mesh
-            this->add_particle(received_particle, true);
-            console_->error("Receive rank: {} {}", __FILE__, __LINE__);
-          }
+          send_particle->remove_cell();
+          particles_.remove(send_particle);
+          map_particles_.remove(id);
         }
         (*citr)->clear_particle_ids();
+      }
+      // Receive particle
+      if (mpi_rank == (*citr)->rank()) {
+        console_->error("Receive rank: {}", mpi_rank);
+        int sender = 0;
+        // Receive the messid
+        mpm::HDF5Particle received;
+        MPI_Datatype particle_type = mpm::register_mpi_particle_type(received);
+        MPI_Recv(&received, 1, particle_type, sender, 0, MPI_COMM_WORLD,
+                 MPI_STATUS_IGNORE);
+        mpm::deregister_mpi_particle_type(particle_type);
+
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
+        mpm::Index id = 0;
+        // Initial particle coordinates
+        Eigen::Matrix<double, Tdim, 1> pcoordinates;
+        pcoordinates.setZero();
+
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
+        // Received particle
+        auto received_particle =
+            std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
+        console_->error("Receive material: {}", received.material_id);
+        auto material = materials_.at(received.material_id);
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
+        // Reinitialise particle from HDF5 data
+        received_particle->initialise_particle(received, material);
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
+        // Add particle to mesh
+        this->add_particle(received_particle, true);
+        console_->error("Receive rank: {} {}", __FILE__, __LINE__);
       }
     }
   }
