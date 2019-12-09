@@ -68,8 +68,8 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
-            mpirun -n 2 ./mpmtest [hdf5]
-            mpirun -n 2 ./mpmtest [transfer]
+            mpirun -n 2 ./mpmtest_coverage [hdf5]
+            mpirun -n 2 ./mpmtest_coverage [transfer]
             make gcov -j2  --ignore-errors
             make lcov
             bash <(curl -s https://codecov.io/bash) -X gcov
