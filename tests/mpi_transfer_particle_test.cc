@@ -133,7 +133,7 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
       // Add particle 1 and check
       REQUIRE(mesh->add_particle(particle1) == true);
       // Add particle 2 and check
-      // REQUIRE(mesh->add_particle(particle2) == true);
+      REQUIRE(mesh->add_particle(particle2) == true);
 
       // Check mesh is active
       REQUIRE(mesh->status() == true);
@@ -147,10 +147,10 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
       // Check location of particle 1
       REQUIRE(particle1->cell_id() == 0);
       // Check location of particle 2
-      // REQUIRE(particle2->cell_id() == 0);
+      REQUIRE(particle2->cell_id() == 0);
 
       // Number of particles in cell 1 is 2
-      // REQUIRE(cell1->nparticles() == 2);
+      REQUIRE(cell1->nparticles() == 2);
     }
     // Assign a MPI rank of 1 to cell
     cell1->rank(1);
@@ -169,7 +169,7 @@ TEST_CASE("MPI Transfer Particle is checked", "[particle][mpi][rank]") {
         // Transfer particle to the correct MPI rank
         std::cout << "MPI receiver rank: " << mpi_rank << std::endl;
         // Number of particles in cell 1 is 0 for rank 2
-        REQUIRE(mesh->nparticles() == 1);
+        REQUIRE(mesh->nparticles() == 2);
         std::cout << "Required number of particles: " << mesh->nparticles()
                   << " rank: " << mpi_rank << std::endl;
       }
