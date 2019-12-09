@@ -19,7 +19,6 @@
 #endif
 
 #include "container.h"
-#include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
 
