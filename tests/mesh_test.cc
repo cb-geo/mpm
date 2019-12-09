@@ -15,8 +15,6 @@
 #include "node.h"
 #include "quadrilateral_element.h"
 
-#include <iostream>
-
 //! \brief Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Dimension

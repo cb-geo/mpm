@@ -382,20 +382,13 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
 #endif
   // Remove associated cell for the particle
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
-    console_->error("Remove particles in cell {}", __LINE__);
-    console_->error("Remove particles in cell {} rank {}", (*citr)->rank(),
-                    mpi_rank);
     // If cell is non empty
     if ((*citr)->particles().size() != 0 && (*citr)->rank() != mpi_rank) {
-      console_->error("Remove particles in cell {}", __LINE__);
       auto particle_ids = (*citr)->particles();
-      console_->error("Remove particles in cell {}", __LINE__);
       for (auto& id : particle_ids) {
-        console_->error("Remove particles in cell {}", __LINE__);
         map_particles_[id]->remove_cell();
         particles_.remove(map_particles_[id]);
         map_particles_.remove(id);
-        console_->error("Remove particles in cell - pid {}", id);
       }
       (*citr)->clear_particle_ids();
     }
