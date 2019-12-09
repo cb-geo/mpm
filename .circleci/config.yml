@@ -69,8 +69,9 @@ jobs:
             make mpmtest_coverage -j2
             ./mpmtest_coverage
             mpirun -n 4 ./mpmtest_coverage [mpi]
-            lcov --directory . --capture --output-file coverage.info
-            bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+            make gcov -j2  --ignore-errors
+            make lcov
+            bash <(curl -s https://codecov.io/bash) -X gcov
 
 workflows:
     version: 2
