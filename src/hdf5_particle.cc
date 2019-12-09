@@ -55,6 +55,12 @@ const size_t dst_offset[NFIELDS] = {
     HOFFSET(HDF5Particle, svars[17]),
     HOFFSET(HDF5Particle, svars[18]),
     HOFFSET(HDF5Particle, svars[19]),
+    HOFFSET(HDF5Particle, svars[20]),
+    HOFFSET(HDF5Particle, svars[21]),
+    HOFFSET(HDF5Particle, svars[22]),
+    HOFFSET(HDF5Particle, svars[23]),
+    HOFFSET(HDF5Particle, svars[24]),
+
 };
 
 // Get size of particle
@@ -113,6 +119,11 @@ const size_t dst_sizes[NFIELDS] = {
     sizeof(particle.svars[17]),
     sizeof(particle.svars[18]),
     sizeof(particle.svars[19]),
+    sizeof(particle.svars[20]),
+    sizeof(particle.svars[21]),
+    sizeof(particle.svars[22]),
+    sizeof(particle.svars[23]),
+    sizeof(particle.svars[24]),
 };
 
 // Define particle field information
@@ -170,6 +181,11 @@ const char* field_names[NFIELDS] = {
     "svars_17",
     "svars_18",
     "svars_19",
+    "svars_20",
+    "svars_21",
+    "svars_22",
+    "svars_23",
+    "svars_24",
 };
 
 // Initialize field types
@@ -187,6 +203,7 @@ const hid_t field_type[NFIELDS] = {
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
-    H5T_NATIVE_DOUBLE};
+    H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
+    H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE};
 }  // namespace hdf5::particle
 }  // namespace mpm

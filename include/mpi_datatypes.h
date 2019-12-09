@@ -17,7 +17,7 @@ MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
   const unsigned nblocks = 34;
   // Array containing the length of each block
   int lengths[nblocks] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20};
+                          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 25};
   // Array containing the displacement for each block, expressed in bytes. The
   // displacement is the distance between the start of the MPI datatype created
   // and the start of the block

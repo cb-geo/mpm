@@ -43,11 +43,11 @@ typedef struct HDF5Particle {
   // Number of state variables
   unsigned nstate_vars;
   // State variables (init to zero)
-  double svars[20] = {0};
+  double svars[25] = {0};
 } HDF5Particle;
 
 namespace hdf5::particle {
-const hsize_t NFIELDS = 53;
+const hsize_t NFIELDS = 58;
 
 const size_t dst_size = sizeof(HDF5Particle);
 
