@@ -101,7 +101,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
-    mesh_->remove_all_nonrank_particles(mpi_rank);
+    mesh_->remove_all_nonrank_particles();
 
 #endif  // PARMETIS
   }

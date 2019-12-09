@@ -185,8 +185,7 @@ class Mesh {
   bool remove_particle_by_id(mpm::Index id);
 
   //! Remove all particles in a cell in nonlocal rank
-  //! \param[in] rank MPI rank of the mesh
-  void remove_all_nonrank_particles(unsigned rank);
+  void remove_all_nonrank_particles();
 
   //! Transfer particles to different ranks in nonlocal rank cells
   //! \param[in] rank MPI rank of the mesh

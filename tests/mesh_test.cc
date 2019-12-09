@@ -15,6 +15,8 @@
 #include "node.h"
 #include "quadrilateral_element.h"
 
+#include <iostream>
+
 //! \brief Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Dimension
@@ -128,6 +130,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
+
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
 
@@ -182,11 +188,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nparticles() == 1);
 
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
   }
@@ -1083,12 +1085,12 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
 
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
+
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
   }
