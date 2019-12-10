@@ -29,7 +29,7 @@ class NorSand : public Material<Tdim> {
   NorSand(unsigned id, const Json& material_properties);
 
   //! Destructor
-  ~NorSand() override{};
+  ~NorSand() override = default;
 
   //! Delete copy constructor
   NorSand(const NorSand&) = delete;
