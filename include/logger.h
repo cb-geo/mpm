@@ -33,6 +33,9 @@ struct Logger {
   // Create a logger for MPM Explicit
   static const std::shared_ptr<spdlog::logger> mpm_explicit_logger;
 
+  // Create a logger for MPM Explicit Two Phase
+  static const std::shared_ptr<spdlog::logger> mpm_explicit_two_phase_logger;
+
   // Create a logger for MPM Explicit USF
   static const std::shared_ptr<spdlog::logger> mpm_explicit_usf_logger;
 

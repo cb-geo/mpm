@@ -95,8 +95,10 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
+  // Phase index
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
+
   bool status = true;
 
   try {
@@ -179,6 +181,16 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Friction constraints are not properly assigned");
     }
 
+    // Read and assign pore pressure constraints
+    if (!io_->file_name("pore_pressure_constraints").empty()) {
+      bool pore_pressure_constraints = mesh_->assign_pressure_constraints(
+          pore_fluid, mesh_reader->read_pressure_constraints(
+                          io_->file_name("pore_pressure_constraints")));
+      if (!pore_pressure_constraints)
+        throw std::runtime_error(
+            "Pore pressure constraints are not properly assigned");
+    }
+
     // Set nodal traction as false if file is empty
     if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
 
@@ -219,8 +231,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
+  // Phase index
+  const unsigned solid_skeleton = 0;
+  const unsigned pore_fluid = 1;
+
   bool status = true;
 
   try {
@@ -352,6 +366,16 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error("Particles volumes are not properly assigned");
     }
 
+    // Read and assign particles initial pore pressure
+    if (!io_->file_name("particles_pore_pressures").empty()) {
+      bool particles_pore_pressures = mesh_->assign_particles_pore_pressures(
+          pore_fluid, particle_reader->read_particles_pressures(
+                          io_->file_name("particles_pore_pressures")));
+      if (!particles_pore_pressures)
+        throw std::runtime_error(
+            "Particles pore pressures are not properly assigned");
+    }
+
     // Read and assign particles tractions
     if (!io_->file_name("particles_tractions").empty()) {
       bool particles_tractions = mesh_->assign_particles_tractions(
@@ -371,6 +395,18 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       if (!particles_velocity_constraints)
         throw std::runtime_error(
             "Particles velocity constraints are not properly assigned");
+    }
+
+    // Read and assign particles pore pressure constraints
+    if (!io_->file_name("particles_pore_pressure_constraints").empty()) {
+      bool particles_pore_pressure_constraints =
+          mesh_->assign_particles_pressure_constraints(
+              pore_fluid,
+              particle_reader->read_pressure_constraints(
+                  io_->file_name("particles_pore_pressure_constraints")));
+      if (!particles_pore_pressure_constraints)
+        throw std::runtime_error(
+            "Particles pore pressure constraints are not properly assigned");
     }
 
     // Read and assign particles stresses
@@ -572,7 +608,8 @@ void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
   auto particles_file =
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
-  const unsigned phase = 0;
+  // TODO: remove phase
+  unsigned phase = 0;
   mesh_->write_particles_hdf5(phase, particles_file);
 }
 

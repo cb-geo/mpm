@@ -247,6 +247,104 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   return stresses;
 }
 
+//! Return pressures of particles
+template <unsigned Tdim>
+std::vector<double> mpm::ReadMeshAscii<Tdim>::read_particles_pressures(
+    const std::string& particles_pressures) {
+
+  // Particles pressures
+  std::vector<double> pressures;
+  pressures.clear();
+
+  // Expected number of particles
+  mpm::Index nparticles;
+
+  // bool to check firstline
+  bool read_first_line = false;
+
+  // input file stream
+  std::fstream file;
+  file.open(particles_pressures.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            if (!read_first_line) {
+              // Read number of nodes and cells
+              istream >> nparticles;
+              pressures.reserve(nparticles);
+              read_first_line = true;
+              break;
+            }
+            // Pressure
+            double pressure;
+            // Read to pressure
+            istream >> pressure;
+            pressures.emplace_back(pressure);
+            break;
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read particle pressure: {}", exception.what());
+    file.close();
+  }
+  return pressures;
+}
+
+//! Read pressure constraints file
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::ReadMeshAscii<Tdim>::read_pressure_constraints(
+        const std::string& pressure_constraints_file) {
+  // Particle pressure constraints
+  std::vector<std::tuple<mpm::Index, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(pressure_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Pressure
+            double pressure;
+            // Read stream
+            istream >> id >> pressure;
+            constraints.emplace_back(std::make_tuple(id, pressure));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read pressure constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
 //! Return velocity constraints of nodes or particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>

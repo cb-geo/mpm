@@ -113,10 +113,34 @@ class Node : public NodeBase<Tdim> {
   bool update_internal_force(bool update, unsigned phase,
                              const VectorDim& force) override;
 
+  //! Update mixture internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] force Internal force from the particles in a cell
+  //! \retval status Update status
+  bool update_mixture_internal_force(bool update,
+                                     const VectorDim& force) override;
+
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  bool update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
+
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
     return internal_force_.col(phase);
+  }
+
+  //! Return mixture internal force at a given node for a given phase
+  VectorDim mixture_internal_force() const override {
+    return mixture_internal_force_;
+  }
+
+  //! Return drag force at a given node
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
   }
 
   //! Update pressure at the nodes from particle
@@ -176,6 +200,14 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity(unsigned phase, double dt) override;
 
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_two_phase(unsigned solid_skeleton,
+                                               unsigned pore_fluid,
+                                               double dt) override;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -205,6 +237,12 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  bool assign_pressure_constraint(const unsigned phase,
+                                  const double pressure) override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -224,6 +262,10 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Mixture internal force
+  Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity
