@@ -374,11 +374,16 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
 
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
+void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
+  // Get MPI rank
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
   // Remove associated cell for the particle
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
     // If cell is non empty
-    if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
+    if ((*citr)->particles().size() != 0 && (*citr)->rank() != mpi_rank) {
       auto particle_ids = (*citr)->particles();
       for (auto& id : particle_ids) {
         map_particles_[id]->remove_cell();
@@ -388,6 +393,93 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
       (*citr)->clear_particle_ids();
     }
   }
+}
+
+//! Transfer all particles in cells that are not in local rank
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+  if (mpi_size > 1) {
+    // Iterate through all the cells
+    for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
+         ++citr) {
+      // If sender ranks
+      if ((*citr)->rank() != mpi_rank) {
+        // Send number of particles to receiver rank
+        int nparticles = (*citr)->particles().size();
+        MPI_Send(&nparticles, 1, MPI_INT, (*citr)->rank(), 0, MPI_COMM_WORLD);
+        // If cell is non empty
+        if ((*citr)->particles().size() != 0) {
+          auto particle_ids = (*citr)->particles();
+          for (auto& id : particle_ids) {
+            // Send and delete particle
+            auto send_particle = map_particles_[id];
+            mpm::HDF5Particle h5_particle = send_particle->hdf5();
+            // Initialize MPI datatypes
+            MPI_Datatype particle_type =
+                mpm::register_mpi_particle_type(h5_particle);
+            MPI_Send(&h5_particle, 1, particle_type, (*citr)->rank(), 0,
+                     MPI_COMM_WORLD);
+            mpm::deregister_mpi_particle_type(particle_type);
+
+            send_particle->remove_cell();
+            particles_.remove(send_particle);
+            map_particles_.remove(id);
+          }
+          (*citr)->clear_particle_ids();
+        }
+      }
+      // Receive particle
+      if (mpi_rank == (*citr)->rank()) {
+        // Iterate through all MPI ranks to get particles
+        for (int sender = 0; sender < mpi_size; ++sender) {
+          // If sender rank is not the same as receiver rank
+          if (sender != mpi_rank) {
+            // Receive number of particles
+            int nreceived_particles;
+            MPI_Recv(&nreceived_particles, 1, MPI_INT, sender, 0,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            // Iterate through n number of received particles
+            if (nreceived_particles > 0) {
+              for (int i = 0; i < nreceived_particles; ++i) {
+                // Receive the messid
+                mpm::HDF5Particle received;
+                MPI_Datatype particle_type =
+                    mpm::register_mpi_particle_type(received);
+                MPI_Recv(&received, 1, particle_type, sender, 0, MPI_COMM_WORLD,
+                         MPI_STATUS_IGNORE);
+                mpm::deregister_mpi_particle_type(particle_type);
+
+                mpm::Index id = 0;
+                // Initial particle coordinates
+                Eigen::Matrix<double, Tdim, 1> pcoordinates;
+                pcoordinates.setZero();
+
+                // Received particle
+                auto received_particle =
+                    std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+                // Get material
+                auto material = materials_.at(received.material_id);
+                // Reinitialise particle from HDF5 data
+                received_particle->initialise_particle(received, material);
+
+                // Add particle to mesh
+                this->add_particle(received_particle, true);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+#endif
 }
 
 //! Locate particles in a cell
