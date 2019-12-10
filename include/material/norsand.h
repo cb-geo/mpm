@@ -45,7 +45,7 @@ class NorSand : public Material<Tdim> {
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
   double thermodynamic_pressure(double volumetric_strain) const override {
-    return 0;
+    std::numeric_limits<double>::quiet_NaN();
   };
 
   //! Compute stress
