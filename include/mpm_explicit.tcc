@@ -83,12 +83,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   if (mpi_size > 1 && mesh_->ncells() > 1) {
 
     // Initialize MPI
-    int size;
-    int rank;
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-    MPI_Comm_size(comm, &size);
-    MPI_Comm_rank(comm, &rank);
 
     // Check if mesh has cells to partition
     if (mesh_->ncells() == 0)
@@ -96,16 +92,16 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
 #ifdef USE_PARMETIS
     // Create graph
-    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), size, rank);
+    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mpi_size, mpi_rank);
 
     // Create partition using ParMETIS
     bool graph_partition = graph_->create_partitions(&comm);
 
     // Collect the partitions
-    graph_->collect_partitions(mesh_->ncells(), size, rank, &comm);
+    graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
-    mesh_->remove_all_nonrank_particles(rank);
+    mesh_->remove_all_nonrank_particles();
 
 #endif  // PARMETIS
   }
@@ -321,6 +317,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
+
+#ifdef USE_MPI
+#ifdef USE_PARMETIS
+    mesh_->transfer_nonrank_particles();
+#endif
+#endif
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
