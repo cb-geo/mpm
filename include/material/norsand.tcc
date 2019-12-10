@@ -349,7 +349,7 @@ typename mpm::NorSand<Tdim>::FailureState
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
-  // Initialise yield status (0: elastic, 1: yield)
+  // Initialise yield status (Elastic, Plastic)
   auto yield_type = FailureState::Elastic;
 
   // Compute yield functions
