@@ -226,6 +226,7 @@ void mpm::Particle<Tdim>::initialise() {
   velocity_.setZero();
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
+  porosity_ = 0.;
   volume_fraction_ = 1.0;
 
   // Initialize vector data properties
@@ -444,13 +445,12 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
 }
 
 // Assign porosity to the particle
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_porosity(
-    const unsigned solid_skeleton) {
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_porosity() {
   bool status = true;
   try {
-    if (material_.at(solid_skeleton) != nullptr) {
-      porosity_ = material_.at(solid_skeleton)
+    if (material_ != nullptr) {
+      porosity_ = material_
                       ->template property<double>(std::string("porosity"));
       if (porosity_ < 0. || porosity_ > 1.)
         throw std::runtime_error(
@@ -489,7 +489,7 @@ bool mpm::Particle<Tdim>::compute_volume() {
   return status;
 }
 
-// Update volume based on the central strain rate
+// Update volume based on the strain rate at cell centre
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::update_volume_strainrate_centroid(double dt) {
   bool status = true;
@@ -514,17 +514,19 @@ bool mpm::Particle<Tdim>::update_volume_strainrate_centroid(double dt) {
   return status;
 }
 
-// Update material point volume
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
+// Update material point volume based on the strain rate at material point
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::update_volume(double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
-      this->volume_ *= (1. + dt * strain_rate_.col(phase).head(Tdim).sum());
+    if (volume_ != std::numeric_limits<double>::max()) {
+      this->volume_ *= (1. + dt * strain_rate_.head(Tdim).sum());
+      this->mass_density_ = this->mass_density_ /
+                            (1. + dt * strain_rate_.head(Tdim).sum());
     } else {
       throw std::runtime_error(
-          "Cell or volume is not initialised! cannot update particle volume");
+          "volume is not initialised! cannot update particle volume");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -534,21 +536,19 @@ bool mpm::Particle<Tdim, Tnphases>::update_volume(unsigned phase, double dt) {
 }
 
 // Update material point porosity
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_porosity(unsigned phase, double dt) {
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::update_porosity(double dt) {
   bool status = true;
   try {
-    // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
-
       // Update particle volume
       this->porosity_ =
           1 - (1 - this->porosity_) /
-                  (1 + dt * strain_rate_.col(phase).head(Tdim).sum());
-    } else {
+                  (1 + dt * strain_rate_.head(Tdim).sum());
+
+    if(porosity_ < 0 || porosity_ > 1)
       throw std::runtime_error(
-          "Cell or volume is not initialised! cannot update particle porosity");
-    }
+          "Invalid porosity, less than zero or greater than one");
+    
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
