@@ -111,9 +111,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Return volume
   double volume() const override { return volume_; }
 
-  //! Assign porosity
-  bool assign_porosity() override;
-
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
@@ -121,19 +118,24 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_volume() override;
 
   //! Update material point volume by using the cell-centre strain rate
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool update_volume_strainrate_centroid(double dt) override;
+  bool update_volume_strainrate_centre(double dt) override;
 
+  //! Update material point volume by using the strain rate 
+  //! \param[in] dt Analysis time step
+  bool update_volume_strainrate(double dt) override;
+  
+  //! Assign porosity
+  bool assign_porosity() override;
+  
   //! Update porosity
   //! \param[in] dt Analysis time step
   bool update_porosity(double dt) override;
 
-  //! Return mass density
-  //! \param[in] phase Index corresponding to the phase
+  //! Return mass density (dry bulk density)
   double mass_density() const override { return mass_density_; }
 
-  //! Compute mass as volume * density
+  //! Compute mass as volume * (dry bulk) density
   bool compute_mass() override;
 
   //! Map particle mass and momentum to nodes

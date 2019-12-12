@@ -121,17 +121,14 @@ class ParticleBase {
   //! Compute volume of particle
   virtual bool compute_volume() = 0;
 
-  //! Update volume based on centre volumetric strain rate
-  virtual bool update_volume_strainrate(double dt) = 0;
-
   //! Return mass density
   virtual double mass_density() const = 0;
 
   //! Update material point volume by using the cell-centre strain rate
-  virtual bool update_volume_centre_strainrate(double dt) = 0;
+  virtual bool update_volume_strainrate_centre(double dt) = 0;
 
   //! Update material point volume
-  virtual bool update_volume(double dt) = 0;
+  virtual bool update_volume_strainrate(double dt) = 0;
 
   //! Update porosity
   virtual bool update_porosity(double dt) = 0;
