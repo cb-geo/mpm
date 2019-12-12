@@ -455,9 +455,6 @@ bool mpm::Particle<Tdim>::assign_porosity() {
       if (porosity_ < 0. || porosity_ > 1.)
         throw std::runtime_error(
             "Particle porosity is negative or larger than one");
-      // Update volume fraction for each phase
-      volume_fraction_[0] = 1. - porosity_;
-      volume_fraction_[1] = porosity_;
     } else {
       throw std::runtime_error("Fluid material is invalid");
     }
@@ -491,7 +488,7 @@ bool mpm::Particle<Tdim>::compute_volume() {
 
 // Update volume based on the strain rate at cell centre
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_volume_strainrate_centroid(double dt) {
+bool mpm::Particle<Tdim>::update_volume_strainrate_centre(double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
@@ -565,7 +562,7 @@ bool mpm::Particle<Tdim>::compute_mass() {
     if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
       // Mass = volume of particle * mass_density
       this->mass_density_ =
-          volume_fraction_ *
+          (1 - porosity_) *
           material_->template property<double>(std::string("density"));
       this->mass_ = volume_ * mass_density_;
     } else {
@@ -924,7 +921,7 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt) {
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
       // Update displacement (displacement is initialized from zero)
-      this->displacement_.col(phase) += nodal_velocity * dt;
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -958,7 +955,7 @@ bool mpm::Particle<Tdim>::compute_updated_position_velocity(double dt) {
       // New position current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
       // Update displacement (displacement is initialized from zero)
-      this->displacement_.col(phase) += nodal_velocity * dt;
+      this->displacement_ += nodal_velocity * dt;
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "

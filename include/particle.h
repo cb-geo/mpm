@@ -340,8 +340,6 @@ class Particle : public ParticleBase<Tdim> {
   double mass_;
   //! Degree of saturation in porous media
   double saturation_degree_{1.0};
-  //! Phase volume fraction
-  double volume_fraction_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
