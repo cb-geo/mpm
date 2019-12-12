@@ -113,10 +113,7 @@ class ParticleBase {
   virtual double volume() const = 0;
 
   //! Assign porosity
-  virtual bool assign_porosity(const unsigned solid_skeleton) = 0;
-
-  //! Return total volume
-  virtual double volume() const = 0;
+  virtual bool assign_porosity() = 0;
 
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
@@ -185,16 +182,16 @@ class ParticleBase {
   //! Initial stress
   virtual void initial_stress(const Eigen::Matrix<double, 6, 1>&) = 0;
 
-  //! Initial pore pressure
-  virtual void initial_pore_pressure(const unsigned pore_fluid,
-                                     const double& pore_pressure) = 0;
+  // //! Initial pore pressure
+  // virtual void initial_pore_pressure(const unsigned pore_fluid,
+  //                                    const double& pore_pressure) = 0;
 
   //! Compute stress
   virtual bool compute_stress() = 0;
 
-  //! Compute pore pressure
-  virtual bool compute_pore_pressure(unsigned solid_skeleton,
-                                     unsigned pore_fluid, double dt) = 0;
+  // //! Compute pore pressure
+  // virtual bool compute_pore_pressure(unsigned solid_skeleton,
+  //                                    unsigned pore_fluid, double dt) = 0;
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
@@ -202,19 +199,19 @@ class ParticleBase {
   //! Map body force
   virtual void map_body_force(const VectorDim& pgravity) = 0;
 
-  //! Map drag force
-  virtual bool map_drag_force_coefficient(const unsigned soild_skeleton,
-                                          const unsigned pore_fluid) = 0;
+  // //! Map drag force
+  // virtual bool map_drag_force_coefficient(const unsigned soild_skeleton,
+  //                                         const unsigned pore_fluid) = 0;
 
   //! Map internal force
   virtual bool map_internal_force() = 0;
 
-  //! Map internal pressure
-  virtual bool map_internal_pressure(unsigned phase) = 0;
+  // //! Map internal pressure
+  // virtual bool map_internal_pressure(unsigned phase) = 0;
 
-  //! Map mixture internal force
-  virtual bool map_mixture_internal_force(const unsigned solid_skeleton,
-                                          const unsigned pore_fluid) = 0;
+  // //! Map mixture internal force
+  // virtual bool map_mixture_internal_force(const unsigned solid_skeleton,
+  //                                         const unsigned pore_fluid) = 0;
 
   //! Update pressure of the particles
   virtual bool update_pressure(double dvolumetric_strain) = 0;
@@ -249,13 +246,13 @@ class ParticleBase {
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(double dt) = 0;
 
-  //! Compute updated position
-  virtual bool update_position_acceleration(unsigned phase, double dt,
-                                            bool update_position) = 0;
+  // //! Compute updated position
+  // virtual bool update_position_acceleration(unsigned phase, double dt,
+  //                                           bool update_position) = 0;
 
-  //! Compute updated position based on nodal velocity
-  virtual bool update_position_velocity(unsigned phase, double dt,
-                                        bool update_position) = 0;
+  // //! Compute updated position based on nodal velocity
+  // virtual bool update_position_velocity(unsigned phase, double dt,
+  //                                       bool update_position) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
@@ -271,9 +268,10 @@ class ParticleBase {
   //! \param[in] velocity Applied particle velocity constraint
   virtual bool assign_particle_velocity_constraint(unsigned dir,
                                                    double velocity) = 0;
-  //! Assign particle pressure constraints
-  virtual bool assign_particle_pressure_constraint(const unsigned phase,
-                                                   const double pressure) = 0;
+  
+  // //! Assign particle pressure constraints
+  // virtual bool assign_particle_pressure_constraint(const unsigned phase,
+  //                                                  const double pressure) = 0;
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;

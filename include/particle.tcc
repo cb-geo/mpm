@@ -36,7 +36,7 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->mass_ = particle.mass;
   // Volume
   this->assign_volume(particle.volume);
-  // Mass Density
+  // Mass Density (Dry bulk density of a porous medium)
   this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
   Eigen::Vector3d psize;
@@ -226,7 +226,7 @@ void mpm::Particle<Tdim>::initialise() {
   velocity_.setZero();
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
-  volume_fraction_ = 1.0;;
+  volume_fraction_ = 1.0;
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
@@ -971,76 +971,76 @@ bool mpm::Particle<Tdim>::compute_updated_position_velocity(double dt) {
   return status;
 }
 
-// Compute updated position of the particle
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_position_acceleration(
-    unsigned phase, double dt, bool update_position) {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Get interpolated nodal acceleration
-      const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-          cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
+// // Compute updated position of the particle
+// template <unsigned Tdim, unsigned Tnphases>
+// bool mpm::Particle<Tdim, Tnphases>::update_position_acceleration(
+//     unsigned phase, double dt, bool update_position) {
+//   bool status = true;
+//   try {
+//     // Check if particle has a valid cell ptr
+//     if (cell_ != nullptr) {
+//       // Get interpolated nodal acceleration
+//       const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+//           cell_->interpolate_nodal_acceleration(this->shapefn_, phase);
 
-      // Update particle velocity from interpolated nodal acceleration
-      this->velocity_.col(phase) += nodal_acceleration * dt;
+//       // Update particle velocity from interpolated nodal acceleration
+//       this->velocity_.col(phase) += nodal_acceleration * dt;
 
-      // Apply particle velocity constraints
-      this->apply_particle_velocity_constraints();
+//       // Apply particle velocity constraints
+//       this->apply_particle_velocity_constraints();
 
-      // Update position
-      if (update_position) {
-        // Get interpolated nodal velocity
-        const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-            cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+//       // Update position
+//       if (update_position) {
+//         // Get interpolated nodal velocity
+//         const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+//             cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
-        // New position current position + velocity * dt
-        this->coordinates_ += nodal_velocity * dt;
-      }
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute updated coordinates of the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
+//         // New position current position + velocity * dt
+//         this->coordinates_ += nodal_velocity * dt;
+//       }
+//     } else {
+//       throw std::runtime_error(
+//           "Cell is not initialised! "
+//           "cannot compute updated coordinates of the particle");
+//     }
+//   } catch (std::exception& exception) {
+//     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+//     status = false;
+//   }
+//   return status;
+// }
 
-// Compute updated position of the particle based on nodal velocity
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::update_position_velocity(
-    unsigned phase, double dt, bool update_position) {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Get interpolated nodal velocity
-      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_, phase);
+// // Compute updated position of the particle based on nodal velocity
+// template <unsigned Tdim, unsigned Tnphases>
+// bool mpm::Particle<Tdim, Tnphases>::update_position_velocity(
+//     unsigned phase, double dt, bool update_position) {
+//   bool status = true;
+//   try {
+//     // Check if particle has a valid cell ptr
+//     if (cell_ != nullptr) {
+//       // Get interpolated nodal velocity
+//       const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+//           cell_->interpolate_nodal_velocity(this->shapefn_, phase);
 
-      // Update particle velocity to interpolated nodal velocity
-      this->velocity_.col(phase) = nodal_velocity;
+//       // Update particle velocity to interpolated nodal velocity
+//       this->velocity_.col(phase) = nodal_velocity;
 
-      // Apply particle velocity constraints
-      this->apply_particle_velocity_constraints();
+//       // Apply particle velocity constraints
+//       this->apply_particle_velocity_constraints();
 
-      // New position current position + velocity * dt
-      if (update_position) this->coordinates_ += nodal_velocity * dt;
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute updated coordinates of the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
+//       // New position current position + velocity * dt
+//       if (update_position) this->coordinates_ += nodal_velocity * dt;
+//     } else {
+//       throw std::runtime_error(
+//           "Cell is not initialised! "
+//           "cannot compute updated coordinates of the particle");
+//     }
+//   } catch (std::exception& exception) {
+//     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+//     status = false;
+//   }
+//   return status;
+// }
 
 // Update pressure
 template <unsigned Tdim>
@@ -1126,20 +1126,20 @@ bool mpm::Particle<Tdim>::assign_particle_velocity_constraint(unsigned dir,
   return status;
 }
 
-//! Assign particle pressure constraints
-template <unsigned Tdim, unsigned Tnphases>
-bool mpm::Particle<Tdim, Tnphases>::assign_particle_pressure_constraint(
-    const unsigned phase, const double pressure) {
-  bool status = true;
-  try {
-    this->pressure_constraint_.insert(std::make_pair<unsigned, double>(
-        static_cast<unsigned>(phase), static_cast<double>(pressure)));
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
+// //! Assign particle pressure constraints
+// template <unsigned Tdim, unsigned Tnphases>
+// bool mpm::Particle<Tdim, Tnphases>::assign_particle_pressure_constraint(
+//     const unsigned phase, const double pressure) {
+//   bool status = true;
+//   try {
+//     this->pressure_constraint_.insert(std::make_pair<unsigned, double>(
+//         static_cast<unsigned>(phase), static_cast<double>(pressure)));
+//   } catch (std::exception& exception) {
+//     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+//     status = false;
+//   }
+//   return status;
+// }
 
 //! Apply particle velocity constraints
 template <unsigned Tdim>

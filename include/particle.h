@@ -112,7 +112,6 @@ class Particle : public ParticleBase<Tdim> {
   double volume() const override { return volume_; }
 
   //! Assign porosity
-  //! \param[in] solid_skeleton Index corresponding to solid phase
   bool assign_porosity() override;
 
   //! Return size of particle in natural coordinates
@@ -121,21 +120,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute volume as cell volume / nparticles
   bool compute_volume() override;
 
-  //! Update volume based on centre volumetric strain rate
-  //! \param[in] dt Analysis time step
-  bool update_volume_strainrate(double dt) override;
-
   //! Update material point volume by using the cell-centre strain rate
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
-  bool update_volume_centre_strainrate(double dt) override;
-
+  bool update_volume_strainrate_centroid(double dt) override;
 
   //! Update porosity
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Analysis time step
   bool update_porosity(double dt) override;
-
 
   //! Return mass density
   //! \param[in] phase Index corresponding to the phase
@@ -184,23 +176,23 @@ class Particle : public ParticleBase<Tdim> {
     this->stress_ = stress;
   }
 
-  //! Initial pore pressure
-  //! \param[in] pore_fluid Index corresponding to fluid phase
-  //! \param[in] pore pressure Initial pore pressure
-  void initial_pore_pressure(const unsigned pore_fluid,
-                             const double& pore_pressure) override {
-    this->pressure_(pore_fluid) = pore_pressure;
-  }
+  // //! Initial pore pressure
+  // //! \param[in] pore_fluid Index corresponding to fluid phase
+  // //! \param[in] pore pressure Initial pore pressure
+  // void initial_pore_pressure(const unsigned pore_fluid,
+  //                            const double& pore_pressure) override {
+  //   this->pressure_(pore_fluid) = pore_pressure;
+  // }
 
   //! Compute stress
   bool compute_stress() override;
 
-  //! Compute pore pressure
-  //! \param[in] solid_skeleton Index corresponding to solid phase
-  //! \param[in] pore_fluid Index corresponding to fluid phase
-  //! \param[in] dt Analysis time step
-  bool compute_pore_pressure(unsigned solid_skeleton, unsigned pore_fluid,
-                             double dt) override;
+  // //! Compute pore pressure
+  // //! \param[in] solid_skeleton Index corresponding to solid phase
+  // //! \param[in] pore_fluid Index corresponding to fluid phase
+  // //! \param[in] dt Analysis time step
+  // bool compute_pore_pressure(unsigned solid_skeleton, unsigned pore_fluid,
+  //                            double dt) override;
 
   //! Return stress of the particle
   Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
@@ -218,15 +210,15 @@ class Particle : public ParticleBase<Tdim> {
   //! Map internal force
   bool map_internal_force() override;
 
-  //! Map internal pressure
-  //! \param[in] phase Index corresponding to the phase
-  bool map_internal_pressure(unsigned phase) override;
+  // //! Map internal pressure
+  // //! \param[in] phase Index corresponding to the phase
+  // bool map_internal_pressure(unsigned phase) override;
 
-  //! Map mixture internal force
-  //! \param[in] solid_skeleton Index corresponding to solid phase
-  //! \param[in] pore_fluid Index corresponding to fluid phase
-  bool map_mixture_internal_force(const unsigned solid_skeleton,
-                                  const unsigned pore_fluid) override;
+  // //! Map mixture internal force
+  // //! \param[in] solid_skeleton Index corresponding to solid phase
+  // //! \param[in] pore_fluid Index corresponding to fluid phase
+  // bool map_mixture_internal_force(const unsigned solid_skeleton,
+  //                                 const unsigned pore_fluid) override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
@@ -259,19 +251,19 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(double dt) override;
 
-  //! Compute updated position of the particle
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Analysis time step
-  //! \param[in] update_position Status of update position
-  bool update_position_acceleration(unsigned phase, double dt,
-                                    bool update_position) override;
+  // //! Compute updated position of the particle
+  // //! \param[in] phase Index corresponding to the phase
+  // //! \param[in] dt Analysis time step
+  // //! \param[in] update_position Status of update position
+  // bool update_position_acceleration(unsigned phase, double dt,
+  //                                   bool update_position) override;
 
-  //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Analysis time step
-  //! \param[in] update_position Status of update position
-  bool update_position_velocity(unsigned phase, double dt,
-                                bool update_position) override;
+  // //! Compute updated position of the particle based on nodal velocity
+  // //! \param[in] phase Index corresponding to the phase
+  // //! \param[in] dt Analysis time step
+  // //! \param[in] update_position Status of update position
+  // bool update_position_velocity(unsigned phase, double dt,
+  //                               bool update_position) override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -307,12 +299,12 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_particle_velocity_constraint(unsigned dir,
                                            double velocity) override;
 
-  //! Assign particle pressure constraints
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Applied particle pressure constraint
-  //! \retval status Assignment status
-  bool assign_particle_pressure_constraint(const unsigned phase,
-                                           const double pressure) override;
+  // //! Assign particle pressure constraints
+  // //! \param[in] phase Index corresponding to the phase
+  // //! \param[in] pressure Applied particle pressure constraint
+  // //! \retval status Assignment status
+  // bool assign_particle_pressure_constraint(const unsigned phase,
+  //                                          const double pressure) override;
 
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
