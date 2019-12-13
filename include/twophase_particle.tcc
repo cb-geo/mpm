@@ -32,3 +32,44 @@ void mpm::TwoPhaseParticle<Tdim>::initialise_liquid_phase() {
     return vec_pressure;
   };
 }
+
+// Assign a liquid material to particle
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_material(
+    const std::shared_ptr<Material<Tdim>>& material) {
+  bool status = false;
+  try {
+    // Check if material is valid and properties are set
+    if (material != nullptr) {
+      liquid_material_ = material;
+      liquid_material_id_ = material_->id();
+      status = true;
+    } else {
+      throw std::runtime_error("Material is undefined!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
+// Assign degree of saturation to the liquid phase
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_saturation_degree() {
+  bool status = true;
+  try {
+    if (material_ != nullptr) {
+      liquid_saturation_ = material_
+                      ->template property<double>(std::string("saturation"));
+      if (liquid_saturation < 0. || liquid_saturation_ > 1.)
+        throw std::runtime_error(
+            "Particle saturation degree is negative or larger than one");
+    } else {
+      throw std::runtime_error("Liquid material is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

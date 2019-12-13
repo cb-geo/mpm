@@ -44,6 +44,9 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool assign_liquid_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
 
+  //! Assign saturation degree
+  bool assign_saturation_degree() override;
+
   //! Compute liquid mass
   bool compute_liquid_mass() override;
 
@@ -99,6 +102,10 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Shape functions
   using Particle<Tdim>::shapefn_;
 
+  //! Material
+  std::shared_ptr<Material<Tdim>> liquid_material_;
+  //! Liquid material id
+  unsigned liquid_material_id_{std::numeric_limits<unsigned>::max()};
   //! Liquid mass
   double liquid_mass_;
   //! Degree of saturation
@@ -113,8 +120,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool set_traction_;
   //! Traction
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
-  //! Material
-  std::shared_ptr<Material<Tdim>> liquid_material_;
   //! Liquid strain rate
   Eigen::Matrix<double, 6, 1> liquid_strain_rate_;
   //! Liquid strain rate
