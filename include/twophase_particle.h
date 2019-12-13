@@ -108,6 +108,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   unsigned liquid_material_id_{std::numeric_limits<unsigned>::max()};
   //! Liquid mass
   double liquid_mass_;
+  //! Liquid mass density (bulk density = liquid mass / total volume)
+  double liquid_mass_density_;
   //! Degree of saturation
   double liquid_saturation{1.0};
   //! Displacement

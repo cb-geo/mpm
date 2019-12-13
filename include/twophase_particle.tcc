@@ -73,3 +73,28 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_saturation_degree() {
   }
   return status;
 }
+
+// Compute mass of particle
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::compute_liquid_mass() {
+  bool status = true;
+  try {
+    // Check if particle volume is set and liquid material ptr is valid
+    if (volume_ != std::numeric_limits<double>::max() &&
+        liquid_material_ != nullptr) {
+      // Mass = volume of particle * bulk_density
+      this->liquid_mass_density_ =
+          liquid_saturation_ * porosity_ *
+          liquid_material_->template property<double>(std::string("density"));
+      this->liquid_mass_ = volume_ * liquid_mass_density_;
+    } else {
+      throw std::runtime_error(
+          "Particle volume or density is invalid! cannot compute mass for the "
+          "liquid particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
