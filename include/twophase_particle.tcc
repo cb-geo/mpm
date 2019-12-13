@@ -98,3 +98,25 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_liquid_mass() {
   }
   return status;
 }
+
+//! Map particle mass and momentum to nodes
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_liquid_mass_momentum_to_nodes() {
+  bool status = true;
+  try {
+    // Check if particle mass is set and positive
+    if (liquid_mass_ != std::numeric_limits<double>::max() &&
+        !liquid_mass_ < 0.) {
+      // Map particle mass and momentum to nodes
+      this->cell_->map_mass_momentum_to_nodes(
+          this->shapefn_, mpm::ParticlePhase::Liquid, liquid_mass_,
+          liquid_velocity_);
+    } else {
+      throw std::runtime_error("Particle mass is not set or negative");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
