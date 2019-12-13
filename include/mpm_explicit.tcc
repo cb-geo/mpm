@@ -11,11 +11,6 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
-  // Get analysis type USL/USF
-  if (io_->analysis_type() == "MPMExplicitUSL2D" ||
-      io_->analysis_type() == "MPMExplicitUSL3D")
-    this->usl_ = true;
-
   console_->error("Analysis{} {}", io_->analysis_type());
 
   // Initialise MPI rank and size
