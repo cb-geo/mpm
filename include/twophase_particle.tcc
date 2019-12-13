@@ -144,3 +144,46 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) {
   }
   return status;
 }
+
+//! Map particle pore liquid pressure to nodes
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_pore_pressure_to_nodes() {
+  bool status = true;
+  try {
+    // Check if particle mass is set
+    if (liquid_mass_ != std::numeric_limits<double>::max()) {
+      // Map particle liquid mass and pore pressure to nodes
+      this->cell_->map_pressure_to_nodes(this->shapefn_,
+                                         mpm::ParticlePhase::Liquid,
+                                         liquid_mass_, pore_pressure_);
+    } else {
+      throw std::runtime_error("Particleliquid mass has not been computed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute pore liquid pressure smoothing based on nodal pressure
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure_smoothing() {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr)
+      // Update pore liquid pressure to interpolated nodal pressure
+      this->pore_pressure_ = cell_->interpolate_nodal_pressure(
+          shapefn_, mpm::ParticlePhase::Liquid);
+    else
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute pore liquid pressure smoothing of the particle");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

@@ -47,6 +47,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Assign saturation degree
   bool assign_saturation_degree() override;
 
+  //! Assign pore pressure
+  //! \param[in] pressure Pore liquid pressure
+  void assign_pore_pressure(const double& pressure) {
+    this->pore_pressure_ = pressure;
+  }
+
   //! Compute liquid mass
   bool compute_liquid_mass() override;
 
