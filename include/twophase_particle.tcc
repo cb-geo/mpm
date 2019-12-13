@@ -74,6 +74,29 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_saturation_degree() {
   return status;
 }
 
+// Assign traction to the liquid phase
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_traction(unsigned direction,
+                                                         double traction) {
+  bool status = false;
+  try {
+    if (direction >= Tdim ||
+        this->volume_ == std::numeric_limits<double>::max()) {
+      throw std::runtime_error(
+          "Particle liquid traction property: volume / direction is invalid");
+    }
+    // Assign liquid traction
+    liquid_traction_(direction) =
+        traction * this->volume_ / this->size_(direction);
+    status = true;
+    this->set_liquid_traction_ = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Compute mass of particle
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::compute_liquid_mass() {
@@ -186,4 +209,23 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure_smoothing() {
     status = false;
   }
   return status;
+}
+
+//! Map liquid phase body force
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::map_liquid_body_force(
+    const VectorDim& pgravity) {
+  // Compute nodal liquid body forces
+  cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Liquid,
+                                  this->liquid_mass_, pgravity);
+}
+
+//! Map liquid phase traction force
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
+  if (this->set_liquid_traction_)
+    // Map particle liquid phase traction forces to nodes
+    cell_->compute_nodal_traction_force(this->shapefn_,
+                                        mpm::ParticlePhase::Liquid,
+                                        -1. * porosity_ * this->traction_);
 }

@@ -53,6 +53,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
     this->pore_pressure_ = pressure;
   }
 
+  //! Assign liquid traction
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  bool assign_liquid_traction(unsigned direction, double traction) override;
+
   //! Compute liquid mass
   bool compute_liquid_mass() override;
 
@@ -69,13 +75,14 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool compute_pore_pressure_smoothening() override;
 
   //! Map liquid body force
-  void map_liquid_body_force() override;
+  //! \param[in] pgravity Gravity of a particle
+  void map_liquid_body_force(const VectorDim& pgravity) override;
+
+  //! Map liquid phase traction force
+  void map_liquid_traction_force() override;
 
   //! Map liquid internal force
   void map_liquid_internal_force() override;
-
-  //! Map liquid traction force
-  void map_liquid_traction_force() override;
 
   //! Map liquid drag force
   void map_liquid_drag_force() override;
@@ -88,12 +95,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Map two phase mixture internal force
   void map_twophase_mixture_internal_force() override;
-
-  //! Assign liquid traction
-  //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Particle traction in specified direction
-  //! \retval status Assignment status
-  bool assign_liquid_traction(unsigned direction, double traction) override;
 
  private:
   //! Shape functions
@@ -116,7 +117,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Pore pressure
   double pore_pressure_;
   //! Set traction
-  bool set_traction_;
+  bool set_liquid_traction_;
   //! Traction
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
   //! Liquid strain rate
