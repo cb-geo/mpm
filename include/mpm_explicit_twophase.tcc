@@ -79,17 +79,14 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   }
 
   // Assign porosity
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_porosity,
-                std::placeholders::_1, solid_skeleton));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::assign_porosity, std::placeholders::_1));
 
   // Compute mass for each phase
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1,
-                solid_skeleton));
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1,
-                pore_fluid));
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::compute_liquid_mass, std::placeholders::_1));
 
   // Check point resume
   if (resume) this->checkpoint_resume();
