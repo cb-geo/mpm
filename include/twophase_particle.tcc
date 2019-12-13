@@ -229,3 +229,25 @@ void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
                                         mpm::ParticlePhase::Liquid,
                                         -1. * porosity_ * this->traction_);
 }
+
+
+//! Map liquid phase internal force
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
+  bool status = true;
+  try {
+    // initialise a vector of pore pressure
+    Eigen::Matrix<double, 6, 1> pressure;
+    pressure.setZero();
+    pressure(0) = pressure(1) = pressure(2) = pore_pressure_;
+    // Compute nodal liquid phase  internal forces
+    // porosity * pressure * volume
+    cell_->compute_nodal_internal_force(
+        this->bmatrix_, mpm::ParticlePhase::Liquid, this->volume_,
+        porosity_ * this->stress_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
