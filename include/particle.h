@@ -311,7 +311,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -338,8 +338,6 @@ class Particle : public ParticleBase<Tdim> {
   double mass_density_;
   //! Mass
   double mass_;
-  //! Degree of saturation in porous media
-  double saturation_degree_{1.0};
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
