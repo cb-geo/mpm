@@ -24,10 +24,6 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-  // Phase
-  const unsigned solid_skeleton = 0;
-  const unsigned pore_fluid = 1;
-
   // Test if checkpoint resume is needed
   bool resume = false;
   if (analysis_.find("resume") != analysis_.end())
@@ -61,20 +57,20 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   // Initialise material ids for each phase
   const auto solid_skeleton_mid =
       particle_props["material_id"][0].template get<unsigned>();
-  const auto pore_fluid_mid =
+  const auto pore_liquid_mid =
       particle_props["material_id"][1].template get<unsigned>();
 
   // Get material from list of materials for each phase
   auto solid_skeleton_material = materials_.at(solid_skeleton_mid);
-  auto pore_fluid_material = materials_.at(pore_fluid_mid);
+  auto pore_liquid_material = materials_.at(pore_fluid_mid);
 
   // Iterate over each particle to assign material to each phase
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::assign_material, std::placeholders::_1,
-      solid_skeleton, solid_skeleton_material));
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, pore_fluid, pore_fluid_material));
+                std::placeholders::_1, solid_skeleton_material));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::assign_liquid_material,
+                std::placeholders::_1, pore_liquid_material));
 
   // Assign material to particle sets
   if (particle_props["particle_sets"].size() != 0) {
