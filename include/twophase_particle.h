@@ -74,17 +74,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Map liquid drag force
   void map_liquid_drag_force() override;
 
-  //! Compute liquid strain
-  //! \param[in] dt Analysis time step
-  void compute_liquid_strain(double dt) override;
-
-  //! Return liquid strain of the particle
-  Eigen::Matrix<double, 6, 1> liquid_strain() const override {
-    return liquid_strain_;
-  }
-
   //! Compute pore pressure
-  void compute_pore_pressure() override;
+  bool compute_pore_pressure(double dt) override;
 
   //! Return liquid pore pressure
   double pore_pressure() const override { return pore_pressure_; }
@@ -123,9 +114,9 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Traction
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
   //! Liquid strain rate
-  Eigen::Matrix<double, 6, 1> liquid_strain_rate_;
+  Eigen::Matrix<double, 6, 1> liquid_strain_rate_; // delete if not needed
   //! Liquid strain rate
-  Eigen::Matrix<double, 6, 1> liquid_strain_;
+  Eigen::Matrix<double, 6, 1> liquid_strain_; // delete if not needed
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> liquid_properties_;
   //! Logger

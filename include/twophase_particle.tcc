@@ -105,8 +105,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_mass_momentum_to_nodes() {
   bool status = true;
   try {
     // Check if particle mass is set and positive
-    if (liquid_mass_ != std::numeric_limits<double>::max() &&
-        !liquid_mass_ < 0.) {
+    if (liquid_mass_ != std::numeric_limits<double>::max()) {
       // Map particle mass and momentum to nodes
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, mpm::ParticlePhase::Liquid, liquid_mass_,
@@ -114,6 +113,31 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_mass_momentum_to_nodes() {
     } else {
       throw std::runtime_error("Particle mass is not set or negative");
     }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Compute pore pressure
+bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) {
+  bool status = true;
+  try {
+    if (liquid_material_ != nullptr && cell_ != nullptr) {
+      // get the bulk modulus of liquid
+      double K = liquid_material_->template property<double>(
+          std::string("bulk_modulus"));
+      // get liquid phase strain rate at cell centre
+      Eigen::VectorXd liquid_strain_rate_centroid =
+          cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Liquid);
+      // update pressure
+      this->pore_pressure_ +=
+          -dt * (K / porosity_) *
+          ((1 - porosity_) * strain_rate_.head(Tdim).sum() +
+           porosity_ * liquid_strain_rate_centroid.head(Tdim).sum());
+    } else
+      throw std::runtime_error("Liquid material is not set");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
