@@ -212,33 +212,32 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 // Initialise particle properties
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::initialise() {
+  natural_size_.setZero();
+  size_.setZero();
+  volume_ = std::numeric_limits<double>::max();
+  mass_ = 0.;
+  velocity_.setZero();
   displacement_.setZero();
   dstrain_.setZero();
-  mass_ = 0.;
-  natural_size_.setZero();
-  pressure_ = 0.;
-  set_traction_ = false;
-  size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
+  set_traction_ = false;
   traction_.setZero();
-  velocity_.setZero();
-  volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
+  pressure_ = 0.;
   porosity_ = 0.;
-  volume_fraction_ = 1.0;
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
-
-  // FIXME: NEED TO BE SOLVED
-  // this->properties_["pressure"] = [&](unsigned phase) {
-  //  return pressure(phase);
-  //};
+  this->liquid_properties_["pressure"] = [&]() {
+    Eigen::VectorXd vec_pressure(1);
+    vec_pressure << this->pressure();
+    return vec_pressure;
+  };
 }
 
 // Assign a cell to particle
@@ -683,13 +682,15 @@ bool mpm::Particle<Tdim>::compute_stress() {
 //   try {
 //     // Apply pore pressure constraint
 //     if (pressure_constraint_.find(pore_fluid) != pressure_constraint_.end())
-//       this->pressure_(pore_fluid) = this->pressure_constraint_.at(pore_fluid);
+//       this->pressure_(pore_fluid) =
+//       this->pressure_constraint_.at(pore_fluid);
 //     // Check if material ptr is valid
 //     else if (material_.at(solid_skeleton) != nullptr &&
 //              material_.at(pore_fluid) != nullptr) {
 //       // Bulk modulus of fluid
 //       double K = material_.at(pore_fluid)
-//                      ->template property<double>(std::string("bulk_modulus"));
+//                      ->template
+//                      property<double>(std::string("bulk_modulus"));
 //       // Compute pore pressure
 //       // double dpore_pressure =
 //       //     -K / porosity_ *
