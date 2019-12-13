@@ -20,7 +20,8 @@ void mpm::TwoPhaseParticle<Tdim>::initialise_liquid_phase() {
   liquid_velocity_.setZero();
   liquid_strain_rate_.setZero();
   liquid_strain_.setZero();
-  set_traction_ = false;
+  set_liquid_traction_ = false;
+  set_mixture_traction_ = false;
   liquid_traction_.setZero();
   pore_pressure_ = 0.;
   liquid_saturation_ = 1.;
@@ -90,6 +91,29 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_traction(unsigned direction,
         traction * this->volume_ / this->size_(direction);
     status = true;
     this->set_liquid_traction_ = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Assign traction to the mixture
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_mixture_traction(unsigned direction,
+                                                         double traction) {
+  bool status = false;
+  try {
+    if (direction >= Tdim ||
+        this->volume_ == std::numeric_limits<double>::max()) {
+      throw std::runtime_error(
+          "Particle mixture traction property: volume / direction is invalid");
+    }
+    // Assign mixture traction
+    mixture_traction_(direction) =
+        traction * this->volume_ / this->size_(direction);
+    status = true;
+    this->set_mixture_traction_ = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -230,6 +254,14 @@ void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
                                         -1. * porosity_ * this->traction_);
 }
 
+//! Map mixture traction force
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force() {
+  if (this->set_mixture_traction_)
+    // Map particle mixture traction forces to nodes
+    cell_->compute_nodal_mixture_traction_force(this->shapefn_,
+                                                this->traction_);
+}
 
 //! Map liquid phase internal force
 template <unsigned Tdim>

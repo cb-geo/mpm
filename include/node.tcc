@@ -26,12 +26,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
-  mixture_internal_force_.setZero();
-  drag_force_coefficient_.setZero();
   pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
+  mixture_traction_force_.setZero();
+  mixture_internal_force_.setZero();
+  drag_force_coefficient_.setZero();
   status_ = false;
 }
 
@@ -122,6 +123,27 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     // Update/assign internal force
     std::lock_guard<std::mutex> guard(node_mutex_);
     internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update mixture traction force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_mixture_traction_force(
+    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
+  bool status = false;
+  try {
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    // Update/assign mixture traction force
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    mixture_traction_force_ = mixture_traction_force_ * factor + force;
     status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

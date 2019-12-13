@@ -91,7 +91,7 @@ class Node : public NodeBase<Tdim> {
   bool assign_traction_force(unsigned phase, unsigned direction,
                              double traction) override;
 
-  //! Update external force (body force / traction force)
+  //! Update partial external forces (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
@@ -105,7 +105,7 @@ class Node : public NodeBase<Tdim> {
     return external_force_.col(phase);
   }
 
-  //! Update internal force (body force / traction force)
+  //! Update partial internal forces (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
@@ -113,11 +113,18 @@ class Node : public NodeBase<Tdim> {
   bool update_internal_force(bool update, unsigned phase,
                              const VectorDim& force) override;
 
-  //! Update mixture internal force (body force / traction force)
+  //! Update mixture internal force from total stress
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] force Internal force from the particles in a cell
   //! \retval status Update status
   bool update_mixture_internal_force(bool update,
+                                     const VectorDim& force) override;
+
+  //! Update mixture traction force
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] force mixture traction force from the particles in a cell
+  //! \retval status Update status
+  bool update_mixture_traction_force(bool update,
                                      const VectorDim& force) override;
 
   //! Update internal force (body force / traction force)
@@ -262,10 +269,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
-  //! Mixture internal force
-  Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
-  //! Drag force
-  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity
@@ -284,6 +287,12 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Mixture internal force
+  Eigen::Matrix<double, Tdim, 1> mixture_internal_force_;
+  //! Mixture traction force
+  Eigen::Matrix<double, Tdim, 1> mixture_traction_force_;
+  //! Drag force
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Node class

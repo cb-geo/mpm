@@ -116,10 +116,14 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
   //! Pore pressure
   double pore_pressure_;
-  //! Set traction
+  //! Set liquid phase traction
   bool set_liquid_traction_;
-  //! Traction
+  //! Set mixture traction
+  bool set_mixture_traction_;
+  //! Traction for liquid phase
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
+    //! Traction for mixture (soil skeleton + pore liquid)
+  Eigen::Matrix<double, Tdim, 1> mixture_traction_;
   //! Liquid strain rate
   Eigen::Matrix<double, 6, 1> liquid_strain_rate_; // delete if not needed
   //! Liquid strain rate
