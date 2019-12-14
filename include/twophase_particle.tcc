@@ -284,7 +284,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
   return status;
 }
 
-//! Map liquid phase internal force
+//! Map mixture internal force
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force() {
   bool status = true;
@@ -298,6 +298,53 @@ bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force() {
     // -1 * total stress * volume
     cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
                                                 -1. * total_stress);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map drag force coefficient
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient(
+    const VectorDim& pgravity) {
+  bool status = true;
+  try {
+    // initialise permeability
+    VectorDim permeability;
+    switch (Tdim) {
+      case (1): {
+        permeability(0) = material_->template property<double>("k_x");
+        break;
+      }
+      case (2): {
+        permeability(0) = material_->template property<double>("k_x");
+        permeability(1) = material_->template property<double>("k_y");
+        break;
+      }
+      default: {
+        permeability(0) = material_->template property<double>("k_x");
+        permeability(1) = material_->template property<double>("k_y");
+        permeability(2) = material_->template property<double>("k_z");
+        break;
+      }
+    }
+
+    // compute particle drag force coefficient
+    VectorDim pcoefficient;
+    for (unsigned dir = 0; dir < Tdim; ++dir) {
+      if (permeability(0) < 0)
+        throw std::runtime_error("Porous medium permeability is negative");
+      pcoefficient(dir) =
+          porosity_ * porosity_ *
+          (liquid_material_->template property<double>("density")) *
+          pgravity(dir) / permeability(dir);
+    }
+
+    // Map particle drag force coefficient to cell nodes
+    cell_->compute_nodal_drag_force_coefficient(this->shapefn_, this->volume_,
+                                                pcoefficient);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

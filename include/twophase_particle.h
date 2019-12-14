@@ -84,9 +84,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Map liquid internal force
   void map_liquid_internal_force() override;
 
-  //! Map liquid drag force
-  void map_liquid_drag_force() override;
-
   //! Compute pore pressure
   bool compute_pore_pressure(double dt) override;
 
@@ -98,6 +95,10 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Map two phase mixture internal force
   void map_mixture_internal_force() override;
+
+  //! Map drag force coefficient
+  //! \param[in] pgravity Gravity of a particle
+  void map_drag_force_coefficient(const VectorDim& pgravity) override;
 
  private:
   //! Shape functions
