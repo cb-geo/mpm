@@ -249,9 +249,9 @@ template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
   if (this->set_liquid_traction_)
     // Map particle liquid phase traction forces to nodes
-    cell_->compute_nodal_traction_force(this->shapefn_,
-                                        mpm::ParticlePhase::Liquid,
-                                        -1. * porosity_ * this->traction_);
+    cell_->compute_nodal_traction_force(
+        this->shapefn_, mpm::ParticlePhase::Liquid,
+        -1. * porosity_ * this->liquid_traction_);
 }
 
 //! Map mixture traction force
@@ -260,7 +260,7 @@ void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force() {
   if (this->set_mixture_traction_)
     // Map particle mixture traction forces to nodes
     cell_->compute_nodal_mixture_traction_force(this->shapefn_,
-                                                this->traction_);
+                                                this->mixture_traction_);
 }
 
 //! Map liquid phase internal force
@@ -271,12 +271,33 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
     // initialise a vector of pore pressure
     Eigen::Matrix<double, 6, 1> pressure;
     pressure.setZero();
-    pressure(0) = pressure(1) = pressure(2) = pore_pressure_;
+    pressure(0) = pressure(1) = pressure(2) = this->pore_pressure_;
     // Compute nodal liquid phase  internal forces
     // porosity * pressure * volume
     cell_->compute_nodal_internal_force(
         this->bmatrix_, mpm::ParticlePhase::Liquid, this->volume_,
         porosity_ * this->stress_);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Map liquid phase internal force
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force() {
+  bool status = true;
+  try {
+    // initialise a vector of pore pressure
+    Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
+    total_stress(0) -= this->pore_pressure_;
+    total_stress(1) -= this->pore_pressure_;
+    total_stress(2) -= this->pore_pressure_;
+    // Compute nodal mixture  internal forces
+    // -1 * total stress * volume
+    cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
+                                                -1. * total_stress);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

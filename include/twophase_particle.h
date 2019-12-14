@@ -93,12 +93,19 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Return liquid pore pressure
   double pore_pressure() const override { return pore_pressure_; }
 
+  //! Map two phase mixture traction force
+  void map_mixture_traction_force() override;
+
   //! Map two phase mixture internal force
-  void map_twophase_mixture_internal_force() override;
+  void map_mixture_internal_force() override;
 
  private:
   //! Shape functions
   using Particle<Tdim>::shapefn_;
+    //! B matrix
+  using Particle<Tdim>::bmatrix_;
+  //! Effective stress of soil skeleton
+  using Particle<Tdim>::stress_;
 
   //! Material
   std::shared_ptr<Material<Tdim>> liquid_material_;
