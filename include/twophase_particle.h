@@ -90,15 +90,26 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Return liquid pore pressure
   double pore_pressure() const override { return pore_pressure_; }
 
+  //! Map two phase mixture body force
+  void map_mixture_body_force(unsigned mixture) override;
+
   //! Map two phase mixture traction force
-  void map_mixture_traction_force() override;
+  void map_mixture_traction_force(unsigned mixture) override;
 
   //! Map two phase mixture internal force
-  void map_mixture_internal_force() override;
+  void map_mixture_internal_force(unsigned mixture) override;
 
   //! Map drag force coefficient
   //! \param[in] pgravity Gravity of a particle
   void map_drag_force_coefficient(const VectorDim& pgravity) override;
+
+  //! Compute updated velocity of the particle using nodal acceleration
+  //! \param[in] dt Analysis time step
+  bool compute_updated_liquid_kinematics(double dt) override;
+
+  //! Compute updated velocity of the particle based on nodal velocity
+  //! \param[in] dt Analysis time step
+  bool compute_updated_liquid_velocity(double dt) override
 
  private:
   //! Shape functions

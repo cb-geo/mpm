@@ -244,6 +244,15 @@ void mpm::TwoPhaseParticle<Tdim>::map_liquid_body_force(
                                   this->liquid_mass_, pgravity);
 }
 
+//! Map mixture body force
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::map_mixture_body_force(
+    unsigned mixture, const VectorDim& pgravity) {
+  // Compute nodal liquid body forces
+  cell_->compute_nodal_body_force(this->shapefn_, mixture,
+                                  (this->liquid_mass_ + this->mass_), pgravity);
+}
+
 //! Map liquid phase traction force
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
@@ -256,10 +265,10 @@ void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() {
 
 //! Map mixture traction force
 template <unsigned Tdim>
-void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force() {
+void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force(unsigned mixture) {
   if (this->set_mixture_traction_)
     // Map particle mixture traction forces to nodes
-    cell_->compute_nodal_mixture_traction_force(this->shapefn_,
+    cell_->compute_nodal_traction_force(this->shapefn_, mixture,
                                                 this->mixture_traction_);
 }
 
@@ -286,7 +295,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
 
 //! Map mixture internal force
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force() {
+bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(unsigned mixture) {
   bool status = true;
   try {
     // initialise a vector of pore pressure
@@ -296,8 +305,8 @@ bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force() {
     total_stress(2) -= this->pore_pressure_;
     // Compute nodal mixture  internal forces
     // -1 * total stress * volume
-    cell_->compute_nodal_mixture_internal_force(this->bmatrix_, this->volume_,
-                                                -1. * total_stress);
+    cell_->compute_nodal_internal_force(this->bmatrix_, unsigned mixture,
+                                        this->volume_, -1. * total_stress);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -345,6 +354,66 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient(
     // Map particle drag force coefficient to cell nodes
     cell_->compute_nodal_drag_force_coefficient(this->shapefn_, this->volume_,
                                                 pcoefficient);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated position of the particle
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::compute_updated_liquid_kinematics(double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal acceleration
+      const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+          cell_->interpolate_nodal_acceleration(this->shapefn_,
+                                                mpm::ParticlePhase::Liquid);
+
+      // Update particle velocity from interpolated nodal acceleration
+      this->liquid_velocity_ += nodal_acceleration * dt;
+
+      // Apply particle velocity constraints
+      this->apply_particle_liquid_velocity_constraints();
+
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated liquid velocity of the particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Compute updated velocity of the liquid phase based on nodal velocity
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_velocity(double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // Get interpolated nodal velocity
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_,
+                                            mpm::ParticlePhase::Liquid);
+
+      // Update particle velocity to interpolated nodal velocity
+      this->liquid_velocity_ = nodal_velocity;
+
+      // Apply particle velocity constraints
+      this->apply_particle_liquid_velocity_constraints();
+      
+    } else {
+      throw std::runtime_error(
+          "Cell is not initialised! "
+          "cannot compute updated liquid velocity of the particle");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
