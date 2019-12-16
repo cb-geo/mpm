@@ -4,6 +4,9 @@
 #include <array>
 #include <limits>
 #include <map>
+#include <mutex>
+#include <set>
+#include <tuple>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -183,6 +186,14 @@ class NodeBase {
   //! \param[in] rotation_matrix Rotation matrix of the node
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  virtual bool mpi_rank(unsigned rank) = 0;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  virtual std::set<unsigned> mpi_ranks() const = 0;
 
 };  // NodeBase class
 }  // namespace mpm

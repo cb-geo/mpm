@@ -1,12 +1,6 @@
 #ifndef MPM_NODE_H_
 #define MPM_NODE_H_
 
-#include <array>
-#include <limits>
-#include <mutex>
-#include <tuple>
-#include <vector>
-
 #include "logger.h"
 #include "node_base.h"
 
@@ -205,6 +199,14 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  bool mpi_rank(unsigned rank) override;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  std::set<unsigned> mpi_ranks() const override { return mpi_ranks_; }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -244,6 +246,8 @@ class Node : public NodeBase<Tdim> {
   std::tuple<unsigned, int, double> friction_constraint_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! MPI ranks
+  std::set<unsigned> mpi_ranks_;
 };  // Node class
 }  // namespace mpm
 

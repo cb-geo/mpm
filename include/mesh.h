@@ -366,6 +366,8 @@ class Mesh {
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Boundary nodes
+  Container<NodeBase<Tdim>> boundary_nodes_;
   //! Container of node sets
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
