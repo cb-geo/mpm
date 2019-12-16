@@ -844,7 +844,6 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
 //! Assign particle pore pressures
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
-    const unsigned pore_fluid,
     const std::vector<double>& particle_pore_pressure) {
   bool status = true;
 
@@ -860,7 +859,7 @@ bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
 
     unsigned i = 0;
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      (*pitr)->initial_pore_pressure(pore_fluid, particle_pore_pressure.at(i));
+      (*pitr)->assign_pore_pressure(particle_pore_pressure.at(i));
       ++i;
     }
   } catch (std::exception& exception) {

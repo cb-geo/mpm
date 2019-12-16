@@ -67,7 +67,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
   // Get material from list of materials for each phase
   auto solid_skeleton_material = materials_.at(solid_skeleton_mid);
-  auto pore_liquid_material = materials_.at(pore_fluid_mid);
+  auto pore_liquid_material = materials_.at(pore_liquid_mid);
 
   // Iterate over each particle to assign material to each phase
   mesh_->iterate_over_particles(
@@ -186,7 +186,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 
       // Iterate over each particle to update particle volume
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::update_volume,
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
                     std::placeholders::_1, dt_));
 
       // Iterate over each particle to update porosity
@@ -319,7 +319,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     // Iterate over active nodes to compute acceleratation and velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_two_phase,
-                  std::placeholders::_1, solid_skeleton, pore_fluid, mixture,
+                  std::placeholders::_1, soil_skeleton, pore_liquid, mixture,
                   this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
@@ -354,8 +354,9 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
                     std::placeholders::_1, dt_));
 
       // Iterate over each particle to update particle volume
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1, dt_));
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
+                    std::placeholders::_1, dt_));
 
       // Iterate over each particle to update porosity
       mesh_->iterate_over_particles(
@@ -414,11 +415,12 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 (stress_update_ == mpm::StressUpdate::usl ? "USL" : "USF"),
-                 std::chrono::duration_cast<std::chrono::milliseconds>(
-                     solver_end - solver_begin)
-                     .count());
+  console_->info(
+      "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+      (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
+      std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
+                                                            solver_begin)
+          .count());
 
   return status;
 }

@@ -1,7 +1,7 @@
 //! Construct a two phase particle with id and coordinates
 template <unsigned Tdim>
 mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord)
-    : mpm::Particl<Tdim>(id, coord) {
+    : mpm::Particle<Tdim>(id, coord) {
   this->initialise_liquid_phase();
 
   // Set material pointer to null
@@ -43,7 +43,7 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_material(
     // Check if material is valid and properties are set
     if (material != nullptr) {
       liquid_material_ = material;
-      liquid_material_id_ = material_->id();
+      liquid_material_id_ = liquid_material_->id();
       status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
@@ -59,10 +59,10 @@ template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::assign_saturation_degree() {
   bool status = true;
   try {
-    if (material_ != nullptr) {
-      liquid_saturation_ = material_
-                      ->template property<double>(std::string("saturation"));
-      if (liquid_saturation < 0. || liquid_saturation_ > 1.)
+    if (liquid_material_ != nullptr) {
+      liquid_saturation_ = liquid_material_->template property<double>(
+          std::string("saturation"));
+      if (liquid_saturation_ < 0. || liquid_saturation_ > 1.)
         throw std::runtime_error(
             "Particle saturation degree is negative or larger than one");
     } else {
@@ -168,6 +168,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_mass_momentum_to_nodes() {
 }
 
 //! Compute pore pressure
+template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) {
   bool status = true;
   try {
@@ -305,8 +306,8 @@ bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(unsigned mixture) {
     total_stress(2) -= this->pore_pressure_;
     // Compute nodal mixture  internal forces
     // -1 * total stress * volume
-    cell_->compute_nodal_internal_force(this->bmatrix_, unsigned mixture,
-                                        this->volume_, -1. * total_stress);
+    cell_->compute_nodal_internal_force(this->bmatrix_, mixture, this->volume_,
+                                        -1. * total_stress);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -363,7 +364,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient(
 
 // Compute updated position of the particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_updated_liquid_kinematics(double dt) {
+bool mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_kinematics(double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr

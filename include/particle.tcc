@@ -233,7 +233,7 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
-  this->liquid_properties_["pressure"] = [&]() {
+  this->properties_["pressure"] = [&]() {
     Eigen::VectorXd vec_pressure(1);
     vec_pressure << this->pressure();
     return vec_pressure;
@@ -487,7 +487,7 @@ bool mpm::Particle<Tdim>::compute_volume() {
 
 // Update volume based on the strain rate at cell centre
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_volume_strainrate_centre(double dt) {
+bool mpm::Particle<Tdim>::update_volume_strainrate_centroid(double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume

@@ -125,7 +125,7 @@ class ParticleBase {
   virtual double mass_density() const = 0;
 
   //! Update material point volume by using the cell-centre strain rate
-  virtual bool update_volume_strainrate_centre(double dt) = 0;
+  virtual bool update_volume_strainrate_centroid(double dt) = 0;
 
   //! Update material point volume
   virtual bool update_volume_strainrate(double dt) = 0;
@@ -272,6 +272,36 @@ class ParticleBase {
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
+
+  virtual void initialise_liquid_phase() {}
+  virtual bool assign_liquid_material(
+      const std::shared_ptr<Material<Tdim>>& material) {}
+  virtual bool assign_saturation_degree() {}
+  virtual void assign_pore_pressure(const double& pressure) {}
+  virtual bool assign_liquid_traction(unsigned direction, double traction) {}
+  virtual bool assign_mixture_traction(unsigned direction, double traction) {}
+  virtual bool compute_liquid_mass() {}
+  virtual double liquid_mass() const {}
+  virtual bool map_liquid_mass_momentum_to_nodes() {}
+  virtual bool map_pore_pressure_to_nodes() {}
+  virtual bool compute_pore_pressure_smoothing() {}
+  virtual void map_liquid_body_force(const VectorDim& pgravity) {}
+  virtual void map_liquid_traction_force() {}
+  virtual bool map_liquid_internal_force() {}
+  virtual bool compute_pore_pressure(double dt) {}
+  virtual double pore_pressure() const {}
+  virtual void map_mixture_body_force(unsigned mixture,
+                                      const VectorDim& pgravit) {}
+  virtual void map_mixture_traction_force(unsigned mixture) {}
+  virtual bool map_mixture_internal_force(unsigned mixture) {}
+  virtual bool map_drag_force_coefficient(const VectorDim& pgravity) {}
+  virtual bool compute_updated_liquid_kinematics(double dt) {}
+  virtual bool compute_updated_liquid_velocity(double dt) {}
+  virtual bool assign_liquid_velocity_constraint(unsigned dir,
+                                                 double velocity) {}
+  virtual void apply_particle_liquid_velocity_constraints() {}
+  virtual Eigen::VectorXd liquid_vector_data(const std::string& property) {}
+  virtual VectorDim liquid_velocity() const {}
 
  protected:
   //! particleBase id

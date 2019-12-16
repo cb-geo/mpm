@@ -30,8 +30,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
-  mixture_traction_force_.setZero();
-  mixture_internal_force_.setZero();
   drag_force_coefficient_.setZero();
   status_ = false;
 }
@@ -311,9 +309,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
   const double tolerance = 1.0E-15;
   try {
     // Compute drag force
-    VectorDim drag_force;
-    = drag_force_coefficient_.cwiseProduct(velocity_(pore_fluid) -
-                                           velocity_(solid_skeleton));
+    VectorDim drag_force = drag_force_coefficient_.cwiseProduct(
+        velocity_.col(pore_fluid) - velocity_.col(solid_skeleton));
 
     if (mass_(solid_skeleton) > tolerance && mass_(pore_fluid) > tolerance) {
       // Acceleration of pore fluid (momentume balance of fluid phase)

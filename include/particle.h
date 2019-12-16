@@ -119,7 +119,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Update material point volume by using the cell-centre strain rate
   //! \param[in] dt Analysis time step
-  bool update_volume_strainrate_centre(double dt) override;
+  bool update_volume_strainrate_centroid(double dt) override;
 
   //! Update material point volume by using the strain rate 
   //! \param[in] dt Analysis time step
@@ -188,24 +188,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(const VectorDim& pgravity) override;
 
-  //! Map drag force
-  //! \param[in] soild_skeleton Index corresponding to the solid phase
-  //! \param[in] pore_fluid Index corresponding to the fluid phase
-  bool map_drag_force_coefficient(const unsigned soild_skeleton,
-                                  const unsigned pore_fluid) override;
-
   //! Map internal force
   bool map_internal_force() override;
-
-  // //! Map internal pressure
-  // //! \param[in] phase Index corresponding to the phase
-  // bool map_internal_pressure(unsigned phase) override;
-
-  // //! Map mixture internal force
-  // //! \param[in] solid_skeleton Index corresponding to solid phase
-  // //! \param[in] pore_fluid Index corresponding to fluid phase
-  // bool map_mixture_internal_force(const unsigned solid_skeleton,
-  //                                 const unsigned pore_fluid) override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity

@@ -286,7 +286,6 @@ class Mesh {
   //! \param[in] pore_fluid Index corresponding to fluid phase
   //! \param[in] particle_pore_pressure Initial pore pressure of particle
   bool assign_particles_pore_pressures(
-      const unsigned pore_fluid,
       const std::vector<double>& particle_pore_pressures);
 
   //! Assign particles cells
