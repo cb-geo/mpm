@@ -420,3 +420,46 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_velocity(double dt) {
   }
   return status;
 }
+
+//! Assign particle liquid phase velocity constraint
+//! Constrain directions can take values between 0 and Dim
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_velocity_constraint(
+    unsigned dir, double velocity) {
+  bool status = true;
+  try {
+    //! Constrain directions can take values between 0 and Dim
+    if (dir < Tdim)
+      this->liquid_velocity_constraints_.insert(
+          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
+                                           static_cast<double>(velocity)));
+    else
+      throw std::runtime_error(
+          "Particle liquid velocity constraint direction is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Apply particle velocity constraints
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::apply_particle_liquid_velocity_constraints() {
+  // Set particle velocity constraint
+  for (const auto& constraint : this->liquid_velocity_constraints_) {
+    // Direction value in the constraint (0, Dim)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    this->liquid_velocity_(direction) = constraint.second;
+  }
+}
+
+//! Return particle liquid phase vector data
+template <unsigned Tdim>
+Eigen::VectorXd mpm::TwoPhaseParticle<Tdim>::liquid_vector_data(
+    const std::string& property) {
+  return this->liquid_properties_.at(property)();
+}

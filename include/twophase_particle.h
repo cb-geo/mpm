@@ -109,7 +109,23 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Compute updated velocity of the particle based on nodal velocity
   //! \param[in] dt Analysis time step
-  bool compute_updated_liquid_velocity(double dt) override
+  bool compute_updated_liquid_velocity(double dt) override;
+
+  //! Assign particle liquid phase velocity constraints
+  //! Directions can take values between 0 and Dim
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle liquid phase velocity constraint
+  //! \retval status Assignment status
+  bool assign_liquid_velocity_constraint(unsigned dir,
+                                           double velocity) override;
+
+  //! Apply particle liquid phase velocity constraints
+  void apply_particle_liquid_velocity_constraints() override;
+
+  //! Return vector data of particle liquid phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle liquid phase property
+  Eigen::VectorXd liquid_vector_data(const std::string& property) override;
 
  private:
   //! Shape functions
@@ -133,6 +149,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::Matrix<double, Tdim, 1> liquid_displacement_;
   //! Liquid velocity
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
+    //! Particle liquid phase velocity constraints
+  std::map<unsigned, double> liquid_velocity_constraints_;
   //! Pore pressure
   double pore_pressure_;
   //! Set liquid phase traction
