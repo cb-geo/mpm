@@ -27,6 +27,7 @@
 #include "hdf5_particle.h"
 #include "logger.h"
 #include "material/material.h"
+#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -183,9 +184,11 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
-  //! Remove all particles in a cell given cell id
-  //! \param[in] rank MPI rank of the mesh
-  void remove_all_nonrank_particles(unsigned rank);
+  //! Remove all particles in a cell in nonlocal rank
+  void remove_all_nonrank_particles();
+
+  //! Transfer particles to different ranks in nonlocal rank cells
+  void transfer_nonrank_particles();
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
