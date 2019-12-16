@@ -174,6 +174,7 @@ class NodeBase {
   //! \param[in] dt Timestep in analysis
   virtual bool compute_acceleration_velocity_two_phase(unsigned solid_skeleton,
                                                        unsigned pore_fluid,
+                                                       unsigned mixture,
                                                        double dt) = 0;
 
   //! Assign velocity constraint

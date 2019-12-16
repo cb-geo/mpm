@@ -306,7 +306,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
 //! Compute acceleration and velocity for two phase
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
-    unsigned solid_skeleton, unsigned pore_fluid, double dt) {
+    unsigned solid_skeleton, unsigned pore_fluid, unsigned mixture, double dt) {
   bool status = true;
   const double tolerance = 1.0E-15;
   try {
@@ -324,9 +324,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
 
       // Acceleration of solid skeleton (momentume balance of mixture)
       this->acceleration_.col(solid_skeleton) =
-          (this->external_force_.col(solid_skeleton) +
-           this->external_force_.col(pore_fluid) +
-           this->mixture_internal_force_ -
+          (this->external_force_.col(mixture) +
+           this->internal_force_.col(mixture) -
            this->mass_(pore_fluid) * this->acceleration_.col(pore_fluid)) /
           this->mass_(solid_skeleton);
 

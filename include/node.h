@@ -194,6 +194,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_two_phase(unsigned solid_skeleton,
                                                unsigned pore_fluid,
+                                               unsigned mixture,
                                                double dt) override;
 
   //! Assign velocity constraint
