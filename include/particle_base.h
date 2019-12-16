@@ -243,14 +243,6 @@ class ParticleBase {
   //! Compute updated position based on nodal velocity
   virtual bool compute_updated_position_velocity(double dt) = 0;
 
-  // //! Compute updated position
-  // virtual bool update_position_acceleration(unsigned phase, double dt,
-  //                                           bool update_position) = 0;
-
-  // //! Compute updated position based on nodal velocity
-  // virtual bool update_position_velocity(unsigned phase, double dt,
-  //                                       bool update_position) = 0;
-
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
 
@@ -273,34 +265,113 @@ class ParticleBase {
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
 
+  //! Initialise liquid phase
   virtual void initialise_liquid_phase() {}
+
+  //! Assign material
+  //! \param[in] material Pointer to a material
   virtual bool assign_liquid_material(
       const std::shared_ptr<Material<Tdim>>& material) {}
+
+  //! Assign saturation degree
   virtual bool assign_saturation_degree() {}
+
+  //! Assign pore pressure
+  //! \param[in] pressure Pore liquid pressure
   virtual void assign_pore_pressure(const double& pressure) {}
+
+  //! Assign liquid traction
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
   virtual bool assign_liquid_traction(unsigned direction, double traction) {}
+
+  //! Assign mixture traction
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
   virtual bool assign_mixture_traction(unsigned direction, double traction) {}
+
+  //! Compute liquid mass
   virtual bool compute_liquid_mass() {}
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
   virtual double liquid_mass() const {}
+
+  //! Assign liquid mass and momentum to nodes
   virtual bool map_liquid_mass_momentum_to_nodes() {}
+
+  //! Assign pore pressure to nodes
   virtual bool map_pore_pressure_to_nodes() {}
+
+  //! Compute pore pressure somoothening by interpolating nodal pressure
   virtual bool compute_pore_pressure_smoothing() {}
+
+  //! Map liquid body force
+  //! \param[in] pgravity Gravity of a particle
   virtual void map_liquid_body_force(const VectorDim& pgravity) {}
+
+  //! Map liquid phase traction force
   virtual void map_liquid_traction_force() {}
+
+  //! Map liquid internal force
   virtual bool map_liquid_internal_force() {}
+
+  //! Compute pore pressure
+  //! \param[in] dt Time step size
   virtual bool compute_pore_pressure(double dt) {}
+
+  //! Return liquid pore pressure
+  //! \retval pore pressure Pore liquid pressure
   virtual double pore_pressure() const {}
+
+  //! Map two phase mixture body force
+  //! \param[in] mixture Identification for Mixture
+  //! \param[in] pgravity Gravity of the particle
   virtual void map_mixture_body_force(unsigned mixture,
                                       const VectorDim& pgravit) {}
+
+  //! Map two phase mixture traction force
+  //! \param[in] mixture Identification for Mixture
   virtual void map_mixture_traction_force(unsigned mixture) {}
+
+  //! Map two phase mixture internal force
+  //! \param[in] mixture Identification for Mixture
   virtual bool map_mixture_internal_force(unsigned mixture) {}
+
+  //! Map drag force coefficient
+  //! \param[in] pgravity Gravity of a particle
   virtual bool map_drag_force_coefficient(const VectorDim& pgravity) {}
+
+  //! Compute updated velocity of the particle using nodal acceleration
+  //! \param[in] dt Analysis time step
+  //! \retval status Compute status
   virtual bool compute_updated_liquid_kinematics(double dt) {}
+
+  //! Compute updated velocity of the particle based on nodal velocity
+  //! \param[in] dt Analysis time step
+  //! \retval status Compute status
   virtual bool compute_updated_liquid_velocity(double dt) {}
-  virtual bool assign_liquid_velocity_constraint(unsigned dir,
+
+  //! Assign particle liquid phase velocity constraints
+  //! Directions can take values between 0 and Dim
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle liquid phase velocity constraint
+  //! \retval status Assignment status
+  virtual bool assign_particle_liquid_velocity_constraint(unsigned dir,
                                                  double velocity) {}
+
+  //! Apply particle liquid phase velocity constraints
   virtual void apply_particle_liquid_velocity_constraints() {}
+
+  //! Return vector data of particle liquid phase
+  //! \param[in] property Property string
+  //! \retval vecdata Vector data of particle liquid phase property
   virtual Eigen::VectorXd liquid_vector_data(const std::string& property) {}
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
   virtual VectorDim liquid_velocity() const {}
 
  protected:
@@ -316,10 +387,6 @@ class ParticleBase {
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
-  //! Material
-  std::shared_ptr<Material<Tdim>> material_;
-  //! Unsigned material id
-  unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
   //! Material point volume
