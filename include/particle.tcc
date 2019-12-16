@@ -674,6 +674,14 @@ bool mpm::Particle<Tdim>::compute_stress() {
   return status;
 }
 
+//! Map body force
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
+  // Compute nodal body forces
+  cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Solid,
+                                  this->mass_, pgravity);
+}
+
 
 
 //! Map internal force
