@@ -274,20 +274,6 @@ class Cell {
                                     unsigned phase, double pvolume,
                                     const Eigen::Matrix<double, 6, 1>& pstress);
 
-  //! Compute the nodal mixture traction force of a cell from the particle
-  //! \param[in] shapefn Shapefns at local coordinates of particle
-  //! \param[in] traction Traction force from the particle
-  void compute_nodal_mixture_traction_force(const Eigen::VectorXd& shapefn,
-                                            const VectorDim& traction);
-
-  //! Compute the nodal mixture internal force of a cell from stress and volume
-  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
-  //! \param[in] pvolume Volume of particle
-  //! \param[in] pstress Stress of particle
-  void compute_nodal_mixture_internal_force(
-      const std::vector<Eigen::MatrixXd>& bmatrix, double pvolume,
-      const Eigen::Matrix<double, 6, 1>& pstress);
-
   //! Compute the nodal drag force of a cell from particle drag force
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] pvolume Volume of particle
