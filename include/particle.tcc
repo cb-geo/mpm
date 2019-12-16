@@ -674,6 +674,8 @@ bool mpm::Particle<Tdim>::compute_stress() {
   return status;
 }
 
+
+
 //! Map internal force
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_internal_force() {
