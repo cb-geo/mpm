@@ -106,13 +106,6 @@ class NodeBase {
 
   //! Update internal force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] force Internal force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_mixture_internal_force(bool update,
-                                             const VectorDim& force) = 0;
-
-  //! Update internal force (body force / traction force)
-  //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] drag_force Drag force from the particles in a cell
   //! \retval status Update status
   virtual bool update_drag_force_coefficient(bool update,
@@ -121,9 +114,6 @@ class NodeBase {
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
-
-  //! Return mixture internal force
-  virtual VectorDim mixture_internal_force() const = 0;
 
   //! Return drag force at a given node
   virtual VectorDim drag_force_coefficient() const = 0;

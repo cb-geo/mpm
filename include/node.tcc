@@ -131,48 +131,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
   return status;
 }
 
-//! Update mixture traction force
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_mixture_traction_force(
-    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
-  bool status = false;
-  try {
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
-
-    // Update/assign mixture traction force
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    mixture_traction_force_ = mixture_traction_force_ * factor + force;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Update mixture internal force (body force / traction force)
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_mixture_internal_force(
-    bool update, const Eigen::Matrix<double, Tdim, 1>& force) {
-  bool status = false;
-  try {
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
-
-    // Update/assign internal force
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    mixture_internal_force_ = mixture_internal_force_ * factor + force;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Update drag force
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_drag_force_coefficient(
@@ -354,12 +312,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_two_phase(
   try {
     // Compute drag force
     VectorDim drag_force;
-    drag_force.setZero();
-
-    for (unsigned i = 0; i < Tdim; ++i)
-      drag_force(i) = this->drag_force_coefficient_(i) *
-                      (this->velocity_.col(pore_fluid)(i) -
-                       this->velocity_.col(solid_skeleton)(i));
+    = drag_force_coefficient_.cwiseProduct(velocity_(pore_fluid) -
+                                           velocity_(solid_skeleton));
 
     if (mass_(solid_skeleton) > tolerance && mass_(pore_fluid) > tolerance) {
       // Acceleration of pore fluid (momentume balance of fluid phase)
