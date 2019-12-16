@@ -279,16 +279,16 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Material
-  using ParticleBase<Tdim>::material_;
-  //! Material id
-  using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
     //! Material point volume
   using ParticleBase<Tdim>::volume_;
   //! Material point porosity
   using ParticleBase<Tdim>::porosity_;
+  //! Material
+  std::shared_ptr<Material<Tdim>> material_;
+  //! Unsigned material id
+  unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Volumetric mass density (mass / volume)
   double mass_density_;
   //! Mass
