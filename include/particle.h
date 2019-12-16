@@ -178,23 +178,8 @@ class Particle : public ParticleBase<Tdim> {
     this->stress_ = stress;
   }
 
-  // //! Initial pore pressure
-  // //! \param[in] pore_fluid Index corresponding to fluid phase
-  // //! \param[in] pore pressure Initial pore pressure
-  // void initial_pore_pressure(const unsigned pore_fluid,
-  //                            const double& pore_pressure) override {
-  //   this->pressure_(pore_fluid) = pore_pressure;
-  // }
-
   //! Compute stress
   bool compute_stress() override;
-
-  // //! Compute pore pressure
-  // //! \param[in] solid_skeleton Index corresponding to solid phase
-  // //! \param[in] pore_fluid Index corresponding to fluid phase
-  // //! \param[in] dt Analysis time step
-  // bool compute_pore_pressure(unsigned solid_skeleton, unsigned pore_fluid,
-  //                            double dt) override;
 
   //! Return stress of the particle
   Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
@@ -252,20 +237,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute updated position of the particle based on nodal velocity
   //! \param[in] dt Analysis time step
   bool compute_updated_position_velocity(double dt) override;
-
-  // //! Compute updated position of the particle
-  // //! \param[in] phase Index corresponding to the phase
-  // //! \param[in] dt Analysis time step
-  // //! \param[in] update_position Status of update position
-  // bool update_position_acceleration(unsigned phase, double dt,
-  //                                   bool update_position) override;
-
-  // //! Compute updated position of the particle based on nodal velocity
-  // //! \param[in] phase Index corresponding to the phase
-  // //! \param[in] dt Analysis time step
-  // //! \param[in] update_position Status of update position
-  // bool update_position_velocity(unsigned phase, double dt,
-  //                               bool update_position) override;
 
   //! Return a state variable
   //! \param[in] var State variable
