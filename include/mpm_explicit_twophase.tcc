@@ -199,16 +199,16 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
 
       // Iterate over each particle to compute pore pressure
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::compute_pore_pressure,
-          std::placeholders::_1, dt_));
-
-    // Pressure smoothing for liquid phase
-    if (pressure_smoothing_) {
-      // Assign pressure to nodes
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_pore_pressure_to_nodes,
-                    std::placeholders::_1));
+          std::bind(&mpm::ParticleBase<Tdim>::compute_pore_pressure,
+                    std::placeholders::_1, dt_));
+
+      // Pressure smoothing for liquid phase
+      if (pressure_smoothing_) {
+        // Assign pressure to nodes
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_pore_pressure_to_nodes,
+                      std::placeholders::_1));
 
 #ifdef USE_MPI
         // Run if there is more than a single MPI task
@@ -250,9 +250,6 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_liquid_traction_force,
                     std::placeholders::_1));
-
-      //! Apply nodal tractions
-      //if (nodal_tractions_) this->apply_nodal_tractions();
     });
 
     // Spawn a task for internal force
@@ -270,7 +267,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
       // Iterate over particles to compute nodal drag force coefficient
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::map_drag_force_coefficient,
-                    std::placeholders::_1, this->gravity_));
+                    std::placeholders::_1));
     });
     task_group.wait();
 

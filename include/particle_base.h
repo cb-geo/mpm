@@ -257,10 +257,11 @@ class ParticleBase {
   //! \param[in] velocity Applied particle velocity constraint
   virtual bool assign_particle_velocity_constraint(unsigned dir,
                                                    double velocity) = 0;
-  
+
   // //! Assign particle pressure constraints
   // virtual bool assign_particle_pressure_constraint(const unsigned phase,
-  //                                                  const double pressure) = 0;
+  //                                                  const double pressure) =
+  //                                                  0;
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
@@ -341,8 +342,7 @@ class ParticleBase {
   virtual bool map_mixture_internal_force(unsigned mixture) {}
 
   //! Map drag force coefficient
-  //! \param[in] pgravity Gravity of a particle
-  virtual bool map_drag_force_coefficient(const VectorDim& pgravity) {}
+  virtual bool map_drag_force_coefficient() {}
 
   //! Compute updated velocity of the particle using nodal acceleration
   //! \param[in] dt Analysis time step
@@ -360,7 +360,7 @@ class ParticleBase {
   //! \param[in] velocity Applied particle liquid phase velocity constraint
   //! \retval status Assignment status
   virtual bool assign_particle_liquid_velocity_constraint(unsigned dir,
-                                                 double velocity) {}
+                                                          double velocity) {}
 
   //! Apply particle liquid phase velocity constraints
   virtual void apply_particle_liquid_velocity_constraints() {}

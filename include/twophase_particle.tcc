@@ -101,7 +101,7 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_traction(unsigned direction,
 // Assign traction to the mixture
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::assign_mixture_traction(unsigned direction,
-                                                         double traction) {
+                                                          double traction) {
   bool status = false;
   try {
     if (direction >= Tdim ||
@@ -154,9 +154,9 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_mass_momentum_to_nodes() {
     // Check if particle mass is set and positive
     if (liquid_mass_ != std::numeric_limits<double>::max()) {
       // Map particle mass and momentum to nodes
-      this->cell_->map_mass_momentum_to_nodes(
-          this->shapefn_, mpm::ParticlePhase::Liquid, liquid_mass_,
-          liquid_velocity_);
+      this->cell_->map_mass_momentum_to_nodes(this->shapefn_,
+                                              mpm::ParticlePhase::Liquid,
+                                              liquid_mass_, liquid_velocity_);
     } else {
       throw std::runtime_error("Particle mass is not set or negative");
     }
@@ -270,7 +270,7 @@ void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force(unsigned mixture) {
   if (this->set_mixture_traction_)
     // Map particle mixture traction forces to nodes
     cell_->compute_nodal_traction_force(this->shapefn_, mixture,
-                                                this->mixture_traction_);
+                                        this->mixture_traction_);
 }
 
 //! Map liquid phase internal force
@@ -317,8 +317,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(unsigned mixture) {
 
 //! Map drag force coefficient
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient(
-    const VectorDim& pgravity) {
+bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
   bool status = true;
   try {
     // initialise permeability
@@ -348,8 +347,8 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient(
         throw std::runtime_error("Porous medium permeability is negative");
       pcoefficient(dir) =
           porosity_ * porosity_ *
-          (liquid_material_->template property<double>("density")) *
-          pgravity(dir) / permeability(dir);
+          (liquid_material_->template property<double>("density")) * 9.81 /
+          permeability(dir);
     }
 
     // Map particle drag force coefficient to cell nodes
@@ -409,7 +408,7 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_velocity(double dt) {
 
       // Apply particle velocity constraints
       this->apply_particle_liquid_velocity_constraints();
-      
+
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -425,7 +424,7 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_velocity(double dt) {
 //! Assign particle liquid phase velocity constraint
 //! Constrain directions can take values between 0 and Dim
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_velocity_constraint(
+bool mpm::TwoPhaseParticle<Tdim>::assign_particle_liquid_velocity_constraint(
     unsigned dir, double velocity) {
   bool status = true;
   try {

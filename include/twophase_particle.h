@@ -49,7 +49,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Assign pore pressure
   //! \param[in] pressure Pore liquid pressure
-  void assign_pore_pressure(const double& pressure) override{
+  void assign_pore_pressure(const double& pressure) override {
     this->pore_pressure_ = pressure;
   }
 
@@ -69,6 +69,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool compute_liquid_mass() override;
 
   //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
   double liquid_mass() const override { return liquid_mass_; }
 
   //! Assign liquid mass and momentum to nodes
@@ -91,31 +92,38 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool map_liquid_internal_force() override;
 
   //! Compute pore pressure
+  //! \param[in] dt Time step size
   bool compute_pore_pressure(double dt) override;
 
   //! Return liquid pore pressure
+  //! \retval pore pressure Pore liquid pressure
   double pore_pressure() const override { return pore_pressure_; }
 
   //! Map two phase mixture body force
+  //! \param[in] mixture Identification for Mixture
+  //! \param[in] pgravity Gravity of the particle
   void map_mixture_body_force(unsigned mixture,
                               const VectorDim& pgravity) override;
 
   //! Map two phase mixture traction force
+  //! \param[in] mixture Identification for Mixture
   void map_mixture_traction_force(unsigned mixture) override;
 
   //! Map two phase mixture internal force
+  //! \param[in] mixture Identification for Mixture
   bool map_mixture_internal_force(unsigned mixture) override;
 
   //! Map drag force coefficient
-  //! \param[in] pgravity Gravity of a particle
-  bool map_drag_force_coefficient(const VectorDim& pgravity) override;
+  bool map_drag_force_coefficient() override;
 
   //! Compute updated velocity of the particle using nodal acceleration
   //! \param[in] dt Analysis time step
+  //! \retval status Compute status
   bool compute_updated_liquid_kinematics(double dt) override;
 
   //! Compute updated velocity of the particle based on nodal velocity
   //! \param[in] dt Analysis time step
+  //! \retval status Compute status
   bool compute_updated_liquid_velocity(double dt) override;
 
   //! Assign particle liquid phase velocity constraints
@@ -123,8 +131,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle liquid phase velocity constraint
   //! \retval status Assignment status
-  bool assign_liquid_velocity_constraint(unsigned dir,
-                                           double velocity) override;
+  bool assign_particle_liquid_velocity_constraint(unsigned dir,
+                                                  double velocity) override;
 
   //! Apply particle liquid phase velocity constraints
   void apply_particle_liquid_velocity_constraints() override;
@@ -135,26 +143,26 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::VectorXd liquid_vector_data(const std::string& property) override;
 
   //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
   VectorDim liquid_velocity() const override { return liquid_velocity_; }
 
  private:
   //! Shape functions
   using Particle<Tdim>::shapefn_;
-    //! B matrix
+  //! B matrix
   using Particle<Tdim>::bmatrix_;
   //! Effective stress of soil skeleton
   using Particle<Tdim>::stress_;
   //! Soil skeleton strain rate
-  using Particle<Tdim>::strain_rate_;  
+  using Particle<Tdim>::strain_rate_;
+  //! Soil skeleton material
+  using Particle<Tdim>::material_;
   //! Particle total volume
   using ParticleBase<Tdim>::volume_;
   //! Porosity
   using ParticleBase<Tdim>::porosity_;
   //! Cell
   using ParticleBase<Tdim>::cell_;
-  //! Soil skeleton material
-  using ParticleBase<Tdim>::material_;
-
   //! Material
   std::shared_ptr<Material<Tdim>> liquid_material_;
   //! Liquid material id
@@ -169,7 +177,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::Matrix<double, Tdim, 1> liquid_displacement_;
   //! Liquid velocity
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
-    //! Particle liquid phase velocity constraints
+  //! Particle liquid phase velocity constraints
   std::map<unsigned, double> liquid_velocity_constraints_;
   //! Pore pressure
   double pore_pressure_;
@@ -179,12 +187,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool set_mixture_traction_;
   //! Traction for liquid phase
   Eigen::Matrix<double, Tdim, 1> liquid_traction_;
-    //! Traction for mixture (soil skeleton + pore liquid)
+  //! Traction for mixture (soil skeleton + pore liquid)
   Eigen::Matrix<double, Tdim, 1> mixture_traction_;
   //! Liquid strain rate
-  Eigen::Matrix<double, 6, 1> liquid_strain_rate_; // delete if not needed
+  Eigen::Matrix<double, 6, 1> liquid_strain_rate_;  // delete if not needed
   //! Liquid strain rate
-  Eigen::Matrix<double, 6, 1> liquid_strain_; // delete if not needed
+  Eigen::Matrix<double, 6, 1> liquid_strain_;  // delete if not needed
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> liquid_properties_;
   //! Logger
