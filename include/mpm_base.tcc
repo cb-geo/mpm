@@ -181,8 +181,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign pressure constraints for single phase materials
     if (!io_->file_name("pressure_constraints").empty()) {
       bool pressure_constraints = mesh_->assign_pressure_constraints(
-        mpm::ParticlePhase::Solid, mesh_reader->read_pressure_constraints(
-                          io_->file_name("pressure_constraints")));
+          mpm::ParticlePhase::Solid,
+          mesh_reader->read_pressure_constraints(
+              io_->file_name("pressure_constraints")));
       if (!pressure_constraints)
         throw std::runtime_error(
             "Pressure constraints are not properly assigned");
@@ -191,8 +192,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign pore pressure constraints for two/three phase materials
     if (!io_->file_name("pore_pressure_constraints").empty()) {
       bool pore_pressure_constraints = mesh_->assign_pressure_constraints(
-        mpm::ParticlePhase::Liquid, mesh_reader->read_pressure_constraints(
-                          io_->file_name("pore_pressure_constraints")));
+          mpm::ParticlePhase::Liquid,
+          mesh_reader->read_pressure_constraints(
+              io_->file_name("pore_pressure_constraints")));
       if (!pore_pressure_constraints)
         throw std::runtime_error(
             "Pore pressure constraints are not properly assigned");

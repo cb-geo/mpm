@@ -121,13 +121,13 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] dt Analysis time step
   bool update_volume_strainrate_centroid(double dt) override;
 
-  //! Update material point volume by using the strain rate 
+  //! Update material point volume by using the strain rate
   //! \param[in] dt Analysis time step
   bool update_volume_strainrate(double dt) override;
-  
+
   //! Assign porosity
   bool assign_porosity() override;
-  
+
   //! Update porosity
   //! \param[in] dt Analysis time step
   bool update_porosity(double dt) override;
@@ -284,7 +284,7 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
-    //! Material point volume
+  //! Material point volume
   using ParticleBase<Tdim>::volume_;
   //! Material point porosity
   using ParticleBase<Tdim>::porosity_;

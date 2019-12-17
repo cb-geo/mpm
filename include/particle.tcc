@@ -435,7 +435,7 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
       // coordinates (cpGIMP Bardenhagen 2008 (pp485))
       this->natural_size_.fill(element->unit_element_length() /
                                cell_->nparticles());
-     }
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -449,8 +449,7 @@ bool mpm::Particle<Tdim>::assign_porosity() {
   bool status = true;
   try {
     if (material_ != nullptr) {
-      porosity_ = material_
-                      ->template property<double>(std::string("porosity"));
+      porosity_ = material_->template property<double>(std::string("porosity"));
       if (porosity_ < 0. || porosity_ > 1.)
         throw std::runtime_error(
             "Particle porosity is negative or larger than one");
@@ -518,8 +517,8 @@ bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
     // Check if particle has a valid cell ptr and a valid volume
     if (volume_ != std::numeric_limits<double>::max()) {
       this->volume_ *= (1. + dt * strain_rate_.head(Tdim).sum());
-      this->mass_density_ = this->mass_density_ /
-                            (1. + dt * strain_rate_.head(Tdim).sum());
+      this->mass_density_ =
+          this->mass_density_ / (1. + dt * strain_rate_.head(Tdim).sum());
     } else {
       throw std::runtime_error(
           "volume is not initialised! cannot update particle volume");
@@ -536,15 +535,14 @@ template <unsigned Tdim>
 bool mpm::Particle<Tdim>::update_porosity(double dt) {
   bool status = true;
   try {
-      // Update particle porosity
-      this->porosity_ =
-          1 - (1 - this->porosity_) /
-                  (1 + dt * strain_rate_.head(Tdim).sum());
+    // Update particle porosity
+    this->porosity_ =
+        1 - (1 - this->porosity_) / (1 + dt * strain_rate_.head(Tdim).sum());
 
-    if(porosity_ < 0 || porosity_ > 1)
+    if (porosity_ < 0 || porosity_ > 1)
       throw std::runtime_error(
           "Invalid porosity, less than zero or greater than one");
-    
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -681,8 +679,6 @@ void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Solid,
                                   this->mass_, pgravity);
 }
-
-
 
 //! Map internal force
 template <unsigned Tdim>

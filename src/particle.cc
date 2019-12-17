@@ -1,7 +1,7 @@
 #include "particle.h"
-#include "twophase_particle.h"
 #include "factory.h"
 #include "particle_base.h"
+#include "twophase_particle.h"
 
 // Single phase particle2D (2 Dim)
 static Register<mpm::ParticleBase<2>, mpm::Particle<2>, mpm::Index,
