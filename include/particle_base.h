@@ -287,11 +287,21 @@ class ParticleBase {
   //! \retval status Assignment status
   virtual bool assign_liquid_traction(unsigned direction, double traction) {}
 
+  //! Return liquid phase traction
+  virtual VectorDim liquid_traction() const {};
+
   //! Assign mixture traction
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
   virtual bool assign_mixture_traction(unsigned direction, double traction) {}
+
+  //! Return mixture traction
+  virtual VectorDim mixture_traction() const {};
+
+  //! Assign liquid mass
+  //! \param[in] lmass Mass of the liquid phase
+  virtual void assign_liquid_mass(double lmass) {}
 
   //! Compute liquid mass
   virtual bool compute_liquid_mass() {}
@@ -299,6 +309,15 @@ class ParticleBase {
   //! Return liquid mass
   //! \retval liquid mass Liquid phase mass
   virtual double liquid_mass() const {}
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  virtual bool assign_liquid_velocity(const VectorDim& velocity) {}
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {}
 
   //! Assign liquid mass and momentum to nodes
   virtual bool map_liquid_mass_momentum_to_nodes() {}
@@ -369,10 +388,6 @@ class ParticleBase {
   //! \param[in] property Property string
   //! \retval vecdata Vector data of particle liquid phase property
   virtual Eigen::VectorXd liquid_vector_data(const std::string& property) {}
-
-  //! Return velocity of the particle liquid phase
-  //! \retval liquid velocity Liquid phase velocity
-  virtual VectorDim liquid_velocity() const {}
 
  protected:
   //! particleBase id

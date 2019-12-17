@@ -141,9 +141,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Map particle mass and momentum to nodes
   bool map_mass_momentum_to_nodes() override;
 
-  //! Assign nodal mass to particles
+  //! Assign mass to particles
   //! \param[in] mass Mass from the particles in a cell
-  //! \retval status Assignment status
   void assign_mass(double mass) override { mass_ = mass; }
 
   //! Return mass of the particles
