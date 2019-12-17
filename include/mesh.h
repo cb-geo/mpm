@@ -261,6 +261,18 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_tractions);
 
+  //! Assign particles mixture tractions
+  //! \param[in] particle_tractions Traction at dir on particle for mixture
+  bool assign_particles_mixture_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_mtractions);
+
+  //! Assign particles liquid phase tractions
+  //! \param[in] particle_tractions Traction at dir on particle for liquid phase
+  bool assign_particles_liquid_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_ltractions);
+
   //! Assign nodal traction force
   //! \param[in] nodal_tractions Traction at dir on nodes
   bool assign_nodal_tractions(

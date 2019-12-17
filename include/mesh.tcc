@@ -791,8 +791,7 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         particle_tractions) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
+
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -809,6 +808,71 @@ bool mpm::Mesh<Tdim>::assign_particles_tractions(
         status = map_particles_[pid]->assign_traction(dir, traction);
 
       if (!status) throw std::runtime_error("Traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_mixture_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_mtractions) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_mtraction : particle_mtractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_mtraction);
+      // Direction
+      unsigned dir = std::get<1>(particle_mtraction);
+      // Traction
+      double traction = std::get<2>(particle_mtraction);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_mixture_traction(dir, traction);
+
+      if (!status)
+        throw std::runtime_error("Mixture traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_liquid_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_ltractions) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_ltraction : particle_ltractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_ltraction);
+      // Direction
+      unsigned dir = std::get<1>(particle_ltraction);
+      // Traction
+      double traction = std::get<2>(particle_ltraction);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_liquid_traction(dir, traction);
+
+      if (!status)
+        throw std::runtime_error(
+            "Liquid phase traction is invalid for particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
