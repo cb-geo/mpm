@@ -493,6 +493,24 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 #endif
 }
 
+//! Transfer all particles in cells that are not in local rank
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::identify_domain_shared_nodes() {
+  // Get MPI rank
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  // Iterate through all the cells
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->assign_mpi_rank_to_nodes();
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // If node has more than 1 MPI rank
+    if ((*nitr)->mpi_ranks().size() > 1) domain_shared_nodes_.add(*nitr);
+  }
+}
+
 //! Locate particles in a cell
 template <unsigned Tdim>
 std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
