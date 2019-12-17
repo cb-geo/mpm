@@ -1,3 +1,4 @@
+#include <iostream>
 #include <limits>
 #include <memory>
 
@@ -510,26 +511,23 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     REQUIRE(node3->material_ids().size() == 2);
 
     // check which material ids were added to each node
-    int id_check = 1;
-    for (auto id_itr : node0->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node1->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node2->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node3->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
+    std::vector<unsigned> material_ids = {1, 2};
+    unsigned i = 0;
+    auto mat_ids = node0->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node1->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node2->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node3->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
   }
 
   SECTION("Test particle addition deletion") {
@@ -1634,46 +1632,39 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(node7->material_ids().size() == 2);
 
     // check which material ids were added to each node
-    int id_check = 1;
-    for (auto id_itr : node0->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node1->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node2->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node3->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node4->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node5->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node6->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
-    id_check = 1;
-    for (auto id_itr : node7->material_ids()) {
-      REQUIRE(id_itr == id_check);
-      id_check++;
-    }
+    std::vector<unsigned> material_ids = {1, 2};
+    unsigned i = 0;
+    auto mat_ids = node0->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node1->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node2->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node3->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node4->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node5->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node6->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
+    i = 0;
+    mat_ids = node7->material_ids();
+    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+      REQUIRE(*itr == material_ids.at(i));
   }
 
   SECTION("Test particle addition deletion") {

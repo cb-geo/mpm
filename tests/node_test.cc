@@ -447,7 +447,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(3);
+      node->append_material_id(4);
       node->append_material_id(0);
       node->append_material_id(2);
 
@@ -455,11 +455,11 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->material_ids().size() == 4);
 
       // Check elements of material_ids
-      int id_check = 0;
-      for (auto id_itr : node->material_ids()) {
-        REQUIRE(id_itr == id_check);
-        id_check++;
-      }
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      unsigned i = 0;
+      auto mat_ids = node->material_ids();
+      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+        REQUIRE(*itr == material_ids.at(i));
     }
   }
 }
@@ -1024,7 +1024,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(3);
+      node->append_material_id(4);
       node->append_material_id(0);
       node->append_material_id(2);
 
@@ -1032,11 +1032,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->material_ids().size() == 4);
 
       // Check elements of material_ids
-      int id_check = 0;
-      for (auto id_itr : node->material_ids()) {
-        REQUIRE(id_itr == id_check);
-        id_check++;
-      }
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      unsigned i = 0;
+      auto mat_ids = node->material_ids();
+      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+        REQUIRE(*itr == material_ids.at(i));
     }
   }
 }
@@ -1577,7 +1577,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Add material to nodes
       node->append_material_id(0);
       node->append_material_id(1);
-      node->append_material_id(3);
+      node->append_material_id(4);
       node->append_material_id(0);
       node->append_material_id(2);
 
@@ -1585,11 +1585,11 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->material_ids().size() == 4);
 
       // Check elements of material_ids
-      int id_check = 0;
-      for (auto id_itr : node->material_ids()) {
-        REQUIRE(id_itr == id_check);
-        id_check++;
-      }
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      unsigned i = 0;
+      auto mat_ids = node->material_ids();
+      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+        REQUIRE(*itr == material_ids.at(i));
     }
   }
 }
