@@ -154,6 +154,9 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
 
+  //! Return material id
+  unsigned material_id() const { return material_id_; }
+
   //! Compute strain
   //! \param[in] dt Analysis time step
   void compute_strain(double dt) override;

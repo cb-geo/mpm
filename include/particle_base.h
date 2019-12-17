@@ -144,7 +144,7 @@ class ParticleBase {
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Return material id
-  unsigned material_id() const { return material_id_; }
+  virtual unsigned material_id() const = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
