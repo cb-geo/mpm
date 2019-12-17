@@ -59,14 +59,33 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \retval status Assignment status
   bool assign_liquid_traction(unsigned direction, double traction) override;
 
+  //! Return liquid phase traction
+  VectorDim liquid_traction() const { return liquid_traction_; };
+
   //! Assign mixture traction
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
   bool assign_mixture_traction(unsigned direction, double traction) override;
 
+  //! Return mixture traction
+  VectorDim mixture_traction() const { return mixture_traction_; };
+
+  //! Assign mass to particles
+  //! \param[in] lmass Mass of the liquid phase
+  void assign_liquid_mass(double lmass) override { liquid_mass_ = lmass; }
+
   //! Compute liquid mass
   bool compute_liquid_mass() override;
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  bool assign_liquid_velocity(const VectorDim& velocity) override;
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  VectorDim liquid_velocity() const override { return liquid_velocity_; }
 
   //! Return liquid mass
   //! \retval liquid mass Liquid phase mass
@@ -141,10 +160,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] property Property string
   //! \retval vecdata Vector data of particle liquid phase property
   Eigen::VectorXd liquid_vector_data(const std::string& property) override;
-
-  //! Return velocity of the particle liquid phase
-  //! \retval liquid velocity Liquid phase velocity
-  VectorDim liquid_velocity() const override { return liquid_velocity_; }
 
  private:
   //! Shape functions

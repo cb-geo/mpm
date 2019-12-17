@@ -75,6 +75,22 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_saturation_degree() {
   return status;
 }
 
+// Assign velocity to the particle liquid phase
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_velocity(
+    const Eigen::Matrix<double, Tdim, 1>& velocity) {
+  bool status = false;
+  try {
+    // Assign velocity
+    liquid_velocity_ = velocity;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Assign traction to the liquid phase
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_traction(unsigned direction,
