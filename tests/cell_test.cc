@@ -491,42 +491,31 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
 
   // Check material adddition to nodes
   SECTION("Check material id addition to nodes") {
+    // create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-    // add nodes to cell
-    cell->add_node(0, node0);
-    cell->add_node(1, node1);
-    cell->add_node(2, node2);
-    cell->add_node(3, node3);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
     // add material ids to nodes in cell
     cell->append_material_id_to_nodes(2);
     cell->append_material_id_to_nodes(1);
     cell->append_material_id_to_nodes(1);
 
-    // check amount of material ids added to each node
-    REQUIRE(node0->material_ids().size() == 2);
-    REQUIRE(node1->material_ids().size() == 2);
-    REQUIRE(node2->material_ids().size() == 2);
-    REQUIRE(node3->material_ids().size() == 2);
-
-    // check which material ids were added to each node
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    unsigned i = 0;
-    auto mat_ids = node0->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node1->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node2->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node3->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
+    for (int j = 0; j < nodes.size(); ++j) {
+      REQUIRE(nodes[j]->material_ids().size() == 2);
+      unsigned i = 0;
+      auto mat_ids = nodes[j]->material_ids();
+      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+        REQUIRE(*itr == material_ids.at(i));
+    }
   }
 
   SECTION("Test particle addition deletion") {
@@ -1604,66 +1593,35 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
   // Check material adddition to nodes
   SECTION("Check material id addition to nodes") {
+    // create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
-    // add nodes to cell
-    cell->add_node(0, node0);
-    cell->add_node(1, node1);
-    cell->add_node(2, node2);
-    cell->add_node(3, node3);
-    cell->add_node(4, node4);
-    cell->add_node(5, node5);
-    cell->add_node(6, node6);
-    cell->add_node(7, node7);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
+    nodes.emplace_back(node0);
+    nodes.emplace_back(node1);
+    nodes.emplace_back(node2);
+    nodes.emplace_back(node3);
+    nodes.emplace_back(node4);
+    nodes.emplace_back(node5);
+    nodes.emplace_back(node6);
+    nodes.emplace_back(node7);
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
     // add material ids to nodes in cell
     cell->append_material_id_to_nodes(2);
     cell->append_material_id_to_nodes(1);
     cell->append_material_id_to_nodes(1);
 
-    // check amount of material ids added to each node
-    REQUIRE(node0->material_ids().size() == 2);
-    REQUIRE(node1->material_ids().size() == 2);
-    REQUIRE(node2->material_ids().size() == 2);
-    REQUIRE(node3->material_ids().size() == 2);
-    REQUIRE(node4->material_ids().size() == 2);
-    REQUIRE(node5->material_ids().size() == 2);
-    REQUIRE(node6->material_ids().size() == 2);
-    REQUIRE(node7->material_ids().size() == 2);
-
-    // check which material ids were added to each node
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    unsigned i = 0;
-    auto mat_ids = node0->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node1->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node2->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node3->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node4->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node5->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node6->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
-    i = 0;
-    mat_ids = node7->material_ids();
-    for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-      REQUIRE(*itr == material_ids.at(i));
+    for (int j = 0; j < nodes.size(); ++j) {
+      REQUIRE(nodes[j]->material_ids().size() == 2);
+      unsigned i = 0;
+      auto mat_ids = nodes[j]->material_ids();
+      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
+        REQUIRE(*itr == material_ids.at(i));
+    }
   }
 
   SECTION("Test particle addition deletion") {
