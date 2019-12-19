@@ -1320,26 +1320,23 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Create vector of nodes and add them to cell
-    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
     coords << 0., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
-    nodes.emplace_back(node0);
 
     coords << 1., 0.;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
-    nodes.emplace_back(node1);
 
     coords << 1., 1.;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
-    nodes.emplace_back(node2);
 
     coords << 0., 1.;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
-    nodes.emplace_back(node3);
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {node0, node1,
+                                                              node2, node3};
 
     for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
@@ -1383,10 +1380,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (int j = 0; j < nodes.size(); ++j) {
-      REQUIRE(nodes[j]->material_ids().size() == 2);
+    for (auto node_itr : nodes) {
+      REQUIRE(node_itr->material_ids().size() == 2);
       unsigned i = 0;
-      auto mat_ids = nodes[j]->material_ids();
+      auto mat_ids = node_itr->material_ids();
       for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
         REQUIRE(*itr == material_ids.at(i));
     }
@@ -2460,46 +2457,39 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(10, Nnodes, element);
     // Create vector of nodes and add them to cell
-    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
     coords << 0, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node0 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
-    nodes.emplace_back(node0);
 
     coords << 2, 0, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node1 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
-    nodes.emplace_back(node1);
 
     coords << 2, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node2 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
-    nodes.emplace_back(node2);
 
     coords << 0, 2, 0;
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
-    nodes.emplace_back(node3);
 
     coords << 0, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node4 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
-    nodes.emplace_back(node4);
 
     coords << 2, 0, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node5 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
-    nodes.emplace_back(node5);
 
     coords << 2, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node6 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
-    nodes.emplace_back(node6);
 
     coords << 0, 2, 2;
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
-    nodes.emplace_back(node7);
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {
+        node0, node1, node2, node3, node4, node5, node6, node7};
 
     for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
@@ -2543,10 +2533,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (int j = 0; j < nodes.size(); ++j) {
-      REQUIRE(nodes[j]->material_ids().size() == 2);
+    for (auto node_itr : nodes) {
+      REQUIRE(node_itr->material_ids().size() == 2);
       unsigned i = 0;
-      auto mat_ids = nodes[j]->material_ids();
+      auto mat_ids = node_itr->material_ids();
       for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
         REQUIRE(*itr == material_ids.at(i));
     }

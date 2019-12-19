@@ -494,11 +494,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
     // create a vector of nodes and add them to cell
-    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
-    nodes.emplace_back(node0);
-    nodes.emplace_back(node1);
-    nodes.emplace_back(node2);
-    nodes.emplace_back(node3);
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {node0, node1,
+                                                              node2, node3};
     for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
     // add material ids to nodes in cell
@@ -509,10 +506,10 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (int j = 0; j < nodes.size(); ++j) {
-      REQUIRE(nodes[j]->material_ids().size() == 2);
+    for (auto node_itr : nodes) {
+      REQUIRE(node_itr->material_ids().size() == 2);
       unsigned i = 0;
-      auto mat_ids = nodes[j]->material_ids();
+      auto mat_ids = node_itr->material_ids();
       for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
         REQUIRE(*itr == material_ids.at(i));
     }
@@ -1596,15 +1593,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // create cell
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
     // create a vector of nodes and add them to cell
-    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes;
-    nodes.emplace_back(node0);
-    nodes.emplace_back(node1);
-    nodes.emplace_back(node2);
-    nodes.emplace_back(node3);
-    nodes.emplace_back(node4);
-    nodes.emplace_back(node5);
-    nodes.emplace_back(node6);
-    nodes.emplace_back(node7);
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {
+        node0, node1, node2, node3, node4, node5, node6, node7};
     for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
 
     // add material ids to nodes in cell
@@ -1615,10 +1605,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (int j = 0; j < nodes.size(); ++j) {
-      REQUIRE(nodes[j]->material_ids().size() == 2);
+    for (auto node_itr : nodes) {
+      REQUIRE(node_itr->material_ids().size() == 2);
       unsigned i = 0;
-      auto mat_ids = nodes[j]->material_ids();
+      auto mat_ids = node_itr->material_ids();
       for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
         REQUIRE(*itr == material_ids.at(i));
     }
