@@ -195,6 +195,12 @@ class NodeBase {
   //! \param[in] rank MPI Rank of the node
   virtual std::set<unsigned> mpi_ranks() const = 0;
 
+  //! Return ghost id
+  virtual Index ghost_id() const = 0;
+
+  //! Set ghost id
+  virtual void ghost_id(Index gid) = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
