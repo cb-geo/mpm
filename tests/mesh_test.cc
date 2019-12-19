@@ -1087,6 +1087,16 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     if (mpi_size == 1) cell1->rank(1);
 
+    mesh->identify_domain_shared_nodes();
+    REQUIRE(node0->mpi_ranks().size() == mpi_size);
+    REQUIRE(node1->mpi_ranks().size() == mpi_size);
+    REQUIRE(node2->mpi_ranks().size() == mpi_size);
+    REQUIRE(node3->mpi_ranks().size() == mpi_size);
+    REQUIRE(node4->mpi_ranks().size() == mpi_size);
+    REQUIRE(node5->mpi_ranks().size() == mpi_size);
+    REQUIRE(node6->mpi_ranks().size() == mpi_size);
+    REQUIRE(node7->mpi_ranks().size() == mpi_size);
+
     // Remove all non-rank particles in mesh
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh

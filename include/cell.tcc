@@ -726,6 +726,12 @@ inline Eigen::Matrix<double, Tdim, 1>
   return xi;
 }
 
+//! Assign MPI rank to nodes
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_mpi_rank_to_nodes() {
+  for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->mpi_rank(this->rank_);
+}
+
 //! Map particle mass to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,

@@ -111,6 +111,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
 
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
       // Length of the cell
@@ -1073,6 +1084,17 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->initialise() == true);
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
+
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
 
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
