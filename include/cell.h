@@ -179,6 +179,9 @@ class Cell {
   Eigen::Matrix<double, Tdim, 1> transform_real_to_unit_cell(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
+  //! Assign MPI rank to nodes
+  void assign_mpi_rank_to_nodes();
+
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
