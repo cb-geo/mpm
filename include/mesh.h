@@ -27,6 +27,7 @@
 #include "hdf5_particle.h"
 #include "logger.h"
 #include "material/material.h"
+#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -183,9 +184,14 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
-  //! Remove all particles in a cell given cell id
-  //! \param[in] rank MPI rank of the mesh
-  void remove_all_nonrank_particles(unsigned rank);
+  //! Remove all particles in a cell in nonlocal rank
+  void remove_all_nonrank_particles();
+
+  //! Transfer particles to different ranks in nonlocal rank cells
+  void transfer_nonrank_particles();
+
+  //! Identify shared domain nodes in a mesh
+  void identify_domain_shared_nodes();
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
@@ -363,6 +369,10 @@ class Mesh {
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Container of domain shared nodes
+  Container<NodeBase<Tdim>> domain_shared_nodes_;
+  //! Boundary nodes
+  Container<NodeBase<Tdim>> boundary_nodes_;
   //! Container of node sets
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes

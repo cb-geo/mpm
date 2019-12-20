@@ -510,3 +510,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
     }
   }
 }
+
+// Assign MPI rank to node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  auto status = this->mpi_ranks_.insert(rank);
+  return status.second;
+}
