@@ -152,6 +152,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
@@ -179,9 +180,9 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
-    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
   )
   if(MPM_BUILD_LIB)
     add_executable(mpmtest ${test_src})
