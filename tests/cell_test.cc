@@ -517,12 +517,12 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (auto node_itr : nodes) {
-      REQUIRE(node_itr->material_ids().size() == 2);
+    for (auto node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
       unsigned i = 0;
-      auto mat_ids = node_itr->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 
@@ -1627,12 +1627,12 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (auto node_itr : nodes) {
-      REQUIRE(node_itr->material_ids().size() == 2);
+    for (auto node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
       unsigned i = 0;
-      auto mat_ids = node_itr->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 

@@ -695,7 +695,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(ref_coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Assign material
-    unsigned mid = 0;
+    unsigned mid = 1;
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -719,7 +719,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_material(material) == true);
 
     // Check material id
-    REQUIRE(particle->material_id() == 0);
+    REQUIRE(particle->material_id() == 1);
 
     // Compute volume
     REQUIRE(particle->compute_volume() == true);
@@ -1380,12 +1380,12 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (auto node_itr : nodes) {
-      REQUIRE(node_itr->material_ids().size() == 2);
+    for (auto node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
       unsigned i = 0;
-      auto mat_ids = node_itr->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }
@@ -2533,12 +2533,12 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (auto node_itr : nodes) {
-      REQUIRE(node_itr->material_ids().size() == 2);
+    for (auto node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
       unsigned i = 0;
-      auto mat_ids = node_itr->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }
