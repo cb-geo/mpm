@@ -30,14 +30,10 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1800.;
-  jmaterial["youngs_modulus"] = 1.0E+7;
   jmaterial["poisson_ratio"] = 0.3;
   jmaterial["reference_pressure"] = 1000.;
   jmaterial["friction_cs"] = 30;
   jmaterial["N"] = 0.3;
-  jmaterial["e_min"] = 0.542;
-  jmaterial["e_max"] = 1.000;
-  jmaterial["crushing_pressure"] = 10000000.0;
   jmaterial["lambda"] = 0.1;
   jmaterial["kappa"] = 0.03;
   jmaterial["gamma"] = 1.3;
@@ -81,8 +77,6 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
     // Get material properties
     REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("youngs_modulus") ==
-            Approx(jmaterial["youngs_modulus"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("poisson_ratio") ==
             Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("reference_pressure") ==
@@ -91,12 +85,6 @@ TEST_CASE("NorSand is checked in 3D", "[material][NorSand][3D]") {
             Approx(jmaterial["friction_cs"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("N") ==
             Approx(jmaterial["N"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("e_min") ==
-            Approx(jmaterial["e_min"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("e_max") ==
-            Approx(jmaterial["e_max"]).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("crushing_pressure") ==
-            Approx(jmaterial["crushing_pressure"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("lambda") ==
             Approx(jmaterial["lambda"]).epsilon(Tolerance));
     REQUIRE(material->template property<double>("kappa") ==

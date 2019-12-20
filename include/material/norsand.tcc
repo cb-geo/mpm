@@ -5,9 +5,6 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
   try {
     // Density
     density_ = material_properties["density"].template get<double>();
-    // Youngs modulus E
-    youngs_modulus_ =
-        material_properties["youngs_modulus"].template get<double>();
     // Poisson ratio
     poisson_ratio_ =
         material_properties["poisson_ratio"].template get<double>();
@@ -19,13 +16,6 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
         material_properties["friction_cs"].template get<double>() * M_PI / 180.;
     // Volumetric coupling (dilatancy) parameter N
     N_ = material_properties["N"].template get<double>();
-    // Minimum void ratio
-    e_min_ = material_properties["e_min"].template get<double>();
-    // Maximum void ratio
-    e_max_ = material_properties["e_max"].template get<double>();
-    // Crushing pressure
-    crushing_pressure_ =
-        material_properties["crushing_pressure"].template get<double>();
     // Lambda volumetric
     lambda_ = material_properties["lambda"].template get<double>();
     // Kappa swelling volumetric
@@ -91,18 +81,12 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       // Void ratio image
       {"e_image",
        gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_)},
-      // {"e_image",
-      //  e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ /
-      //  p_image_initial_)},
       // Image pressure
       {"p_image", p_image_initial_},
       // State variable psi
       {"psi_image",
        void_ratio_initial_ -
            (gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_))},
-      // {"psi_image", void_ratio_initial_ -
-      //                   (e_max_ - (e_max_ - e_min_) / log(crushing_pressure_
-      //                   / p_image_initial_))},
       // p_cohesion
       {"p_cohesion", p_cohesion_initial_},
       // p_cohesion degradation function
@@ -238,7 +222,7 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   double p_image;
   double e_image;
 
-  if (yield_type == mpm::NorSand::FailureState::Elastic) {
+  if (yield_type == mpm::NorSand<Tdim>::FailureState::Elastic) {
     // Keep the same pressure image and void ratio image at critical state
     p_image = (*state_vars).at("p_image");
     e_image = (*state_vars).at("e_image");
@@ -585,12 +569,10 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   this->compute_stress_invariants(stress_neg, state_vars);
 
   // Elastic step
-  // --------------------------------------------------------------------------------------
-  // Using critical state volumetric
-  // Bulk modulus
+  // Bulk modulus computation
   bulk_modulus_ =
       (1. + (*state_vars).at("void_ratio")) / kappa_ * (*state_vars).at("p");
-  // Shear modulus
+  // Shear modulus computation
   if (bond_model_) {
     shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
                          (2.0 * (1. + poisson_ratio_)) +
@@ -600,13 +582,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
                      (2.0 * (1. + poisson_ratio_));
   }
-
-  // Using Young's Modulus
-  // Shear modulus
-  // shear_modulus_ = youngs_modulus_ / (2.0 * (1. + poisson_ratio_));
-  // // Bulk modulus
-  // bulk_modulus_ = shear_modulus_ * (2.0 * (1 + poisson_ratio_)) /
-  //                 (3.0 * (1. - 2. * poisson_ratio_));
 
   // Set elastic tensor
   this->compute_elastic_tensor();
@@ -619,7 +594,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   auto yield_type =
       this->compute_yield_state(&yield_function, trial_stress, state_vars);
 
-  // --------------------------------------------------------------------------------------
   // Return the updated stress in elastic state
   if (yield_type == FailureState::Elastic) {
 
@@ -636,7 +610,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     // Return elastic stress
     return (-trial_stress);
   }
-  // --------------------------------------------------------------------------------------
 
   // Set plastic tensor
   this->compute_plastic_tensor(stress_neg, state_vars);
