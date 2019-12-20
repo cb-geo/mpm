@@ -187,6 +187,13 @@ class NodeBase {
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  virtual void append_material_id(unsigned id) = 0;
+
+  //! Return material ids in node
+  virtual std::set<unsigned> material_ids() const = 0;
+
   //! Assign MPI rank to node
   //! \param[in] rank MPI Rank of the node
   virtual bool mpi_rank(unsigned rank) = 0;

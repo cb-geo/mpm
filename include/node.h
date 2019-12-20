@@ -199,6 +199,13 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  void append_material_id(unsigned id) override;
+
+  //! Return material ids in node
+  std::set<unsigned> material_ids() const override { return material_ids_; }
+
   //! Assign MPI rank to node
   //! \param[in] rank MPI Rank of the node
   bool mpi_rank(unsigned rank) override;
@@ -246,6 +253,8 @@ class Node : public NodeBase<Tdim> {
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! Material ids whose information was passed to this node
+  std::set<unsigned> material_ids_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};

@@ -470,6 +470,25 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
     }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
   }
 }
 
@@ -1056,6 +1075,25 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
     }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
   }
 }
 
@@ -1617,6 +1655,25 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
           REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }

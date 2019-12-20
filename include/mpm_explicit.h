@@ -65,6 +65,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   bool usl_{false};
   //! Pressure smoothing
   bool pressure_smoothing_{false};
+  //! Interface
+  bool interface_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm
