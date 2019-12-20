@@ -606,6 +606,23 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
         file, mesh_->particles_vector_data(attribute, phase), attribute);
+    // Write a parallel MPI
+#ifdef USE_MPI
+    int mpi_rank = 0;
+    int mpi_size = 1;
+    // Get MPI rank
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    bool write_mpi_rank = false;
+    auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                          max_steps, write_mpi_rank)
+                             .string();
+    if (mpi_rank == 0)
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+#endif
   }
 }
 #endif
