@@ -238,7 +238,7 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   double p_image;
   double e_image;
 
-  if (yield_type == FailureState::Elastic) {
+  if (yield_type == mpm::NorSand::FailureState::Elastic) {
     // Keep the same pressure image and void ratio image at critical state
     p_image = (*state_vars).at("p_image");
     e_image = (*state_vars).at("e_image");
@@ -349,7 +349,7 @@ typename mpm::NorSand<Tdim>::FailureState
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
-  // Initialise yield status (0: elastic, 1: yield)
+  // Initialise yield status (Elastic, Plastic)
   auto yield_type = FailureState::Elastic;
 
   // Compute yield functions
