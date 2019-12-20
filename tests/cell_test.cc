@@ -517,7 +517,7 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (auto node : nodes) {
+    for (const auto& node : nodes) {
       REQUIRE(node->material_ids().size() == 2);
       auto mat_ids = node->material_ids();
       unsigned i = 0;
@@ -1627,7 +1627,7 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {1, 2};
-    for (auto node : nodes) {
+    for (const auto& node : nodes) {
       REQUIRE(node->material_ids().size() == 2);
       auto mat_ids = node->material_ids();
       unsigned i = 0;

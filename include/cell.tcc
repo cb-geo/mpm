@@ -1026,6 +1026,6 @@ inline unsigned mpm::Cell<Tdim>::rank() const {
 template <unsigned Tdim>
 inline void mpm::Cell<Tdim>::append_material_id_to_nodes(unsigned material_id) {
   // Loop over all nodes to add the material_id to the nodes
-  for (unsigned itr_node = 0; itr_node < nodes_.size(); ++itr_node)
-    nodes_[itr_node]->append_material_id(material_id);
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->append_material_id(material_id);
 }

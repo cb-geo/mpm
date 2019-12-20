@@ -484,10 +484,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
       // Check elements of material_ids
       std::vector<unsigned> material_ids = {0, 1, 2, 4};
-      unsigned i = 0;
       auto mat_ids = node->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }
@@ -1089,10 +1089,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
       // Check elements of material_ids
       std::vector<unsigned> material_ids = {0, 1, 2, 4};
-      unsigned i = 0;
       auto mat_ids = node->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }
@@ -1670,10 +1670,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
       // Check elements of material_ids
       std::vector<unsigned> material_ids = {0, 1, 2, 4};
-      unsigned i = 0;
       auto mat_ids = node->material_ids();
-      for (auto itr = mat_ids.begin(); itr != mat_ids.end(); ++itr, ++i)
-        REQUIRE(*itr == material_ids.at(i));
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }

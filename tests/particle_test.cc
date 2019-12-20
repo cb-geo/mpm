@@ -762,7 +762,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
               Approx(nodal_mass.at(i)).epsilon(Tolerance));
 
     // Compute nodal velocity
-    for (const auto node : nodes) node->compute_velocity();
+    for (const auto& node : nodes) node->compute_velocity();
 
     // Values of nodal momentum
     Eigen::Matrix<double, 4, 2> nodal_momentum;
@@ -810,7 +810,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                       0., 4.;
     // clang-format on
     // Compute nodal velocity
-    for (const auto node : nodes) node->compute_velocity();
+    for (const auto& node : nodes) node->compute_velocity();
     // Check nodal velocity
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
@@ -1380,7 +1380,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (auto node : nodes) {
+    for (const auto& node : nodes) {
       REQUIRE(node->material_ids().size() == 2);
       auto mat_ids = node->material_ids();
       unsigned i = 0;
@@ -1861,7 +1861,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
               Approx(nodal_mass.at(i)).epsilon(Tolerance));
 
     // Compute nodal velocity
-    for (const auto node : nodes) node->compute_velocity();
+    for (const auto& node : nodes) node->compute_velocity();
 
     // Values of nodal momentum
     Eigen::Matrix<double, 8, 3> nodal_momentum;
@@ -1927,7 +1927,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                       0., 8., 16.;
     // clang-format on
     // Compute nodal velocity
-    for (const auto node : nodes) node->compute_velocity();
+    for (const auto& node : nodes) node->compute_velocity();
     // Check nodal velocity
     for (unsigned i = 0; i < nodal_velocity.rows(); ++i)
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
@@ -2533,7 +2533,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // check if the correct amount of material ids were added to node and if
     // their indexes are correct
     std::vector<unsigned> material_ids = {0, 1};
-    for (auto node : nodes) {
+    for (const auto& node : nodes) {
       REQUIRE(node->material_ids().size() == 2);
       auto mat_ids = node->material_ids();
       unsigned i = 0;
