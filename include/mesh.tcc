@@ -259,6 +259,42 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 }
 
+//! Find ghost cell neighbours
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  bool check_duplicates = true;
+  if (mpi_size > 1) {
+    ghost_cells_.clear();
+    // Iterate through cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      bool current_cell_is_ghost = false;
+      // If cell rank is the current MPI rank
+      if ((*citr)->rank() == mpi_rank) {
+        // Iterate through the neighbours of a cell
+        auto neighbours = (*citr)->neighbours();
+        for (auto neighbour : neighbours) {
+          // If the neighbour is in a different MPI rank
+          if (map_cells_[neighbour]->rank() != mpi_rank) {
+            ghost_cells_.add(map_cells_[neighbour], check_duplicates);
+            // Also add the current cell, as this would be a receiver
+            if (!current_cell_is_ghost) {
+              ghost_cells_.add(*citr, check_duplicates);
+              current_cell_is_ghost = true;
+            }
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
 //! Create cells from node lists
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
@@ -406,9 +442,9 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   if (mpi_size > 1) {
-    // Iterate through all the cells
-    for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
-         ++citr) {
+    // Iterate through the ghost cells
+    for (auto citr = this->ghost_cells_.cbegin();
+         citr != this->ghost_cells_.cend(); ++citr) {
       // If sender ranks
       if ((*citr)->rank() != mpi_rank) {
         // Create a vector of h5_particles
@@ -493,9 +529,15 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 #endif
 }
 
-//! Transfer all particles in cells that are not in local rank
+//! Find shared nodes across MPI domains
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::identify_domain_shared_nodes() {
+void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
+  this->domain_shared_nodes_.clear();
+  // Clear MPI rank at the nodes
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
+                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+                           node->clear_mpi_ranks();
+                         });
   // Get MPI rank
   int mpi_rank = 0;
 #ifdef USE_MPI
