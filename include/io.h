@@ -75,11 +75,13 @@ class IO {
   //! \param[in] file_extension File Extension (*.vtk or *.vtp)
   //! \param[in] step Current step
   //! \param[in] max_steps Total number of steps to be solved
+  //! \param[in] parallel Write output as parallel file system
   //! \return file_name File name with the correct attribute and a VTK extension
   boost::filesystem::path output_file(const std::string& attribute,
                                       const std::string& file_extension,
                                       const std::string& analysis_id,
-                                      unsigned step, unsigned max_steps);
+                                      unsigned step, unsigned max_steps,
+                                      bool parallel = true);
 
  private:
   //! Number of parallel threads

@@ -1021,3 +1021,11 @@ template <unsigned Tdim>
 inline unsigned mpm::Cell<Tdim>::rank() const {
   return this->rank_;
 }
+
+//! Assign materials to nodes from the particles within this cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::append_material_id_to_nodes(unsigned material_id) {
+  // Loop over all nodes to add the material_id to the nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->append_material_id(material_id);
+}

@@ -42,6 +42,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     pressure_smoothing_ =
         analysis_.at("pressure_smoothing").template get<bool>();
 
+  // Interface
+  if (analysis_.find("interface") != analysis_.end())
+    interface_ = analysis_.at("interface").template get<bool>();
+
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) status = false;
@@ -143,6 +147,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     });
 
     task_group.wait();
+
+    // Assign material ids to node
+    if (interface_)
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
+                    std::placeholders::_1));
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
