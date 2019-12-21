@@ -315,6 +315,9 @@ class Mesh {
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
 
+  //! Find ghost boundary cells
+  void find_ghost_boundary_cells();
+
   //! Write HDF5 particles
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
@@ -383,6 +386,8 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Container of ghost cells sharing the current MPI rank
+  Container<Cell<Tdim>> ghost_cells_;
   //! Faces and cells
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Materials

@@ -112,6 +112,37 @@ TEST_CASE("MPI transfer particle is checked in 2D",
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
+    coords << 4., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    // Add node 4 and check
+    REQUIRE(mesh->add_node(node4) == true);
+
+    coords << 4., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    // Add node 5 and check
+    REQUIRE(mesh->add_node(node5) == true);
+
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(2, Nnodes, element);
+
+    // Add nodes to cell
+    cell2->add_node(0, node1);
+    cell2->add_node(1, node4);
+    cell2->add_node(2, node5);
+    cell2->add_node(3, node2);
+
+    // Initialize cell
+    REQUIRE(cell2->initialise() == true);
+
+    // Initialize material models
+    mesh->initialise_material_models(materials);
+
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
+
     // Add 1 particle to rank 0
     if (mpi_rank == 0) {
       // Particle 1
@@ -138,35 +169,6 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       // Number of particles in cell 1 is 2
       REQUIRE(cell1->nparticles() == 1);
 
-      if (mpi_size == 2) {
-        // Particle 2
-        coords << 1.5, 1.5;
-        std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-            std::make_shared<mpm::Particle<Dim>>(1, coords);
-        particle2->assign_material(material);
-
-        // Add particle 2 and check
-        REQUIRE(mesh->add_particle(particle2) == true);
-
-        // Check mesh is active
-        REQUIRE(mesh->status() == true);
-
-        // Locate particles in a mesh
-        auto particles = mesh->locate_particles_mesh();
-
-        // Should find all particles in mesh
-        REQUIRE(particles.size() == 0);
-
-        // Check location of particle 2
-        REQUIRE(particle2->cell_id() == 0);
-
-        // Number of particles in cell 1 is 2
-        REQUIRE(cell1->nparticles() == 2);
-      }
-    }
-
-    // Add 1 particle to rank 2
-    if (mpi_rank == 2) {
       // Particle 2
       coords << 1.5, 1.5;
       std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
@@ -180,25 +182,29 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       REQUIRE(mesh->status() == true);
 
       // Locate particles in a mesh
-      auto particles = mesh->locate_particles_mesh();
+      auto lparticles = mesh->locate_particles_mesh();
 
       // Should find all particles in mesh
-      REQUIRE(particles.size() == 0);
+      REQUIRE(lparticles.size() == 0);
 
       // Check location of particle 2
       REQUIRE(particle2->cell_id() == 0);
 
       // Number of particles in cell 1 is 2
-      REQUIRE(cell1->nparticles() == 1);
+      REQUIRE(cell1->nparticles() == 2);
     }
 
-    if (mpi_size > 1) {
+    if (mpi_size == 2) {
       // Assign a MPI rank of 1 to cell in all MPI ranks
       cell1->rank(1);
+      cell2->rank(0);
+      // Identify ghost boundary cells
+      mesh->compute_cell_neighbours();
+      mesh->find_ghost_boundary_cells();
 
       // Transfer particle to the correct MPI rank
       mesh->transfer_nonrank_particles();
-      // Check all non receiver ranks
+      // Check sender ranks
       if (mpi_rank != receiver) {
         REQUIRE(cell1->nparticles() == 0);
         REQUIRE(mesh->nparticles() == 0);
@@ -209,44 +215,8 @@ TEST_CASE("MPI transfer particle is checked in 2D",
         REQUIRE(mesh->nparticles() == 2);
         REQUIRE(cell1->nparticles() == 2);
       }
-    }
-    SECTION("Check node MPI ranks") {
-      if (mpi_size > 1) {
-        coords << 4., 0.;
-        std::shared_ptr<mpm::NodeBase<Dim>> node4 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
 
-        // Add node 4 and check
-        REQUIRE(mesh->add_node(node4) == true);
-
-        coords << 4., 2.;
-        std::shared_ptr<mpm::NodeBase<Dim>> node5 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
-
-        // Add node 5 and check
-        REQUIRE(mesh->add_node(node5) == true);
-
-        auto cell2 = std::make_shared<mpm::Cell<Dim>>(2, Nnodes, element);
-
-        // Add nodes to cell
-        cell2->add_node(0, node1);
-        cell2->add_node(1, node4);
-        cell2->add_node(2, node5);
-        cell2->add_node(3, node2);
-
-        // Initialize cell
-        REQUIRE(cell2->initialise() == true);
-
-        // Initialize material models
-        mesh->initialise_material_models(materials);
-
-        // Add cell 1 and check
-        REQUIRE(mesh->add_cell(cell2) == true);
-
-        // Assign MPI ranks
-        cell1->rank(0);
-        cell2->rank(1);
-
+      SECTION("Check node MPI ranks") {
         // Transfer particle to the correct MPI rank
         mesh->identify_domain_shared_nodes();
 
@@ -379,6 +349,46 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
+    coords << 0, 0, 4;
+    std::shared_ptr<mpm::NodeBase<Dim>> node8 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
+    REQUIRE(mesh->add_node(node8) == true);
+
+    coords << 2, 0, 4;
+    std::shared_ptr<mpm::NodeBase<Dim>> node9 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
+    REQUIRE(mesh->add_node(node9) == true);
+
+    coords << 2, 2, 4;
+    std::shared_ptr<mpm::NodeBase<Dim>> node10 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
+    REQUIRE(mesh->add_node(node10) == true);
+
+    coords << 0, 2, 4;
+    std::shared_ptr<mpm::NodeBase<Dim>> node11 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
+    REQUIRE(mesh->add_node(node11) == true);
+
+    auto cell2 = std::make_shared<mpm::Cell<Dim>>(2, Nnodes, element);
+
+    // Add nodes to cell
+    cell2->add_node(0, node4);
+    cell2->add_node(1, node5);
+    cell2->add_node(2, node6);
+    cell2->add_node(3, node7);
+    cell2->add_node(4, node8);
+    cell2->add_node(5, node9);
+    cell2->add_node(6, node10);
+    cell2->add_node(7, node11);
+
+    // Initialize cell
+    REQUIRE(cell2->initialise() == true);
+
+    // Initialize material models
+    mesh->initialise_material_models(materials);
+
+    // Add cell 1 and check
+    REQUIRE(mesh->add_cell(cell2) == true);
     if (mpi_rank == 0) {
       // Particle 1
       coords << 1.0, 1.0, 1.0;
@@ -415,10 +425,14 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       REQUIRE(cell1->nparticles() == 2);
     }
 
-    // Assign a MPI rank of 1 to cell in all MPI ranks
-    cell1->rank(1);
+    if (mpi_size == 2) {
+      // Assign a MPI rank of 1 to cell in all MPI ranks
+      cell1->rank(1);
+      cell2->rank(0);
+      // Identify ghost boundary cells
+      mesh->compute_cell_neighbours();
+      mesh->find_ghost_boundary_cells();
 
-    if (mpi_size > 1) {
       // Transfer particle to the correct MPI rank
       mesh->transfer_nonrank_particles();
       // Check all non receiver ranks
@@ -432,54 +446,8 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
         REQUIRE(mesh->nparticles() == 2);
         REQUIRE(cell1->nparticles() == 2);
       }
-    }
-    SECTION("Check node MPI ranks") {
-      if (mpi_size > 1) {
-        coords << 0, 0, 4;
-        std::shared_ptr<mpm::NodeBase<Dim>> node8 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(8, coords);
-        REQUIRE(mesh->add_node(node8) == true);
 
-        coords << 2, 0, 4;
-        std::shared_ptr<mpm::NodeBase<Dim>> node9 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(9, coords);
-        REQUIRE(mesh->add_node(node9) == true);
-
-        coords << 2, 2, 4;
-        std::shared_ptr<mpm::NodeBase<Dim>> node10 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(10, coords);
-        REQUIRE(mesh->add_node(node10) == true);
-
-        coords << 0, 2, 4;
-        std::shared_ptr<mpm::NodeBase<Dim>> node11 =
-            std::make_shared<mpm::Node<Dim, Dof, Nphases>>(11, coords);
-        REQUIRE(mesh->add_node(node11) == true);
-
-        auto cell2 = std::make_shared<mpm::Cell<Dim>>(2, Nnodes, element);
-
-        // Add nodes to cell
-        cell2->add_node(0, node4);
-        cell2->add_node(1, node5);
-        cell2->add_node(2, node6);
-        cell2->add_node(3, node7);
-        cell2->add_node(4, node8);
-        cell2->add_node(5, node9);
-        cell2->add_node(6, node10);
-        cell2->add_node(7, node11);
-
-        // Initialize cell
-        REQUIRE(cell2->initialise() == true);
-
-        // Initialize material models
-        mesh->initialise_material_models(materials);
-
-        // Add cell 1 and check
-        REQUIRE(mesh->add_cell(cell2) == true);
-
-        // Assign MPI ranks
-        cell1->rank(0);
-        cell2->rank(1);
-
+      SECTION("Check node MPI ranks") {
         // Transfer particle to the correct MPI rank
         mesh->identify_domain_shared_nodes();
 
