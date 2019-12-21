@@ -529,9 +529,9 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 #endif
 }
 
-//! Transfer all particles in cells that are not in local rank
+//! Find shared nodes across MPI domains
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::identify_domain_shared_nodes() {
+void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   // Get MPI rank
   int mpi_rank = 0;
 #ifdef USE_MPI

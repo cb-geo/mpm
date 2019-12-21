@@ -190,8 +190,8 @@ class Mesh {
   //! Transfer particles to different ranks in nonlocal rank cells
   void transfer_nonrank_particles();
 
-  //! Identify shared domain nodes in a mesh
-  void identify_domain_shared_nodes();
+  //! Find shared nodes across MPI domains in the mesh
+  void find_domain_shared_nodes();
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }

@@ -218,7 +218,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
 
       SECTION("Check node MPI ranks") {
         // Transfer particle to the correct MPI rank
-        mesh->identify_domain_shared_nodes();
+        mesh->find_domain_shared_nodes();
 
         REQUIRE(node0->mpi_ranks().size() == 1);
         REQUIRE(node1->mpi_ranks().size() == 2);
@@ -449,7 +449,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
 
       SECTION("Check node MPI ranks") {
         // Transfer particle to the correct MPI rank
-        mesh->identify_domain_shared_nodes();
+        mesh->find_domain_shared_nodes();
 
         REQUIRE(node0->mpi_ranks().size() == 1);
         REQUIRE(node1->mpi_ranks().size() == 1);

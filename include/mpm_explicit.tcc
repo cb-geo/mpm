@@ -103,8 +103,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Delete all the particles which is not in local task parititon
     mesh_->remove_all_nonrank_particles();
 
-    // Identify shared nodes
-    mesh_->identify_domain_shared_nodes();
+    // Identify shared nodes across MPI domains
+    mesh_->find_domain_shared_nodes();
+
+    // Identify ghost boundary cells
+    mesh_->find_ghost_boundary_cells();
 
 #endif  // PARMETIS
   }
