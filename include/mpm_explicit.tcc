@@ -6,6 +6,53 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
   console_ = spdlog::get("MPMExplicit");
 }
 
+//! Domain decomposition
+template <unsigned Tdim>
+void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
+#ifdef USE_MPI
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
+
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    // Initialize MPI
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+    // Check if mesh has cells to partition
+    if (mesh_->ncells() == 0)
+      throw std::runtime_error("Container of cells is empty");
+
+#ifdef USE_PARMETIS
+    // Create graph
+    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mpi_size, mpi_rank);
+
+    // Create partition using ParMETIS
+    bool graph_partition = graph_->create_partitions(&comm);
+
+    // Collect the partitions
+    graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
+
+    // Delete all the particles which is not in local task parititon
+    mesh_->remove_all_nonrank_particles();
+
+    // Identify shared nodes across MPI domains
+    mesh_->find_domain_shared_nodes();
+
+    // Identify ghost boundary cells
+    mesh_->find_ghost_boundary_cells();
+
+#endif  // PARMETIS
+  }
+#endif  // MPI
+}
+
 //! MPM Explicit solver
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
@@ -83,39 +130,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
-#ifdef USE_MPI
-  if (mpi_size > 1 && mesh_->ncells() > 1) {
-
-    // Initialize MPI
-    MPI_Comm comm;
-    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-
-    // Check if mesh has cells to partition
-    if (mesh_->ncells() == 0)
-      throw std::runtime_error("Container of cells is empty");
-
-#ifdef USE_PARMETIS
-    // Create graph
-    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mpi_size, mpi_rank);
-
-    // Create partition using ParMETIS
-    bool graph_partition = graph_->create_partitions(&comm);
-
-    // Collect the partitions
-    graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
-
-    // Delete all the particles which is not in local task parititon
-    mesh_->remove_all_nonrank_particles();
-
-    // Identify shared nodes across MPI domains
-    mesh_->find_domain_shared_nodes();
-
-    // Identify ghost boundary cells
-    mesh_->find_ghost_boundary_cells();
-
-#endif  // PARMETIS
-  }
-#endif  // MPI
+  // Domain decompose
+  this->mpi_domain_decompose();
 
   // Check point resume
   if (resume) this->checkpoint_resume();

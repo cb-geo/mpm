@@ -202,6 +202,9 @@ class NodeBase {
   //! \param[in] rank MPI Rank of the node
   virtual std::set<unsigned> mpi_ranks() const = 0;
 
+  //! Clear MPI ranks on node
+  virtual void clear_mpi_ranks() = 0;
+
   //! Return ghost id
   virtual Index ghost_id() const = 0;
 

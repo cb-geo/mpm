@@ -532,6 +532,12 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 //! Find shared nodes across MPI domains
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
+  this->domain_shared_nodes_.clear();
+  // Clear MPI rank at the nodes
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
+                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+                           node->clear_mpi_ranks();
+                         });
   // Get MPI rank
   int mpi_rank = 0;
 #ifdef USE_MPI

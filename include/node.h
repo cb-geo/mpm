@@ -214,6 +214,9 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] rank MPI Rank of the node
   std::set<unsigned> mpi_ranks() const override { return mpi_ranks_; }
 
+  //! Clear MPI rank
+  void clear_mpi_ranks() override { mpi_ranks_.clear(); }
+
   //! Return ghost id
   Index ghost_id() const override { return ghost_id_; }
 
