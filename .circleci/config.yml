@@ -19,7 +19,7 @@ jobs:
             cmake -GNinja -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On ..
             ninja -j2
             ctest -VV
-            mpirun -n 2 ./mpmtest [mpi]
+            mpirun -n 4 ./mpmtest [mpi]
   clang:
     docker:
       - image: quay.io/cbgeo/mpm
@@ -67,7 +67,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
-            mpirun -n 2 ./mpmtest_coverage [mpi]
+            mpirun -n 4 ./mpmtest_coverage [mpi]
             lcov --directory . --capture --output-file coverage.info
             bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
 

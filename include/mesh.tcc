@@ -271,9 +271,11 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
   bool check_duplicates = true;
   if (mpi_size > 1) {
     ghost_cells_.clear();
+    local_ghost_cells_.clear();
+    ghost_cells_neighbour_ranks_.clear();
     // Iterate through cells
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      bool current_cell_is_ghost = false;
+      std::set<unsigned> neighbour_ranks;
       // If cell rank is the current MPI rank
       if ((*citr)->rank() == mpi_rank) {
         // Iterate through the neighbours of a cell
@@ -282,13 +284,20 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
           // If the neighbour is in a different MPI rank
           if (map_cells_[neighbour]->rank() != mpi_rank) {
             ghost_cells_.add(map_cells_[neighbour], check_duplicates);
-            // Also add the current cell, as this would be a receiver
-            if (!current_cell_is_ghost) {
-              ghost_cells_.add(*citr, check_duplicates);
-              current_cell_is_ghost = true;
-            }
+            // Add mpi rank to set
+            neighbour_ranks.insert(map_cells_[neighbour]->rank());
           }
         }
+      }
+      // Set the number of different MPI rank neighbours to a ghost cell
+      if (neighbour_ranks.size() > 0) {
+        // Also add the current cell, as this would be a receiver
+        local_ghost_cells_.add(*citr, check_duplicates);
+
+        // Update the neighbouring ranks of the local ghost cell
+        std::vector<unsigned> mpi_neighbours;
+        for (auto rank : neighbour_ranks) mpi_neighbours.emplace_back(rank);
+        ghost_cells_neighbour_ranks_[(*citr)->id()] = mpi_neighbours;
       }
     }
   }
@@ -442,48 +451,58 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   if (mpi_size > 1) {
-    // Iterate through the ghost cells
+    std::vector<MPI_Request> send_requests;
+    send_requests.reserve(ghost_cells_.size());
+    unsigned i = 0;
+    // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
-         citr != this->ghost_cells_.cend(); ++citr) {
-      // If sender ranks
-      if ((*citr)->rank() != mpi_rank) {
-        // Create a vector of h5_particles
-        std::vector<mpm::HDF5Particle> h5_particles;
-        auto particle_ids = (*citr)->particles();
-        for (auto& id : particle_ids) {
-          // Send and delete particle
-          auto send_particle = map_particles_[id];
-          // Append to vector of particles
-          h5_particles.emplace_back(send_particle->hdf5());
-          // Clear particle in current rank
-          send_particle->remove_cell();
-          particles_.remove(send_particle);
-          map_particles_.remove(id);
-        }
-        (*citr)->clear_particle_ids();
-
-        // Send number of particles to receiver rank
-        unsigned nparticles = h5_particles.size();
-        MPI_Send(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
-                 MPI_COMM_WORLD);
-        if (nparticles != 0) {
-          mpm::HDF5Particle h5_particle;
-          // Initialize MPI datatypes and send vector of particles
-          MPI_Datatype particle_type =
-              mpm::register_mpi_particle_type(h5_particle);
-          MPI_Send(h5_particles.data(), nparticles, particle_type,
-                   (*citr)->rank(), 0, MPI_COMM_WORLD);
-          mpm::deregister_mpi_particle_type(particle_type);
-        }
-        h5_particles.clear();
+         citr != this->ghost_cells_.cend(); ++citr, ++i) {
+      // Create a vector of h5_particles
+      std::vector<mpm::HDF5Particle> h5_particles;
+      auto particle_ids = (*citr)->particles();
+      for (auto& id : particle_ids) {
+        // Send and delete particle
+        auto send_particle = map_particles_[id];
+        // Append to vector of particles
+        h5_particles.emplace_back(send_particle->hdf5());
+        // Clear particle in current rank
+        send_particle->remove_cell();
+        particles_.remove(send_particle);
+        map_particles_.remove(id);
       }
-      // Receive particle
-      if (mpi_rank == (*citr)->rank()) {
+      (*citr)->clear_particle_ids();
+
+      // Send number of particles to receiver rank
+      unsigned nparticles = h5_particles.size();
+      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
+                MPI_COMM_WORLD, &send_requests[i]);
+      if (nparticles != 0) {
+        mpm::HDF5Particle h5_particle;
+        // Initialize MPI datatypes and send vector of particles
+        MPI_Datatype particle_type =
+            mpm::register_mpi_particle_type(h5_particle);
+        MPI_Send(h5_particles.data(), nparticles, particle_type,
+                 (*citr)->rank(), 0, MPI_COMM_WORLD);
+        mpm::deregister_mpi_particle_type(particle_type);
+      }
+      h5_particles.clear();
+    }
+    // Send complete
+    for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
+      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    // Iterate through the local ghost cells and receive particles
+    for (auto citr = this->local_ghost_cells_.cbegin();
+         citr != this->local_ghost_cells_.cend(); ++citr) {
+      std::vector<unsigned> neighbour_ranks =
+          ghost_cells_neighbour_ranks_[(*citr)->id()];
+
+      for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
         // MPI status
         MPI_Status recv_status;
         // Receive number of particles
         unsigned nrecv_particles;
-        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, MPI_ANY_SOURCE, MPI_ANY_TAG,
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
                  MPI_COMM_WORLD, &recv_status);
 
         if (nrecv_particles != 0) {
@@ -491,10 +510,11 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
           recv_particles.resize(nrecv_particles);
           // Receive the vector of particles
           mpm::HDF5Particle received;
+          MPI_Status status_recv;
           MPI_Datatype particle_type =
               mpm::register_mpi_particle_type(received);
           MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
+                   neighbour_ranks[i], 0, MPI_COMM_WORLD, &status_recv);
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
