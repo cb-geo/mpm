@@ -272,9 +272,9 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
   if (mpi_size > 1) {
     ghost_cells_.clear();
     local_ghost_cells_.clear();
+    ghost_cells_neighbour_ranks_.clear();
     // Iterate through cells
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      bool current_cell_is_ghost = false;
       std::set<unsigned> neighbour_ranks;
       // If cell rank is the current MPI rank
       if ((*citr)->rank() == mpi_rank) {
@@ -286,16 +286,15 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
             ghost_cells_.add(map_cells_[neighbour], check_duplicates);
             // Add mpi rank to set
             neighbour_ranks.insert(map_cells_[neighbour]->rank());
-            // Current cell is a ghost cell
-            if (!current_cell_is_ghost) current_cell_is_ghost = true;
           }
         }
       }
       // Set the number of different MPI rank neighbours to a ghost cell
-      if (current_cell_is_ghost && neighbour_ranks.size() > 0) {
+      if (neighbour_ranks.size() > 0) {
         // Also add the current cell, as this would be a receiver
         local_ghost_cells_.add(*citr, check_duplicates);
 
+        // Update the neighbouring ranks of the local ghost cell
         std::vector<unsigned> mpi_neighbours;
         for (auto rank : neighbour_ranks) mpi_neighbours.emplace_back(rank);
         ghost_cells_neighbour_ranks_[(*citr)->id()] = mpi_neighbours;

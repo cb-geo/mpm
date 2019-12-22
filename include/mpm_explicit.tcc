@@ -25,6 +25,9 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
+    auto mpi_domain_begin = std::chrono::steady_clock::now();
+    console_->info("Rank {}, Domain decomposition started\n", mpi_rank);
+
     // Check if mesh has cells to partition
     if (mesh_->ncells() == 0)
       throw std::runtime_error("Container of cells is empty");
@@ -49,6 +52,11 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     mesh_->find_ghost_boundary_cells();
 
 #endif  // PARMETIS
+    auto mpi_domain_end = std::chrono::steady_clock::now();
+    console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       mpi_domain_end - mpi_domain_begin)
+                       .count());
   }
 #endif  // MPI
 }
