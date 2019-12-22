@@ -388,6 +388,10 @@ class Mesh {
   Container<Cell<Tdim>> cells_;
   //! Container of ghost cells sharing the current MPI rank
   Container<Cell<Tdim>> ghost_cells_;
+  //! Container of local ghost cells
+  Container<Cell<Tdim>> local_ghost_cells_;
+  //! Map of ghost cells to the neighbours ranks
+  std::map<unsigned, std::vector<unsigned>> ghost_cells_neighbour_ranks_;
   //! Faces and cells
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Materials
