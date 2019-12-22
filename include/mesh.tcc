@@ -479,48 +479,41 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
       }
       // Receive particle
       if (mpi_rank == (*citr)->rank()) {
-        // Iterate through all MPI ranks to get particles
-        for (int sender = 0; sender < mpi_size; ++sender) {
-          // If sender rank is not the same as receiver rank
-          if (sender != mpi_rank) {
-            // MPI status
-            MPI_Status recv_status;
-            // Receive number of particles
-            unsigned nrecv_particles;
-            MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, sender, 0,
-                     MPI_COMM_WORLD, &recv_status);
+        // MPI status
+        MPI_Status recv_status;
+        // Receive number of particles
+        unsigned nrecv_particles;
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, MPI_ANY_SOURCE, MPI_ANY_TAG,
+                 MPI_COMM_WORLD, &recv_status);
 
-            if (nrecv_particles != 0) {
-              std::vector<mpm::HDF5Particle> recv_particles;
-              recv_particles.resize(nrecv_particles);
-              // recv_particles.reserve(nrecv_particles);
-              // Receive the vector of particles
-              mpm::HDF5Particle received;
-              MPI_Datatype particle_type =
-                  mpm::register_mpi_particle_type(received);
-              MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                       sender, 0, MPI_COMM_WORLD, &recv_status);
-              mpm::deregister_mpi_particle_type(particle_type);
+        if (nrecv_particles != 0) {
+          std::vector<mpm::HDF5Particle> recv_particles;
+          recv_particles.resize(nrecv_particles);
+          // Receive the vector of particles
+          mpm::HDF5Particle received;
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(received);
+          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
+                   MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
+          mpm::deregister_mpi_particle_type(particle_type);
 
-              // Iterate through n number of received particles
-              for (const auto& rparticle : recv_particles) {
-                mpm::Index id = 0;
-                // Initial particle coordinates
-                Eigen::Matrix<double, Tdim, 1> pcoordinates;
-                pcoordinates.setZero();
+          // Iterate through n number of received particles
+          for (const auto& rparticle : recv_particles) {
+            mpm::Index id = 0;
+            // Initial particle coordinates
+            Eigen::Matrix<double, Tdim, 1> pcoordinates;
+            pcoordinates.setZero();
 
-                // Received particle
-                auto received_particle =
-                    std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
-                // Get material
-                auto material = materials_.at(rparticle.material_id);
-                // Reinitialise particle from HDF5 data
-                received_particle->initialise_particle(rparticle, material);
+            // Received particle
+            auto received_particle =
+                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+            // Get material
+            auto material = materials_.at(rparticle.material_id);
+            // Reinitialise particle from HDF5 data
+            received_particle->initialise_particle(rparticle, material);
 
-                // Add particle to mesh
-                this->add_particle(received_particle, true);
-              }
-            }
+            // Add particle to mesh
+            this->add_particle(received_particle, true);
           }
         }
       }
