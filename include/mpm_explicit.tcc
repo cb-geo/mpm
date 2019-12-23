@@ -154,23 +154,23 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     tbb::task_group task_group;
 
     // Spawn a task for initialising nodes and cells
-    task_group.run([&] {
-      // Initialise nodes
-      mesh_->iterate_over_nodes(
-          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
+    // task_group.run([&] {
+    // Initialise nodes
+    mesh_->iterate_over_nodes(
+        std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
-      mesh_->iterate_over_cells(
-          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-    });
+    mesh_->iterate_over_cells(
+        std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+    //    });
 
     // Spawn a task for particles
-    task_group.run([&] {
-      // Iterate over each particle to compute shapefn
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
-    });
+    //  task_group.run([&] {
+    // Iterate over each particle to compute shapefn
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+    // });
 
-    task_group.wait();
+    // task_group.wait();
 
     // Assign material ids to node
     if (interface_)
