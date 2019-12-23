@@ -50,6 +50,9 @@ class Container {
     return elements_.cend();
   }
 
+  //! Return value at a given index
+  std::shared_ptr<T> operator[](Index id) const { return elements_.at(id); }
+
   //! Iterate over elements in the container
   //! \tparam T A class with a template argument Tdim
   //! \tparam Tunaryfn A unary function
