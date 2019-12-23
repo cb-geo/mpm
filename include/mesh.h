@@ -398,6 +398,8 @@ class Mesh {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! TBB grain size
+  int tbb_grain_size_{1000};
 };  // Mesh class
 }  // namespace mpm
 
