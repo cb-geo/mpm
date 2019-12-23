@@ -399,7 +399,7 @@ class Mesh {
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
-  int tbb_grain_size_{1000};
+  int tbb_grain_size_{100};
 };  // Mesh class
 }  // namespace mpm
 
