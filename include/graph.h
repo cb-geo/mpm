@@ -11,6 +11,7 @@
 
 #ifdef USE_PARMETIS
 #include "parmetis.h"
+#include <parhip_interface.h>
 
 #include "cell.h"
 #include "container.h"
@@ -35,58 +36,58 @@ class Graph {
   bool create_partitions(MPI_Comm* comm);
 
   //! Collect partitions
-  void collect_partitions(int ncells, int npes, int rank, MPI_Comm* comm);
+  void collect_partitions(int ncells, int mpi_size, int rank, MPI_Comm* comm);
 
   //! Return xadj
-  idx_t* xadj();
+  idxtype* xadj();
 
   //! Return adjncy
-  idx_t* adjncy();
+  idxtype* adjncy();
 
   //! Return vtxdist
-  idx_t* vtxdist();
+  idxtype* vtxdist();
 
   //! Return vwgt
-  idx_t* vwgt();
+  idxtype* vwgt();
 
   //! Tdim
-  void assign_ndims(idx_t a);
+  void assign_ndims(idxtype a);
 
   //! Return nparts
-  idx_t nparts();
+  int nparts();
 
  private:
   // Container of cells
   Container<Cell<Tdim>> cells_;
 
-  idx_t numflag_ = 0;
-  idx_t wgtflag_ = 2;
+  idxtype numflag_ = 0;
+  idxtype wgtflag_ = 2;
 
-  idx_t ncon_ = 0;
-  idx_t nparts_ = 0;
+  idxtype ncon_ = 0;
+  int nparts_ = 0;
   real_t ubvec_[MAXNCON];
-  idx_t options_[1];
+  idxtype options_[1];
   real_t* xyz_ = nullptr;
-  idx_t ndims_ = 0;
-  idx_t edgecut_ = 0;
+  idxtype ndims_ = 0;
+  int edgecut_ = 0;
 
   real_t* tpwgts_ = nullptr;
   // Array that stores the weights of the adjacency lists
-  idx_t* adjwgt_ = nullptr;
-  idx_t nvtxs_ = 0;
-  idx_t* part_ = nullptr;
-  idx_t* partition_ = nullptr;
+  idxtype* adjwgt_ = nullptr;
+  idxtype nvtxs_ = 0;
+  std::vector<mpm::Index> part_;
+  idxtype* partition_ = nullptr;
 
   // Pointers to the locally stored vertices
-  idx_t* xadj_ = nullptr;
+  idxtype* xadj_ = nullptr;
   // Vertex weights
-  idx_t* vwgt_ = nullptr;
+  idxtype* vwgt_ = nullptr;
   // Vertex weights
   real_t* nvwgt = nullptr;
   // Array that stores the adjacency lists of nvtxs
-  idx_t* adjncy_ = nullptr;
+  idxtype* adjncy_ = nullptr;
   // Distribution of vertices
-  idx_t* vtxdist_ = nullptr;
+  idxtype* vtxdist_ = nullptr;
 };  // namespace graph
 }  // namespace mpm
 

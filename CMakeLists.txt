@@ -107,6 +107,14 @@ if (PARMETIS_FOUND)
   link_libraries(${PARMETIS_LIBRARIES})
 endif()
 
+# KaHIP
+find_package(KaHIP)
+if (KAHIP_FOUND)
+  add_definitions("-DUSE_PARMETIS")
+  include_directories(${KAHIP_INCLUDE_DIRS})
+  link_libraries(${KAHIP_LIBRARIES})
+endif()
+
 
 # Include directories
 include_directories(BEFORE
