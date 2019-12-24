@@ -290,8 +290,10 @@ class Mesh {
 
   //! Generate points
   //! \param[in] nquadratures Number of points per direction in cell
+  //! \param[in] particle_type Particle type
   //! \retval point Material point coordinates
-  std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
+  void generate_material_points(unsigned nquadratures,
+                                const std::string& particle_type);
 
   //! Initialise material models
   //! \param[in] materials Material models

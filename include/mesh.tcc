@@ -329,31 +329,37 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 
 //! Create cells from node lists
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, Tdim, 1>>
-    mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
-  std::vector<VectorDim> points;
+void mpm::Mesh<Tdim>::generate_material_points(
+    unsigned nquadratures, const std::string& particle_type) {
   try {
     if (cells_.size() > 0) {
-      points.reserve(cells_.size() * std::pow(nquadratures, Tdim));
-
+      bool checks = false;
       // Generate points
       for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
         (*citr)->assign_quadrature(nquadratures);
-        const auto cpoints = (*citr)->generate_points();
-        points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
+        const std::vector<Eigen::Matrix<double, Tdim, 1>> cpoints =
+            (*citr)->generate_points();
+        for (const auto& coordinates : cpoints) {
+          mpm::Index pid = particles_.size();
+          bool status = this->add_particle(
+              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                  ->create(particle_type, static_cast<mpm::Index>(pid),
+                           coordinates),
+              checks);
+          if (status) map_particles_[pid]->assign_cell(*citr);
+        }
       }
       console_->info(
           "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
           "# of points generated: {}",
           cells_.size(), cells_.size() * std::pow(nquadratures, Tdim),
-          points.size());
+          particles_.size());
     } else
       throw std::runtime_error("No cells are found in the mesh!");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    points.clear();
   }
-  return points;
 }
 
 //! Create particles from coordinates
