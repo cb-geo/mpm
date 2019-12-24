@@ -92,29 +92,9 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   std::vector<idxtype>(vvtxdist).swap(vvtxdist);
   std::vector<idxtype>(vvwgt).swap(vvwgt);
 
-  //! assign ubvec (ParMETIS suggests 1.05)
-  for (int nncon = 0; nncon < MAXNCON; ++nncon) ubvec_[nncon] = 1.05;
-
   //! assign nparts
   //! nparts is different from mpi_size, but here we can set them equal
   nparts_ = mpi_size;
-
-  //! assign tpwgts
-  std::vector<real_t> ttpwgts;
-  real_t sub_total = 0.0;
-  for (int ntpwgts = 0; ntpwgts < ((nparts_) * this->ncon_); ++ntpwgts) {
-    if (ntpwgts != (nparts_ * this->ncon_) - 1) {
-      ttpwgts.push_back(1.0 / (real_t)nparts_);
-      sub_total = sub_total + 1.0 / (real_t)nparts_;
-    } else {
-      ttpwgts.push_back(1.0 - sub_total);
-    }
-  }
-  real_t* mtpwts = (real_t*)malloc(ttpwgts.size() * sizeof(real_t));
-  for (int ntpwgts = 0; ntpwgts < ttpwgts.size(); ++ntpwgts)
-    mtpwts[ntpwgts] = ttpwgts.at(ntpwgts);
-  this->tpwgts_ = mtpwts;
-  std::vector<real_t>(ttpwgts).swap(ttpwgts);
 
   //! nvtxs
   this->nvtxs_ = vtxdist_[mpi_rank + 1] - vtxdist_[mpi_rank];

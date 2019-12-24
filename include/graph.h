@@ -10,7 +10,6 @@
 #endif
 
 #ifdef USE_PARMETIS
-#include "parmetis.h"
 #include <parhip_interface.h>
 
 #include "cell.h"
@@ -18,7 +17,6 @@
 #include "particle.h"
 
 namespace mpm {
-const int MAXNCON = 1;
 
 //! Base class of graph
 //! \brief Base class that stores the information about graph
@@ -65,13 +63,10 @@ class Graph {
 
   idxtype ncon_ = 0;
   int nparts_ = 0;
-  real_t ubvec_[MAXNCON];
   idxtype options_[1];
-  real_t* xyz_ = nullptr;
   idxtype ndims_ = 0;
   int edgecut_ = 0;
 
-  real_t* tpwgts_ = nullptr;
   // Array that stores the weights of the adjacency lists
   idxtype* adjwgt_ = nullptr;
   idxtype nvtxs_ = 0;
@@ -82,8 +77,6 @@ class Graph {
   idxtype* xadj_ = nullptr;
   // Vertex weights
   idxtype* vwgt_ = nullptr;
-  // Vertex weights
-  real_t* nvwgt = nullptr;
   // Array that stores the adjacency lists of nvtxs
   idxtype* adjncy_ = nullptr;
   // Distribution of vertices
