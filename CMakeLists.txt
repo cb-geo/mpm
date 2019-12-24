@@ -92,21 +92,15 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
-# METIS
-find_package(METIS)
-if (METIS_FOUND)
-    include_directories(SYSTEM ${METIS_INCLUDE_DIR})
-    link_libraries(${METIS_LIBRARY})
-endif (METIS_FOUND)
-
-# ParMETIS
-find_package(ParMETIS)
-if (PARMETIS_FOUND)
-  add_definitions("-DUSE_PARMETIS")
-  include_directories(${PARMETIS_INCLUDE_DIRS})
-  link_libraries(${PARMETIS_LIBRARIES})
+# KaHIP
+if (MPI_FOUND)
+find_package(KaHIP REQUIRED)
+if (KAHIP_FOUND)
+  add_definitions("-DUSE_GRAPH_PARTITIONING")
+  include_directories(${KAHIP_INCLUDE_DIRS})
+  link_libraries(${KAHIP_LIBRARIES})
 endif()
-
+endif()
 
 # Include directories
 include_directories(BEFORE

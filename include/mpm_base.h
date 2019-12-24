@@ -14,7 +14,7 @@
 #endif
 #include "tbb/task_group.h"
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
@@ -110,7 +110,7 @@ class MPMBase : public MPM {
   //! Bool nodal tractions
   bool nodal_tractions_{true};
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
   std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 #endif

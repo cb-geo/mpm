@@ -1,7 +1,7 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
@@ -45,7 +45,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   //! Graph
   using mpm::MPMBase<Tdim>::graph_;
 #endif

@@ -32,26 +32,24 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     if (mesh_->ncells() == 0)
       throw std::runtime_error("Container of cells is empty");
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
     // Create graph
     graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mpi_size, mpi_rank);
 
-    // Create partition using ParMETIS
-    bool graph_partition = graph_->create_partitions(&comm);
-
+    // Graph partitioning mode
+    int mode = 4;  // FAST
+    // Create graph partition
+    bool graph_partition = graph_->create_partitions(&comm, mode);
     // Collect the partitions
-    graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
+    graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
     mesh_->remove_all_nonrank_particles();
-
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
-
     // Identify ghost boundary cells
     mesh_->find_ghost_boundary_cells();
-
-#endif  // PARMETIS
+#endif
     auto mpi_domain_end = std::chrono::steady_clock::now();
     console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -359,7 +357,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       throw std::runtime_error("Particle outside the mesh domain");
 
 #ifdef USE_MPI
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
     mesh_->transfer_nonrank_particles();
 #endif
 #endif

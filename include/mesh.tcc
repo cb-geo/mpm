@@ -451,22 +451,33 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
   // Get MPI rank
   int mpi_rank = 0;
+  int mpi_size = 1;
 #ifdef USE_MPI
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
+
   // Remove associated cell for the particle
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
     // If cell is non empty
     if ((*citr)->particles().size() != 0 && (*citr)->rank() != mpi_rank) {
-      auto particle_ids = (*citr)->particles();
-      for (auto& id : particle_ids) {
+      auto pids = (*citr)->particles();
+      // Remove particles from map
+      for (auto& id : pids) {
         map_particles_[id]->remove_cell();
-        particles_.remove(map_particles_[id]);
         map_particles_.remove(id);
       }
       (*citr)->clear_particle_ids();
     }
   }
+
+  // Get number of particles to reserve size
+  unsigned nparticles = this->nparticles();
+  // Clear particles and start a new element of particles
+  particles_.clear();
+  particles_.reserve(static_cast<int>(nparticles / mpi_size));
+  // Iterate over the map of particles and add them to container
+  for (auto& particle : map_particles_) particles_.add(particle.second, false);
 }
 
 //! Transfer all particles in cells that are not in local rank
