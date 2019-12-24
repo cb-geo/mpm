@@ -25,13 +25,21 @@ template <unsigned Tdim>
 class Graph {
  public:
   //! Constructor with cells, size and rank
-  Graph(Container<Cell<Tdim>> cells, int size, int rank);
+  //! \param[in] cells Container of cells
+  //! \param[in] mpi_size # of MPI tasks
+  //! \param[in] mpi_rank MPI rank
+  Graph(Container<Cell<Tdim>> cells, int mpi_size, int mpi_rank);
 
   //! Create graph partition
-  bool create_partitions(MPI_Comm* comm);
+  //! \param[in] comm MPI Communication
+  //! \param[in] mode KaHIP graph partitioning mode
+  bool create_partitions(MPI_Comm* comm, int mode);
 
   //! Collect partitions
-  void collect_partitions(int mpi_size, int rank, MPI_Comm* comm);
+  //! \param[in] mpi_size # of MPI tasks
+  //! \param[in] mpi_rank MPI rank
+  //! \param[in] comm MPI Communication
+  void collect_partitions(int mpi_size, int mpi_rank, MPI_Comm* comm);
 
   //! Return xadj
   std::vector<idxtype> xadj() const;

@@ -116,12 +116,11 @@ int mpm::Graph<Tdim>::nparts() {
 
 //! Create partition
 template <unsigned Tdim>
-bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
+bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
 
   // The amount of imbalance that is allowed. (3%)
   double imbalance = 0.03;
 
-  int mode = 4;  // Fast Mode
   int seed = 0;
 
   // Suppress output from the partitioning library.

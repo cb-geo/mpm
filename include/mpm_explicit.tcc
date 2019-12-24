@@ -36,8 +36,10 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     // Create graph
     graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells(), mpi_size, mpi_rank);
 
+    // Graph partitioning mode
+    int mode = 4;  // FAST
     // Create graph partition
-    bool graph_partition = graph_->create_partitions(&comm);
+    bool graph_partition = graph_->create_partitions(&comm, mode);
     // Collect the partitions
     graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 

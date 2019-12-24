@@ -5,7 +5,6 @@
 #include <array>
 #include <limits>
 #include <memory>
-#include <mutex>
 #include <numeric>
 #include <vector>
 
@@ -365,8 +364,6 @@ class Mesh {
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
  private:
-  //! Mutex
-  std::mutex mesh_mutex_;
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
   //! Isoparametric mesh

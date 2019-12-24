@@ -495,8 +495,10 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
         REQUIRE(mesh->nghost_cells() == 0);
         REQUIRE(mesh->nlocal_ghost_cells() == 0);
 
+        // Fast mode for graph partitioning
+        int mode = 4;
         // Create partition
-        bool graphpartition = graph->create_partitions(&comm);
+        bool graphpartition = graph->create_partitions(&comm, mode);
 
         // Collect the partitions
         graph->collect_partitions(mpi_size, mpi_rank, &comm);
@@ -746,8 +748,10 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         REQUIRE(mesh->nghost_cells() == 0);
         REQUIRE(mesh->nlocal_ghost_cells() == 0);
 
+        // Fast mode for graph partitioning
+        int mode = 4;
         // Create partition
-        bool graphpartition = graph->create_partitions(&comm);
+        bool graphpartition = graph->create_partitions(&comm, mode);
 
         // Collect the partitions
         graph->collect_partitions(mpi_size, mpi_rank, &comm);
