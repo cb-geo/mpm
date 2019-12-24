@@ -49,23 +49,23 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   start = vtxdist_[mpi_rank];
   idxtype end = vtxdist_[mpi_rank + 1];
 
-  for (auto stcl = cells_.cbegin(); stcl != cells_.cend(); ++stcl) {
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
 
-    if ((*stcl)->id() >= start && (*stcl)->id() < end) {
-      if (offset == 0) this->ndims_ = (*stcl)->centroid().rows();
+    if ((*citr)->id() >= start && (*citr)->id() < end) {
+      if (offset == 0) this->ndims_ = (*citr)->centroid().rows();
 
       //! Insert the offset of the size of cell's neighbour
-      offset += (*stcl)->nneighbours();
+      offset += (*citr)->nneighbours();
 
       this->xadj_.emplace_back(offset);
 
       //! get the neighbours
-      auto neighbours = (*stcl)->neighbours();
+      auto neighbours = (*citr)->neighbours();
 
       //! get the id of neighbours
       for (const auto& neighbour : neighbours) adjncy_.emplace_back(neighbour);
 
-      vwgt_.emplace_back((*stcl)->nparticles());
+      vwgt_.emplace_back((*citr)->nparticles());
     }
   }
 
@@ -136,8 +136,8 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
 
 //! Collect the partitions and store it in the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::collect_partitions(int mpi_size,
-                                          int mpi_rank, MPI_Comm* comm) {
+void mpm::Graph<Tdim>::collect_partitions(int mpi_size, int mpi_rank,
+                                          MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
   mpm::Index ncells = this->cells_.size();

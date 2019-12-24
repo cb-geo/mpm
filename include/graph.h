@@ -9,7 +9,7 @@
 #include "mpi.h"
 #endif
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include <parhip_interface.h>
 
 #include "cell.h"

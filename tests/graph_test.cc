@@ -1,4 +1,4 @@
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 
 #include <functional>
 #include <limits>
