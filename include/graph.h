@@ -37,16 +37,16 @@ class Graph {
   void collect_partitions(int ncells, int mpi_size, int rank, MPI_Comm* comm);
 
   //! Return xadj
-  idxtype* xadj();
+  std::vector<idxtype> xadj() const;
 
   //! Return adjncy
-  idxtype* adjncy();
+  std::vector<idxtype> adjncy() const;
 
   //! Return vtxdist
-  idxtype* vtxdist();
+  std::vector<idxtype> vtxdist() const;
 
   //! Return vwgt
-  idxtype* vwgt();
+  std::vector<idxtype> vwgt() const;
 
   //! Tdim
   void assign_ndims(idxtype a);
@@ -57,30 +57,26 @@ class Graph {
  private:
   // Container of cells
   Container<Cell<Tdim>> cells_;
-
-  idxtype numflag_ = 0;
-  idxtype wgtflag_ = 2;
-
-  idxtype ncon_ = 0;
+  // Number of partitions
   int nparts_ = 0;
-  idxtype options_[1];
+  // Number of dimensions
   idxtype ndims_ = 0;
+  // Edge cut
   int edgecut_ = 0;
 
-  // Array that stores the weights of the adjacency lists
-  idxtype* adjwgt_ = nullptr;
-  idxtype nvtxs_ = 0;
+  // Partition ids
   std::vector<mpm::Index> part_;
   idxtype* partition_ = nullptr;
-
+  // Array that stores the weights of the adjacency lists
+  std::vector<idxtype> adjwgt_;
   // Pointers to the locally stored vertices
-  idxtype* xadj_ = nullptr;
+  std::vector<idxtype> xadj_;
   // Vertex weights
-  idxtype* vwgt_ = nullptr;
+  std::vector<idxtype> vwgt_;
   // Array that stores the adjacency lists of nvtxs
-  idxtype* adjncy_ = nullptr;
+  std::vector<idxtype> adjncy_;
   // Distribution of vertices
-  idxtype* vtxdist_ = nullptr;
+  std::vector<idxtype> vtxdist_;
 };  // namespace graph
 }  // namespace mpm
 

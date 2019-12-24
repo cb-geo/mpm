@@ -4,19 +4,13 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
                         int mpi_rank) {
 
   this->cells_ = cells;
-  //! Basic parameters used in ParMETIS
-  std::vector<idxtype> vxadj;
-  std::vector<idxtype> vadjncy;
-  std::vector<idxtype> vvtxdist;
-  std::vector<idxtype> vvwgt;
 
-  //! There is no weight to adjwgt
-  this->adjwgt_ = {};
-  //! There is only one weight of one vertex
-  this->ncon_ = 1;
+  // Clear all graph properties
+  this->adjncy_.clear();
+  this->xadj_.clear();
 
-  //! Use default value to fill the options[1]
-  this->options_[0] = 0;
+  //! There is no adjacency weight (edge weight)
+  this->adjwgt_.clear();
 
   idxtype sum = cells_.size();
 
@@ -26,78 +20,55 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   if (rest != 0) part = part + 1;
 
   idxtype start = 0;
-  vvtxdist.push_back(start);
+  vtxdist_.emplace_back(start);
   start = start + part;
   //! Insert the local cells for each processor
   if (sum != 1 && part != 0) {
     while (start < sum) {
-      vvtxdist.push_back(start);
+      vtxdist_.emplace_back(start);
       start = start + part;
     }
   }
 
-  //! If the numbr of processor can not be evenly distributed, then the last
-  //! processor handle the rest of cells
+  //! If the number of processors can not be evenly distributed, then the last
+  //! processor will handle the rest of cells
   if (rest != 0) {
     start = start - part;
     start = sum;
-    vvtxdist.push_back(start);
+    vtxdist_.emplace_back(start);
   } else {
-    vvtxdist.push_back(start);
+    vtxdist_.emplace_back(start);
   }
 
-  vxadj.push_back(0);
+  this->xadj_.emplace_back(0);
 
-  long long counter = 0;
-  start = vvtxdist[mpi_rank];
-  idxtype end = vvtxdist[mpi_rank + 1];
+  mpm::Index offset = 0;
+  start = vtxdist_[mpi_rank];
+  idxtype end = vtxdist_[mpi_rank + 1];
 
   for (auto stcl = cells_.cbegin(); stcl != cells_.cend(); ++stcl) {
 
     if ((*stcl)->id() >= start && (*stcl)->id() < end) {
-      if (counter == 0) this->ndims_ = (*stcl)->centroid().rows();
+      if (offset == 0) this->ndims_ = (*stcl)->centroid().rows();
 
       //! Insert the offset of the size of cell's neighbour
-      counter += (*stcl)->nneighbours();
+      offset += (*stcl)->nneighbours();
 
-      vxadj.push_back(counter);
+      this->xadj_.emplace_back(offset);
 
       //! get the neighbours
       auto neighbours = (*stcl)->neighbours();
 
       //! get the id of neighbours
-      for (auto neighbour : neighbours) vadjncy.push_back(neighbour);
+      for (const auto& neighbour : neighbours) adjncy_.emplace_back(neighbour);
 
-      vvwgt.push_back((*stcl)->nparticles());
+      vwgt_.emplace_back((*stcl)->nparticles());
     }
   }
-
-  idxtype* final_xadj = (idxtype*)malloc(vxadj.size() * sizeof(idxtype));
-  idxtype* final_adjncy = (idxtype*)malloc(vadjncy.size() * sizeof(idxtype));
-  idxtype* final_vtxdist = (idxtype*)malloc(vvtxdist.size() * sizeof(idxtype));
-  idxtype* final_vwgt = (idxtype*)malloc(vvwgt.size() * sizeof(idxtype));
-  //! Assign the value
-  for (long i = 0; i < vxadj.size(); ++i) final_xadj[i] = vxadj.at(i);
-  for (long i = 0; i < vadjncy.size(); ++i) final_adjncy[i] = vadjncy.at(i);
-  for (long i = 0; i < vvtxdist.size(); ++i) final_vtxdist[i] = vvtxdist.at(i);
-  for (long i = 0; i < vvwgt.size(); ++i) final_vwgt[i] = vvwgt.at(i);
-
-  //! Assign the pointer
-  this->adjncy_ = final_adjncy;
-  this->xadj_ = final_xadj;
-  this->vtxdist_ = final_vtxdist;
-  this->vwgt_ = final_vwgt;
-  std::vector<idxtype>(vadjncy).swap(vadjncy);
-  std::vector<idxtype>(vxadj).swap(vxadj);
-  std::vector<idxtype>(vvtxdist).swap(vvtxdist);
-  std::vector<idxtype>(vvwgt).swap(vvwgt);
 
   //! assign nparts
   //! nparts is different from mpi_size, but here we can set them equal
   nparts_ = mpi_size;
-
-  //! nvtxs
-  this->nvtxs_ = vtxdist_[mpi_rank + 1] - vtxdist_[mpi_rank];
 
   //! allocate space for part
   part_.reserve(cells_.size());
@@ -112,26 +83,26 @@ mpm::Graph<Tdim>::~Graph() {
   part_.clear();
 }
 
-//! Get the xadj
+//! Return xadj
 template <unsigned Tdim>
-idxtype* mpm::Graph<Tdim>::xadj() {
+std::vector<idxtype> mpm::Graph<Tdim>::xadj() const {
   return this->xadj_;
 }
 
-//! Get the adjncy
+//! Return adjncy
 template <unsigned Tdim>
-idxtype* mpm::Graph<Tdim>::adjncy() {
+std::vector<idxtype> mpm::Graph<Tdim>::adjncy() const {
   return this->adjncy_;
 }
-//! Get the vtxdist
+//! Return vtxdist
 template <unsigned Tdim>
-idxtype* mpm::Graph<Tdim>::vtxdist() {
+std::vector<idxtype> mpm::Graph<Tdim>::vtxdist() const {
   return this->vtxdist_;
 }
 
-//! Get the vwgt
+//! Return vwgt
 template <unsigned Tdim>
-idxtype* mpm::Graph<Tdim>::vwgt() {
+std::vector<idxtype> mpm::Graph<Tdim>::vwgt() const {
   return this->vwgt_;
 }
 
@@ -159,10 +130,10 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
   // Suppress output from the partitioning library.
   bool suppress_output = true;
 
-  ParHIPPartitionKWay(this->vtxdist(), this->xadj(), this->adjncy(),
-                      this->vwgt(), this->adjwgt_, &this->nparts_, &imbalance,
-                      suppress_output, seed, mode, &this->edgecut_,
-                      this->part_.data(), comm);
+  ParHIPPartitionKWay(
+      this->vtxdist_.data(), this->xadj_.data(), this->adjncy_.data(),
+      this->vwgt_.data(), this->adjwgt_.data(), &this->nparts_, &imbalance,
+      suppress_output, seed, mode, &this->edgecut_, this->part_.data(), comm);
   return true;
 }
 
