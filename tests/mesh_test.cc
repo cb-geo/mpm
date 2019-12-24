@@ -409,33 +409,43 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
+    // Particle type 2D
+    const std::string particle_type = "P2D";
 
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    REQUIRE(mesh->nparticles() == 0);
+
+    mesh->generate_material_points(1, particle_type);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      mesh->generate_material_points(1, particle_type);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 4);
+    SECTION("Check generating 2 particle / cell") {
+      mesh->generate_material_points(2, particle_type);
+      REQUIRE(mesh->nparticles() == 4);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 9);
+    SECTION("Check generating 3 particle / cell") {
+      mesh->generate_material_points(3, particle_type);
+      REQUIRE(mesh->nparticles() == 9);
+    }
 
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1379,32 +1389,41 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise cell and compute volume
     REQUIRE(cell1->initialise() == true);
 
+    // Particle type 2D
+    const std::string particle_type = "P3D";
+
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    mesh->generate_material_points(1, particle_type);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      mesh->generate_material_points(1, particle_type);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 8);
+    SECTION("Check generating 2 particle / cell") {
+      mesh->generate_material_points(2, particle_type);
+      REQUIRE(mesh->nparticles() == 8);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 27);
+    SECTION("Check generating 3 particle / cell") {
+      mesh->generate_material_points(3, particle_type);
+      REQUIRE(mesh->nparticles() == 27);
+    }
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
