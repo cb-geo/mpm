@@ -352,6 +352,12 @@ class Mesh {
   //! Return particle cell ids
   std::map<mpm::Index, mpm::Index>* particles_cell_ids();
 
+  //! Return nghost cells
+  unsigned nghost_cells() const { return ghost_cells_.size(); }
+
+  //! Return nlocal ghost cells
+  unsigned nlocal_ghost_cells() const { return local_ghost_cells_.size(); }
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
