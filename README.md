@@ -36,8 +36,7 @@ If you have any issues running or compiling the MPM code please open a issue on 
 
 #### Optional
 * [MPI](https://www.open-mpi.org/)
-* [METIS](http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/)
-* [ParMETIS](http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/)
+* [KaHIP](https://github.com/schulzchristian/KaHIP)
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -84,25 +83,12 @@ make -j
 sudo make install
 ```
 
-### METIS/ParMETIS installation
+### KaHIP installation for domain decomposition
 
 ```shell
-# METIS and PARMETIS
-
-wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz && \
-    tar -xf metis-5.1.0.tar.gz && \
-    cd metis-5.1.0/ && mkdir -p ~/workspace/metis && \
-    make config shared=1 cc=mpicc cxx=mpic++ prefix=~/workspace/metis && \
-    make install 
-
-wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz && \
-    tar -xf parmetis-4.0.3.tar.gz && \
-    cd parmetis-4.0.3/ && mkdir -p ~/workspace/parmetis && \
-    make config shared=1 cc=mpicc cxx=mpic++ prefix=~/workspace/parmetis && \
-    make install
+cd ~/workspace/ && git clone https://github.com/schulzchristian/KaHIP && \
+   cd KaHIP && sh ./compile_withcmake.sh
 ```
-
-
 
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
@@ -136,7 +122,7 @@ Compile with OpenMPI:
 ```
 mkdir build && cd build 
 export CXX_COMPILER=mpicxx
-cmake -DCMAKE_BUILD_TYPE=Release -DMETIS_DIR=~/workspace/metis/ -DPARMETIS_DIR=~/workspace/parmetis/ ..
+cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ ..
 make -jN
 ```
 
@@ -169,7 +155,6 @@ For example:
 Where:
 
 ```
-
    -p <tbb_parallel>,  --tbb_parallel <tbb_parallel>
      Number of parallel TBB threads
 
@@ -206,4 +191,6 @@ mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 
 ## Citation
 
-Kumar, K., Salmond, J., Kularathna, S., Wilkes, C., Tjung, E., Biscontin, G., & Soga, K. (2019). Scalable and modular material point method for large scale simulations. 2nd International Conference on the Material Point Method. Cambridge, UK.
+If you publish results using our code, please acknowledge our work by quoting the following paper:
+
+Kumar, K., Salmond, J., Kularathna, S., Wilkes, C., Tjung, E., Biscontin, G., & Soga, K. (2019). Scalable and modular material point method for large scale simulations. 2nd International Conference on the Material Point Method. Cambridge, UK. [https://arxiv.org/abs/1909.13380](https://arxiv.org/abs/1909.13380)
