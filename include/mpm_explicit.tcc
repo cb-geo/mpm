@@ -38,19 +38,15 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
 
     // Create partition using ParMETIS
     bool graph_partition = graph_->create_partitions(&comm);
-
     // Collect the partitions
     graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
     mesh_->remove_all_nonrank_particles();
-
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
-
     // Identify ghost boundary cells
     mesh_->find_ghost_boundary_cells();
-
 #endif  // PARMETIS
     auto mpi_domain_end = std::chrono::steady_clock::now();
     console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,
