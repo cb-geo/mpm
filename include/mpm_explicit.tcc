@@ -39,7 +39,7 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     // Create partition using ParMETIS
     bool graph_partition = graph_->create_partitions(&comm);
     // Collect the partitions
-    graph_->collect_partitions(mesh_->ncells(), mpi_size, mpi_rank, &comm);
+    graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
     mesh_->remove_all_nonrank_particles();

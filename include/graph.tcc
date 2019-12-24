@@ -6,8 +6,11 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   this->cells_ = cells;
 
   // Clear all graph properties
-  this->adjncy_.clear();
   this->xadj_.clear();
+  this->vwgt_.clear();
+  this->adjncy_.clear();
+  this->vtxdist_.clear();
+  this->part_.clear();
 
   //! There is no adjacency weight (edge weight)
   this->adjwgt_.clear();
@@ -77,12 +80,6 @@ mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
   this->edgecut_ = 0;
 }
 
-//! Destructor
-template <unsigned Tdim>
-mpm::Graph<Tdim>::~Graph() {
-  part_.clear();
-}
-
 //! Return xadj
 template <unsigned Tdim>
 std::vector<idxtype> mpm::Graph<Tdim>::xadj() const {
@@ -139,48 +136,46 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm) {
 
 //! Collect the partitions and store it in the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::collect_partitions(int ncells, int mpi_size,
+void mpm::Graph<Tdim>::collect_partitions(int mpi_size,
                                           int mpi_rank, MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
-  this->partition_ = (idxtype*)malloc(ncells * sizeof(idxtype));
+  mpm::Index ncells = this->cells_.size();
+  std::vector<mpm::Index> partition(ncells, 0);
 
   if (mpi_rank == 0) {
     int par = 0;
     for (int i = 0; i < this->vtxdist_[1]; ++i) {
-      this->partition_[par] = this->part_[i];
+      partition[par] = this->part_[i];
       par = par + 1;
     }
 
     for (int penum = 1; penum < mpi_size; ++penum) {
       idxtype rnvtxs = this->vtxdist_[penum + 1] - this->vtxdist_[penum];
-      idxtype* rpart = (idxtype*)malloc(rnvtxs * sizeof(idxtype));
+      std::vector<idxtype> rpart(rnvtxs);
       //! penum is the source process
-      MPI_Recv((void*)rpart, rnvtxs, MPI_UNSIGNED_LONG_LONG, penum, 1, *comm,
+      MPI_Recv(rpart.data(), rnvtxs, MPI_UNSIGNED_LONG_LONG, penum, 1, *comm,
                &status);
 
       for (int i = 0; i < rnvtxs; ++i) {
-        this->partition_[par] = rpart[i];
+        partition[par] = rpart[i];
         par = par + 1;
       }
-      free(rpart);
     }
 
     for (int penum = 1; penum < mpi_size; ++penum)
-      MPI_Send((void*)this->partition_, ncells, MPI_UNSIGNED_LONG_LONG, penum,
-               1, *comm);
+      MPI_Send(partition.data(), ncells, MPI_UNSIGNED_LONG_LONG, penum, 1,
+               *comm);
 
   } else {
     MPI_Send(this->part_.data(),
              this->vtxdist_[mpi_rank + 1] - this->vtxdist_[mpi_rank],
              MPI_UNSIGNED_LONG_LONG, 0, 1, *comm);
-    MPI_Recv((void*)this->partition_, ncells, MPI_UNSIGNED_LONG_LONG, 0, 1,
-             *comm, &status);
+    MPI_Recv(partition.data(), ncells, MPI_UNSIGNED_LONG_LONG, 0, 1, *comm,
+             &status);
   }
 
   // Assign partition to cells
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
-    (*citr)->rank(this->partition_[(*citr)->id()]);
-
-  free(this->partition_);
+    (*citr)->rank(partition[(*citr)->id()]);
 }

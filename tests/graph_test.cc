@@ -499,7 +499,7 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
         bool graphpartition = graph->create_partitions(&comm);
 
         // Collect the partitions
-        graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
+        graph->collect_partitions(mpi_size, mpi_rank, &comm);
 
         // Delete all the particles which is not in local task parititon
         mesh->remove_all_nonrank_particles();
@@ -750,7 +750,7 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         bool graphpartition = graph->create_partitions(&comm);
 
         // Collect the partitions
-        graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
+        graph->collect_partitions(mpi_size, mpi_rank, &comm);
 
         // Delete all the particles which is not in local task parititon
         mesh->remove_all_nonrank_particles();

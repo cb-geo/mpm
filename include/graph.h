@@ -27,14 +27,11 @@ class Graph {
   //! Constructor with cells, size and rank
   Graph(Container<Cell<Tdim>> cells, int size, int rank);
 
-  //! Destructor
-  ~Graph();
-
   //! Create graph partition
   bool create_partitions(MPI_Comm* comm);
 
   //! Collect partitions
-  void collect_partitions(int ncells, int mpi_size, int rank, MPI_Comm* comm);
+  void collect_partitions(int mpi_size, int rank, MPI_Comm* comm);
 
   //! Return xadj
   std::vector<idxtype> xadj() const;
@@ -66,7 +63,6 @@ class Graph {
 
   // Partition ids
   std::vector<mpm::Index> part_;
-  idxtype* partition_ = nullptr;
   // Array that stores the weights of the adjacency lists
   std::vector<idxtype> adjwgt_;
   // Pointers to the locally stored vertices
