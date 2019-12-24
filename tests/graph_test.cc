@@ -483,33 +483,32 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
     mesh->compute_cell_neighbours();
 
     SECTION("Decompose mesh graph") {
-      // Create graph
-      auto graph =
-          std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size, mpi_rank);
-      // Initialize MPI
-      MPI_Comm comm;
-      MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-
-      // Check number of ghost cells
-      REQUIRE(mesh->nghost_cells() == 0);
-      REQUIRE(mesh->nlocal_ghost_cells() == 0);
-
-      // Create partition
-      bool graphpartition = graph->create_partitions(&comm);
-
-      // Collect the partitions
-      graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
-
-      // Delete all the particles which is not in local task parititon
-      mesh->remove_all_nonrank_particles();
-
-      // Identify shared nodes across MPI domains
-      mesh->find_domain_shared_nodes();
-
-      // Identify ghost boundary cells
-      mesh->find_ghost_boundary_cells();
-
       if (mpi_rank == 4) {
+        // Create graph
+        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
+                                                       mpi_rank);
+        // Initialize MPI
+        MPI_Comm comm;
+        MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+        // Check number of ghost cells
+        REQUIRE(mesh->nghost_cells() == 0);
+        REQUIRE(mesh->nlocal_ghost_cells() == 0);
+
+        // Create partition
+        bool graphpartition = graph->create_partitions(&comm);
+
+        // Collect the partitions
+        graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
+
+        // Delete all the particles which is not in local task parititon
+        mesh->remove_all_nonrank_particles();
+
+        // Identify shared nodes across MPI domains
+        mesh->find_domain_shared_nodes();
+
+        // Identify ghost boundary cells
+        mesh->find_ghost_boundary_cells();
         REQUIRE(mesh->nghost_cells() == 3);
         REQUIRE(mesh->nlocal_ghost_cells() == 1);
       }
@@ -735,33 +734,33 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
     mesh->compute_cell_neighbours();
 
     SECTION("Decompose mesh graph") {
-      // Create graph
-      auto graph =
-          std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size, mpi_rank);
-      // Initialize MPI
-      MPI_Comm comm;
-      MPI_Comm_dup(MPI_COMM_WORLD, &comm);
-
-      // Check number of ghost cells
-      REQUIRE(mesh->nghost_cells() == 0);
-      REQUIRE(mesh->nlocal_ghost_cells() == 0);
-
-      // Create partition
-      bool graphpartition = graph->create_partitions(&comm);
-
-      // Collect the partitions
-      graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
-
-      // Delete all the particles which is not in local task parititon
-      mesh->remove_all_nonrank_particles();
-
-      // Identify shared nodes across MPI domains
-      mesh->find_domain_shared_nodes();
-
-      // Identify ghost boundary cells
-      mesh->find_ghost_boundary_cells();
-
       if (mpi_rank == 4) {
+        // Create graph
+        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
+                                                       mpi_rank);
+        // Initialize MPI
+        MPI_Comm comm;
+        MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+        // Check number of ghost cells
+        REQUIRE(mesh->nghost_cells() == 0);
+        REQUIRE(mesh->nlocal_ghost_cells() == 0);
+
+        // Create partition
+        bool graphpartition = graph->create_partitions(&comm);
+
+        // Collect the partitions
+        graph->collect_partitions(mesh->ncells(), mpi_size, mpi_rank, &comm);
+
+        // Delete all the particles which is not in local task parititon
+        mesh->remove_all_nonrank_particles();
+
+        // Identify shared nodes across MPI domains
+        mesh->find_domain_shared_nodes();
+
+        // Identify ghost boundary cells
+        mesh->find_ghost_boundary_cells();
+
         REQUIRE(mesh->nghost_cells() == 3);
         REQUIRE(mesh->nlocal_ghost_cells() == 1);
       }
