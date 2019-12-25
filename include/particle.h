@@ -308,8 +308,8 @@ class Particle : public ParticleBase<Tdim> {
   std::shared_ptr<FunctionBase> traction_function_{nullptr};
   //! Shape functions
   Eigen::VectorXd shapefn_;
-  //! B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix_;
+  //! dN/dX
+  Eigen::MatrixXd dn_dx_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
