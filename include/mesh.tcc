@@ -333,6 +333,7 @@ void mpm::Mesh<Tdim>::generate_material_points(
     unsigned nquadratures, const std::string& particle_type) {
   try {
     if (cells_.size() > 0) {
+      unsigned before_generation = this->nparticles();
       bool checks = false;
       // Generate points
       for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
@@ -350,6 +351,8 @@ void mpm::Mesh<Tdim>::generate_material_points(
           if (status) map_particles_[pid]->assign_cell(*citr);
         }
       }
+      if (before_generation == this->nparticles())
+        throw std::runtime_error("No particles were generated!");
       console_->info(
           "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
           "# of points generated: {}",
@@ -1268,4 +1271,82 @@ mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
 template <unsigned Tdim>
 std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::particles_cell_ids() {
   return &(this->particles_cell_ids_);
+}
+
+//! Generate particles
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
+                                         const Json& generator) {
+
+  try {
+    // Particle generator
+    const auto generator_type = generator["type"].template get<std::string>();
+
+    // Generate particles from file
+    if (generator_type == "file") {
+      this->read_particles_file(io, generator);
+    }
+
+    // Generate material points at the Gauss location in all cells
+    else if (generator_type == "gauss") {
+      // Number of particles per cell
+      unsigned nparticles_cell =
+          generator["nparticles_cells"].template get<unsigned>();
+      // Particle type
+      auto particle_type =
+          generator["particle_type"].template get<std::string>();
+      this->generate_material_points(nparticles_cell, particle_type);
+    }
+
+    else
+      throw std::runtime_error(
+          "Particle generator type is not properly specified");
+
+  } catch (std::exception& exception) {
+    console_->error("{}: #{} Generating particle failed", __FILE__, __LINE__);
+  }
+}
+
+// Read particles file
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
+                                          const Json& generator) {
+  // Get all particles
+  std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
+
+  // Particle type
+  auto particle_type = generator["particle_type"].template get<std::string>();
+
+  // File location
+  auto file_loc =
+      io->working_dir() + generator["location"].template get<std::string>();
+
+  // Check duplicates
+  bool check_duplicates = generator["check_duplicates"].template get<bool>();
+
+  const std::string reader =
+      generator["particle_reader"].template get<std::string>();
+
+  // Create a particle reader
+  auto particle_reader =
+      Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+  all_particles = particle_reader->read_particles(file_loc);
+
+  console_->error("Received particles: {} from dir {} file {}",
+                  all_particles.size(), io->working_dir(),
+                  io->file_name(file_loc));
+  // Get all particle ids
+  std::vector<mpm::Index> all_particles_ids(all_particles.size());
+  std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
+
+  // Create particles from file
+  bool particle_status =
+      this->create_particles(all_particles_ids,  // global id
+                             particle_type,      // particle type
+                             all_particles,      // coordinates
+                             check_duplicates);  // Check duplicates
+
+  if (!particle_status)
+    throw std::runtime_error("Addition of particles to mesh failed");
 }

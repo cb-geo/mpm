@@ -19,7 +19,6 @@
 #endif
 
 #include "container.h"
-#include "generators/generator_factory.h"
 #include "mpm.h"
 #include "particle.h"
 
@@ -55,7 +54,7 @@ template <unsigned Tdim>
 class MPMBase : public MPM {
  public:
   //! Default constructor
-  MPMBase(std::unique_ptr<IO>&& io);
+  MPMBase(const std::shared_ptr<IO>& io);
 
   //! Initialise mesh
   bool initialise_mesh() override;

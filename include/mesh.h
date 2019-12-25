@@ -19,12 +19,16 @@
 #include <tbb/parallel_for_each.h>
 
 #include <tsl/robin_map.h>
+// JSON
+#include "json.hpp"
+using Json = nlohmann::json;
 
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
+#include "io.h"
 #include "levelset.h"
 #include "logger.h"
 #include "material/material.h"
@@ -32,6 +36,7 @@
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "read_mesh.h"
 
 namespace mpm {
 
@@ -363,7 +368,17 @@ class Mesh {
   //! Return nlocal ghost cells
   unsigned nlocal_ghost_cells() const { return local_ghost_cells_.size(); }
 
+  //! Generate particles
+  //! \param[in] io IO object handle
+  //! \param[in] generator Point generator object
+  void generate_particles(const std::shared_ptr<mpm::IO>& io,
+                          const Json& generator);
+
  private:
+  // Read particles from file
+  void read_particles_file(const std::shared_ptr<mpm::IO>& io,
+                           const Json& generator);
+
   // Locate a particle in mesh cells
   bool locate_particle_cells(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
