@@ -94,7 +94,11 @@ endif()
 
 # KaHIP
 if (MPI_FOUND)
-find_package(KaHIP REQUIRED)
+  if (NO_KAHIP)
+    find_package(KaHIP)
+  else()
+    find_package(KaHIP REQUIRED)
+  endif()
 if (KAHIP_FOUND)
   add_definitions("-DUSE_GRAPH_PARTITIONING")
   include_directories(${KAHIP_INCLUDE_DIRS})

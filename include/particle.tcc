@@ -391,9 +391,9 @@ bool mpm::Particle<Tdim>::compute_shapefn() {
       // Compute shape function of the particle
       shapefn_ = element->shapefn(this->xi_, this->natural_size_, zero);
 
-      // Compute bmatrix of the particle for reference cell
-      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
-                                  this->natural_size_, zero);
+      // Compute dN/dx
+      dn_dx_ = element->dn_dx(this->xi_, cell_->nodal_coordinates(),
+                              this->natural_size_, zero);
     } else {
       throw std::runtime_error(
           "Cell is not initialised! "
@@ -528,51 +528,17 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
 // Compute strain of the particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain(double dt) {
-  // Strain rate
-  const auto strain_rate =
-      cell_->compute_strain_rate(bmatrix_, mpm::ParticlePhase::Solid);
-  // particle_strain_rate
-  Eigen::Matrix<double, 6, 1> particle_strain_rate;
-  particle_strain_rate.setZero();
-  // Set dimension of strain rate
-  switch (Tdim) {
-    case (1): {
-      particle_strain_rate(0) = strain_rate(0);
-      break;
-    }
-    case (2): {
-      particle_strain_rate(0) = strain_rate(0);
-      particle_strain_rate(1) = strain_rate(1);
-      particle_strain_rate(3) = strain_rate(2);
-      break;
-    }
-    default: {
-      particle_strain_rate = strain_rate;
-      break;
-    }
-  }
-
-  // Check to see if value is below threshold
-  for (unsigned i = 0; i < particle_strain_rate.size(); ++i)
-    if (std::fabs(particle_strain_rate(i)) < 1.E-15)
-      particle_strain_rate(i) = 0.;
-
   // Assign strain rate
-  strain_rate_ = particle_strain_rate;
+  strain_rate_ = cell_->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
   // Update dstrain
-  dstrain_ = particle_strain_rate * dt;
+  dstrain_ = strain_rate_ * dt;
   // Update strain
-  strain_ += particle_strain_rate * dt;
+  strain_ += dstrain_;
 
   // Compute at centroid
   // Strain rate for reduced integration
-  Eigen::VectorXd strain_rate_centroid =
+  const Eigen::VectorXd strain_rate_centroid =
       cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
-
-  // Check to see if value is below threshold
-  for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
-    if (std::fabs(strain_rate_centroid(i)) < 1.E-15)
-      strain_rate_centroid(i) = 0.;
 
   // Assign volumetric strain at centroid
   const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
@@ -621,9 +587,9 @@ bool mpm::Particle<Tdim>::map_internal_force() {
     if (material_ != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(this->bmatrix_,
+      cell_->compute_nodal_internal_force(this->dn_dx_,
                                           mpm::ParticlePhase::Solid,
-                                          this->volume_, -1. * this->stress_);
+                                          -1. * this->volume_ * this->stress_);
     } else {
       throw std::runtime_error("Material is invalid");
     }

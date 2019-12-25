@@ -84,6 +84,16 @@ class Element {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
+  //! Return the dN/dx at a given local coord
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  virtual Eigen::MatrixXd dn_dx(
+      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+      const VectorDim& particle_size,
+      const VectorDim& deformation_gradient) const = 0;
+
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
@@ -164,4 +174,5 @@ class Element {
 };
 
 }  // namespace mpm
-#endif  // MPM_ELEMENTx_H_
+
+#endif  // MPM_ELEMENT_H_

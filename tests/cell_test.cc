@@ -629,6 +629,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     const auto bmatrix =
         element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
                          Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto dn_dx =
+        element->dn_dx(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                       Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -709,14 +712,14 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
-      REQUIRE(strain_rate.size() == 3);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
+      Eigen::VectorXd pstrain_rate = cell->compute_strain_rate(dn_dx, phase);
+      REQUIRE(pstrain_rate.size() == 6);
+      for (unsigned i = 0; i < pstrain_rate.size(); ++i)
+        REQUIRE(pstrain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
           cell->compute_strain_rate_centroid(phase);
-      REQUIRE(strain_rate_centroid.size() == 3);
+      REQUIRE(strain_rate_centroid.size() == 6);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
     }
@@ -760,8 +763,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(dn_dx, phase,
+                                         pvolume * pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector2d> internal_forces;
@@ -1960,6 +1963,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     const auto bmatrix =
         element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
                          Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto dn_dx =
+        element->dn_dx(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                       Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -2041,10 +2047,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
-      REQUIRE(strain_rate.size() == 6);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
+      Eigen::VectorXd pstrain_rate = cell->compute_strain_rate(dn_dx, phase);
+      REQUIRE(pstrain_rate.size() == 6);
+      for (unsigned i = 0; i < pstrain_rate.size(); ++i)
+        REQUIRE(pstrain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
           cell->compute_strain_rate_centroid(phase);
@@ -2092,8 +2098,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(dn_dx, phase,
+                                         pvolume * pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector3d> internal_forces;
