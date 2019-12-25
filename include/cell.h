@@ -246,18 +246,12 @@ class Cell {
   //! Compute particle strain rate
   //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  inline Eigen::Matrix<double, 6, 1> compute_particle_strain_rate(
+  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dNdx, unsigned phase);
-
-  //! Compute strain rate
-  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
-  Eigen::VectorXd compute_strain_rate(
-      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
 
   //! Compute strain rate for reduced integration at the centroid of cell
   //! \param[in] phase Phase associate to the particle
-  Eigen::VectorXd compute_strain_rate_centroid(unsigned phase);
+  Eigen::Matrix<double, 6, 1> compute_strain_rate_centroid(unsigned phase);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] shapefn Shapefns at local coordinates of particle
@@ -342,6 +336,8 @@ class Cell {
   std::shared_ptr<Quadrature<Tdim>> quadrature_{nullptr};
   //! BMatrix centroid
   std::vector<Eigen::MatrixXd> bmatrix_centroid_;
+  //! dN/dx
+  Eigen::MatrixXd dn_dx_centroid_;
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>

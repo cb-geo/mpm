@@ -532,23 +532,16 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Assign strain rate
-  strain_rate_ =
-      cell_->compute_particle_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
+  strain_rate_ = cell_->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
   // Update dstrain
   dstrain_ = strain_rate_ * dt;
   // Update strain
   strain_ += dstrain_;
 
-  /*
   // Compute at centroid
   // Strain rate for reduced integration
-  Eigen::VectorXd strain_rate_centroid =
+  const Eigen::VectorXd strain_rate_centroid =
       cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
-
-  // Check to see if value is below threshold
-  for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
-    if (std::fabs(strain_rate_centroid(i)) < 1.E-15)
-      strain_rate_centroid(i) = 0.;
 
   // Assign volumetric strain at centroid
   const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
@@ -556,7 +549,6 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
 
   // Update thermodynamic pressure
   this->update_pressure(dvolumetric_strain);
-  */
 }
 
 // Compute stress

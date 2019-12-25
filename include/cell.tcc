@@ -49,6 +49,9 @@ bool mpm::Cell<Tdim>::initialise() {
       bmatrix_centroid_ =
           element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
 
+      dn_dx_centroid_ =
+          element_->dn_dx(xi_centroid, this->nodal_coordinates_, zero, zero);
+
       status = true;
     } else {
       throw std::runtime_error(
@@ -784,7 +787,7 @@ void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
 
 //! Compute particle strain rate
 template <>
-inline Eigen::Matrix<double, 6, 1> mpm::Cell<1>::compute_particle_strain_rate(
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<1>::compute_strain_rate(
     const Eigen::MatrixXd& dNdx, unsigned phase) {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate;
@@ -801,7 +804,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::Cell<1>::compute_particle_strain_rate(
 
 //! Compute particle strain rate
 template <>
-inline Eigen::Matrix<double, 6, 1> mpm::Cell<2>::compute_particle_strain_rate(
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<2>::compute_strain_rate(
     const Eigen::MatrixXd& dNdx, unsigned phase) {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate;
@@ -821,7 +824,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::Cell<2>::compute_particle_strain_rate(
 
 //! Compute particle strain rate
 template <>
-inline Eigen::Matrix<double, 6, 1> mpm::Cell<3>::compute_particle_strain_rate(
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<3>::compute_strain_rate(
     const Eigen::MatrixXd& dNdx, unsigned phase) {
   // Define strain rate
   Eigen::Matrix<double, 6, 1> strain_rate;
@@ -842,42 +845,11 @@ inline Eigen::Matrix<double, 6, 1> mpm::Cell<3>::compute_particle_strain_rate(
   return strain_rate;
 }
 
-//! Compute strain rate
-template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
-    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase) {
-  // Define strain rate
-  Eigen::Matrix<double, Tdof, 1> strain_rate =
-      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix.at(0).rows());
-
-  try {
-    // Check if B-Matrix size and number of nodes match
-    if (this->nfunctions() != bmatrix.size() ||
-        this->nnodes() != bmatrix.size())
-      throw std::runtime_error(
-          "Number of nodes / shapefn doesn't match BMatrix");
-
-    for (unsigned i = 0; i < this->nnodes(); ++i)
-      strain_rate += bmatrix.at(i) * nodes_[i]->velocity(phase);
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return strain_rate;
-}
-
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
-
-  // Define strain rate at centroid
-  Eigen::Matrix<double, Tdof, 1> strain_rate_centroid =
-      Eigen::Matrix<double, Tdof, 1>::Zero(bmatrix_centroid_.at(0).rows());
-
-  // Compute strain rate
-  for (unsigned i = 0; i < this->nnodes(); ++i)
-    strain_rate_centroid +=
-        bmatrix_centroid_.at(i) * nodes_[i]->velocity(phase);
-  return strain_rate_centroid;
+Eigen::Matrix<double, 6, 1> mpm::Cell<Tdim>::compute_strain_rate_centroid(
+    unsigned phase) {
+  return this->compute_strain_rate(dn_dx_centroid_, phase);
 }
 
 //! Compute the nodal body force of a cell from particle mass and gravity
