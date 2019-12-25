@@ -405,7 +405,7 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
   // Get equivalent plastic deviatoric strain
-  const double& pdstrain = (*state_vars).at("pdstrain");
+  const double pdstrain = (*state_vars).at("pdstrain");
   // Update MC parameters using a linear softening rule
   if (softening_ && pdstrain > pdstrain_peak_) {
     if (pdstrain < pdstrain_residual_) {
