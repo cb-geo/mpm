@@ -251,47 +251,6 @@ inline Eigen::VectorXd
   return this->shapefn(xi, particle_size, deformation_gradient);
 }
 
-//! Compute Jacobian with particle size and deformation gradient
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::Matrix<double, Tdim, Tdim>
-    mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian(
-        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const VectorDim& particle_size,
-        const VectorDim& deformation_gradient) const {
-
-  // Get gradient shape functions
-  const Eigen::MatrixXd grad_shapefn =
-      mpm::QuadrilateralElement<Tdim, Tnfunctions>::grad_shapefn(
-          xi, particle_size, deformation_gradient);
-
-  try {
-    // Check if matrices dimensions are correct
-    if ((grad_shapefn.rows() != nodal_coordinates.rows()) ||
-        (xi.size() != nodal_coordinates.cols()))
-      throw std::runtime_error(
-          "Jacobian calculation: Incorrect dimension of xi and "
-          "nodal_coordinates");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    return Eigen::Matrix<double, Tdim, Tdim>::Zero();
-  }
-
-  // Jacobian dx_i/dxi_j
-  return (grad_shapefn.transpose() * nodal_coordinates);
-}
-
-//! Compute Jacobian local with particle size and deformation gradient
-template <unsigned Tdim, unsigned Tnfunctions>
-inline Eigen::Matrix<double, Tdim, Tdim>
-    mpm::QuadrilateralElement<Tdim, Tnfunctions>::jacobian_local(
-        const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-        const VectorDim& particle_size,
-        const VectorDim& deformation_gradient) const {
-  // Jacobian dx_i/dxi_j
-  return this->jacobian(xi, nodal_coordinates, particle_size,
-                        deformation_gradient);
-}
-
 //! Return the B-matrix of a Quadrilateral Element at a given local
 //! coordinate for a real cell
 template <unsigned Tdim, unsigned Tnfunctions>

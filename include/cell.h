@@ -339,8 +339,6 @@ class Cell {
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Quadrature
   std::shared_ptr<Quadrature<Tdim>> quadrature_{nullptr};
-  //! BMatrix centroid
-  std::vector<Eigen::MatrixXd> bmatrix_centroid_;
   //! dN/dx
   Eigen::MatrixXd dn_dx_centroid_;
   //! Velocity constraints

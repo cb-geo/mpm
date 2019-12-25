@@ -83,28 +83,6 @@ class TriangleElement : public Element<Tdim> {
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
 
-  //! Compute Jacobian
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
-      const VectorDim& deformation_gradient) const override;
-
-  //! Compute Jacobian local
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
-      const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
-      const VectorDim& particle_size,
-      const VectorDim& deformation_gradient) const override;
-
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

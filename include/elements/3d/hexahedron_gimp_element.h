@@ -56,29 +56,7 @@ class HexahedronGIMPElement : public HexahedronElement<3, 8> {
   Eigen::VectorXd shapefn_local(
       const VectorDim& xi, const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const override;
-  //! Compute Jacobian
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian(
-      const Eigen::Matrix<double, 3, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates,
-      const Eigen::Matrix<double, 3, 1>& particle_size,
-      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
-  //! Compute Jacobian local
-  //! \param[in] xi given local coordinates
-  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
-  //! \param[in] particle_size Particle size
-  //! \param[in] deformation_gradient Deformation gradient
-  //! \retval jacobian Jacobian matrix
-  Eigen::Matrix<double, Tdim, Tdim> jacobian_local(
-      const Eigen::Matrix<double, 3, 1>& xi,
-      const Eigen::MatrixXd& nodal_coordinates,
-      const Eigen::Matrix<double, 3, 1>& particle_size,
-      const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

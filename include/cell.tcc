@@ -45,10 +45,7 @@ bool mpm::Cell<Tdim>::initialise() {
       Eigen::Matrix<double, Tdim, 1> zero;
       zero.setZero();
 
-      // Get B-Matrix at the centroid
-      bmatrix_centroid_ =
-          element_->bmatrix(xi_centroid, this->nodal_coordinates_, zero, zero);
-
+      // dN/dX at the centroid
       dn_dx_centroid_ =
           element_->dn_dx(xi_centroid, this->nodal_coordinates_, zero, zero);
 
