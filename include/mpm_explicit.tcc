@@ -112,7 +112,7 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
 template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
-  
+
   console_->error("Analysis{} {}", io_->analysis_type());
 
   // Initialise MPI rank and size
