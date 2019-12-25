@@ -210,10 +210,8 @@ class ParticleBase {
   virtual void map_traction_force() = 0;
 
   //! Compute updated position
-  virtual bool compute_updated_position(double dt) = 0;
-
-  //! Compute updated position based on nodal velocity
-  virtual bool compute_updated_position_velocity(double dt) = 0;
+  virtual bool compute_updated_position(double dt,
+                                        bool velocity_update = false) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

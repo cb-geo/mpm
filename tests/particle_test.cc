@@ -660,7 +660,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Compute updated particle location should fail
     REQUIRE(particle->compute_updated_position(dt) == false);
     // Compute updated particle location from nodal velocity should fail
-    REQUIRE(particle->compute_updated_position_velocity(dt) == false);
+    REQUIRE(particle->compute_updated_position(dt, true) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
     // Update volume should fail
@@ -1000,7 +1000,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Compute updated particle location from nodal velocity
-    REQUIRE(particle->compute_updated_position_velocity(dt) == true);
+    REQUIRE(particle->compute_updated_position(dt, true) == true);
     // Check particle velocity
     velocity << 0., 0.894;
     for (unsigned i = 0; i < velocity.size(); ++i)
@@ -1758,7 +1758,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Compute updated particle location should fail
     REQUIRE(particle->compute_updated_position(dt) == false);
     // Compute updated particle location from nodal velocity should fail
-    REQUIRE(particle->compute_updated_position_velocity(dt) == false);
+    REQUIRE(particle->compute_updated_position(dt, true) == false);
     // Compute volume
     REQUIRE(particle->compute_volume() == false);
     // Update volume should fail
@@ -2138,7 +2138,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
 
     // Compute updated particle location based on nodal velocity
-    REQUIRE(particle->compute_updated_position_velocity(dt) == true);
+    REQUIRE(particle->compute_updated_position(dt, true) == true);
     // Check particle velocity
     velocity << 0., 5.875, 10.769;
     for (unsigned i = 0; i < velocity.size(); ++i)
