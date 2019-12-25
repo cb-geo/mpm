@@ -211,10 +211,6 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_updated_position(double dt,
                                 bool velocity_update = false) override;
 
-  //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] dt Analysis time step
-  bool compute_updated_position_velocity(double dt) override;
-
   //! Return a state variable
   //! \param[in] var State variable
   //! \retval Quantity of the state history variable
