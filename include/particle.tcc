@@ -687,6 +687,11 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt) {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
+      // Get interpolated nodal velocity
+      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+          cell_->interpolate_nodal_velocity(this->shapefn_,
+                                            mpm::ParticlePhase::Solid);
+
       // Get interpolated nodal acceleration
       const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
           cell_->interpolate_nodal_acceleration(this->shapefn_,
@@ -697,11 +702,6 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt) {
 
       // Apply particle velocity constraints
       this->apply_particle_velocity_constraints();
-
-      // Get interpolated nodal velocity
-      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_,
-                                            mpm::ParticlePhase::Solid);
 
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
