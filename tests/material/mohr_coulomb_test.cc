@@ -1735,8 +1735,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00079891425543).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00124536).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain <  pdstrain_peak)
@@ -1870,8 +1870,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00042208124206).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00065032).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)
@@ -2019,8 +2019,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00199714).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00769306).epsilon(Tolerance));
     }
   }
 
@@ -2220,8 +2220,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance_stress));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00022227288873).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00042854).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain <  pdstrain_peak)
@@ -2356,8 +2356,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00020052699393).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00023305).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)
@@ -2504,8 +2504,8 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(0.).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00190403).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00819002).epsilon(Tolerance));
     }
   }
 }
@@ -2743,8 +2743,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(2514.11370494).epsilon(Tolerance_stress));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00136884760877).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00249852).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain <  pdstrain_peak)
@@ -2883,8 +2883,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(3792.50758943).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00102043239115).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00190256).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)
@@ -3036,8 +3036,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(665.58999459).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00425104264179).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.01837761).epsilon(Tolerance));
     }
   }
 
@@ -3244,8 +3244,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
               Approx(-362.44916664).epsilon(Tolerance_stress));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00022395846847).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00048279).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain <  pdstrain_peak)
@@ -3384,8 +3384,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(332.52895913).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00023014058518).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00027400).epsilon(Tolerance));
     }
 
     //! Check for shear failure (pdstrain >  pdstrain_residual)
@@ -3536,8 +3536,8 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
       REQUIRE(updated_stress(5) == Approx(617.95482478).epsilon(Tolerance));
 
       // Check plastic strain
-      // REQUIRE(state_variables.at("pdstrain") ==
-      //        Approx(0.00243521047959).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") ==
+              Approx(0.00260862).epsilon(Tolerance));
     }
   }
 }
