@@ -337,6 +337,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -374,6 +384,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -415,6 +435,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1007,6 +1037,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -1049,6 +1089,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -1090,6 +1140,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1134,6 +1194,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -1939,6 +2009,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -1980,6 +2060,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       auto gradsf = quad->grad_shapefn(xi, Eigen::Vector2d::Zero(),
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -2024,6 +2114,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -2067,6 +2167,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
       // Check gradient of shape functions
       auto gradsf = quad->grad_shapefn(xi, psize, defgrad);
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
