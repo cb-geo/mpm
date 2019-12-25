@@ -290,6 +290,16 @@ TEST_CASE("Quadrilateral elements are checked", "[quad][element][2D]") {
                                        Eigen::Vector2d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = quad->dn_dx(xi, coords, Eigen::Vector2d::Zero(),
+                               Eigen::Vector2d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 

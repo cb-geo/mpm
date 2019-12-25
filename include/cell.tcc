@@ -734,8 +734,8 @@ void mpm::Cell<Tdim>::assign_mpi_rank_to_nodes() {
 
 //! Map particle mass to nodes
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
-                                                 unsigned phase, double pmass) {
+inline void mpm::Cell<Tdim>::map_particle_mass_to_nodes(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass) {
   for (unsigned i = 0; i < shapefn.size(); ++i) {
     nodes_[i]->update_mass(true, phase, shapefn(i) * pmass);
   }
@@ -743,7 +743,7 @@ void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
 
 //! Map particle volume to nodes
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
+inline void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pvolume) {
 
   for (unsigned i = 0; i < shapefn.size(); ++i) {
@@ -753,7 +753,7 @@ void mpm::Cell<Tdim>::map_particle_volume_to_nodes(
 
 //! Map particle mass and momentum to nodes for a given phase
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
+inline void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
     const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
     const Eigen::VectorXd& pvelocity) {
   for (unsigned i = 0; i < this->nfunctions(); ++i) {
@@ -764,9 +764,9 @@ void mpm::Cell<Tdim>::map_mass_momentum_to_nodes(
 
 //! Map particle pressure to nodes for a given phase
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
-                                            unsigned phase, double pmass,
-                                            double ppressure) {
+inline void mpm::Cell<Tdim>::map_pressure_to_nodes(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
+    double ppressure) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_mass_pressure(phase, shapefn(i) * pmass * ppressure);
@@ -774,9 +774,9 @@ void mpm::Cell<Tdim>::map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
 
 //! Compute nodal momentum from particle mass and velocity for a given phase
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
-                                             unsigned phase, double pmass,
-                                             const Eigen::VectorXd& pvelocity) {
+inline void mpm::Cell<Tdim>::compute_nodal_momentum(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
+    const Eigen::VectorXd& pvelocity) {
 
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);
@@ -844,16 +844,16 @@ inline Eigen::Matrix<double, 6, 1> mpm::Cell<3>::compute_strain_rate(
 
 //! Compute strain rate for reduced integration at the centroid of cell
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::Cell<Tdim>::compute_strain_rate_centroid(
-    unsigned phase) {
+inline Eigen::Matrix<double, 6, 1>
+    mpm::Cell<Tdim>::compute_strain_rate_centroid(unsigned phase) {
   return this->compute_strain_rate(dn_dx_centroid_, phase);
 }
 
 //! Compute the nodal body force of a cell from particle mass and gravity
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
-                                               unsigned phase, double pmass,
-                                               const VectorDim& pgravity) {
+inline void mpm::Cell<Tdim>::compute_nodal_body_force(
+    const Eigen::VectorXd& shapefn, unsigned phase, double pmass,
+    const VectorDim& pgravity) {
   // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
     nodes_[i]->update_external_force(true, phase,
@@ -862,7 +862,7 @@ void mpm::Cell<Tdim>::compute_nodal_body_force(const Eigen::VectorXd& shapefn,
 
 //! Compute the nodal traction force of a cell from particle
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::compute_nodal_traction_force(
+inline void mpm::Cell<Tdim>::compute_nodal_traction_force(
     const Eigen::VectorXd& shapefn, unsigned phase, const VectorDim& traction) {
   // Map external forces from particle to nodes
   for (unsigned i = 0; i < this->nfunctions(); ++i)
@@ -920,8 +920,9 @@ inline void mpm::Cell<3>::compute_nodal_internal_force(
 
 //! Return velocity at a given point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
-    const Eigen::VectorXd& shapefn, unsigned phase) {
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::interpolate_nodal_velocity(const Eigen::VectorXd& shapefn,
+                                                unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> velocity;
   velocity.setZero();
 
@@ -933,8 +934,9 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_velocity(
 
 //! Return acceleration at a point by interpolating from nodes
 template <unsigned Tdim>
-Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
-    const Eigen::VectorXd& shapefn, unsigned phase) {
+inline Eigen::Matrix<double, Tdim, 1>
+    mpm::Cell<Tdim>::interpolate_nodal_acceleration(
+        const Eigen::VectorXd& shapefn, unsigned phase) {
   Eigen::Matrix<double, Tdim, 1> acceleration;
   acceleration.setZero();
   for (unsigned i = 0; i < this->nfunctions(); ++i)
@@ -945,7 +947,7 @@ Eigen::Matrix<double, Tdim, 1> mpm::Cell<Tdim>::interpolate_nodal_acceleration(
 
 //! Return pressure at a point by interpolating from nodes
 template <unsigned Tdim>
-double mpm::Cell<Tdim>::interpolate_nodal_pressure(
+inline double mpm::Cell<Tdim>::interpolate_nodal_pressure(
     const Eigen::VectorXd& shapefn, unsigned phase) {
   double pressure = 0;
   for (unsigned i = 0; i < this->nfunctions(); ++i)
