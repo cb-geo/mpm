@@ -97,6 +97,8 @@ cd ~/workspace/ && git clone https://github.com/schulzchristian/KaHIP && \
 
 1. Run `make clean && make -jN` (where N is the number of cores).
 
+> To compile without KaHIP partitioning use `cmake -DNO_KAHIP=True ..`
+
 ### Compile mpm or mpmtest
 
 * To compile either `mpm` or `mpmtest` alone, run `make mpm -jN` or `make mpmtest -jN` (where N is the number of cores).
