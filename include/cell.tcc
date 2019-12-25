@@ -874,7 +874,7 @@ void mpm::Cell<Tdim>::compute_nodal_traction_force(
 
 //! Compute and map internal force to nodes
 template <>
-inline void mpm::Cell<1>::compute_internal_force(
+inline void mpm::Cell<1>::compute_nodal_internal_force(
     const Eigen::MatrixXd& dNdx, unsigned phase,
     const Eigen::Matrix<double, 6, 1>& pforce) {
   // Iterate over nodes
@@ -888,7 +888,7 @@ inline void mpm::Cell<1>::compute_internal_force(
 
 //! Compute and map internal force to nodes
 template <>
-inline void mpm::Cell<2>::compute_internal_force(
+inline void mpm::Cell<2>::compute_nodal_internal_force(
     const Eigen::MatrixXd& dNdx, unsigned phase,
     const Eigen::Matrix<double, 6, 1>& pforce) {
   // Iterate over nodes
@@ -903,7 +903,7 @@ inline void mpm::Cell<2>::compute_internal_force(
 
 //! Compute and map internal force to nodes
 template <>
-inline void mpm::Cell<3>::compute_internal_force(
+inline void mpm::Cell<3>::compute_nodal_internal_force(
     const Eigen::MatrixXd& dNdx, unsigned phase,
     const Eigen::Matrix<double, 6, 1>& pforce) {
   // Iterate over nodes
@@ -919,42 +919,6 @@ inline void mpm::Cell<3>::compute_internal_force(
                dNdx(i, 0) * pforce[5];
     nodes_[i]->update_internal_force(true, phase, force);
   }
-}
-
-//! Compute the nodal internal force  of a cell from particle stress and
-//! volume
-template <unsigned Tdim>
-inline void mpm::Cell<Tdim>::compute_nodal_internal_force(
-    const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase, double pvolume,
-    const Eigen::Matrix<double, 6, 1>& pstress) {
-  // Define strain rate
-  Eigen::VectorXd stress;
-
-  switch (Tdim) {
-    case (1): {
-      stress.resize(1);
-      stress.setZero();
-      stress(0) = pstress(0);
-      break;
-    }
-    case (2): {
-      stress.resize(3);
-      stress.setZero();
-      stress(0) = pstress(0);
-      stress(1) = pstress(1);
-      stress(2) = pstress(3);
-      break;
-    }
-    default: {
-      stress.resize(6);
-      stress = pstress;
-      break;
-    }
-  }
-  // Map internal forces from particle to nodes
-  for (unsigned j = 0; j < this->nfunctions(); ++j)
-    nodes_[j]->update_internal_force(
-        true, phase, (pvolume * bmatrix.at(j).transpose() * stress));
 }
 
 //! Return velocity at a given point by interpolating from nodes
