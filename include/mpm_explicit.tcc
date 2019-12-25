@@ -307,17 +307,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                   std::placeholders::_1, phase, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    // Use nodal velocity to update position
-    if (velocity_update_)
-      // Iterate over each particle to compute updated position
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position_velocity,
-                    std::placeholders::_1, this->dt_));
-    else
-      // Iterate over each particle to compute updated position
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                    std::placeholders::_1, this->dt_));
+    // Iterate over each particle to compute updated position
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                  std::placeholders::_1, this->dt_, this->velocity_update_));
 
     // Update Stress Last
     if (this->stress_update_ == mpm::StressUpdate::USL)
