@@ -726,6 +726,12 @@ inline Eigen::Matrix<double, Tdim, 1>
   return xi;
 }
 
+//! Assign MPI rank to nodes
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::assign_mpi_rank_to_nodes() {
+  for (unsigned i = 0; i < nodes_.size(); ++i) nodes_[i]->mpi_rank(this->rank_);
+}
+
 //! Map particle mass to nodes
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
@@ -1014,4 +1020,12 @@ inline void mpm::Cell<Tdim>::rank(unsigned rank) {
 template <unsigned Tdim>
 inline unsigned mpm::Cell<Tdim>::rank() const {
   return this->rank_;
+}
+
+//! Assign materials to nodes from the particles within this cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::append_material_id_to_nodes(unsigned material_id) {
+  // Loop over all nodes to add the material_id to the nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->append_material_id(material_id);
 }

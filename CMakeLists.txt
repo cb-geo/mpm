@@ -1,9 +1,8 @@
 project(mpm LANGUAGES CXX)
 
-# Require C++14-compliant compiler; only available for CMake v3.10 and up
 set(CMAKE_CXX_STANDARD 14)
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 SET(CMAKE_COLOR_MAKEFILE ON)
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -93,21 +92,15 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
-# METIS
-find_package(METIS)
-if (METIS_FOUND)
-    include_directories(SYSTEM ${METIS_INCLUDE_DIR})
-    link_libraries(${METIS_LIBRARY})
-endif (METIS_FOUND)
-
-# ParMETIS
-find_package(ParMETIS)
-if (PARMETIS_FOUND)
-  add_definitions("-DUSE_PARMETIS")
-  include_directories(${PARMETIS_INCLUDE_DIRS})
-  link_libraries(${PARMETIS_LIBRARIES})
+# KaHIP
+if (MPI_FOUND)
+find_package(KaHIP REQUIRED)
+if (KAHIP_FOUND)
+  add_definitions("-DUSE_GRAPH_PARTITIONING")
+  include_directories(${KAHIP_INCLUDE_DIRS})
+  link_libraries(${KAHIP_LIBRARIES})
 endif()
-
+endif()
 
 # Include directories
 include_directories(BEFORE
@@ -156,6 +149,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
@@ -170,7 +164,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
@@ -183,6 +177,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/math_functions_test.cc

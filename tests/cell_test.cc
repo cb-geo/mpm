@@ -111,6 +111,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
 
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
       // Length of the cell
@@ -486,6 +497,32 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
           Factory<mpm::Element<Dim>>::instance()->create("ED2Q9");
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, element);
       REQUIRE(cell->nfunctions() == 9);
+    }
+  }
+
+  // Check material adddition to nodes
+  SECTION("Check material id addition to nodes") {
+    // create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {node0, node1,
+                                                              node2, node3};
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
+
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
+    cell->append_material_id_to_nodes(1);
+    cell->append_material_id_to_nodes(1);
+
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
+    std::vector<unsigned> material_ids = {1, 2};
+    for (const auto& node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 
@@ -1048,6 +1085,17 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
 
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
       // Length of the cell
@@ -1559,6 +1607,32 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
       auto cell = std::make_shared<mpm::Cell<Dim>>(id, nnodes, element);
       REQUIRE(cell->nfunctions() == 20);
+    }
+  }
+
+  // Check material adddition to nodes
+  SECTION("Check material id addition to nodes") {
+    // create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {
+        node0, node1, node2, node3, node4, node5, node6, node7};
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
+
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
+    cell->append_material_id_to_nodes(1);
+    cell->append_material_id_to_nodes(1);
+
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
+    std::vector<unsigned> material_ids = {1, 2};
+    for (const auto& node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 

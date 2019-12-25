@@ -69,17 +69,27 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(), oper);
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over nodes
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
-                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-                           if (pred(node)) oper(node);
-                         });
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i)
+          if (pred(nodes_[i])) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create a list of active nodes in mesh
@@ -96,7 +106,14 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
-  tbb::parallel_for_each(active_nodes_.cbegin(), active_nodes_.cend(), oper);
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(active_nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i)
+          oper(active_nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 #ifdef USE_MPI
@@ -106,22 +123,22 @@ template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
   // Create vector of nodal scalars
-  mpm::Index nnodes = this->nodes_.size();
+  mpm::Index nnodes = this->domain_shared_nodes_.size();
   std::vector<double> prop_get(nnodes), prop_set(nnodes);
 
   tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
+      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->id()) = getter(node);
+        prop_get.at(node->ghost_id()) = getter(node);
       });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
                 MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
+      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->id()));
+        setter(node, prop_set.at(node->ghost_id()));
       });
 }
 #endif
@@ -133,23 +150,23 @@ template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
   // Create vector of nodal vectors
-  mpm::Index nnodes = this->nodes_.size();
+  mpm::Index nnodes = this->domain_shared_nodes_.size();
   std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
       prop_set(nnodes);
 
   tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
+      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->id()) = getter(node);
+        prop_get.at(node->ghost_id()) = getter(node);
       });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
                 MPI_SUM, MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
-      nodes_.cbegin(), nodes_.cend(),
+      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->id()));
+        setter(node, prop_set.at(node->ghost_id()));
       });
 }
 #endif
@@ -226,63 +243,123 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-  tbb::parallel_for_each(cells_.cbegin(), cells_.cend(), oper);
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(cells_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create cells from node lists
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_cell_neighbours() {
+  // Initialize and compute node cell map
+  tsl::robin_map<mpm::Index, std::set<mpm::Index>> node_cell_map;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    const auto faces = (*citr)->sorted_face_node_ids();
-    for (const auto& face : faces) {
-      faces_cells_.insert(
-          std::pair<std::vector<mpm::Index>, mpm::Index>(face, (*citr)->id()));
-    }
+    // Get cell id and nodes id
+    auto cell_id = (*citr)->id();
+    const auto nodes_id_list = (*citr)->nodes_id();
+    // Populate node_cell_map with the node_id and multiple cell_id
+    for (const auto& id : nodes_id_list) node_cell_map[id].insert(cell_id);
   }
 
-  // Iterate through all unique keys in faces_cells_
-  for (auto itr = faces_cells_.begin(); itr != faces_cells_.end();
-       itr = faces_cells_.upper_bound(itr->first)) {
-    // Returns a pair representing the range of elements with key
-    auto range = faces_cells_.equal_range(itr->first);
-    // A face is shared only by 2 cells (distance between the range is 2)
-    if (std::distance(range.first, range.second) == 2) {
-      // Add cell as neighbours to each other
-      map_cells_[range.first->second]->add_neighbour(
-          std::prev(range.second)->second);
-      map_cells_[std::prev(range.second)->second]->add_neighbour(
-          range.first->second);
+  // Assign neighbour to cells
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Initiate set of neighbouring cells
+    std::set<mpm::Index> neighbouring_cell_sets;
+
+    // Loop over the current cell nodes and add ids of the initiated set
+    const auto nodes_id_list = (*citr)->nodes_id();
+    for (const auto& id : nodes_id_list)
+      neighbouring_cell_sets.insert(node_cell_map[id].begin(),
+                                    node_cell_map[id].end());
+
+    for (const auto& neighbour_id : neighbouring_cell_sets)
+      if (neighbour_id != (*citr)->id())
+        map_cells_[(*citr)->id()]->add_neighbour(neighbour_id);
+  }
+}
+
+//! Find ghost cell neighbours
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  bool check_duplicates = true;
+  if (mpi_size > 1) {
+    ghost_cells_.clear();
+    local_ghost_cells_.clear();
+    ghost_cells_neighbour_ranks_.clear();
+    // Iterate through cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      std::set<unsigned> neighbour_ranks;
+      // If cell rank is the current MPI rank
+      if ((*citr)->rank() == mpi_rank) {
+        // Iterate through the neighbours of a cell
+        auto neighbours = (*citr)->neighbours();
+        for (auto neighbour : neighbours) {
+          // If the neighbour is in a different MPI rank
+          if (map_cells_[neighbour]->rank() != mpi_rank) {
+            ghost_cells_.add(map_cells_[neighbour], check_duplicates);
+            // Add mpi rank to set
+            neighbour_ranks.insert(map_cells_[neighbour]->rank());
+          }
+        }
+      }
+      // Set the number of different MPI rank neighbours to a ghost cell
+      if (neighbour_ranks.size() > 0) {
+        // Also add the current cell, as this would be a receiver
+        local_ghost_cells_.add(*citr, check_duplicates);
+
+        // Update the neighbouring ranks of the local ghost cell
+        std::vector<unsigned> mpi_neighbours;
+        for (auto rank : neighbour_ranks) mpi_neighbours.emplace_back(rank);
+        ghost_cells_neighbour_ranks_[(*citr)->id()] = mpi_neighbours;
+      }
     }
   }
+#endif
 }
 
 //! Create cells from node lists
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, Tdim, 1>>
-    mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures) {
-  std::vector<VectorDim> points;
+void mpm::Mesh<Tdim>::generate_material_points(
+    unsigned nquadratures, const std::string& particle_type) {
   try {
     if (cells_.size() > 0) {
-      points.reserve(cells_.size() * std::pow(nquadratures, Tdim));
-
+      bool checks = false;
       // Generate points
       for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
         (*citr)->assign_quadrature(nquadratures);
-        const auto cpoints = (*citr)->generate_points();
-        points.insert(std::end(points), std::begin(cpoints), std::end(cpoints));
+        const std::vector<Eigen::Matrix<double, Tdim, 1>> cpoints =
+            (*citr)->generate_points();
+        for (const auto& coordinates : cpoints) {
+          mpm::Index pid = particles_.size();
+          bool status = this->add_particle(
+              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                  ->create(particle_type, static_cast<mpm::Index>(pid),
+                           coordinates),
+              checks);
+          if (status) map_particles_[pid]->assign_cell(*citr);
+        }
       }
       console_->info(
           "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
           "# of points generated: {}",
           cells_.size(), cells_.size() * std::pow(nquadratures, Tdim),
-          points.size());
+          particles_.size());
     } else
       throw std::runtime_error("No cells are found in the mesh!");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    points.clear();
   }
-  return points;
 }
 
 //! Create particles from coordinates
@@ -371,18 +448,165 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
 
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::remove_all_nonrank_particles(unsigned rank) {
+void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
+  // Get MPI rank
+  int mpi_rank = 0;
+  int mpi_size = 1;
+#ifdef USE_MPI
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
   // Remove associated cell for the particle
   for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
     // If cell is non empty
-    if ((*citr)->particles().size() != 0 && (*citr)->rank() != rank) {
-      auto particle_ids = (*citr)->particles();
-      for (auto& id : particle_ids) {
+    if ((*citr)->particles().size() != 0 && (*citr)->rank() != mpi_rank) {
+      auto pids = (*citr)->particles();
+      // Remove particles from map
+      for (auto& id : pids) {
         map_particles_[id]->remove_cell();
-        particles_.remove(map_particles_[id]);
         map_particles_.remove(id);
       }
       (*citr)->clear_particle_ids();
+    }
+  }
+
+  // Get number of particles to reserve size
+  unsigned nparticles = this->nparticles();
+  // Clear particles and start a new element of particles
+  particles_.clear();
+  particles_.reserve(static_cast<int>(nparticles / mpi_size));
+  // Iterate over the map of particles and add them to container
+  for (auto& particle : map_particles_) particles_.add(particle.second, false);
+}
+
+//! Transfer all particles in cells that are not in local rank
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+  if (mpi_size > 1) {
+    std::vector<MPI_Request> send_requests;
+    send_requests.reserve(ghost_cells_.size());
+    unsigned i = 0;
+    // Iterate through the ghost cells and send particles
+    for (auto citr = this->ghost_cells_.cbegin();
+         citr != this->ghost_cells_.cend(); ++citr, ++i) {
+      // Create a vector of h5_particles
+      std::vector<mpm::HDF5Particle> h5_particles;
+      auto particle_ids = (*citr)->particles();
+      for (auto& id : particle_ids) {
+        // Send and delete particle
+        auto send_particle = map_particles_[id];
+        // Append to vector of particles
+        h5_particles.emplace_back(send_particle->hdf5());
+        // Clear particle in current rank
+        send_particle->remove_cell();
+        particles_.remove(send_particle);
+        map_particles_.remove(id);
+      }
+      (*citr)->clear_particle_ids();
+
+      // Send number of particles to receiver rank
+      unsigned nparticles = h5_particles.size();
+      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
+                MPI_COMM_WORLD, &send_requests[i]);
+      if (nparticles != 0) {
+        mpm::HDF5Particle h5_particle;
+        // Initialize MPI datatypes and send vector of particles
+        MPI_Datatype particle_type =
+            mpm::register_mpi_particle_type(h5_particle);
+        MPI_Send(h5_particles.data(), nparticles, particle_type,
+                 (*citr)->rank(), 0, MPI_COMM_WORLD);
+        mpm::deregister_mpi_particle_type(particle_type);
+      }
+      h5_particles.clear();
+    }
+    // Send complete
+    for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
+      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    // Iterate through the local ghost cells and receive particles
+    for (auto citr = this->local_ghost_cells_.cbegin();
+         citr != this->local_ghost_cells_.cend(); ++citr) {
+      std::vector<unsigned> neighbour_ranks =
+          ghost_cells_neighbour_ranks_[(*citr)->id()];
+
+      for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
+        // MPI status
+        MPI_Status recv_status;
+        // Receive number of particles
+        unsigned nrecv_particles;
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
+                 MPI_COMM_WORLD, &recv_status);
+
+        if (nrecv_particles != 0) {
+          std::vector<mpm::HDF5Particle> recv_particles;
+          recv_particles.resize(nrecv_particles);
+          // Receive the vector of particles
+          mpm::HDF5Particle received;
+          MPI_Status status_recv;
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(received);
+          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
+                   neighbour_ranks[i], 0, MPI_COMM_WORLD, &status_recv);
+          mpm::deregister_mpi_particle_type(particle_type);
+
+          // Iterate through n number of received particles
+          for (const auto& rparticle : recv_particles) {
+            mpm::Index id = 0;
+            // Initial particle coordinates
+            Eigen::Matrix<double, Tdim, 1> pcoordinates;
+            pcoordinates.setZero();
+
+            // Received particle
+            auto received_particle =
+                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+            // Get material
+            auto material = materials_.at(rparticle.material_id);
+            // Reinitialise particle from HDF5 data
+            received_particle->initialise_particle(rparticle, material);
+
+            // Add particle to mesh
+            this->add_particle(received_particle, true);
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+//! Find shared nodes across MPI domains
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
+  this->domain_shared_nodes_.clear();
+  // Clear MPI rank at the nodes
+  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
+                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
+                           node->clear_mpi_ranks();
+                         });
+  // Get MPI rank
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  // Iterate through all the cells
+  tbb::parallel_for_each(cells_.cbegin(), cells_.cend(),
+                         [=](std::shared_ptr<mpm::Cell<Tdim>> cell) {
+                           cell->assign_mpi_rank_to_nodes();
+                         });
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // If node has more than 1 MPI rank
+    if ((*nitr)->mpi_ranks().size() > 1) {
+      (*nitr)->ghost_id(domain_shared_nodes_.size());
+      domain_shared_nodes_.add(*nitr);
     }
   }
 }
@@ -449,15 +673,26 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-  tbb::parallel_for_each(particles_.cbegin(), particles_.cend(), oper);
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(particles_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
-  tbb::parallel_for_each(this->particle_sets_.at(set_id).cbegin(),
-                         this->particle_sets_.at(set_id).cend(), oper);
+  auto set = particle_sets_.at(set_id);
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(set[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer

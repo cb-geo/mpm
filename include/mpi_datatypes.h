@@ -12,7 +12,7 @@
 
 namespace mpm {
 //! Initialize MPI particle data types
-MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
+inline MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
   // Number of blocks to create
   const unsigned nblocks = 34;
   // Array containing the length of each block
@@ -108,7 +108,7 @@ MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
 }
 
 //! Deregister MPI particle data type
-void deregister_mpi_particle_type(MPI_Datatype& particle_type) {
+inline void deregister_mpi_particle_type(MPI_Datatype& particle_type) {
   MPI_Type_free(&particle_type);
 }
 }  // namespace mpm

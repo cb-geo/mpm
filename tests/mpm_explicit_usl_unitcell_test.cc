@@ -49,7 +49,6 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
 
     // Reinitialise mesh
     REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -107,7 +106,6 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
 
     // Reinitialise mesh
     REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);

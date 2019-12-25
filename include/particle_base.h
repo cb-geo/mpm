@@ -213,10 +213,8 @@ class ParticleBase {
   virtual void map_traction_force(double current_time) = 0;
 
   //! Compute updated position
-  virtual bool compute_updated_position(double dt) = 0;
-
-  //! Compute updated position based on nodal velocity
-  virtual bool compute_updated_position_velocity(double dt) = 0;
+  virtual bool compute_updated_position(double dt,
+                                        bool velocity_update = false) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
@@ -235,6 +233,9 @@ class ParticleBase {
 
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
+
+  //! Assign material id of this particle to nodes
+  virtual void append_material_id_to_nodes() const = 0;
 
  protected:
   //! particleBase id

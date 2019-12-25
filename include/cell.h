@@ -79,6 +79,13 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Return nodes id in a cell
+  std::set<mpm::Index> nodes_id() const {
+    std::set<mpm::Index> nodes_id_lists;
+    for (const auto& node : nodes_) nodes_id_lists.insert(node->id());
+    return nodes_id_lists;
+  }
+
   //! Side node pair ids
   std::vector<std::array<mpm::Index, 2>> side_node_pairs() const;
 
@@ -171,6 +178,9 @@ class Cell {
   //! \retval xi Local coordinates of a point
   Eigen::Matrix<double, Tdim, 1> transform_real_to_unit_cell(
       const Eigen::Matrix<double, Tdim, 1>& point);
+
+  //! Assign MPI rank to nodes
+  void assign_mpi_rank_to_nodes();
 
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
@@ -286,6 +296,9 @@ class Cell {
 
   //! Return rank
   unsigned rank() const;
+
+  //! Assign material to nodes from the particles within this cell
+  void append_material_id_to_nodes(unsigned material_id);
 
  private:
   //! Approximately check if a point is in a cell

@@ -1,17 +1,9 @@
-#ifdef USE_GRAPH_PARTITIONING
-
-#include <functional>
 #include <limits>
-#include <memory>
 
-#include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "cell.h"
-#include "container.h"
 #include "data_types.h"
 #include "element.h"
-#include "graph.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "material/material.h"
@@ -21,279 +13,9 @@
 #include "particle.h"
 #include "quadrilateral_element.h"
 
-// MPI
-#ifdef USE_MPI
-#include "mpi.h"
-#endif
-
-//! \brief Check graph class for 2D case
-TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
-  // Dimension
-  const unsigned Dim = 2;
-  // Deress of freedom
-  const unsigned Dof = 2;
-  // Number of nodes per cell
-  const unsigned Nnodes = 4;
-  // Number of phases
-  const unsigned Nphases = 1;
-
-  // Tolerance
-  const double Tolerance = 1.E-7;
-
-  //! Try to use the graph from the guide to test the graph for 2D
-
-  // Element
-  std::shared_ptr<mpm::Element<Dim>> element =
-      std::make_shared<mpm::QuadrilateralElement<Dim, 4>>();
-
-  // Cell 1
-  mpm::Index id0 = 0;
-  auto cell0 = std::make_shared<mpm::Cell<Dim>>(id0, Nnodes, element);
-
-  // Cell 2
-  mpm::Index id1 = 1;
-  auto cell1 = std::make_shared<mpm::Cell<Dim>>(id1, Nnodes, element);
-
-  // Cell 3
-  mpm::Index id2 = 2;
-  auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
-
-  // Cell 4
-  mpm::Index id3 = 3;
-  auto cell3 = std::make_shared<mpm::Cell<Dim>>(id3, Nnodes, element);
-
-  // Cell 5
-  mpm::Index id4 = 4;
-  auto cell4 = std::make_shared<mpm::Cell<Dim>>(id4, Nnodes, element);
-
-  // Cell 6
-  mpm::Index id5 = 5;
-  auto cell5 = std::make_shared<mpm::Cell<Dim>>(id5, Nnodes, element);
-
-  // Cell 7
-  mpm::Index id6 = 6;
-  auto cell6 = std::make_shared<mpm::Cell<Dim>>(id6, Nnodes, element);
-
-  // Cell 8
-  mpm::Index id7 = 7;
-  auto cell7 = std::make_shared<mpm::Cell<Dim>>(id7, Nnodes, element);
-
-  // Cell 9
-  mpm::Index id8 = 8;
-  auto cell8 = std::make_shared<mpm::Cell<Dim>>(id8, Nnodes, element);
-
-  // Cell 10
-  mpm::Index id9 = 9;
-  auto cell9 = std::make_shared<mpm::Cell<Dim>>(id9, Nnodes, element);
-
-  // Cell 11
-  mpm::Index id10 = 10;
-  auto cell10 = std::make_shared<mpm::Cell<Dim>>(id10, Nnodes, element);
-
-  // Cell 12
-  mpm::Index id11 = 11;
-  auto cell11 = std::make_shared<mpm::Cell<Dim>>(id11, Nnodes, element);
-
-  // Cell 13
-  mpm::Index id12 = 12;
-  auto cell12 = std::make_shared<mpm::Cell<Dim>>(id12, Nnodes, element);
-
-  // Cell 14
-  mpm::Index id13 = 13;
-  auto cell13 = std::make_shared<mpm::Cell<Dim>>(id13, Nnodes, element);
-
-  // Cell 15
-  mpm::Index id14 = 14;
-  auto cell14 = std::make_shared<mpm::Cell<Dim>>(id14, Nnodes, element);
-
-  //! create 15 cells
-  //! add neighbours
-
-  //! cell0
-  cell0->add_neighbour(id1);
-  cell0->add_neighbour(id5);
-
-  //! cell1
-  cell1->add_neighbour(id0);
-  cell1->add_neighbour(id2);
-  cell1->add_neighbour(id6);
-
-  //! cell2
-  cell2->add_neighbour(id1);
-  cell2->add_neighbour(id3);
-  cell2->add_neighbour(id7);
-
-  //! cell3
-  cell3->add_neighbour(id2);
-  cell3->add_neighbour(id4);
-  cell3->add_neighbour(id8);
-
-  //! cell4
-  cell4->add_neighbour(id3);
-  cell4->add_neighbour(id9);
-
-  //! cell5
-  cell5->add_neighbour(id0);
-  cell5->add_neighbour(id6);
-  cell5->add_neighbour(id10);
-
-  //! cell6
-  cell6->add_neighbour(id1);
-  cell6->add_neighbour(id5);
-  cell6->add_neighbour(id7);
-  cell6->add_neighbour(id11);
-
-  // cell7
-  cell7->add_neighbour(id2);
-  cell7->add_neighbour(id6);
-  cell7->add_neighbour(id8);
-  cell7->add_neighbour(id12);
-
-  // cell8
-  cell8->add_neighbour(id3);
-  cell8->add_neighbour(id7);
-  cell8->add_neighbour(id9);
-  cell8->add_neighbour(id13);
-
-  // cell9
-  cell9->add_neighbour(id4);
-  cell9->add_neighbour(id8);
-  cell9->add_neighbour(id14);
-
-  // cell10
-  cell10->add_neighbour(id5);
-  cell10->add_neighbour(id11);
-
-  // cell11
-  cell11->add_neighbour(id6);
-  cell11->add_neighbour(id10);
-  cell11->add_neighbour(id12);
-
-  // cell12
-  cell12->add_neighbour(id7);
-  cell12->add_neighbour(id11);
-  cell12->add_neighbour(id13);
-
-  // cell13
-  cell13->add_neighbour(id8);
-  cell13->add_neighbour(id12);
-  cell13->add_neighbour(id14);
-
-  // cell14
-  cell14->add_neighbour(id9);
-  cell14->add_neighbour(id13);
-
-  // adding neighour complete
-  // Cell container
-  auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
-
-  // add cells into container
-  cellcontainer->add(cell0);
-  cellcontainer->add(cell1);
-  cellcontainer->add(cell2);
-  cellcontainer->add(cell3);
-  cellcontainer->add(cell4);
-  cellcontainer->add(cell5);
-  cellcontainer->add(cell6);
-  cellcontainer->add(cell7);
-  cellcontainer->add(cell8);
-  cellcontainer->add(cell9);
-  cellcontainer->add(cell10);
-  cellcontainer->add(cell11);
-  cellcontainer->add(cell12);
-  cellcontainer->add(cell13);
-  cellcontainer->add(cell14);
-
-  // simluate number of tasks
-  int num_threads = 3;
-
-  // initialize graph
-  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellcontainer, num_threads, 0);
-  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellcontainer, num_threads, 1);
-  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellcontainer, num_threads, 2);
-
-  // Check graph structure
-  SECTION("Check graph initialize function") {
-    // check element in xadj in graph1
-    REQUIRE(graph1.xadj()[0] == 0);
-    REQUIRE(graph1.xadj()[1] == 2);
-    REQUIRE(graph1.xadj()[2] == 5);
-    REQUIRE(graph1.xadj()[3] == 8);
-    REQUIRE(graph1.xadj()[4] == 11);
-    REQUIRE(graph1.xadj()[5] == 13);
-
-    // check element in xadj in graph2
-    REQUIRE(graph2.xadj()[0] == 0);
-    REQUIRE(graph2.xadj()[1] == 3);
-    REQUIRE(graph2.xadj()[2] == 7);
-    REQUIRE(graph2.xadj()[3] == 11);
-    REQUIRE(graph2.xadj()[4] == 15);
-    REQUIRE(graph2.xadj()[5] == 18);
-
-    // check element in xadj in graph3
-    REQUIRE(graph3.xadj()[0] == 0);
-    REQUIRE(graph3.xadj()[1] == 2);
-    REQUIRE(graph3.xadj()[2] == 5);
-    REQUIRE(graph3.xadj()[3] == 8);
-    REQUIRE(graph3.xadj()[4] == 11);
-    REQUIRE(graph3.xadj()[5] == 13);
-
-    // check element in adjncy in graph1
-    REQUIRE(graph1.adjncy()[0] == 1);
-    REQUIRE(graph1.adjncy()[1] == 5);
-    REQUIRE(graph1.adjncy()[2] == 0);
-    REQUIRE(graph1.adjncy()[3] == 2);
-    REQUIRE(graph1.adjncy()[4] == 6);
-    REQUIRE(graph1.adjncy()[5] == 1);
-    REQUIRE(graph1.adjncy()[6] == 3);
-    REQUIRE(graph1.adjncy()[7] == 7);
-    REQUIRE(graph1.adjncy()[8] == 2);
-    REQUIRE(graph1.adjncy()[9] == 4);
-    REQUIRE(graph1.adjncy()[10] == 8);
-    REQUIRE(graph1.adjncy()[11] == 3);
-    REQUIRE(graph1.adjncy()[12] == 9);
-
-    // check element in adjncy in graph1
-    REQUIRE(graph2.adjncy()[0] == 0);
-    REQUIRE(graph2.adjncy()[1] == 6);
-    REQUIRE(graph2.adjncy()[2] == 10);
-    REQUIRE(graph2.adjncy()[3] == 1);
-    REQUIRE(graph2.adjncy()[4] == 5);
-    REQUIRE(graph2.adjncy()[5] == 7);
-    REQUIRE(graph2.adjncy()[6] == 11);
-    REQUIRE(graph2.adjncy()[7] == 2);
-    REQUIRE(graph2.adjncy()[8] == 6);
-    REQUIRE(graph2.adjncy()[9] == 8);
-    REQUIRE(graph2.adjncy()[10] == 12);
-    REQUIRE(graph2.adjncy()[11] == 3);
-    REQUIRE(graph2.adjncy()[12] == 7);
-    REQUIRE(graph2.adjncy()[13] == 9);
-    REQUIRE(graph2.adjncy()[14] == 13);
-    REQUIRE(graph2.adjncy()[15] == 4);
-    REQUIRE(graph2.adjncy()[16] == 8);
-    REQUIRE(graph2.adjncy()[17] == 14);
-
-    // check element in adjncy in graph1
-    REQUIRE(graph3.adjncy()[0] == 5);
-    REQUIRE(graph3.adjncy()[1] == 11);
-    REQUIRE(graph3.adjncy()[2] == 6);
-    REQUIRE(graph3.adjncy()[3] == 10);
-    REQUIRE(graph3.adjncy()[4] == 12);
-    REQUIRE(graph3.adjncy()[5] == 7);
-    REQUIRE(graph3.adjncy()[6] == 11);
-    REQUIRE(graph3.adjncy()[7] == 13);
-    REQUIRE(graph3.adjncy()[8] == 8);
-    REQUIRE(graph3.adjncy()[9] == 12);
-    REQUIRE(graph3.adjncy()[10] == 14);
-    REQUIRE(graph3.adjncy()[11] == 9);
-    REQUIRE(graph3.adjncy()[12] == 13);
-  }
-}
-
-// MPI
-#ifdef USE_MPI
-//! Check domain decomposition
-TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
+//! Check transfer of particles across MPI tasks
+TEST_CASE("MPI transfer particle is checked in 2D",
+          "[particle][mpi][transfer][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -479,47 +201,130 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
     // Add cell 3 and check
     REQUIRE(mesh->add_cell(cell3) == true);
 
-    // Compute cell neighbours
-    mesh->compute_cell_neighbours();
+    // Add 1 particle to rank 1
+    if (mpi_rank == 1) {
+      // Particle 1
+      coords << 0.5, 0.5;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+          std::make_shared<mpm::Particle<Dim>>(0, coords);
+      particle1->assign_material(material);
 
-    SECTION("Decompose mesh graph") {
-      if (mpi_rank == 4) {
-        // Create graph
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
-                                                       mpi_rank);
-        // Initialize MPI
-        MPI_Comm comm;
-        MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+      // Add particle 1 and check
+      REQUIRE(mesh->add_particle(particle1) == true);
 
-        // Check number of ghost cells
-        REQUIRE(mesh->nghost_cells() == 0);
-        REQUIRE(mesh->nlocal_ghost_cells() == 0);
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
 
-        // Fast mode for graph partitioning
-        int mode = 4;
-        // Create partition
-        bool graphpartition = graph->create_partitions(&comm, mode);
+      // Locate particles in a mesh
+      auto particles = mesh->locate_particles_mesh();
 
-        // Collect the partitions
-        graph->collect_partitions(mpi_size, mpi_rank, &comm);
+      // Should find all particles in mesh
+      REQUIRE(particles.size() == 0);
 
-        // Delete all the particles which is not in local task parititon
-        mesh->remove_all_nonrank_particles();
+      // Check location of particle 1
+      REQUIRE(particle1->cell_id() == 0);
 
-        // Identify shared nodes across MPI domains
+      // Number of particles in cell 0 is 1
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_rank == 2) {
+      // Particle 2
+      coords << 1.5, 1.5;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+          std::make_shared<mpm::Particle<Dim>>(2, coords);
+      particle2->assign_material(material);
+
+      // Add particle 2 and check
+      REQUIRE(mesh->add_particle(particle2) == true);
+
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
+
+      // Locate particles in a mesh
+      auto lparticles = mesh->locate_particles_mesh();
+
+      // Should find all particles in mesh
+      REQUIRE(lparticles.size() == 0);
+
+      // Check location of particle 2
+      REQUIRE(particle2->cell_id() == 0);
+
+      // Number of particles in cell 0 is 2
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_rank == 3) {
+      // Particle 2
+      coords << 0.5, 1.5;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+          std::make_shared<mpm::Particle<Dim>>(3, coords);
+      particle3->assign_material(material);
+
+      // Add particle 3 and check
+      REQUIRE(mesh->add_particle(particle3) == true);
+
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
+
+      // Locate particles in a mesh
+      auto lparticles = mesh->locate_particles_mesh();
+
+      // Should find all particles in mesh
+      REQUIRE(lparticles.size() == 0);
+
+      // Check location of particle 3
+      REQUIRE(particle3->cell_id() == 0);
+
+      // Number of particles in cell 0 is 1
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_size == 4) {
+      // Assign a MPI rank of 1 to cell in all MPI ranks
+      cell0->rank(0);
+      cell1->rank(1);
+      cell2->rank(2);
+      cell3->rank(3);
+      // Identify ghost boundary cells
+      mesh->compute_cell_neighbours();
+      mesh->find_ghost_boundary_cells();
+
+      // Transfer particle to the correct MPI rank
+      mesh->transfer_nonrank_particles();
+      // Check sender ranks
+      if (mpi_rank != 0) {
+        REQUIRE(cell0->nparticles() == 0);
+        REQUIRE(mesh->nparticles() == 0);
+      }
+      // Number of particles in receiver rank
+      if (mpi_rank == 0) {
+        auto particles = mesh->locate_particles_mesh();
+        REQUIRE(mesh->nparticles() == 3);
+        REQUIRE(cell0->nparticles() == 3);
+      }
+
+      SECTION("Check node MPI ranks") {
+        // Transfer particle to the correct MPI rank
         mesh->find_domain_shared_nodes();
 
-        // Identify ghost boundary cells
-        mesh->find_ghost_boundary_cells();
-        REQUIRE(mesh->nghost_cells() == 3);
-        REQUIRE(mesh->nlocal_ghost_cells() == 1);
+        REQUIRE(node0->mpi_ranks().size() == 1);
+        REQUIRE(node1->mpi_ranks().size() == 2);
+        REQUIRE(node2->mpi_ranks().size() == 4);
+        REQUIRE(node3->mpi_ranks().size() == 2);
+        REQUIRE(node4->mpi_ranks().size() == 1);
+        REQUIRE(node5->mpi_ranks().size() == 2);
+        REQUIRE(node6->mpi_ranks().size() == 1);
+        REQUIRE(node7->mpi_ranks().size() == 2);
+        REQUIRE(node8->mpi_ranks().size() == 1);
       }
     }
   }
 }
 
-//! Check domain decomposition
-TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
+//! Check transfer of particles across MPI tasks
+TEST_CASE("MPI Transfer Particle is checked in 3D",
+          "[particle][mpi][transfer][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -732,44 +537,131 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
     REQUIRE(mesh->add_cell(cell2) == true);
     REQUIRE(mesh->add_cell(cell3) == true);
 
-    // Compute cell neighbours
-    mesh->compute_cell_neighbours();
+    if (mpi_rank == 1) {
+      // Particle 1
+      coords << 1.0, 1.0, 1.0;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+          std::make_shared<mpm::Particle<Dim>>(0, coords);
+      particle1->assign_material(material);
 
-    SECTION("Decompose mesh graph") {
-      if (mpi_rank == 4) {
-        // Create graph
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
-                                                       mpi_rank);
-        // Initialize MPI
-        MPI_Comm comm;
-        MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+      // Add particle 1 and check
+      REQUIRE(mesh->add_particle(particle1) == true);
 
-        // Check number of ghost cells
-        REQUIRE(mesh->nghost_cells() == 0);
-        REQUIRE(mesh->nlocal_ghost_cells() == 0);
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
 
-        // Fast mode for graph partitioning
-        int mode = 4;
-        // Create partition
-        bool graphpartition = graph->create_partitions(&comm, mode);
+      // Locate particles in a mesh
+      auto particles = mesh->locate_particles_mesh();
 
-        // Collect the partitions
-        graph->collect_partitions(mpi_size, mpi_rank, &comm);
+      // Should find all particles in mesh
+      REQUIRE(particles.size() == 0);
 
-        // Delete all the particles which is not in local task parititon
-        mesh->remove_all_nonrank_particles();
+      // Check location of particle 1
+      REQUIRE(particle1->cell_id() == 0);
 
-        // Identify shared nodes across MPI domains
+      // Number of particles in cell 0 is 1
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_rank == 2) {
+      // Particle 2
+      coords << 1.5, 1.5, 1.5;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+          std::make_shared<mpm::Particle<Dim>>(1, coords);
+      particle2->assign_material(material);
+
+      // Add particle 2 and check
+      REQUIRE(mesh->add_particle(particle2) == true);
+
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
+
+      // Locate particles in a mesh
+      auto particles = mesh->locate_particles_mesh();
+
+      // Should find all particles in mesh
+      REQUIRE(particles.size() == 0);
+
+      // Check location of particle 2
+      REQUIRE(particle2->cell_id() == 0);
+
+      // Number of particles in cell 0 is 1
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_rank == 3) {
+      // Particle 3
+      coords << 0.5, 0.5, 0.5;
+      std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+          std::make_shared<mpm::Particle<Dim>>(3, coords);
+      particle3->assign_material(material);
+
+      // Add particle 3 and check
+      REQUIRE(mesh->add_particle(particle3) == true);
+
+      // Check mesh is active
+      REQUIRE(mesh->status() == true);
+
+      // Locate particles in a mesh
+      auto particles = mesh->locate_particles_mesh();
+
+      // Should find all particles in mesh
+      REQUIRE(particles.size() == 0);
+
+      // Check location of particle 3
+      REQUIRE(particle3->cell_id() == 0);
+
+      // Number of particles in cell 0 is 1
+      REQUIRE(cell0->nparticles() == 1);
+    }
+
+    if (mpi_size == 4) {
+      // Assign a MPI ranks to cells
+      cell0->rank(0);
+      cell1->rank(1);
+      cell2->rank(2);
+      cell3->rank(3);
+      // Identify ghost boundary cells
+      mesh->compute_cell_neighbours();
+      mesh->find_ghost_boundary_cells();
+
+      // Transfer particle to the correct MPI rank
+      mesh->transfer_nonrank_particles();
+      // Check all non receiver ranks
+      if (mpi_rank != 0) {
+        REQUIRE(cell0->nparticles() == 0);
+        REQUIRE(mesh->nparticles() == 0);
+      }
+      // Number of particles in cell 0 is 3 in receiver
+      if (mpi_rank == 0) {
+        auto particles = mesh->locate_particles_mesh();
+        REQUIRE(mesh->nparticles() == 3);
+        REQUIRE(cell0->nparticles() == 3);
+      }
+
+      SECTION("Check node MPI ranks") {
+        // Transfer particle to the correct MPI rank
         mesh->find_domain_shared_nodes();
 
-        // Identify ghost boundary cells
-        mesh->find_ghost_boundary_cells();
-
-        REQUIRE(mesh->nghost_cells() == 3);
-        REQUIRE(mesh->nlocal_ghost_cells() == 1);
+        REQUIRE(node0->mpi_ranks().size() == 1);
+        REQUIRE(node1->mpi_ranks().size() == 2);
+        REQUIRE(node2->mpi_ranks().size() == 2);
+        REQUIRE(node3->mpi_ranks().size() == 1);
+        REQUIRE(node4->mpi_ranks().size() == 2);
+        REQUIRE(node5->mpi_ranks().size() == 4);
+        REQUIRE(node6->mpi_ranks().size() == 4);
+        REQUIRE(node7->mpi_ranks().size() == 2);
+        REQUIRE(node8->mpi_ranks().size() == 1);
+        REQUIRE(node9->mpi_ranks().size() == 2);
+        REQUIRE(node10->mpi_ranks().size() == 2);
+        REQUIRE(node11->mpi_ranks().size() == 1);
+        REQUIRE(node12->mpi_ranks().size() == 1);
+        REQUIRE(node13->mpi_ranks().size() == 1);
+        REQUIRE(node14->mpi_ranks().size() == 2);
+        REQUIRE(node15->mpi_ranks().size() == 2);
+        REQUIRE(node16->mpi_ranks().size() == 1);
+        REQUIRE(node17->mpi_ranks().size() == 1);
       }
     }
   }
 }
-#endif
-#endif

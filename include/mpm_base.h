@@ -14,12 +14,11 @@
 #endif
 #include "tbb/task_group.h"
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
 #include "container.h"
-#include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
 
@@ -116,7 +115,7 @@ class MPMBase : public MPM {
   //! Set node concentrated force
   bool set_node_concentrated_force_{false};
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
   std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 #endif
