@@ -84,6 +84,24 @@ class Element {
       const VectorDim& particle_size,
       const VectorDim& deformation_gradient) const = 0;
 
+  //! Return the dN/dx of a Quadrilateral Element at a given local coord
+  inline Eigen::MatrixXd dn_dx(const VectorDim& xi,
+                               const Eigen::MatrixXd& nodal_coordinates,
+                               const VectorDim& particle_size,
+                               const VectorDim& deformation_gradient) const {
+    // Get gradient shape functions
+    Eigen::MatrixXd grad_sf =
+        this->grad_shapefn(xi, particle_size, deformation_gradient);
+
+    // Jacobian dx_i/dxi_j
+    Eigen::Matrix<double, Tdim, Tdim> jacobian =
+        (grad_sf.transpose() * nodal_coordinates);
+
+    // Gradient shapefn of the cell
+    // dN/dx = [J]^-1 * dN/dxi
+    return grad_sf * (jacobian.inverse()).transpose();
+  }
+
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

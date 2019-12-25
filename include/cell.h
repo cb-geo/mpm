@@ -243,6 +243,12 @@ class Cell {
   double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
                                     unsigned phase);
 
+  //! Compute particle strain rate
+  //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  inline Eigen::Matrix<double, 6, 1> compute_particle_strain_rate(
+      const Eigen::MatrixXd& dNdx, unsigned phase);
+
   //! Compute strain rate
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle

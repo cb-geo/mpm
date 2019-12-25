@@ -782,6 +782,66 @@ void mpm::Cell<Tdim>::compute_nodal_momentum(const Eigen::VectorXd& shapefn,
     nodes_[i]->update_momentum(true, phase, shapefn(i) * pmass * pvelocity);
 }
 
+//! Compute particle strain rate
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<1>::compute_particle_strain_rate(
+    const Eigen::MatrixXd& dNdx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 1, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dNdx(i, 0) * vel[0];
+  }
+
+  if (std::fabs(strain_rate(0)) < 1.E-15) strain_rate[0] = 0.;
+  return strain_rate;
+}
+
+//! Compute particle strain rate
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<2>::compute_particle_strain_rate(
+    const Eigen::MatrixXd& dNdx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 2, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dNdx(i, 0) * vel[0];
+    strain_rate[1] += dNdx(i, 1) * vel[1];
+    strain_rate[3] += dNdx(i, 1) * vel[0] + dNdx(i, 0) * vel[1];
+  }
+
+  for (unsigned i = 0; i < strain_rate.size(); ++i)
+    if (std::fabs(strain_rate(0)) < 1.E-15) strain_rate[0] = 0.;
+  return strain_rate;
+}
+
+//! Compute particle strain rate
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Cell<3>::compute_particle_strain_rate(
+    const Eigen::MatrixXd& dNdx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 3, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dNdx(i, 0) * vel[0];
+    strain_rate[1] += dNdx(i, 1) * vel[1];
+    strain_rate[2] += dNdx(i, 2) * vel[2];
+    strain_rate[3] += dNdx(i, 1) * vel[0] + dNdx(i, 0) * vel[1];
+    strain_rate[4] += dNdx(i, 2) * vel[1] + dNdx(i, 1) * vel[2];
+    strain_rate[5] += dNdx(i, 2) * vel[0] + dNdx(i, 0) * vel[2];
+  }
+
+  for (unsigned i = 0; i < strain_rate.size(); ++i)
+    if (std::fabs(strain_rate(0)) < 1.E-15) strain_rate[0] = 0.;
+  return strain_rate;
+}
+
 //! Compute strain rate
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Cell<Tdim>::compute_strain_rate(
