@@ -391,10 +391,7 @@ bool mpm::Particle<Tdim>::compute_shapefn() {
       // Compute shape function of the particle
       shapefn_ = element->shapefn(this->xi_, this->natural_size_, zero);
 
-      // Compute bmatrix of the particle for reference cell
-      bmatrix_ = element->bmatrix(this->xi_, cell_->nodal_coordinates(),
-                                  this->natural_size_, zero);
-
+      // Compute dN/dx
       dn_dx_ = element->dn_dx(this->xi_, cell_->nodal_coordinates(),
                               this->natural_size_, zero);
     } else {

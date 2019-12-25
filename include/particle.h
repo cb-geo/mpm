@@ -304,8 +304,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tdim, 1> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
-  //! B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
   //! Logger
