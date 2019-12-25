@@ -82,10 +82,11 @@ class MohrCoulomb : public Material<Tdim> {
   //! \param[in] stress Stress
   //! \param[in] df_dsigma dF/dSigma
   //! \param[in] dp_dsigma dP/dSigma
+  //! \param[in] dp_dq dP / dq
   //! \param[in] softening Softening parameter
   void compute_df_dp(mpm::mohrcoulomb::FailureState yield_type,
                      const mpm::dense_map* state_vars, const Vector6d& stress,
-                     Vector6d* df_dsigma, Vector6d* dp_dsigma,
+                     Vector6d* df_dsigma, Vector6d* dp_dsigma, double* dp_dq,
                      double* softening);
 
  protected:
@@ -125,9 +126,9 @@ class MohrCoulomb : public Material<Tdim> {
   //! Residual cohesion
   double cohesion_residual_{std::numeric_limits<double>::max()};
   //! Peak plastic deviatoric strain
-  double epds_peak_{std::numeric_limits<double>::max()};
+  double pdstrain_peak_{std::numeric_limits<double>::max()};
   //! Residual plastic deviatoric strain
-  double epds_residual_{std::numeric_limits<double>::max()};
+  double pdstrain_residual_{std::numeric_limits<double>::max()};
   //! Tension cutoff
   double tension_cutoff_{std::numeric_limits<double>::max()};
   //! softening
