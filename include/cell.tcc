@@ -872,6 +872,55 @@ void mpm::Cell<Tdim>::compute_nodal_traction_force(
     nodes_[i]->update_external_force(true, phase, (shapefn(i) * traction));
 }
 
+//! Compute and map internal force to nodes
+template <>
+inline void mpm::Cell<1>::compute_internal_force(
+    const Eigen::MatrixXd& dNdx, unsigned phase,
+    const Eigen::Matrix<double, 6, 1>& pforce) {
+  // Iterate over nodes
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = dNdx(i, 0) * pforce[0];
+
+    nodes_[i]->update_internal_force(true, phase, force);
+  }
+}
+
+//! Compute and map internal force to nodes
+template <>
+inline void mpm::Cell<2>::compute_internal_force(
+    const Eigen::MatrixXd& dNdx, unsigned phase,
+    const Eigen::Matrix<double, 6, 1>& pforce) {
+  // Iterate over nodes
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 2, 1> force;
+    force[0] = dNdx(i, 0) * pforce[0] + dNdx(i, 1) * pforce[3];
+    force[1] = dNdx(i, 1) * pforce[1] + dNdx(i, 0) * pforce[3];
+
+    nodes_[i]->update_internal_force(true, phase, force);
+  }
+}
+
+//! Compute and map internal force to nodes
+template <>
+inline void mpm::Cell<3>::compute_internal_force(
+    const Eigen::MatrixXd& dNdx, unsigned phase,
+    const Eigen::Matrix<double, 6, 1>& pforce) {
+  // Iterate over nodes
+  for (unsigned i = 0; i < this->nnodes(); ++i) {
+    Eigen::Matrix<double, 3, 1> force;
+    force[0] = dNdx(i, 0) * pforce[0] + dNdx(i, 1) * pforce[3] +
+               dNdx(i, 2) * pforce[5];
+
+    force[1] = dNdx(i, 1) * pforce[1] + dNdx(i, 0) * pforce[3] +
+               dNdx(i, 2) * pforce[4];
+
+    force[2] = dNdx(i, 2) * pforce[2] + dNdx(i, 1) * pforce[4] +
+               dNdx(i, 0) * pforce[5];
+    nodes_[i]->update_internal_force(true, phase, force);
+  }
+}
+
 //! Compute the nodal internal force  of a cell from particle stress and
 //! volume
 template <unsigned Tdim>

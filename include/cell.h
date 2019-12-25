@@ -269,6 +269,13 @@ class Cell {
                                     unsigned phase, const VectorDim& traction);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
+  //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
+  //! \param[in] phase Phase associate to the particle
+  //! \param[in] pforce Force of particle dim 6
+  void compute_internal_force(const Eigen::MatrixXd& dNdx, unsigned phase,
+                              const Eigen::Matrix<double, 6, 1>& pforce);
+
+  //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume Volume of particle

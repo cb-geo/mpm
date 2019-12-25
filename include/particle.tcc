@@ -590,9 +590,8 @@ bool mpm::Particle<Tdim>::map_internal_force() {
     if (material_ != nullptr) {
       // Compute nodal internal forces
       // -pstress * volume
-      cell_->compute_nodal_internal_force(this->bmatrix_,
-                                          mpm::ParticlePhase::Solid,
-                                          this->volume_, -1. * this->stress_);
+      cell_->compute_internal_force(this->dn_dx_, mpm::ParticlePhase::Solid,
+                                    -1. * this->volume_ * this->stress_);
     } else {
       throw std::runtime_error("Material is invalid");
     }
