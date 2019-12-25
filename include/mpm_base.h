@@ -14,13 +14,12 @@
 #endif
 #include "tbb/task_group.h"
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
 #include "container.h"
 #include "generators/generator_factory.h"
-#include "mpi_wrapper.h"
 #include "mpm.h"
 #include "particle.h"
 
@@ -56,7 +55,7 @@ template <unsigned Tdim>
 class MPMBase : public MPM {
  public:
   //! Default constructor
-  MPMBase(const std::shared_ptr<IO>& io);
+  MPMBase(std::unique_ptr<IO>&& io);
 
   //! Initialise mesh
   bool initialise_mesh() override;
@@ -111,6 +110,7 @@ class MPMBase : public MPM {
   using mpm::MPM::post_process_;
   //! Logger
   using mpm::MPM::console_;
+
   //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
   mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
   //! velocity update
@@ -118,7 +118,7 @@ class MPMBase : public MPM {
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
-  std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
+  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! VTK attributes
@@ -132,7 +132,7 @@ class MPMBase : public MPM {
   // Level set methods
   bool ls_methods_{false};
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
   std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 #endif

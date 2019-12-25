@@ -24,10 +24,11 @@
 #include "container.h"
 #include "factory.h"
 #include "geometry.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
 #include "levelset.h"
 #include "logger.h"
 #include "material/material.h"
+#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -184,9 +185,14 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
-  //! Remove all particles in a cell given cell id
-  //! \param[in] rank MPI rank of the mesh
-  void remove_all_nonrank_particles(unsigned rank);
+  //! Remove all particles in a cell in nonlocal rank
+  void remove_all_nonrank_particles();
+
+  //! Transfer particles to different ranks in nonlocal rank cells
+  void transfer_nonrank_particles();
+
+  //! Find shared nodes across MPI domains in the mesh
+  void find_domain_shared_nodes();
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
@@ -285,8 +291,18 @@ class Mesh {
 
   //! Generate points
   //! \param[in] nquadratures Number of points per direction in cell
+  //! \param[in] particle_type Particle type
   //! \retval point Material point coordinates
-  std::vector<VectorDim> generate_material_points(unsigned nquadratures = 1);
+  void generate_material_points(unsigned nquadratures,
+                                const std::string& particle_type);
+
+  //! Initialise material models
+  //! \param[in] materials Material models
+  void initialise_material_models(
+      const std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>>&
+          materials) {
+    materials_ = materials;
+  }
 
   //! Find cell neighbours
   void compute_cell_neighbours();
@@ -301,6 +317,9 @@ class Mesh {
 
   //! Return the number of neighbouring meshes
   unsigned nneighbours() const { return neighbour_meshes_.size(); }
+
+  //! Find ghost boundary cells
+  void find_ghost_boundary_cells();
 
   //! Write HDF5 particles
   //! \param[in] phase Index corresponding to the phase
@@ -338,6 +357,12 @@ class Mesh {
   //! Return particle cell ids
   std::map<mpm::Index, mpm::Index>* particles_cell_ids();
 
+  //! Return nghost cells
+  unsigned nghost_cells() const { return ghost_cells_.size(); }
+
+  //! Return nlocal ghost cells
+  unsigned nlocal_ghost_cells() const { return local_ghost_cells_.size(); }
+
  private:
   // Locate a particle in mesh cells
   bool locate_particle_cells(
@@ -360,6 +385,10 @@ class Mesh {
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
   Container<NodeBase<Tdim>> nodes_;
+  //! Container of domain shared nodes
+  Container<NodeBase<Tdim>> domain_shared_nodes_;
+  //! Boundary nodes
+  Container<NodeBase<Tdim>> boundary_nodes_;
   //! Container of node sets
   tsl::robin_map<unsigned, Container<NodeBase<Tdim>>> node_sets_;
   //! Container of active nodes
@@ -370,12 +399,22 @@ class Mesh {
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
   Container<Cell<Tdim>> cells_;
+  //! Container of ghost cells sharing the current MPI rank
+  Container<Cell<Tdim>> ghost_cells_;
+  //! Container of local ghost cells
+  Container<Cell<Tdim>> local_ghost_cells_;
+  //! Map of ghost cells to the neighbours ranks
+  std::map<unsigned, std::vector<unsigned>> ghost_cells_neighbour_ranks_;
   //! Faces and cells
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
+  //! Materials
+  std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   // Level sets
   std::unordered_map<unsigned, std::shared_ptr<LevelSet<Tdim>>> level_sets_;
+  //! TBB grain size
+  int tbb_grain_size_{100};
 };  // Mesh class
 }  // namespace mpm
 

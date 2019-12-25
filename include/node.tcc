@@ -31,6 +31,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   momentum_.setZero();
   acceleration_.setZero();
   status_ = false;
+  material_ids_.clear();
 }
 
 //! Update mass at the nodes from particle
@@ -509,4 +510,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       }
     }
   }
+}
+
+//! Add material id from material points to material_ids_
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::append_material_id(unsigned id) {
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  material_ids_.emplace(id);
+}
+
+// Assign MPI rank to node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  auto status = this->mpi_ranks_.insert(rank);
+  return status.second;
 }

@@ -1,19 +1,10 @@
 #ifndef MPM_NODE_H_
 #define MPM_NODE_H_
 
-#include <array>
-#include <limits>
-#include <mutex>
-#include <tuple>
-#include <vector>
-
 #include "logger.h"
 #include "node_base.h"
 
 namespace mpm {
-
-//! Global index type for the node
-using Index = unsigned long long;
 
 // Node base class
 //! \brief Base class that stores the information about nodes
@@ -208,11 +199,37 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  void append_material_id(unsigned id) override;
+
+  //! Return material ids in node
+  std::set<unsigned> material_ids() const override { return material_ids_; }
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  bool mpi_rank(unsigned rank) override;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  std::set<unsigned> mpi_ranks() const override { return mpi_ranks_; }
+
+  //! Clear MPI rank
+  void clear_mpi_ranks() override { mpi_ranks_.clear(); }
+
+  //! Return ghost id
+  Index ghost_id() const override { return ghost_id_; }
+
+  //! Set ghost id
+  void ghost_id(Index gid) override { ghost_id_ = gid; }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
+  //! shared ghost id
+  Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
   VectorDim coordinates_;
   //! Degrees of freedom
@@ -239,6 +256,8 @@ class Node : public NodeBase<Tdim> {
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! Material ids whose information was passed to this node
+  std::set<unsigned> material_ids_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};
@@ -247,6 +266,8 @@ class Node : public NodeBase<Tdim> {
   std::tuple<unsigned, int, double> friction_constraint_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! MPI ranks
+  std::set<unsigned> mpi_ranks_;
 };  // Node class
 }  // namespace mpm
 

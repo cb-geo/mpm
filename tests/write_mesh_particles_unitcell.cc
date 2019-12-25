@@ -4,6 +4,7 @@ namespace mpm_test {
 
 // Write JSON Configuration file
 bool write_json_unitcell(unsigned dim, const std::string& analysis,
+                         const std::string& stress_update,
                          const std::string& file_name) {
   // Make json object with input files
   // 2D
@@ -34,7 +35,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
        {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
         {"velocity_constraints", "velocity-constraints-unitcell.txt"},
         {"particles", "particles-" + dimension + "-unitcell.txt"},
-        {"particle_stresses", "initial-stresses-" + dimension + ".txt"},
+        {"particle_stresses", "initial-stresses-" + dimension + "d.txt"},
         {"materials", "materials.txt"},
         {"traction", "traction.txt"}}},
       {"mesh",
@@ -64,8 +65,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
          {"poisson_ratio", 0.25}}}},
       {"analysis",
        {{"type", analysis},
-        {"file_reader", mesh_reader},
-        {"check_duplicates", "true"},
+        {"stress_update", stress_update},
         {"dt", 0.001},
         {"nsteps", 10},
         {"gravity", gravity},
@@ -73,6 +73,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
+
   // Dump JSON as an input file to be read
   std::ofstream file;
   file.open((file_name + "-" + dimension + "-unitcell.json").c_str());

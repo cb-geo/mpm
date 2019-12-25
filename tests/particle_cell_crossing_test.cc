@@ -4,7 +4,7 @@
 
 #include "cell.h"
 #include "element.h"
-#include "hdf5.h"
+#include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "material/material.h"
 #include "mesh.h"
@@ -106,22 +106,22 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Add particle
   id = 0;
   coords << 0.25, 0.25;
-  auto particle0 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle0 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 1;
   coords << 0.75, 0.25;
-  auto particle1 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle1 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 2;
   coords << 0.75, 0.75;
-  auto particle2 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle2 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particle
   id = 3;
   coords << 0.25, 0.75;
-  auto particle3 = std::make_shared<mpm::Particle<Dim, Nphases>>(id, coords);
+  auto particle3 = std::make_shared<mpm::Particle<Dim>>(id, coords);
 
   // Add particles and check status
   REQUIRE(mesh->add_particle(particle0) == true);
@@ -162,15 +162,15 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                Phase, material));
+                material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1, Phase));
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(std::bind(&mpm::ParticleBase<Dim>::compute_mass,
-                                         std::placeholders::_1, Phase));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -192,7 +192,7 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Assign mass and momentum to nodes
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1, Phase));
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
@@ -203,7 +203,7 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
-                std::placeholders::_1, Phase, dt));
+                std::placeholders::_1, dt, false));
 
   // Locate particles in a mesh
   particles = mesh->locate_particles_mesh();
@@ -353,28 +353,28 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
 
   // Add particle
   coords << 0.25, 0.25, 0.25;
-  auto particle0 = std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+  auto particle0 = std::make_shared<mpm::Particle<Dim>>(0, coords);
 
   coords << 0.75, 0.25, 0.25;
-  auto particle1 = std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+  auto particle1 = std::make_shared<mpm::Particle<Dim>>(1, coords);
 
   coords << 0.25, 0.75, 0.25;
-  auto particle2 = std::make_shared<mpm::Particle<Dim, Nphases>>(2, coords);
+  auto particle2 = std::make_shared<mpm::Particle<Dim>>(2, coords);
 
   coords << 0.75, 0.75, 0.25;
-  auto particle3 = std::make_shared<mpm::Particle<Dim, Nphases>>(3, coords);
+  auto particle3 = std::make_shared<mpm::Particle<Dim>>(3, coords);
 
   coords << 0.25, 0.25, 0.75;
-  auto particle4 = std::make_shared<mpm::Particle<Dim, Nphases>>(4, coords);
+  auto particle4 = std::make_shared<mpm::Particle<Dim>>(4, coords);
 
   coords << 0.25, 0.25, 0.75;
-  auto particle5 = std::make_shared<mpm::Particle<Dim, Nphases>>(5, coords);
+  auto particle5 = std::make_shared<mpm::Particle<Dim>>(5, coords);
 
   coords << 0.75, 0.75, 0.75;
-  auto particle6 = std::make_shared<mpm::Particle<Dim, Nphases>>(6, coords);
+  auto particle6 = std::make_shared<mpm::Particle<Dim>>(6, coords);
 
   coords << 0.75, 0.75, 0.75;
-  auto particle7 = std::make_shared<mpm::Particle<Dim, Nphases>>(7, coords);
+  auto particle7 = std::make_shared<mpm::Particle<Dim>>(7, coords);
 
   // Add particles and check status
   REQUIRE(mesh->add_particle(particle0) == true);
@@ -418,15 +418,15 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Iterate over each particle to assign material
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                Phase, material));
+                material));
 
   // Compute volume
   mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1, Phase));
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(std::bind(&mpm::ParticleBase<Dim>::compute_mass,
-                                         std::placeholders::_1, Phase));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -452,7 +452,7 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Assign mass and momentum to nodes
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1, Phase));
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
@@ -463,7 +463,7 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
-                std::placeholders::_1, Phase, dt));
+                std::placeholders::_1, dt, false));
 
   // Locate particles in a mesh
   particles = mesh->locate_particles_mesh();

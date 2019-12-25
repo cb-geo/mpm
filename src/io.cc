@@ -101,8 +101,8 @@ bool mpm::IO::check_file(const std::string& filename) {
 boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
                                              const std::string& file_extension,
                                              const std::string& analysis_id,
-                                             unsigned step,
-                                             unsigned max_steps) {
+                                             unsigned step, unsigned max_steps,
+                                             bool parallel) {
   std::stringstream file_name;
   std::string path = this->output_folder();
 
@@ -116,7 +116,7 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  if (mpi_size > 1) {
+  if (mpi_size > 1 && parallel) {
     const std::string rank_size =
         "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size) + "-";
     file_name << rank_size;

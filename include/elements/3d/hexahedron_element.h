@@ -173,6 +173,16 @@ class HexahedronElement : public Element<Tdim> {
       const Eigen::Matrix<double, 3, 1>& particle_size,
       const Eigen::Matrix<double, 3, 1>& deformation_gradient) const override;
 
+  //! Return the dN/dx at a given local coord
+  //! \param[in] xi given local coordinates
+  //! \param[in] nodal_coordinates Coordinates of nodes forming the cell
+  //! \param[in] particle_size Particle size
+  //! \param[in] deformation_gradient Deformation gradient
+  Eigen::MatrixXd dn_dx(const VectorDim& xi,
+                        const Eigen::MatrixXd& nodal_coordinates,
+                        const VectorDim& particle_size,
+                        const VectorDim& deformation_gradient) const override;
+
   //! Evaluate the B matrix at given local coordinates for a real cell
   //! \param[in] xi given local coordinates
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

@@ -72,13 +72,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     Eigen::Vector2d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -127,6 +127,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(1, node1);
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
+
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
 
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
@@ -182,11 +186,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nparticles() == 1);
 
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
   }
@@ -409,33 +409,43 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
+    // Particle type 2D
+    const std::string particle_type = "P2D";
 
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    REQUIRE(mesh->nparticles() == 0);
+
+    mesh->generate_material_points(1, particle_type);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      mesh->generate_material_points(1, particle_type);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 4);
+    SECTION("Check generating 2 particle / cell") {
+      mesh->generate_material_points(2, particle_type);
+      REQUIRE(mesh->nparticles() == 4);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 9);
+    SECTION("Check generating 3 particle / cell") {
+      mesh->generate_material_points(3, particle_type);
+      REQUIRE(mesh->nparticles() == 9);
+    }
 
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -687,7 +697,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -742,7 +752,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);
@@ -984,13 +994,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     Eigen::Vector3d coords;
     coords.setZero();
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id1, coords);
+        std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2., 2.;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(id2, coords);
+        std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
     // Check mesh is active
@@ -1083,12 +1093,25 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
 
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
+
+    mesh->find_domain_shared_nodes();
+    REQUIRE(node0->mpi_ranks().size() == mpi_size);
+    REQUIRE(node1->mpi_ranks().size() == mpi_size);
+    REQUIRE(node2->mpi_ranks().size() == mpi_size);
+    REQUIRE(node3->mpi_ranks().size() == mpi_size);
+    REQUIRE(node4->mpi_ranks().size() == mpi_size);
+    REQUIRE(node5->mpi_ranks().size() == mpi_size);
+    REQUIRE(node6->mpi_ranks().size() == mpi_size);
+    REQUIRE(node7->mpi_ranks().size() == mpi_size);
+
+    // Check mesh ghost boundary cells
+    mesh->find_ghost_boundary_cells();
+
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
   }
@@ -1366,32 +1389,41 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise cell and compute volume
     REQUIRE(cell1->initialise() == true);
 
+    // Particle type 2D
+    const std::string particle_type = "P3D";
+
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    mesh->generate_material_points(1, particle_type);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      mesh->generate_material_points(1, particle_type);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 8);
+    SECTION("Check generating 2 particle / cell") {
+      mesh->generate_material_points(2, particle_type);
+      REQUIRE(mesh->nparticles() == 8);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 27);
+    SECTION("Check generating 3 particle / cell") {
+      mesh->generate_material_points(3, particle_type);
+      REQUIRE(mesh->nparticles() == 27);
+    }
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim, Nphases>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1644,7 +1676,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               mpm::Index pid = 100;
               std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
-                  std::make_shared<mpm::Particle<Dim, Nphases>>(pid, coords);
+                  std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
               REQUIRE(mesh->add_particle(particle100) == false);
@@ -1734,7 +1766,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1, phase));
+                            std::placeholders::_1));
 
               REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
                       true);

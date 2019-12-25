@@ -17,15 +17,11 @@
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkZLibDataCompressor.h>
 
+#include <fstream>
 #include <string>
 #include <vector>
 
-namespace mpm {
-
-//! Global index type for the cell
-using Index = unsigned long long;
-
-}  // namespace mpm
+#include "data_types.h"
 
 //! VTK Writer class
 //! \brief VTK writer class
@@ -49,6 +45,11 @@ class VtkWriter {
   void write_mesh(const std::string& filename,
                   const std::vector<Eigen::Vector3d>& coordinates,
                   const std::vector<std::array<mpm::Index, 2>>& node_pairs);
+
+  //! Write Parallel VTK file
+  void write_parallel_vtk(const std::string& filename,
+                          const std::string& attribute, int mpi_size,
+                          unsigned step, unsigned max_steps);
 
  private:
   //! Vector of nodal coordinates

@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     auto console = spdlog::stdout_color_mt("main");
 
     // Create an IO object
-    auto io = std::make_shared<mpm::IO>(argc, argv);
+    auto io = std::make_unique<mpm::IO>(argc, argv);
 
     // Set TBB threads
     unsigned nthreads = tbb::task_scheduler_init::default_num_threads();
@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
     const std::string analysis = io->analysis_type();
 
     // Create an MPM analysis
-    auto mpm = Factory<mpm::MPM, std::shared_ptr<mpm::IO>&>::instance()->create(
-        analysis, io);
+    auto mpm =
+        Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
+            analysis, std::move(io));
     // Solve
     mpm->solve();
 

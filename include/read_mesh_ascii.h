@@ -10,9 +10,6 @@
 //! MPM namespace
 namespace mpm {
 
-//! Global index type for the cell
-using Index = unsigned long long;
-
 //! ReadMeshAscii class
 //! \brief Derived class that returns mesh and particles locataions from ascii
 //! file \tparam Tdim Dimension

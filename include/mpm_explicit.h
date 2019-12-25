@@ -1,7 +1,7 @@
 #ifndef MPM_MPM_EXPLICIT_H_
 #define MPM_MPM_EXPLICIT_H_
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
@@ -17,10 +17,21 @@ template <unsigned Tdim>
 class MPMExplicit : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  MPMExplicit(const std::shared_ptr<IO>& io);
+  MPMExplicit(std::unique_ptr<IO>&& io);
+
+  //! Domain decomposition
+  void mpi_domain_decompose();
 
   //! Solve
   bool solve() override;
+
+  //! Pressure smoothing
+  //! \param[in] phase Phase to smooth pressure
+  void pressure_smoothing(unsigned phase);
+
+  //! Compute stress strain
+  //! \param[in] phase Phase to smooth pressure
+  void compute_stress_strain(unsigned phase);
 
  protected:
   // Generate a unique id for the analysis
@@ -42,7 +53,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   //! Graph
   using mpm::MPMBase<Tdim>::graph_;
 #endif
@@ -63,6 +74,8 @@ class MPMExplicit : public MPMBase<Tdim> {
  private:
   //! Pressure smoothing
   bool pressure_smoothing_{false};
+  //! Interface
+  bool interface_{false};
 
 };  // MPMExplicit class
 }  // namespace mpm

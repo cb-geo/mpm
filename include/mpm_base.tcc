@@ -1,6 +1,7 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
+mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
+    : mpm::MPM(std::move(io)) {
   //! Logger
   console_ = spdlog::get("MPMBase");
 
@@ -13,7 +14,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   // Set mesh as isoparametric
   bool isoparametric = is_isoparametric();
 
-  mesh_ = std::make_shared<mpm::Mesh<Tdim>>(id, isoparametric);
+  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id, isoparametric);
 
   // Empty all materials
   materials_.clear();
@@ -27,8 +28,9 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 
     if (analysis_.at("gravity").is_array() &&
         analysis_.at("gravity").size() == gravity_.size()) {
-      for (unsigned i = 0; i < gravity_.size(); ++i)
+      for (unsigned i = 0; i < gravity_.size(); ++i) {
         gravity_[i] = analysis_.at("gravity").at(i);
+      }
     } else {
       throw std::runtime_error("Specified gravity dimension is invalid");
     }
@@ -256,72 +258,84 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_begin = std::chrono::steady_clock::now();
 
-    // Get all particles
-    std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
-
-    // Get particles properties
-    auto json_particles = io_->json_object("particles");
-
-    for (const auto& json_particle : json_particles) {
-      // Generate particles
-      all_particles =
-          mpm::generator_factory<Tdim>(mesh_, io_, json_particle["generator"]);
-      console_->error("{} {} {}", __FILE__, __LINE__, all_particles.size());
-      if (all_particles.empty())
-        throw std::runtime_error("No particles were generated");
-    }
-
-    // Get all particle ids
-    std::vector<mpm::Index> all_particles_ids(all_particles.size());
-    std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
-
     // Particle type
     const auto particle_type =
         particle_props["particle_type"].template get<std::string>();
-
-    // Create particles from file
-    bool particle_status =
-        mesh_->create_particles(all_particles_ids,  // global id
-                                particle_type,      // particle type
-                                all_particles,      // coordinates
-                                check_duplicates);  // Check duplicates
-
-    if (!particle_status)
-      throw std::runtime_error("Addition of particles to mesh failed");
-
-    auto particles_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read particles: {} ms", mpi_rank,
-                   std::chrono::duration_cast<std::chrono::milliseconds>(
-                       particles_end - particles_begin)
-                       .count());
+    // Generate particles
+    bool read_particles_file = false;
     try {
-      // Read and assign particles cells
-      if (!io_->file_name("particles_cells").empty()) {
-        bool particles_cells =
-            mesh_->assign_particles_cells(particle_reader->read_particles_cells(
-                io_->file_name("particles_cells")));
-        if (!particles_cells)
+      unsigned nparticles_cell =
+          mesh_props["generate_particles_cells"].template get<unsigned>();
+
+      if (nparticles_cell > 0) {
+        unsigned before_generation = mesh_->nparticles();
+        mesh_->generate_material_points(nparticles_cell, particle_type);
+        if (before_generation == mesh_->nparticles())
           throw std::runtime_error(
-              "Cell ids are not properly assigned to particles");
-      }
+              "No particles were generated, mesh is empty!");
+      } else
+        throw std::runtime_error(
+            "Specified # of particles per cell for generation is invalid!");
+
     } catch (std::exception& exception) {
-      console_->error("{} #{}: Reading particles cells: {}", __FILE__, __LINE__,
-                      exception.what());
+      console_->warn("Generate particles is not set, reading particles file");
+      read_particles_file = true;
     }
 
-    auto particles_locate_begin = std::chrono::steady_clock::now();
-    // Locate particles in cell
-    auto unlocatable_particles = mesh_->locate_particles_mesh();
+    // Read particles from file
+    if (read_particles_file) {
+      // Get all particles
+      std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
 
-    if (!unlocatable_particles.empty())
-      throw std::runtime_error("Particle outside the mesh domain");
+      all_particles =
+          particle_reader->read_particles(io_->file_name("particles"));
+      // Get all particle ids
+      std::vector<mpm::Index> all_particles_ids(all_particles.size());
+      std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
 
-    auto particles_locate_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Locate particles: {} ms", mpi_rank,
-                   std::chrono::duration_cast<std::chrono::milliseconds>(
-                       particles_locate_end - particles_locate_begin)
-                       .count());
+      // Create particles from file
+      bool particle_status =
+          mesh_->create_particles(all_particles_ids,  // global id
+                                  particle_type,      // particle type
+                                  all_particles,      // coordinates
+                                  check_duplicates);  // Check duplicates
 
+      if (!particle_status)
+        throw std::runtime_error("Addition of particles to mesh failed");
+
+      auto particles_end = std::chrono::steady_clock::now();
+      console_->info("Rank {} Read particles: {} ms", mpi_rank,
+                     std::chrono::duration_cast<std::chrono::milliseconds>(
+                         particles_end - particles_begin)
+                         .count());
+      try {
+        // Read and assign particles cells
+        if (!io_->file_name("particles_cells").empty()) {
+          bool particles_cells = mesh_->assign_particles_cells(
+              particle_reader->read_particles_cells(
+                  io_->file_name("particles_cells")));
+          if (!particles_cells)
+            throw std::runtime_error(
+                "Cell ids are not properly assigned to particles");
+        }
+      } catch (std::exception& exception) {
+        console_->error("{} #{}: Reading particles cells: {}", __FILE__,
+                        __LINE__, exception.what());
+      }
+
+      auto particles_locate_begin = std::chrono::steady_clock::now();
+      // Locate particles in cell
+      auto unlocatable_particles = mesh_->locate_particles_mesh();
+
+      if (!unlocatable_particles.empty())
+        throw std::runtime_error("Particle outside the mesh domain");
+
+      auto particles_locate_end = std::chrono::steady_clock::now();
+      console_->info("Rank {} Locate particles: {} ms", mpi_rank,
+                     std::chrono::duration_cast<std::chrono::milliseconds>(
+                         particles_locate_end - particles_locate_begin)
+                         .count());
+    }
     // Write particles and cells to file
     particle_reader->write_particles_cells(
         io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
@@ -329,9 +343,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_traction_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_volume,
-                  std::placeholders::_1, phase));
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
@@ -428,6 +441,8 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
             "New material cannot be added, insertion failed");
       }
     }
+    // Copy materials to mesh
+    mesh_->initialise_material_models(this->materials_);
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
@@ -488,7 +503,7 @@ bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
       for (const auto& sitr : sids) {
         mesh_->iterate_over_particle_set(
             sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, phase, set_material));
+                            std::placeholders::_1, set_material));
       }
     }
     status = true;
@@ -594,6 +609,23 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
         file, mesh_->particles_vector_data(attribute, phase), attribute);
+    // Write a parallel MPI
+#ifdef USE_MPI
+    int mpi_rank = 0;
+    int mpi_size = 1;
+    // Get MPI rank
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    bool write_mpi_rank = false;
+    auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                          max_steps, write_mpi_rank)
+                             .string();
+    if (mpi_rank == 0)
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+#endif
   }
 }
 #endif

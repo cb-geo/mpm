@@ -4,14 +4,16 @@
 #include <array>
 #include <limits>
 #include <map>
+#include <mutex>
+#include <set>
+#include <tuple>
 #include <vector>
 
 #include <Eigen/Dense>
 
-namespace mpm {
+#include "data_types.h"
 
-//! Global index type for the node_base
-using Index = unsigned long long;
+namespace mpm {
 
 //! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
@@ -184,6 +186,30 @@ class NodeBase {
   //! \param[in] rotation_matrix Rotation matrix of the node
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
+
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  virtual void append_material_id(unsigned id) = 0;
+
+  //! Return material ids in node
+  virtual std::set<unsigned> material_ids() const = 0;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  virtual bool mpi_rank(unsigned rank) = 0;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  virtual std::set<unsigned> mpi_ranks() const = 0;
+
+  //! Clear MPI ranks on node
+  virtual void clear_mpi_ranks() = 0;
+
+  //! Return ghost id
+  virtual Index ghost_id() const = 0;
+
+  //! Set ghost id
+  virtual void ghost_id(Index gid) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

@@ -5,8 +5,9 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-namespace mpm {
+#include "data_types.h"
 
+namespace mpm {
 // Define a struct of particle
 typedef struct HDF5Particle {
   // Index
@@ -33,11 +34,36 @@ typedef struct HDF5Particle {
   double gamma_xy, gamma_yz, gamma_xz;
   // Volumetric strain centroid
   double epsilon_v;
-  // Status
-  bool status;
   // Index
   mpm::Index cell_id;
+  // Status
+  bool status;
+  // Material id
+  unsigned material_id;
+  // Number of state variables
+  unsigned nstate_vars;
+  // State variables (init to zero)
+  double svars[20] = {0};
 } HDF5Particle;
+
+namespace hdf5::particle {
+const hsize_t NFIELDS = 53;
+
+const size_t dst_size = sizeof(HDF5Particle);
+
+// Destination offset
+extern const size_t dst_offset[NFIELDS];
+
+// Destination size
+extern const size_t dst_sizes[NFIELDS];
+
+// Define particle field information
+extern const char* field_names[NFIELDS];
+
+// Initialize field types
+extern const hid_t field_type[NFIELDS];
+
+}  // namespace hdf5::particle
 
 }  // namespace mpm
 

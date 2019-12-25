@@ -21,9 +21,6 @@
 
 namespace mpm {
 
-//! Global index type for the cell
-using Index = unsigned long long;
-
 //! Cell class
 //! \brief Base class that stores the information about cells
 //! \tparam Tdim Dimension
@@ -81,6 +78,13 @@ class Cell {
 
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
+
+  //! Return nodes id in a cell
+  std::set<mpm::Index> nodes_id() const {
+    std::set<mpm::Index> nodes_id_lists;
+    for (const auto& node : nodes_) nodes_id_lists.insert(node->id());
+    return nodes_id_lists;
+  }
 
   //! Side node pair ids
   std::vector<std::array<mpm::Index, 2>> side_node_pairs() const;
@@ -149,7 +153,8 @@ class Cell {
 
   //! Check if a point is in a cartesian cell by checking the domain ranges
   //! \param[in] point Coordinates of point
-  bool point_in_cartesian_cell(const Eigen::Matrix<double, Tdim, 1>& point);
+  inline bool point_in_cartesian_cell(
+      const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Check if a point is in a isoparametric cell
   //! Use an affine transformation and NR to check if a transformed point is in
@@ -159,52 +164,56 @@ class Cell {
   //! \param[in] point Coordinates of point
   //! \param[in|out] xi Local coordinates of point
   //! \retval status Return if a point is in cell or not
-  bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point,
-                        Eigen::Matrix<double, Tdim, 1>* xi);
+  inline bool is_point_in_cell(const Eigen::Matrix<double, Tdim, 1>& point,
+                               Eigen::Matrix<double, Tdim, 1>* xi);
 
   //! Return the local coordinates of a point in a cell
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
+  inline Eigen::Matrix<double, Tdim, 1> local_coordinates_point(
       const Eigen::Matrix<double, Tdim, 1>& point);
 
   //! Return the local coordinates of a point in a unit cell
   //! Using newton iteration / affine transformation
   //! \param[in] point Coordinates of a point
   //! \retval xi Local coordinates of a point
-  Eigen::Matrix<double, Tdim, 1> transform_real_to_unit_cell(
+  inline Eigen::Matrix<double, Tdim, 1> transform_real_to_unit_cell(
       const Eigen::Matrix<double, Tdim, 1>& point);
+
+  //! Assign MPI rank to nodes
+  void assign_mpi_rank_to_nodes();
 
   //! Map particle mass to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass mass of particle
-  void map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
-                                  unsigned phase, double pmass);
+  inline void map_particle_mass_to_nodes(const Eigen::VectorXd& shapefn,
+                                         unsigned phase, double pmass);
 
   //! Map particle volume to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pvolume volume of particle
-  void map_particle_volume_to_nodes(const Eigen::VectorXd& shapefn,
-                                    unsigned phase, double pvolume);
+  inline void map_particle_volume_to_nodes(const Eigen::VectorXd& shapefn,
+                                           unsigned phase, double pvolume);
 
   //! Compute the nodal momentum with particle mass & velocity for a phase
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pvelocity velocity of a particle
-  void compute_nodal_momentum(const Eigen::VectorXd& shapefn, unsigned phase,
-                              double pmass, const Eigen::VectorXd& pvelocity);
+  inline void compute_nodal_momentum(const Eigen::VectorXd& shapefn,
+                                     unsigned phase, double pmass,
+                                     const Eigen::VectorXd& pvelocity);
 
   //! Map particle mass and momentum to nodes for a phase
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass mass of a particle
   //! \param[in] velocity velocity of a particle
-  void map_mass_momentum_to_nodes(const Eigen::VectorXd& shapefn,
-                                  unsigned phase, double pmass,
-                                  const Eigen::VectorXd& pvelocity);
+  inline void map_mass_momentum_to_nodes(const Eigen::VectorXd& shapefn,
+                                         unsigned phase, double pmass,
+                                         const Eigen::VectorXd& pvelocity);
 
   //! Map particle pressure to nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
@@ -212,63 +221,66 @@ class Cell {
   //! \param[in] pmass Mass of a particle
   //! \param[in] ppressure Pressure of particle
   //! $$p_i = \frac{\sum_{p = 1}^{n_p} N_i (x_p) M_p p_p}{m_i}$$
-  void map_pressure_to_nodes(const Eigen::VectorXd& shapefn, unsigned phase,
-                             double pmass, double ppressure);
+  inline void map_pressure_to_nodes(const Eigen::VectorXd& shapefn,
+                                    unsigned phase, double pmass,
+                                    double ppressure);
 
   //! Return velocity at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval velocity Interpolated velocity at xi
-  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity(
+  inline Eigen::Matrix<double, Tdim, 1> interpolate_nodal_velocity(
       const Eigen::VectorXd& shapefn, unsigned phase);
 
   //! Return acceleration at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval acceleration Interpolated acceleration at xi
-  Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
+  inline Eigen::Matrix<double, Tdim, 1> interpolate_nodal_acceleration(
       const Eigen::VectorXd& shapefn, unsigned phase);
 
   //! Return pressure at given location by interpolating from nodes
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \retval pressure Interpolated pressure at xi
-  double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
-                                    unsigned phase);
+  inline double interpolate_nodal_pressure(const Eigen::VectorXd& shapefn,
+                                           unsigned phase);
 
-  //! Compute strain rate
-  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! Compute particle strain rate
+  //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  Eigen::VectorXd compute_strain_rate(
-      const std::vector<Eigen::MatrixXd>& bmatrix, unsigned phase);
+  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
+      const Eigen::MatrixXd& dNdx, unsigned phase);
 
   //! Compute strain rate for reduced integration at the centroid of cell
   //! \param[in] phase Phase associate to the particle
-  Eigen::VectorXd compute_strain_rate_centroid(unsigned phase);
+  inline Eigen::Matrix<double, 6, 1> compute_strain_rate_centroid(
+      unsigned phase);
 
   //! Compute the nodal body force of a cell from particle mass and gravity
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] pmass Mass of a particle
   //! \param[in] pgravity Gravity of a particle
-  void compute_nodal_body_force(const Eigen::VectorXd& shapefn, unsigned phase,
-                                double pmass, const VectorDim& pgravity);
+  inline void compute_nodal_body_force(const Eigen::VectorXd& shapefn,
+                                       unsigned phase, double pmass,
+                                       const VectorDim& pgravity);
 
   //! Compute the nodal traction force of a cell from the particle
   //! \param[in] shapefn Shapefns at local coordinates of particle
   //! \param[in] phase Phase associate to the particle
   //! \param[in] traction Traction force from the particle
-  void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
-                                    unsigned phase, const VectorDim& traction);
+  inline void compute_nodal_traction_force(const Eigen::VectorXd& shapefn,
+                                           unsigned phase,
+                                           const VectorDim& traction);
 
   //! Compute the noal internal force  of a cell from particle stress and volume
-  //! \param[in] bmatrix Bmatrix corresponding to local coordinates of particle
+  //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle
-  //! \param[in] pvolume Volume of particle
-  //! \param[in] pstress Stress of particle
-  void compute_nodal_internal_force(const std::vector<Eigen::MatrixXd>& bmatrix,
-                                    unsigned phase, double pvolume,
-                                    const Eigen::Matrix<double, 6, 1>& pstress);
+  //! \param[in] pforce Force of particle dim 6
+  inline void compute_nodal_internal_force(
+      const Eigen::MatrixXd& dNdx, unsigned phase,
+      const Eigen::Matrix<double, 6, 1>& pforce);
 
   //! Assign velocity constraint
   //! \param[in] face_id Face of cell of velocity constraint
@@ -289,6 +301,9 @@ class Cell {
 
   //! Return rank
   unsigned rank() const;
+
+  //! Assign material to nodes from the particles within this cell
+  void append_material_id_to_nodes(unsigned material_id);
 
  private:
   //! Approximately check if a point is in a cell
@@ -324,8 +339,8 @@ class Cell {
   std::shared_ptr<const Element<Tdim>> element_{nullptr};
   //! Quadrature
   std::shared_ptr<Quadrature<Tdim>> quadrature_{nullptr};
-  //! BMatrix centroid
-  std::vector<Eigen::MatrixXd> bmatrix_centroid_;
+  //! dN/dx
+  Eigen::MatrixXd dn_dx_centroid_;
   //! Velocity constraints
   //! key: face_id, value: pair of direction [0/1/2] and velocity value
   std::map<unsigned, std::vector<std::pair<unsigned, double>>>

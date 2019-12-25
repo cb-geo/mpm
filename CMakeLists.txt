@@ -1,17 +1,16 @@
 project(mpm LANGUAGES CXX)
 
-# Require C++14-compliant compiler; only available for CMake v3.10 and up
 set(CMAKE_CXX_STANDARD 14)
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 SET(CMAKE_COLOR_MAKEFILE ON)
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # General compile settings
 IF (NOT CMAKE_BUILD_TYPE)
- SET(CMAKE_BUILD_TYPE "Debug")
- #SET(CMAKE_BUILD_TYPE "Release")
+ #SET(CMAKE_BUILD_TYPE "Debug")
+ SET(CMAKE_BUILD_TYPE "Release")
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # GNU specific settings
@@ -32,6 +31,9 @@ endif()
 # CMake seems to have no way to enable/disable testing per subproject,
 # so we provide an option similar to BUILD_TESTING, but just for MPM.
 option(MPM_BUILD_TESTING "enable testing for mpm" ON)
+
+# CMake option for building mpm as a shared library for CI
+option(MPM_BUILD_LIB "enable libmpm" OFF)
 
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -90,21 +92,19 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
 endif()
 
-# METIS
-find_package(METIS)
-if (METIS_FOUND)
-    include_directories(SYSTEM ${METIS_INCLUDE_DIR})
-    link_libraries(${METIS_LIBRARY})
-endif (METIS_FOUND)
-
-# ParMETIS
-find_package(ParMETIS)
-if (PARMETIS_FOUND)
-  add_definitions("-DUSE_PARMETIS")
-  include_directories(${PARMETIS_INCLUDE_DIRS})
-  link_libraries(${PARMETIS_LIBRARIES})
+# KaHIP
+if (MPI_FOUND)
+  if (NO_KAHIP)
+    find_package(KaHIP)
+  else()
+    find_package(KaHIP REQUIRED)
+  endif()
+if (KAHIP_FOUND)
+  add_definitions("-DUSE_GRAPH_PARTITIONING")
+  include_directories(${KAHIP_INCLUDE_DIRS})
+  link_libraries(${KAHIP_LIBRARIES})
 endif()
-
+endif()
 
 # Include directories
 include_directories(BEFORE
@@ -122,6 +122,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
   ${mpm_SOURCE_DIR}/src/io.cc
   ${mpm_SOURCE_DIR}/src/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
@@ -133,10 +134,13 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/element.cc
 )
 
+if(MPM_BUILD_LIB)
 add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
-
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
 target_link_libraries(mpm lmpm)
+else()
+add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
+endif()
 
 # Unit test
 if(MPM_BUILD_TESTING)
@@ -147,6 +151,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
+    ${mpm_SOURCE_DIR}/tests/elements/hexahedron_gimp_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_gimp_element_test.cc
@@ -160,7 +165,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_wrapper_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
@@ -173,13 +179,20 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )
-  add_executable(mpmtest ${test_src})
-  target_link_libraries(mpmtest lmpm)
-  add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-  enable_testing()
+  if(MPM_BUILD_LIB)
+    add_executable(mpmtest ${test_src})
+    target_link_libraries(mpmtest lmpm)
+    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+    enable_testing()
+  else()
+    add_executable(mpmtest ${test_src} ${mpm_src} ${mpm_vtk})
+    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+    enable_testing()
+  endif()
 endif()
 
 # Coverage
