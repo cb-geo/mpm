@@ -641,8 +641,6 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
-    console_->error("Traction size: {}", this->traction_.size());
-    console_->error("Shapfn size: {}", this->shapefn_.size());
     // Map particle traction forces to nodes
     cell_->compute_nodal_traction_force(
         this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);

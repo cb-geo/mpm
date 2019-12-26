@@ -35,7 +35,7 @@ jobs:
             scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ ..
             scan-build -k -V ninja -j2
             ctest -VV
-  cppcheck/clang-format:
+  cppcheck:
     docker:
       - image: quay.io/cbgeo/mpm
     steps:

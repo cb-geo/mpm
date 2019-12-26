@@ -889,8 +889,6 @@ bool mpm::Mesh<Tdim>::create_particles_tractions(
     const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
     double traction) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end())
       // Create a particle traction load
@@ -1259,6 +1257,7 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     bool check_duplicates) {
   bool status = false;
   try {
+    console_->error("Particle set creation: {}", particle_sets.size());
     // Create container for each particle set
     for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
          ++sitr) {
@@ -1271,12 +1270,16 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
         bool insertion_status =
             particles.add(map_particles_[pid], check_duplicates);
       }
+      console_->error("Particle set: {} particles {}", sitr->first,
+                      particles.size());
+
       // Create the map of the container
       status = this->particle_sets_
                    .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
                        sitr->first, particles))
                    .second;
     }
+    console_->error("Particle set creation: {}", this->particle_sets_.size());
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
