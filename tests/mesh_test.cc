@@ -777,6 +777,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
                       false);
 
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+              REQUIRE(particles.size() == 0);
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_shapefn,
+                            std::placeholders::_1));
+
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
@@ -1764,28 +1771,36 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
               tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
-              /*
-              particle_sets.insert(mpm::Index(0), std::vector<mpm::Index>{0});
-              particle_sets.insert(mpm::Index(1), std::vector<mpm::Index>{1});
-              particle_sets.insert(mpm::Index(2), std::vector<mpm::Index>{2});
-              particle_sets.insert(mpm::Index(3), std::vector<mpm::Index>{3});
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
 
-              REQUIRE(mesh->nparticles() == 8);
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
+
+              REQUIRE(mesh->nparticles() == 16);
 
               REQUIRE(mesh->create_particles_tractions(mfunction, 0, 0, 10.5) ==
                       true);
-              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1, -10.5)
-              == true); REQUIRE(mesh->create_particles_tractions(mfunction, 2,
-              0, -12.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1,
+                                                       -10.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 2, 0,
+                                                       -12.5) == true);
               REQUIRE(mesh->create_particles_tractions(mfunction, 3, 1, 0.5) ==
                       true);
-              */
               REQUIRE(mesh->create_particles_tractions(mfunction, -1, 1, 0.5) ==
                       true);
               REQUIRE(mesh->create_particles_tractions(mfunction, 5, 1, 0.5) ==
                       false);
               REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
                       false);
+
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+              REQUIRE(particles.size() == 0);
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_shapefn,
+                            std::placeholders::_1));
 
               // Compute volume
               mesh->iterate_over_particles(

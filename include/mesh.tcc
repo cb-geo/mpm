@@ -920,7 +920,6 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
       pset = particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
-    console_->error("Mesh traction: {} {}", dir, traction);
     tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
                       [&](const tbb::blocked_range<int>& range) {
                         for (int i = range.begin(); i != range.end(); ++i)

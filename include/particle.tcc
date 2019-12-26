@@ -642,8 +642,7 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
     console_->error("Traction size: {}", this->traction_.size());
-    for (unsigned i = 0; i < traction_.size(); ++i)
-      console_->info("Ti {} => {}", i, traction_[i]);
+    console_->error("Shapfn size: {}", this->shapefn_.size());
     // Map particle traction forces to nodes
     cell_->compute_nodal_traction_force(
         this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
