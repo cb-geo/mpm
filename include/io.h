@@ -35,10 +35,6 @@ class IO {
   //! Return number of tbb threads
   unsigned nthreads() const { return nthreads_; }
 
-  //! Return working directory
-  //! \retval string of working directory
-  std::string working_directory() { return working_dir_; }
-
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
   //! \param[in] key Input key in JSON for the filename of
@@ -86,6 +82,9 @@ class IO {
                                       const std::string& analysis_id,
                                       unsigned step, unsigned max_steps,
                                       bool parallel = true);
+  //! Return working directory
+  //! \retval string of working directory
+  std::string working_directory() const { return working_dir_; }
 
  private:
   //! Number of parallel threads
