@@ -4,7 +4,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "solvers/mpm_explicit.h"
+#include "mpm_explicit.h"
 #include "write_mesh_particles_unitcell.h"
 
 // Check MPM Explicit USF
