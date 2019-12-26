@@ -340,7 +340,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
         mesh_->particles_cells());
 
-    auto particles_traction_begin = std::chrono::steady_clock::now();
+    auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
@@ -379,11 +379,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
             "Particles stresses are not properly assigned");
     }
 
-    auto particles_traction_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read particle traction and stresses: {} ms",
+    auto particles_volume_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read volume, velocity and stresses: {} ms",
                    mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                       particles_traction_end - particles_traction_begin)
+                       particles_volume_end - particles_volume_begin)
                        .count());
 
     // Read and assign particle sets
@@ -633,15 +633,18 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
       for (const auto& ptraction : loads["particle_surface_traction"]) {
         // Get the math function
         std::shared_ptr<FunctionBase> tfunction = nullptr;
-        if (ptraction.find("math_function_id") != ptraction.end())
-          tfunction = math_functions_.at(
-              ptraction["math_function_id"].template get<unsigned>());
-        // Read and assign particle surface tractions
-        bool particles_tractions = mesh_->assign_particles_tractions(
-            tfunction,
-            traction_reader->read_tractions(
-                io_->working_directory() +
-                ptraction["input_file"].template get<std::string>()));
+        tfunction = math_functions_.at(
+            ptraction.at("math_function_id").template get<unsigned>());
+        // Set id
+        int pset_id = ptraction.at("pset_id").template get<int>();
+        // Direction
+        unsigned dir = ptraction.at("dir").template get<unsigned>();
+        // Traction
+        double traction = ptraction.at("traction").template get<double>();
+
+        // Create particle surface tractions
+        bool particles_tractions = mesh_->create_particles_tractions(
+            tfunction, pset_id, dir, traction);
         if (!particles_tractions)
           throw std::runtime_error(
               "Particles tractions are not properly assigned");

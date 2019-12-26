@@ -618,9 +618,7 @@ bool mpm::Particle<Tdim>::assign_velocity(
 
 // Assign traction to the particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::assign_traction(
-    unsigned direction, double traction,
-    const std::shared_ptr<FunctionBase>& function) {
+bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
   bool status = false;
   try {
     if (direction >= Tdim ||
@@ -632,7 +630,6 @@ bool mpm::Particle<Tdim>::assign_traction(
     traction_(direction) = traction * this->volume_ / this->size_(direction);
     status = true;
     this->set_traction_ = true;
-    this->traction_function_ = function;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -642,14 +639,14 @@ bool mpm::Particle<Tdim>::assign_traction(
 
 //! Map traction force
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_traction_force(double current_time) {
+void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
-    double scalar = 1.0;
-    if (traction_function_ != nullptr)
-      scalar = (this->traction_function_)->value(current_time);
+    console_->error("Traction size: {}", this->traction_.size());
+    for (unsigned i = 0; i < traction_.size(); ++i)
+      console_->info("Ti {} => {}", i, traction_[i]);
     // Map particle traction forces to nodes
     cell_->compute_nodal_traction_force(
-        this->shapefn_, mpm::ParticlePhase::Solid, scalar * this->traction_);
+        this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
   }
 }
 

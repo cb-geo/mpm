@@ -196,15 +196,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
-  bool assign_traction(unsigned direction, double traction,
-                       const std::shared_ptr<FunctionBase>& function) override;
+  bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
   //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
   //! Map traction force
-  void map_traction_force(double current_time) override;
+  void map_traction_force() override;
 
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
@@ -304,8 +303,6 @@ class Particle : public ParticleBase<Tdim> {
   bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
-  //! Mathematical function for surface traction force
-  std::shared_ptr<FunctionBase> traction_function_{nullptr};
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! dN/dX

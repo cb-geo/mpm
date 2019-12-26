@@ -202,15 +202,13 @@ class ParticleBase {
   virtual VectorDim displacement() const = 0;
 
   //! Assign traction
-  virtual bool assign_traction(
-      unsigned direction, double traction,
-      const std::shared_ptr<FunctionBase>& function) = 0;
+  virtual bool assign_traction(unsigned direction, double traction) = 0;
 
   //! Return traction
   virtual VectorDim traction() const = 0;
 
   //! Map traction force
-  virtual void map_traction_force(double current_time) = 0;
+  virtual void map_traction_force() = 0;
 
   //! Compute updated position
   virtual bool compute_updated_position(double dt,

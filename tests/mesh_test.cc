@@ -12,6 +12,7 @@
 #include "element.h"
 #include "function_base.h"
 #include "hexahedron_element.h"
+#include "linear_function.h"
 #include "mesh.h"
 #include "node.h"
 #include "quadrilateral_element.h"
@@ -28,8 +29,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Nnodes = 4;
   // Tolerance
   const double Tolerance = 1.E-9;
-  // Null pointer to math function
-  std::shared_ptr<mpm::FunctionBase> mfunction = nullptr;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
   // 4-noded quadrilateral element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -740,32 +750,39 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_tractions;
-              // Tractions
-              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
+
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
 
               REQUIRE(mesh->nparticles() == 8);
 
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 0, 0, 10.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1,
+                                                       -10.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 2, 0,
+                                                       -12.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 3, 1, 0.5) ==
+                      true);
+
+              REQUIRE(mesh->create_particles_tractions(mfunction, -1, 1, 0.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 5, 0, 0.5) ==
+                      false);
+              REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
+                      false);
+
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
                             std::placeholders::_1));
 
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == true);
-              // When tractions fail
-              particles_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
-              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
+              mesh->apply_traction_on_particles(10);
             }
 
             // Test assign particles stresses
@@ -931,8 +948,17 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Nnodes = 8;
   // Tolerance
   const double Tolerance = 1.E-9;
-  // Null pointer to math function
-  std::shared_ptr<mpm::FunctionBase> mfunction = nullptr;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0, 1.5}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0, 0.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
   // 8-noded hexahedron element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -1737,30 +1763,36 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_tractions;
-              // Tractions
-              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              /*
+              particle_sets.insert(mpm::Index(0), std::vector<mpm::Index>{0});
+              particle_sets.insert(mpm::Index(1), std::vector<mpm::Index>{1});
+              particle_sets.insert(mpm::Index(2), std::vector<mpm::Index>{2});
+              particle_sets.insert(mpm::Index(3), std::vector<mpm::Index>{3});
 
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
+              REQUIRE(mesh->nparticles() == 8);
+
+              REQUIRE(mesh->create_particles_tractions(mfunction, 0, 0, 10.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1, -10.5)
+              == true); REQUIRE(mesh->create_particles_tractions(mfunction, 2,
+              0, -12.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 3, 1, 0.5) ==
+                      true);
+              */
+              REQUIRE(mesh->create_particles_tractions(mfunction, -1, 1, 0.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 5, 1, 0.5) ==
+                      false);
+              REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
+                      false);
+
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
                             std::placeholders::_1));
 
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == true);
-              // When tractions fail
-              particles_tractions.emplace_back(std::make_tuple(3, 3, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
-              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(
-                          mfunction, particles_tractions) == false);
+              mesh->apply_traction_on_particles(10);
             }
 
             // Test assign particles stresses

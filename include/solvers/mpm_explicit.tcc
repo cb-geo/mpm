@@ -264,10 +264,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                     std::placeholders::_1, this->gravity_));
 
-      // Iterate over each particle to map traction force to nodes
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_traction_force,
-                    std::placeholders::_1, (this->step_ * this->dt_)));
+      // Apply particle traction and map to nodes
+      mesh_->apply_traction_on_particles(this->step_ * this->dt_);
 
       // Iterate over each node to add concentrated node force to external force
       if (set_node_concentrated_force_)

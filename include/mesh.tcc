@@ -883,37 +883,58 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
   return status;
 }
 
-//! Assign particle tractions
+//! Create particle tractions
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_particles_tractions(
-    const std::shared_ptr<FunctionBase>& mfunction,
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        particle_tractions) {
+bool mpm::Mesh<Tdim>::create_particles_tractions(
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+    double traction) {
   bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
-    if (!particles_.size())
-      throw std::runtime_error(
-          "No particles have been assigned in mesh, cannot assign traction");
-    for (const auto& particle_traction : particle_tractions) {
-      // Particle id
-      mpm::Index pid = std::get<0>(particle_traction);
-      // Direction
-      unsigned dir = std::get<1>(particle_traction);
-      // Traction
-      double traction = std::get<2>(particle_traction);
+    if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end())
+      // Create a particle traction load
+      particle_tractions_.emplace_back(std::make_shared<mpm::ParticleTraction>(
+          set_id, mfunction, dir, traction));
+    else
+      throw std::runtime_error("No particle set found to assign traction");
 
-      if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_traction(dir, traction, mfunction);
-
-      if (!status) throw std::runtime_error("Traction is invalid for particle");
-    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+//! Apply particle tractions
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
+  // Iterate over all particle tractions
+  for (const auto& ptraction : particle_tractions_) {
+    int set_id = ptraction->setid();
+    Container<ParticleBase<Tdim>> pset;
+    // If set id is -1, use all particles
+    if (set_id == -1)
+      pset = this->particles_;
+    else
+      pset = particle_sets_.at(set_id);
+    unsigned dir = ptraction->dir();
+    double traction = ptraction->traction(current_time);
+    console_->error("Mesh traction: {} {}", dir, traction);
+    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
+                      [&](const tbb::blocked_range<int>& range) {
+                        for (int i = range.begin(); i != range.end(); ++i)
+                          pset[i]->assign_traction(dir, traction);
+                      });
+  }
+  if (!particle_tractions_.empty()) {
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size())),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            particles_[i]->map_traction_force();
+        });
+  }
 }
 
 //! Assign particles velocity constraints

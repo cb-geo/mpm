@@ -32,6 +32,7 @@
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "particle_traction.h"
 
 namespace mpm {
 
@@ -253,13 +254,18 @@ class Mesh {
   bool assign_particles_volumes(
       const std::vector<std::tuple<mpm::Index, double>>& particle_volumes);
 
-  //! Assign particles tractions
+  //! Create particles tractions
   //! \param[in] mfunction Math function if defined
-  //! \param[in] particle_tractions Traction at dir on particle
-  bool assign_particles_tractions(
-      const std::shared_ptr<FunctionBase>& mfunction,
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          particle_tractions);
+  //! \param[setid] setid Particle set id
+  //! \param[dir] dir Direction of traction load
+  //! \param[traction] traction Particle traction
+  bool create_particles_tractions(
+      const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+      double traction);
+
+  //! Apply traction to particles
+  //! \param[in] current_time Current time
+  void apply_traction_on_particles(double current_time);
 
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
@@ -408,6 +414,8 @@ class Mesh {
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! Loading (Particle tractions)
+  std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
