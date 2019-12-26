@@ -9,6 +9,11 @@ using Json = nlohmann::json;
 
 namespace mpm {
 
+//! Particle traction class to store the load on a particle set
+//! \brief Particle traction class to store the load on a particle set
+//! \details ParticleTraction stores the load on a set of particles
+//! using mathematical functions, so the load can vary dynamically
+//! with time
 class ParticleTraction {
  public:
   // Constructor

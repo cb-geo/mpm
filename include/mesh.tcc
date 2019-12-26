@@ -910,12 +910,8 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   // Iterate over all particle tractions
   for (const auto& ptraction : particle_tractions_) {
     int set_id = ptraction->setid();
-    Container<ParticleBase<Tdim>> pset;
     // If set id is -1, use all particles
-    if (set_id == -1)
-      pset = this->particles_;
-    else
-      pset = particle_sets_.at(set_id);
+    auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
     tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
@@ -971,8 +967,8 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
 //! Assign node tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
-    const std::shared_ptr<FunctionBase>& mfunction,
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>& node_forces) {
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+    double concentrated_force) {
   bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
@@ -981,21 +977,18 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
       throw std::runtime_error(
           "No nodes have been assigned in mesh, cannot assign concentrated "
           "force");
-    for (const auto& node_force : node_forces) {
-      // Particle id
-      mpm::Index nid = std::get<0>(node_force);
-      // Direction
-      unsigned dir = std::get<1>(node_force);
-      // Traction
-      double concentrated_force = std::get<2>(node_force);
 
-      if (map_nodes_.find(nid) != map_nodes_.end())
-        status = map_nodes_[nid]->assign_concentrated_force(
-            phase, dir, concentrated_force, mfunction);
+    // Set id of -1, is all nodes
+    Container<NodeBase<Tdim>> nodes =
+        (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-      if (!status)
-        throw std::runtime_error("Concentrated force is invalid for node");
-    }
+    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
+                      [&](const tbb::blocked_range<int>& range) {
+                        for (int i = range.begin(); i != range.end(); ++i)
+                          nodes[i]->assign_concentrated_force(
+                              phase, dir, concentrated_force, mfunction);
+                      });
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1257,7 +1250,6 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     bool check_duplicates) {
   bool status = false;
   try {
-    console_->error("Particle set creation: {}", particle_sets.size());
     // Create container for each particle set
     for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
          ++sitr) {
@@ -1270,8 +1262,6 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
         bool insertion_status =
             particles.add(map_particles_[pid], check_duplicates);
       }
-      console_->error("Particle set: {} particles {}", sitr->first,
-                      particles.size());
 
       // Create the map of the container
       status = this->particle_sets_
@@ -1279,7 +1269,6 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
                        sitr->first, particles))
                    .second;
     }
-    console_->error("Particle set creation: {}", this->particle_sets_.size());
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

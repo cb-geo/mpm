@@ -115,6 +115,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/loads/
   ${mpm_SOURCE_DIR}/include/material/
+  ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )

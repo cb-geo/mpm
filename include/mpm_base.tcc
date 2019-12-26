@@ -660,12 +660,17 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
         std::shared_ptr<FunctionBase> ffunction = nullptr;
         if (nforce.find("math_function_id") != nforce.end())
           ffunction = math_functions_.at(
-              nforce["math_function_id"].template get<unsigned>());
+              nforce.at("math_function_id").template get<unsigned>());
+        // Set id
+        int nset_id = nforce.at("nset_id").template get<int>();
+        // Direction
+        unsigned dir = nforce.at("dir").template get<unsigned>();
+        // Traction
+        double force = nforce.at("force").template get<double>();
+
         // Read and assign nodal concentrated forces
         bool nodal_force = mesh_->assign_nodal_concentrated_forces(
-            ffunction, traction_reader->read_tractions(
-                           io_->working_directory() +
-                           nforce["input_file"].template get<std::string>()));
+            ffunction, nset_id, dir, force);
         if (!nodal_force)
           throw std::runtime_error(
               "Concentrated nodal forces are not properly assigned");

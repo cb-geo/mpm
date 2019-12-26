@@ -12,13 +12,13 @@ using Json = nlohmann::json;
 
 namespace mpm {
 
-//! Load Base class
+//! Mathematical function base class
 //! \brief Base class that implements a mathematical function
 //! \details function base class to compute the value of a mathematical function
 //! at a given input
 class FunctionBase {
  public:
-  // Construct a Function Base with a unique id
+  //! Construct a Function Base with a unique id
   //! \param[in] id Global id
   //! \param[in] json object of function properties
   FunctionBase(unsigned id, const Json& function_properties) : id_{id} {};

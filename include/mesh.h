@@ -238,8 +238,7 @@ class Mesh {
           velocity_constraints);
 
   //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, and
-  //! friction
+  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
   bool assign_friction_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
           friction_constraints);
@@ -256,9 +255,9 @@ class Mesh {
 
   //! Create particles tractions
   //! \param[in] mfunction Math function if defined
-  //! \param[setid] setid Particle set id
-  //! \param[dir] dir Direction of traction load
-  //! \param[traction] traction Particle traction
+  //! \param[in] setid Particle set id
+  //! \param[in] dir Direction of traction load
+  //! \param[in] traction Particle traction
   bool create_particles_tractions(
       const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
       double traction);
@@ -269,10 +268,12 @@ class Mesh {
 
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
+  //! \param[in] setid Node set id
+  //! \param[in] dir Direction of force
   //! \param[in] node_forces Concentrated force at dir on nodes
   bool assign_nodal_concentrated_forces(
-      const std::shared_ptr<FunctionBase>& mfunction,
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>& node_forces);
+      const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+      double force);
 
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle

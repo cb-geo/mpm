@@ -3,7 +3,7 @@
 #include "factory.h"
 #include "io.h"
 #include "mpm.h"
-#include "solvers/mpm_explicit.h"
+#include "mpm_explicit.h"
 
 namespace mpm {
 // Stress update method
