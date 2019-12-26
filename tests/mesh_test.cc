@@ -17,7 +17,7 @@
 #include "node.h"
 #include "quadrilateral_element.h"
 
-//! \brief Check mesh class for 2D case
+//! Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Dimension
   const unsigned Dim = 2;
@@ -202,6 +202,74 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+
+    // Test assign node concentrated force
+    SECTION("Check assign node concentrated force") {
+      unsigned Nphase = 0;
+      // Set external force to zero
+      Eigen::Matrix<double, Dim, 1> force;
+      force.setZero();
+      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
+      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+
+      const unsigned Direction = 0;
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+      node_sets[0] = std::vector<mpm::Index>{0, 1};
+
+      REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 0, 0, 10.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -1, 0, 0.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 5, 0, 0.5) ==
+              false);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -5, 1, 0.5) ==
+              false);
+
+      double current_time = 0.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      current_time = 0.25;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      std::vector<double> ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+
+      current_time = 5.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      ext_forces = {0.75, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+    }
   }
 
   // Check add / remove node
@@ -1131,6 +1199,74 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+
+    // Test assign node concentrated force
+    SECTION("Check assign node concentrated force") {
+      unsigned Nphase = 0;
+      // Set external force to zero
+      Eigen::Matrix<double, Dim, 1> force;
+      force.setZero();
+      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
+      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+
+      const unsigned Direction = 0;
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+      node_sets[0] = std::vector<mpm::Index>{0, 1};
+
+      REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 0, 0, 10.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -1, 0, 0.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 5, 0, 0.5) ==
+              false);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -5, 1, 0.5) ==
+              false);
+
+      double current_time = 0.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      current_time = 0.25;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      std::vector<double> ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+
+      current_time = 5.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+    }
   }
 
   // Check add / remove node

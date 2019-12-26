@@ -357,6 +357,14 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Create map of container of nodes in sets
+  //! \param[in] map of nodes ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \retval status Status of  create node sets
+  bool create_node_sets(
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
+      bool check_duplicates);
+
   //! Get the container of cell
   mpm::Container<Cell<Tdim>> cells();
 

@@ -984,9 +984,12 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
 
     tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
                       [&](const tbb::blocked_range<int>& range) {
-                        for (int i = range.begin(); i != range.end(); ++i)
-                          nodes[i]->assign_concentrated_force(
-                              phase, dir, concentrated_force, mfunction);
+                        for (int i = range.begin(); i != range.end(); ++i) {
+                          if (!nodes[i]->assign_concentrated_force(
+                                phase, dir, concentrated_force, mfunction))
+                            throw std::runtime_error(
+                                "Setting concentrated force failed");
+                        }
                       });
 
   } catch (std::exception& exception) {
@@ -1267,6 +1270,38 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
       status = this->particle_sets_
                    .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
                        sitr->first, particles))
+                   .second;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
+//! Create map of container of nodes in sets
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_node_sets(
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
+    bool check_duplicates) {
+  bool status = false;
+  try {
+    // Create container for each node set
+    for (auto sitr = node_sets.begin(); sitr != node_sets.end();
+         ++sitr) {
+      // Create a container for the set
+      Container<NodeBase<Tdim>> nodes;
+      // Reserve the size of the container
+      nodes.reserve((sitr->second).size());
+      // Add nodes to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status =
+            nodes.add(map_nodes_[pid], check_duplicates);
+      }
+
+      // Create the map of the container
+      status = this->node_sets_
+                   .insert(std::pair<mpm::Index, Container<NodeBase<Tdim>>>(
+                       sitr->first, nodes))
                    .second;
     }
   } catch (std::exception& exception) {
