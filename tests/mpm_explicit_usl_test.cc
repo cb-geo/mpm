@@ -48,6 +48,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
+    // Initialise external loading
+    REQUIRE(mpm->initialise_loads() == true);
+
     // Reinitialise mesh
     REQUIRE(mpm->initialise_mesh() == false);
 
