@@ -152,6 +152,15 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                        nodes_end - nodes_begin)
                        .count());
 
+    // Read and assign node sets
+    if (!io_->file_name("entity_sets").empty()) {
+      bool node_sets = mesh_->create_node_sets(
+          (io_->entity_sets(io_->file_name("entity_sets"), "node_sets")),
+          check_duplicates);
+      if (!node_sets)
+        throw std::runtime_error("Node sets are not properly assigned");
+    }
+
     // Read nodal euler angles and assign rotation matrices
     if (!io_->file_name("nodal_euler_angles").empty()) {
       bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
@@ -206,7 +215,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        cells_end - cells_begin)
                        .count());
-
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
                     exception.what());
