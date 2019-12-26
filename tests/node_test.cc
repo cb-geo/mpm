@@ -7,7 +7,7 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "functions/function_base.h"
+#include "function_base.h"
 #include "geometry.h"
 #include "node.h"
 

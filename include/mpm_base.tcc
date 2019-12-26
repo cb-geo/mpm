@@ -51,8 +51,9 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
 
     // Math functions
     try {
-      if (analysis_["math_functions"].template get<bool>())
-        this->initialise_math_functions();
+      // Get materials properties
+      auto math_functions = io_->json_object("math_functions");
+      if (!math_functions.empty()) this->initialise_math_functions();
     } catch (std::exception& exception) {
       console_->warn("{} #{}: No math functions are defined; set to default",
                      __FILE__, __LINE__, exception.what());
@@ -682,7 +683,7 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions() {
   try {
     // Get materials properties
     auto math_functions = io_->json_object("math_functions");
-    for (const auto function_props : math_functions) {
+    for (const auto& function_props : math_functions) {
 
       // Get math function id
       auto function_id = function_props["id"].template get<unsigned>();

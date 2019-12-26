@@ -10,7 +10,7 @@
 #endif
 
 #include "element.h"
-#include "functions/function_base.h"
+#include "function_base.h"
 #include "hexahedron_element.h"
 #include "mesh.h"
 #include "node.h"

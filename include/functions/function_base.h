@@ -38,7 +38,7 @@ class FunctionBase {
   //! Return the value of the function at given input
   //! \param[in] input x
   //! \retval f(x)
-  virtual double value(const double x_input) = 0;
+  virtual double value(double x_input) = 0;
 
  protected:
   //! function id

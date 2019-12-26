@@ -113,6 +113,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/elements/2d
   ${mpm_SOURCE_DIR}/include/elements/3d
   ${mpm_SOURCE_DIR}/include/functions/
+  ${mpm_SOURCE_DIR}/include/material/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -122,7 +123,8 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
   ${mpm_SOURCE_DIR}/src/element.cc
-  ${mpm_SOURCE_DIR}/src/function.cc
+  ${mpm_SOURCE_DIR}/src/functions/functions.cc
+  ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
   ${mpm_SOURCE_DIR}/src/io.cc
@@ -133,7 +135,6 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
-  ${mpm_SOURCE_DIR}/src/step_function.cc
 )
 
 if(MPM_BUILD_LIB)
@@ -160,6 +161,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
+    ${mpm_SOURCE_DIR}/tests/functions_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
@@ -184,7 +186,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
-    ${mpm_SOURCE_DIR}/tests/math_functions_test.cc
   )
   if(MPM_BUILD_LIB)
     add_executable(mpmtest ${test_src})

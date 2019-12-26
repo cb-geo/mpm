@@ -4,10 +4,10 @@
 
 #include "cell.h"
 #include "element.h"
-#include "functions/function_base.h"
+#include "function_base.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
-#include "material/material.h"
+#include "material.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"

@@ -72,8 +72,6 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::set_node_concentrated_force_;
 
  private:
-  //! Boolean to switch between USL and USF
-  bool usl_{false};
   //! Pressure smoothing
   bool pressure_smoothing_{false};
   //! Interface

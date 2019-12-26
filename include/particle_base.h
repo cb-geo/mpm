@@ -8,9 +8,9 @@
 
 #include "cell.h"
 #include "data_types.h"
-#include "functions/function_base.h"
+#include "function_base.h"
 #include "hdf5_particle.h"
-#include "material/material.h"
+#include "material.h"
 
 namespace mpm {
 

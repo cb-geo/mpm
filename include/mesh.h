@@ -23,7 +23,7 @@
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
-#include "functions/function_base.h"
+#include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
 #include "logger.h"

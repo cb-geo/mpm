@@ -12,7 +12,7 @@
 #include <Eigen/Dense>
 
 #include "data_types.h"
-#include "functions/function_base.h"
+#include "function_base.h"
 
 namespace mpm {
 
