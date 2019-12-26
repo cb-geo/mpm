@@ -113,7 +113,7 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
-  console_->error("Analysis {}", io_->analysis_type());
+  console_->info("MPM analysis type {}", io_->analysis_type());
 
   // Initialise MPI rank and size
   int mpi_rank = 0;
