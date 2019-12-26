@@ -52,7 +52,7 @@ class MPM {
   virtual bool initialise_loads() = 0;
 
   // Initialise math functions
-  virtual bool initialise_math_functions() = 0;
+  virtual bool initialise_math_functions(const Json&) = 0;
 
   //! Apply properties to particles sets (e.g: material)
   virtual bool apply_properties_to_particles_sets() = 0;

@@ -53,7 +53,8 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
     try {
       // Get materials properties
       auto math_functions = io_->json_object("math_functions");
-      if (!math_functions.empty()) this->initialise_math_functions();
+      if (!math_functions.empty())
+        this->initialise_math_functions(math_functions);
     } catch (std::exception& exception) {
       console_->warn("{} #{}: No math functions are defined; set to default",
                      __FILE__, __LINE__, exception.what());
@@ -678,11 +679,10 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
 
 //! Initialise math functions
 template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::initialise_math_functions() {
+bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
   bool status = true;
   try {
     // Get materials properties
-    auto math_functions = io_->json_object("math_functions");
     for (const auto& function_props : math_functions) {
 
       // Get math function id
@@ -705,7 +705,7 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions() {
       if (!insert_status.second) {
         status = false;
         throw std::runtime_error(
-            "New math function cannot be added, insertion failed");
+            "Invalid properties for new math function, fn insertion failed");
       }
     }
   } catch (std::exception& exception) {

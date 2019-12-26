@@ -15,6 +15,8 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
   auto mesh_reader = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
 
   // 3D
   if (dim == 3) {
@@ -56,6 +58,11 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
          {"youngs_modulus", 1.5E+6},
          {"poisson_ratio", 0.25}}}},
       {"external_loading_conditions", {{"gravity", gravity}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
         {"stress_update", stress_update},
