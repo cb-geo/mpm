@@ -982,15 +982,15 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
     Container<NodeBase<Tdim>> nodes =
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
-                      [&](const tbb::blocked_range<int>& range) {
-                        for (int i = range.begin(); i != range.end(); ++i) {
-                          if (!nodes[i]->assign_concentrated_force(
-                                phase, dir, concentrated_force, mfunction))
-                            throw std::runtime_error(
-                                "Setting concentrated force failed");
-                        }
-                      });
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            if (!nodes[i]->assign_concentrated_force(
+                    phase, dir, concentrated_force, mfunction))
+              throw std::runtime_error("Setting concentrated force failed");
+          }
+        });
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1286,16 +1286,14 @@ bool mpm::Mesh<Tdim>::create_node_sets(
   bool status = false;
   try {
     // Create container for each node set
-    for (auto sitr = node_sets.begin(); sitr != node_sets.end();
-         ++sitr) {
+    for (auto sitr = node_sets.begin(); sitr != node_sets.end(); ++sitr) {
       // Create a container for the set
       Container<NodeBase<Tdim>> nodes;
       // Reserve the size of the container
       nodes.reserve((sitr->second).size());
       // Add nodes to the container
       for (auto pid : sitr->second) {
-        bool insertion_status =
-            nodes.add(map_nodes_[pid], check_duplicates);
+        bool insertion_status = nodes.add(map_nodes_[pid], check_duplicates);
       }
 
       // Create the map of the container

@@ -183,6 +183,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
