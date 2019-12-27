@@ -51,9 +51,6 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     // Initialise external loading
     REQUIRE(mpm->initialise_loads() == true);
 
-    // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh() == false);
-
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
   }
@@ -130,9 +127,6 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
     REQUIRE(mpm->initialise_mesh() == true);
     // Initialise particles
     REQUIRE(mpm->initialise_particles() == true);
-
-    // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh() == false);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);

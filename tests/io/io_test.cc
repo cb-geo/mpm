@@ -16,16 +16,10 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     // Make json object with input files
     Json json_file = {
         {"title", "Example JSON Input for MPM"},
-        {"input_files",
-         {{"config", "mpm.json"},
+        {"mesh",
+         {{"io_type", "Ascii3D"},
           {"mesh", "mesh-3d.txt"},
-          {"constraints", "mesh_constraints.txt"},
-          {"particles", "particles-3d.txt"},
-          {"initial_stresses", "initial_soil_stress.txt"},
-          {"materials", "materials.txt"},
-          {"traction", "traction.txt"},
-          {"entity_sets", "entity_sets.json"}}},
-        {"mesh", {{"mesh_reader", "Ascii3D"}, {"cell_type", "ED3H8"}}},
+          {"cell_type", "ED3H8"}}},
         {"particle",
          {{"material_id", "0"},
           {"particle_type", "P3D"},
@@ -93,7 +87,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(io->file_name("mpm.json") == "./mpm.json");
 
     // Material file should return an empty string, as file is missing
-    std::string material_file = io->file_name("material");
+    std::string material_file = io->file_name("materials.txt");
     REQUIRE(material_file.empty() == true);
 
     // Check if mpm.json exists

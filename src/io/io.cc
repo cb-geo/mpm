@@ -45,14 +45,9 @@ mpm::IO::IO(int argc, char** argv) {
   std::string file = working_dir_ + input_file_;
   std::ifstream ifs(file);
 
-  try {
-    if (!ifs.is_open())
-      throw std::runtime_error(
-          std::string("Input file not found in specified location: ") + file);
-  } catch (const std::runtime_error& except) {
-    console_->error("{}", except.what());
-    std::terminate();
-  }
+  if (!ifs.is_open())
+    throw std::runtime_error(
+        std::string("Input file not found in specified location: ") + file);
 
   json_ = Json::parse(ifs);
 }
@@ -66,7 +61,8 @@ std::string mpm::IO::file_name(const std::string& filename) {
   try {
     file_name = working_dir_ + filename;
     // Check if a file is present, if not set file_name to empty
-    if (!this->check_file(file_name)) file_name.clear();
+    if (!this->check_file(file_name))
+      throw std::runtime_error("no file found!");
 
   } catch (const std::exception& except) {
     console_->warn("Fetching file: {}; failed with: {}", filename,

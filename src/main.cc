@@ -53,6 +53,7 @@ int main(int argc, char** argv) {
 #ifdef USE_MPI
     MPI_Abort(MPI_COMM_WORLD, 1);
 #endif
+    std::terminate();
   }
 
 #ifdef USE_MPI

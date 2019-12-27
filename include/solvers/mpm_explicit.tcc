@@ -145,19 +145,31 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Initialise material
   bool mat_status = this->initialise_materials();
-  if (!mat_status) status = false;
+  if (!mat_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) status = false;
+  if (!mesh_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise particles
   bool particle_status = this->initialise_particles();
-  if (!particle_status) status = false;
+  if (!particle_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
-  if (!loading_status) status = false;
+  if (!loading_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Compute mass
   mesh_->iterate_over_particles(

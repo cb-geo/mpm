@@ -55,8 +55,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       if (!math_functions.empty())
         this->initialise_math_functions(math_functions);
     } catch (std::exception& exception) {
-      console_->warn("{} #{}: No math functions are defined; set to default",
-                     __FILE__, __LINE__, exception.what());
+      console_->warn("{} #{}: No math functions are defined", __FILE__,
+                     __LINE__, exception.what());
     }
 
     post_process_ = io_->post_processing();
@@ -147,8 +147,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                             mesh_io->read_mesh_nodes(mesh_file),  // coordinates
                             check_duplicates);                    // check dups
 
-    if (!node_status)
+    if (!node_status) {
+      status = false;
       throw std::runtime_error("Addition of nodes to mesh failed");
+    }
 
     auto nodes_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read nodes: {} ms", mpi_rank,
@@ -239,8 +241,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                             mesh_io->read_mesh_cells(mesh_file),  // Node ids
                             check_duplicates);                    // Check dups
 
-    if (!cell_status)
+    if (!cell_status) {
+      status = false;
       throw std::runtime_error("Addition of cells to mesh failed");
+    }
 
     // Compute cell neighbours
     mesh_->compute_cell_neighbours();
@@ -267,10 +271,11 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                        cells_end - cells_begin)
                        .count());
   } catch (std::exception& exception) {
-    console_->error("#{}: Reading mesh and particles: {}", __LINE__,
-                    exception.what());
-    status = false;
+    console_->error("#{}: Reading mesh: {}", __LINE__, exception.what());
   }
+
+  // Terminate if mesh creation failed
+  if (!status) throw std::runtime_error("Initialisation of mesh failed");
   return status;
 }
 
@@ -462,6 +467,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                     exception.what());
     status = false;
   }
+  if (!status) throw std::runtime_error("Initialisation of particles failed");
   return status;
 }
 
