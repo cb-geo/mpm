@@ -4,9 +4,11 @@
 
 #include "cell.h"
 #include "element.h"
+#include "function_base.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
-#include "material/material.h"
+#include "linear_function.h"
+#include "material.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
@@ -21,6 +23,17 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   const unsigned Nphases = 1;
   // Phase
   const unsigned phase = 0;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
   // Coordinates
   Eigen::Matrix<double, 1, 1> coords;
@@ -173,7 +186,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check traction
     for (unsigned i = 0; i < Dim; ++i)
       REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
-
+    // Try with a null math fuction ptr
     REQUIRE(particle->assign_traction(Direction, traction) == true);
 
     for (unsigned i = 0; i < Dim; ++i) {
@@ -390,6 +403,17 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   const unsigned phase = 0;
   // Tolerance
   const double Tolerance = 1.E-7;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
   // Coordinates
   Eigen::Vector2d coords;
   coords.setZero();
@@ -888,9 +912,11 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_volume(0.0) == false);
     REQUIRE(particle->assign_volume(-5.0) == false);
     REQUIRE(particle->assign_volume(2.0) == true);
-    // Assign traction to particle
-    particle->assign_traction(direction, traction);
     // Map traction force
+    double current_time = 5.0;
+    // Assign traction to particle
+    particle->assign_traction(direction,
+                              mfunction->value(current_time) * traction);
     particle->map_traction_force();
 
     // Traction force
@@ -911,7 +937,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(traction_force(i, j)).epsilon(Tolerance));
     // Reset traction
-    particle->assign_traction(direction, -traction);
+    particle->assign_traction(direction,
+                              -traction * mfunction->value(current_time));
     // Map traction force
     particle->map_traction_force();
     // Check nodal external force
@@ -1404,6 +1431,19 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   const unsigned phase = 0;
   // Tolerance
   const double Tolerance = 1.E-7;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
+  // Current time for traction force
+  double current_time = 10.0;
 
   // Coordinates
   Eigen::Vector3d coords;
@@ -1676,6 +1716,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
+    // Phase
+    const unsigned phase = 0;
     // Time-step
     const double dt = 0.1;
 
@@ -2011,7 +2053,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_volume(-5.0) == false);
     REQUIRE(particle->assign_volume(2.0) == true);
     // Assign traction to particle
-    particle->assign_traction(direction, traction);
+    particle->assign_traction(direction,
+                              mfunction->value(current_time) * traction);
     // Map traction force
     particle->map_traction_force();
 
@@ -2037,7 +2080,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(nodes[i]->external_force(phase)[j] ==
                 Approx(traction_force(i, j)).epsilon(Tolerance));
     // Reset traction
-    particle->assign_traction(direction, -traction);
+    particle->assign_traction(direction,
+                              mfunction->value(current_time) * -traction);
     // Map traction force
     particle->map_traction_force();
     // Check nodal external force

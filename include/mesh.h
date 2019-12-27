@@ -26,6 +26,7 @@ using Json = nlohmann::json;
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
 #include "io.h"
@@ -36,6 +37,7 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "particle_traction.h"
 #include "read_mesh.h"
 
 namespace mpm {
@@ -242,8 +244,7 @@ class Mesh {
           velocity_constraints);
 
   //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, and
-  //! friction
+  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
   bool assign_friction_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
           friction_constraints);
@@ -258,17 +259,27 @@ class Mesh {
   bool assign_particles_volumes(
       const std::vector<std::tuple<mpm::Index, double>>& particle_volumes);
 
-  //! Assign particles tractions
-  //! \param[in] particle_tractions Traction at dir on particle
-  bool assign_particles_tractions(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          particle_tractions);
+  //! Create particles tractions
+  //! \param[in] mfunction Math function if defined
+  //! \param[in] setid Particle set id
+  //! \param[in] dir Direction of traction load
+  //! \param[in] traction Particle traction
+  bool create_particles_tractions(
+      const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+      double traction);
 
-  //! Assign nodal traction force
-  //! \param[in] nodal_tractions Traction at dir on nodes
-  bool assign_nodal_tractions(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          nodal_tractions);
+  //! Apply traction to particles
+  //! \param[in] current_time Current time
+  void apply_traction_on_particles(double current_time);
+
+  //! Assign nodal concentrated force
+  //! \param[in] mfunction Math function if defined
+  //! \param[in] setid Node set id
+  //! \param[in] dir Direction of force
+  //! \param[in] node_forces Concentrated force at dir on nodes
+  bool assign_nodal_concentrated_forces(
+      const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+      double force);
 
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle
@@ -352,6 +363,14 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& particle_sets,
       bool check_duplicates);
 
+  //! Create map of container of nodes in sets
+  //! \param[in] map of nodes ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \retval status Status of  create node sets
+  bool create_node_sets(
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
+      bool check_duplicates);
+
   //! Return the number of level sets defined
   //! \retval number of level sets
   unsigned nlevelsets() const { return level_sets_.size(); }
@@ -424,6 +443,8 @@ class Mesh {
   std::multimap<std::vector<mpm::Index>, mpm::Index> faces_cells_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! Loading (Particle tractions)
+  std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   // Level sets

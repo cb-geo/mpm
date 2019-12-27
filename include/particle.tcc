@@ -640,10 +640,11 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
 //! Map traction force
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
-  if (this->set_traction_)
+  if (this->set_traction_) {
     // Map particle traction forces to nodes
     cell_->compute_nodal_traction_force(
         this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
+  }
 }
 
 // Compute updated position of the particle

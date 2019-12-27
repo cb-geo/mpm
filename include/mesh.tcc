@@ -886,36 +886,51 @@ bool mpm::Mesh<Tdim>::compute_nodal_rotation_matrices(
   return status;
 }
 
-//! Assign particle tractions
+//! Create particle tractions
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_particles_tractions(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        particle_tractions) {
+bool mpm::Mesh<Tdim>::create_particles_tractions(
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+    double traction) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
-    if (!particles_.size())
-      throw std::runtime_error(
-          "No particles have been assigned in mesh, cannot assign traction");
-    for (const auto& particle_traction : particle_tractions) {
-      // Particle id
-      mpm::Index pid = std::get<0>(particle_traction);
-      // Direction
-      unsigned dir = std::get<1>(particle_traction);
-      // Traction
-      double traction = std::get<2>(particle_traction);
+    if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end())
+      // Create a particle traction load
+      particle_tractions_.emplace_back(std::make_shared<mpm::ParticleTraction>(
+          set_id, mfunction, dir, traction));
+    else
+      throw std::runtime_error("No particle set found to assign traction");
 
-      if (map_particles_.find(pid) != map_particles_.end())
-        status = map_particles_[pid]->assign_traction(dir, traction);
-
-      if (!status) throw std::runtime_error("Traction is invalid for particle");
-    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+//! Apply particle tractions
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
+  // Iterate over all particle tractions
+  for (const auto& ptraction : particle_tractions_) {
+    int set_id = ptraction->setid();
+    // If set id is -1, use all particles
+    auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
+    unsigned dir = ptraction->dir();
+    double traction = ptraction->traction(current_time);
+    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
+                      [&](const tbb::blocked_range<int>& range) {
+                        for (int i = range.begin(); i != range.end(); ++i)
+                          pset[i]->assign_traction(dir, traction);
+                      });
+  }
+  if (!particle_tractions_.empty()) {
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size())),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            particles_[i]->map_traction_force();
+        });
+  }
 }
 
 //! Assign particles velocity constraints
@@ -954,29 +969,32 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
 
 //! Assign node tractions
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_tractions(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        node_tractions) {
+bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
+    double concentrated_force) {
   bool status = true;
   // TODO: Remove phase
   const unsigned phase = 0;
   try {
     if (!nodes_.size())
       throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign traction");
-    for (const auto& node_traction : node_tractions) {
-      // Node id
-      mpm::Index pid = std::get<0>(node_traction);
-      // Direction
-      unsigned dir = std::get<1>(node_traction);
-      // Traction
-      double traction = std::get<2>(node_traction);
+          "No nodes have been assigned in mesh, cannot assign concentrated "
+          "force");
 
-      if (map_nodes_.find(pid) != map_nodes_.end())
-        status = map_nodes_[pid]->assign_traction_force(phase, dir, traction);
+    // Set id of -1, is all nodes
+    Container<NodeBase<Tdim>> nodes =
+        (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-      if (!status) throw std::runtime_error("Traction is invalid for node");
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            if (!nodes[i]->assign_concentrated_force(
+                    phase, dir, concentrated_force, mfunction))
+              throw std::runtime_error("Setting concentrated force failed");
+          }
+        });
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1250,10 +1268,41 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
         bool insertion_status =
             particles.add(map_particles_[pid], check_duplicates);
       }
+
       // Create the map of the container
       status = this->particle_sets_
                    .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
                        sitr->first, particles))
+                   .second;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
+}
+
+//! Create map of container of nodes in sets
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_node_sets(
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
+    bool check_duplicates) {
+  bool status = false;
+  try {
+    // Create container for each node set
+    for (auto sitr = node_sets.begin(); sitr != node_sets.end(); ++sitr) {
+      // Create a container for the set
+      Container<NodeBase<Tdim>> nodes;
+      // Reserve the size of the container
+      nodes.reserve((sitr->second).size());
+      // Add nodes to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status = nodes.add(map_nodes_[pid], check_duplicates);
+      }
+
+      // Create the map of the container
+      status = this->node_sets_
+                   .insert(std::pair<mpm::Index, Container<NodeBase<Tdim>>>(
+                       sitr->first, nodes))
                    .second;
     }
   } catch (std::exception& exception) {

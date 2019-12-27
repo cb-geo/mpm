@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 
 #include "data_types.h"
+#include "function_base.h"
 
 namespace mpm {
 
@@ -79,13 +80,20 @@ class NodeBase {
   //! Return volume at a given node for a given phase
   virtual double volume(unsigned phase) const = 0;
 
-  //! Assign traction force to the node
-  //! \param[in] phase Index corresponding to the phase
+  //! Assign concentrated force to the node
   //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Nodal traction in specified direction
+  //! \param[in] traction Nodal concentrated force in specified direction
+  //! \param[in] function math function
   //! \retval status Assignment status
-  virtual bool assign_traction_force(unsigned phase, unsigned direction,
-                                     double traction) = 0;
+  virtual bool assign_concentrated_force(
+      unsigned phase, unsigned direction, double traction,
+      const std::shared_ptr<FunctionBase>& function) = 0;
+
+  //! Apply concentrated force to external force
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  virtual void apply_concentrated_force(unsigned phase,
+                                        double current_time) = 0;
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)

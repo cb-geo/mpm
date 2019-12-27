@@ -112,7 +112,11 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
   ${mpm_SOURCE_DIR}/include/elements/3d
+  ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
+  ${mpm_SOURCE_DIR}/include/loads/
+  ${mpm_SOURCE_DIR}/include/material/
+  ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -121,6 +125,9 @@ include_directories(BEFORE
 SET(mpm_src
   ${mpm_SOURCE_DIR}/src/affine_transform.cc
   ${mpm_SOURCE_DIR}/src/cell.cc
+  ${mpm_SOURCE_DIR}/src/element.cc
+  ${mpm_SOURCE_DIR}/src/functions/functions.cc
+  ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
   ${mpm_SOURCE_DIR}/src/io.cc
@@ -131,7 +138,6 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
   ${mpm_SOURCE_DIR}/src/read_mesh.cc
-  ${mpm_SOURCE_DIR}/src/element.cc
 )
 
 if(MPM_BUILD_LIB)
@@ -158,6 +164,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
+    ${mpm_SOURCE_DIR}/tests/functions_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io_test.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
@@ -177,6 +184,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc

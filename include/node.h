@@ -77,13 +77,20 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
-  //! Assign traction force to the node
+  //! Assign concentrated force to the node
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Nodal traction in specified direction
+  //! \param[in] traction Nodal concentrated force in specified direction
+  //! \param[in] function math function
   //! \retval status Assignment status
-  bool assign_traction_force(unsigned phase, unsigned direction,
-                             double traction) override;
+  bool assign_concentrated_force(
+      unsigned phase, unsigned direction, double traction,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Apply concentrated force to external force
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  void apply_concentrated_force(unsigned phase, double current_time) override;
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -264,6 +271,10 @@ class Node : public NodeBase<Tdim> {
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Concentrated force
+  Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
+  //! Mathematical function for force
+  std::shared_ptr<FunctionBase> force_function_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks

@@ -199,6 +199,7 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
+  //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
   //! Map traction force
@@ -300,7 +301,7 @@ class Particle : public ParticleBase<Tdim> {
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
   bool set_traction_{false};
-  //! Traction
+  //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;

@@ -25,15 +25,6 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
-    if (analysis_.at("gravity").is_array() &&
-        analysis_.at("gravity").size() == gravity_.size()) {
-      for (unsigned i = 0; i < gravity_.size(); ++i) {
-        gravity_[i] = analysis_.at("gravity").at(i);
-      }
-    } else {
-      throw std::runtime_error("Specified gravity dimension is invalid");
-    }
-
     // Stress update method (USF/USL/MUSL)
     try {
       if (analysis_.find("stress_update") != analysis_.end())
@@ -55,6 +46,17 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
           "as false",
           __FILE__, __LINE__, exception.what());
       velocity_update_ = false;
+    }
+
+    // Math functions
+    try {
+      // Get materials properties
+      auto math_functions = io_->json_object("math_functions");
+      if (!math_functions.empty())
+        this->initialise_math_functions(math_functions);
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: No math functions are defined; set to default",
+                     __FILE__, __LINE__, exception.what());
     }
 
     post_process_ = io_->post_processing();
@@ -149,6 +151,15 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                        nodes_end - nodes_begin)
                        .count());
 
+    // Read and assign node sets
+    if (!io_->file_name("entity_sets").empty()) {
+      bool node_sets = mesh_->create_node_sets(
+          (io_->entity_sets(io_->file_name("entity_sets"), "node_sets")),
+          check_duplicates);
+      if (!node_sets)
+        throw std::runtime_error("Node sets are not properly assigned");
+    }
+
     // Read nodal euler angles and assign rotation matrices
     if (!io_->file_name("nodal_euler_angles").empty()) {
       bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
@@ -178,9 +189,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Friction constraints are not properly assigned");
     }
 
-    // Set nodal traction as false if file is empty
-    if (io_->file_name("nodal_tractions").empty()) nodal_tractions_ = false;
-
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -206,7 +214,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        cells_end - cells_begin)
                        .count());
-
   } catch (std::exception& exception) {
     console_->error("#{}: Reading mesh and particles: {}", __LINE__,
                     exception.what());
@@ -299,7 +306,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
         mesh_->particles_cells());
 
-    auto particles_traction_begin = std::chrono::steady_clock::now();
+    auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
@@ -311,16 +318,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
               io_->file_name("particles_volumes")));
       if (!particles_volumes)
         throw std::runtime_error("Particles volumes are not properly assigned");
-    }
-
-    // Read and assign particles tractions
-    if (!io_->file_name("particles_tractions").empty()) {
-      bool particles_tractions = mesh_->assign_particles_tractions(
-          particle_reader->read_particles_tractions(
-              io_->file_name("particles_tractions")));
-      if (!particles_tractions)
-        throw std::runtime_error(
-            "Particles tractions are not properly assigned");
     }
 
     // Read and assign particles velocity constraints
@@ -348,11 +345,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
             "Particles stresses are not properly assigned");
     }
 
-    auto particles_traction_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read particle traction and stresses: {} ms",
+    auto particles_volume_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Read volume, velocity and stresses: {} ms",
                    mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                       particles_traction_end - particles_traction_begin)
+                       particles_volume_end - particles_volume_begin)
                        .count());
 
     // Read and assign particle sets
@@ -405,37 +402,6 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
-  }
-  return status;
-}
-
-//! Apply nodal tractions
-template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::apply_nodal_tractions() {
-  bool status = true;
-  try {
-    // Read and assign nodes tractions
-    if (!io_->file_name("nodal_tractions").empty()) {
-      // Get mesh properties
-      auto mesh_props = io_->json_object("mesh");
-      // Get Mesh reader from JSON object
-      const std::string reader =
-          mesh_props["mesh_reader"].template get<std::string>();
-      // Create a mesh reader
-      auto node_reader =
-          Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
-
-      bool nodal_tractions =
-          mesh_->assign_nodal_tractions(node_reader->read_particles_tractions(
-              io_->file_name("nodal_tractions")));
-      if (!nodal_tractions)
-        throw std::runtime_error("Nodal tractions are not properly assigned");
-    } else
-      nodal_tractions_ = false;
-  } catch (std::exception& exception) {
-    console_->error("#{}: Nodal traction: {}", __LINE__, exception.what());
-    status = false;
-    nodal_tractions_ = false;
   }
   return status;
 }
@@ -605,4 +571,122 @@ bool mpm::MPMBase<Tdim>::is_isoparametric() {
     isoparametric = true;
   }
   return isoparametric;
+}
+
+//! Initialise loads
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_loads() {
+  bool status = true;
+  try {
+    auto loads = io_->json_object("external_loading_conditions");
+    // Initialise gravity loading
+    if (loads.at("gravity").is_array() &&
+        loads.at("gravity").size() == gravity_.size()) {
+      for (unsigned i = 0; i < gravity_.size(); ++i) {
+        gravity_[i] = loads.at("gravity").at(i);
+      }
+    } else {
+      throw std::runtime_error("Specified gravity dimension is invalid");
+    }
+
+    // Create a file reader
+    const std::string reader =
+        io_->json_object("mesh")["mesh_reader"].template get<std::string>();
+    auto traction_reader =
+        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+
+    // Read and assign particles surface tractions
+    if (loads.find("particle_surface_traction") != loads.end()) {
+      for (const auto& ptraction : loads["particle_surface_traction"]) {
+        // Get the math function
+        std::shared_ptr<FunctionBase> tfunction = nullptr;
+        tfunction = math_functions_.at(
+            ptraction.at("math_function_id").template get<unsigned>());
+        // Set id
+        int pset_id = ptraction.at("pset_id").template get<int>();
+        // Direction
+        unsigned dir = ptraction.at("dir").template get<unsigned>();
+        // Traction
+        double traction = ptraction.at("traction").template get<double>();
+
+        // Create particle surface tractions
+        bool particles_tractions = mesh_->create_particles_tractions(
+            tfunction, pset_id, dir, traction);
+        if (!particles_tractions)
+          throw std::runtime_error(
+              "Particles tractions are not properly assigned");
+      }
+    } else
+      console_->warn(
+          "No particle surface traction is defined for the analysis");
+
+    // Read and assign nodal concentrated forces
+    if (loads.find("concentrated_nodal_forces") != loads.end()) {
+      for (const auto& nforce : loads["concentrated_nodal_forces"]) {
+        // Get the math function
+        std::shared_ptr<FunctionBase> ffunction = nullptr;
+        if (nforce.find("math_function_id") != nforce.end())
+          ffunction = math_functions_.at(
+              nforce.at("math_function_id").template get<unsigned>());
+        // Set id
+        int nset_id = nforce.at("nset_id").template get<int>();
+        // Direction
+        unsigned dir = nforce.at("dir").template get<unsigned>();
+        // Traction
+        double force = nforce.at("force").template get<double>();
+
+        // Read and assign nodal concentrated forces
+        bool nodal_force = mesh_->assign_nodal_concentrated_forces(
+            ffunction, nset_id, dir, force);
+        if (!nodal_force)
+          throw std::runtime_error(
+              "Concentrated nodal forces are not properly assigned");
+        set_node_concentrated_force_ = true;
+      }
+    } else
+      console_->warn("No concentrated nodal force is defined for the analysis");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Initialise math functions
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
+  bool status = true;
+  try {
+    // Get materials properties
+    for (const auto& function_props : math_functions) {
+
+      // Get math function id
+      auto function_id = function_props["id"].template get<unsigned>();
+
+      // Get function type
+      const std::string function_type =
+          function_props["type"].template get<std::string>();
+
+      // Create a new function from JSON object
+      auto function =
+          Factory<mpm::FunctionBase, unsigned, const Json&>::instance()->create(
+              function_type, std::move(function_id), function_props);
+
+      // Add material to list
+      auto insert_status =
+          math_functions_.insert(std::make_pair(function->id(), function));
+
+      // If insert material failed
+      if (!insert_status.second) {
+        status = false;
+        throw std::runtime_error(
+            "Invalid properties for new math function, fn insertion failed");
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("#{}: Reading math functions: {}", __LINE__,
+                    exception.what());
+    status = false;
+  }
+  return status;
 }

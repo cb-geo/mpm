@@ -113,7 +113,7 @@ template <unsigned Tdim>
 bool mpm::MPMExplicit<Tdim>::solve() {
   bool status = true;
 
-  console_->error("Analysis{} {}", io_->analysis_type());
+  console_->info("MPM analysis type {}", io_->analysis_type());
 
   // Initialise MPI rank and size
   int mpi_rank = 0;
@@ -154,6 +154,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Initialise particles
   bool particle_status = this->initialise_particles();
   if (!particle_status) status = false;
+
+  // Initialise loading conditions
+  bool loading_status = this->initialise_loads();
+  if (!loading_status) status = false;
 
   // Assign material to particles
   // Get particle properties
@@ -260,12 +264,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
                     std::placeholders::_1, this->gravity_));
 
-      // Iterate over each particle to map traction force to nodes
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
+      // Apply particle traction and map to nodes
+      mesh_->apply_traction_on_particles(this->step_ * this->dt_);
 
-      //! Apply nodal tractions
-      if (nodal_tractions_) this->apply_nodal_tractions();
+      // Iterate over each node to add concentrated node force to external force
+      if (set_node_concentrated_force_)
+        mesh_->iterate_over_nodes(
+            std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
+                      std::placeholders::_1, phase, (this->step_ * this->dt_)));
     });
 
     // Spawn a task for internal force
