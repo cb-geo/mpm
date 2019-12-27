@@ -53,7 +53,6 @@ class ParticleTraction {
   unsigned dir_;
   // Traction
   double traction_;
-  // Scalar
 };
 }  // namespace mpm
 #endif  // MPM_PARTICLE_TRACTION_H_
