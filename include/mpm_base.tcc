@@ -315,7 +315,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     for (const auto& json_particle : json_particles) {
       // Generate particles
-      mesh_->generate_particles(io_, json_particle["generator"]);
+      bool gen_status =
+          mesh_->generate_particles(io_, json_particle["generator"]);
+      if (!gen_status) status = false;
     }
 
     auto particles_gen_end = std::chrono::steady_clock::now();

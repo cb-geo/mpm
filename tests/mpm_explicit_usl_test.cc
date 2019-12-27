@@ -41,12 +41,12 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE(mpm->initialise_materials() == true);
+
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
     REQUIRE(mpm->initialise_particles() == true);
-
-    // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
 
     // Initialise external loading
     REQUIRE(mpm->initialise_loads() == true);
@@ -124,12 +124,12 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE(mpm->initialise_materials() == true);
+
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
     REQUIRE(mpm->initialise_particles() == true);
-
-    // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
 
     // Reinitialise mesh
     REQUIRE(mpm->initialise_mesh() == false);

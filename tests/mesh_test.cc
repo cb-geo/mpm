@@ -514,7 +514,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Generate material points in cell
     REQUIRE(mesh->nparticles() == 0);
 
-    mesh->generate_material_points(1, particle_type, mid, -1);
+    REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) == false);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -522,17 +522,20 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(2, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 4);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(3, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 9);
     }
 
@@ -562,7 +565,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
       REQUIRE(mesh->nparticles() == 0);
       // Generate
-      mesh->generate_particles(io, jgen);
+      REQUIRE(mesh->generate_particles(io, jgen) == true);
       // Number of particles
       REQUIRE(mesh->nparticles() == 4);
     }
@@ -1609,8 +1612,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise material models
     mesh->initialise_material_models(materials);
 
+    REQUIRE(mesh->nparticles() == 0);
     // Generate material points in cell
-    mesh->generate_material_points(1, particle_type, mid, -1);
+    REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) == false);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -1618,17 +1622,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(2, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 8);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type, mid, -1);
+      REQUIRE(mesh->generate_material_points(3, particle_type, mid, -1) ==
+              true);
       REQUIRE(mesh->nparticles() == 27);
     }
 
@@ -1658,7 +1665,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
       REQUIRE(mesh->nparticles() == 0);
       // Generate
-      mesh->generate_particles(io, jgen);
+      REQUIRE(mesh->generate_particles(io, jgen) == true);
       // Number of particles
       REQUIRE(mesh->nparticles() == 8);
     }

@@ -33,9 +33,6 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
 
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
-      {"input_files",
-       {{"velocity_constraints", "velocity-constraints-unitcell.txt"},
-        {"particle_stresses", "initial-stresses-" + dimension + ".txt"}}},
       {"mesh",
        {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
         {"io_type", io_type},

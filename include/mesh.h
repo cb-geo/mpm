@@ -310,7 +310,7 @@ class Mesh {
   //! \param[in] material_id ID of the material
   //! \param[in] cset_id Set ID of the cell [-1 for all cells]
   //! \retval point Material point coordinates
-  void generate_material_points(unsigned nquadratures,
+  bool generate_material_points(unsigned nquadratures,
                                 const std::string& particle_type,
                                 unsigned material_id, int cset_id);
 
@@ -400,12 +400,12 @@ class Mesh {
   //! Generate particles
   //! \param[in] io IO object handle
   //! \param[in] generator Point generator object
-  void generate_particles(const std::shared_ptr<mpm::IO>& io,
+  bool generate_particles(const std::shared_ptr<mpm::IO>& io,
                           const Json& generator);
 
  private:
   // Read particles from file
-  void read_particles_file(const std::shared_ptr<mpm::IO>& io,
+  bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
                            const Json& generator);
 
   // Locate a particle in mesh cells
