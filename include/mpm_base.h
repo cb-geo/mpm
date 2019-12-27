@@ -90,6 +90,53 @@ class MPMBase : public MPM {
   //! \retval isoparametric Status of mesh type
   bool is_isoparametric();
 
+  //! Node entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void node_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Node Euler angles
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void node_euler_angles(const Json& mesh_prop,
+                         const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Nodal velocity constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_velocity_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Nodal frictional constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_frictional_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Cell entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void cell_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Particles cells
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_cells(const Json& mesh_prop,
+                       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particles volumes
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_volumes(const Json& mesh_prop,
+                         const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particle velocity constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particle_velocity_constraints(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
