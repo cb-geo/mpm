@@ -12,7 +12,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   auto particle_type = "P2D";
   auto node_type = "N2D";
   auto cell_type = "ED2Q4";
-  auto mesh_reader = "Ascii2D";
+  auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
   std::vector<unsigned> material_id{{1}};
@@ -25,7 +25,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
     particle_type = "P3D";
     node_type = "N3D";
     cell_type = "ED3H8";
-    mesh_reader = "Ascii3D";
+    io_type = "Ascii3D";
     material = "LinearElastic3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
@@ -35,10 +35,9 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
       {"title", "Example JSON Input for MPM"},
       {"input_files",
        {{"mesh", "mesh-" + dimension + ".txt"},
-        {"velocity_constraints", "velocity-constraints.txt"},
-        {"particles", "particles-" + dimension + ".txt"}}},
+        {"velocity_constraints", "velocity-constraints.txt"}}},
       {"mesh",
-       {{"mesh_reader", mesh_reader},
+       {{"io_type", io_type},
         {"check_duplicates", true},
         {"isoparametric", false},
         {"node_type", node_type},
@@ -49,7 +48,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
          {"generator",
           {{"type", "file"},
            {"material_id", material_id},
-           {"particle_reader", mesh_reader},
+           {"io_type", io_type},
            {"particle_type", particle_type},
            {"check_duplicates", true},
            {"location", "particles-" + dimension + ".txt"}}}}}},

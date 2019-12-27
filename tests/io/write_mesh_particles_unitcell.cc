@@ -12,7 +12,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
   auto particle_type = "P2D";
   auto node_type = "N2D";
   auto cell_type = "ED2Q4";
-  auto mesh_reader = "Ascii2D";
+  auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<unsigned> material_id{{1}};
   std::vector<double> gravity{{0., -9.81}};
@@ -25,7 +25,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
     particle_type = "P3D";
     node_type = "N3D";
     cell_type = "ED3H8";
-    mesh_reader = "Ascii3D";
+    io_type = "Ascii3D";
     material = "LinearElastic3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
@@ -36,12 +36,9 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
       {"input_files",
        {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
         {"velocity_constraints", "velocity-constraints-unitcell.txt"},
-        {"particles", "particles-" + dimension + "-unitcell.txt"},
-        {"particle_stresses", "initial-stresses-" + dimension + ".txt"},
-        {"materials", "materials.txt"},
-        {"traction", "traction.txt"}}},
+        {"particle_stresses", "initial-stresses-" + dimension + ".txt"}}},
       {"mesh",
-       {{"mesh_reader", mesh_reader},
+       {{"io_type", io_type},
         {"isoparametric", false},
         {"node_type", node_type},
         {"cell_type", cell_type},
@@ -51,11 +48,11 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
        {{{"group_id", 0},
          {"generator",
           {{"type", "file"},
-           {"particle_reader", mesh_reader},
+           {"io_type", io_type},
            {"material_id", material_id},
            {"particle_type", particle_type},
            {"check_duplicates", true},
-           {"location", "particles-" + dimension + ".txt"}}}}}},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
       {"materials",
        {{{"id", 0},
          {"type", material},

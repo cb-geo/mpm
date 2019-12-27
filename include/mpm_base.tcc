@@ -114,8 +114,8 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
-    const std::string reader =
-        mesh_props["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        mesh_props["io_type"].template get<std::string>();
 
     bool check_duplicates = true;
     try {
@@ -128,7 +128,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     }
 
     // Create a mesh reader
-    auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+    auto mesh_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
     auto nodes_begin = std::chrono::steady_clock::now();
     // Global Index
@@ -137,10 +137,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     const auto node_type = mesh_props["node_type"].template get<std::string>();
     // Create nodes from file
     bool node_status = mesh_->create_nodes(
-        gid,                                                   // global id
-        node_type,                                             // node type
-        mesh_reader->read_mesh_nodes(io_->file_name("mesh")),  // coordinates
-        check_duplicates);  // check duplicates
+        gid,                                               // global id
+        node_type,                                         // node type
+        mesh_io->read_mesh_nodes(io_->file_name("mesh")),  // coordinates
+        check_duplicates);                                 // check duplicates
 
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
@@ -163,7 +163,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read nodal euler angles and assign rotation matrices
     if (!io_->file_name("nodal_euler_angles").empty()) {
       bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
-          mesh_reader->read_euler_angles(io_->file_name("nodal_euler_angles")));
+          mesh_io->read_euler_angles(io_->file_name("nodal_euler_angles")));
       if (!rotation_matrices)
         throw std::runtime_error(
             "Euler angles are not properly assigned/computed");
@@ -171,8 +171,8 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 
     // Read and assign velocity constraints
     if (!io_->file_name("velocity_constraints").empty()) {
-      bool velocity_constraints = mesh_->assign_velocity_constraints(
-          mesh_reader->read_velocity_constraints(
+      bool velocity_constraints =
+          mesh_->assign_velocity_constraints(mesh_io->read_velocity_constraints(
               io_->file_name("velocity_constraints")));
       if (!velocity_constraints)
         throw std::runtime_error(
@@ -181,8 +181,8 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 
     // Read and assign friction constraints
     if (!io_->file_name("friction_constraints").empty()) {
-      bool friction_constraints = mesh_->assign_friction_constraints(
-          mesh_reader->read_friction_constraints(
+      bool friction_constraints =
+          mesh_->assign_friction_constraints(mesh_io->read_friction_constraints(
               io_->file_name("friction_constraints")));
       if (!friction_constraints)
         throw std::runtime_error(
@@ -198,10 +198,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 
     // Create cells from file
     bool cell_status = mesh_->create_cells(
-        gid,                                                   // global id
-        element,                                               // element tyep
-        mesh_reader->read_mesh_cells(io_->file_name("mesh")),  // Node ids
-        check_duplicates);  // Check duplicates
+        gid,                                               // global id
+        element,                                           // element tyep
+        mesh_io->read_mesh_cells(io_->file_name("mesh")),  // Node ids
+        check_duplicates);                                 // Check duplicates
 
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
@@ -245,8 +245,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
-    const std::string reader =
-        mesh_props["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        mesh_props["io_type"].template get<std::string>();
 
     bool check_duplicates = true;
     try {
@@ -257,10 +257,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
           __FILE__, __LINE__, exception.what());
       check_duplicates = true;
     }
-
-    // Create a mesh reader
-    auto particle_reader =
-        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
     auto particles_gen_begin = std::chrono::steady_clock::now();
 
@@ -280,11 +276,13 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_locate_begin = std::chrono::steady_clock::now();
 
+    // Create a mesh reader
+    auto particle_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+
     // Read and assign particles cells
     if (!io_->file_name("particles_cells").empty()) {
-      bool particles_cells =
-          mesh_->assign_particles_cells(particle_reader->read_particles_cells(
-              io_->file_name("particles_cells")));
+      bool particles_cells = mesh_->assign_particles_cells(
+          particle_io->read_particles_cells(io_->file_name("particles_cells")));
       if (!particles_cells)
         throw std::runtime_error(
             "Cell ids are not properly assigned to particles");
@@ -297,7 +295,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       throw std::runtime_error("Particle outside the mesh domain");
 
     // Write particles and cells to file
-    particle_reader->write_particles_cells(
+    particle_io->write_particles_cells(
         io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
         mesh_->particles_cells());
 
@@ -314,8 +312,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     // Read and assign particles volumes
     if (!io_->file_name("particles_volumes").empty()) {
-      bool particles_volumes = mesh_->assign_particles_volumes(
-          particle_reader->read_particles_volumes(
+      bool particles_volumes =
+          mesh_->assign_particles_volumes(particle_io->read_particles_volumes(
               io_->file_name("particles_volumes")));
       if (!particles_volumes)
         throw std::runtime_error("Particles volumes are not properly assigned");
@@ -325,7 +323,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     if (!io_->file_name("particles_velocity_constraints").empty()) {
       bool particles_velocity_constraints =
           mesh_->assign_particles_velocity_constraints(
-              particle_reader->read_velocity_constraints(
+              particle_io->read_velocity_constraints(
                   io_->file_name("particles_velocity_constraints")));
       if (!particles_velocity_constraints)
         throw std::runtime_error(
@@ -336,9 +334,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     if (!io_->file_name("particles_stresses").empty()) {
 
       // Get stresses of all particles
-      const auto all_particles_stresses =
-          particle_reader->read_particles_stresses(
-              io_->file_name("particles_stresses"));
+      const auto all_particles_stresses = particle_io->read_particles_stresses(
+          io_->file_name("particles_stresses"));
 
       // Read and assign particles stresses
       if (!mesh_->assign_particles_stresses(all_particles_stresses))
@@ -598,10 +595,10 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     }
 
     // Create a file reader
-    const std::string reader =
-        io_->json_object("mesh")["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        io_->json_object("mesh")["io_type"].template get<std::string>();
     auto traction_reader =
-        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+        Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
     // Read and assign particles surface tractions
     if (loads.find("particle_surface_traction") != loads.end()) {

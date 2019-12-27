@@ -30,6 +30,7 @@ using Json = nlohmann::json;
 #include "geometry.h"
 #include "hdf5_particle.h"
 #include "io.h"
+#include "io_mesh.h"
 #include "levelset.h"
 #include "logger.h"
 #include "material/material.h"
@@ -38,7 +39,6 @@ using Json = nlohmann::json;
 #include "particle.h"
 #include "particle_base.h"
 #include "particle_traction.h"
-#include "read_mesh.h"
 
 namespace mpm {
 

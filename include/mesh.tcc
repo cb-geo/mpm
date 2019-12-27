@@ -1394,15 +1394,13 @@ void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   // Material id
   unsigned material_id = generator["material_id"].template get<unsigned>();
 
-  const std::string reader =
-      generator["particle_reader"].template get<std::string>();
+  const std::string reader = generator["io_type"].template get<std::string>();
 
   // Create a particle reader
-  auto particle_reader =
-      Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+  auto particle_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(reader);
 
   // Get coordinates
-  auto coords = particle_reader->read_particles(file_loc);
+  auto coords = particle_io->read_particles(file_loc);
 
   console_->error("Received particles: {} from dir {} file {}", coords.size(),
                   io->working_dir(), io->file_name(file_loc));

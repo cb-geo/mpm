@@ -5,12 +5,12 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::io_logger =
     spdlog::stdout_color_st("IO");
 
 // Create a logger for reading mesh
-const std::shared_ptr<spdlog::logger> mpm::Logger::read_mesh_logger =
-    spdlog::stdout_color_st("ReadMesh");
+const std::shared_ptr<spdlog::logger> mpm::Logger::io_mesh_logger =
+    spdlog::stdout_color_st("IOMesh");
 
 // Create a logger for reading ascii mesh
-const std::shared_ptr<spdlog::logger> mpm::Logger::read_mesh_ascii_logger =
-    spdlog::stdout_color_st("ReadMeshAscii");
+const std::shared_ptr<spdlog::logger> mpm::Logger::io_mesh_ascii_logger =
+    spdlog::stdout_color_st("IOMeshAscii");
 
 // Create a logger for point generator
 const std::shared_ptr<spdlog::logger> mpm::Logger::point_generator_logger =

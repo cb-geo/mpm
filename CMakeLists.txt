@@ -95,7 +95,7 @@ if (VTK_FOUND)
   include_directories(${VTK_INCLUDE_DIRS})
   link_libraries(${VTK_LIBRARIES})
   add_definitions("-DUSE_VTK")
-  set(mpm_vtk ${mpm_SOURCE_DIR}/src/vtk_writer.cc)
+  set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
 endif()
 
 # KaHIP
@@ -120,6 +120,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/elements/3d
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
+  ${mpm_SOURCE_DIR}/include/io/
   ${mpm_SOURCE_DIR}/include/loads/
   ${mpm_SOURCE_DIR}/include/material/
   ${mpm_SOURCE_DIR}/include/solvers/
@@ -136,14 +137,14 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
-  ${mpm_SOURCE_DIR}/src/io.cc
-  ${mpm_SOURCE_DIR}/src/logger.cc
+  ${mpm_SOURCE_DIR}/src/io/io.cc
+  ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
+  ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
-  ${mpm_SOURCE_DIR}/src/read_mesh.cc
 )
 
 if(MPM_BUILD_LIB)
@@ -172,7 +173,11 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/functions_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
-    ${mpm_SOURCE_DIR}/tests/io_test.cc
+    ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
+    ${mpm_SOURCE_DIR}/tests/io/io_test.cc
+    ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
+    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
+    ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
@@ -192,10 +197,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
-    ${mpm_SOURCE_DIR}/tests/read_mesh_ascii_test.cc
-    ${mpm_SOURCE_DIR}/tests/vtk_writer_test.cc
-    ${mpm_SOURCE_DIR}/tests/write_mesh_particles.cc
-    ${mpm_SOURCE_DIR}/tests/write_mesh_particles_unitcell.cc
   )
   if(MPM_BUILD_LIB)
     add_executable(mpmtest ${test_src})
