@@ -429,52 +429,6 @@ std::vector<std::tuple<mpm::Index, double>>
   return volumes;
 }
 
-//! Return particles traction
-template <unsigned Tdim>
-std::vector<std::tuple<mpm::Index, unsigned, double>>
-    mpm::ReadMeshAscii<Tdim>::read_particles_tractions(
-        const std::string& traction_file) {
-
-  // particle tractions
-  std::vector<std::tuple<mpm::Index, unsigned, double>> tractions;
-  tractions.clear();
-
-  // input file stream
-  std::fstream file;
-  file.open(traction_file.c_str(), std::ios::in);
-
-  try {
-    if (file.is_open() && file.good()) {
-      // Line
-      std::string line;
-      while (std::getline(file, line)) {
-        boost::algorithm::trim(line);
-        std::istringstream istream(line);
-        // ignore comment lines (# or !) or blank lines
-        if ((line.find('#') == std::string::npos) &&
-            (line.find('!') == std::string::npos) && (line != "")) {
-          while (istream.good()) {
-            // ID
-            mpm::Index id;
-            // Direction
-            unsigned dir;
-            // Traction
-            double traction;
-            // Read stream
-            istream >> id >> dir >> traction;
-            tractions.emplace_back(std::make_tuple(id, dir, traction));
-          }
-        }
-      }
-    }
-    file.close();
-  } catch (std::exception& exception) {
-    console_->error("Read traction : {}", exception.what());
-    file.close();
-  }
-  return tractions;
-}
-
 //! Return particles and their cells
 template <unsigned Tdim>
 std::vector<std::array<mpm::Index, 2>>

@@ -321,36 +321,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     }
 
     file.close();
-
-    // Check read tractions
-    SECTION("Check tractions") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
-
-      // Try to read constrtaints from a non-existant file
-      auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
-      // Check number of tractions
-      REQUIRE(tractions.size() == 0);
-
-      // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-2d.txt");
-      // Check number of particles
-      REQUIRE(tractions.size() == particles_tractions.size());
-
-      // Check tractions
-      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
-        REQUIRE(
-            std::get<0>(tractions.at(i)) ==
-            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(tractions.at(i)) ==
-            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(tractions.at(i)) ==
-            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
-      }
-    }
   }
 
   SECTION("Check stresses file") {
@@ -760,36 +730,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
     }
 
     file.close();
-
-    // Check read tractions
-    SECTION("Check tractions") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
-
-      // Try to read constraints from a non-existant file
-      auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
-      // Check number of tractions
-      REQUIRE(tractions.size() == 0);
-
-      // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-3d.txt");
-      // Check number of particles
-      REQUIRE(tractions.size() == particles_tractions.size());
-
-      // Check tractions
-      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
-        REQUIRE(
-            std::get<0>(tractions.at(i)) ==
-            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(tractions.at(i)) ==
-            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(tractions.at(i)) ==
-            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
-      }
-    }
   }
 
   SECTION("Check stresses file") {

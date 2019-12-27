@@ -50,8 +50,11 @@ class MPMBase : public MPM {
   //! Initialise materials
   bool initialise_materials() override;
 
-  //! Apply nodal tractions
-  bool apply_nodal_tractions() override;
+  //! Initialise loading
+  bool initialise_loads() override;
+
+  //! Initialise math functions
+  bool initialise_math_functions(const Json&) override;
 
   //! Apply properties to particles sets (e.g: material)
   bool apply_properties_to_particles_sets() override;
@@ -105,15 +108,18 @@ class MPMBase : public MPM {
   std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! Mathematical functions
+  std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
-  //! Bool nodal tractions
-  bool nodal_tractions_{true};
+  //! Set node concentrated force
+  bool set_node_concentrated_force_{false};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
   std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 #endif
+
 };  // MPMBase class
 }  // namespace mpm
 

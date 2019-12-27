@@ -200,3 +200,32 @@ tsl::robin_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
 
   return entity_sets;
 }
+
+//! Return analysis
+std::string mpm::IO::analysis_type() const {
+  return json_["analysis"]["type"].template get<std::string>();
+}
+
+//! Return json analysis object
+Json mpm::IO::analysis() const { return json_["analysis"]; }
+
+//! Return json object
+Json mpm::IO::json_object(const std::string& key) const {
+  Json empty;
+  if (json_.find(key) != json_.end()) {
+    return json_.at(key);
+  } else {
+    throw std::runtime_error("No object found, returning an empty object");
+    return empty;
+  }
+}
+
+//! Return post processing object
+Json mpm::IO::post_processing() const { return json_["post_processing"]; }
+
+//! Return working directory
+//! \retval string of working directory
+std::string mpm::IO::working_directory() const { return working_dir_; }
+
+//! Return number of tbb threads
+unsigned mpm::IO::nthreads() const { return nthreads_; }
