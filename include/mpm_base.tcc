@@ -135,12 +135,17 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     mpm::Index gid = 0;
     // Node type
     const auto node_type = mesh_props["node_type"].template get<std::string>();
+
+    // Mesh file
+    std::string mesh_file =
+        io_->working_dir() + mesh_props["mesh"].template get<std::string>();
+
     // Create nodes from file
-    bool node_status = mesh_->create_nodes(
-        gid,                                               // global id
-        node_type,                                         // node type
-        mesh_io->read_mesh_nodes(io_->file_name("mesh")),  // coordinates
-        check_duplicates);                                 // check duplicates
+    bool node_status =
+        mesh_->create_nodes(gid,                                  // global id
+                            node_type,                            // node type
+                            mesh_io->read_mesh_nodes(mesh_file),  // coordinates
+                            check_duplicates);                    // check dups
 
     if (!node_status)
       throw std::runtime_error("Addition of nodes to mesh failed");
@@ -197,11 +202,11 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
         Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
 
     // Create cells from file
-    bool cell_status = mesh_->create_cells(
-        gid,                                               // global id
-        element,                                           // element tyep
-        mesh_io->read_mesh_cells(io_->file_name("mesh")),  // Node ids
-        check_duplicates);                                 // Check duplicates
+    bool cell_status =
+        mesh_->create_cells(gid,      // global id
+                            element,  // element tyep
+                            mesh_io->read_mesh_cells(mesh_file),  // Node ids
+                            check_duplicates);                    // Check dups
 
     if (!cell_status)
       throw std::runtime_error("Addition of cells to mesh failed");
