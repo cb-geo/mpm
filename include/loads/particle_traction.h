@@ -37,7 +37,10 @@ class ParticleTraction {
 
   // Return traction
   double traction(double current_time) const {
-    return traction_ * (this->traction_fn_)->value(current_time);
+    double scalar = (this->traction_fn_ != nullptr)
+                        ? (this->traction_fn_)->value(current_time)
+                        : 1.0;
+    return traction_ * scalar;
   }
 
  private:
@@ -49,6 +52,7 @@ class ParticleTraction {
   unsigned dir_;
   // Traction
   double traction_;
+  // Scalar
 };
 }  // namespace mpm
 #endif  // MPM_PARTICLE_TRACTION_H_
