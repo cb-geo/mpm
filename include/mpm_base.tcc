@@ -646,7 +646,9 @@ template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::node_euler_angles(
     const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
   try {
-    if (mesh_props.find("nodal_euler_angles") != mesh_props.end()) {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("nodal_euler_angles") !=
+            mesh_props["boundary_conditions"].end()) {
       std::string euler_angles =
           mesh_props["boundary_conditions"]["nodal_euler_angles"]
               .template get<std::string>();
@@ -671,7 +673,9 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
     const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
   try {
     // Read and assign velocity constraints
-    if (mesh_props.find("velocity_constraints") != mesh_props.end()) {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("velocity_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
       std::string vel_constraints =
           mesh_props["boundary_conditions"]["velocity_constraints"]
               .template get<std::string>();
@@ -698,7 +702,9 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
     const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
   try {
     // Read and assign friction constraints
-    if (mesh_props.find("friction_constraints") != mesh_props.end()) {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("friction_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
       std::string fric_constraints =
           mesh_props["boundary_conditions"]["friction_constraints"]
               .template get<std::string>();
@@ -802,7 +808,10 @@ void mpm::MPMBase<Tdim>::particle_velocity_constraints(
     const Json& mesh_props,
     const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
   try {
-    if (mesh_props.find("particles_velocity_constraints") != mesh_props.end()) {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find(
+            "particles_velocity_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
       std::string fparticles_velocity_constraints =
           mesh_props["boundary_conditions"]["particles_velocity_constraints"]
               .template get<std::string>();
