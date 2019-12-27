@@ -289,6 +289,7 @@ void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force(unsigned mixture) {
                                         this->mixture_traction_);
 }
 
+// TODO
 //! Map liquid phase internal force
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
@@ -300,9 +301,9 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
     pressure(0) = pressure(1) = pressure(2) = this->pore_pressure_;
     // Compute nodal liquid phase  internal forces
     // porosity * pressure * volume
-    cell_->compute_nodal_internal_force(
-        this->bmatrix_, mpm::ParticlePhase::Liquid, this->volume_,
-        porosity_ * this->stress_);
+    //cell_->compute_nodal_internal_force(
+      //  this->bmatrix_, mpm::ParticlePhase::Liquid, this->volume_,
+        //porosity_ * this->stress_);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -310,6 +311,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_liquid_internal_force() {
   return status;
 }
 
+// TODO
 //! Map mixture internal force
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(unsigned mixture) {
@@ -322,8 +324,8 @@ bool mpm::TwoPhaseParticle<Tdim>::map_mixture_internal_force(unsigned mixture) {
     total_stress(2) -= this->pore_pressure_;
     // Compute nodal mixture  internal forces
     // -1 * total stress * volume
-    cell_->compute_nodal_internal_force(this->bmatrix_, mixture, this->volume_,
-                                        -1. * total_stress);
+   // cell_->compute_nodal_internal_force(this->bmatrix_, mixture, this->volume_,
+     //                                   -1. * total_stress);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

@@ -320,6 +320,8 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
                   this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
+    // TODO
+    /*
     // Use nodal velocity to update particle velocity
     if (velocity_update_) {
       // Soil skeleton
@@ -342,6 +344,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::compute_updated_liquid_kinematics,
                     std::placeholders::_1, this->dt_));
     }
+    */
 
     // Update Stress Last
     if (this->stress_update_ == mpm::StressUpdate::USL) {

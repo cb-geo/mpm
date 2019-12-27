@@ -392,7 +392,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error(
             "Particles pore pressures are not properly assigned");
     }
-
+    // TODO
+    /*
     // Read and assign particles mixture tractions for two/three phase
     if (!io_->file_name("particles_mixture_tractions").empty()) {
       bool particles_mtractions = mesh_->assign_particles_mixture_tractions(
@@ -411,6 +412,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         throw std::runtime_error(
             "Particles liquid phase tractions are not properly assigned");
     }
+    */
 
     // Read and assign particles velocity constraints
     if (!io_->file_name("particles_velocity_constraints").empty()) {

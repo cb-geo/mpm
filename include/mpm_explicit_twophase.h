@@ -50,8 +50,6 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::materials_;
   //! VTK attributes
   using mpm::MPMBase<Tdim>::vtk_attributes_;
-  //! Bool nodal tractions
-  using mpm::MPMBase<Tdim>::nodal_tractions_;
 
  private:
   //! Pressure smoothing

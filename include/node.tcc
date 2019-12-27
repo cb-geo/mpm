@@ -618,6 +618,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   std::lock_guard<std::mutex> guard(node_mutex_);
   auto status = this->mpi_ranks_.insert(rank);
   return status.second;
+}
 
 // TODO
 //! Assign pore pressure constraint
