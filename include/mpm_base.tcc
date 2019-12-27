@@ -240,8 +240,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-    // Get particle properties
-    auto particle_props = io_->json_object("particle");
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
@@ -407,39 +405,6 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
-  }
-  return status;
-}
-
-//! Apply properties to particles sets (e.g: material)
-template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
-  bool status = false;
-  // Set phase to zero
-  unsigned phase = 0;
-  // Assign material to particle sets
-  try {
-    // Get particle properties
-    auto particle_props = io_->json_object("particle");
-    // Get particle sets properties
-    auto particle_sets = particle_props["particle_sets"];
-    // Assign material to each particle sets
-    for (const auto& psets : particle_sets) {
-      // Get set material from list of materials
-      auto set_material = materials_.at(psets["material_id"]);
-      // Get sets ids
-      std::vector<unsigned> sids = psets["set_id"];
-      // Assign material to particles in the specific sets
-      for (const auto& sitr : sids) {
-        mesh_->iterate_over_particle_set(
-            sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
-      }
-    }
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("#{}: Particle sets material: {}", __LINE__,
-                    exception.what());
   }
   return status;
 }

@@ -1402,9 +1402,6 @@ void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   // Get coordinates
   auto coords = particle_io->read_particles(file_loc);
 
-  console_->error("Received particles: {} from dir {} file {}", coords.size(),
-                  io->working_dir(), io->file_name(file_loc));
-
   // Create particles from coordinates
   bool particle_status = this->create_particles(particle_type, coords,
                                                 material_id, check_duplicates);

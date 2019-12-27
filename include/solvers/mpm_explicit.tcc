@@ -159,27 +159,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   bool loading_status = this->initialise_loads();
   if (!loading_status) status = false;
 
-  // Assign material to particles
-  // Get particle properties
-  auto particle_props = io_->json_object("particle");
-  // Material id
-  const auto material_id =
-      particle_props.at("material_id").template get<unsigned>();
-
-  // Get material from list of materials
-  auto material = materials_.at(material_id);
-
-  // Iterate over each particle to assign material
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, material));
-
-  // Assign material to particle sets
-  if (particle_props["particle_sets"].size() != 0) {
-    // Assign material to particles in the specific sets
-    bool set_material_status = this->apply_properties_to_particles_sets();
-  }
-
   // Compute mass
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));

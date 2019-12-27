@@ -71,9 +71,6 @@ class MPMBase : public MPM {
   //! Initialise math functions
   bool initialise_math_functions(const Json&) override;
 
-  //! Apply properties to particles sets (e.g: material)
-  bool apply_properties_to_particles_sets() override;
-
   //! Solve
   bool solve() override { return true; }
 
