@@ -31,7 +31,6 @@ using Json = nlohmann::json;
 #include "hdf5_particle.h"
 #include "io.h"
 #include "io_mesh.h"
-#include "levelset.h"
 #include "logger.h"
 #include "material/material.h"
 #include "mpi_datatypes.h"
@@ -381,10 +380,6 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& cell_sets,
       bool check_duplicates);
 
-  //! Return the number of level sets defined
-  //! \retval number of level sets
-  unsigned nlevelsets() const { return level_sets_.size(); }
-
   //! Get the container of cell
   mpm::Container<Cell<Tdim>> cells();
 
@@ -459,10 +454,6 @@ class Mesh {
   std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  // Level sets
-  std::unordered_map<unsigned, std::shared_ptr<LevelSet<Tdim>>> level_sets_;
-  //! TBB grain size
-  int tbb_grain_size_{100};
 };  // Mesh class
 }  // namespace mpm
 
