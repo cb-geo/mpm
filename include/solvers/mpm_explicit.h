@@ -17,7 +17,7 @@ template <unsigned Tdim>
 class MPMExplicit : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  MPMExplicit(std::unique_ptr<IO>&& io);
+  MPMExplicit(const std::shared_ptr<IO>& io);
 
   //! Domain decomposition
   void mpi_domain_decompose();

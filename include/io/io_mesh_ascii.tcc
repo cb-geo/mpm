@@ -1,7 +1,7 @@
 //! Return coordinates of nodes in a mesh from input file
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
-    mpm::ReadMeshAscii<Tdim>::read_mesh_nodes(const std::string& mesh) {
+    mpm::IOMeshAscii<Tdim>::read_mesh_nodes(const std::string& mesh) {
   // Nodal coordinates
   std::vector<VectorDim> coordinates;
   coordinates.clear();
@@ -66,7 +66,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
 
 //! Return indices of nodes of cells in a mesh from input file
 template <unsigned Tdim>
-std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
+std::vector<std::vector<mpm::Index>> mpm::IOMeshAscii<Tdim>::read_mesh_cells(
     const std::string& mesh) {
   // Indices of nodes
   std::vector<std::vector<mpm::Index>> cells;
@@ -137,8 +137,7 @@ std::vector<std::vector<mpm::Index>> mpm::ReadMeshAscii<Tdim>::read_mesh_cells(
 //! Return coordinates of particles
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>>
-    mpm::ReadMeshAscii<Tdim>::read_particles(
-        const std::string& particles_file) {
+    mpm::IOMeshAscii<Tdim>::read_particles(const std::string& particles_file) {
 
   // Nodal coordinates
   std::vector<VectorDim> coordinates;
@@ -194,7 +193,7 @@ std::vector<Eigen::Matrix<double, Tdim, 1>>
 //! Return stresses of particles
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 6, 1>>
-    mpm::ReadMeshAscii<Tdim>::read_particles_stresses(
+    mpm::IOMeshAscii<Tdim>::read_particles_stresses(
         const std::string& particles_stresses) {
 
   // Nodal stresses
@@ -250,7 +249,7 @@ std::vector<Eigen::Matrix<double, 6, 1>>
 //! Return velocity constraints of nodes or particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>
-    mpm::ReadMeshAscii<Tdim>::read_velocity_constraints(
+    mpm::IOMeshAscii<Tdim>::read_velocity_constraints(
         const std::string& velocity_constraints_file) {
 
   // Nodal or particle velocity constraints
@@ -296,7 +295,7 @@ std::vector<std::tuple<mpm::Index, unsigned, double>>
 //! Return friction constraints of particles
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, int, double>>
-    mpm::ReadMeshAscii<Tdim>::read_friction_constraints(
+    mpm::IOMeshAscii<Tdim>::read_friction_constraints(
         const std::string& friction_constraints_file) {
 
   // Nodal friction constraints
@@ -344,7 +343,7 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
 //! Return euler angles of nodes
 template <unsigned Tdim>
 std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
-    mpm::ReadMeshAscii<Tdim>::read_euler_angles(
+    mpm::IOMeshAscii<Tdim>::read_euler_angles(
         const std::string& nodal_euler_angles_file) {
 
   // Nodal euler angles
@@ -388,7 +387,7 @@ std::map<mpm::Index, Eigen::Matrix<double, Tdim, 1>>
 //! Return particles volume
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, double>>
-    mpm::ReadMeshAscii<Tdim>::read_particles_volumes(
+    mpm::IOMeshAscii<Tdim>::read_particles_volumes(
         const std::string& volume_file) {
 
   // particle volumes
@@ -432,7 +431,7 @@ std::vector<std::tuple<mpm::Index, double>>
 //! Return particles and their cells
 template <unsigned Tdim>
 std::vector<std::array<mpm::Index, 2>>
-    mpm::ReadMeshAscii<Tdim>::read_particles_cells(
+    mpm::IOMeshAscii<Tdim>::read_particles_cells(
         const std::string& particles_cells_file) {
 
   // Particle cells
@@ -473,7 +472,7 @@ std::vector<std::array<mpm::Index, 2>>
 
 //! Write particles and their cells
 template <unsigned Tdim>
-void mpm::ReadMeshAscii<Tdim>::write_particles_cells(
+void mpm::IOMeshAscii<Tdim>::write_particles_cells(
     const std::string& particles_cells_file,
     const std::vector<std::array<mpm::Index, 2>>& particles_cells) {
 

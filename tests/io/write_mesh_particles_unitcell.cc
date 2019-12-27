@@ -1,19 +1,20 @@
-#include "write_mesh_particles.h"
+#include "write_mesh_particles_unitcell.h"
 
 namespace mpm_test {
 
 // Write JSON Configuration file
-bool write_json(unsigned dim, bool resume, const std::string& analysis,
-                const std::string& stress_update,
-                const std::string& file_name) {
+bool write_json_unitcell(unsigned dim, const std::string& analysis,
+                         const std::string& stress_update,
+                         const std::string& file_name) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
   auto particle_type = "P2D";
   auto node_type = "N2D";
   auto cell_type = "ED2Q4";
-  auto mesh_reader = "Ascii2D";
+  auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
+  unsigned material_id = 1;
   std::vector<double> gravity{{0., -9.81}};
   std::vector<double> xvalues{{0.0, 0.5, 1.0}};
   std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
@@ -24,7 +25,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
     particle_type = "P3D";
     node_type = "N3D";
     cell_type = "ED3H8";
-    mesh_reader = "Ascii3D";
+    io_type = "Ascii3D";
     material = "LinearElastic3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
@@ -32,17 +33,23 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
 
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
-      {"input_files",
-       {{"mesh", "mesh-" + dimension + ".txt"},
-        {"velocity_constraints", "velocity-constraints.txt"},
-        {"particles", "particles-" + dimension + ".txt"}}},
       {"mesh",
-       {{"mesh_reader", mesh_reader},
-        {"check_duplicates", true},
+       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
+        {"io_type", io_type},
         {"isoparametric", false},
         {"node_type", node_type},
+        {"boundary_conditions",
+         {{"velocity_constraints", "velocity-constraints.txt"}}},
         {"cell_type", cell_type}}},
-      {"particle", {{"material_id", 1}, {"particle_type", particle_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"io_type", io_type},
+           {"material_id", material_id},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
       {"materials",
        {{{"id", 0},
          {"type", material},
@@ -71,27 +78,24 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
          {"type", "Linear"},
          {"xvalues", xvalues},
          {"fxvalues", fxvalues}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
         {"stress_update", stress_update},
         {"dt", 0.001},
-        {"uuid", file_name + "-" + dimension},
         {"nsteps", 10},
         {"boundary_friction", 0.5},
-        {"resume",
-         {{"resume", resume},
-          {"uuid", file_name + "-" + dimension},
-          {"step", 5}}},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
-      {"post_processing",
-       {{"path", "results/"},
-        {"vtk", {{"stresses", "strains", "velocity"}}},
-        {"output_steps", 5}}}};
+      {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};
 
   // Dump JSON as an input file to be read
   std::ofstream file;
-  file.open((file_name + "-" + dimension + ".json").c_str());
+  file.open((file_name + "-" + dimension + "-unitcell.json").c_str());
   file << json_file.dump(2);
   file.close();
 
@@ -99,7 +103,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
 }
 
 // Write Mesh file in 2D
-bool write_mesh_2d() {
+bool write_mesh_2d_unitcell() {
   // Dimension
   const unsigned dim = 2;
 
@@ -114,21 +118,21 @@ bool write_mesh_2d() {
   node << 0., 0.;
   coordinates.emplace_back(node);
   // Node 1
-  node << 0.5, 0.;
+  node << 1.0, 0.;
   coordinates.emplace_back(node);
   // Node 2
-  node << 0.5, 0.5;
+  node << 1.0, 1.0;
   coordinates.emplace_back(node);
   // Node 3
-  node << 0., 0.5;
+  node << 0., 1.0;
   coordinates.emplace_back(node);
 
   // Cell 1
   // Node 4
-  node << 1.0, 0.;
+  node << 2.0, 0.;
   coordinates.emplace_back(node);
   // Node 5
-  node << 1.0, 0.5;
+  node << 2.0, 1.0;
   coordinates.emplace_back(node);
 
   // Cell with node ids
@@ -139,7 +143,7 @@ bool write_mesh_2d() {
 
   // Dump mesh file as an input file to be read
   std::ofstream file;
-  file.open("mesh-2d.txt");
+  file.open("mesh-2d-unitcell.txt");
   file << "! elementShape hexahedron\n";
   file << "! elementNumPoints 8\n";
   file << coordinates.size() << "\t" << cells.size() << "\n";
@@ -155,11 +159,12 @@ bool write_mesh_2d() {
     for (auto nid : cell) file << nid << "\t";
     file << "\n";
   }
+
   file.close();
 
   // Dump mesh velocity constraints
   std::ofstream file_constraints;
-  file_constraints.open("velocity-constraints.txt");
+  file_constraints.open("velocity-constraints-unitcell.txt");
   file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
   file_constraints.close();
 
@@ -167,7 +172,7 @@ bool write_mesh_2d() {
 }
 
 // Write particles file in 2D
-bool write_particles_2d() {
+bool write_particles_2d_unitcell() {
   const unsigned dim = 2;
   // Vector of particle coordinates
   std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
@@ -178,35 +183,21 @@ bool write_particles_2d() {
 
   // Cell 0
   // Particle 0
-  particle << 0.125, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 1
-  particle << 0.25, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 2
   particle << 0.25, 0.25;
   coordinates.emplace_back(particle);
+  // Particle 1
+  particle << 0.75, 0.25;
+  coordinates.emplace_back(particle);
+  // Particle 2
+  particle << 0.75, 0.75;
+  coordinates.emplace_back(particle);
   // Particle 3
-  particle << 0.125, 0.25;
-  coordinates.emplace_back(particle);
-
-  // Cell 1
-  // Particle 4
-  particle << 0.675, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 5
-  particle << 0.85, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 6
-  particle << 0.85, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 7
-  particle << 0.675, 0.25;
+  particle << 0.25, 0.75;
   coordinates.emplace_back(particle);
 
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
-  file.open("particles-2d.txt");
+  file.open("particles-2d-unitcell.txt");
   file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
@@ -217,11 +208,30 @@ bool write_particles_2d() {
   }
 
   file.close();
+
+  // Vector of particle stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+  // Stresses
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(1.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(2.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(3.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(4.4));
+
+  // Dump initial stresses as an input file to be read
+  file.open("initial-stresses-2d.txt");
+  file << particles_stresses.size() << "\n";
+  // Write particle coordinates
+  for (const auto& stress : particles_stresses) {
+    for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+    file << "\n";
+  }
+  file.close();
+
   return true;
 }
 
 // Write mesh file in 3D
-bool write_mesh_3d() {
+bool write_mesh_3d_unitcell() {
 
   // Dimension
   const unsigned dim = 3;
@@ -239,39 +249,39 @@ bool write_mesh_3d() {
   node << 0., 0., 0.;
   coordinates.emplace_back(node);
   // Node 1
-  node << 0.5, 0., 0.;
+  node << 1.0, 0., 0.;
   coordinates.emplace_back(node);
   // Node 2
-  node << 0.5, 0.5, 0.;
+  node << 1.0, 1.0, 0.;
   coordinates.emplace_back(node);
   // Node 3
-  node << 0., 0.5, 0.;
+  node << 0., 1.0, 0.;
   coordinates.emplace_back(node);
   // Node 4
-  node << 0., 0., 0.5;
+  node << 0., 0., 1.0;
   coordinates.emplace_back(node);
   // Node 5
-  node << 0.5, 0., 0.5;
+  node << 1.0, 0., 1.0;
   coordinates.emplace_back(node);
   // Node 6
-  node << 0.5, 0.5, 0.5;
+  node << 1.0, 1.0, 1.0;
   coordinates.emplace_back(node);
   // Node 7
-  node << 0., 0.5, 0.5;
+  node << 0., 1.0, 1.0;
   coordinates.emplace_back(node);
 
   // Cell 1
   // Node 8
-  node << 1.0, 0., 0.;
+  node << 2.0, 0., 0.;
   coordinates.emplace_back(node);
   // Node 9
-  node << 1.0, 0.5, 0.;
+  node << 2.0, 1.0, 0.;
   coordinates.emplace_back(node);
   // Node 10
-  node << 1.0, 0., 0.5;
+  node << 2.0, 0., 1.0;
   coordinates.emplace_back(node);
   // Node 11
-  node << 1.0, 0.5, 0.5;
+  node << 2.0, 1.0, 1.0;
   coordinates.emplace_back(node);
 
   // Cell with node ids
@@ -282,7 +292,7 @@ bool write_mesh_3d() {
 
   // Dump mesh file as an input file to be read
   std::ofstream file;
-  file.open("mesh-3d.txt");
+  file.open("mesh-3d-unitcell.txt");
   file << "! elementShape hexahedron\n";
   file << "! elementNumPoints 8\n";
   file << coordinates.size() << "\t" << cells.size() << "\n";
@@ -303,7 +313,7 @@ bool write_mesh_3d() {
 
   // Dump mesh velocity constraints
   std::ofstream file_constraints;
-  file_constraints.open("velocity-constraints.txt");
+  file_constraints.open("velocity-constraints-unitcell.txt");
   file_constraints << 0 << "\t" << 0 << "\t" << 0 << "\n";
   file_constraints.close();
 
@@ -311,7 +321,7 @@ bool write_mesh_3d() {
 }
 
 // Write particles file in 3D
-bool write_particles_3d() {
+bool write_particles_3d_unitcell() {
   const unsigned dim = 3;
   // Vector of particle coordinates
   std::vector<Eigen::Matrix<double, dim, 1>> coordinates;
@@ -321,59 +331,33 @@ bool write_particles_3d() {
 
   // Cell 0
   // Particle 0
-  particle << 0.125, 0.125, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 1
-  particle << 0.25, 0.125, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 2
-  particle << 0.25, 0.25, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 3
-  particle << 0.125, 0.25, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 4
-  particle << 0.125, 0.125, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 5
-  particle << 0.25, 0.125, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 6
   particle << 0.25, 0.25, 0.25;
   coordinates.emplace_back(particle);
+  // Particle 1
+  particle << 0.75, 0.25, 0.25;
+  coordinates.emplace_back(particle);
+  // Particle 2
+  particle << 0.25, 0.75, 0.25;
+  coordinates.emplace_back(particle);
+  // Particle 3
+  particle << 0.75, 0.75, 0.25;
+  coordinates.emplace_back(particle);
+  // Particle 4
+  particle << 0.25, 0.25, 0.75;
+  coordinates.emplace_back(particle);
+  // Particle 5
+  particle << 0.25, 0.25, 0.75;
+  coordinates.emplace_back(particle);
+  // Particle 6
+  particle << 0.75, 0.75, 0.75;
+  coordinates.emplace_back(particle);
   // Particle 7
-  particle << 0.125, 0.25, 0.25;
-  coordinates.emplace_back(particle);
-
-  // Cell 1
-  // Particle 8
-  particle << 0.675, 0.125, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 9
-  particle << 0.85, 0.125, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 10
-  particle << 0.85, 0.25, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 11
-  particle << 0.675, 0.25, 0.125;
-  coordinates.emplace_back(particle);
-  // Particle 12
-  particle << 0.675, 0.125, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 13
-  particle << 0.85, 0.125, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 14
-  particle << 0.85, 0.25, 0.25;
-  coordinates.emplace_back(particle);
-  // Particle 15
-  particle << 0.675, 0.25, 0.25;
+  particle << 0.75, 0.75, 0.75;
   coordinates.emplace_back(particle);
 
   // Dump particles coordinates as an input file to be read
   std::ofstream file;
-  file.open("particles-3d.txt");
+  file.open("particles-3d-unitcell.txt");
   file << coordinates.size() << "\n";
   // Write particle coordinates
   for (const auto& coord : coordinates) {
@@ -382,8 +366,30 @@ bool write_particles_3d() {
     }
     file << "\n";
   }
-
   file.close();
+
+  // Vector of particle stresses
+  std::vector<Eigen::Matrix<double, 6, 1>> particles_stresses;
+  // Stresses
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(1.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(2.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(3.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(4.4));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(5.1));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(6.2));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(7.3));
+  particles_stresses.emplace_back(Eigen::Matrix<double, 6, 1>::Constant(8.4));
+
+  // Dump initial stresses as an input file to be read
+  file.open("initial-stresses-3d.txt");
+  file << particles_stresses.size() << "\n";
+  // Write particle coordinates
+  for (const auto& stress : particles_stresses) {
+    for (unsigned i = 0; i < stress.size(); ++i) file << stress[i] << "\t";
+    file << "\n";
+  }
+  file.close();
+
   return true;
 }
 

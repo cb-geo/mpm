@@ -1,7 +1,7 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMExplicit<Tdim>::MPMExplicit(std::unique_ptr<IO>&& io)
-    : mpm::MPMBase<Tdim>(std::move(io)) {
+mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
+    : mpm::MPMBase<Tdim>(io) {
   //! Logger
   console_ = spdlog::get("MPMExplicit");
 }
@@ -145,39 +145,30 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Initialise material
   bool mat_status = this->initialise_materials();
-  if (!mat_status) status = false;
+  if (!mat_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) status = false;
+  if (!mesh_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise particles
   bool particle_status = this->initialise_particles();
-  if (!particle_status) status = false;
+  if (!particle_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
-  if (!loading_status) status = false;
-
-  // Assign material to particles
-  // Get particle properties
-  auto particle_props = io_->json_object("particle");
-  // Material id
-  const auto material_id =
-      particle_props.at("material_id").template get<unsigned>();
-
-  // Get material from list of materials
-  auto material = materials_.at(material_id);
-
-  // Iterate over each particle to assign material
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, material));
-
-  // Assign material to particle sets
-  if (particle_props["particle_sets"].size() != 0) {
-    // Assign material to particles in the specific sets
-    bool set_material_status = this->apply_properties_to_particles_sets();
+  if (!loading_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
   }
 
   // Compute mass
