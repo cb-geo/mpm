@@ -329,26 +329,39 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 
 //! Create cells from node lists
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::generate_material_points(
-    unsigned nquadratures, const std::string& particle_type) {
+void mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
+                                               const std::string& particle_type,
+                                               unsigned material_id) {
   try {
     if (cells_.size() > 0) {
       unsigned before_generation = this->nparticles();
       bool checks = false;
-      // Generate points
+      // Get material
+      auto material = materials_.at(material_id);
+
+      // Iterate over each cell to generate points
       for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
         (*citr)->assign_quadrature(nquadratures);
-        const std::vector<Eigen::Matrix<double, Tdim, 1>> cpoints =
-            (*citr)->generate_points();
+        // Genereate particles at the Gauss points
+        const auto cpoints = (*citr)->generate_points();
+        // Iterate over each coordinate to generate material points
         for (const auto& coordinates : cpoints) {
+          // Particle id
           mpm::Index pid = particles_.size();
-          bool status = this->add_particle(
+          // Create particle
+          auto particle =
               Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                       const Eigen::Matrix<double, Tdim, 1>&>::instance()
                   ->create(particle_type, static_cast<mpm::Index>(pid),
-                           coordinates),
-              checks);
-          if (status) map_particles_[pid]->assign_cell(*citr);
+                           coordinates);
+
+          // Add particle to mesh
+          bool status = this->add_particle(particle, checks);
+          if (status) {
+            map_particles_[pid]->assign_cell(*citr);
+            map_particles_[pid]->assign_material(material);
+          } else
+            throw std::runtime_error("Generate particles in mesh failed");
         }
       }
       if (before_generation == this->nparticles())
@@ -368,27 +381,31 @@ void mpm::Mesh<Tdim>::generate_material_points(
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
-    const std::vector<mpm::Index>& gp_ids, const std::string& particle_type,
-    const std::vector<VectorDim>& coordinates, bool check_duplicates) {
+    const std::string& particle_type, const std::vector<VectorDim>& coordinates,
+    unsigned material_id, bool check_duplicates) {
   bool status = true;
   try {
-    unsigned gpid = 0;
+    // Get material
+    auto material = materials_.at(material_id);
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
     // Iterate over particle coordinates
     for (const auto& particle_coordinates : coordinates) {
-      // Add particle to mesh and check
-      bool insert_status = this->add_particle(
-          Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
-              ->create(particle_type, static_cast<mpm::Index>(gp_ids.at(gpid)),
-                       particle_coordinates),
-          check_duplicates);
+      // Particle id
+      mpm::Index pid = particles_.size();
+      // Create particle
+      auto particle = Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                              const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                          ->create(particle_type, static_cast<mpm::Index>(pid),
+                                   particle_coordinates);
 
-      // Increment particle id
-      if (insert_status) ++gpid;
-      // When addition of particle fails
+      // Add particle to mesh and check
+      bool insert_status = this->add_particle(particle, check_duplicates);
+
+      // If insertion is successful
+      if (insert_status)
+        map_particles_[pid]->assign_material(material);
       else
         throw std::runtime_error("Addition of particle to mesh failed!");
     }
@@ -1344,7 +1361,11 @@ void mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       // Particle type
       auto particle_type =
           generator["particle_type"].template get<std::string>();
-      this->generate_material_points(nparticles_cell, particle_type);
+      // Material id
+      unsigned material_id = generator["material_id"].template get<unsigned>();
+
+      this->generate_material_points(nparticles_cell, particle_type,
+                                     material_id);
     }
 
     else
@@ -1360,9 +1381,6 @@ void mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
                                           const Json& generator) {
-  // Get all particles
-  std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
-
   // Particle type
   auto particle_type = generator["particle_type"].template get<std::string>();
 
@@ -1373,6 +1391,9 @@ void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   // Check duplicates
   bool check_duplicates = generator["check_duplicates"].template get<bool>();
 
+  // Material id
+  unsigned material_id = generator["material_id"].template get<unsigned>();
+
   const std::string reader =
       generator["particle_reader"].template get<std::string>();
 
@@ -1380,21 +1401,15 @@ void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   auto particle_reader =
       Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
-  all_particles = particle_reader->read_particles(file_loc);
+  // Get coordinates
+  auto coords = particle_reader->read_particles(file_loc);
 
-  console_->error("Received particles: {} from dir {} file {}",
-                  all_particles.size(), io->working_dir(),
-                  io->file_name(file_loc));
-  // Get all particle ids
-  std::vector<mpm::Index> all_particles_ids(all_particles.size());
-  std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
+  console_->error("Received particles: {} from dir {} file {}", coords.size(),
+                  io->working_dir(), io->file_name(file_loc));
 
-  // Create particles from file
-  bool particle_status =
-      this->create_particles(all_particles_ids,  // global id
-                             particle_type,      // particle type
-                             all_particles,      // coordinates
-                             check_duplicates);  // Check duplicates
+  // Create particles from coordinates
+  bool particle_status = this->create_particles(particle_type, coords,
+                                                material_id, check_duplicates);
 
   if (!particle_status)
     throw std::runtime_error("Addition of particles to mesh failed");

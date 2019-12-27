@@ -166,15 +166,14 @@ class Mesh {
   void iterate_over_cells(Toper oper);
 
   //! Create particles from coordinates
-  //! \param[in] gpids Global particle ids
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
+  //! \param[in] material_id ID of the material
   //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create particle status
-  bool create_particles(const std::vector<mpm::Index>& gpids,
-                        const std::string& particle_type,
+  bool create_particles(const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates,
-                        bool check_duplicates = true);
+                        unsigned material_id, bool check_duplicates = true);
 
   //! Add a particle to the mesh
   //! \param[in] particle A shared pointer to particle
@@ -308,9 +307,11 @@ class Mesh {
   //! Generate points
   //! \param[in] nquadratures Number of points per direction in cell
   //! \param[in] particle_type Particle type
+  //! \param[in] material_id ID of the material
   //! \retval point Material point coordinates
   void generate_material_points(unsigned nquadratures,
-                                const std::string& particle_type);
+                                const std::string& particle_type,
+                                unsigned material_id);
 
   //! Initialise material models
   //! \param[in] materials Material models

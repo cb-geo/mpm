@@ -262,21 +262,23 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     auto particle_reader =
         Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
 
-    auto particles_begin = std::chrono::steady_clock::now();
+    auto particles_gen_begin = std::chrono::steady_clock::now();
 
     // Get particles properties
     auto json_particles = io_->json_object("particles");
 
     for (const auto& json_particle : json_particles) {
-      auto particles_gen_begin = std::chrono::steady_clock::now();
       // Generate particles
       mesh_->generate_particles(io_, json_particle["generator"]);
-      auto particles_gen_end = std::chrono::steady_clock::now();
-      console_->info("Rank {} Generate particles: {} ms", mpi_rank,
-                     std::chrono::duration_cast<std::chrono::milliseconds>(
-                         particles_gen_end - particles_gen_begin)
-                         .count());
     }
+
+    auto particles_gen_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Generate particles: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_gen_end - particles_gen_begin)
+                       .count());
+
+    auto particles_locate_begin = std::chrono::steady_clock::now();
 
     // Read and assign particles cells
     if (!io_->file_name("particles_cells").empty()) {
@@ -288,23 +290,22 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
             "Cell ids are not properly assigned to particles");
     }
 
-    auto particles_locate_begin = std::chrono::steady_clock::now();
     // Locate particles in cell
     auto unlocatable_particles = mesh_->locate_particles_mesh();
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
 
+    // Write particles and cells to file
+    particle_reader->write_particles_cells(
+        io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
+        mesh_->particles_cells());
+
     auto particles_locate_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Locate particles: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_locate_end - particles_locate_begin)
                        .count());
-
-    // Write particles and cells to file
-    particle_reader->write_particles_cells(
-        io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
-        mesh_->particles_cells());
 
     auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
@@ -352,12 +353,19 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_volume_end - particles_volume_begin)
                        .count());
 
+    auto particles_sets_begin = std::chrono::steady_clock::now();
     // Read and assign particle sets
     if (!io_->file_name("entity_sets").empty()) {
       bool particle_sets = mesh_->create_particle_sets(
           (io_->entity_sets(io_->file_name("entity_sets"), "particle_sets")),
           check_duplicates);
     }
+    auto particles_sets_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Create particle sets: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_volume_end - particles_volume_begin)
+                       .count());
+
   } catch (std::exception& exception) {
     console_->error("#{}: MPM Base generating particles: {}", __LINE__,
                     exception.what());

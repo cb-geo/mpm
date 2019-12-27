@@ -45,6 +45,21 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   std::shared_ptr<mpm::Element<Dim>> element =
       Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
 
+  // Assign material
+  unsigned mid = 0;
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
+  auto le_material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic2D", std::move(mid), jmaterial);
+
+  std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
+  materials[mid] = le_material;
+
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
     //! Check for id = 0
@@ -493,10 +508,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Particle type 2D
     const std::string particle_type = "P2D";
 
+    // Initialise material models
+    mesh->initialise_material_models(materials);
+
     // Generate material points in cell
     REQUIRE(mesh->nparticles() == 0);
 
-    mesh->generate_material_points(1, particle_type);
+    mesh->generate_material_points(1, particle_type, mid);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -504,17 +522,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type);
+      mesh->generate_material_points(1, particle_type, mid);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type);
+      mesh->generate_material_points(2, particle_type, mid);
       REQUIRE(mesh->nparticles() == 4);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type);
+      mesh->generate_material_points(3, particle_type, mid);
       REQUIRE(mesh->nparticles() == 9);
     }
 
@@ -673,17 +691,14 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           particle << 0.675, 0.25;
           coordinates.emplace_back(particle);
 
+          // Initialise material models in mesh
+          mesh->initialise_material_models(materials);
+
           SECTION("Check addition of particles to mesh") {
             // Particle type 2D
             const std::string particle_type = "P2D";
-            // Global particle index
-            std::vector<mpm::Index> gpid(coordinates.size());
-            std::iota(gpid.begin(), gpid.end(), 0);
-            mesh->create_particles(gpid, particle_type, coordinates, false);
-            // Check if mesh has added particles
-            REQUIRE(mesh->nparticles() == coordinates.size());
-            // Try again this shouldn't add more coordinates
-            mesh->create_particles(gpid, particle_type, coordinates);
+            // Create particles from file
+            mesh->create_particles(particle_type, coordinates, mid, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
 
@@ -742,7 +757,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(gpid, particle_type, coordinates);
+            mesh->create_particles(particle_type, coordinates, mid, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             const unsigned phase = 0;
@@ -1030,6 +1045,21 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   std::vector<double> fx_values{{0.0, 1.0, 1.0, 0.0}};
   jfunctionproperties["xvalues"] = x_values;
   jfunctionproperties["fxvalues"] = fx_values;
+
+  // Assign material
+  unsigned mid = 0;
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
+  auto le_material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic3D", std::move(mid), jmaterial);
+
+  std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
+  materials[mid] = le_material;
 
   // math function
   std::shared_ptr<mpm::FunctionBase> mfunction =
@@ -1542,11 +1572,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise cell and compute volume
     REQUIRE(cell1->initialise() == true);
 
-    // Particle type 2D
+    // Particle type 3D
     const std::string particle_type = "P3D";
 
+    // Initialise material models
+    mesh->initialise_material_models(materials);
+
     // Generate material points in cell
-    mesh->generate_material_points(1, particle_type);
+    mesh->generate_material_points(1, particle_type, mid);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -1554,17 +1587,17 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type);
+      mesh->generate_material_points(1, particle_type, mid);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type);
+      mesh->generate_material_points(2, particle_type, mid);
       REQUIRE(mesh->nparticles() == 8);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type);
+      mesh->generate_material_points(3, particle_type, mid);
       REQUIRE(mesh->nparticles() == 27);
     }
 
@@ -1762,17 +1795,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           particle << 0.675, 0.25, 0.25;
           coordinates.emplace_back(particle);
 
+          // Initialise material models in mesh
+          mesh->initialise_material_models(materials);
+
           SECTION("Check addition of particles to mesh") {
             // Particle type 3D
             const std::string particle_type = "P3D";
-            // Global particle index
-            std::vector<mpm::Index> gpid(coordinates.size());
-            std::iota(gpid.begin(), gpid.end(), 0);
-            mesh->create_particles(gpid, particle_type, coordinates);
-            // Check if mesh has added particles
-            REQUIRE(mesh->nparticles() == coordinates.size());
-            // Try again this shouldn't add more coordinates
-            mesh->create_particles(gpid, particle_type, coordinates);
+            // Create particles from file
+            mesh->create_particles(particle_type, coordinates, mid, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
             // Clear coordinates and try creating a list of particles with an
@@ -1780,7 +1810,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(gpid, particle_type, coordinates);
+            mesh->create_particles(particle_type, coordinates, mid, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             // Test assign particles cells again should fail
