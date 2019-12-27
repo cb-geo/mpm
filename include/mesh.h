@@ -372,6 +372,14 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
       bool check_duplicates);
 
+  //! Create map of container of cells in sets
+  //! \param[in] map of cells ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \retval status Status of  create cell sets
+  bool create_cell_sets(
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& cell_sets,
+      bool check_duplicates);
+
   //! Return the number of level sets defined
   //! \retval number of level sets
   unsigned nlevelsets() const { return level_sets_.size(); }
@@ -438,6 +446,8 @@ class Mesh {
   Container<Cell<Tdim>> ghost_cells_;
   //! Container of local ghost cells
   Container<Cell<Tdim>> local_ghost_cells_;
+  //! Container of cell sets
+  tsl::robin_map<unsigned, Container<Cell<Tdim>>> cell_sets_;
   //! Map of ghost cells to the neighbours ranks
   std::map<unsigned, std::vector<unsigned>> ghost_cells_neighbour_ranks_;
   //! Faces and cells

@@ -209,6 +209,15 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Compute cell neighbours
     mesh_->compute_cell_neighbours();
 
+    // Read and assign cell sets
+    if (!io_->file_name("entity_sets").empty()) {
+      bool cell_sets = mesh_->create_cell_sets(
+          (io_->entity_sets(io_->file_name("entity_sets"), "cell_sets")),
+          check_duplicates);
+      if (!cell_sets)
+        throw std::runtime_error("Cell sets are not properly assigned");
+    }
+
     auto cells_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read cells: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(

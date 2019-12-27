@@ -1328,9 +1328,40 @@ bool mpm::Mesh<Tdim>::create_node_sets(
   return status;
 }
 
+// Return cells
 template <unsigned Tdim>
 mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
+}
+
+//! Create map of container of cells in sets
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_cell_sets(
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& cell_sets,
+    bool check_duplicates) {
+  bool status = false;
+  try {
+    // Create container for each cell set
+    for (auto sitr = cell_sets.begin(); sitr != cell_sets.end(); ++sitr) {
+      // Create a container for the set
+      Container<Cell<Tdim>> cells;
+      // Reserve the size of the container
+      cells.reserve((sitr->second).size());
+      // Add cells to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status = cells.add(map_cells_[pid], check_duplicates);
+      }
+
+      // Create the map of the container
+      status = this->cell_sets_
+                   .insert(std::pair<mpm::Index, Container<Cell<Tdim>>>(
+                       sitr->first, cells))
+                   .second;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
 }
 
 //! return particle_ptr
