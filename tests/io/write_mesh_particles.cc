@@ -15,7 +15,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
-  std::vector<unsigned> material_id{{1}};
+  unsigned material_id = 1;
   std::vector<double> xvalues{{0.0, 0.5, 1.0}};
   std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
 

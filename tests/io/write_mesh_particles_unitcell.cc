@@ -14,7 +14,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
   auto cell_type = "ED2Q4";
   auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
-  std::vector<unsigned> material_id{{1}};
+  unsigned material_id = 1;
   std::vector<double> gravity{{0., -9.81}};
   std::vector<double> xvalues{{0.0, 0.5, 1.0}};
   std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
