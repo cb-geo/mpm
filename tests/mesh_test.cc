@@ -514,7 +514,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Generate material points in cell
     REQUIRE(mesh->nparticles() == 0);
 
-    mesh->generate_material_points(1, particle_type, mid);
+    mesh->generate_material_points(1, particle_type, mid, -1);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -522,17 +522,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type, mid);
+      mesh->generate_material_points(1, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type, mid);
+      mesh->generate_material_points(2, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 4);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type, mid);
+      mesh->generate_material_points(3, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 9);
     }
 
@@ -541,6 +541,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       Json jgen;
       jgen["type"] = "gauss";
       jgen["material_id"] = mid;
+      jgen["cset_id"] = 1;
       jgen["particle_type"] = "P2D";
       jgen["check_duplicates"] = false;
       jgen["nparticles_per_dir"] = 2;
@@ -553,6 +554,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
       // Create an IO object
       auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> cell_sets;
+      cell_sets[1] = std::vector<mpm::Index>{0};
+
+      REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
 
       REQUIRE(mesh->nparticles() == 0);
       // Generate
@@ -1604,7 +1610,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     mesh->initialise_material_models(materials);
 
     // Generate material points in cell
-    mesh->generate_material_points(1, particle_type, mid);
+    mesh->generate_material_points(1, particle_type, mid, -1);
     REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
@@ -1612,17 +1618,17 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      mesh->generate_material_points(1, particle_type, mid);
+      mesh->generate_material_points(1, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      mesh->generate_material_points(2, particle_type, mid);
+      mesh->generate_material_points(2, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 8);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      mesh->generate_material_points(3, particle_type, mid);
+      mesh->generate_material_points(3, particle_type, mid, -1);
       REQUIRE(mesh->nparticles() == 27);
     }
 
@@ -1631,6 +1637,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       Json jgen;
       jgen["type"] = "gauss";
       jgen["material_id"] = mid;
+      jgen["cset_id"] = 1;
       jgen["particle_type"] = "P3D";
       jgen["check_duplicates"] = false;
       jgen["nparticles_per_dir"] = 2;
@@ -1643,6 +1650,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
       // Create an IO object
       auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> cell_sets;
+      cell_sets[1] = std::vector<mpm::Index>{0};
+
+      REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
 
       REQUIRE(mesh->nparticles() == 0);
       // Generate

@@ -331,7 +331,8 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
                                                const std::string& particle_type,
-                                               unsigned material_id) {
+                                               unsigned material_id,
+                                               int cset_id) {
   try {
     if (cells_.size() > 0) {
       unsigned before_generation = this->nparticles();
@@ -339,8 +340,10 @@ void mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
       // Get material
       auto material = materials_.at(material_id);
 
+      // If set id is -1, use all cells
+      auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
       // Iterate over each cell to generate points
-      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
         (*citr)->assign_quadrature(nquadratures);
         // Genereate particles at the Gauss points
         const auto cpoints = (*citr)->generate_points();
@@ -1394,9 +1397,10 @@ void mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
           generator["particle_type"].template get<std::string>();
       // Material id
       unsigned material_id = generator["material_id"].template get<unsigned>();
-
-      this->generate_material_points(nparticles_dir, particle_type,
-                                     material_id);
+      // Cell set id
+      int cset_id = generator["cset_id"].template get<int>();
+      this->generate_material_points(nparticles_dir, particle_type, material_id,
+                                     cset_id);
     }
 
     else
