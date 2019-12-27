@@ -80,12 +80,6 @@ class IO {
                                       const std::string& analysis_id,
                                       unsigned step, unsigned max_steps,
                                       bool parallel = true);
-  //! Return working directory
-  //! \retval string of working directory
-  std::string working_directory() const;
-
-  //! Return working directory
-  std::string working_dir() const { return working_dir_; }
 
  private:
   //! Number of parallel threads

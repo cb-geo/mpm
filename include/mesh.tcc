@@ -1421,7 +1421,7 @@ void mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
 
   // File location
   auto file_loc =
-      io->working_dir() + generator["location"].template get<std::string>();
+      io->file_name(generator["location"].template get<std::string>());
 
   // Check duplicates
   bool check_duplicates = generator["check_duplicates"].template get<bool>();

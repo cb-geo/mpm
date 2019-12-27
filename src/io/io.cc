@@ -221,9 +221,5 @@ Json mpm::IO::json_object(const std::string& key) const {
 //! Return post processing object
 Json mpm::IO::post_processing() const { return json_["post_processing"]; }
 
-//! Return working directory
-//! \retval string of working directory
-std::string mpm::IO::working_directory() const { return working_dir_; }
-
 //! Return number of tbb threads
 unsigned mpm::IO::nthreads() const { return nthreads_; }
