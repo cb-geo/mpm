@@ -64,18 +64,16 @@ std::string mpm::IO::file_name(const std::string& filename) {
   std::string file_name;
   // Read input file name from the JSON object
   try {
-    file_name = working_dir_ +
-                json_["input_files"][filename].template get<std::string>();
+    file_name = working_dir_ + filename;
+    // Check if a file is present, if not set file_name to empty
+    if (!this->check_file(file_name)) file_name.clear();
+
   } catch (const std::exception& except) {
-    console_->warn("Invalid JSON argument: {}; error: {}", filename,
+    console_->warn("Fetching file: {}; failed with: {}", filename,
                    except.what());
     file_name.clear();
     return file_name;
   }
-
-  // Check if a file is present, if not set file_name to empty
-  if (!this->check_file(file_name)) file_name.clear();
-
   return file_name;
 }
 

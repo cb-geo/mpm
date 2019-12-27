@@ -90,7 +90,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     REQUIRE(io->analysis_type() == "MPMExplicitUSF3D");
 
     // Check cmake JSON object
-    REQUIRE(io->file_name("config") == "./mpm.json");
+    REQUIRE(io->file_name("mpm.json") == "./mpm.json");
 
     // Material file should return an empty string, as file is missing
     std::string material_file = io->file_name("material");
@@ -154,7 +154,7 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(0, {0, 1}));
     node_sets.insert(std::pair<mpm::Index, std::vector<mpm::Index>>(1, {2, 3}));
     tsl::robin_map<mpm::Index, std::vector<mpm::Index>> check =
-        io->entity_sets(io->file_name("entity_sets"), "node_sets");
+        io->entity_sets(io->file_name("entity_sets.json"), "node_sets");
     REQUIRE(std::equal(check.begin(), check.end(), node_sets.begin()) == true);
     REQUIRE(check.size() == node_sets.size());
   }

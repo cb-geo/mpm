@@ -138,7 +138,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 
     // Mesh file
     std::string mesh_file =
-        io_->working_dir() + mesh_props["mesh"].template get<std::string>();
+        io_->file_name(mesh_props["mesh"].template get<std::string>());
 
     // Create nodes from file
     bool node_status =
@@ -160,9 +160,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     try {
       std::string entity_sets =
           mesh_props["entity_sets"].template get<std::string>();
-      if (!entity_sets.empty()) {
+      if (!io_->file_name(entity_sets).empty()) {
         bool node_sets = mesh_->create_node_sets(
-            (io_->entity_sets(io_->working_dir() + entity_sets, "node_sets")),
+            (io_->entity_sets(io_->file_name(entity_sets), "node_sets")),
             check_duplicates);
         if (!node_sets)
           throw std::runtime_error("Node sets are not properly assigned");
@@ -177,9 +177,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
       std::string euler_angles =
           mesh_props["boundary_conditions"]["nodal_euler_angles"]
               .template get<std::string>();
-      if (!euler_angles.empty()) {
+      if (!io_->file_name(euler_angles).empty()) {
         bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
-            mesh_io->read_euler_angles(io_->working_dir() + euler_angles));
+            mesh_io->read_euler_angles(io_->file_name(euler_angles)));
         if (!rotation_matrices)
           throw std::runtime_error(
               "Euler angles are not properly assigned/computed");
@@ -194,10 +194,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
       std::string vel_constraints =
           mesh_props["boundary_conditions"]["velocity_constraints"]
               .template get<std::string>();
-      if (!vel_constraints.empty()) {
+      if (!io_->file_name(vel_constraints).empty()) {
         bool velocity_constraints = mesh_->assign_velocity_constraints(
-            mesh_io->read_velocity_constraints(io_->working_dir() +
-                                               vel_constraints));
+            mesh_io->read_velocity_constraints(
+                io_->file_name(vel_constraints)));
         if (!velocity_constraints)
           throw std::runtime_error(
               "Velocity constraints are not properly assigned");
@@ -212,10 +212,10 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
       std::string fric_constraints =
           mesh_props["boundary_conditions"]["friction_constraints"]
               .template get<std::string>();
-      if (!fric_constraints.empty()) {
+      if (!io_->file_name(fric_constraints).empty()) {
         bool friction_constraints = mesh_->assign_friction_constraints(
-            mesh_io->read_friction_constraints(io_->working_dir() +
-                                               fric_constraints));
+            mesh_io->read_friction_constraints(
+                io_->file_name(fric_constraints)));
         if (!friction_constraints)
           throw std::runtime_error(
               "Friction constraints are not properly assigned");
@@ -249,9 +249,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
       // Read and assign cell sets
       std::string entity_sets =
           mesh_props["entity_sets"].template get<std::string>();
-      if (!entity_sets.empty()) {
+      if (!io_->file_name(entity_sets).empty()) {
         bool cell_sets = mesh_->create_cell_sets(
-            (io_->entity_sets(io_->working_dir() + entity_sets, "cell_sets")),
+            (io_->entity_sets(io_->file_name(entity_sets), "cell_sets")),
             check_duplicates);
         if (!cell_sets)
           throw std::runtime_error("Cell sets are not properly assigned");
@@ -334,10 +334,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       std::string fparticles_cells =
           mesh_props["particle_cells"].template get<std::string>();
 
-      if (!fparticles_cells.empty()) {
+      if (!io_->file_name(fparticles_cells).empty()) {
         bool particles_cells =
             mesh_->assign_particles_cells(particle_io->read_particles_cells(
-                io_->working_dir() + fparticles_cells));
+                io_->file_name(fparticles_cells)));
         if (!particles_cells)
           throw std::runtime_error(
               "Cell ids are not properly assigned to particles");
@@ -373,10 +373,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     try {
       std::string fparticles_volumes =
           mesh_props["particles_volumes"].template get<std::string>();
-      if (!fparticles_volumes.empty()) {
+      if (!io_->file_name(fparticles_volumes).empty()) {
         bool particles_volumes =
             mesh_->assign_particles_volumes(particle_io->read_particles_volumes(
-                io_->working_dir() + fparticles_volumes));
+                io_->file_name(fparticles_volumes)));
         if (!particles_volumes)
           throw std::runtime_error(
               "Particles volumes are not properly assigned");
@@ -391,11 +391,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       std::string fparticles_velocity_constraints =
           mesh_props["boundary_conditions"]["particles_velocity_constraints"]
               .template get<std::string>();
-      if (!fparticles_velocity_constraints.empty()) {
+      if (!io_->file_name(fparticles_velocity_constraints).empty()) {
         bool particles_velocity_constraints =
             mesh_->assign_particles_velocity_constraints(
                 particle_io->read_velocity_constraints(
-                    io_->working_dir() + fparticles_velocity_constraints));
+                    io_->file_name(fparticles_velocity_constraints)));
         if (!particles_velocity_constraints)
           throw std::runtime_error(
               "Particles velocity constraints are not properly assigned");
@@ -409,12 +409,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     try {
       std::string fparticles_stresses =
           mesh_props["particles_stresses"].template get<std::string>();
-      if (!fparticles_stresses.empty()) {
+      if (!io_->file_name(fparticles_stresses).empty()) {
 
         // Get stresses of all particles
         const auto all_particles_stresses =
-            particle_io->read_particles_stresses(io_->working_dir() +
-                                                 fparticles_stresses);
+            particle_io->read_particles_stresses(
+                io_->file_name(fparticles_stresses));
 
         // Read and assign particles stresses
         if (!mesh_->assign_particles_stresses(all_particles_stresses))
@@ -439,10 +439,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     try {
       std::string entity_sets =
           mesh_props["entity_sets"].template get<std::string>();
-      if (!entity_sets.empty()) {
+      if (!io_->file_name(entity_sets).empty()) {
         bool particle_sets = mesh_->create_particle_sets(
-            (io_->entity_sets(io_->working_dir() + entity_sets,
-                              "particle_sets")),
+            (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
             check_duplicates);
       }
     } catch (std::exception& exception) {
