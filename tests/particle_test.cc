@@ -12,6 +12,7 @@
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
+#include "twophase_particle.h"
 
 //! \brief Check particle class for 1D case
 TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
@@ -19,10 +20,11 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   const unsigned Dim = 1;
   // Dimension
   const unsigned Dof = 1;
-  // Number of phases
-  const unsigned Nphases = 1;
+  // Single phase
+  const unsigned Nphase = 1;
   // Phase
   const unsigned phase = 0;
+
   // Json property
   Json jfunctionproperties;
   jfunctionproperties["id"] = 0;
@@ -34,6 +36,13 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   // math function
   std::shared_ptr<mpm::FunctionBase> mfunction =
       std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
+
+  // Two phase
+  const unsigned Nphase_2p = 2;
+  // Phases
+  const unsigned Phase_solid = 0;
+  const unsigned Phase_liquid = 1;
+  const unsigned mixture = 0;
 
   // Coordinates
   Eigen::Matrix<double, 1, 1> coords;
@@ -206,6 +215,138 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
         REQUIRE(particle->traction()(i) == Approx(traction).epsilon(Tolerance));
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+  }
+
+  SECTION("Check particle properties in two phase") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
+
+    // Check mass of each phase
+    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(0.0).epsilon(Tolerance));
+    double mass_solid = 100.5;
+    double mass_liquid = 10.5;
+    particle->assign_mass(mass_solid);
+    particle->assign_liquid_mass(mass_liquid);
+    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(10.5).epsilon(Tolerance));
+
+    Eigen::Matrix<double, 6, 1> stress_solid;
+    double pore_liquid_pressure;
+    for (unsigned i = 0; i < stress_solid.size(); ++i) stress_solid(i) = 17.51;
+    pore_liquid_pressure = 7.51;
+
+    // Check solid skeleton stress
+    for (unsigned i = 0; i < stress_solid.size(); ++i)
+      REQUIRE(particle->stress()(i) == Approx(0.).epsilon(Tolerance));
+    // check pore liquid pressure
+    REQUIRE(particle->pore_pressure() == Approx(0.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity_solid;
+    Eigen::VectorXd velocity_liquid;
+    velocity_solid.resize(Dim);
+    velocity_liquid.resize(Dim);
+    for (unsigned i = 0; i < Dim; ++i) velocity_solid(i) = 17.51;
+    for (unsigned i = 0; i < Dim; ++i) velocity_liquid(i) = 27.51;
+
+    // check solid skeleton velocity
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
+    // check liquid phase velocity
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    // assign solid skeleton velocity
+    REQUIRE(particle->assign_velocity(velocity_solid) == true);
+    // assign liquid phase velocity
+    REQUIRE(particle->assign_liquid_velocity(velocity_liquid) == true);
+    // check solid skeleton velocity
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+    // check liquid phase velocity
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) ==
+              Approx(27.51).epsilon(Tolerance));
+
+    // Assign volume
+    REQUIRE(particle->assign_volume(0.0) == false);
+    REQUIRE(particle->assign_volume(-5.0) == false);
+    REQUIRE(particle->assign_volume(2.0) == true);
+    // Check total volume
+    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+
+    // Traction
+    double traction_solid = 65.32;
+    double traction_liquid = 35.32;
+    double traction_mixture = 55.32;
+    const unsigned Direction = 0;
+
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i) {
+      REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(particle->liquid_traction()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(particle->mixture_traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    // assign traction force for single phase
+    REQUIRE(particle->assign_traction(Direction, traction_solid) == true);
+    // assign traction forcce for liquid phase
+    REQUIRE(particle->assign_liquid_traction(Direction, traction_liquid) ==
+            true);
+    // assign traction force for mixture
+    REQUIRE(particle->assign_mixture_traction(Direction, traction_mixture) ==
+            true);
+
+    // Calculate traction force = traction * volume / spacing
+    traction_solid *= 2.0 / (std::pow(2.0, 1. / Dim));
+    traction_liquid *= 2.0 / (std::pow(2.0, 1. / Dim));
+    traction_mixture *= 2.0 / (std::pow(2.0, 1. / Dim));
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(traction_mixture).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    REQUIRE(particle->assign_traction(wrong_dir, traction_solid) == false);
+    REQUIRE(particle->assign_liquid_traction(wrong_dir, traction_liquid) ==
+            false);
+    REQUIRE(particle->assign_mixture_traction(wrong_dir, traction_mixture) ==
+            false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(traction_mixture).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
     }
   }
 
@@ -395,12 +536,24 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   const unsigned Dim = 2;
   // Degree of freedom
   const unsigned Dof = 2;
-  // Number of nodes per cell
-  const unsigned Nnodes = 4;
+  // Single phase particle
   // Number of phases
   const unsigned Nphases = 1;
-  // Phase
+  // single phase
   const unsigned phase = 0;
+
+  // Two phase particle
+  // Phases
+  const unsigned Nphases_2P = 2;
+  // solid skeleton
+  const unsigned solid_skeleton = 0;
+  // pore liquid phase
+  const unsigned pore_liquid = 1;
+  // mixture
+  const unsigned mixture = 0;
+
+  // Number of nodes per cell
+  const unsigned Nnodes = 4;
   // Tolerance
   const double Tolerance = 1.E-7;
   // Json property
@@ -865,7 +1018,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(dt) == true);
+    REQUIRE(particle->update_volume_strainrate_centroid(dt) == true);
     REQUIRE(particle->volume() == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
@@ -1079,6 +1232,42 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->material_id() == 1);
   }
 
+  SECTION("Check assign material to particle in two phase") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75;
+    auto particle = std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
+
+    unsigned mid_soild = 0;
+    unsigned mid_liquid = 1;
+    // Initialise soil material
+    Json jmaterial_solid;
+    jmaterial_solid["density"] = 1800.;
+    jmaterial_solid["youngs_modulus"] = 1.0E+7;
+    jmaterial_solid["poisson_ratio"] = 0.3;
+    // Initialise fluid material
+    Json jmaterial_liquid;
+    jmaterial_liquid["density"] = 1000.;
+
+    auto material_solid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid_soild), jmaterial_solid);
+
+    auto material_liquid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic2D", std::move(mid_liquid), jmaterial_liquid);
+
+    REQUIRE(material_solid->id() == 0);
+    REQUIRE(material_liquid->id() == 1);
+
+    // Check if particle can be assigned a null material
+    REQUIRE(particle->assign_material(nullptr) == false);
+    REQUIRE(particle->assign_liquid_material(nullptr) == false);
+    // Assign material to particle for each phase
+    REQUIRE(particle->assign_material(material_solid) == true);
+    REQUIRE(particle->assign_liquid_material(material_liquid) == true);
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -1145,6 +1334,126 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(particle->traction()(i) == Approx(traction).epsilon(Tolerance));
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+  }
+
+  SECTION("Check particle properties in two phase") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
+
+    // Check mass of each phase
+    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(0.0).epsilon(Tolerance));
+    double mass_solid = 100.5;
+    double mass_liquid = 10.5;
+    particle->assign_mass(mass_solid);
+    particle->assign_liquid_mass(mass_liquid);
+    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(10.5).epsilon(Tolerance));
+
+    Eigen::Matrix<double, 6, 1> stress_solid;
+    Eigen::Matrix<double, 6, 1> stress_fluid;
+    for (unsigned i = 0; i < stress_solid.size(); ++i) stress_solid(i) = 17.51;
+    for (unsigned i = 0; i < stress_solid.size(); ++i) stress_fluid(i) = 7.51;
+
+    // Check solid skeleton stress
+    for (unsigned i = 0; i < stress_solid.size(); ++i)
+      REQUIRE(particle->stress()(i) == Approx(0.).epsilon(Tolerance));
+    // check pore liquid pressure
+    REQUIRE(particle->pore_pressure() == Approx(0.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity_solid;
+    Eigen::VectorXd velocity_liquid;
+    velocity_solid.resize(Dim);
+    velocity_liquid.resize(Dim);
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      velocity_solid(i) = 17.51;
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      velocity_liquid(i) = 27.51;
+
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_velocity(velocity_solid) == true);
+    REQUIRE(particle->assign_liquid_velocity(velocity_liquid) == true);
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) ==
+              Approx(27.51).epsilon(Tolerance));
+
+    // Assign volume
+    REQUIRE(particle->assign_volume(0.0) == false);
+    REQUIRE(particle->assign_volume(-5.0) == false);
+    REQUIRE(particle->assign_volume(2.0) == true);
+
+    // Check total volume
+    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+
+    // Traction
+    double traction_solid = 65.32;
+    double traction_liquid = 35.32;
+    double traction_mixture = 55.44;
+    const unsigned Direction = 0;
+
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i) {
+      REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(particle->liquid_traction()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(particle->mixture_traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(particle->assign_traction(Direction, traction_solid) == true);
+    REQUIRE(particle->assign_liquid_traction(Direction, traction_liquid) ==
+            true);
+    REQUIRE(particle->assign_mixture_traction(Direction, traction_mixture) ==
+            true);
+
+    // Calculate traction force = traction * volume / spacing
+    traction_solid *= 2.0 / (std::pow(2.0, 1. / Dim));
+    traction_liquid *= 2.0 / (std::pow(2.0, 1. / Dim));
+    traction_mixture *= 2.0 / (std::pow(2.0, 1. / Dim));
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(traction_mixture).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->mixture_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    REQUIRE(particle->assign_traction(wrong_dir, traction_solid) == false);
+    REQUIRE(particle->assign_liquid_traction(wrong_dir, traction_liquid) ==
+            false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
     }
   }
 
@@ -1423,10 +1732,24 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   const unsigned Dim = 3;
   // Dimension
   const unsigned Dof = 6;
+
+  // Single phase particle
+  // Nnumber of phases
+  const unsigned Nphases = 1;
+  // Phase
+  const unsigned Phase = 0;
+
+  // Two phase particle
+  // Phases
+  const unsigned Nphases_2P = 2;
+  // Phase
+  const unsigned Phase_solid = 0;
+  const unsigned Phase_fluid = 1;
+
   // Number of nodes per cell
   const unsigned Nnodes = 8;
   // Number of phases
-  const unsigned Nphases = 1;
+  const unsigned Nphase = 1;
   // Phase
   const unsigned phase = 0;
   // Tolerance
@@ -2001,7 +2324,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
-    REQUIRE(particle->update_volume_strainrate(dt) == true);
+    REQUIRE(particle->update_volume_strainrate_centroid(dt) == true);
     REQUIRE(particle->volume() == Approx(12.0).epsilon(Tolerance));
 
     // Compute stress
@@ -2232,6 +2555,42 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->material_id() == 1);
   }
 
+  SECTION("Check assign material to particle in two phase") {
+    // Add particle
+    mpm::Index id = 0;
+    coords << 0.75, 0.75, 0.75;
+    auto particle = std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
+
+    unsigned mid_soild = 0;
+    unsigned mid_liquid = 1;
+    // Initialise soil material
+    Json jmaterial_solid;
+    jmaterial_solid["density"] = 1800.;
+    jmaterial_solid["youngs_modulus"] = 1.0E+7;
+    jmaterial_solid["poisson_ratio"] = 0.3;
+    // Initialise fluid material
+    Json jmaterial_liquid;
+    jmaterial_liquid["density"] = 1000.;
+
+    auto material_solid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid_soild), jmaterial_solid);
+
+    auto material_liquid =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid_liquid), jmaterial_liquid);
+
+    REQUIRE(material_solid->id() == 0);
+    REQUIRE(material_liquid->id() == 1);
+
+    // Check if particle can be assigned a null material
+    REQUIRE(particle->assign_material(nullptr) == false);
+    REQUIRE(particle->assign_liquid_material(nullptr) == false);
+    // Assign material to particle for each phase
+    REQUIRE(particle->assign_material(material_solid) == true);
+    REQUIRE(particle->assign_liquid_material(material_liquid) == true);
+  }
+
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -2298,6 +2657,117 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(particle->traction()(i) == Approx(traction).epsilon(Tolerance));
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+  }
+
+  SECTION("Check particle properties in two phase") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
+
+    // Check mass of each phase
+    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(0.0).epsilon(Tolerance));
+    double mass_solid = 100.5;
+    double mass_liquid = 10.5;
+    particle->assign_mass(mass_solid);
+    particle->assign_liquid_mass(mass_liquid);
+    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    REQUIRE(particle->liquid_mass() == Approx(10.5).epsilon(Tolerance));
+
+    Eigen::Matrix<double, 6, 1> stress_solid;
+    Eigen::Matrix<double, 6, 1> stress_fluid;
+    for (unsigned i = 0; i < stress_solid.size(); ++i) stress_solid(i) = 17.51;
+    for (unsigned i = 0; i < stress_solid.size(); ++i) stress_fluid(i) = 7.51;
+
+    // Check stress for solid skeleton
+    for (unsigned i = 0; i < stress_solid.size(); ++i)
+      REQUIRE(particle->stress()(i) == Approx(0.).epsilon(Tolerance));
+    // Check pore liquid pressure
+    REQUIRE(particle->pore_pressure() == Approx(0.).epsilon(Tolerance));
+
+    // Check velocity
+    Eigen::VectorXd velocity_solid;
+    Eigen::VectorXd velocity_liquid;
+    velocity_solid.resize(Dim);
+    velocity_liquid.resize(Dim);
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      velocity_solid(i) = 17.51;
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      velocity_liquid(i) = 27.51;
+
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) == Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_velocity(velocity_solid) == true);
+    REQUIRE(particle->assign_liquid_velocity(velocity_liquid) == true);
+    for (unsigned i = 0; i < velocity_solid.size(); ++i)
+      REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+    for (unsigned i = 0; i < velocity_liquid.size(); ++i)
+      REQUIRE(particle->liquid_velocity()(i) ==
+              Approx(27.51).epsilon(Tolerance));
+
+    // Assign volume
+    REQUIRE(particle->assign_volume(0.0) == false);
+    REQUIRE(particle->assign_volume(-5.0) == false);
+    REQUIRE(particle->assign_volume(2.0) == true);
+
+    // Check total volume
+    REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
+
+    // Traction
+    double traction_solid = 65.32;
+    double traction_liquid = 35.32;
+    const unsigned Direction = 0;
+
+    // Check traction
+    for (unsigned i = 0; i < Dim; ++i) {
+      REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+      REQUIRE(particle->liquid_traction()(i) == Approx(0.).epsilon(Tolerance));
+    }
+
+    REQUIRE(particle->assign_traction(Direction, traction_solid) == true);
+    REQUIRE(particle->assign_liquid_traction(Direction, traction_liquid) ==
+            true);
+
+    // Calculate traction force = traction * volume / spacing
+    traction_solid *= 2.0 / (std::pow(2.0, 1. / Dim));
+    traction_liquid *= 2.0 / (std::pow(2.0, 1. / Dim));
+
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+    }
+
+    // Check for incorrect direction / phase
+    const unsigned wrong_dir = 4;
+    REQUIRE(particle->assign_traction(wrong_dir, traction_solid) == false);
+    REQUIRE(particle->assign_liquid_traction(wrong_dir, traction_liquid) ==
+            false);
+
+    // Check again to ensure value hasn't been updated
+    for (unsigned i = 0; i < Dim; ++i) {
+      if (i == Direction) {
+        REQUIRE(particle->traction()(i) ==
+                Approx(traction_solid).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(traction_liquid).epsilon(Tolerance));
+      } else {
+        REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
+        REQUIRE(particle->liquid_traction()(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
     }
   }
 

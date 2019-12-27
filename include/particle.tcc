@@ -36,7 +36,7 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->mass_ = particle.mass;
   // Volume
   this->assign_volume(particle.volume);
-  // Mass Density
+  // Mass Density (Dry bulk density of a porous medium)
   this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
   Eigen::Vector3d psize;
@@ -212,26 +212,32 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 // Initialise particle properties
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::initialise() {
+  natural_size_.setZero();
+  size_.setZero();
+  volume_ = std::numeric_limits<double>::max();
+  mass_ = 0.;
+  velocity_.setZero();
   displacement_.setZero();
   dstrain_.setZero();
-  mass_ = 0.;
-  natural_size_.setZero();
-  pressure_ = 0.;
-  set_traction_ = false;
-  size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
+  set_traction_ = false;
   traction_.setZero();
-  velocity_.setZero();
-  volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
+  pressure_ = 0.;
+  porosity_ = 0.;
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
+  this->properties_["pressure"] = [&]() {
+    Eigen::VectorXd vec_pressure(1);
+    vec_pressure << this->pressure();
+    return vec_pressure;
+  };
 }
 
 // Assign a cell to particle
@@ -437,6 +443,26 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
   return status;
 }
 
+// Assign porosity to the particle
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_porosity() {
+  bool status = true;
+  try {
+    if (material_ != nullptr) {
+      porosity_ = material_->template property<double>(std::string("porosity"));
+      if (porosity_ < 0. || porosity_ > 1.)
+        throw std::runtime_error(
+            "Particle porosity is negative or larger than one");
+    } else {
+      throw std::runtime_error("Material is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Compute volume of the particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::compute_volume() {
@@ -458,9 +484,9 @@ bool mpm::Particle<Tdim>::compute_volume() {
   return status;
 }
 
-// Update volume based on the central strain rate
+// Update volume based on the strain rate at cell centre
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
+bool mpm::Particle<Tdim>::update_volume_strainrate_centroid(double dt) {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
@@ -483,6 +509,47 @@ bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
   return status;
 }
 
+// Update material point volume based on the strain rate at material point
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
+  bool status = true;
+  try {
+    // Check if particle has a valid cell ptr and a valid volume
+    if (volume_ != std::numeric_limits<double>::max()) {
+      this->volume_ *= (1. + dt * strain_rate_.head(Tdim).sum());
+      this->mass_density_ =
+          this->mass_density_ / (1. + dt * strain_rate_.head(Tdim).sum());
+    } else {
+      throw std::runtime_error(
+          "volume is not initialised! cannot update particle volume");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Update material point porosity
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::update_porosity(double dt) {
+  bool status = true;
+  try {
+    // Update particle porosity
+    this->porosity_ =
+        1 - (1 - this->porosity_) / (1 + dt * strain_rate_.head(Tdim).sum());
+
+    if (porosity_ < 0 || porosity_ > 1)
+      throw std::runtime_error(
+          "Invalid porosity, less than zero or greater than one");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Compute mass of particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::compute_mass() {
@@ -492,11 +559,13 @@ bool mpm::Particle<Tdim>::compute_mass() {
     if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
       // Mass = volume of particle * mass_density
       this->mass_density_ =
+          (1 - porosity_) *
           material_->template property<double>(std::string("density"));
       this->mass_ = volume_ * mass_density_;
     } else {
       throw std::runtime_error(
-          "Cell or material is invalid! cannot compute mass for the particle");
+          "Particle volume or density is invalid! cannot compute mass for the "
+          "particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -570,7 +639,6 @@ bool mpm::Particle<Tdim>::compute_stress() {
 }
 
 //! Map body force
-//! \param[in] pgravity Gravity of a particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
@@ -719,7 +787,7 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
   try {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
-      // Map particle mass and momentum to nodes
+      // Map particle mass and pressure to nodes
       this->cell_->map_pressure_to_nodes(
           this->shapefn_, mpm::ParticlePhase::Solid, mass_, pressure_);
     } else {

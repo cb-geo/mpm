@@ -822,6 +822,37 @@ bool mpm::Mesh<Tdim>::assign_friction_constraints(
   return status;
 }
 
+//! Assign pressure constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_pressure_constraints(
+    const unsigned phase,
+    const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign pressure "
+          "constraints");
+
+    for (const auto& pressure_constraint : pressure_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(pressure_constraint);
+      // Pressure
+      double pressure = std::get<1>(pressure_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_pressure_constraint(phase, pressure);
+
+      if (!status)
+        throw std::runtime_error("Node or pressure constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particles volumes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
@@ -930,6 +961,71 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   }
 }
 
+//! Assign particle multi-phase coupled mixture tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_mixture_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_mtractions) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_mtraction : particle_mtractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_mtraction);
+      // Direction
+      unsigned dir = std::get<1>(particle_mtraction);
+      // Traction
+      double traction = std::get<2>(particle_mtraction);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_mixture_traction(dir, traction);
+
+      if (!status)
+        throw std::runtime_error("Mixture traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign multi-phase coupled particle liquid tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_liquid_tractions(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        particle_ltractions) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign traction");
+    for (const auto& particle_ltraction : particle_ltractions) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_ltraction);
+      // Direction
+      unsigned dir = std::get<1>(particle_ltraction);
+      // Traction
+      double traction = std::get<2>(particle_ltraction);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_liquid_traction(dir, traction);
+
+      if (!status)
+        throw std::runtime_error(
+            "Liquid phase traction is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particles velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
@@ -951,11 +1047,44 @@ bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
       // Velocity
       double velocity = std::get<2>(particle_velocity_constraint);
 
-      // if (map_particles_.find(pid) != map_particles_.end())
-      status = map_particles_[pid]->assign_particle_velocity_constraint(
-          dir, velocity);
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_particle_velocity_constraint(
+            dir, velocity);
 
-      if (!status) throw std::runtime_error("Velocity is invalid for particle");
+      if (!status)
+        throw std::runtime_error("Velocity constraint is invalid for particle");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particles pressure constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_pressure_constraints(
+    const unsigned phase, const std::vector<std::tuple<mpm::Index, double>>&
+                              particle_pressure_constraints) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign pressure");
+    for (const auto& particle_pressure_constraint :
+         particle_pressure_constraints) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_pressure_constraint);
+      // Pressure
+      double pressure = std::get<1>(particle_pressure_constraint);
+
+      if (map_particles_.find(pid) != map_particles_.end())
+        status = map_particles_[pid]->assign_particle_pressure_constraint(
+            phase, pressure);
+
+      if (!status)
+        throw std::runtime_error("Pressure constraint is invalid for particle");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1018,6 +1147,34 @@ bool mpm::Mesh<Tdim>::assign_particles_stresses(
     unsigned i = 0;
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       (*pitr)->initial_stress(particle_stresses.at(i));
+      ++i;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle pore pressures
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
+    const std::vector<double>& particle_pore_pressure) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign pore "
+          "pressures");
+
+    if (particles_.size() != particle_pore_pressure.size())
+      throw std::runtime_error(
+          "Number of particles in mesh and initial pore pressures don't match");
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      (*pitr)->assign_pore_pressure(particle_pore_pressure.at(i));
       ++i;
     }
   } catch (std::exception& exception) {

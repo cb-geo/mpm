@@ -115,9 +115,19 @@ class NodeBase {
   virtual bool update_internal_force(bool update, unsigned phase,
                                      const VectorDim& force) = 0;
 
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual bool update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
+
+  //! Return drag force at a given node
+  virtual VectorDim drag_force_coefficient() const = 0;
 
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
@@ -169,6 +179,15 @@ class NodeBase {
   //! \param[in] dt Time-step
   virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
 
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] phase Index corresponding to the solid skeleton
+  //! \param[in] phase Index corresponding to the pore fluid
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_two_phase(unsigned solid_skeleton,
+                                                       unsigned pore_fluid,
+                                                       unsigned mixture,
+                                                       double dt) = 0;
+
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of velocity constraint
@@ -218,6 +237,13 @@ class NodeBase {
 
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
+
+  // TODO
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  virtual bool assign_pressure_constraint(const unsigned phase,
+                                          double pressure) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

@@ -243,6 +243,12 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
           friction_constraints);
 
+  //! Assign pressure constraints to nodes
+  //! \param[in] pressure_constraints Constraint at node, pressure
+  bool assign_pressure_constraints(
+      const unsigned phase,
+      const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints);
+
   //! Compute and assign rotation matrix to nodes
   //! \param[in] euler_angles Map of node number and respective euler_angles
   bool compute_nodal_rotation_matrices(
@@ -275,16 +281,42 @@ class Mesh {
       const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
       double force);
 
+  //! Assign particles mixture tractions
+  //! \param[in] particle_tractions Traction at dir on particle for mixture
+  bool assign_particles_mixture_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_mtractions);
+
+  //! Assign particles liquid phase tractions
+  //! \param[in] particle_tractions Traction at dir on particle for liquid phase
+  bool assign_particles_liquid_tractions(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          particle_ltractions);
+
+
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle
   bool assign_particles_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_velocity_constraints);
 
+  //! Assign particles pore pressure constraints
+  //! \param[in] phase Index corresponding to phase
+  //! \param[in] particle_pressure_constraints pressure on particle
+  bool assign_particles_pressure_constraints(
+      const unsigned phase, const std::vector<std::tuple<mpm::Index, double>>&
+                                particle_pressure_constraints);
+
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
   bool assign_particles_stresses(
       const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses);
+
+  //! Assign particles pore pressures
+  //! \param[in] pore_fluid Index corresponding to fluid phase
+  //! \param[in] particle_pore_pressure Initial pore pressure of particle
+  bool assign_particles_pore_pressures(
+      const std::vector<double>& particle_pore_pressures);
 
   //! Assign particles cells
   //! \param[in] particles_cells Particles and cells

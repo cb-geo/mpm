@@ -117,23 +117,32 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute volume as cell volume / nparticles
   bool compute_volume() override;
 
-  //! Update volume based on centre volumetric strain rate
+  //! Update material point volume by using the cell-centre strain rate
+  //! \param[in] dt Analysis time step
+  bool update_volume_strainrate_centroid(double dt) override;
+
+  //! Update material point volume by using the strain rate
   //! \param[in] dt Analysis time step
   bool update_volume_strainrate(double dt) override;
 
-  //! Return mass density
-  //! \param[in] phase Index corresponding to the phase
+  //! Assign porosity
+  bool assign_porosity() override;
+
+  //! Update porosity
+  //! \param[in] dt Analysis time step
+  bool update_porosity(double dt) override;
+
+  //! Return mass density (dry bulk density)
   double mass_density() const override { return mass_density_; }
 
-  //! Compute mass as volume * density
+  //! Compute mass as volume * (dry bulk) density
   bool compute_mass() override;
 
   //! Map particle mass and momentum to nodes
   bool map_mass_momentum_to_nodes() override;
 
-  //! Assign nodal mass to particles
+  //! Assign mass to particles
   //! \param[in] mass Mass from the particles in a cell
-  //! \retval status Assignment status
   void assign_mass(double mass) override { mass_ = mass; }
 
   //! Return mass of the particles
@@ -143,6 +152,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] material Pointer to a material
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
+
+  //! Return material id
+  unsigned material_id() const { return material_id_; }
 
   //! Compute strain
   //! \param[in] dt Analysis time step
@@ -246,13 +258,20 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_particle_velocity_constraint(unsigned dir,
                                            double velocity) override;
 
+  // //! Assign particle pressure constraints
+  // //! \param[in] phase Index corresponding to the phase
+  // //! \param[in] pressure Applied particle pressure constraint
+  // //! \retval status Assignment status
+  // bool assign_particle_pressure_constraint(const unsigned phase,
+  //                                          const double pressure) override;
+
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
 
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -265,24 +284,28 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_id_;
   //! Status
   using ParticleBase<Tdim>::status_;
-  //! Material
-  using ParticleBase<Tdim>::material_;
-  //! Material id
-  using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
+  //! Material point volume
+  using ParticleBase<Tdim>::volume_;
+  //! Material point porosity
+  using ParticleBase<Tdim>::porosity_;
+  //! Material
+  std::shared_ptr<Material<Tdim>> material_;
+  //! Unsigned material id
+  unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Volumetric mass density (mass / volume)
   double mass_density_;
   //! Mass
   double mass_;
-  //! Volume
-  double volume_;
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
   Eigen::Matrix<double, 1, Tdim> natural_size_;
   //! Pressure
   double pressure_;
+  //! Pore pressure constraint (0: solid, 1: fluid)
+  double pressure_constraint_;
   //! Stresses
   Eigen::Matrix<double, 6, 1> stress_;
   //! Strains
