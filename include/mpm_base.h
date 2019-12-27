@@ -137,6 +137,18 @@ class MPMBase : public MPM {
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
+  //! Particles stresses
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_stresses(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particle entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void particle_entity_sets(const Json& mesh_prop, bool check);
+
  protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;

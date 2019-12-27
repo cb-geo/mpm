@@ -299,25 +299,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     this->particle_velocity_constraints(mesh_props, particle_io);
 
     // Read and assign particles stresses
-    try {
-      std::string fparticles_stresses =
-          mesh_props["particles_stresses"].template get<std::string>();
-      if (!io_->file_name(fparticles_stresses).empty()) {
-
-        // Get stresses of all particles
-        const auto all_particles_stresses =
-            particle_io->read_particles_stresses(
-                io_->file_name(fparticles_stresses));
-
-        // Read and assign particles stresses
-        if (!mesh_->assign_particles_stresses(all_particles_stresses))
-          throw std::runtime_error(
-              "Particles stresses are not properly assigned");
-      }
-    } catch (std::exception& exception) {
-      console_->warn("#{}: Particle stresses are undefined {} ", __LINE__,
-                     exception.what());
-    }
+    this->particles_stresses(mesh_props, particle_io);
 
     auto particles_volume_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read volume, velocity and stresses: {} ms",
@@ -326,22 +308,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_volume_end - particles_volume_begin)
                        .count());
 
+    // Particle entity sets
     auto particles_sets_begin = std::chrono::steady_clock::now();
-
-    // Read and assign particle sets
-    try {
-      std::string entity_sets =
-          mesh_props["entity_sets"].template get<std::string>();
-      if (!io_->file_name(entity_sets).empty()) {
-        bool particle_sets = mesh_->create_particle_sets(
-            (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
-            check_duplicates);
-      }
-    } catch (std::exception& exception) {
-      console_->warn("#{}: Particle sets are undefined {} ", __LINE__,
-                     exception.what());
-    }
-
+    this->particle_entity_sets(mesh_props, check_duplicates);
     auto particles_sets_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Create particle sets: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -819,5 +788,49 @@ void mpm::MPMBase<Tdim>::particle_velocity_constraints(
   } catch (std::exception& exception) {
     console_->warn("#{}: Particle velocity constraints are undefined {} ",
                    __LINE__, exception.what());
+  }
+}
+
+// Particles stresses
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_stresses(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    std::string fparticles_stresses =
+        mesh_props["particles_stresses"].template get<std::string>();
+    if (!io_->file_name(fparticles_stresses).empty()) {
+
+      // Get stresses of all particles
+      const auto all_particles_stresses = particle_io->read_particles_stresses(
+          io_->file_name(fparticles_stresses));
+
+      // Read and assign particles stresses
+      if (!mesh_->assign_particles_stresses(all_particles_stresses))
+        throw std::runtime_error(
+            "Particles stresses are not properly assigned");
+    }
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle stresses are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+//! Particle entity sets
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
+                                              bool check_duplicates) {
+  // Read and assign particle sets
+  try {
+    std::string entity_sets =
+        mesh_props["entity_sets"].template get<std::string>();
+    if (!io_->file_name(entity_sets).empty()) {
+      bool particle_sets = mesh_->create_particle_sets(
+          (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
+          check_duplicates);
+    }
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle sets are undefined {} ", __LINE__,
+                   exception.what());
   }
 }
