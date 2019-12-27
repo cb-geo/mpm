@@ -1355,16 +1355,16 @@ void mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
 
     // Generate material points at the Gauss location in all cells
     else if (generator_type == "gauss") {
-      // Number of particles per cell
-      unsigned nparticles_cell =
-          generator["nparticles_cells"].template get<unsigned>();
+      // Number of particles per dir
+      unsigned nparticles_dir =
+          generator["nparticles_per_dir"].template get<unsigned>();
       // Particle type
       auto particle_type =
           generator["particle_type"].template get<std::string>();
       // Material id
       unsigned material_id = generator["material_id"].template get<unsigned>();
 
-      this->generate_material_points(nparticles_cell, particle_type,
+      this->generate_material_points(nparticles_dir, particle_type,
                                      material_id);
     }
 

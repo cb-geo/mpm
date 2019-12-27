@@ -536,6 +536,31 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       REQUIRE(mesh->nparticles() == 9);
     }
 
+    SECTION("Check material point generation") {
+      // Generator property
+      Json jgen;
+      jgen["type"] = "gauss";
+      jgen["material_id"] = mid;
+      jgen["particle_type"] = "P2D";
+      jgen["check_duplicates"] = false;
+      jgen["nparticles_per_dir"] = 2;
+
+      // Assign argc and argv to nput arguments of MPM
+      int argc = 7;
+      char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
+                      (char*)"-p",      (char*)"8",  (char*)"-i",
+                      (char*)"mpm.json"};
+
+      // Create an IO object
+      auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      REQUIRE(mesh->nparticles() == 0);
+      // Generate
+      mesh->generate_particles(io, jgen);
+      // Number of particles
+      REQUIRE(mesh->nparticles() == 4);
+    }
+
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
@@ -1599,6 +1624,31 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     SECTION("Check generating 3 particle / cell") {
       mesh->generate_material_points(3, particle_type, mid);
       REQUIRE(mesh->nparticles() == 27);
+    }
+
+    SECTION("Check material point generation") {
+      // Generator property
+      Json jgen;
+      jgen["type"] = "gauss";
+      jgen["material_id"] = mid;
+      jgen["particle_type"] = "P3D";
+      jgen["check_duplicates"] = false;
+      jgen["nparticles_per_dir"] = 2;
+
+      // Assign argc and argv to nput arguments of MPM
+      int argc = 7;
+      char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
+                      (char*)"-p",      (char*)"8",  (char*)"-i",
+                      (char*)"mpm.json"};
+
+      // Create an IO object
+      auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      REQUIRE(mesh->nparticles() == 0);
+      // Generate
+      mesh->generate_particles(io, jgen);
+      // Number of particles
+      REQUIRE(mesh->nparticles() == 8);
     }
 
     // Particle 1
