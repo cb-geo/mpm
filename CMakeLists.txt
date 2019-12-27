@@ -28,6 +28,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
 endif()
 
+# Check if Ninja
+set(USED_CMAKE_GENERATOR "${CMAKE_GENERATOR}" CACHE STRING "Expose CMAKE_GENERATOR" FORCE)
+if (USED_CMAKE_GENERATOR MATCHES "Ninja")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+endif()
+
 # CMake seems to have no way to enable/disable testing per subproject,
 # so we provide an option similar to BUILD_TESTING, but just for MPM.
 option(MPM_BUILD_TESTING "enable testing for mpm" ON)
