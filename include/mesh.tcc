@@ -69,22 +69,27 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(nodes_[i]);
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over nodes
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        if (pred(nodes_[i])) oper(nodes_[i]);
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i)
+          if (pred(nodes_[i])) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create a list of active nodes in mesh
@@ -102,11 +107,13 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
   tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(active_nodes_.size())),
+      tbb::blocked_range<int>(size_t(0), size_t(active_nodes_.size()),
+                              tbb_grain_size_),
       [&](const tbb::blocked_range<int>& range) {
         for (int i = range.begin(); i != range.end(); ++i)
           oper(active_nodes_[i]);
-      });
+      },
+      tbb::simple_partitioner());
 }
 
 #ifdef USE_MPI
@@ -236,11 +243,13 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(cells_.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(cells_[i]);
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(cells_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create cells from node lists
@@ -691,10 +700,12 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
   tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(particles_.size())),
+      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                              tbb_grain_size_),
       [&](const tbb::blocked_range<int>& range) {
         for (int i = range.begin(); i != range.end(); ++i) oper(particles_[i]);
-      });
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over particle set
@@ -702,11 +713,12 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
   auto set = particle_sets_.at(set_id);
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(set.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(set[i]);
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(set[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
@@ -928,19 +940,24 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
     auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
-    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
-                      [&](const tbb::blocked_range<int>& range) {
-                        for (int i = range.begin(); i != range.end(); ++i)
-                          pset[i]->assign_traction(dir, traction);
-                      });
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(pset.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            pset[i]->assign_traction(dir, traction);
+        },
+        tbb::simple_partitioner());  // KK
   }
   if (!particle_tractions_.empty()) {
     tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(particles_.size())),
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                                tbb_grain_size_),
         [&](const tbb::blocked_range<int>& range) {
           for (int i = range.begin(); i != range.end(); ++i)
             particles_[i]->map_traction_force();
-        });
+        },
+        tbb::simple_partitioner());
   }
 }
 
@@ -997,14 +1014,16 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
     tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
+        tbb::blocked_range<int>(size_t(0), size_t(nodes.size()),
+                                tbb_grain_size_),
         [&](const tbb::blocked_range<int>& range) {
           for (int i = range.begin(); i != range.end(); ++i) {
             if (!nodes[i]->assign_concentrated_force(
                     phase, dir, concentrated_force, mfunction))
               throw std::runtime_error("Setting concentrated force failed");
           }
-        });
+        },
+        tbb::simple_partitioner());
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

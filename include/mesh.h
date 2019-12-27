@@ -454,6 +454,8 @@ class Mesh {
   std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! TBB grain size
+  int tbb_grain_size_{100};
 };  // Mesh class
 }  // namespace mpm
 
