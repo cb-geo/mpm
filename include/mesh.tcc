@@ -961,6 +961,25 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   }
 }
 
+//! Create particle tractions
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::add_nodal_velocity_constraints(
+    int set_id, const std::shared_ptr<mpm::Constraint>& constraint) {
+  bool status = true;
+  try {
+    if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end())
+      // Create a nodal velocity constraint
+      nodal_velocity_constraints_.emplace_back(constraint);
+    else
+      throw std::runtime_error("No node set found to assign velocity con");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Assign particles velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(

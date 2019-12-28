@@ -24,6 +24,7 @@
 using Json = nlohmann::json;
 
 #include "cell.h"
+#include "constraint.h"
 #include "container.h"
 #include "factory.h"
 #include "function_base.h"
@@ -270,6 +271,11 @@ class Mesh {
   //! \param[in] current_time Current time
   void apply_traction_on_particles(double current_time);
 
+  //! Create nodal velocity constraints tractions
+  //! \param[in] setid Node set id
+  bool add_nodal_velocity_constraints(
+      int set_id, const std::shared_ptr<mpm::Constraint>& constraint);
+
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
   //! \param[in] setid Node set id
@@ -452,6 +458,8 @@ class Mesh {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Loading (Particle tractions)
   std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
+  //! Nodal velocity constraints
+  std::vector<std::shared_ptr<mpm::Constraint>> nodal_velocity_constraints_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
