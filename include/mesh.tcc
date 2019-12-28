@@ -329,27 +329,47 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 
 //! Create cells from node lists
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::generate_material_points(
-    unsigned nquadratures, const std::string& particle_type) {
+bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
+                                               const std::string& particle_type,
+                                               unsigned material_id,
+                                               int cset_id) {
+  bool status = true;
   try {
     if (cells_.size() > 0) {
+      unsigned before_generation = this->nparticles();
       bool checks = false;
-      // Generate points
-      for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      // Get material
+      auto material = materials_.at(material_id);
+
+      // If set id is -1, use all cells
+      auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
+      // Iterate over each cell to generate points
+      for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
         (*citr)->assign_quadrature(nquadratures);
-        const std::vector<Eigen::Matrix<double, Tdim, 1>> cpoints =
-            (*citr)->generate_points();
+        // Genereate particles at the Gauss points
+        const auto cpoints = (*citr)->generate_points();
+        // Iterate over each coordinate to generate material points
         for (const auto& coordinates : cpoints) {
+          // Particle id
           mpm::Index pid = particles_.size();
-          bool status = this->add_particle(
+          // Create particle
+          auto particle =
               Factory<mpm::ParticleBase<Tdim>, mpm::Index,
                       const Eigen::Matrix<double, Tdim, 1>&>::instance()
                   ->create(particle_type, static_cast<mpm::Index>(pid),
-                           coordinates),
-              checks);
-          if (status) map_particles_[pid]->assign_cell(*citr);
+                           coordinates);
+
+          // Add particle to mesh
+          status = this->add_particle(particle, checks);
+          if (status) {
+            map_particles_[pid]->assign_cell(*citr);
+            map_particles_[pid]->assign_material(material);
+          } else
+            throw std::runtime_error("Generate particles in mesh failed");
         }
       }
+      if (before_generation == this->nparticles())
+        throw std::runtime_error("No particles were generated!");
       console_->info(
           "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
           "# of points generated: {}",
@@ -359,33 +379,39 @@ void mpm::Mesh<Tdim>::generate_material_points(
       throw std::runtime_error("No cells are found in the mesh!");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
   }
+  return status;
 }
 
 //! Create particles from coordinates
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
-    const std::vector<mpm::Index>& gp_ids, const std::string& particle_type,
-    const std::vector<VectorDim>& coordinates, bool check_duplicates) {
+    const std::string& particle_type, const std::vector<VectorDim>& coordinates,
+    unsigned material_id, bool check_duplicates) {
   bool status = true;
   try {
-    unsigned gpid = 0;
+    // Get material
+    auto material = materials_.at(material_id);
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
     // Iterate over particle coordinates
     for (const auto& particle_coordinates : coordinates) {
-      // Add particle to mesh and check
-      bool insert_status = this->add_particle(
-          Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                  const Eigen::Matrix<double, Tdim, 1>&>::instance()
-              ->create(particle_type, static_cast<mpm::Index>(gp_ids.at(gpid)),
-                       particle_coordinates),
-          check_duplicates);
+      // Particle id
+      mpm::Index pid = particles_.size();
+      // Create particle
+      auto particle = Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                              const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                          ->create(particle_type, static_cast<mpm::Index>(pid),
+                                   particle_coordinates);
 
-      // Increment particle id
-      if (insert_status) ++gpid;
-      // When addition of particle fails
+      // Add particle to mesh and check
+      bool insert_status = this->add_particle(particle, check_duplicates);
+
+      // If insertion is successful
+      if (insert_status)
+        map_particles_[pid]->assign_material(material);
       else
         throw std::runtime_error("Addition of particle to mesh failed!");
     }
@@ -945,19 +971,24 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
     auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
-    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(pset.size())),
-                      [&](const tbb::blocked_range<int>& range) {
-                        for (int i = range.begin(); i != range.end(); ++i)
-                          pset[i]->assign_traction(dir, traction);
-                      });
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(pset.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            pset[i]->assign_traction(dir, traction);
+        },
+        tbb::simple_partitioner());  // KK
   }
   if (!particle_tractions_.empty()) {
     tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(particles_.size())),
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                                tbb_grain_size_),
         [&](const tbb::blocked_range<int>& range) {
           for (int i = range.begin(); i != range.end(); ++i)
             particles_[i]->map_traction_force();
-        });
+        },
+        tbb::simple_partitioner());
   }
 }
 
@@ -1112,14 +1143,16 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
     tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(nodes.size())),
+        tbb::blocked_range<int>(size_t(0), size_t(nodes.size()),
+                                tbb_grain_size_),
         [&](const tbb::blocked_range<int>& range) {
           for (int i = range.begin(); i != range.end(); ++i) {
             if (!nodes[i]->assign_concentrated_force(
                     phase, dir, concentrated_force, mfunction))
               throw std::runtime_error("Setting concentrated force failed");
           }
-        });
+        },
+        tbb::simple_partitioner());
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1465,13 +1498,119 @@ bool mpm::Mesh<Tdim>::create_node_sets(
   return status;
 }
 
+// Return cells
 template <unsigned Tdim>
 mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
+}
+
+//! Create map of container of cells in sets
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::create_cell_sets(
+    const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& cell_sets,
+    bool check_duplicates) {
+  bool status = false;
+  try {
+    // Create container for each cell set
+    for (auto sitr = cell_sets.begin(); sitr != cell_sets.end(); ++sitr) {
+      // Create a container for the set
+      Container<Cell<Tdim>> cells;
+      // Reserve the size of the container
+      cells.reserve((sitr->second).size());
+      // Add cells to the container
+      for (auto pid : sitr->second) {
+        bool insertion_status = cells.add(map_cells_[pid], check_duplicates);
+      }
+
+      // Create the map of the container
+      status = this->cell_sets_
+                   .insert(std::pair<mpm::Index, Container<Cell<Tdim>>>(
+                       sitr->first, cells))
+                   .second;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return status;
 }
 
 //! return particle_ptr
 template <unsigned Tdim>
 std::map<mpm::Index, mpm::Index>* mpm::Mesh<Tdim>::particles_cell_ids() {
   return &(this->particles_cell_ids_);
+}
+
+//! Generate particles
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
+                                         const Json& generator) {
+  bool status = true;
+  try {
+    // Particle generator
+    const auto generator_type = generator["type"].template get<std::string>();
+
+    // Generate particles from file
+    if (generator_type == "file") {
+      status = this->read_particles_file(io, generator);
+    }
+
+    // Generate material points at the Gauss location in all cells
+    else if (generator_type == "gauss") {
+      // Number of particles per dir
+      unsigned nparticles_dir =
+          generator["nparticles_per_dir"].template get<unsigned>();
+      // Particle type
+      auto particle_type =
+          generator["particle_type"].template get<std::string>();
+      // Material id
+      unsigned material_id = generator["material_id"].template get<unsigned>();
+      // Cell set id
+      int cset_id = generator["cset_id"].template get<int>();
+      status = this->generate_material_points(nparticles_dir, particle_type,
+                                              material_id, cset_id);
+    }
+
+    else
+      throw std::runtime_error(
+          "Particle generator type is not properly specified");
+
+  } catch (std::exception& exception) {
+    console_->error("{}: #{} Generating particle failed", __FILE__, __LINE__);
+    status = false;
+  }
+  return status;
+}
+
+// Read particles file
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
+                                          const Json& generator) {
+  // Particle type
+  auto particle_type = generator["particle_type"].template get<std::string>();
+
+  // File location
+  auto file_loc =
+      io->file_name(generator["location"].template get<std::string>());
+
+  // Check duplicates
+  bool check_duplicates = generator["check_duplicates"].template get<bool>();
+
+  // Material id
+  unsigned material_id = generator["material_id"].template get<unsigned>();
+
+  const std::string reader = generator["io_type"].template get<std::string>();
+
+  // Create a particle reader
+  auto particle_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(reader);
+
+  // Get coordinates
+  auto coords = particle_io->read_particles(file_loc);
+
+  // Create particles from coordinates
+  bool status = this->create_particles(particle_type, coords, material_id,
+                                       check_duplicates);
+
+  if (!status) throw std::runtime_error("Addition of particles to mesh failed");
+
+  return status;
 }

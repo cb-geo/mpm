@@ -45,14 +45,9 @@ mpm::IO::IO(int argc, char** argv) {
   std::string file = working_dir_ + input_file_;
   std::ifstream ifs(file);
 
-  try {
-    if (!ifs.is_open())
-      throw std::runtime_error(
-          std::string("Input file not found in specified location: ") + file);
-  } catch (const std::runtime_error& except) {
-    console_->error("{}", except.what());
-    std::terminate();
-  }
+  if (!ifs.is_open())
+    throw std::runtime_error(
+        std::string("Input file not found in specified location: ") + file);
 
   json_ = Json::parse(ifs);
 }
@@ -64,18 +59,17 @@ std::string mpm::IO::file_name(const std::string& filename) {
   std::string file_name;
   // Read input file name from the JSON object
   try {
-    file_name = working_dir_ +
-                json_["input_files"][filename].template get<std::string>();
+    file_name = working_dir_ + filename;
+    // Check if a file is present, if not set file_name to empty
+    if (!this->check_file(file_name))
+      throw std::runtime_error("no file found!");
+
   } catch (const std::exception& except) {
-    console_->warn("Invalid JSON argument: {}; error: {}", filename,
+    console_->warn("Fetching file: {}; failed with: {}", filename,
                    except.what());
     file_name.clear();
     return file_name;
   }
-
-  // Check if a file is present, if not set file_name to empty
-  if (!this->check_file(file_name)) file_name.clear();
-
   return file_name;
 }
 
@@ -222,10 +216,6 @@ Json mpm::IO::json_object(const std::string& key) const {
 
 //! Return post processing object
 Json mpm::IO::post_processing() const { return json_["post_processing"]; }
-
-//! Return working directory
-//! \retval string of working directory
-std::string mpm::IO::working_directory() const { return working_dir_; }
 
 //! Return number of tbb threads
 unsigned mpm::IO::nthreads() const { return nthreads_; }

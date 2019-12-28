@@ -274,7 +274,6 @@ class Cell {
                                            unsigned phase,
                                            const VectorDim& traction);
 
-
   //! Compute the noal internal force  of a cell from particle stress and volume
   //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
   //! \param[in] phase Phase associate to the particle

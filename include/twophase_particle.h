@@ -165,7 +165,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Shape functions
   using Particle<Tdim>::shapefn_;
   //! B matrix
-//  using Particle<Tdim>::bmatrix_;
+  //  using Particle<Tdim>::bmatrix_;
   //! Effective stress of soil skeleton
   using Particle<Tdim>::stress_;
   //! Soil skeleton strain rate

@@ -1,7 +1,6 @@
 //! Constructor
 template <unsigned Tdim>
-mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
-    : mpm::MPM(std::move(io)) {
+mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   //! Logger
   console_ = spdlog::get("MPMBase");
 
@@ -51,13 +50,13 @@ mpm::MPMBase<Tdim>::MPMBase(std::unique_ptr<IO>&& io)
 
     // Math functions
     try {
-      // Get materials properties
+      // Get math functions properties
       auto math_functions = io_->json_object("math_functions");
       if (!math_functions.empty())
         this->initialise_math_functions(math_functions);
     } catch (std::exception& exception) {
-      console_->warn("{} #{}: No math functions are defined; set to default",
-                     __FILE__, __LINE__, exception.what());
+      console_->warn("{} #{}: No math functions are defined", __FILE__,
+                     __LINE__, exception.what());
     }
 
     post_process_ = io_->post_processing();
@@ -114,8 +113,8 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
-    const std::string reader =
-        mesh_props["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        mesh_props["io_type"].template get<std::string>();
 
     bool check_duplicates = true;
     try {
@@ -128,22 +127,29 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     }
 
     // Create a mesh reader
-    auto mesh_reader = Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+    auto mesh_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
     auto nodes_begin = std::chrono::steady_clock::now();
     // Global Index
     mpm::Index gid = 0;
     // Node type
     const auto node_type = mesh_props["node_type"].template get<std::string>();
-    // Create nodes from file
-    bool node_status = mesh_->create_nodes(
-        gid,                                                   // global id
-        node_type,                                             // node type
-        mesh_reader->read_mesh_nodes(io_->file_name("mesh")),  // coordinates
-        check_duplicates);  // check duplicates
 
-    if (!node_status)
+    // Mesh file
+    std::string mesh_file =
+        io_->file_name(mesh_props["mesh"].template get<std::string>());
+
+    // Create nodes from file
+    bool node_status =
+        mesh_->create_nodes(gid,                                  // global id
+                            node_type,                            // node type
+                            mesh_io->read_mesh_nodes(mesh_file),  // coordinates
+                            check_duplicates);                    // check dups
+
+    if (!node_status) {
+      status = false;
       throw std::runtime_error("Addition of nodes to mesh failed");
+    }
 
     auto nodes_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read nodes: {} ms", mpi_rank,
@@ -152,44 +158,20 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                        .count());
 
     // Read and assign node sets
-    if (!io_->file_name("entity_sets").empty()) {
-      bool node_sets = mesh_->create_node_sets(
-          (io_->entity_sets(io_->file_name("entity_sets"), "node_sets")),
-          check_duplicates);
-      if (!node_sets)
-        throw std::runtime_error("Node sets are not properly assigned");
-    }
+    this->node_entity_sets(mesh_props, check_duplicates);
 
     // Read nodal euler angles and assign rotation matrices
-    if (!io_->file_name("nodal_euler_angles").empty()) {
-      bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
-          mesh_reader->read_euler_angles(io_->file_name("nodal_euler_angles")));
-      if (!rotation_matrices)
-        throw std::runtime_error(
-            "Euler angles are not properly assigned/computed");
-    }
+    this->node_euler_angles(mesh_props, mesh_io);
 
     // Read and assign velocity constraints
-    if (!io_->file_name("velocity_constraints").empty()) {
-      bool velocity_constraints = mesh_->assign_velocity_constraints(
-          mesh_reader->read_velocity_constraints(
-              io_->file_name("velocity_constraints")));
-      if (!velocity_constraints)
-        throw std::runtime_error(
-            "Velocity constraints are not properly assigned");
-    }
+    this->nodal_velocity_constraints(mesh_props, mesh_io);
 
     // Read and assign friction constraints
-    if (!io_->file_name("friction_constraints").empty()) {
-      bool friction_constraints = mesh_->assign_friction_constraints(
-          mesh_reader->read_friction_constraints(
-              io_->file_name("friction_constraints")));
-      if (!friction_constraints)
-        throw std::runtime_error(
-            "Friction constraints are not properly assigned");
-    }
+    this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+    // TODO: Add a function to apply to pore pressure constraints to nodes
 
+    // TODO: remove this
     // Read and assign pressure constraints for single phase materials
     if (!io_->file_name("pressure_constraints").empty()) {
       bool pressure_constraints = mesh_->assign_pressure_constraints(
@@ -201,6 +183,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Pressure constraints are not properly assigned");
     }
 
+    // TODO: remove this
     // Read and assign pore pressure constraints for two/three phase materials
     if (!io_->file_name("pore_pressure_constraints").empty()) {
       bool pore_pressure_constraints = mesh_->assign_pressure_constraints(
@@ -212,6 +195,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
             "Pore pressure constraints are not properly assigned");
     }
 
+    // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
     const auto cell_type = mesh_props["cell_type"].template get<std::string>();
@@ -220,17 +204,22 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
         Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
 
     // Create cells from file
-    bool cell_status = mesh_->create_cells(
-        gid,                                                   // global id
-        element,                                               // element tyep
-        mesh_reader->read_mesh_cells(io_->file_name("mesh")),  // Node ids
-        check_duplicates);  // Check duplicates
+    bool cell_status =
+        mesh_->create_cells(gid,      // global id
+                            element,  // element tyep
+                            mesh_io->read_mesh_cells(mesh_file),  // Node ids
+                            check_duplicates);                    // Check dups
 
-    if (!cell_status)
+    if (!cell_status) {
+      status = false;
       throw std::runtime_error("Addition of cells to mesh failed");
+    }
 
     // Compute cell neighbours
     mesh_->compute_cell_neighbours();
+
+    // Read and assign cell sets
+    this->cell_entity_sets(mesh_props, check_duplicates);
 
     auto cells_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read cells: {} ms", mpi_rank,
@@ -238,10 +227,11 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
                        cells_end - cells_begin)
                        .count());
   } catch (std::exception& exception) {
-    console_->error("#{}: Reading mesh and particles: {}", __LINE__,
-                    exception.what());
-    status = false;
+    console_->error("#{}: Reading mesh: {}", __LINE__, exception.what());
   }
+
+  // Terminate if mesh creation failed
+  if (!status) throw std::runtime_error("Initialisation of mesh failed");
   return status;
 }
 
@@ -262,13 +252,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-    // Get particle properties
-    auto particle_props = io_->json_object("particle");
     // Get mesh properties
     auto mesh_props = io_->json_object("mesh");
     // Get Mesh reader from JSON object
-    const std::string reader =
-        mesh_props["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        mesh_props["io_type"].template get<std::string>();
 
     bool check_duplicates = true;
     try {
@@ -280,94 +268,48 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       check_duplicates = true;
     }
 
+    auto particles_gen_begin = std::chrono::steady_clock::now();
+
+    // Get particles properties
+    auto json_particles = io_->json_object("particles");
+
+    for (const auto& json_particle : json_particles) {
+      // Generate particles
+      bool gen_status =
+          mesh_->generate_particles(io_, json_particle["generator"]);
+      if (!gen_status) status = false;
+    }
+
+    auto particles_gen_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Generate particles: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_gen_end - particles_gen_begin)
+                       .count());
+
+    auto particles_locate_begin = std::chrono::steady_clock::now();
+
     // Create a mesh reader
-    auto particle_reader =
-        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+    auto particle_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
-    auto particles_begin = std::chrono::steady_clock::now();
+    // Read and assign particles cells
+    this->particles_cells(mesh_props, particle_io);
 
-    // Particle type
-    const auto particle_type =
-        particle_props["particle_type"].template get<std::string>();
-    // Generate particles
-    bool read_particles_file = false;
-    try {
-      unsigned nparticles_cell =
-          mesh_props["generate_particles_cells"].template get<unsigned>();
+    // Locate particles in cell
+    auto unlocatable_particles = mesh_->locate_particles_mesh();
 
-      if (nparticles_cell > 0) {
-        unsigned before_generation = mesh_->nparticles();
-        mesh_->generate_material_points(nparticles_cell, particle_type);
-        if (before_generation == mesh_->nparticles())
-          throw std::runtime_error(
-              "No particles were generated, mesh is empty!");
-      } else
-        throw std::runtime_error(
-            "Specified # of particles per cell for generation is invalid!");
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
 
-    } catch (std::exception& exception) {
-      console_->warn("Generate particles is not set, reading particles file");
-      read_particles_file = true;
-    }
-
-    // Read particles from file
-    if (read_particles_file) {
-      // Get all particles
-      std::vector<Eigen::Matrix<double, Tdim, 1>> all_particles;
-
-      all_particles =
-          particle_reader->read_particles(io_->file_name("particles"));
-      // Get all particle ids
-      std::vector<mpm::Index> all_particles_ids(all_particles.size());
-      std::iota(all_particles_ids.begin(), all_particles_ids.end(), 0);
-
-      // Create particles from file
-      bool particle_status =
-          mesh_->create_particles(all_particles_ids,  // global id
-                                  particle_type,      // particle type
-                                  all_particles,      // coordinates
-                                  check_duplicates);  // Check duplicates
-
-      if (!particle_status)
-        throw std::runtime_error("Addition of particles to mesh failed");
-
-      auto particles_end = std::chrono::steady_clock::now();
-      console_->info("Rank {} Read particles: {} ms", mpi_rank,
-                     std::chrono::duration_cast<std::chrono::milliseconds>(
-                         particles_end - particles_begin)
-                         .count());
-      try {
-        // Read and assign particles cells
-        if (!io_->file_name("particles_cells").empty()) {
-          bool particles_cells = mesh_->assign_particles_cells(
-              particle_reader->read_particles_cells(
-                  io_->file_name("particles_cells")));
-          if (!particles_cells)
-            throw std::runtime_error(
-                "Cell ids are not properly assigned to particles");
-        }
-      } catch (std::exception& exception) {
-        console_->error("{} #{}: Reading particles cells: {}", __FILE__,
-                        __LINE__, exception.what());
-      }
-
-      auto particles_locate_begin = std::chrono::steady_clock::now();
-      // Locate particles in cell
-      auto unlocatable_particles = mesh_->locate_particles_mesh();
-
-      if (!unlocatable_particles.empty())
-        throw std::runtime_error("Particle outside the mesh domain");
-
-      auto particles_locate_end = std::chrono::steady_clock::now();
-      console_->info("Rank {} Locate particles: {} ms", mpi_rank,
-                     std::chrono::duration_cast<std::chrono::milliseconds>(
-                         particles_locate_end - particles_locate_begin)
-                         .count());
-    }
     // Write particles and cells to file
-    particle_reader->write_particles_cells(
+    particle_io->write_particles_cells(
         io_->output_file("particles-cells", ".txt", uuid_, 0, 0).string(),
         mesh_->particles_cells());
+
+    auto particles_locate_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Locate particles: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_locate_end - particles_locate_begin)
+                       .count());
 
     auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
@@ -375,15 +317,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
-    if (!io_->file_name("particles_volumes").empty()) {
-      bool particles_volumes = mesh_->assign_particles_volumes(
-          particle_reader->read_particles_volumes(
-              io_->file_name("particles_volumes")));
-      if (!particles_volumes)
-        throw std::runtime_error("Particles volumes are not properly assigned");
-    }
+    this->particles_volumes(mesh_props, particle_io);
 
-    // Read and assign particles initial pore pressure for two/three phase
+    // TODO: Remove this and add a function to read and assign initial pore
+    // pressure Read and assign particles initial pore pressure for two/three
+    // phase
     if (!io_->file_name("particles_pore_pressures").empty()) {
       bool particles_pore_pressures = mesh_->assign_particles_pore_pressures(
           particle_reader->read_particles_pressures(
@@ -415,29 +353,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     */
 
     // Read and assign particles velocity constraints
-    if (!io_->file_name("particles_velocity_constraints").empty()) {
-      bool particles_velocity_constraints =
-          mesh_->assign_particles_velocity_constraints(
-              particle_reader->read_velocity_constraints(
-                  io_->file_name("particles_velocity_constraints")));
-      if (!particles_velocity_constraints)
-        throw std::runtime_error(
-            "Particles velocity constraints are not properly assigned");
-    }
+    this->particle_velocity_constraints(mesh_props, particle_io);
 
     // Read and assign particles stresses
-    if (!io_->file_name("particles_stresses").empty()) {
-
-      // Get stresses of all particles
-      const auto all_particles_stresses =
-          particle_reader->read_particles_stresses(
-              io_->file_name("particles_stresses"));
-
-      // Read and assign particles stresses
-      if (!mesh_->assign_particles_stresses(all_particles_stresses))
-        throw std::runtime_error(
-            "Particles stresses are not properly assigned");
-    }
+    this->particles_stresses(mesh_props, particle_io);
 
     auto particles_volume_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read volume, velocity and stresses: {} ms",
@@ -446,16 +365,21 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_volume_end - particles_volume_begin)
                        .count());
 
-    // Read and assign particle sets
-    if (!io_->file_name("entity_sets").empty()) {
-      bool particle_sets = mesh_->create_particle_sets(
-          (io_->entity_sets(io_->file_name("entity_sets"), "particle_sets")),
-          check_duplicates);
-    }
+    // Particle entity sets
+    auto particles_sets_begin = std::chrono::steady_clock::now();
+    this->particle_entity_sets(mesh_props, check_duplicates);
+    auto particles_sets_end = std::chrono::steady_clock::now();
+    console_->info("Rank {} Create particle sets: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       particles_volume_end - particles_volume_begin)
+                       .count());
+
   } catch (std::exception& exception) {
-    console_->error("#{}: Reading particles: {}", __LINE__, exception.what());
+    console_->error("#{}: MPM Base generating particles: {}", __LINE__,
+                    exception.what());
     status = false;
   }
+  if (!status) throw std::runtime_error("Initialisation of particles failed");
   return status;
 }
 
@@ -495,39 +419,6 @@ bool mpm::MPMBase<Tdim>::initialise_materials() {
   } catch (std::exception& exception) {
     console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
     status = false;
-  }
-  return status;
-}
-
-//! Apply properties to particles sets (e.g: material)
-template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::apply_properties_to_particles_sets() {
-  bool status = false;
-  // Set phase to zero
-  unsigned phase = 0;
-  // Assign material to particle sets
-  try {
-    // Get particle properties
-    auto particle_props = io_->json_object("particle");
-    // Get particle sets properties
-    auto particle_sets = particle_props["particle_sets"];
-    // Assign material to each particle sets
-    for (const auto& psets : particle_sets) {
-      // Get set material from list of materials
-      auto set_material = materials_.at(psets["material_id"]);
-      // Get sets ids
-      std::vector<unsigned> sids = psets["set_id"];
-      // Assign material to particles in the specific sets
-      for (const auto& sitr : sids) {
-        mesh_->iterate_over_particle_set(
-            sitr, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                            std::placeholders::_1, set_material));
-      }
-    }
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("#{}: Particle sets material: {}", __LINE__,
-                    exception.what());
   }
   return status;
 }
@@ -684,18 +575,20 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     }
 
     // Create a file reader
-    const std::string reader =
-        io_->json_object("mesh")["mesh_reader"].template get<std::string>();
+    const std::string io_type =
+        io_->json_object("mesh")["io_type"].template get<std::string>();
     auto traction_reader =
-        Factory<mpm::ReadMesh<Tdim>>::instance()->create(reader);
+        Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
     // Read and assign particles surface tractions
     if (loads.find("particle_surface_traction") != loads.end()) {
       for (const auto& ptraction : loads["particle_surface_traction"]) {
         // Get the math function
         std::shared_ptr<FunctionBase> tfunction = nullptr;
-        tfunction = math_functions_.at(
-            ptraction.at("math_function_id").template get<unsigned>());
+        // If a math function is defined set to function or use scalar
+        if (ptraction.find("math_function_id") != ptraction.end())
+          tfunction = math_functions_.at(
+              ptraction.at("math_function_id").template get<unsigned>());
         // Set id
         int pset_id = ptraction.at("pset_id").template get<int>();
         // Direction
@@ -783,4 +676,271 @@ bool mpm::MPMBase<Tdim>::initialise_math_functions(const Json& math_functions) {
     status = false;
   }
   return status;
+}
+
+//! Node entity sets
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::node_entity_sets(const Json& mesh_props,
+                                          bool check_duplicates) {
+  try {
+    if (mesh_props.find("entity_sets") != mesh_props.end()) {
+      std::string entity_sets =
+          mesh_props["entity_sets"].template get<std::string>();
+      if (!io_->file_name(entity_sets).empty()) {
+        bool node_sets = mesh_->create_node_sets(
+            (io_->entity_sets(io_->file_name(entity_sets), "node_sets")),
+            check_duplicates);
+        if (!node_sets)
+          throw std::runtime_error("Node sets are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Entity set JSON not found");
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Entity sets are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+//! Node Euler angles
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::node_euler_angles(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("nodal_euler_angles") !=
+            mesh_props["boundary_conditions"].end()) {
+      std::string euler_angles =
+          mesh_props["boundary_conditions"]["nodal_euler_angles"]
+              .template get<std::string>();
+      if (!io_->file_name(euler_angles).empty()) {
+        bool rotation_matrices = mesh_->compute_nodal_rotation_matrices(
+            mesh_io->read_euler_angles(io_->file_name(euler_angles)));
+        if (!rotation_matrices)
+          throw std::runtime_error(
+              "Euler angles are not properly assigned/computed");
+      }
+    } else
+      throw std::runtime_error("Euler angles JSON not found");
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Euler angles are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Nodal velocity constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign velocity constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("velocity_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      std::string vel_constraints =
+          mesh_props["boundary_conditions"]["velocity_constraints"]
+              .template get<std::string>();
+      if (!io_->file_name(vel_constraints).empty()) {
+        bool velocity_constraints = mesh_->assign_velocity_constraints(
+            mesh_io->read_velocity_constraints(
+                io_->file_name(vel_constraints)));
+        if (!velocity_constraints)
+          throw std::runtime_error(
+              "Velocity constraints are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Velocity constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Velocity constraints are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Nodal frictional constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign friction constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("friction_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      std::string fric_constraints =
+          mesh_props["boundary_conditions"]["friction_constraints"]
+              .template get<std::string>();
+      if (!io_->file_name(fric_constraints).empty()) {
+        bool friction_constraints = mesh_->assign_friction_constraints(
+            mesh_io->read_friction_constraints(
+                io_->file_name(fric_constraints)));
+        if (!friction_constraints)
+          throw std::runtime_error(
+              "Friction constraints are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Friction constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Friction conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+//! Cell entity sets
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::cell_entity_sets(const Json& mesh_props,
+                                          bool check_duplicates) {
+  try {
+    if (mesh_props.find("entity_sets") != mesh_props.end()) {
+      // Read and assign cell sets
+      std::string entity_sets =
+          mesh_props["entity_sets"].template get<std::string>();
+      if (!io_->file_name(entity_sets).empty()) {
+        bool cell_sets = mesh_->create_cell_sets(
+            (io_->entity_sets(io_->file_name(entity_sets), "cell_sets")),
+            check_duplicates);
+        if (!cell_sets)
+          throw std::runtime_error("Cell sets are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Cell entity sets JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Cell entity sets are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Particles cells
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_cells(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("particle_cells") != mesh_props.end()) {
+      std::string fparticles_cells =
+          mesh_props["particle_cells"].template get<std::string>();
+
+      if (!io_->file_name(fparticles_cells).empty()) {
+        bool particles_cells =
+            mesh_->assign_particles_cells(particle_io->read_particles_cells(
+                io_->file_name(fparticles_cells)));
+        if (!particles_cells)
+          throw std::runtime_error(
+              "Particle cells are not properly assigned to particles");
+      }
+    } else
+      throw std::runtime_error("Particle cells JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle cells are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Particles volumes
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_volumes(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("particles_volumes") != mesh_props.end()) {
+      std::string fparticles_volumes =
+          mesh_props["particles_volumes"].template get<std::string>();
+      if (!io_->file_name(fparticles_volumes).empty()) {
+        bool particles_volumes =
+            mesh_->assign_particles_volumes(particle_io->read_particles_volumes(
+                io_->file_name(fparticles_volumes)));
+        if (!particles_volumes)
+          throw std::runtime_error(
+              "Particles volumes are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Particle volumes JSON not found");
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle volumes are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Particle velocity constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particle_velocity_constraints(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find(
+            "particles_velocity_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      std::string fparticles_velocity_constraints =
+          mesh_props["boundary_conditions"]["particles_velocity_constraints"]
+              .template get<std::string>();
+      if (!io_->file_name(fparticles_velocity_constraints).empty()) {
+        bool particles_velocity_constraints =
+            mesh_->assign_particles_velocity_constraints(
+                particle_io->read_velocity_constraints(
+                    io_->file_name(fparticles_velocity_constraints)));
+        if (!particles_velocity_constraints)
+          throw std::runtime_error(
+              "Particles velocity constraints are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Particle velocity constraints JSON not found");
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle velocity constraints are undefined {} ",
+                   __LINE__, exception.what());
+  }
+}
+
+// Particles stresses
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_stresses(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("particles_velocity_constraints") != mesh_props.end()) {
+      std::string fparticles_stresses =
+          mesh_props["particles_stresses"].template get<std::string>();
+      if (!io_->file_name(fparticles_stresses).empty()) {
+
+        // Get stresses of all particles
+        const auto all_particles_stresses =
+            particle_io->read_particles_stresses(
+                io_->file_name(fparticles_stresses));
+
+        // Read and assign particles stresses
+        if (!mesh_->assign_particles_stresses(all_particles_stresses))
+          throw std::runtime_error(
+              "Particles stresses are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Particle stresses JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle stresses are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+//! Particle entity sets
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
+                                              bool check_duplicates) {
+  // Read and assign particle sets
+  try {
+    if (mesh_props.find("entity_sets") != mesh_props.end()) {
+      std::string entity_sets =
+          mesh_props["entity_sets"].template get<std::string>();
+      if (!io_->file_name(entity_sets).empty()) {
+        bool particle_sets = mesh_->create_particle_sets(
+            (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
+            check_duplicates);
+      }
+    } else
+      throw std::runtime_error("Particle entity set JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle sets are undefined {} ", __LINE__,
+                   exception.what());
+  }
 }

@@ -119,7 +119,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
   return status;
 }
 
-//! Update internal force 
+//! Update internal force
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     bool update, unsigned phase, const Eigen::Matrix<double, Tdim, 1>& force) {
@@ -603,7 +603,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
     }
   }
 }
-
 
 //! Add material id from material points to material_ids_
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>

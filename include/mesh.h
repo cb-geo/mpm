@@ -19,6 +19,9 @@
 #include <tbb/parallel_for_each.h>
 
 #include <tsl/robin_map.h>
+// JSON
+#include "json.hpp"
+using Json = nlohmann::json;
 
 #include "cell.h"
 #include "container.h"
@@ -26,6 +29,8 @@
 #include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
+#include "io.h"
+#include "io_mesh.h"
 #include "logger.h"
 #include "material/material.h"
 #include "mpi_datatypes.h"
@@ -160,15 +165,14 @@ class Mesh {
   void iterate_over_cells(Toper oper);
 
   //! Create particles from coordinates
-  //! \param[in] gpids Global particle ids
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
+  //! \param[in] material_id ID of the material
   //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create particle status
-  bool create_particles(const std::vector<mpm::Index>& gpids,
-                        const std::string& particle_type,
+  bool create_particles(const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates,
-                        bool check_duplicates = true);
+                        unsigned material_id, bool check_duplicates = true);
 
   //! Add a particle to the mesh
   //! \param[in] particle A shared pointer to particle
@@ -293,7 +297,6 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           particle_ltractions);
 
-
   //! Assign particles velocity constraints
   //! \param[in] particle_velocity_constraints velocity at dir on particle
   bool assign_particles_velocity_constraints(
@@ -334,9 +337,12 @@ class Mesh {
   //! Generate points
   //! \param[in] nquadratures Number of points per direction in cell
   //! \param[in] particle_type Particle type
+  //! \param[in] material_id ID of the material
+  //! \param[in] cset_id Set ID of the cell [-1 for all cells]
   //! \retval point Material point coordinates
-  void generate_material_points(unsigned nquadratures,
-                                const std::string& particle_type);
+  bool generate_material_points(unsigned nquadratures,
+                                const std::string& particle_type,
+                                unsigned material_id, int cset_id);
 
   //! Initialise material models
   //! \param[in] materials Material models
@@ -397,6 +403,14 @@ class Mesh {
       const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& node_sets,
       bool check_duplicates);
 
+  //! Create map of container of cells in sets
+  //! \param[in] map of cells ids in sets
+  //! \param[in] check_duplicates Parameter to check duplicates
+  //! \retval status Status of  create cell sets
+  bool create_cell_sets(
+      const tsl::robin_map<mpm::Index, std::vector<mpm::Index>>& cell_sets,
+      bool check_duplicates);
+
   //! Get the container of cell
   mpm::Container<Cell<Tdim>> cells();
 
@@ -409,7 +423,17 @@ class Mesh {
   //! Return nlocal ghost cells
   unsigned nlocal_ghost_cells() const { return local_ghost_cells_.size(); }
 
+  //! Generate particles
+  //! \param[in] io IO object handle
+  //! \param[in] generator Point generator object
+  bool generate_particles(const std::shared_ptr<mpm::IO>& io,
+                          const Json& generator);
+
  private:
+  // Read particles from file
+  bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
+                           const Json& generator);
+
   // Locate a particle in mesh cells
   bool locate_particle_cells(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
@@ -449,6 +473,8 @@ class Mesh {
   Container<Cell<Tdim>> ghost_cells_;
   //! Container of local ghost cells
   Container<Cell<Tdim>> local_ghost_cells_;
+  //! Container of cell sets
+  tsl::robin_map<unsigned, Container<Cell<Tdim>>> cell_sets_;
   //! Map of ghost cells to the neighbours ranks
   std::map<unsigned, std::vector<unsigned>> ghost_cells_neighbour_ranks_;
   //! Faces and cells

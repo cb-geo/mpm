@@ -1,32 +1,32 @@
-#ifndef MPM_READ_MESH_ASCII_H_
-#define MPM_READ_MESH_ASCII_H_
+#ifndef MPM_IO_MESH_ASCII_H_
+#define MPM_IO_MESH_ASCII_H_
 
 #include <vector>
 
 #include "Eigen/Dense"
 
-#include "read_mesh.h"
+#include "io_mesh.h"
 
 //! MPM namespace
 namespace mpm {
 
-//! ReadMeshAscii class
+//! IOMeshAscii class
 //! \brief Derived class that returns mesh and particles locataions from ascii
 //! file \tparam Tdim Dimension
 template <unsigned Tdim>
-class ReadMeshAscii : public ReadMesh<Tdim> {
+class IOMeshAscii : public IOMesh<Tdim> {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor
-  ReadMeshAscii() : mpm::ReadMesh<Tdim>() {
+  IOMeshAscii() : mpm::IOMesh<Tdim>() {
     //! Logger
-    console_ = spdlog::get("ReadMeshAscii");
+    console_ = spdlog::get("IOMeshAscii");
   }
 
   //! Destructor
-  ~ReadMeshAscii() override = default;
+  ~IOMeshAscii() override = default;
 
   //! Read mesh nodes file
   //! \param[in] mesh file name with nodes and cells
@@ -104,6 +104,6 @@ class ReadMeshAscii : public ReadMesh<Tdim> {
 };  // ReadAscii class
 }  // namespace mpm
 
-#include "read_mesh_ascii.tcc"
+#include "io_mesh_ascii.tcc"
 
-#endif  // MPM_READ_MESH_ASCII_H_
+#endif  // MPM_IO_MESH_ASCII_H_
