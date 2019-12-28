@@ -229,12 +229,6 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
       const std::string& attribute, unsigned phase);
 
-  //! Assign velocity constraints to nodes
-  //! \param[in] velocity_constraints Constraint at node, dir, and velocity
-  bool assign_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          velocity_constraints);
-
   //! Assign velocity constraints to cells
   //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
   //! velocity
@@ -271,9 +265,14 @@ class Mesh {
   //! \param[in] current_time Current time
   void apply_traction_on_particles(double current_time);
 
-  //! Create nodal velocity constraints tractions
+  //! Create particle velocity constraints tractions
   //! \param[in] setid Node set id
-  bool add_nodal_velocity_constraints(
+  bool create_particle_velocity_constraint(
+      int set_id, const std::shared_ptr<mpm::Constraint>& constraint);
+
+  //! Assign nodal velocity constraints
+  //! \param[in] setid Node set id
+  bool assign_nodal_velocity_constraint(
       int set_id, const std::shared_ptr<mpm::Constraint>& constraint);
 
   //! Assign nodal concentrated force
@@ -458,8 +457,8 @@ class Mesh {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Loading (Particle tractions)
   std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
-  //! Nodal velocity constraints
-  std::vector<std::shared_ptr<mpm::Constraint>> nodal_velocity_constraints_;
+  //! Particle velocity constraints
+  std::vector<std::shared_ptr<mpm::Constraint>> particle_velocity_constraints_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
