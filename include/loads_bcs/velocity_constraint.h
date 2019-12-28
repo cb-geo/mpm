@@ -9,9 +9,9 @@ namespace mpm {
 class VelocityConstraint {
  public:
   // Constructor
-  //! \param[setid] setid  set id
-  //! \param[dir] dir Direction of constraint load
-  //! \param[velocity] velocity Constraint  velocity
+  //! \param[in] setid  set id
+  //! \param[in] dir Direction of constraint load
+  //! \param[in] velocity Constraint  velocity
   VelocityConstraint(int setid, unsigned dir, double velocity)
       : setid_{setid}, dir_{dir}, velocity_{velocity} {};
 

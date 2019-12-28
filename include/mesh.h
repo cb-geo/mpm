@@ -26,6 +26,7 @@ using Json = nlohmann::json;
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "friction_constraint.h"
 #include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
@@ -236,12 +237,6 @@ class Mesh {
       const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
 
-  //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
-  bool assign_friction_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-          friction_constraints);
-
   //! Compute and assign rotation matrix to nodes
   //! \param[in] euler_angles Map of node number and respective euler_angles
   bool compute_nodal_rotation_matrices(
@@ -272,8 +267,16 @@ class Mesh {
 
   //! Assign nodal velocity constraints
   //! \param[in] setid Node set id
+  //! \param[in] velocity_constraints Velocity constraint at node, dir, velocity
   bool assign_nodal_velocity_constraint(
       int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
+
+  //! Assign nodal frictional constraints
+  //! \param[in] setid Node set id
+  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
+  bool assign_nodal_frictional_constraint(
+      int nset_id,
+      const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
 
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
