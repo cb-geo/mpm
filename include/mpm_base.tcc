@@ -690,7 +690,7 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
         double velocity = constraints.at("velocity").template get<double>();
         // Add velocity constraint to mesh
         auto velocity_constraint =
-            std::make_shared<mpm::Constraint>(nset_id, dir, velocity);
+            std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
         mesh_->assign_nodal_velocity_constraint(nset_id, velocity_constraint);
       }
     } else

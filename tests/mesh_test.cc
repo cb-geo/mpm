@@ -984,8 +984,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           int dir = 0;
           double constraint = 10.5;
           // Add velocity constraint to mesh
-          auto velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          auto velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
@@ -993,22 +993,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           dir = 1;
           constraint = -12.5;
           // Add velocity constraint to mesh
-          velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // Add velocity constraint to all nodes in mesh
           velocity_constraint =
-              std::make_shared<mpm::Constraint>(-1, dir, constraint);
+              std::make_shared<mpm::VelocityConstraint>(-1, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // When constraints fail
           dir = 2;
           // Add velocity constraint to mesh
-          velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == false);
         }
@@ -2159,8 +2159,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           int dir = 0;
           double constraint = 10.5;
           // Add velocity constraint to mesh
-          auto velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          auto velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
@@ -2168,22 +2168,22 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           dir = 1;
           constraint = -12.5;
           // Add velocity constraint to mesh
-          velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // Add velocity constraint to all nodes in mesh
           velocity_constraint =
-              std::make_shared<mpm::Constraint>(-1, dir, constraint);
+              std::make_shared<mpm::VelocityConstraint>(-1, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // When constraints fail
           dir = 3;
           // Add velocity constraint to mesh
-          velocity_constraint =
-              std::make_shared<mpm::Constraint>(set_id, dir, constraint);
+          velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+              set_id, dir, constraint);
           REQUIRE(mesh->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == false);
         }

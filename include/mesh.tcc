@@ -931,7 +931,7 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
 //! Create particle velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particle_velocity_constraint(
-    int set_id, const std::shared_ptr<mpm::Constraint>& constraint) {
+    int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint) {
   bool status = true;
   try {
     if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end())
@@ -950,15 +950,15 @@ bool mpm::Mesh<Tdim>::create_particle_velocity_constraint(
 //! Assign nodal velocity constraints
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_velocity_constraint(
-    int set_id, const std::shared_ptr<mpm::Constraint>& constraint) {
+    int set_id, const std::shared_ptr<mpm::VelocityConstraint>& vconstraint) {
   bool status = true;
   try {
     if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end()) {
-      int set_id = constraint->setid();
+      int set_id = vconstraint->setid();
       // If set id is -1, use all nodes
       auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
-      unsigned dir = constraint->dir();
-      double velocity = constraint->value();
+      unsigned dir = vconstraint->dir();
+      double velocity = vconstraint->velocity();
       tbb::parallel_for(
           tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
                                   tbb_grain_size_),

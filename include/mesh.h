@@ -24,7 +24,6 @@
 using Json = nlohmann::json;
 
 #include "cell.h"
-#include "constraint.h"
 #include "container.h"
 #include "factory.h"
 #include "function_base.h"
@@ -39,6 +38,7 @@ using Json = nlohmann::json;
 #include "particle.h"
 #include "particle_base.h"
 #include "traction.h"
+#include "velocity_constraint.h"
 
 namespace mpm {
 
@@ -268,12 +268,12 @@ class Mesh {
   //! Create particle velocity constraints tractions
   //! \param[in] setid Node set id
   bool create_particle_velocity_constraint(
-      int set_id, const std::shared_ptr<mpm::Constraint>& constraint);
+      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
 
   //! Assign nodal velocity constraints
   //! \param[in] setid Node set id
   bool assign_nodal_velocity_constraint(
-      int set_id, const std::shared_ptr<mpm::Constraint>& constraint);
+      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
 
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
@@ -458,7 +458,8 @@ class Mesh {
   //! Loading (Particle tractions)
   std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
   //! Particle velocity constraints
-  std::vector<std::shared_ptr<mpm::Constraint>> particle_velocity_constraints_;
+  std::vector<std::shared_ptr<mpm::VelocityConstraint>>
+      particle_velocity_constraints_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
