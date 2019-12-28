@@ -761,8 +761,9 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
 
 // Nodal pore pressure constraints (Coupled solid-fluid formulation)
 template <unsigned Tdim>
-void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
-    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io,
+    unsigned phase) {
   try {
     // Read and assign pore pressure constraints
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
@@ -772,9 +773,10 @@ void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
           mesh_props["boundary_conditions"]["pore_pressure_constraints"]
               .template get<std::string>();
       if (!io_->file_name(porepress_constraints).empty()) {
-        bool ppressure_constraints = mesh_->assign_pore_pressure_constraints(
+        bool ppressure_constraints = mesh_->assign_pressure_constraints(
             mesh_io->read_pressure_constraints(
-                io_->file_name(pore_pressure_constraints)));
+                io_->file_name(pore_pressure_constraints)),
+            phase);
         if (!ppressure_constraints)
           throw std::runtime_error(
               "Pore pressure constraints are not properly assigned");
