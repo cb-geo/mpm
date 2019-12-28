@@ -37,7 +37,11 @@ class ParticleTraction {
 
   // Return traction
   double traction(double current_time) const {
-    return traction_ * (this->traction_fn_)->value(current_time);
+    // Static load when no math function is defined
+    double scalar = (this->traction_fn_ != nullptr)
+                        ? (this->traction_fn_)->value(current_time)
+                        : 1.0;
+    return traction_ * scalar;
   }
 
  private:

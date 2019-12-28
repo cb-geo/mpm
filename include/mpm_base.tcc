@@ -527,8 +527,10 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
       for (const auto& ptraction : loads["particle_surface_traction"]) {
         // Get the math function
         std::shared_ptr<FunctionBase> tfunction = nullptr;
-        tfunction = math_functions_.at(
-            ptraction.at("math_function_id").template get<unsigned>());
+        // If a math function is defined set to function or use scalar
+        if (ptraction.find("math_function_id") != ptraction.end())
+          tfunction = math_functions_.at(
+              ptraction.at("math_function_id").template get<unsigned>());
         // Set id
         int pset_id = ptraction.at("pset_id").template get<int>();
         // Direction
