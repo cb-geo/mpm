@@ -169,32 +169,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign friction constraints
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
-    // TODO: Add a function to apply to pore pressure constraints to nodes
-
-    // TODO: remove this
-    // Read and assign pressure constraints for single phase materials
-    if (!io_->file_name("pressure_constraints").empty()) {
-      bool pressure_constraints = mesh_->assign_pressure_constraints(
-          mpm::ParticlePhase::Solid,
-          mesh_reader->read_pressure_constraints(
-              io_->file_name("pressure_constraints")));
-      if (!pressure_constraints)
-        throw std::runtime_error(
-            "Pressure constraints are not properly assigned");
-    }
-
-    // TODO: remove this
-    // Read and assign pore pressure constraints for two/three phase materials
-    if (!io_->file_name("pore_pressure_constraints").empty()) {
-      bool pore_pressure_constraints = mesh_->assign_pressure_constraints(
-          mpm::ParticlePhase::Liquid,
-          mesh_reader->read_pressure_constraints(
-              io_->file_name("pore_pressure_constraints")));
-      if (!pore_pressure_constraints)
-        throw std::runtime_error(
-            "Pore pressure constraints are not properly assigned");
-    }
-
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
@@ -785,6 +759,34 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   }
 }
 
+// Nodal pore pressure constraints (Coupled solid-fluid formulation)
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Read and assign pore pressure constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("pore_pressure_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+      std::string porepress_constraints =
+          mesh_props["boundary_conditions"]["pore_pressure_constraints"]
+              .template get<std::string>();
+      if (!io_->file_name(porepress_constraints).empty()) {
+        bool ppressure_constraints = mesh_->assign_pore_pressure_constraints(
+            mesh_io->read_pressure_constraints(
+                io_->file_name(pore_pressure_constraints)));
+        if (!ppressure_constraints)
+          throw std::runtime_error(
+              "Pore pressure constraints are not properly assigned");
+      }
+    } else
+      throw std::runtime_error("Pore pressure constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Pore pressure conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
 //! Cell entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::cell_entity_sets(const Json& mesh_props,
