@@ -113,6 +113,14 @@ class MPMBase : public MPM {
   void nodal_frictional_constraints(
       const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
 
+  //! Nodal pore pressure constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  //!  \param[in] phase
+  void nodal_pressure_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io,
+      unsigned phase);
+
   //! Cell entity sets
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates
