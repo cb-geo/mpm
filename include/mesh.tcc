@@ -918,8 +918,8 @@ bool mpm::Mesh<Tdim>::create_particles_tractions(
   try {
     if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end())
       // Create a particle traction load
-      particle_tractions_.emplace_back(std::make_shared<mpm::ParticleTraction>(
-          set_id, mfunction, dir, traction));
+      particle_tractions_.emplace_back(
+          std::make_shared<mpm::Traction>(set_id, mfunction, dir, traction));
     else
       throw std::runtime_error("No particle set found to assign traction");
 

@@ -37,7 +37,7 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
-#include "particle_traction.h"
+#include "traction.h"
 
 namespace mpm {
 
@@ -451,7 +451,7 @@ class Mesh {
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Loading (Particle tractions)
-  std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
+  std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
