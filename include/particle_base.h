@@ -8,8 +8,9 @@
 
 #include "cell.h"
 #include "data_types.h"
+#include "function_base.h"
 #include "hdf5_particle.h"
-#include "material/material.h"
+#include "material.h"
 
 namespace mpm {
 
@@ -54,6 +55,14 @@ class ParticleBase {
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(const HDF5Particle& particle) = 0;
+
+  //! Initialise particle HDF5 data and material
+  //! \param[in] particle HDF5 data of particle
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(
+      const HDF5Particle& particle,
+      const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
@@ -122,9 +131,12 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual bool map_mass_momentum_to_nodes() = 0;
 
-  // Assign material
+  //! Assign material
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
+
+  //! Return material id
+  unsigned material_id() const { return material_id_; }
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -199,10 +211,8 @@ class ParticleBase {
   virtual void map_traction_force() = 0;
 
   //! Compute updated position
-  virtual bool compute_updated_position(double dt) = 0;
-
-  //! Compute updated position based on nodal velocity
-  virtual bool compute_updated_position_velocity(double dt) = 0;
+  virtual bool compute_updated_position(double dt,
+                                        bool velocity_update = false) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
@@ -222,6 +232,9 @@ class ParticleBase {
   //! Apply particle velocity constraints
   virtual void apply_particle_velocity_constraints() = 0;
 
+  //! Assign material id of this particle to nodes
+  virtual void append_material_id_to_nodes() const = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
@@ -237,6 +250,8 @@ class ParticleBase {
   std::shared_ptr<Cell<Tdim>> cell_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
+  //! Unsigned material id
+  unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
 };  // ParticleBase class

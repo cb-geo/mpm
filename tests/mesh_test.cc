@@ -10,12 +10,14 @@
 #endif
 
 #include "element.h"
+#include "function_base.h"
 #include "hexahedron_element.h"
+#include "linear_function.h"
 #include "mesh.h"
 #include "node.h"
 #include "quadrilateral_element.h"
 
-//! \brief Check mesh class for 2D case
+//! Check mesh class for 2D case
 TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   // Dimension
   const unsigned Dim = 2;
@@ -27,10 +29,36 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
   const unsigned Nnodes = 4;
   // Tolerance
   const double Tolerance = 1.E-9;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
   // 4-noded quadrilateral element
   std::shared_ptr<mpm::Element<Dim>> element =
       Factory<mpm::Element<Dim>>::instance()->create("ED2Q4");
+
+  // Assign material
+  unsigned mid = 0;
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
+  auto le_material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic2D", std::move(mid), jmaterial);
+
+  std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
+  materials[mid] = le_material;
 
   //! Check Mesh IDs
   SECTION("Check mesh ids") {
@@ -128,6 +156,10 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     cell1->add_node(2, node2);
     cell1->add_node(3, node3);
 
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
+
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
 
@@ -182,13 +214,77 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     REQUIRE(mesh->nparticles() == 1);
 
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+
+    // Test assign node concentrated force
+    SECTION("Check assign node concentrated force") {
+      unsigned Nphase = 0;
+      // Set external force to zero
+      Eigen::Matrix<double, Dim, 1> force;
+      force.setZero();
+      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
+      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+
+      const unsigned Direction = 0;
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+      node_sets[0] = std::vector<mpm::Index>{0, 1};
+
+      REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 0, 0, 10.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -1, 0, 0.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 5, 0, 0.5) ==
+              false);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -5, 1, 0.5) ==
+              false);
+
+      double current_time = 0.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      current_time = 0.25;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      std::vector<double> ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+
+      current_time = 5.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      ext_forces = {0.75, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+    }
   }
 
   // Check add / remove node
@@ -409,33 +505,80 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Initialize cell
     REQUIRE(cell1->initialise() == true);
+    // Particle type 2D
+    const std::string particle_type = "P2D";
+
+    // Initialise material models
+    mesh->initialise_material_models(materials);
 
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    REQUIRE(mesh->nparticles() == 0);
+
+    REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) == false);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 4);
+    SECTION("Check generating 2 particle / cell") {
+      REQUIRE(mesh->generate_material_points(2, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 4);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 9);
+    SECTION("Check generating 3 particle / cell") {
+      REQUIRE(mesh->generate_material_points(3, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 9);
+    }
+
+    SECTION("Check material point generation") {
+      // Generator property
+      Json jgen;
+      jgen["type"] = "gauss";
+      jgen["material_id"] = mid;
+      jgen["cset_id"] = 1;
+      jgen["particle_type"] = "P2D";
+      jgen["check_duplicates"] = false;
+      jgen["nparticles_per_dir"] = 2;
+
+      // Assign argc and argv to nput arguments of MPM
+      int argc = 7;
+      char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
+                      (char*)"-p",      (char*)"8",  (char*)"-i",
+                      (char*)"mpm.json"};
+
+      // Create an IO object
+      auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> cell_sets;
+      cell_sets[1] = std::vector<mpm::Index>{0};
+
+      REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
+
+      REQUIRE(mesh->nparticles() == 0);
+      // Generate
+      REQUIRE(mesh->generate_particles(io, jgen) == true);
+      // Number of particles
+      REQUIRE(mesh->nparticles() == 4);
+    }
 
     // Particle 1
     coords << 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -582,17 +725,14 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           particle << 0.675, 0.25;
           coordinates.emplace_back(particle);
 
+          // Initialise material models in mesh
+          mesh->initialise_material_models(materials);
+
           SECTION("Check addition of particles to mesh") {
             // Particle type 2D
             const std::string particle_type = "P2D";
-            // Global particle index
-            std::vector<mpm::Index> gpid(coordinates.size());
-            std::iota(gpid.begin(), gpid.end(), 0);
-            mesh->create_particles(gpid, particle_type, coordinates, false);
-            // Check if mesh has added particles
-            REQUIRE(mesh->nparticles() == coordinates.size());
-            // Try again this shouldn't add more coordinates
-            mesh->create_particles(gpid, particle_type, coordinates);
+            // Create particles from file
+            mesh->create_particles(particle_type, coordinates, mid, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
 
@@ -651,7 +791,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(gpid, particle_type, coordinates);
+            mesh->create_particles(particle_type, coordinates, mid, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             const unsigned phase = 0;
@@ -727,53 +867,46 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_tractions;
-              // Tractions
-              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
+
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
 
               REQUIRE(mesh->nparticles() == 8);
 
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+              REQUIRE(mesh->create_particles_tractions(mfunction, 0, 0, 10.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1,
+                                                       -10.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 2, 0,
+                                                       -12.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 3, 1, 0.5) ==
+                      true);
+
+              REQUIRE(mesh->create_particles_tractions(mfunction, -1, 1, 0.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 5, 0, 0.5) ==
                       false);
+              REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
+                      false);
+
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+              REQUIRE(particles.size() == 0);
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_shapefn,
+                            std::placeholders::_1));
+
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
                             std::placeholders::_1));
 
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      true);
-              // When tractions fail
-              particles_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      false);
-              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      false);
-            }
-
-            // Test assign nodes tractions
-            SECTION("Check assign nodes tractions") {
-              // Vector of node coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  nodes_tractions;
-              // Tractions
-              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
-
-              REQUIRE(mesh->nnodes() == 6);
-
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
-              // When tractions fail
-              nodes_tractions.emplace_back(std::make_tuple(3, 2, 0.0));
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
-              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              mesh->apply_traction_on_particles(10);
             }
 
             // Test assign particles stresses
@@ -939,6 +1072,32 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
   const unsigned Nnodes = 8;
   // Tolerance
   const double Tolerance = 1.E-9;
+  // Json property
+  Json jfunctionproperties;
+  jfunctionproperties["id"] = 0;
+  std::vector<double> x_values{{0.0, 0.5, 1.0, 1.5}};
+  std::vector<double> fx_values{{0.0, 1.0, 1.0, 0.0}};
+  jfunctionproperties["xvalues"] = x_values;
+  jfunctionproperties["fxvalues"] = fx_values;
+
+  // Assign material
+  unsigned mid = 0;
+  // Initialise material
+  Json jmaterial;
+  jmaterial["density"] = 1000.;
+  jmaterial["youngs_modulus"] = 1.0E+7;
+  jmaterial["poisson_ratio"] = 0.3;
+
+  auto le_material =
+      Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+          "LinearElastic3D", std::move(mid), jmaterial);
+
+  std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
+  materials[mid] = le_material;
+
+  // math function
+  std::shared_ptr<mpm::FunctionBase> mfunction =
+      std::make_shared<mpm::LinearFunction>(0, jfunctionproperties);
 
   // 8-noded hexahedron element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -1083,14 +1242,95 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 1);
 
+    int mpi_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_size == 1) cell1->rank(1);
+
+    mesh->find_domain_shared_nodes();
+    REQUIRE(node0->mpi_ranks().size() == mpi_size);
+    REQUIRE(node1->mpi_ranks().size() == mpi_size);
+    REQUIRE(node2->mpi_ranks().size() == mpi_size);
+    REQUIRE(node3->mpi_ranks().size() == mpi_size);
+    REQUIRE(node4->mpi_ranks().size() == mpi_size);
+    REQUIRE(node5->mpi_ranks().size() == mpi_size);
+    REQUIRE(node6->mpi_ranks().size() == mpi_size);
+    REQUIRE(node7->mpi_ranks().size() == mpi_size);
+
+    // Check mesh ghost boundary cells
+    mesh->find_ghost_boundary_cells();
+
     // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(0);
-    // Check number of particles in mesh
-    REQUIRE(mesh->nparticles() == 1);
-    // Remove all non-rank particles in mesh
-    mesh->remove_all_nonrank_particles(1);
+    mesh->remove_all_nonrank_particles();
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
+
+    // Test assign node concentrated force
+    SECTION("Check assign node concentrated force") {
+      unsigned Nphase = 0;
+      // Set external force to zero
+      Eigen::Matrix<double, Dim, 1> force;
+      force.setZero();
+      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
+      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+
+      const unsigned Direction = 0;
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+      node_sets[0] = std::vector<mpm::Index>{0, 1};
+
+      REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 0, 0, 10.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -1, 0, 0.5) ==
+              true);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, 5, 0, 0.5) ==
+              false);
+      REQUIRE(mesh->assign_nodal_concentrated_forces(mfunction, -5, 1, 0.5) ==
+              false);
+
+      double current_time = 0.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(0.).epsilon(Tolerance));
+      }
+
+      current_time = 0.25;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      std::vector<double> ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+
+      current_time = 5.0;
+      node0->apply_concentrated_force(Nphase, current_time);
+      node1->apply_concentrated_force(Nphase, current_time);
+      ext_forces = {0.25, 0., 0.};
+      // Check external force
+      for (unsigned i = 0; i < Dim; ++i) {
+        REQUIRE(node0->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+        REQUIRE(node1->external_force(Nphase)(i) ==
+                Approx(ext_forces.at(i)).epsilon(Tolerance));
+      }
+    }
   }
 
   // Check add / remove node
@@ -1366,32 +1606,79 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise cell and compute volume
     REQUIRE(cell1->initialise() == true);
 
+    // Particle type 3D
+    const std::string particle_type = "P3D";
+
+    // Initialise material models
+    mesh->initialise_material_models(materials);
+
+    REQUIRE(mesh->nparticles() == 0);
     // Generate material points in cell
-    auto points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 0);
+    REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) == false);
+    REQUIRE(mesh->nparticles() == 0);
 
     // Add cell 1 and check
     REQUIRE(mesh->add_cell(cell1) == true);
 
-    // Generate material points in cell
-    points = mesh->generate_material_points(1);
-    REQUIRE(points.size() == 1);
+    SECTION("Check generating 1 particle / cell") {
+      // Generate material points in cell
+      REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 1);
+    }
 
-    points = mesh->generate_material_points(2);
-    REQUIRE(points.size() == 8);
+    SECTION("Check generating 2 particle / cell") {
+      REQUIRE(mesh->generate_material_points(2, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 8);
+    }
 
-    points = mesh->generate_material_points(3);
-    REQUIRE(points.size() == 27);
+    SECTION("Check generating 3 particle / cell") {
+      REQUIRE(mesh->generate_material_points(3, particle_type, mid, -1) ==
+              true);
+      REQUIRE(mesh->nparticles() == 27);
+    }
+
+    SECTION("Check material point generation") {
+      // Generator property
+      Json jgen;
+      jgen["type"] = "gauss";
+      jgen["material_id"] = mid;
+      jgen["cset_id"] = 1;
+      jgen["particle_type"] = "P3D";
+      jgen["check_duplicates"] = false;
+      jgen["nparticles_per_dir"] = 2;
+
+      // Assign argc and argv to nput arguments of MPM
+      int argc = 7;
+      char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
+                      (char*)"-p",      (char*)"8",  (char*)"-i",
+                      (char*)"mpm.json"};
+
+      // Create an IO object
+      auto io = std::make_shared<mpm::IO>(argc, argv);
+
+      tsl::robin_map<mpm::Index, std::vector<mpm::Index>> cell_sets;
+      cell_sets[1] = std::vector<mpm::Index>{0};
+
+      REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
+
+      REQUIRE(mesh->nparticles() == 0);
+      // Generate
+      REQUIRE(mesh->generate_particles(io, jgen) == true);
+      // Number of particles
+      REQUIRE(mesh->nparticles() == 8);
+    }
 
     // Particle 1
     coords << 1.0, 1.0, 1.0;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
-        std::make_shared<mpm::Particle<Dim>>(0, coords);
+        std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5, 1.5;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
-        std::make_shared<mpm::Particle<Dim>>(1, coords);
+        std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
     REQUIRE(mesh->add_particle(particle1) == true);
@@ -1577,17 +1864,14 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           particle << 0.675, 0.25, 0.25;
           coordinates.emplace_back(particle);
 
+          // Initialise material models in mesh
+          mesh->initialise_material_models(materials);
+
           SECTION("Check addition of particles to mesh") {
             // Particle type 3D
             const std::string particle_type = "P3D";
-            // Global particle index
-            std::vector<mpm::Index> gpid(coordinates.size());
-            std::iota(gpid.begin(), gpid.end(), 0);
-            mesh->create_particles(gpid, particle_type, coordinates);
-            // Check if mesh has added particles
-            REQUIRE(mesh->nparticles() == coordinates.size());
-            // Try again this shouldn't add more coordinates
-            mesh->create_particles(gpid, particle_type, coordinates);
+            // Create particles from file
+            mesh->create_particles(particle_type, coordinates, mid, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
             // Clear coordinates and try creating a list of particles with an
@@ -1595,7 +1879,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(gpid, particle_type, coordinates);
+            mesh->create_particles(particle_type, coordinates, mid, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             // Test assign particles cells again should fail
@@ -1721,51 +2005,44 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
               // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_tractions;
-              // Tractions
-              particles_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              particles_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              particles_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              particles_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
 
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              REQUIRE(mesh->create_particles_tractions(mfunction, 0, 0, 10.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 1, 1,
+                                                       -10.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 2, 0,
+                                                       -12.5) == true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 3, 1, 0.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, -1, 1, 0.5) ==
+                      true);
+              REQUIRE(mesh->create_particles_tractions(mfunction, 5, 1, 0.5) ==
                       false);
+              REQUIRE(mesh->create_particles_tractions(mfunction, -5, 1, 0.5) ==
+                      false);
+
+              // Locate particles in a mesh
+              auto particles = mesh->locate_particles_mesh();
+              REQUIRE(particles.size() == 0);
+              mesh->iterate_over_particles(
+                  std::bind(&mpm::ParticleBase<Dim>::compute_shapefn,
+                            std::placeholders::_1));
+
               // Compute volume
               mesh->iterate_over_particles(
                   std::bind(&mpm::ParticleBase<Dim>::compute_volume,
                             std::placeholders::_1));
 
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      true);
-              // When tractions fail
-              particles_tractions.emplace_back(std::make_tuple(3, 3, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      false);
-              particles_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_particles_tractions(particles_tractions) ==
-                      false);
-            }
-
-            // Test assign nodes tractions
-            SECTION("Check assign nodes tractions") {
-              // Vector of node coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  nodes_tractions;
-              // Tractions
-              nodes_tractions.emplace_back(std::make_tuple(0, 0, 10.5));
-              nodes_tractions.emplace_back(std::make_tuple(1, 1, -10.5));
-              nodes_tractions.emplace_back(std::make_tuple(2, 0, -12.5));
-              nodes_tractions.emplace_back(std::make_tuple(3, 1, 0.0));
-
-              REQUIRE(mesh->nnodes() == 12);
-
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == true);
-              // When tractions fail
-              nodes_tractions.emplace_back(std::make_tuple(3, 4, 0.0));
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
-              nodes_tractions.emplace_back(std::make_tuple(300, 0, 0.0));
-              REQUIRE(mesh->assign_nodal_tractions(nodes_tractions) == false);
+              mesh->apply_traction_on_particles(10);
             }
 
             // Test assign particles stresses

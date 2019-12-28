@@ -111,6 +111,17 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
 
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
+
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
       // Length of the cell
@@ -489,6 +500,32 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     }
   }
 
+  // Check material adddition to nodes
+  SECTION("Check material id addition to nodes") {
+    // create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {node0, node1,
+                                                              node2, node3};
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
+
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
+    cell->append_material_id_to_nodes(1);
+    cell->append_material_id_to_nodes(1);
+
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
+    std::vector<unsigned> material_ids = {1, 2};
+    for (const auto& node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
+  }
+
   SECTION("Test particle addition deletion") {
     mpm::Index pid = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
@@ -592,6 +629,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     const auto bmatrix =
         element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
                          Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto dn_dx =
+        element->dn_dx(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                       Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -672,14 +712,14 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
-      REQUIRE(strain_rate.size() == 3);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
+      Eigen::VectorXd pstrain_rate = cell->compute_strain_rate(dn_dx, phase);
+      REQUIRE(pstrain_rate.size() == 6);
+      for (unsigned i = 0; i < pstrain_rate.size(); ++i)
+        REQUIRE(pstrain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
           cell->compute_strain_rate_centroid(phase);
-      REQUIRE(strain_rate_centroid.size() == 3);
+      REQUIRE(strain_rate_centroid.size() == 6);
       for (unsigned i = 0; i < strain_rate_centroid.size(); ++i)
         REQUIRE(strain_rate_centroid(i) == Approx(0.).epsilon(Tolerance));
     }
@@ -723,8 +763,8 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(dn_dx, phase,
+                                         pvolume * pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector2d> internal_forces;
@@ -1047,6 +1087,17 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     REQUIRE(cell->initialise() == true);
     // Check if cell is initialised, after addition of nodes
     REQUIRE(cell->is_initialised() == true);
+
+    // Check MPI rank
+    SECTION("Assign and check MPI rank on nodes") {
+      cell->rank(1);
+      cell->assign_mpi_rank_to_nodes();
+
+      REQUIRE(node0->mpi_ranks().size() == 1);
+      REQUIRE(node1->mpi_ranks().size() == 1);
+      REQUIRE(node2->mpi_ranks().size() == 1);
+      REQUIRE(node3->mpi_ranks().size() == 1);
+    }
 
     // Check cell length calculation
     SECTION("Compute mean length of cell") {
@@ -1562,6 +1613,32 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     }
   }
 
+  // Check material adddition to nodes
+  SECTION("Check material id addition to nodes") {
+    // create cell
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    // create a vector of nodes and add them to cell
+    std::vector<std::shared_ptr<mpm::NodeBase<Dim>>> nodes = {
+        node0, node1, node2, node3, node4, node5, node6, node7};
+    for (int j = 0; j < nodes.size(); ++j) cell->add_node(j, nodes[j]);
+
+    // add material ids to nodes in cell
+    cell->append_material_id_to_nodes(2);
+    cell->append_material_id_to_nodes(1);
+    cell->append_material_id_to_nodes(1);
+
+    // check if the correct amount of material ids were added to node and if
+    // their indexes are correct
+    std::vector<unsigned> material_ids = {1, 2};
+    for (const auto& node : nodes) {
+      REQUIRE(node->material_ids().size() == 2);
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
+  }
+
   SECTION("Test particle addition deletion") {
     mpm::Index pid = 0;
     auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
@@ -1886,6 +1963,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
     const auto bmatrix =
         element->bmatrix(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
                          Eigen::Matrix<double, Dim, 1>::Zero());
+    const auto dn_dx =
+        element->dn_dx(xi, coords, Eigen::Matrix<double, Dim, 1>::Zero(),
+                       Eigen::Matrix<double, Dim, 1>::Zero());
 
     SECTION("Check particle mass mapping") {
       cell->map_particle_mass_to_nodes(shapefns_xi, phase, pmass);
@@ -1967,10 +2047,10 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         }
       }
 
-      Eigen::VectorXd strain_rate = cell->compute_strain_rate(bmatrix, phase);
-      REQUIRE(strain_rate.size() == 6);
-      for (unsigned i = 0; i < strain_rate.size(); ++i)
-        REQUIRE(strain_rate(i) == Approx(0.).epsilon(Tolerance));
+      Eigen::VectorXd pstrain_rate = cell->compute_strain_rate(dn_dx, phase);
+      REQUIRE(pstrain_rate.size() == 6);
+      for (unsigned i = 0; i < pstrain_rate.size(); ++i)
+        REQUIRE(pstrain_rate(i) == Approx(0.).epsilon(Tolerance));
 
       Eigen::VectorXd strain_rate_centroid =
           cell->compute_strain_rate_centroid(phase);
@@ -2018,8 +2098,8 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       Eigen::Matrix<double, 6, 1> pinternal_stress;
       pinternal_stress << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5;
 
-      cell->compute_nodal_internal_force(bmatrix, phase, pvolume,
-                                         pinternal_stress);
+      cell->compute_nodal_internal_force(dn_dx, phase,
+                                         pvolume * pinternal_stress);
 
       // Check internal force
       std::vector<Eigen::Vector3d> internal_forces;

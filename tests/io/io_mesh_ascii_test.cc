@@ -4,10 +4,10 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
-#include "read_mesh_ascii.h"
+#include "io_mesh_ascii.h"
 
-// Check ReadMeshAscii
-TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
+// Check IOMeshAscii
+TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
 
   // Dimension
   const unsigned dim = 2;
@@ -72,15 +72,15 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read mesh nodes
     SECTION("Check read mesh nodes") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read nodes from a non-existant file
-      auto check_coords = read_mesh->read_mesh_nodes("mesh-missing.txt");
+      auto check_coords = io_mesh->read_mesh_nodes("mesh-missing.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == 0);
 
-      check_coords = read_mesh->read_mesh_nodes("mesh-2d.txt");
+      check_coords = io_mesh->read_mesh_nodes("mesh-2d.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == coordinates.size());
 
@@ -95,16 +95,16 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read mesh cells
     SECTION("Check read mesh cell ids") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read cells from a non-existant file
-      auto check_node_ids = read_mesh->read_mesh_cells("mesh-missing.txt");
+      auto check_node_ids = io_mesh->read_mesh_cells("mesh-missing.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == 0);
 
       // Check node ids in cell
-      check_node_ids = read_mesh->read_mesh_cells("mesh-2d.txt");
+      check_node_ids = io_mesh->read_mesh_cells("mesh-2d.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == cells.size());
       // Check node ids of cells
@@ -168,16 +168,16 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read particle coordinates
     SECTION("Check particle coordinates") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read particle from a non-existant file
-      auto particles = read_mesh->read_particles("particles-missing.txt");
+      auto particles = io_mesh->read_particles("particles-missing.txt");
       // Check number of particles
       REQUIRE(particles.size() == 0);
 
       // Check particle coordinates
-      particles = read_mesh->read_particles("particles-2d.txt");
+      particles = io_mesh->read_particles("particles-2d.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
@@ -216,18 +216,18 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read velocity constraints
     SECTION("Check velocity constraints") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read constraints from a non-existant file
-      auto constraints = read_mesh->read_velocity_constraints(
+      auto constraints = io_mesh->read_velocity_constraints(
           "velocity-constraints-missing.txt");
       // Check number of constraints
       REQUIRE(constraints.size() == 0);
 
       // Check constraints
       constraints =
-          read_mesh->read_velocity_constraints("velocity-constraints-2d.txt");
+          io_mesh->read_velocity_constraints("velocity-constraints-2d.txt");
       // Check number of particles
       REQUIRE(constraints.size() == velocity_constraints.size());
 
@@ -272,18 +272,18 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read euler angles
     SECTION("Check euler angles") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read euler angles from a non-existant file
       auto read_euler_angles =
-          read_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
+          io_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
       // Check number of euler angles
       REQUIRE(read_euler_angles.size() == 0);
 
       // Check euler angles
       read_euler_angles =
-          read_mesh->read_euler_angles("nodal-euler-angles-2d.txt");
+          io_mesh->read_euler_angles("nodal-euler-angles-2d.txt");
 
       // Check number of elements
       REQUIRE(read_euler_angles.size() == euler_angles.size());
@@ -321,36 +321,6 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
     }
 
     file.close();
-
-    // Check read tractions
-    SECTION("Check tractions") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
-
-      // Try to read constrtaints from a non-existant file
-      auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
-      // Check number of tractions
-      REQUIRE(tractions.size() == 0);
-
-      // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-2d.txt");
-      // Check number of particles
-      REQUIRE(tractions.size() == particles_tractions.size());
-
-      // Check tractions
-      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
-        REQUIRE(
-            std::get<0>(tractions.at(i)) ==
-            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(tractions.at(i)) ==
-            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(tractions.at(i)) ==
-            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
-      }
-    }
   }
 
   SECTION("Check stresses file") {
@@ -378,17 +348,16 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
 
     // Check read stresses
     SECTION("Check stresses") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read stresses from a non-existant file
-      auto stresses =
-          read_mesh->read_particles_stresses("stresses-missing.txt");
+      auto stresses = io_mesh->read_particles_stresses("stresses-missing.txt");
       // Check number of stresses
       REQUIRE(stresses.size() == 0);
 
       // Check stresses
-      stresses = read_mesh->read_particles_stresses("particle-stresses-2d.txt");
+      stresses = io_mesh->read_particles_stresses("particle-stresses-2d.txt");
       // Check number of particles
       REQUIRE(stresses.size() == particles_stresses.size());
 
@@ -402,8 +371,8 @@ TEST_CASE("ReadMeshAscii is checked for 2D", "[ReadMesh][ReadMeshAscii][2D]") {
   }
 }
 
-// Check ReadMeshAscii
-TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
+// Check IOMeshAscii
+TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
 
   // Dimension
   const unsigned dim = 3;
@@ -486,16 +455,16 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read mesh nodes
     SECTION("Check read mesh nodes") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Check nodal coordinates
-      auto check_coords = read_mesh->read_mesh_nodes("mesh-missing.txt");
+      auto check_coords = io_mesh->read_mesh_nodes("mesh-missing.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == 0);
 
       // Check nodal coordinates
-      check_coords = read_mesh->read_mesh_nodes("mesh-3d.txt");
+      check_coords = io_mesh->read_mesh_nodes("mesh-3d.txt");
       // Check number of nodal coordinates
       REQUIRE(check_coords.size() == coordinates.size());
 
@@ -510,16 +479,16 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read mesh cells
     SECTION("Check read mesh cell ids") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read cells from a non-existant file
-      auto check_node_ids = read_mesh->read_mesh_cells("mesh-missing.txt");
+      auto check_node_ids = io_mesh->read_mesh_cells("mesh-missing.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == 0);
 
       // Check node ids in cell
-      check_node_ids = read_mesh->read_mesh_cells("mesh-3d.txt");
+      check_node_ids = io_mesh->read_mesh_cells("mesh-3d.txt");
       // Check number of cells
       REQUIRE(check_node_ids.size() == cells.size());
       // Check node ids of cells
@@ -606,16 +575,16 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read particles
     SECTION("Check particle coordinates") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read particle from a non-existant file
-      auto particles = read_mesh->read_particles("particles-missing.txt");
+      auto particles = io_mesh->read_particles("particles-missing.txt");
       // Check number of particles
       REQUIRE(particles.size() == 0);
 
       // Check particle coordinates
-      particles = read_mesh->read_particles("particles-3d.txt");
+      particles = io_mesh->read_particles("particles-3d.txt");
       // Check number of particles
       REQUIRE(particles.size() == coordinates.size());
 
@@ -655,18 +624,18 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read velocity constraints
     SECTION("Check velocity constraints") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read constrtaints from a non-existant file
-      auto constraints = read_mesh->read_velocity_constraints(
+      auto constraints = io_mesh->read_velocity_constraints(
           "velocity-constraints-missing.txt");
       // Check number of constraints
       REQUIRE(constraints.size() == 0);
 
       // Check constraints
       constraints =
-          read_mesh->read_velocity_constraints("velocity-constraints-3d.txt");
+          io_mesh->read_velocity_constraints("velocity-constraints-3d.txt");
       // Check number of particles
       REQUIRE(constraints.size() == velocity_constraints.size());
 
@@ -711,18 +680,18 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read euler angles
     SECTION("Check euler angles") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read euler angles from a non-existant file
       auto read_euler_angles =
-          read_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
+          io_mesh->read_euler_angles("nodal-euler-angles-missing.txt");
       // Check number of euler angles
       REQUIRE(read_euler_angles.size() == 0);
 
       // Check euler angles
       read_euler_angles =
-          read_mesh->read_euler_angles("nodal-euler-angles-3d.txt");
+          io_mesh->read_euler_angles("nodal-euler-angles-3d.txt");
 
       // Check number of elements
       REQUIRE(read_euler_angles.size() == euler_angles.size());
@@ -760,36 +729,6 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
     }
 
     file.close();
-
-    // Check read tractions
-    SECTION("Check tractions") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
-
-      // Try to read constraints from a non-existant file
-      auto tractions =
-          read_mesh->read_particles_tractions("tractions-missing.txt");
-      // Check number of tractions
-      REQUIRE(tractions.size() == 0);
-
-      // Check tractions
-      tractions = read_mesh->read_particles_tractions("tractions-3d.txt");
-      // Check number of particles
-      REQUIRE(tractions.size() == particles_tractions.size());
-
-      // Check tractions
-      for (unsigned i = 0; i < particles_tractions.size(); ++i) {
-        REQUIRE(
-            std::get<0>(tractions.at(i)) ==
-            Approx(std::get<0>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(tractions.at(i)) ==
-            Approx(std::get<1>(particles_tractions.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(tractions.at(i)) ==
-            Approx(std::get<2>(particles_tractions.at(i))).epsilon(Tolerance));
-      }
-    }
   }
 
   SECTION("Check stresses file") {
@@ -818,17 +757,16 @@ TEST_CASE("ReadMeshAscii is checked for 3D", "[ReadMesh][ReadMeshAscii][3D]") {
 
     // Check read stresses
     SECTION("Check stresses") {
-      // Create a read_mesh object
-      auto read_mesh = std::make_unique<mpm::ReadMeshAscii<dim>>();
+      // Create a io_mesh object
+      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
 
       // Try to read stresses from a non-existant file
-      auto stresses =
-          read_mesh->read_particles_stresses("stresses-missing.txt");
+      auto stresses = io_mesh->read_particles_stresses("stresses-missing.txt");
       // Check number of stresses
       REQUIRE(stresses.size() == 0);
 
       // Check stresses
-      stresses = read_mesh->read_particles_stresses("particle-stresses-3d.txt");
+      stresses = io_mesh->read_particles_stresses("particle-stresses-3d.txt");
       // Check number of particles
       REQUIRE(stresses.size() == particles_stresses.size());
 

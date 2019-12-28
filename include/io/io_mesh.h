@@ -1,5 +1,5 @@
-#ifndef MPM_READ_MESH_H_
-#define MPM_READ_MESH_H_
+#ifndef MPM_IO_MESH_H_
+#define MPM_IO_MESH_H_
 
 #include <array>
 #include <exception>
@@ -19,26 +19,26 @@
 
 namespace mpm {
 
-//! ReadMesh class
+//! IOMesh class
 //! \brief Abstract Base class that returns mesh and particles locataions
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class ReadMesh {
+class IOMesh {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   // Constructor
-  ReadMesh() = default;
+  IOMesh() = default;
 
   //! Default destructor
-  virtual ~ReadMesh() = default;
+  virtual ~IOMesh() = default;
 
   //! Delete copy constructor
-  ReadMesh(const ReadMesh<Tdim>&) = delete;
+  IOMesh(const IOMesh<Tdim>&) = delete;
 
   //! Delete assignement operator
-  ReadMesh& operator=(const ReadMesh<Tdim>&) = delete;
+  IOMesh& operator=(const IOMesh<Tdim>&) = delete;
 
   //! Read mesh nodes file
   //! \param[in] mesh file name with nodes and cells
@@ -86,11 +86,6 @@ class ReadMesh {
   virtual std::vector<std::tuple<mpm::Index, double>> read_particles_volumes(
       const std::string& volume_file) = 0;
 
-  //! Read particles traction file
-  //! \param[in] traction_files file name with particle tractions
-  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
-      read_particles_tractions(const std::string& traction_file) = 0;
-
   //! Read particles cells file
   //! \param[in] particles_cells_file file name with particle cell ids
   virtual std::vector<std::array<mpm::Index, 2>> read_particles_cells(
@@ -103,7 +98,7 @@ class ReadMesh {
       const std::string& particles_cells_file,
       const std::vector<std::array<mpm::Index, 2>>& particles_cells) = 0;
 
-};  // ReadMesh class
+};  // IOMesh class
 }  // namespace mpm
 
-#endif  // MPM_READ_MESH_H_
+#endif  // MPM_IO_MESH_H_

@@ -137,3 +137,47 @@ void VtkWriter::write_mesh(
 #endif
   writer->Write();
 }
+
+//! Write Parallel VTK file
+void VtkWriter::write_parallel_vtk(const std::string& filename,
+                                   const std::string& attribute, int mpi_size,
+                                   unsigned step, unsigned max_steps) {
+
+  std::string ppolydata =
+      "<?xml version=\"1.0\"?>\n<VTKFile type=\"PPolyData\" version=\"0.1\" "
+      "byte_order=\"LittleEndian\" "
+      "compressor=\"vtkZLibDataCompressor\">\n<PPolyData "
+      "GhostLevel=\"0\">\n\t<PPointData Vectors=\"" +
+      attribute +
+      "\">\n\t\t<PDataArray "
+      "type=\"Float64\" Name=\"" +
+      attribute +
+      "\" "
+      "NumberOfComponents=\"3\"/>\n\t</"
+      "PPointData>\n\n\t<PPoints>\n\t\t<PDataArray "
+      "type=\"Float32\" Name=\"Points\" "
+      "NumberOfComponents=\"3\"/>\n\t</PPoints>\n";
+
+  for (unsigned i = 0; i < mpi_size; ++i) {
+    std::stringstream file_name;
+    file_name.str(std::string());
+    file_name << attribute;
+    const std::string rank_size =
+        "-" + std::to_string(i) + "_" + std::to_string(mpi_size) + "-";
+    file_name << rank_size;
+
+    file_name.fill('0');
+    int digits = log10(max_steps) + 1;
+    file_name.width(digits);
+    file_name << step;
+    file_name << ".vtp";
+    ppolydata += "\n\t<Piece Source=\"" + file_name.str() + "\"/>";
+  }
+  ppolydata += "\n</PPolyData>\n\n</VTKFile>";
+
+  // Write parallel VTK file
+  ofstream pvtk;
+  pvtk.open(filename);
+  pvtk << ppolydata;
+  pvtk.close();
+}

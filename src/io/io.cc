@@ -45,14 +45,9 @@ mpm::IO::IO(int argc, char** argv) {
   std::string file = working_dir_ + input_file_;
   std::ifstream ifs(file);
 
-  try {
-    if (!ifs.is_open())
-      throw std::runtime_error(
-          std::string("Input file not found in specified location: ") + file);
-  } catch (const std::runtime_error& except) {
-    console_->error("{}", except.what());
-    std::terminate();
-  }
+  if (!ifs.is_open())
+    throw std::runtime_error(
+        std::string("Input file not found in specified location: ") + file);
 
   json_ = Json::parse(ifs);
 }
@@ -64,18 +59,17 @@ std::string mpm::IO::file_name(const std::string& filename) {
   std::string file_name;
   // Read input file name from the JSON object
   try {
-    file_name = working_dir_ +
-                json_["input_files"][filename].template get<std::string>();
+    file_name = working_dir_ + filename;
+    // Check if a file is present, if not set file_name to empty
+    if (!this->check_file(file_name))
+      throw std::runtime_error("no file found!");
+
   } catch (const std::exception& except) {
-    console_->warn("Invalid JSON argument: {}; error: {}", filename,
+    console_->warn("Fetching file: {}; failed with: {}", filename,
                    except.what());
     file_name.clear();
     return file_name;
   }
-
-  // Check if a file is present, if not set file_name to empty
-  if (!this->check_file(file_name)) file_name.clear();
-
   return file_name;
 }
 
@@ -101,8 +95,8 @@ bool mpm::IO::check_file(const std::string& filename) {
 boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
                                              const std::string& file_extension,
                                              const std::string& analysis_id,
-                                             unsigned step,
-                                             unsigned max_steps) {
+                                             unsigned step, unsigned max_steps,
+                                             bool parallel) {
   std::stringstream file_name;
   std::string path = this->output_folder();
 
@@ -116,7 +110,7 @@ boost::filesystem::path mpm::IO::output_file(const std::string& attribute,
   int mpi_size;
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  if (mpi_size > 1) {
+  if (mpi_size > 1 && parallel) {
     const std::string rank_size =
         "-" + std::to_string(mpi_rank) + "_" + std::to_string(mpi_size) + "-";
     file_name << rank_size;
@@ -200,3 +194,28 @@ tsl::robin_map<mpm::Index, std::vector<mpm::Index>> mpm::IO::entity_sets(
 
   return entity_sets;
 }
+
+//! Return analysis
+std::string mpm::IO::analysis_type() const {
+  return json_["analysis"]["type"].template get<std::string>();
+}
+
+//! Return json analysis object
+Json mpm::IO::analysis() const { return json_["analysis"]; }
+
+//! Return json object
+Json mpm::IO::json_object(const std::string& key) const {
+  Json empty;
+  if (json_.find(key) != json_.end()) {
+    return json_.at(key);
+  } else {
+    throw std::runtime_error("No object found, returning an empty object");
+    return empty;
+  }
+}
+
+//! Return post processing object
+Json mpm::IO::post_processing() const { return json_["post_processing"]; }
+
+//! Return number of tbb threads
+unsigned mpm::IO::nthreads() const { return nthreads_; }

@@ -12,9 +12,12 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
   auto particle_type = "P2D";
   auto node_type = "N2D";
   auto cell_type = "ED2Q4";
-  auto mesh_reader = "Ascii2D";
+  auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
+  unsigned material_id = 1;
   std::vector<double> gravity{{0., -9.81}};
+  std::vector<double> xvalues{{0.0, 0.5, 1.0}};
+  std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
 
   // 3D
   if (dim == 3) {
@@ -22,7 +25,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
     particle_type = "P3D";
     node_type = "N3D";
     cell_type = "ED3H8";
-    mesh_reader = "Ascii3D";
+    io_type = "Ascii3D";
     material = "LinearElastic3D";
     gravity.clear();
     gravity = {0., 0., -9.81};
@@ -30,19 +33,23 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
 
   Json json_file = {
       {"title", "Example JSON Input for MPM"},
-      {"input_files",
-       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
-        {"velocity_constraints", "velocity-constraints-unitcell.txt"},
-        {"particles", "particles-" + dimension + "-unitcell.txt"},
-        {"particle_stresses", "initial-stresses-" + dimension + "d.txt"},
-        {"materials", "materials.txt"},
-        {"traction", "traction.txt"}}},
       {"mesh",
-       {{"mesh_reader", mesh_reader},
+       {{"mesh", "mesh-" + dimension + "-unitcell.txt"},
+        {"io_type", io_type},
+        {"isoparametric", false},
         {"node_type", node_type},
-        {"cell_type", cell_type},
-        {"generate_particles_cells", 1}}},
-      {"particle", {{"material_id", 1}, {"particle_type", particle_type}}},
+        {"boundary_conditions",
+         {{"velocity_constraints", "velocity-constraints.txt"}}},
+        {"cell_type", cell_type}}},
+      {"particles",
+       {{{"group_id", 0},
+         {"generator",
+          {{"type", "file"},
+           {"io_type", io_type},
+           {"material_id", material_id},
+           {"particle_type", particle_type},
+           {"check_duplicates", true},
+           {"location", "particles-" + dimension + "-unitcell.txt"}}}}}},
       {"materials",
        {{{"id", 0},
          {"type", material},
@@ -54,12 +61,33 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
          {"density", 2300.},
          {"youngs_modulus", 1.5E+6},
          {"poisson_ratio", 0.25}}}},
+      {"external_loading_conditions",
+       {{"gravity", gravity},
+        {"particle_surface_traction",
+         {{{"math_function_id", 0},
+           {"pset_id", -1},
+           {"dir", 1},
+           {"traction", 10.5}}}},
+        {"concentrated_nodal_forces",
+         {{{"math_function_id", 0},
+           {"nset_id", -1},
+           {"dir", 1},
+           {"force", 10.5}}}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
+      {"math_functions",
+       {{{"id", 0},
+         {"type", "Linear"},
+         {"xvalues", xvalues},
+         {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
         {"stress_update", stress_update},
         {"dt", 0.001},
         {"nsteps", 10},
-        {"gravity", gravity},
         {"boundary_friction", 0.5},
         {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},

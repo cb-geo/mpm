@@ -51,6 +51,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(const HDF5Particle& particle) override;
 
+  //! Initialise particle HDF5 data and material
+  //! \param[in] particle HDF5 data of particle
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(
+      const HDF5Particle& particle,
+      const std::shared_ptr<Material<Tdim>>& material) override;
+
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
   HDF5Particle hdf5() const override;
@@ -191,6 +199,7 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
+  //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
   //! Map traction force
@@ -198,11 +207,10 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
-  bool compute_updated_position(double dt) override;
-
-  //! Compute updated position of the particle based on nodal velocity
-  //! \param[in] dt Analysis time step
-  bool compute_updated_position_velocity(double dt) override;
+  //! \param[in] velocity_update Update particle velocity from nodal vel when
+  //! true
+  bool compute_updated_position(double dt,
+                                bool velocity_update = false) override;
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -241,6 +249,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Apply particle velocity constraints
   void apply_particle_velocity_constraints() override;
 
+  //! Assign material id of this particle to nodes
+  void append_material_id_to_nodes() const override;
+
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;
@@ -256,6 +267,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::status_;
   //! Material
   using ParticleBase<Tdim>::material_;
+  //! Material id
+  using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Volumetric mass density (mass / volume)
@@ -288,12 +301,12 @@ class Particle : public ParticleBase<Tdim> {
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
   bool set_traction_{false};
-  //! Traction
+  //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
-  //! B-Matrix
-  std::vector<Eigen::MatrixXd> bmatrix_;
+  //! dN/dX
+  Eigen::MatrixXd dn_dx_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties

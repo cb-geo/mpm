@@ -16,6 +16,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 
   // Clear any velocity constraints
   velocity_constraints_.clear();
+  concentrated_force_.setZero();
   this->initialise();
 }
 
@@ -31,6 +32,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
   momentum_.setZero();
   acceleration_.setZero();
   status_ = false;
+  material_ids_.clear();
 }
 
 //! Update mass at the nodes from particle
@@ -59,25 +61,37 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
   volume_(phase) = volume_(phase) * factor + volume;
 }
 
-// Assign traction force to the node
+// Assign concentrated force to the node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::assign_traction_force(unsigned phase,
-                                                            unsigned direction,
-                                                            double traction) {
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_concentrated_force(
+    unsigned phase, unsigned direction, double concentrated_force,
+    const std::shared_ptr<FunctionBase>& function) {
   bool status = false;
   try {
     if (phase >= Tnphases || direction >= Tdim) {
       throw std::runtime_error(
-          "Nodal traction property: Direction / phase is invalid");
+          "Cannot assign nodal concentrated forcey: Direction / phase is "
+          "invalid");
     }
-    // Assign traction
-    external_force_(direction, phase) = traction;
+    // Assign concentrated force
+    concentrated_force_(direction, phase) = concentrated_force;
     status = true;
+    this->force_function_ = function;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+// Apply concentrated force to the node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_concentrated_force(
+    unsigned phase, double current_time) {
+  double scalar = 1.0;
+  if (force_function_ != nullptr) scalar = force_function_->value(current_time);
+  this->update_external_force(true, phase,
+                              scalar * concentrated_force_.col(phase));
 }
 
 //! Update external force (body force / traction force)
@@ -509,4 +523,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       }
     }
   }
+}
+
+//! Add material id from material points to material_ids_
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::append_material_id(unsigned id) {
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  material_ids_.emplace(id);
+}
+
+// Assign MPI rank to node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  auto status = this->mpi_ranks_.insert(rank);
+  return status.second;
 }

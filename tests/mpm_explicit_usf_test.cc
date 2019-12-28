@@ -41,16 +41,15 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-    // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
-
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
+    // Initialise mesh
+    REQUIRE(mpm->initialise_mesh() == true);
+    // Initialise particles
+    REQUIRE(mpm->initialise_particles() == true);
 
-    // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
+    // Initialise external loading
+    REQUIRE(mpm->initialise_loads() == true);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -122,16 +121,12 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-    // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
-
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
-
-    // Reinitialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
+    // Initialise mesh
+    REQUIRE(mpm->initialise_mesh() == true);
+    // Initialise particles
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);

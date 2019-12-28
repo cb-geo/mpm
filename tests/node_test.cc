@@ -5,6 +5,7 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
+#include "function_base.h"
 #include "geometry.h"
 #include "node.h"
 
@@ -49,6 +50,34 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     REQUIRE(node->status() == false);
     node->assign_status(true);
     REQUIRE(node->status() == true);
+  }
+
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
+  }
+
+  // Check MPI Rank
+  SECTION("Check MPI Rank") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    REQUIRE(node->id() == 0);
+
+    // Assign MPI ranks
+    node->mpi_rank(0);
+    node->mpi_rank(0);
+    node->mpi_rank(1);
+
+    std::set<unsigned> ranks = node->mpi_ranks();
+    REQUIRE(ranks.size() == 2);
+    std::vector<unsigned> mpi_ranks = {0, 1};
+    unsigned i = 0;
+    for (auto it = ranks.begin(); it != ranks.end(); ++it, ++i)
+      REQUIRE(*it == mpi_ranks.at(i));
   }
 
   // Test coordinates function
@@ -166,26 +195,30 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, bad_phase, force) == false);
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // concentrated force
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
-        // Check traction
+        // Check external force
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+
+        double current_time = 0.0;
+        node->apply_concentrated_force(Nphase, current_time);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -193,14 +226,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -442,6 +475,25 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
     }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
   }
 }
 
@@ -486,6 +538,34 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     REQUIRE(node->status() == false);
     node->assign_status(true);
     REQUIRE(node->status() == true);
+  }
+
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
+  }
+
+  // Check MPI Rank
+  SECTION("Check MPI Rank") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    REQUIRE(node->id() == 0);
+
+    // Assign MPI ranks
+    node->mpi_rank(0);
+    node->mpi_rank(0);
+    node->mpi_rank(1);
+
+    std::set<unsigned> ranks = node->mpi_ranks();
+    REQUIRE(ranks.size() == 2);
+    std::vector<unsigned> mpi_ranks = {0, 1};
+    unsigned i = 0;
+    for (auto it = ranks.begin(); it != ranks.end(); ++it, ++i)
+      REQUIRE(*it == mpi_ranks.at(i));
   }
 
   // Test coordinates function
@@ -621,26 +701,30 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Exception handling invalid force dimension
       REQUIRE(node->update_external_force(false, 1, force_bad) == false);
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // Concentrated force
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
         // Check traction
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+        double current_time = 0.0;
+        node->apply_concentrated_force(Nphase, current_time);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
+
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -648,14 +732,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1000,6 +1084,25 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
     }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
+    }
   }
 }
 
@@ -1045,6 +1148,34 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     REQUIRE(node->status() == false);
     node->assign_status(true);
     REQUIRE(node->status() == true);
+  }
+
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
+  }
+
+  // Check MPI Rank
+  SECTION("Check MPI Rank") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    REQUIRE(node->id() == 0);
+
+    // Assign MPI ranks
+    node->mpi_rank(0);
+    node->mpi_rank(0);
+    node->mpi_rank(1);
+
+    std::set<unsigned> ranks = node->mpi_ranks();
+    REQUIRE(ranks.size() == 2);
+    std::vector<unsigned> mpi_ranks = {0, 1};
+    unsigned i = 0;
+    for (auto it = ranks.begin(); it != ranks.end(); ++it, ++i)
+      REQUIRE(*it == mpi_ranks.at(i));
   }
 
   // Test coordinates function
@@ -1155,26 +1286,29 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
-      SECTION("Check traction") {
-        // External force
+      SECTION("Check concentrated force") {
+        // Set external force to zero
         force.setZero();
         REQUIRE(node->update_external_force(false, Nphase, force) == true);
 
-        // Traction
-        double traction = 65.32;
+        // Concentrated froce
+        std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
+        double concentrated_force = 65.32;
         const unsigned Direction = 0;
-        // Check traction
+        // Check external force
         for (unsigned i = 0; i < Dim; ++i)
           REQUIRE(node->external_force(Nphase)(i) ==
                   Approx(0.).epsilon(Tolerance));
 
-        REQUIRE(node->assign_traction_force(Nphase, Direction, traction) ==
-                true);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, Direction, concentrated_force, ffunction) == true);
+        double current_time = 0.0;
+        node->apply_concentrated_force(Nphase, current_time);
 
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1182,14 +1316,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
         // Check for incorrect direction / phase
         const unsigned wrong_dir = 4;
-        REQUIRE(node->assign_traction_force(Nphase, wrong_dir, traction) ==
-                false);
+        REQUIRE(node->assign_concentrated_force(
+                    Nphase, wrong_dir, concentrated_force, ffunction) == false);
 
         // Check again to ensure value hasn't been updated
         for (unsigned i = 0; i < Dim; ++i) {
           if (i == Direction)
             REQUIRE(node->external_force(Nphase)(i) ==
-                    Approx(traction).epsilon(Tolerance));
+                    Approx(concentrated_force).epsilon(Tolerance));
           else
             REQUIRE(node->external_force(Nphase)(i) ==
                     Approx(0.).epsilon(Tolerance));
@@ -1533,6 +1667,25 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
           REQUIRE((inverse_rotation_matrix * node->acceleration(Nphase))(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
       }
+    }
+
+    SECTION("Check node material ids") {
+      // Add material to nodes
+      node->append_material_id(0);
+      node->append_material_id(1);
+      node->append_material_id(4);
+      node->append_material_id(0);
+      node->append_material_id(2);
+
+      // Check size of material_ids
+      REQUIRE(node->material_ids().size() == 4);
+
+      // Check elements of material_ids
+      std::vector<unsigned> material_ids = {0, 1, 2, 4};
+      auto mat_ids = node->material_ids();
+      unsigned i = 0;
+      for (auto mitr = mat_ids.begin(); mitr != mat_ids.end(); ++mitr, ++i)
+        REQUIRE(*mitr == material_ids.at(i));
     }
   }
 }

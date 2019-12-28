@@ -33,7 +33,7 @@ class IO {
   IO(int argc, char** argv);
 
   //! Return number of tbb threads
-  unsigned nthreads() const { return nthreads_; }
+  unsigned nthreads() const;
 
   //! Return input file name of mesh/submesh/soil particles
   //! or an empty string if specified file for the key is not found
@@ -46,15 +46,16 @@ class IO {
   bool check_file(const std::string& file_name);
 
   //! Return analysis
-  std::string analysis_type() const {
-    return json_["analysis"]["type"].template get<std::string>();
-  }
+  std::string analysis_type() const;
 
   //! Return json analysis object
-  Json analysis() const { return json_["analysis"]; }
+  Json analysis() const;
 
   //! Return json object
-  Json json_object(const std::string& name) const { return json_[name]; }
+  Json json_object(const std::string& key) const;
+
+  //! Return post processing object
+  Json post_processing() const;
 
   //! Return the entity sets from the input set JSON file
   //! \param[in] filename File name
@@ -62,9 +63,6 @@ class IO {
   //! \retval entity_sets map of entity sets
   tsl::robin_map<mpm::Index, std::vector<mpm::Index>> entity_sets(
       const std::string& filename, const std::string& sets_type);
-
-  //! Return post processing object
-  Json post_processing() const { return json_["post_processing"]; }
 
   //! Return the output folder for the analysis
   std::string output_folder() const;
@@ -75,11 +73,13 @@ class IO {
   //! \param[in] file_extension File Extension (*.vtk or *.vtp)
   //! \param[in] step Current step
   //! \param[in] max_steps Total number of steps to be solved
+  //! \param[in] parallel Write output as parallel file system
   //! \return file_name File name with the correct attribute and a VTK extension
   boost::filesystem::path output_file(const std::string& attribute,
                                       const std::string& file_extension,
                                       const std::string& analysis_id,
-                                      unsigned step, unsigned max_steps);
+                                      unsigned step, unsigned max_steps,
+                                      bool parallel = true);
 
  private:
   //! Number of parallel threads
