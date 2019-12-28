@@ -38,50 +38,75 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   if (analysis_.find("pressure_smoothing") != analysis_.end())
     pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
 
-  // Initialise material
+  // Initialise materials
   bool mat_status = this->initialise_materials();
-  if (!mat_status) status = false;
+  if (!mat_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) status = false;
+  if (!mesh_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of mesh failed");
+  }
+
+  // Get mesh properties
+  auto mesh_props = io_->json_object("mesh");
+  // Create a mesh reader
+  auto mesh_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+  // Initialise pore pressure constraints
+  this->nodal_pressure_constraints(mesh_props, mesh_io, pore_liquid);
 
   // Initialise particles
   bool particle_status = this->initialise_particles();
-  if (!particle_status) status = false;
-
-  // Assign material to particles for each phases
-  // Get particle properties
-  auto particle_props = io_->json_object("particle");
-
-  // Get material ids from input file
-  if (!particle_props.at("material_id").is_array() ||
-      particle_props.at("material_id").size() != 2)
-    throw std::runtime_error("Unable to assign material for each phase");
-
-  // Initialise material ids for each phase
-  const auto solid_skeleton_mid =
-      particle_props["material_id"][0].template get<unsigned>();
-  const auto pore_liquid_mid =
-      particle_props["material_id"][1].template get<unsigned>();
-
-  // Get material from list of materials for each phase
-  auto solid_skeleton_material = materials_.at(solid_skeleton_mid);
-  auto pore_liquid_material = materials_.at(pore_liquid_mid);
-
-  // Iterate over each particle to assign material to each phase
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                std::placeholders::_1, solid_skeleton_material));
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::assign_liquid_material,
-                std::placeholders::_1, pore_liquid_material));
-
-  // Assign material to particle sets
-  if (particle_props["particle_sets"].size() != 0) {
-    // Assign material to particles in the specific sets
-    bool set_material_status = this->apply_properties_to_particles_sets();
+  if (!particle_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of particles failed");
   }
+
+  // Initialise loading conditions
+  bool loading_status = this->initialise_loads();
+  if (!loading_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of loads failed");
+  }
+
+  // TODO:
+  //  // Assign material to particles for each phases
+  //  // Get particle properties
+  //  auto particle_props = io_->json_object("particle");
+  //
+  //  // Get material ids from input file
+  //  if (!particle_props.at("material_id").is_array() ||
+  //      particle_props.at("material_id").size() != 2)
+  //    throw std::runtime_error("Unable to assign material for each phase");
+  //
+  //  // Initialise material ids for each phase
+  //  const auto solid_skeleton_mid =
+  //      particle_props["material_id"][0].template get<unsigned>();
+  //  const auto pore_liquid_mid =
+  //      particle_props["material_id"][1].template get<unsigned>();
+  //
+  //  // Get material from list of materials for each phase
+  //  auto solid_skeleton_material = materials_.at(solid_skeleton_mid);
+  //  auto pore_liquid_material = materials_.at(pore_liquid_mid);
+  //
+  //  // Iterate over each particle to assign material to each phase
+  //  mesh_->iterate_over_particles(
+  //      std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+  //                std::placeholders::_1, solid_skeleton_material));
+  //  mesh_->iterate_over_particles(
+  //      std::bind(&mpm::ParticleBase<Tdim>::assign_liquid_material,
+  //                std::placeholders::_1, pore_liquid_material));
+
+  // TODO:
+  //  // Assign material to particle sets
+  //  if (particle_props["particle_sets"].size() != 0) {
+  //    // Assign material to particles in the specific sets
+  //    bool set_material_status = this->apply_properties_to_particles_sets();
+  //  }
 
   // Assign porosity
   mesh_->iterate_over_particles(std::bind(
