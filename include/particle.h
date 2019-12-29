@@ -238,16 +238,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval vecdata Vector data of particle property
   Eigen::VectorXd vector_data(const std::string& property) override;
 
-  //! Assign particle velocity constraints
-  //! Directions can take values between 0 and Dim
+  //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
-  //! \retval status Assignment status
-  bool assign_particle_velocity_constraint(unsigned dir,
+  void apply_particle_velocity_constraints(unsigned dir,
                                            double velocity) override;
-
-  //! Apply particle velocity constraints
-  void apply_particle_velocity_constraints() override;
 
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;

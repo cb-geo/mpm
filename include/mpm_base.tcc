@@ -823,17 +823,23 @@ void mpm::MPMBase<Tdim>::particle_velocity_constraints(
         mesh_props["boundary_conditions"].find(
             "particles_velocity_constraints") !=
             mesh_props["boundary_conditions"].end()) {
-      std::string fparticles_velocity_constraints =
-          mesh_props["boundary_conditions"]["particles_velocity_constraints"]
-              .template get<std::string>();
-      if (!io_->file_name(fparticles_velocity_constraints).empty()) {
-        bool particles_velocity_constraints =
-            mesh_->assign_particles_velocity_constraints(
-                particle_io->read_velocity_constraints(
-                    io_->file_name(fparticles_velocity_constraints)));
-        if (!particles_velocity_constraints)
-          throw std::runtime_error(
-              "Particles velocity constraints are not properly assigned");
+
+      // Iterate over velocity constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]
+                     ["particles_velocity_constraints"]) {
+
+        // Set id
+        int pset_id = constraints.at("pset_id").template get<int>();
+        // Direction
+        unsigned dir = constraints.at("dir").template get<unsigned>();
+        // Velocity
+        double velocity = constraints.at("velocity").template get<double>();
+        // Add velocity constraint to mesh
+        auto velocity_constraint =
+            std::make_shared<mpm::VelocityConstraint>(pset_id, dir, velocity);
+        mesh_->create_particle_velocity_constraint(pset_id,
+                                                   velocity_constraint);
       }
     } else
       throw std::runtime_error("Particle velocity constraints JSON not found");

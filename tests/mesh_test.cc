@@ -866,8 +866,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
             // Test assign particles tractions
             SECTION("Check assign particles tractions") {
-              // Vector of particle coordinates
-
               tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
               particle_sets[0] = std::vector<mpm::Index>{0};
               particle_sets[1] = std::vector<mpm::Index>{1};
@@ -949,26 +947,41 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
             // Test assign particles velocity constraints
             SECTION("Check assign particles velocity constraints") {
-              // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_velocity_constraints;
-              // Constraint
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(0, 0, 10.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(1, 1, -10.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(2, 0, -12.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(3, 1, 0.0));
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
 
-              REQUIRE(mesh->assign_particles_velocity_constraints(
-                          particles_velocity_constraints) == true);
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
+
+              REQUIRE(mesh->nparticles() == 8);
+
+              int set_id = 0;
+              int dir = 0;
+              double constraint = 10.5;
+              // Add velocity constraint to mesh
+              auto velocity_constraint =
+                  std::make_shared<mpm::VelocityConstraint>(set_id, dir,
+                                                            constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == true);
+
+              // Add velocity constraint to all nodes in mesh
+              velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+                  -1, dir, constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == true);
+
               // When constraints fail
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(3, 2, 0.0));
-              REQUIRE(mesh->assign_particles_velocity_constraints(
-                          particles_velocity_constraints) == false);
+              dir = 2;
+              // Add velocity constraint to mesh
+              velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+                  set_id, dir, constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == false);
+
+              mesh->apply_particle_velocity_constraints();
             }
           }
         }
@@ -2165,27 +2178,41 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
             // Test assign particles velocity constraints
             SECTION("Check assign particles velocity constraints") {
-              // Vector of particle coordinates
-              std::vector<std::tuple<mpm::Index, unsigned, double>>
-                  particles_velocity_constraints;
-              // Constraint
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(0, 0, 10.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(1, 1, -10.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(2, 2, -12.5));
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(3, 1, 0.0));
+              tsl::robin_map<mpm::Index, std::vector<mpm::Index>> particle_sets;
+              particle_sets[0] = std::vector<mpm::Index>{0};
+              particle_sets[1] = std::vector<mpm::Index>{1};
+              particle_sets[2] = std::vector<mpm::Index>{2};
+              particle_sets[3] = std::vector<mpm::Index>{3};
 
-              REQUIRE(mesh->assign_particles_velocity_constraints(
-                          particles_velocity_constraints) == true);
+              REQUIRE(mesh->create_particle_sets(particle_sets, true) == true);
+
+              REQUIRE(mesh->nparticles() == 16);
+
+              int set_id = 0;
+              int dir = 0;
+              double constraint = 10.5;
+              // Add velocity constraint to mesh
+              auto velocity_constraint =
+                  std::make_shared<mpm::VelocityConstraint>(set_id, dir,
+                                                            constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == true);
+
+              // Add velocity constraint to all nodes in mesh
+              velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+                  -1, dir, constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == true);
 
               // When constraints fail
-              particles_velocity_constraints.emplace_back(
-                  std::make_tuple(3, 3, 0.0));
-              REQUIRE(mesh->assign_particles_velocity_constraints(
-                          particles_velocity_constraints) == false);
+              dir = 3;
+              // Add velocity constraint to mesh
+              velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
+                  set_id, dir, constraint);
+              REQUIRE(mesh->create_particle_velocity_constraint(
+                          set_id, velocity_constraint) == false);
+
+              mesh->apply_particle_velocity_constraints();
             }
           }
         }

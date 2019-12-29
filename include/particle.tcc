@@ -674,9 +674,6 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt,
       else
         this->velocity_ = nodal_velocity;
 
-      // Apply particle velocity constraints
-      this->apply_particle_velocity_constraints();
-
       // New position  current position + velocity * dt
       this->coordinates_ += nodal_velocity * dt;
       // Update displacement (displacement is initialized from zero)
@@ -754,40 +751,12 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
   return status;
 }
 
-//! Assign particle velocity constraint
-//! Constrain directions can take values between 0 and Dim
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::assign_particle_velocity_constraint(unsigned dir,
-                                                              double velocity) {
-  bool status = true;
-  try {
-    //! Constrain directions can take values between 0 and Dim
-    if (dir < Tdim)
-      this->particle_velocity_constraints_.insert(
-          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
-                                           static_cast<double>(velocity)));
-    else
-      throw std::runtime_error(
-          "Particle velocity constraint direction is out of bounds");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Apply particle velocity constraints
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::apply_particle_velocity_constraints() {
+void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
+                                                              double velocity) {
   // Set particle velocity constraint
-  for (const auto& constraint : this->particle_velocity_constraints_) {
-    // Direction value in the constraint (0, Dim)
-    const unsigned dir = constraint.first;
-    // Direction: dir % Tdim (modulus)
-    const auto direction = static_cast<unsigned>(dir % Tdim);
-    this->velocity_(direction) = constraint.second;
-  }
+  this->velocity_(dir) = velocity;
 }
 
 //! Return particle vector data
