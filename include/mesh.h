@@ -265,6 +265,9 @@ class Mesh {
   bool create_particle_velocity_constraint(
       int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
 
+  //! Apply particles velocity constraints
+  void apply_particle_velocity_constraints();
+
   //! Assign nodal velocity constraints
   //! \param[in] setid Node set id
   //! \param[in] velocity_constraints Velocity constraint at node, dir, velocity
@@ -286,15 +289,6 @@ class Mesh {
   bool assign_nodal_concentrated_forces(
       const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
       double force);
-
-  //! Assign particles velocity constraints
-  //! \param[in] particle_velocity_constraints velocity at dir on particle
-  bool create_particles_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          particle_velocity_constraints);
-
-  //! Apply particles velocity constraints
-  void apply_particle_velocity_constraints();
 
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
