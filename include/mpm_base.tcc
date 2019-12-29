@@ -678,20 +678,23 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find("velocity_constraints") !=
             mesh_props["boundary_conditions"].end()) {
-      std::string vel_constraints =
-          mesh_props["boundary_conditions"]["velocity_constraints"]
-              .template get<std::string>();
-      if (!io_->file_name(vel_constraints).empty()) {
-        bool velocity_constraints = mesh_->assign_velocity_constraints(
-            mesh_io->read_velocity_constraints(
-                io_->file_name(vel_constraints)));
-        if (!velocity_constraints)
-          throw std::runtime_error(
-              "Velocity constraints are not properly assigned");
+      // Iterate over velocity constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["velocity_constraints"]) {
+
+        // Set id
+        int nset_id = constraints.at("nset_id").template get<int>();
+        // Direction
+        unsigned dir = constraints.at("dir").template get<unsigned>();
+        // Velocity
+        double velocity = constraints.at("velocity").template get<double>();
+        // Add velocity constraint to mesh
+        auto velocity_constraint =
+            std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
+        mesh_->assign_nodal_velocity_constraint(nset_id, velocity_constraint);
       }
     } else
       throw std::runtime_error("Velocity constraints JSON not found");
-
   } catch (std::exception& exception) {
     console_->warn("#{}: Velocity constraints are undefined {} ", __LINE__,
                    exception.what());
@@ -707,16 +710,22 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find("friction_constraints") !=
             mesh_props["boundary_conditions"].end()) {
-      std::string fric_constraints =
-          mesh_props["boundary_conditions"]["friction_constraints"]
-              .template get<std::string>();
-      if (!io_->file_name(fric_constraints).empty()) {
-        bool friction_constraints = mesh_->assign_friction_constraints(
-            mesh_io->read_friction_constraints(
-                io_->file_name(fric_constraints)));
-        if (!friction_constraints)
-          throw std::runtime_error(
-              "Friction constraints are not properly assigned");
+      // Iterate over velocity constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["friction_constraints"]) {
+
+        // Set id
+        int nset_id = constraints.at("nset_id").template get<int>();
+        // Direction
+        unsigned dir = constraints.at("dir").template get<unsigned>();
+        // Sign n
+        int sign_n = constraints.at("sign_n").template get<int>();
+        // Friction
+        double friction = constraints.at("friction").template get<double>();
+        // Add friction constraint to mesh
+        auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
+            nset_id, dir, sign_n, friction);
+        mesh_->assign_nodal_frictional_constraint(nset_id, friction_constraint);
       }
     } else
       throw std::runtime_error("Friction constraints JSON not found");
@@ -814,17 +823,23 @@ void mpm::MPMBase<Tdim>::particle_velocity_constraints(
         mesh_props["boundary_conditions"].find(
             "particles_velocity_constraints") !=
             mesh_props["boundary_conditions"].end()) {
-      std::string fparticles_velocity_constraints =
-          mesh_props["boundary_conditions"]["particles_velocity_constraints"]
-              .template get<std::string>();
-      if (!io_->file_name(fparticles_velocity_constraints).empty()) {
-        bool particles_velocity_constraints =
-            mesh_->assign_particles_velocity_constraints(
-                particle_io->read_velocity_constraints(
-                    io_->file_name(fparticles_velocity_constraints)));
-        if (!particles_velocity_constraints)
-          throw std::runtime_error(
-              "Particles velocity constraints are not properly assigned");
+
+      // Iterate over velocity constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]
+                     ["particles_velocity_constraints"]) {
+
+        // Set id
+        int pset_id = constraints.at("pset_id").template get<int>();
+        // Direction
+        unsigned dir = constraints.at("dir").template get<unsigned>();
+        // Velocity
+        double velocity = constraints.at("velocity").template get<double>();
+        // Add velocity constraint to mesh
+        auto velocity_constraint =
+            std::make_shared<mpm::VelocityConstraint>(pset_id, dir, velocity);
+        mesh_->create_particle_velocity_constraint(pset_id,
+                                                   velocity_constraint);
       }
     } else
       throw std::runtime_error("Particle velocity constraints JSON not found");

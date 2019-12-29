@@ -1,5 +1,5 @@
-#ifndef MPM_PARTICLE_TRACTION_H_
-#define MPM_PARTICLE_TRACTION_H_
+#ifndef MPM_TRACTION_H_
+#define MPM_TRACTION_H_
 
 //! Alias for JSON
 #include "json.hpp"
@@ -9,21 +9,19 @@ using Json = nlohmann::json;
 
 namespace mpm {
 
-//! Particle traction class to store the load on a particle set
-//! \brief Particle traction class to store the load on a particle set
-//! \details ParticleTraction stores the load on a set of particles
-//! using mathematical functions, so the load can vary dynamically
-//! with time
-class ParticleTraction {
+//! Traction class to store the load on a set
+//! \brief Traction class to store the load on a set
+//! \details Traction stores the load on a set using mathematical functions, so
+//! the load can vary dynamically with time
+class Traction {
  public:
   // Constructor
-  //! \param[setid] setid Particle set id
+  //! \param[setid] setid  set id
   //! \param[in] mfunction Math function if defined
   //! \param[dir] dir Direction of traction load
-  //! \param[traction] traction Particle traction
-  ParticleTraction(int setid,
-                   const std::shared_ptr<mpm::FunctionBase>& traction_fn,
-                   unsigned dir, double traction)
+  //! \param[traction] traction  traction
+  Traction(int setid, const std::shared_ptr<mpm::FunctionBase>& traction_fn,
+           unsigned dir, double traction)
       : setid_{setid},
         traction_fn_{traction_fn},
         dir_{dir},
@@ -55,4 +53,4 @@ class ParticleTraction {
   double traction_;
 };
 }  // namespace mpm
-#endif  // MPM_PARTICLE_TRACTION_H_
+#endif  // MPM_TRACTION_H_

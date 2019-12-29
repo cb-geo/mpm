@@ -26,6 +26,7 @@ using Json = nlohmann::json;
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "friction_constraint.h"
 #include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
@@ -37,7 +38,8 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
-#include "particle_traction.h"
+#include "traction.h"
+#include "velocity_constraint.h"
 
 namespace mpm {
 
@@ -228,24 +230,12 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
       const std::string& attribute, unsigned phase);
 
-  //! Assign velocity constraints to nodes
-  //! \param[in] velocity_constraints Constraint at node, dir, and velocity
-  bool assign_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          velocity_constraints);
-
   //! Assign velocity constraints to cells
   //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
   //! velocity
   bool assign_cell_velocity_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
           velocity_constraints);
-
-  //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
-  bool assign_friction_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-          friction_constraints);
 
   //! Compute and assign rotation matrix to nodes
   //! \param[in] euler_angles Map of node number and respective euler_angles
@@ -270,6 +260,27 @@ class Mesh {
   //! \param[in] current_time Current time
   void apply_traction_on_particles(double current_time);
 
+  //! Create particle velocity constraints tractions
+  //! \param[in] setid Node set id
+  bool create_particle_velocity_constraint(
+      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
+
+  //! Apply particles velocity constraints
+  void apply_particle_velocity_constraints();
+
+  //! Assign nodal velocity constraints
+  //! \param[in] setid Node set id
+  //! \param[in] velocity_constraints Velocity constraint at node, dir, velocity
+  bool assign_nodal_velocity_constraint(
+      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
+
+  //! Assign nodal frictional constraints
+  //! \param[in] setid Node set id
+  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
+  bool assign_nodal_frictional_constraint(
+      int nset_id,
+      const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
+
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
   //! \param[in] setid Node set id
@@ -278,12 +289,6 @@ class Mesh {
   bool assign_nodal_concentrated_forces(
       const std::shared_ptr<FunctionBase>& mfunction, int set_id, unsigned dir,
       double force);
-
-  //! Assign particles velocity constraints
-  //! \param[in] particle_velocity_constraints velocity at dir on particle
-  bool assign_particles_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          particle_velocity_constraints);
 
   //! Assign particles stresses
   //! \param[in] particle_stresses Initial stresses of particle
@@ -451,7 +456,10 @@ class Mesh {
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Loading (Particle tractions)
-  std::vector<std::shared_ptr<mpm::ParticleTraction>> particle_tractions_;
+  std::vector<std::shared_ptr<mpm::Traction>> particle_tractions_;
+  //! Particle velocity constraints
+  std::vector<std::shared_ptr<mpm::VelocityConstraint>>
+      particle_velocity_constraints_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size

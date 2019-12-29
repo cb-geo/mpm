@@ -131,13 +131,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     bool status = true;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
-    // Apply particles velocity constraints
-    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
-    // Check out of bounds condition
-    REQUIRE(particle->assign_particle_velocity_constraint(1, 0) == false);
-
     // Apply constraints
-    particle->apply_particle_velocity_constraints();
+    particle->apply_particle_velocity_constraints(0, 10.5);
 
     // Check apply constraints
     REQUIRE(particle->velocity()(0) == Approx(10.5).epsilon(Tolerance));
@@ -609,14 +604,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
 
-    // Apply particles velocity constraints
-    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
-    REQUIRE(particle->assign_particle_velocity_constraint(1, -12.5) == true);
-    // Check out of bounds condition
-    REQUIRE(particle->assign_particle_velocity_constraint(2, 0) == false);
-
     // Apply constraints
-    particle->apply_particle_velocity_constraints();
+    particle->apply_particle_velocity_constraints(0, 10.5);
+    particle->apply_particle_velocity_constraints(1, -12.5);
 
     // Check apply constraints
     REQUIRE(particle->velocity()(0) == Approx(10.5).epsilon(Tolerance));
@@ -1691,16 +1681,10 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     bool status = true;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
-
-    // Apply particles velocity constraints
-    REQUIRE(particle->assign_particle_velocity_constraint(0, 10.5) == true);
-    REQUIRE(particle->assign_particle_velocity_constraint(1, -12.5) == true);
-    REQUIRE(particle->assign_particle_velocity_constraint(2, 14.5) == true);
-    // Check out of bounds condition
-    REQUIRE(particle->assign_particle_velocity_constraint(3, 0) == false);
-
     // Apply constraints
-    particle->apply_particle_velocity_constraints();
+    particle->apply_particle_velocity_constraints(0, 10.5);
+    particle->apply_particle_velocity_constraints(1, -12.5);
+    particle->apply_particle_velocity_constraints(2, 14.5);
 
     // Check apply constraints
     REQUIRE(particle->velocity()(0) == Approx(10.5).epsilon(Tolerance));

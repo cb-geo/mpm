@@ -4,7 +4,7 @@
 
 #include "function_base.h"
 #include "linear_function.h"
-#include "particle_traction.h"
+#include "traction.h"
 
 //! Check particle traction
 TEST_CASE("Particle traction is checked", "[load][traction]") {
@@ -28,8 +28,8 @@ TEST_CASE("Particle traction is checked", "[load][traction]") {
     int set_id = -1;
     unsigned dir = 1;
     double traction = 10;
-    auto ptraction = std::make_shared<mpm::ParticleTraction>(set_id, mfunction,
-                                                             dir, traction);
+    auto ptraction =
+        std::make_shared<mpm::Traction>(set_id, mfunction, dir, traction);
 
     // Check particle set id
     REQUIRE(ptraction->setid() == set_id);

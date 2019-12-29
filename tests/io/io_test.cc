@@ -41,8 +41,6 @@ TEST_CASE("IO is checked for input parsing", "[IO][JSON]") {
          {{"type", "MPMExplicitUSF3D"},
           {"dt", 0.001},
           {"nsteps", 1000},
-          {"gravity", true},
-          {"boundary_friction", 0.5},
           {"damping", {{"damping", true}, {"damping_ratio", 0.02}}},
           {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
         {"post_processing", {{"path", "results/"}, {"output_steps", 10}}}};

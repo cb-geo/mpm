@@ -19,8 +19,10 @@
 #endif
 
 #include "container.h"
+#include "friction_constraint.h"
 #include "mpm.h"
 #include "particle.h"
+#include "velocity_constraint.h"
 
 namespace mpm {
 

@@ -222,15 +222,11 @@ class ParticleBase {
   //! \retval vecdata Vector data of particle property
   virtual Eigen::VectorXd vector_data(const std::string& property) = 0;
 
-  //! Assign particle velocity constraint
-  //! Directions can take values between 0 and Dim
+  //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
-  virtual bool assign_particle_velocity_constraint(unsigned dir,
+  virtual void apply_particle_velocity_constraints(unsigned dir,
                                                    double velocity) = 0;
-
-  //! Apply particle velocity constraints
-  virtual void apply_particle_velocity_constraints() = 0;
 
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
