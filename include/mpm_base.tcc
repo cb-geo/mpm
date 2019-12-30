@@ -48,6 +48,18 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       velocity_update_ = false;
     }
 
+    // Damping
+    try {
+      if (analysis_.find("damping") != analysis_.end()) {
+        auto damping = analysis_["damping"];
+        damping_type_ = damping.at("type").template get<std::string>();
+        damping_factor_ = damping.at("damping_factor").template get<double>();
+      }
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: Damping is not specified, using none as default",
+                     __FILE__, __LINE__, exception.what());
+    }
+
     // Math functions
     try {
       // Get materials properties

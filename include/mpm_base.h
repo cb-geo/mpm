@@ -195,6 +195,10 @@ class MPMBase : public MPM {
   unsigned quadrature_order_{2};
   // Level set methods
   bool ls_methods_{false};
+  //! Damping type
+  std::string damping_type_{""};
+  //! Damping factor
+  double damping_factor_{std::numeric_limits<double>::max()};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
