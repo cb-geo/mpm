@@ -120,7 +120,7 @@ class ParticleBase {
   virtual bool compute_volume() = 0;
 
   //! Update volume based on centre volumetric strain rate
-  virtual bool update_volume_strainrate(double dt) = 0;
+  virtual bool update_volume() = 0;
 
   //! Return mass density
   virtual double mass_density() const = 0;
@@ -167,6 +167,9 @@ class ParticleBase {
 
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid() const = 0;
+
+  //! dvolumetric strain
+  virtual double dvolumetric_strain() const = 0;
 
   //! Initial stress
   virtual void initial_stress(const Eigen::Matrix<double, 6, 1>&) = 0;
