@@ -74,6 +74,10 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const double trace_invariant2 = 0.5 * (tau.head(3)).dot(tau.head(3));
   if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+
   // Update volumetric and deviatoric stress
   // thermodynamic pressure is from material point
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
