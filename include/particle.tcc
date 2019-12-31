@@ -542,9 +542,6 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Assign volumetric strain at centroid
   dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
   volumetric_strain_centroid_ += dvolumetric_strain_;
-
-  // Update thermodynamic pressure
-  // this->update_pressure(dvolumetric_strain_);
 }
 
 // Compute stress
@@ -681,25 +678,6 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt,
       throw std::runtime_error(
           "Cell is not initialised! "
           "cannot compute updated coordinates of the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-// Update pressure
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_pressure(double dvolumetric_strain) {
-  bool status = true;
-  try {
-    // Check if material ptr is valid
-    if (material_ != nullptr) {
-      // Update pressure
-      this->pressure_ += material_->thermodynamic_pressure(dvolumetric_strain);
-    } else {
-      throw std::runtime_error("Material is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

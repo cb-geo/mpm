@@ -222,10 +222,6 @@ class Particle : public ParticleBase<Tdim> {
     return state_variables_.at(var);
   }
 
-  //! Update pressure of the particles
-  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(double dvolumetric_strain) override;
-
   //! Map particle pressure to nodes
   bool map_pressure_to_nodes() override;
 
