@@ -96,9 +96,8 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-                std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);

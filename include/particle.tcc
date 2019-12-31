@@ -460,18 +460,15 @@ bool mpm::Particle<Tdim>::compute_volume() {
 
 // Update volume based on the central strain rate
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_volume_strainrate(double dt) {
+bool mpm::Particle<Tdim>::update_volume() {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr and a valid volume
     if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
       // Compute at centroid
       // Strain rate for reduced integration
-      Eigen::VectorXd strain_rate_centroid =
-          cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
-      this->volume_ *= (1. + dt * strain_rate_centroid.head(Tdim).sum());
-      this->mass_density_ = this->mass_density_ /
-                            (1. + dt * strain_rate_centroid.head(Tdim).sum());
+      this->volume_ *= (1. + dvolumetric_strain_);
+      this->mass_density_ = this->mass_density_ / (1. + dvolumetric_strain_);
     } else {
       throw std::runtime_error(
           "Cell or volume is not initialised! cannot update particle volume");
@@ -541,11 +538,11 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
       cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
 
   // Assign volumetric strain at centroid
-  const double dvolumetric_strain = dt * strain_rate_centroid.head(Tdim).sum();
-  volumetric_strain_centroid_ += dvolumetric_strain;
+  dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
+  volumetric_strain_centroid_ += dvolumetric_strain_;
 
   // Update thermodynamic pressure
-  this->update_pressure(dvolumetric_strain);
+  this->update_pressure(dvolumetric_strain_);
 }
 
 // Compute stress

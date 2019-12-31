@@ -118,8 +118,7 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_volume() override;
 
   //! Update volume based on centre volumetric strain rate
-  //! \param[in] dt Analysis time step
-  bool update_volume_strainrate(double dt) override;
+  bool update_volume() override;
 
   //! Return mass density
   //! \param[in] phase Index corresponding to the phase
@@ -155,6 +154,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate() const override {
     return strain_rate_;
   };
+
+  //! Return dvolumetric strain of centroid
+  //! \retval dvolumetric strain at centroid
+  double dvolumetric_strain() const override { return dvolumetric_strain_; }
 
   //! Return volumetric strain of centroid
   //! \retval volumetric strain at centroid
@@ -282,6 +285,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> stress_;
   //! Strains
   Eigen::Matrix<double, 6, 1> strain_;
+  //! dvolumetric strain
+  double dvolumetric_strain_;
   //! Volumetric strain at centroid
   double volumetric_strain_centroid_;
   //! Strain rate
