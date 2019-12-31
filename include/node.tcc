@@ -303,13 +303,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
       // acceleration = (unbalaced force / mass)
       auto unbalanced_force =
           this->external_force_.col(phase) + this->internal_force_.col(phase);
-      this->acceleration_.col(phase) = unbalanced_force / this->mass_(phase);
-
-      // damped acceleration
-      auto damped_acceleration = -damping_factor * unbalanced_force.norm() *
-                                 this->velocity_.col(phase).cwiseSign() /
-                                 this->mass_(phase);
-      this->acceleration_.col(phase) += damped_acceleration;
+      this->acceleration_.col(phase) =
+          (unbalanced_force - damping_factor * unbalanced_force.norm() *
+                                  this->velocity_.col(phase).cwiseSign()) /
+          this->mass_(phase);
 
       // Apply friction constraints
       this->apply_friction_constraints(dt);
