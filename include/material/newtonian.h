@@ -42,11 +42,6 @@ class Newtonian : public Material<Tdim> {
     return state_vars;
   }
 
-  //! Thermodynamic pressure
-  //! \param[in] volumetric_strain dVolumetric_strain
-  //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) const override;
-
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
@@ -66,6 +61,11 @@ class Newtonian : public Material<Tdim> {
   using Material<Tdim>::console_;
 
  private:
+  //! Thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Pressure for volumetric strain
+  double thermodynamic_pressure(double volumetric_strain) const;
+
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Bulk modulus

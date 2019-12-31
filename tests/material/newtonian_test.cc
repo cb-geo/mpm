@@ -67,13 +67,6 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
-
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
@@ -165,6 +158,13 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(check_stress(3) == Approx(0.000002255).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 0.;
+    REQUIRE(state_vars.at("pressure") ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 }
 
@@ -221,13 +221,6 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     // Get material properties
     REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
-
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
@@ -337,5 +330,12 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     REQUIRE(check_stress(3) == Approx(0.000000451).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000000902).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000001353).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = 0.;
+    REQUIRE(state_vars.at("pressure") ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 }
