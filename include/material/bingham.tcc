@@ -83,7 +83,7 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -ptr->pressure() * this->dirac_delta() + tau;
+      -(*state_vars).at("pressure") * this->dirac_delta() + tau;
 
   return updated_stress;
 }

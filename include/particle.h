@@ -230,11 +230,15 @@ class Particle : public ParticleBase<Tdim> {
   bool map_pressure_to_nodes() override;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
+  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   bool compute_pressure_smoothing() override;
 
   //! Return pressure of the particles
-  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  double pressure() const override { return pressure_; }
+  double pressure() const override {
+    return (state_variables_.find("pressure") != state_variables_.end())
+               ? state_variables_.at("pressure")
+               : 0.;
+  }
 
   //! Return vector data of particles
   //! \param[in] property Property string

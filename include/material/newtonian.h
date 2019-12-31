@@ -38,7 +38,7 @@ class Newtonian : public Material<Tdim> {
   //! Initialise history variables
   //! \retval state_vars State variables with history
   mpm::dense_map initialise_state_variables() override {
-    mpm::dense_map state_vars;
+    mpm::dense_map state_vars = {{"pressure", 0.0}};
     return state_vars;
   }
 

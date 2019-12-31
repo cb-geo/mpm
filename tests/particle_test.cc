@@ -850,8 +850,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check updated pressure
     const double K = 8333333.333333333;
-    REQUIRE(particle->pressure() ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
+    REQUIRE(particle->pressure() == 0.0);
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
@@ -1876,8 +1875,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->compute_mass() == true);
     REQUIRE(particle->map_mass_momentum_to_nodes() == true);
 
-    REQUIRE(particle->map_pressure_to_nodes() == true);
-    REQUIRE(particle->compute_pressure_smoothing() == true);
+    REQUIRE(particle->map_pressure_to_nodes() == false);
+    REQUIRE(particle->compute_pressure_smoothing() == false);
 
     // Values of nodal mass
     std::array<double, 8> nodal_mass{125., 375.,  1125., 375.,
@@ -1980,9 +1979,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
             Approx(volumetric_strain).epsilon(Tolerance));
 
     // Check updated pressure
-    const double K = 8333333.333333333;
-    REQUIRE(particle->pressure() ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
+    REQUIRE(particle->pressure() == 0.0);
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));

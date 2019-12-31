@@ -1,3 +1,5 @@
+#include <iostream>
+
 //! Constructor with material properties
 template <unsigned Tdim>
 mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
@@ -29,7 +31,11 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
     mpm::dense_map* state_vars) {
 
-  const double pressure = ptr->pressure();
+  // const double pressure = ptr->pressure();
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+  const double pressure = (*state_vars).at("pressure");
 
   const double volumetric_strain = dstrain(0) + dstrain(1);
 
@@ -53,7 +59,10 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
     mpm::dense_map* state_vars) {
 
-  const double pressure = ptr->pressure();
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+  const double pressure = (*state_vars).at("pressure");
 
   const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
 

@@ -77,7 +77,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
-      REQUIRE(state_variables.empty() == true);
+      REQUIRE(state_variables.size() == 1);
     }
   }
 
@@ -151,8 +151,8 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars = material->initialise_state_variables();
     mpm::Material<Dim>::Vector6d stress;
-    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -232,7 +232,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
-      REQUIRE(state_variables.empty() == true);
+      REQUIRE(state_variables.size() == 1);
     }
   }
 
@@ -323,8 +323,8 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     dstrain(5) = 0.0000300;
 
     // Compute updated stress
+    mpm::dense_map state_vars = material->initialise_state_variables();
     mpm::Material<Dim>::Vector6d stress;
-    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
