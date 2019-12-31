@@ -154,7 +154,10 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   particle_data.id = this->id();
   particle_data.mass = this->mass();
   particle_data.volume = this->volume();
-  particle_data.pressure = this->pressure();
+  particle_data.pressure =
+      (state_variables_.find("pressure") != state_variables_.end())
+          ? state_variables_.at("pressure")
+          : 0.;
 
   particle_data.coord_x = coordinates[0];
   particle_data.coord_y = coordinates[1];
@@ -216,7 +219,6 @@ void mpm::Particle<Tdim>::initialise() {
   dstrain_.setZero();
   mass_ = 0.;
   natural_size_.setZero();
-  pressure_ = 0.;
   set_traction_ = false;
   size_.setZero();
   strain_rate_.setZero();
@@ -540,9 +542,6 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Assign volumetric strain at centroid
   dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
   volumetric_strain_centroid_ += dvolumetric_strain_;
-
-  // Update thermodynamic pressure
-  this->update_pressure(dvolumetric_strain_);
 }
 
 // Compute stress
@@ -687,35 +686,18 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt,
   return status;
 }
 
-// Update pressure
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_pressure(double dvolumetric_strain) {
-  bool status = true;
-  try {
-    // Check if material ptr is valid
-    if (material_ != nullptr) {
-      // Update pressure
-      this->pressure_ += material_->thermodynamic_pressure(dvolumetric_strain);
-    } else {
-      throw std::runtime_error("Material is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
   bool status = true;
   try {
-    // Check if particle mass is set
-    if (mass_ != std::numeric_limits<double>::max()) {
+    // Check if particle mass is set and state variable pressure is found
+    if (mass_ != std::numeric_limits<double>::max() &&
+        (state_variables_.find("pressure") != state_variables_.end())) {
       // Map particle mass and momentum to nodes
-      this->cell_->map_pressure_to_nodes(
-          this->shapefn_, mpm::ParticlePhase::Solid, mass_, pressure_);
+      this->cell_->map_pressure_to_nodes(this->shapefn_,
+                                         mpm::ParticlePhase::Solid, mass_,
+                                         state_variables_.at("pressure"));
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -732,9 +714,10 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
   bool status = true;
   try {
     // Check if particle has a valid cell ptr
-    if (cell_ != nullptr)
+    if (cell_ != nullptr &&
+        (state_variables_.find("pressure") != state_variables_.end()))
       // Update particle pressure to interpolated nodal pressure
-      this->pressure_ = cell_->interpolate_nodal_pressure(
+      state_variables_.at("pressure") = cell_->interpolate_nodal_pressure(
           this->shapefn_, mpm::ParticlePhase::Solid);
     else
       throw std::runtime_error(

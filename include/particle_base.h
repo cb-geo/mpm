@@ -186,9 +186,6 @@ class ParticleBase {
   //! Map internal force
   virtual bool map_internal_force() = 0;
 
-  //! Update pressure of the particles
-  virtual bool update_pressure(double dvolumetric_strain) = 0;
-
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes() = 0;
 
