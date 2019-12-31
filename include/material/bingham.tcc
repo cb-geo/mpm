@@ -22,6 +22,13 @@ mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
   }
 }
 
+//! Initialise history variables
+template <unsigned Tdim>
+mpm::dense_map mpm::Bingham<Tdim>::initialise_state_variables() {
+  mpm::dense_map state_vars = {{"pressure", 0.0}};
+  return state_vars;
+}
+
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Bingham<Tdim>::thermodynamic_pressure(

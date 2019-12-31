@@ -1,5 +1,3 @@
-#include <iostream>
-
 //! Constructor with material properties
 template <unsigned Tdim>
 mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
@@ -15,6 +13,13 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
     console_->error("Material parameter not set: {} {}\n", except.what(),
                     except.id);
   }
+}
+
+//! Initialise history variables
+template <unsigned Tdim>
+mpm::dense_map mpm::Newtonian<Tdim>::initialise_state_variables() {
+  mpm::dense_map state_vars = {{"pressure", 0.0}};
+  return state_vars;
 }
 
 //! Compute pressure
