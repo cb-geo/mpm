@@ -350,6 +350,14 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     REQUIRE(check_stress(3) == Approx(-233.778008402801).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 1.0E+7 / (3.0 * (1. - 2. * 0.3));
+    const double volumetric_strain = -0.625;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
+    REQUIRE(state_vars.at("pressure") ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 }
 
@@ -737,7 +745,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     // Calculate modulus values
     const double K = 1.0E+7 / (3.0 * (1. - 2. * 0.3));
     // Calculate pressure
-    const double volumetric_strain = 0.;
+    const double volumetric_strain = -0.1875;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
     REQUIRE(state_vars.at("pressure") ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
   }

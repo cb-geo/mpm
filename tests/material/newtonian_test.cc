@@ -162,7 +162,9 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     // Calculate modulus values
     const double K = 8333333.333333333;
     // Calculate pressure
-    const double volumetric_strain = 0.;
+    const double volumetric_strain = -0.00625;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
     REQUIRE(state_vars.at("pressure") ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
@@ -334,7 +336,9 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     // Calculate modulus values
     const double K = 8333333.333333333;
     // Calculate pressure
-    const double volumetric_strain = 0.;
+    const double volumetric_strain = -0.001875;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
     REQUIRE(state_vars.at("pressure") ==
             Approx(-K * volumetric_strain).epsilon(Tolerance));
   }

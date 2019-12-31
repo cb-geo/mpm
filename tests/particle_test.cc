@@ -844,7 +844,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->strain()(i) == Approx(strain(i)).epsilon(Tolerance));
 
     // Check volumetric strain at centroid
-    const double volumetric_strain = 0.2;
+    double volumetric_strain = 0.2;
     REQUIRE(particle->volumetric_strain_centroid() ==
             Approx(volumetric_strain).epsilon(Tolerance));
 
@@ -1036,6 +1036,67 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    SECTION("Particle pressure smoothing") {
+      // Assign material
+      unsigned mid1 = 0;
+      // Initialise material
+      Json jmaterial1;
+      jmaterial1["density"] = 1000.;
+      jmaterial1["bulk_modulus"] = 8333333.333333333;
+      jmaterial1["mu"] = 0.0451;
+
+      auto material1 =
+          Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+              ->create("Newtonian2D", std::move(mid1), jmaterial1);
+
+      // Assign material properties
+      REQUIRE(particle->assign_material(material1) == true);
+
+      // Compute volume
+      REQUIRE(particle->compute_volume() == true);
+
+      // Compute mass
+      REQUIRE(particle->compute_mass() == true);
+      // Mass
+      REQUIRE(particle->mass() == Approx(1000.).epsilon(Tolerance));
+
+      // Map particle mass to nodes
+      particle->assign_mass(std::numeric_limits<double>::max());
+      REQUIRE(particle->map_mass_momentum_to_nodes() == false);
+
+      // Map particle pressure to nodes
+      REQUIRE(particle->map_pressure_to_nodes() == false);
+
+      // Assign mass to nodes
+      REQUIRE(particle->compute_reference_location() == true);
+      REQUIRE(particle->compute_shapefn() == true);
+
+      // Check velocity
+      velocity.resize(Dim);
+      for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
+      REQUIRE(particle->assign_velocity(velocity) == true);
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
+
+      REQUIRE(particle->compute_mass() == true);
+      REQUIRE(particle->map_mass_momentum_to_nodes() == true);
+
+      // Check volumetric strain at centroid
+      volumetric_strain = 0.2;
+      REQUIRE(particle->dvolumetric_strain() ==
+              Approx(volumetric_strain).epsilon(Tolerance));
+
+      // Compute stress
+      particle->compute_stress();
+
+      REQUIRE(
+          particle->pressure() ==
+          Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
+
+      REQUIRE(particle->map_pressure_to_nodes() == true);
+      REQUIRE(particle->compute_pressure_smoothing() == true);
+    }
   }
 
   SECTION("Check assign material to particle") {
@@ -1974,7 +2035,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->strain()(i) == Approx(strain(i)).epsilon(Tolerance));
 
     // Check volumetric strain at centroid
-    const double volumetric_strain = 0.5;
+    double volumetric_strain = 0.5;
     REQUIRE(particle->volumetric_strain_centroid() ==
             Approx(volumetric_strain).epsilon(Tolerance));
 
@@ -2141,6 +2202,67 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     coordinates = particle->coordinates();
     for (unsigned i = 0; i < coordinates.size(); ++i)
       REQUIRE(coordinates(i) == Approx(coords(i)).epsilon(Tolerance));
+
+    SECTION("Particle pressure smoothing") {
+      // Assign material
+      unsigned mid1 = 0;
+      // Initialise material
+      Json jmaterial1;
+      jmaterial1["density"] = 1000.;
+      jmaterial1["bulk_modulus"] = 8333333.333333333;
+      jmaterial1["mu"] = 0.0451;
+
+      auto material1 =
+          Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+              ->create("Newtonian3D", std::move(mid1), jmaterial1);
+
+      // Assign material properties
+      REQUIRE(particle->assign_material(material1) == true);
+
+      // Compute volume
+      REQUIRE(particle->compute_volume() == true);
+
+      // Compute mass
+      REQUIRE(particle->compute_mass() == true);
+      // Mass
+      REQUIRE(particle->mass() == Approx(8000.).epsilon(Tolerance));
+
+      // Map particle mass to nodes
+      particle->assign_mass(std::numeric_limits<double>::max());
+      REQUIRE(particle->map_mass_momentum_to_nodes() == false);
+
+      // Map particle pressure to nodes
+      REQUIRE(particle->map_pressure_to_nodes() == false);
+
+      // Assign mass to nodes
+      REQUIRE(particle->compute_reference_location() == true);
+      REQUIRE(particle->compute_shapefn() == true);
+
+      // Check velocity
+      velocity.resize(Dim);
+      for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
+      REQUIRE(particle->assign_velocity(velocity) == true);
+      for (unsigned i = 0; i < velocity.size(); ++i)
+        REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
+
+      REQUIRE(particle->compute_mass() == true);
+      REQUIRE(particle->map_mass_momentum_to_nodes() == true);
+
+      // Check volumetric strain at centroid
+      volumetric_strain = 0.5;
+      REQUIRE(particle->dvolumetric_strain() ==
+              Approx(volumetric_strain).epsilon(Tolerance));
+
+      // Compute stress
+      particle->compute_stress();
+
+      REQUIRE(
+          particle->pressure() ==
+          Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
+
+      REQUIRE(particle->map_pressure_to_nodes() == true);
+      REQUIRE(particle->compute_pressure_smoothing() == true);
+    }
 
     // Compute updated particle location
     REQUIRE(particle->compute_updated_position(dt) == true);
