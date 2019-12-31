@@ -295,7 +295,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
 //! Compute acceleration and velocity with cundall damping factor
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
-  unsigned phase, double dt, double damping_factor) {
+    unsigned phase, double dt, double damping_factor) {
   bool status = true;
   const double tolerance = 1.0E-15;
   try {
