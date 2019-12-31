@@ -80,6 +80,7 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 
@@ -428,6 +429,7 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 

@@ -71,6 +71,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 
@@ -228,6 +229,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 
