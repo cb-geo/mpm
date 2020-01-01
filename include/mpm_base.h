@@ -172,8 +172,6 @@ class MPMBase : public MPM {
   std::vector<std::string> vtk_attributes_;
   //! Set node concentrated force
   bool set_node_concentrated_force_{false};
-  //! Bool nodal tractions
-  bool nodal_tractions_{true};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
