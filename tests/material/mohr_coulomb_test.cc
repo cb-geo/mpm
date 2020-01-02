@@ -65,13 +65,18 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
   //! Check failed initialisation
   SECTION("MohrCoulomb failed initialisation") {
     unsigned id = 0;
+    auto logger = std::make_unique<spdlog::logger>("MC_Test", mpm::stdout_sink);
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
     jmaterial["poisson_ratio"] = 0.3;
-    auto material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+    try {
+      auto material =
+          Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+              ->create("MohrCoulomb2D", std::move(id), jmaterial);
+    } catch (std::exception& except) {
+      logger->error("MohrCoulomb initialization failed: {}", except.what());
+    }
   }
 
   //! Check material properties
