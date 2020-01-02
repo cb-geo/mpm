@@ -63,11 +63,6 @@ class Material {
   //! Initialise history variables
   virtual mpm::dense_map initialise_state_variables() = 0;
 
-  //! Compute thermodynamic pressure
-  //! \param[in] volumetric_strain dVolumetric_strain
-  //! \retval pressure Thermodynamic pressure for volumetric strain
-  virtual double thermodynamic_pressure(double volumetric_strain) const = 0;
-
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain

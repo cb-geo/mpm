@@ -37,15 +37,7 @@ class Newtonian : public Material<Tdim> {
 
   //! Initialise history variables
   //! \retval state_vars State variables with history
-  mpm::dense_map initialise_state_variables() override {
-    mpm::dense_map state_vars;
-    return state_vars;
-  }
-
-  //! Thermodynamic pressure
-  //! \param[in] volumetric_strain dVolumetric_strain
-  //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) const override;
+  mpm::dense_map initialise_state_variables() override;
 
   //! Compute stress
   //! \param[in] stress Stress
@@ -66,6 +58,11 @@ class Newtonian : public Material<Tdim> {
   using Material<Tdim>::console_;
 
  private:
+  //! Thermodynamic pressure
+  //! \param[in] volumetric_strain dVolumetric_strain
+  //! \retval pressure Pressure for volumetric strain
+  double thermodynamic_pressure(double volumetric_strain) const;
+
   //! Density
   double density_{std::numeric_limits<double>::max()};
   //! Bulk modulus
