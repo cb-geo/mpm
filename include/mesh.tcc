@@ -526,15 +526,13 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
       // Create a vector of h5_particles
       std::vector<mpm::HDF5Particle> h5_particles;
       auto particle_ids = (*citr)->particles();
+      // Create a vector of HDF5 data of particles to send
+      // delete particle
       for (auto& id : particle_ids) {
-        // Send and delete particle
-        auto send_particle = map_particles_[id];
         // Append to vector of particles
-        h5_particles.emplace_back(send_particle->hdf5());
+        h5_particles.emplace_back(map_particles_[id]->hdf5());
         // Clear particle in current rank
-        send_particle->remove_cell();
-        particles_.remove(send_particle);
-        map_particles_.remove(id);
+        this->remove_particle_by_id(id);
       }
       (*citr)->clear_particle_ids();
 
