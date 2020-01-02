@@ -428,7 +428,7 @@ class Mesh {
   //! Container of particles ids and cell ids
   std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Container of particle sets
-  tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
+  tsl::robin_map<unsigned, tbb::concurrent_vector<mpm::Index>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes

@@ -740,14 +740,29 @@ template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
   // If set id is -1, use all particles
-  auto set = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
-
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) oper(set[i]);
-      },
-      tbb::simple_partitioner());
+  if (set_id == -1) {
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            oper(particles_[i]);
+        },
+        tbb::simple_partitioner());
+  } else {
+    // Iterate over the particle set
+    auto set = particle_sets_.at(set_id);
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            unsigned id = set[i];
+            if (map_particles_.find(id) != map_particles_.end())
+              oper(map_particles_[id]);
+          }
+        },
+        tbb::simple_partitioner());
+  }
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
@@ -937,9 +952,8 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
   // Iterate over all particle velocity constraints
   for (const auto& pvelocity : particle_velocity_constraints_) {
-    int set_id = pvelocity->setid();
     // If set id is -1, use all particles
-    auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
+    int set_id = pvelocity->setid();
     unsigned dir = pvelocity->dir();
     double velocity = pvelocity->velocity();
 
@@ -1315,20 +1329,15 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
          ++sitr) {
       // Create a container for the set
-      Container<ParticleBase<Tdim>> particles;
-      // Reserve the size of the container
-      particles.reserve((sitr->second).size());
-      // Add particles to the container
-      for (auto pid : sitr->second) {
-        bool insertion_status =
-            particles.add(map_particles_[pid], check_duplicates);
-      }
+      tbb::concurrent_vector<mpm::Index> particles((sitr->second).begin(),
+                                                   (sitr->second).end());
 
       // Create the map of the container
-      status = this->particle_sets_
-                   .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
-                       sitr->first, particles))
-                   .second;
+      status =
+          this->particle_sets_
+              .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
+                  sitr->first, particles))
+              .second;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
