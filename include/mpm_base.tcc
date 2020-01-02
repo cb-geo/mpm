@@ -48,6 +48,17 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
       velocity_update_ = false;
     }
 
+    // Damping
+    try {
+      if (analysis_.find("damping") != analysis_.end()) {
+        if (!initialise_damping(analysis_.at("damping")))
+          throw std::runtime_error("Damping parameters are not defined");
+      }
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: Damping is not specified, using none as default",
+                     __FILE__, __LINE__, exception.what());
+    }
+
     // Math functions
     try {
       // Get materials properties
@@ -900,4 +911,27 @@ void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
     console_->warn("#{}: Particle sets are undefined {} ", __LINE__,
                    exception.what());
   }
+}
+
+// Initialise Damping
+template <unsigned Tdim>
+bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
+
+  // Read damping JSON object
+  bool status = true;
+  try {
+    // Read damping type
+    std::string type = damping_props.at("type").template get<std::string>();
+    if (type == "Cundall") damping_type_ = mpm::Damping::Cundall;
+
+    // Read damping factor
+    damping_factor_ = damping_props.at("damping_factor").template get<double>();
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Damping parameters are undefined {} ", __LINE__,
+                   exception.what());
+    status = false;
+  }
+
+  return status;
 }
