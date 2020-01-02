@@ -218,6 +218,18 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
 
+    // Add and use remove all particles
+    REQUIRE(mesh->add_particle(particle1) == true);
+    REQUIRE(mesh->add_particle(particle2) == true);
+
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 2);
+    std::vector<mpm::Index> remove_pids = {{0, 1}};
+    // Remove all particles
+    mesh->remove_particles(remove_pids);
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
+
     // Test assign node concentrated force
     SECTION("Check assign node concentrated force") {
       unsigned Nphase = 0;
@@ -1338,6 +1350,18 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Remove all non-rank particles in mesh
     mesh->remove_all_nonrank_particles();
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 0);
+
+    // Add and use remove all particles
+    REQUIRE(mesh->add_particle(particle1) == true);
+    REQUIRE(mesh->add_particle(particle2) == true);
+
+    // Check number of particles in mesh
+    REQUIRE(mesh->nparticles() == 2);
+    std::vector<mpm::Index> remove_pids = {{0, 1}};
+    // Remove all particles
+    mesh->remove_particles(remove_pids);
     // Check number of particles in mesh
     REQUIRE(mesh->nparticles() == 0);
 

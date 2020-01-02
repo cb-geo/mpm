@@ -192,6 +192,10 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
+  //! Remove a particle from the mesh
+  //! \param[in] pids Vector of particle ids
+  void remove_particles(const std::vector<mpm::Index>& pids);
+
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 

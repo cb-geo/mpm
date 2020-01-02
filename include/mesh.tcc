@@ -472,6 +472,31 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   return (result && map_particles_.remove(id));
 }
 
+//! Remove a particle by id
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::remove_particles(const std::vector<mpm::Index>& pids) {
+  if (!pids.empty()) {
+    // Get MPI rank
+    int mpi_size = 1;
+#ifdef USE_MPI
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+    for (auto& id : pids) {
+      map_particles_[id]->remove_cell();
+      map_particles_.remove(id);
+    }
+
+    // Get number of particles to reserve size
+    unsigned nparticles = this->nparticles();
+    // Clear particles and start a new element of particles
+    particles_.clear();
+    particles_.reserve(static_cast<int>(nparticles / mpi_size));
+    // Iterate over the map of particles and add them to container
+    for (auto& particle : map_particles_)
+      particles_.add(particle.second, false);
+  }
+}
+
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
@@ -520,6 +545,8 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ghost_cells_.size());
     unsigned i = 0;
+
+    std::vector<mpm::Index> remove_pids;
     // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
@@ -531,8 +558,8 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
       for (auto& id : particle_ids) {
         // Append to vector of particles
         h5_particles.emplace_back(map_particles_[id]->hdf5());
-        // Clear particle in current rank
-        this->remove_particle_by_id(id);
+        // Particles to be removed from the current rank
+        remove_pids.emplace_back(id);
       }
       (*citr)->clear_particle_ids();
 
@@ -551,6 +578,8 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
       }
       h5_particles.clear();
     }
+    // Remove all sent particles
+    this->remove_particles(remove_pids);
     // Send complete
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
