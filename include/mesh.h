@@ -192,6 +192,10 @@ class Mesh {
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
 
+  //! Remove a particle from the mesh
+  //! \param[in] pids Vector of particle ids
+  void remove_particles(const std::vector<mpm::Index>& pids);
+
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 
@@ -219,7 +223,7 @@ class Mesh {
   //! \tparam Toper Callable object typically a baseclass functor
   //! \param[in] set_id particle set id
   template <typename Toper>
-  void iterate_over_particle_set(unsigned set_id, Toper oper);
+  void iterate_over_particle_set(int set_id, Toper oper);
 
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
@@ -424,7 +428,7 @@ class Mesh {
   //! Container of particles ids and cell ids
   std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Container of particle sets
-  tsl::robin_map<unsigned, Container<ParticleBase<Tdim>>> particle_sets_;
+  tsl::robin_map<unsigned, tbb::concurrent_vector<mpm::Index>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Container of nodes
