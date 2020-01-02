@@ -922,16 +922,20 @@ bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
   try {
     // Read damping type
     if (damping_props.find("type") != damping_props.end())
-      damping_type_ = damping_props["type"].template get<mpm::MPMBase<Tdim>::Damping>;
-    else throw std::runtime_error("Damping type was not specified");
+      damping_type_ =
+          damping_props["type"].template get<mpm::MPMBase<Tdim>::Damping>();
+    else
+      throw std::runtime_error("Damping type was not specified");
 
     // Read damping factor
     if (damping_props.find("damping_factor") != damping_props.end())
-      damping_factor_ = damping_props["damping_factor"].template get<double>;
-    else throw std::runtime_error("Damping factor was not specified");
-    
+      damping_factor_ = damping_props["damping_factor"].template get<double>();
+    else
+      throw std::runtime_error("Damping factor was not specified");
+
   } catch (std::exception& exception) {
-    console_->warn("#{}: Damping parameters are undefined {} ", __LINE__, exception.what());
+    console_->warn("#{}: Damping parameters are undefined {} ", __LINE__,
+                   exception.what());
     status = false;
   }
 

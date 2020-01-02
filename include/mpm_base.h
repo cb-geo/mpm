@@ -199,7 +199,7 @@ class MPMBase : public MPM {
   // Level set methods
   bool ls_methods_{false};
   //! Damping type
-  enum class Damping{ None, Cundall };
+  enum class Damping { None, Cundall };
   Damping damping_type_{mpm::MPMBase<Tdim>::Damping::None};
   //! Damping factor
   double damping_factor_{0.};
