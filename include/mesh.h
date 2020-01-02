@@ -223,7 +223,7 @@ class Mesh {
   //! \tparam Toper Callable object typically a baseclass functor
   //! \param[in] set_id particle set id
   template <typename Toper>
-  void iterate_over_particle_set(unsigned set_id, Toper oper);
+  void iterate_over_particle_set(int set_id, Toper oper);
 
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();

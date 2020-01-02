@@ -738,8 +738,10 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
-void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
-  auto set = particle_sets_.at(set_id);
+void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
+  // If set id is -1, use all particles
+  auto set = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
+
   tbb::parallel_for(
       tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
       [&](const tbb::blocked_range<int>& range) {
@@ -895,28 +897,15 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   // Iterate over all particle tractions
   for (const auto& ptraction : particle_tractions_) {
     int set_id = ptraction->setid();
-    // If set id is -1, use all particles
-    auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(pset.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            pset[i]->assign_traction(dir, traction);
-        },
-        tbb::simple_partitioner());
+    this->iterate_over_particle_set(
+        set_id, std::bind(&mpm::ParticleBase<Tdim>::assign_traction,
+                          std::placeholders::_1, dir, traction));
   }
   if (!particle_tractions_.empty()) {
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            particles_[i]->map_traction_force();
-        },
-        tbb::simple_partitioner());
+    this->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
   }
 }
 
@@ -953,14 +942,11 @@ void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
     auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = pvelocity->dir();
     double velocity = pvelocity->velocity();
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(pset.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            pset[i]->apply_particle_velocity_constraints(dir, velocity);
-        },
-        tbb::simple_partitioner());
+
+    this->iterate_over_particle_set(
+        set_id,
+        std::bind(&mpm::ParticleBase<Tdim>::apply_particle_velocity_constraints,
+                  std::placeholders::_1, dir, velocity));
   }
 }
 
