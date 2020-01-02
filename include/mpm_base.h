@@ -73,6 +73,9 @@ class MPMBase : public MPM {
   //! Initialise math functions
   bool initialise_math_functions(const Json&) override;
 
+  //! Initialise damping
+  bool initialise_damping(const Json&) override;
+
   //! Solve
   bool solve() override { return true; }
 
@@ -196,9 +199,10 @@ class MPMBase : public MPM {
   // Level set methods
   bool ls_methods_{false};
   //! Damping type
-  std::string damping_type_{""};
+  enum class Damping{ None, Cundall };
+  Damping damping_type_{mpm::MPMBase<Tdim>::Damping::None};
   //! Damping factor
-  double damping_factor_{std::numeric_limits<double>::max()};
+  double damping_factor_{0.};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell

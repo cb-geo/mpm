@@ -54,6 +54,9 @@ class MPM {
   // Initialise math functions
   virtual bool initialise_math_functions(const Json&) = 0;
 
+  //! Initialise damping
+  virtual bool initialise_damping(const Json&) = 0;
+
   // Solve
   virtual bool solve() = 0;
 

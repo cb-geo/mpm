@@ -295,7 +295,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Check if damping has been specified and accordingly Iterate over active
     // nodes to compute acceleratation and velocity
-    if (damping_type_ == "Cundall")
+    if (damping_type_ == mpm::MPMBase<Tdim>::Damping::Cundall)
       mesh_->iterate_over_nodes_predicate(
           std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_cundall,
                     std::placeholders::_1, phase, this->dt_, damping_factor_),
