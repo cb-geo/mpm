@@ -63,9 +63,6 @@ class MPMBase : public MPM {
   //! Initialise math functions
   bool initialise_math_functions(const Json&) override;
 
-  //! Initialise damping
-  bool initialise_damping(const Json&) override;
-
   //! Solve
   bool solve() override { return true; }
 
@@ -143,6 +140,10 @@ class MPMBase : public MPM {
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates
   void particle_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Initialise damping
+  //! \param[in] damping_props Damping properties
+  bool initialise_damping(const Json& damping_props);
 
  protected:
   // Generate a unique id for the analysis
