@@ -48,6 +48,11 @@ enum class QuadratureRule { StandardMPM, Gauss, MovingGauss, GaussMPM };
 enum class StressUpdate { USF, USL, MUSL };
 extern std::map<std::string, StressUpdate> stress_update;
 
+//! Damping type
+//! None: No damping is specified
+//! Cundall: Cundall damping
+enum class Damping { None, Cundall };
+
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
 //! \details A Base MPM class
@@ -199,8 +204,7 @@ class MPMBase : public MPM {
   // Level set methods
   bool ls_methods_{false};
   //! Damping type
-  enum class Damping { None, Cundall };
-  Damping damping_type_{mpm::MPMBase<Tdim>::Damping::None};
+  mpm::Damping damping_type_{mpm::Damping::None};
   //! Damping factor
   double damping_factor_{0.};
 
