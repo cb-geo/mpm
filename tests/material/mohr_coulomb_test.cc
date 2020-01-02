@@ -115,30 +115,6 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     }
   }
 
-  //! Check thermodynamic pressure
-  SECTION("MohrCoulomb check thermodynamic pressure") {
-    unsigned id = 0;
-    auto material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
-    REQUIRE(material->id() == 0);
-
-    // Get material properties
-    REQUIRE(material->template property<double>("density") ==
-            Approx(jmaterial["density"]).epsilon(Tolerance));
-
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    const double G = 3846153.846153846;
-    const double a1 = 13461538.461566667;
-    const double a2 = 5769230.769166667;
-
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(0.).epsilon(Tolerance));
-  }
-
   //! Check yield correction based on trial stress
   SECTION("MohrCoulomb check yield correction based on trial stress") {
     unsigned id = 0;

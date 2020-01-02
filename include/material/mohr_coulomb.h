@@ -45,13 +45,6 @@ class MohrCoulomb : public Material<Tdim> {
   //! \retval state_vars State variables with history
   mpm::dense_map initialise_state_variables() override;
 
-  //! Thermodynamic pressure
-  //! \param[in] volumetric_strain dVolumetric_strain
-  //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) const override {
-    return 0;
-  };
-
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
