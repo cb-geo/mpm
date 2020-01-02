@@ -190,61 +190,6 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
       }
     }
   }
-  SECTION("Check velocity constraints file") {
-    // Vector of velocity constraints
-    std::vector<std::tuple<mpm::Index, unsigned, double>> velocity_constraints;
-
-    // Constraint
-    velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
-    velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
-    velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
-    velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
-
-    // Dump constraints as an input file to be read
-    std::ofstream file;
-    file.open("velocity-constraints-2d.txt");
-    // Write particle coordinates
-    for (const auto& velocity_constraint : velocity_constraints) {
-      file << std::get<0>(velocity_constraint) << "\t";
-      file << std::get<1>(velocity_constraint) << "\t";
-      file << std::get<2>(velocity_constraint) << "\t";
-
-      file << "\n";
-    }
-
-    file.close();
-
-    // Check read velocity constraints
-    SECTION("Check velocity constraints") {
-      // Create a io_mesh object
-      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
-
-      // Try to read constraints from a non-existant file
-      auto constraints = io_mesh->read_velocity_constraints(
-          "velocity-constraints-missing.txt");
-      // Check number of constraints
-      REQUIRE(constraints.size() == 0);
-
-      // Check constraints
-      constraints =
-          io_mesh->read_velocity_constraints("velocity-constraints-2d.txt");
-      // Check number of particles
-      REQUIRE(constraints.size() == velocity_constraints.size());
-
-      // Check coordinates of nodes
-      for (unsigned i = 0; i < velocity_constraints.size(); ++i) {
-        REQUIRE(
-            std::get<0>(constraints.at(i)) ==
-            Approx(std::get<0>(velocity_constraints.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(constraints.at(i)) ==
-            Approx(std::get<1>(velocity_constraints.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(constraints.at(i)) ==
-            Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
-      }
-    }
-  }
 
   SECTION("Check nodal euler angle file") {
     // Map of euler angles
@@ -621,37 +566,6 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
     }
 
     file.close();
-
-    // Check read velocity constraints
-    SECTION("Check velocity constraints") {
-      // Create a io_mesh object
-      auto io_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
-
-      // Try to read constrtaints from a non-existant file
-      auto constraints = io_mesh->read_velocity_constraints(
-          "velocity-constraints-missing.txt");
-      // Check number of constraints
-      REQUIRE(constraints.size() == 0);
-
-      // Check constraints
-      constraints =
-          io_mesh->read_velocity_constraints("velocity-constraints-3d.txt");
-      // Check number of particles
-      REQUIRE(constraints.size() == velocity_constraints.size());
-
-      // Check coordinates of nodes
-      for (unsigned i = 0; i < velocity_constraints.size(); ++i) {
-        REQUIRE(
-            std::get<0>(constraints.at(i)) ==
-            Approx(std::get<0>(velocity_constraints.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<1>(constraints.at(i)) ==
-            Approx(std::get<1>(velocity_constraints.at(i))).epsilon(Tolerance));
-        REQUIRE(
-            std::get<2>(constraints.at(i)) ==
-            Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
-      }
-    }
   }
 
   SECTION("Check nodal euler angle file") {

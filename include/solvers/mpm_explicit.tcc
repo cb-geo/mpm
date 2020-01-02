@@ -96,9 +96,8 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::update_volume_strainrate,
-                std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
@@ -154,21 +153,21 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   bool mesh_status = this->initialise_mesh();
   if (!mesh_status) {
     status = false;
-    throw std::runtime_error("Initialisation of materials failed");
+    throw std::runtime_error("Initialisation of mesh failed");
   }
 
   // Initialise particles
   bool particle_status = this->initialise_particles();
   if (!particle_status) {
     status = false;
-    throw std::runtime_error("Initialisation of materials failed");
+    throw std::runtime_error("Initialisation of particles failed");
   }
 
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
   if (!loading_status) {
     status = false;
-    throw std::runtime_error("Initialisation of materials failed");
+    throw std::runtime_error("Initialisation of loading failed");
   }
 
   // Compute mass
@@ -303,6 +302,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, this->dt_, this->velocity_update_));
+
+    // Apply particle velocity constraints
+    mesh_->apply_particle_velocity_constraints();
 
     // Update Stress Last
     if (this->stress_update_ == mpm::StressUpdate::USL)

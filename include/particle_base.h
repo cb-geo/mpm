@@ -120,7 +120,7 @@ class ParticleBase {
   virtual bool compute_volume() = 0;
 
   //! Update volume based on centre volumetric strain rate
-  virtual bool update_volume_strainrate(double dt) = 0;
+  virtual bool update_volume() = 0;
 
   //! Return mass density
   virtual double mass_density() const = 0;
@@ -168,6 +168,9 @@ class ParticleBase {
   //! Volumetric strain of centroid
   virtual double volumetric_strain_centroid() const = 0;
 
+  //! dvolumetric strain
+  virtual double dvolumetric_strain() const = 0;
+
   //! Initial stress
   virtual void initial_stress(const Eigen::Matrix<double, 6, 1>&) = 0;
 
@@ -182,9 +185,6 @@ class ParticleBase {
 
   //! Map internal force
   virtual bool map_internal_force() = 0;
-
-  //! Update pressure of the particles
-  virtual bool update_pressure(double dvolumetric_strain) = 0;
 
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes() = 0;
@@ -222,15 +222,11 @@ class ParticleBase {
   //! \retval vecdata Vector data of particle property
   virtual Eigen::VectorXd vector_data(const std::string& property) = 0;
 
-  //! Assign particle velocity constraint
-  //! Directions can take values between 0 and Dim
+  //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
-  virtual bool assign_particle_velocity_constraint(unsigned dir,
+  virtual void apply_particle_velocity_constraints(unsigned dir,
                                                    double velocity) = 0;
-
-  //! Apply particle velocity constraints
-  virtual void apply_particle_velocity_constraints() = 0;
 
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;

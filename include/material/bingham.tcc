@@ -22,6 +22,13 @@ mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
   }
 }
 
+//! Initialise history variables
+template <unsigned Tdim>
+mpm::dense_map mpm::Bingham<Tdim>::initialise_state_variables() {
+  mpm::dense_map state_vars = {{"pressure", 0.0}};
+  return state_vars;
+}
+
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Bingham<Tdim>::thermodynamic_pressure(
@@ -74,12 +81,16 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
   const double trace_invariant2 = 0.5 * (tau.head(3)).dot(tau.head(3));
   if (trace_invariant2 < (tau0_ * tau0_)) tau.setZero();
 
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+
   // Update volumetric and deviatoric stress
   // thermodynamic pressure is from material point
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -ptr->pressure() * this->dirac_delta() + tau;
+      -(*state_vars).at("pressure") * this->dirac_delta() + tau;
 
   return updated_stress;
 }

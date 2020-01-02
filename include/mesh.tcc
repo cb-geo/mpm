@@ -472,6 +472,31 @@ bool mpm::Mesh<Tdim>::remove_particle_by_id(mpm::Index id) {
   return (result && map_particles_.remove(id));
 }
 
+//! Remove a particle by id
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::remove_particles(const std::vector<mpm::Index>& pids) {
+  if (!pids.empty()) {
+    // Get MPI rank
+    int mpi_size = 1;
+#ifdef USE_MPI
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+    for (auto& id : pids) {
+      map_particles_[id]->remove_cell();
+      map_particles_.remove(id);
+    }
+
+    // Get number of particles to reserve size
+    unsigned nparticles = this->nparticles();
+    // Clear particles and start a new element of particles
+    particles_.clear();
+    particles_.reserve(static_cast<int>(nparticles / mpi_size));
+    // Iterate over the map of particles and add them to container
+    for (auto& particle : map_particles_)
+      particles_.add(particle.second, false);
+  }
+}
+
 //! Remove all particles in a cell given cell id
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
@@ -520,21 +545,21 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ghost_cells_.size());
     unsigned i = 0;
+
+    std::vector<mpm::Index> remove_pids;
     // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
       // Create a vector of h5_particles
       std::vector<mpm::HDF5Particle> h5_particles;
       auto particle_ids = (*citr)->particles();
+      // Create a vector of HDF5 data of particles to send
+      // delete particle
       for (auto& id : particle_ids) {
-        // Send and delete particle
-        auto send_particle = map_particles_[id];
         // Append to vector of particles
-        h5_particles.emplace_back(send_particle->hdf5());
-        // Clear particle in current rank
-        send_particle->remove_cell();
-        particles_.remove(send_particle);
-        map_particles_.remove(id);
+        h5_particles.emplace_back(map_particles_[id]->hdf5());
+        // Particles to be removed from the current rank
+        remove_pids.emplace_back(id);
       }
       (*citr)->clear_particle_ids();
 
@@ -553,6 +578,8 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
       }
       h5_particles.clear();
     }
+    // Remove all sent particles
+    this->remove_particles(remove_pids);
     // Send complete
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
@@ -711,14 +738,31 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
-void mpm::Mesh<Tdim>::iterate_over_particle_set(unsigned set_id, Toper oper) {
-  auto set = particle_sets_.at(set_id);
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) oper(set[i]);
-      },
-      tbb::simple_partitioner());
+void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
+  // If set id is -1, use all particles
+  if (set_id == -1) {
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i)
+            oper(particles_[i]);
+        },
+        tbb::simple_partitioner());
+  } else {
+    // Iterate over the particle set
+    auto set = particle_sets_.at(set_id);
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            unsigned id = set[i];
+            if (map_particles_.find(id) != map_particles_.end())
+              oper(map_particles_[id]);
+          }
+        },
+        tbb::simple_partitioner());
+  }
 }
 
 //! Add a neighbour mesh, using the local id of the mesh and a mesh pointer
@@ -778,74 +822,6 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
     vector_data.clear();
   }
   return vector_data;
-}
-
-//! Assign velocity constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_velocity_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        velocity_constraints) {
-  bool status = false;
-  try {
-    if (!nodes_.size())
-      throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign velocity "
-          "constraints");
-
-    for (const auto& velocity_constraint : velocity_constraints) {
-      // Node id
-      mpm::Index nid = std::get<0>(velocity_constraint);
-      // Direction
-      unsigned dir = std::get<1>(velocity_constraint);
-      // Velocity
-      double velocity = std::get<2>(velocity_constraint);
-
-      // Apply constraint
-      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
-
-      if (!status)
-        throw std::runtime_error("Node or velocity constraint is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Assign friction constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_friction_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-        friction_constraints) {
-  bool status = false;
-  try {
-    if (!nodes_.size())
-      throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign friction "
-          "constraints");
-
-    for (const auto& friction_constraint : friction_constraints) {
-      // Node id
-      mpm::Index nid = std::get<0>(friction_constraint);
-      // Direction
-      unsigned dir = std::get<1>(friction_constraint);
-      // Sign
-      int sign = std::get<2>(friction_constraint);
-      // Friction
-      double friction = std::get<3>(friction_constraint);
-
-      // Apply constraint
-      status = map_nodes_[nid]->assign_friction_constraint(dir, sign, friction);
-
-      if (!status)
-        throw std::runtime_error("Node or friction constraint is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
 }
 
 //! Assign particles volumes
@@ -918,8 +894,8 @@ bool mpm::Mesh<Tdim>::create_particles_tractions(
   try {
     if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end())
       // Create a particle traction load
-      particle_tractions_.emplace_back(std::make_shared<mpm::ParticleTraction>(
-          set_id, mfunction, dir, traction));
+      particle_tractions_.emplace_back(
+          std::make_shared<mpm::Traction>(set_id, mfunction, dir, traction));
     else
       throw std::runtime_error("No particle set found to assign traction");
 
@@ -936,58 +912,121 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
   // Iterate over all particle tractions
   for (const auto& ptraction : particle_tractions_) {
     int set_id = ptraction->setid();
-    // If set id is -1, use all particles
-    auto pset = (set_id == -1) ? this->particles_ : particle_sets_.at(set_id);
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(pset.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            pset[i]->assign_traction(dir, traction);
-        },
-        tbb::simple_partitioner());  // KK
+    this->iterate_over_particle_set(
+        set_id, std::bind(&mpm::ParticleBase<Tdim>::assign_traction,
+                          std::placeholders::_1, dir, traction));
   }
   if (!particle_tractions_.empty()) {
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            particles_[i]->map_traction_force();
-        },
-        tbb::simple_partitioner());
+    this->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
   }
 }
 
-//! Assign particles velocity constraints
+//! Create particle velocity constraints
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_particles_velocity_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        particle_velocity_constraints) {
+bool mpm::Mesh<Tdim>::create_particle_velocity_constraint(
+    int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
-    if (!particles_.size())
+    if (set_id == -1 || particle_sets_.find(set_id) != particle_sets_.end()) {
+      // Create a particle velocity constraint
+      if (constraint->dir() < Tdim)
+        particle_velocity_constraints_.emplace_back(constraint);
+      else
+        throw std::runtime_error("Invalid direction of velocity constraint");
+    } else
       throw std::runtime_error(
-          "No particles have been assigned in mesh, cannot assign velocity");
-    for (const auto& particle_velocity_constraint :
-         particle_velocity_constraints) {
-      // Particle id
-      mpm::Index pid = std::get<0>(particle_velocity_constraint);
-      // Direction
-      unsigned dir = std::get<1>(particle_velocity_constraint);
-      // Velocity
-      double velocity = std::get<2>(particle_velocity_constraint);
+          "No particle set found to assign velocity constraint");
 
-      // if (map_particles_.find(pid) != map_particles_.end())
-      status = map_particles_[pid]->assign_particle_velocity_constraint(
-          dir, velocity);
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
 
-      if (!status) throw std::runtime_error("Velocity is invalid for particle");
-    }
+//! Apply particle tractions
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
+  // Iterate over all particle velocity constraints
+  for (const auto& pvelocity : particle_velocity_constraints_) {
+    // If set id is -1, use all particles
+    int set_id = pvelocity->setid();
+    unsigned dir = pvelocity->dir();
+    double velocity = pvelocity->velocity();
+
+    this->iterate_over_particle_set(
+        set_id,
+        std::bind(&mpm::ParticleBase<Tdim>::apply_particle_velocity_constraints,
+                  std::placeholders::_1, dir, velocity));
+  }
+}
+
+//! Assign nodal velocity constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_velocity_constraint(
+    int set_id, const std::shared_ptr<mpm::VelocityConstraint>& vconstraint) {
+  bool status = true;
+  try {
+    if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end()) {
+      int set_id = vconstraint->setid();
+      // If set id is -1, use all nodes
+      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+      unsigned dir = vconstraint->dir();
+      double velocity = vconstraint->velocity();
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
+                                  tbb_grain_size_),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              status = nset[i]->assign_velocity_constraint(dir, velocity);
+              if (!status)
+                throw std::runtime_error(
+                    "Failed to initialise velocity constraint at node");
+            }
+          },
+          tbb::simple_partitioner());
+    } else
+      throw std::runtime_error("No node set found to assign velocity con");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign friction constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_frictional_constraint(
+    int nset_id, const std::shared_ptr<mpm::FrictionConstraint>& fconstraint) {
+  bool status = false;
+  try {
+    if (nset_id == -1 || node_sets_.find(nset_id) != node_sets_.end()) {
+      int set_id = fconstraint->setid();
+      // If set id is -1, use all nodes
+      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+      unsigned dir = fconstraint->dir();
+      int nsign_n = fconstraint->sign_n();
+      double friction = fconstraint->friction();
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
+                                  tbb_grain_size_),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              status =
+                  nset[i]->assign_friction_constraint(dir, nsign_n, friction);
+              if (!status)
+                throw std::runtime_error(
+                    "Failed to initialise velocity constraint at node");
+            }
+          },
+          tbb::simple_partitioner());
+    } else
+      throw std::runtime_error("No node set found to assign velocity con");
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1290,20 +1329,15 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
          ++sitr) {
       // Create a container for the set
-      Container<ParticleBase<Tdim>> particles;
-      // Reserve the size of the container
-      particles.reserve((sitr->second).size());
-      // Add particles to the container
-      for (auto pid : sitr->second) {
-        bool insertion_status =
-            particles.add(map_particles_[pid], check_duplicates);
-      }
+      tbb::concurrent_vector<mpm::Index> particles((sitr->second).begin(),
+                                                   (sitr->second).end());
 
       // Create the map of the container
-      status = this->particle_sets_
-                   .insert(std::pair<mpm::Index, Container<ParticleBase<Tdim>>>(
-                       sitr->first, particles))
-                   .second;
+      status =
+          this->particle_sets_
+              .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
+                  sitr->first, particles))
+              .second;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

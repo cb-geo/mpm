@@ -118,8 +118,7 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_volume() override;
 
   //! Update volume based on centre volumetric strain rate
-  //! \param[in] dt Analysis time step
-  bool update_volume_strainrate(double dt) override;
+  bool update_volume() override;
 
   //! Return mass density
   //! \param[in] phase Index corresponding to the phase
@@ -155,6 +154,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate() const override {
     return strain_rate_;
   };
+
+  //! Return dvolumetric strain of centroid
+  //! \retval dvolumetric strain at centroid
+  double dvolumetric_strain() const override { return dvolumetric_strain_; }
 
   //! Return volumetric strain of centroid
   //! \retval volumetric strain at centroid
@@ -219,35 +222,30 @@ class Particle : public ParticleBase<Tdim> {
     return state_variables_.at(var);
   }
 
-  //! Update pressure of the particles
-  //! \param[in] dvolumetric_strain dvolumetric strain in a cell
-  bool update_pressure(double dvolumetric_strain) override;
-
   //! Map particle pressure to nodes
   bool map_pressure_to_nodes() override;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
+  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   bool compute_pressure_smoothing() override;
 
   //! Return pressure of the particles
-  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  double pressure() const override { return pressure_; }
+  double pressure() const override {
+    return (state_variables_.find("pressure") != state_variables_.end())
+               ? state_variables_.at("pressure")
+               : 0.;
+  }
 
   //! Return vector data of particles
   //! \param[in] property Property string
   //! \retval vecdata Vector data of particle property
   Eigen::VectorXd vector_data(const std::string& property) override;
 
-  //! Assign particle velocity constraints
-  //! Directions can take values between 0 and Dim
+  //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
-  //! \retval status Assignment status
-  bool assign_particle_velocity_constraint(unsigned dir,
+  void apply_particle_velocity_constraints(unsigned dir,
                                            double velocity) override;
-
-  //! Apply particle velocity constraints
-  void apply_particle_velocity_constraints() override;
 
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
@@ -281,12 +279,12 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
   Eigen::Matrix<double, 1, Tdim> natural_size_;
-  //! Pressure
-  double pressure_;
   //! Stresses
   Eigen::Matrix<double, 6, 1> stress_;
   //! Strains
   Eigen::Matrix<double, 6, 1> strain_;
+  //! dvolumetric strain
+  double dvolumetric_strain_;
   //! Volumetric strain at centroid
   double volumetric_strain_centroid_;
   //! Strain rate
