@@ -921,10 +921,8 @@ bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
   bool status = true;
   try {
     // Read damping type
-    if (damping_props.find("type") != damping_props.end())
-      damping_type_ = damping_props.at("type").template get<mpm::Damping>();
-    else
-      throw std::runtime_error("Damping type was not specified");
+    std::string type = damping_props.at("type").template get<std::string>();
+    if (type == "Cundall") damping_type_ = mpm::Damping::Cundall;
 
     // Read damping factor
     damping_factor_ = damping_props.at("damping_factor").template get<double>();
