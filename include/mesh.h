@@ -234,13 +234,6 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
       const std::string& attribute, unsigned phase);
 
-  //! Assign velocity constraints to cells
-  //! \param[in] velocity_constraints Constraint at cell id, face id, dir, and
-  //! velocity
-  bool assign_cell_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>&
-          velocity_constraints);
-
   //! Compute and assign rotation matrix to nodes
   //! \param[in] euler_angles Map of node number and respective euler_angles
   bool compute_nodal_rotation_matrices(

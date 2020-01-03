@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "container.h"
 #include "data_types.h"
 #include "function_base.h"
 #include "hdf5_particle.h"
@@ -184,7 +185,7 @@ class ParticleBase {
   virtual void map_body_force(const VectorDim& pgravity) = 0;
 
   //! Map internal force
-  virtual bool map_internal_force() = 0;
+  virtual void map_internal_force() = 0;
 
   //! Map particle pressure to nodes
   virtual bool map_pressure_to_nodes() = 0;
@@ -244,6 +245,8 @@ class ParticleBase {
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+  //! Container of nodeal pointers
+  Container<NodeBase<Tdim>> nodes_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
   //! Unsigned material id

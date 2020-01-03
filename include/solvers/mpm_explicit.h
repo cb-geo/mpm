@@ -70,6 +70,10 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::vtk_attributes_;
   //! Node concentrated force
   using mpm::MPMBase<Tdim>::set_node_concentrated_force_;
+  //! Damping type
+  using mpm::MPMBase<Tdim>::damping_type_;
+  //! Damping factor
+  using mpm::MPMBase<Tdim>::damping_factor_;
 
  private:
   //! Pressure smoothing

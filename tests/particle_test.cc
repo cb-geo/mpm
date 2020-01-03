@@ -726,9 +726,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress() == false);
 
-    // Test compute internal force before material assignment
-    REQUIRE(particle->map_internal_force() == false);
-
     // Assign material properties
     REQUIRE(particle->assign_material(material) == true);
 
@@ -948,7 +945,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Map particle internal force
     particle->assign_volume(1.0);
-    REQUIRE(particle->map_internal_force() == true);
+    particle->map_internal_force();
 
     // Check nodal internal force
     for (unsigned i = 0; i < internal_force.rows(); ++i)
@@ -1897,9 +1894,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Test compute stress before material assignment
     REQUIRE(particle->compute_stress() == false);
 
-    // Test compute internal force before material assignment
-    REQUIRE(particle->map_internal_force() == false);
-
     // Assign material properties
     REQUIRE(particle->assign_material(material) == true);
 
@@ -2149,7 +2143,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Map particle internal force
     particle->assign_volume(8.0);
-    REQUIRE(particle->map_internal_force() == true);
+    particle->map_internal_force();
 
     // Check nodal internal force
     for (unsigned i = 0; i < internal_force.rows(); ++i)

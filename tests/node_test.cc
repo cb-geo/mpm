@@ -334,6 +334,16 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
 
+      // Apply cundall damping when calculating acceleration
+      REQUIRE(node->compute_acceleration_velocity_cundall(Nphase, dt, 0.05) ==
+              true);
+
+      // Test acceleration with cundall damping
+      acceleration[0] = 0.;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
@@ -840,6 +850,16 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
       // Test acceleration with constraints
       acceleration[0] = 0.;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Apply cundall damping when calculating acceleration
+      REQUIRE(node->compute_acceleration_velocity_cundall(Nphase, dt, 0.05) ==
+              true);
+
+      // Test acceleration with cundall damping
+      acceleration << 0., 0.1425;
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
@@ -1420,6 +1440,20 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Apply cundall damping when calculating acceleration
+      REQUIRE(node->compute_acceleration_velocity_cundall(Nphase, dt, 0.05) ==
+              true);
+
+      // Test acceleration with cundall damping
+      acceleration << 0.0, 0.13322949016875, 0.28322949016875;
+      for (unsigned i = 0; i < acceleration.size(); ++i)
+        REQUIRE(node->acceleration(Nphase)(i) ==
+                Approx(acceleration(i)).epsilon(Tolerance));
+
+      // Apply velocity constraints
+      REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
+      REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == true);
 
       // Exception check when mass is zero
       mass = 0.;

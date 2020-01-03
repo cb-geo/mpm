@@ -1,6 +1,9 @@
 #ifndef MPM_PARTICLE_H_
 #define MPM_PARTICLE_H_
 
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+
 #include <array>
 #include <limits>
 #include <memory>
@@ -182,7 +185,7 @@ class Particle : public ParticleBase<Tdim> {
   void map_body_force(const VectorDim& pgravity) override;
 
   //! Map internal force
-  bool map_internal_force() override;
+  inline void map_internal_force() override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
@@ -251,6 +254,11 @@ class Particle : public ParticleBase<Tdim> {
   void append_material_id_to_nodes() const override;
 
  private:
+  //! Compute strain rate
+  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
+      const Eigen::MatrixXd& dn_dx, unsigned phase);
+
+ private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -261,6 +269,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_;
   //! Cell id
   using ParticleBase<Tdim>::cell_id_;
+  //! Nodes
+  using ParticleBase<Tdim>::nodes_;
   //! Status
   using ParticleBase<Tdim>::status_;
   //! Material
@@ -305,6 +315,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
+  //! dN/dX at cell centroid
+  Eigen::MatrixXd dn_dx_centroid_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties

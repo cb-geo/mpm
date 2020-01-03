@@ -1127,23 +1127,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
                   false);
         }
-
-        // Test assign velocity constraints to cells
-        SECTION("Check assign velocity constraints to cells") {
-          // Vector of particle coordinates
-          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
-              velocity_constraints;
-          // Constraint
-          velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
-          velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
-
-          REQUIRE(mesh->assign_cell_velocity_constraints(
-                      velocity_constraints) == true);
-          // When constraints fail
-          velocity_constraints.emplace_back(std::make_tuple(1, 10, 1, 0.0));
-          REQUIRE(mesh->assign_cell_velocity_constraints(
-                      velocity_constraints) == false);
-        }
       }
     }
   }
@@ -2370,24 +2353,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           auto mesh_fail = std::make_shared<mpm::Mesh<Dim>>(1);
           REQUIRE(mesh_fail->compute_nodal_rotation_matrices(euler_angles) ==
                   false);
-        }
-
-        // Test assign velocity constraints to cells
-        SECTION("Check assign velocity constraints to cells") {
-          // Vector of particle coordinates
-          std::vector<std::tuple<mpm::Index, unsigned, unsigned, double>>
-              velocity_constraints;
-          // Constraint
-          velocity_constraints.emplace_back(std::make_tuple(0, 3, 0, 10.5));
-          velocity_constraints.emplace_back(std::make_tuple(1, 2, 1, -10.5));
-
-          REQUIRE(mesh->assign_cell_velocity_constraints(
-                      velocity_constraints) == true);
-
-          // When constraints fail
-          velocity_constraints.emplace_back(std::make_tuple(1, 10, 1, -10.5));
-          REQUIRE(mesh->assign_cell_velocity_constraints(
-                      velocity_constraints) == false);
         }
       }
     }
