@@ -21,6 +21,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
+  nodes_.clear();
   material_ = nullptr;
   //! Logger
   std::string logger =
@@ -90,6 +91,9 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   // Cell id
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
+
+  // Clear nodes
+  this->nodes_.clear();
 
   // Material id
   this->material_id_ = particle.material_id;
@@ -285,6 +289,11 @@ bool mpm::Particle<Tdim>::assign_cell_xi(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // Copy nodal pointer to cell
+      nodes_.clear();
+      auto nodes = cell_->nodes();
+      for (auto node : nodes) nodes_.add(node, false);
+
       // Assign the reference location of particle
       bool xi_nan = false;
 
@@ -333,6 +342,8 @@ void mpm::Particle<Tdim>::remove_cell() {
   // if a cell is not nullptr
   if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
   cell_id_ = std::numeric_limits<Index>::max();
+  // Clear all the nodes
+  nodes_.clear();
 }
 
 // Assign a material to particle
@@ -518,14 +529,15 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   try {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
+      // Map mass and momentum to nodes
       tbb::parallel_for(
           tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
           [&](const tbb::blocked_range<int>& range) {
             for (int i = range.begin(); i != range.end(); ++i) {
               nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
-                                     shapefn_(i) * mass_);
+                                     mass_ * shapefn_[i]);
               nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
-                                         shapefn_(i) * mass_ * velocity_);
+                                         mass_ * shapefn_[i] * velocity_);
             }
           });
     } else {
