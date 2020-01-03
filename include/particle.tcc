@@ -592,7 +592,6 @@ bool mpm::Particle<Tdim>::compute_stress() {
 }
 
 //! Map body force
-//! \param[in] pgravity Gravity of a particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
@@ -607,12 +606,69 @@ void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
 }
 
 //! Map internal force
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_internal_force() {
+template <>
+inline void mpm::Particle<1>::map_internal_force() {
   // Compute nodal internal forces
-  // -pstress * volume
-  cell_->compute_nodal_internal_force(this->dn_dx_, mpm::ParticlePhase::Solid,
-                                      -1. * this->volume_ * this->stress_);
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        // Compute force: -pstress * volume
+                        Eigen::Matrix<double, 1, 1> force;
+                        force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+
+                        nodes_[i]->update_internal_force(
+                            true, mpm::ParticlePhase::Solid, force);
+                      }
+                    });
+}
+
+//! Map internal force
+template <>
+inline void mpm::Particle<2>::map_internal_force() {
+  // Compute nodal internal forces
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        // Compute force: -pstress * volume
+                        Eigen::Matrix<double, 2, 1> force;
+                        force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+                        force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+
+                        force *= -1. * this->volume_;
+
+                        nodes_[i]->update_internal_force(
+                            true, mpm::ParticlePhase::Solid, force);
+                      }
+                    });
+}
+
+//! Map internal force
+template <>
+inline void mpm::Particle<3>::map_internal_force() {
+  // Compute nodal internal forces
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        // Compute force: -pstress * volume
+                        Eigen::Matrix<double, 3, 1> force;
+                        force[0] = dn_dx_(i, 0) * stress_[0] +
+                                   dn_dx_(i, 1) * stress_[3] +
+                                   dn_dx_(i, 2) * stress_[5];
+
+                        force[1] = dn_dx_(i, 1) * stress_[1] +
+                                   dn_dx_(i, 0) * stress_[3] +
+                                   dn_dx_(i, 2) * stress_[4];
+
+                        force[2] = dn_dx_(i, 2) * stress_[2] +
+                                   dn_dx_(i, 1) * stress_[4] +
+                                   dn_dx_(i, 0) * stress_[5];
+
+                        force *= -1. * this->volume_;
+
+                        nodes_[i]->update_internal_force(
+                            true, mpm::ParticlePhase::Solid, force);
+                      }
+                    });
 }
 
 // Assign velocity to the particle
@@ -657,8 +713,14 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
     // Map particle traction forces to nodes
-    cell_->compute_nodal_traction_force(
-        this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
+    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                      [&](const tbb::blocked_range<int>& range) {
+                        for (int i = range.begin(); i != range.end(); ++i) {
+                          nodes_[i]->update_external_force(
+                              true, mpm::ParticlePhase::Solid,
+                              (shapefn_[i] * traction_));
+                        }
+                      });
   }
 }
 
@@ -671,16 +733,20 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
-      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_,
-                                            mpm::ParticlePhase::Solid);
+      Eigen::Matrix<double, Tdim, 1> nodal_velocity;
+      nodal_velocity.setZero();
+
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodal_velocity += shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
       // Acceleration update
       if (!velocity_update) {
         // Get interpolated nodal acceleration
-        const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-            cell_->interpolate_nodal_acceleration(this->shapefn_,
-                                                  mpm::ParticlePhase::Solid);
+        Eigen::Matrix<double, Tdim, 1> nodal_acceleration;
+        nodal_acceleration.setZero();
+        for (unsigned i = 0; i < nodes_.size(); ++i)
+          nodal_acceleration +=
+              shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
 
         // Update particle velocity from interpolated nodal acceleration
         this->velocity_ += nodal_acceleration * dt;
