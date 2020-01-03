@@ -518,16 +518,16 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   try {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
-      /*
-      for (unsigned i = 0; i < this->nodes_.size(); ++i) {
-        nodes_[i]->update_mass(true, phase, shapefn_(i) * pmass);
-        nodes_[i]->update_momentum(true, phase, shapefn_(i) * pmass *
-      pvelocity);
-      }
-      */
-      // Map particle mass and momentum to nodes
-      this->cell_->map_mass_momentum_to_nodes(
-          this->shapefn_, mpm::ParticlePhase::Solid, mass_, velocity_);
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
+                                     shapefn_(i) * mass_);
+              nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
+                                         shapefn_(i) * mass_ * velocity_);
+            }
+          });
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
