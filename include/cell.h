@@ -191,17 +191,6 @@ class Cell {
   //! Assign MPI rank to nodes
   void assign_mpi_rank_to_nodes();
 
-  //! Compute particle strain rate
-  //! \param[in] dNdx dN/dx corresponding to local coordinates of particle
-  //! \param[in] phase Phase associate to the particle
-  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
-      const Eigen::MatrixXd& dNdx, unsigned phase);
-
-  //! Compute strain rate for reduced integration at the centroid of cell
-  //! \param[in] phase Phase associate to the particle
-  inline Eigen::Matrix<double, 6, 1> compute_strain_rate_centroid(
-      unsigned phase);
-
   //! Compute normal vector
   void compute_normals();
 
