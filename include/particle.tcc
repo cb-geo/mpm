@@ -256,6 +256,8 @@ bool mpm::Particle<Tdim>::assign_cell(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // dn_dx centroid
+      dn_dx_centroid_ = cell_->dn_dx_centroid();
       // Copy nodal pointer to cell
       nodes_.clear();
       auto nodes = cell_->nodes();
@@ -289,6 +291,8 @@ bool mpm::Particle<Tdim>::assign_cell_xi(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // dn_dx centroid
+      dn_dx_centroid_ = cell_->dn_dx_centroid();
       // Copy nodal pointer to cell
       nodes_.clear();
       auto nodes = cell_->nodes();
@@ -550,11 +554,72 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   return status;
 }
 
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 1, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+  }
+
+  if (std::fabs(strain_rate(0)) < 1.E-15) strain_rate[0] = 0.;
+  return strain_rate;
+}
+
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 2, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+    strain_rate[1] += dn_dx(i, 1) * vel[1];
+    strain_rate[3] += dn_dx(i, 1) * vel[0] + dn_dx(i, 0) * vel[1];
+  }
+
+  if (std::fabs(strain_rate[0]) < 1.E-15) strain_rate[0] = 0.;
+  if (std::fabs(strain_rate[1]) < 1.E-15) strain_rate[1] = 0.;
+  if (std::fabs(strain_rate[3]) < 1.E-15) strain_rate[3] = 0.;
+  return strain_rate;
+}
+
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 3, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+    strain_rate[1] += dn_dx(i, 1) * vel[1];
+    strain_rate[2] += dn_dx(i, 2) * vel[2];
+    strain_rate[3] += dn_dx(i, 1) * vel[0] + dn_dx(i, 0) * vel[1];
+    strain_rate[4] += dn_dx(i, 2) * vel[1] + dn_dx(i, 1) * vel[2];
+    strain_rate[5] += dn_dx(i, 2) * vel[0] + dn_dx(i, 0) * vel[2];
+  }
+
+  for (unsigned i = 0; i < strain_rate.size(); ++i)
+    if (std::fabs(strain_rate[i]) < 1.E-15) strain_rate[i] = 0.;
+  return strain_rate;
+}
+
 // Compute strain of the particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Assign strain rate
-  strain_rate_ = cell_->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
+  strain_rate_ = this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
   // Update dstrain
   dstrain_ = strain_rate_ * dt;
   // Update strain
@@ -562,8 +627,8 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
 
   // Compute at centroid
   // Strain rate for reduced integration
-  const Eigen::VectorXd strain_rate_centroid =
-      cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
+  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
+      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
 
   // Assign volumetric strain at centroid
   dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();

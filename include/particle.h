@@ -254,6 +254,11 @@ class Particle : public ParticleBase<Tdim> {
   void append_material_id_to_nodes() const override;
 
  private:
+  //! Compute strain rate
+  inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
+      const Eigen::MatrixXd& dn_dx, unsigned phase);
+
+ private:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -310,6 +315,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
+  //! dN/dX at cell centroid
+  Eigen::MatrixXd dn_dx_centroid_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties

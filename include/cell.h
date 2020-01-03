@@ -147,6 +147,9 @@ class Cell {
   //! Return the centroid of the cell
   Eigen::Matrix<double, Tdim, 1> centroid() const { return centroid_; }
 
+  //! Return the dN/dx at the centroid of the cell
+  Eigen::MatrixXd dn_dx_centroid() const { return dn_dx_centroid_; }
+
   //! Compute mean length of cell
   void compute_mean_length();
 
