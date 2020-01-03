@@ -779,10 +779,17 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
     // Check if particle mass is set and state variable pressure is found
     if (mass_ != std::numeric_limits<double>::max() &&
         (state_variables_.find("pressure") != state_variables_.end())) {
-      // Map particle mass and momentum to nodes
-      this->cell_->map_pressure_to_nodes(this->shapefn_,
-                                         mpm::ParticlePhase::Solid, mass_,
-                                         state_variables_.at("pressure"));
+      // Map particle pressure to nodes
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              nodes_[i]->update_mass_pressure(
+                  mpm::ParticlePhase::Solid,
+                  shapefn_[i] * mass_ * state_variables_.at("pressure"));
+            }
+          });
+
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -800,15 +807,19 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr &&
-        (state_variables_.find("pressure") != state_variables_.end()))
+        (state_variables_.find("pressure") != state_variables_.end())) {
+      double pressure = 0.;
       // Update particle pressure to interpolated nodal pressure
-      state_variables_.at("pressure") = cell_->interpolate_nodal_pressure(
-          this->shapefn_, mpm::ParticlePhase::Solid);
-    else
+      for (unsigned i = 0; i < this->nodes_.size(); ++i)
+        pressure +=
+            shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
+
+      state_variables_.at("pressure") = pressure;
+    } else {
       throw std::runtime_error(
           "Cell is not initialised! "
           "cannot compute pressure smoothing of the particle");
-
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
