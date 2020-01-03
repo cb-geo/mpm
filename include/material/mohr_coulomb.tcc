@@ -6,39 +6,39 @@ mpm::MohrCoulomb<Tdim>::MohrCoulomb(unsigned id,
   try {
     // General parameters
     // Density
-    density_ = material_properties["density"].template get<double>();
+    density_ = material_properties.at("density").template get<double>();
     // Young's modulus
     youngs_modulus_ =
-        material_properties["youngs_modulus"].template get<double>();
+        material_properties.at("youngs_modulus").template get<double>();
     // Poisson ratio
     poisson_ratio_ =
-        material_properties["poisson_ratio"].template get<double>();
+        material_properties.at("poisson_ratio").template get<double>();
     // Softening status
-    softening_ = material_properties["softening"].template get<bool>();
+    softening_ = material_properties.at("softening").template get<bool>();
     // Peak friction, dilation and cohesion
     phi_peak_ =
-        material_properties["friction"].template get<double>() * M_PI / 180.;
+        material_properties.at("friction").template get<double>() * M_PI / 180.;
     psi_peak_ =
-        material_properties["dilation"].template get<double>() * M_PI / 180.;
-    cohesion_peak_ = material_properties["cohesion"].template get<double>();
+        material_properties.at("dilation").template get<double>() * M_PI / 180.;
+    cohesion_peak_ = material_properties.at("cohesion").template get<double>();
     // Residual friction, dilation and cohesion
     phi_residual_ =
-        material_properties["residual_friction"].template get<double>() * M_PI /
-        180.;
+        material_properties.at("residual_friction").template get<double>() *
+        M_PI / 180.;
     psi_residual_ =
-        material_properties["residual_dilation"].template get<double>() * M_PI /
-        180.;
+        material_properties.at("residual_dilation").template get<double>() *
+        M_PI / 180.;
     cohesion_residual_ =
-        material_properties["residual_cohesion"].template get<double>();
+        material_properties.at("residual_cohesion").template get<double>();
     // Peak plastic deviatoric strain
     pdstrain_peak_ =
-        material_properties["peak_pdstrain"].template get<double>();
+        material_properties.at("peak_pdstrain").template get<double>();
     // Residual plastic deviatoric strain
     pdstrain_residual_ =
-        material_properties["residual_pdstrain"].template get<double>();
+        material_properties.at("residual_pdstrain").template get<double>();
     // Tensile strength
     tension_cutoff_ =
-        material_properties["tension_cutoff"].template get<double>();
+        material_properties.at("tension_cutoff").template get<double>();
     // Properties
     properties_ = material_properties;
     // Bulk modulus
