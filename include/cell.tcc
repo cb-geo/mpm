@@ -799,26 +799,6 @@ inline Eigen::Matrix<double, 6, 1>
   return this->compute_strain_rate(dn_dx_centroid_, phase);
 }
 
-//! Assign velocity constraint
-template <unsigned Tdim>
-bool mpm::Cell<Tdim>::assign_velocity_constraint(unsigned face_id, unsigned dir,
-                                                 double velocity) {
-  bool status = true;
-  try {
-    //! Constraint directions can take values between 0 and Dim * Nphases - 1
-    if (face_id < element_->nfaces()) {
-      this->velocity_constraints_[face_id].emplace_back(
-          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
-                                           static_cast<double>(velocity)));
-    } else
-      throw std::runtime_error("Constraint direction is out of bounds");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Compute all face normals 2d
 template <>
 inline void mpm::Cell<2>::compute_normals() {

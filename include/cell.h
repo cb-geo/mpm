@@ -199,13 +199,6 @@ class Cell {
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate_centroid(
       unsigned phase);
 
-  //! Assign velocity constraint
-  //! \param[in] face_id Face of cell of velocity constraint
-  //! \param[in] dir Direction of velocity constraint
-  //! \param[in] velocity Applied velocity constraint
-  bool assign_velocity_constraint(unsigned face_id, unsigned dir,
-                                  double velocity);
-
   //! Compute normal vector
   void compute_normals();
 
