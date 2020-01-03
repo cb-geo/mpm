@@ -260,8 +260,7 @@ bool mpm::Particle<Tdim>::assign_cell(
       dn_dx_centroid_ = cell_->dn_dx_centroid();
       // Copy nodal pointer to cell
       nodes_.clear();
-      auto nodes = cell_->nodes();
-      for (auto node : nodes) nodes_.add(node, false);
+      nodes_ = cell_->nodes();
 
       // Compute reference location of particle
       bool xi_status = this->compute_reference_location();
@@ -295,8 +294,7 @@ bool mpm::Particle<Tdim>::assign_cell_xi(
       dn_dx_centroid_ = cell_->dn_dx_centroid();
       // Copy nodal pointer to cell
       nodes_.clear();
-      auto nodes = cell_->nodes();
-      for (auto node : nodes) nodes_.add(node, false);
+      nodes_ = cell_->nodes();
 
       // Assign the reference location of particle
       bool xi_nan = false;
