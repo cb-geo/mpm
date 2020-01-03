@@ -534,16 +534,12 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
       // Map mass and momentum to nodes
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
-                                     mass_ * shapefn_[i]);
-              nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
-                                         mass_ * shapefn_[i] * velocity_);
-            }
-          });
+      for (unsigned i = 0; i < nodes_.size(); ++i) {
+        nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
+                               mass_ * shapefn_[i]);
+        nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
+                                   mass_ * shapefn_[i] * velocity_);
+      }
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -660,79 +656,60 @@ bool mpm::Particle<Tdim>::compute_stress() {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i) {
-                        nodes_[i]->update_external_force(
-                            true, mpm::ParticlePhase::Solid,
-                            (pgravity * mass_ * shapefn_(i)));
-                      }
-                    });
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                     (pgravity * mass_ * shapefn_(i)));
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<1>::map_internal_force() {
   // Compute nodal internal forces
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i) {
-                        // Compute force: -pstress * volume
-                        Eigen::Matrix<double, 1, 1> force;
-                        force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
-                        nodes_[i]->update_internal_force(
-                            true, mpm::ParticlePhase::Solid, force);
-                      }
-                    });
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<2>::map_internal_force() {
   // Compute nodal internal forces
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) {
-          // Compute force: -pstress * volume
-          Eigen::Matrix<double, 2, 1> force;
-          force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
-          force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 2, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-          force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-          nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid,
-                                           force);
-        }
-      });
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 //! Map internal force
 template <>
 inline void mpm::Particle<3>::map_internal_force() {
   // Compute nodal internal forces
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) {
-          // Compute force: -pstress * volume
-          Eigen::Matrix<double, 3, 1> force;
-          force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
-                     dn_dx_(i, 2) * stress_[5];
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 3, 1> force;
+    force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+               dn_dx_(i, 2) * stress_[5];
 
-          force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
-                     dn_dx_(i, 2) * stress_[4];
+    force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+               dn_dx_(i, 2) * stress_[4];
 
-          force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
-                     dn_dx_(i, 0) * stress_[5];
+    force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+               dn_dx_(i, 0) * stress_[5];
 
-          force *= -1. * this->volume_;
+    force *= -1. * this->volume_;
 
-          nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid,
-                                           force);
-        }
-      });
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+  }
 }
 
 // Assign velocity to the particle
@@ -777,14 +754,9 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
     // Map particle traction forces to nodes
-    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-                      [&](const tbb::blocked_range<int>& range) {
-                        for (int i = range.begin(); i != range.end(); ++i) {
-                          nodes_[i]->update_external_force(
-                              true, mpm::ParticlePhase::Solid,
-                              (shapefn_[i] * traction_));
-                        }
-                      });
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                       (shapefn_[i] * traction_));
   }
 }
 
@@ -845,15 +817,10 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
     if (mass_ != std::numeric_limits<double>::max() &&
         (state_variables_.find("pressure") != state_variables_.end())) {
       // Map particle pressure to nodes
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              nodes_[i]->update_mass_pressure(
-                  mpm::ParticlePhase::Solid,
-                  shapefn_[i] * mass_ * state_variables_.at("pressure"));
-            }
-          });
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodes_[i]->update_mass_pressure(
+            mpm::ParticlePhase::Solid,
+            shapefn_[i] * mass_ * state_variables_.at("pressure"));
 
     } else {
       throw std::runtime_error("Particle mass has not been computed");
