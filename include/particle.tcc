@@ -596,30 +596,23 @@ bool mpm::Particle<Tdim>::compute_stress() {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
-  cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Solid,
-                                  this->mass_, pgravity);
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        nodes_[i]->update_external_force(
+                            true, mpm::ParticlePhase::Solid,
+                            (pgravity * mass_ * shapefn_(i)));
+                      }
+                    });
 }
 
 //! Map internal force
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::map_internal_force() {
-  bool status = true;
-  try {
-    // Check if  material ptr is valid
-    if (material_ != nullptr) {
-      // Compute nodal internal forces
-      // -pstress * volume
-      cell_->compute_nodal_internal_force(this->dn_dx_,
-                                          mpm::ParticlePhase::Solid,
-                                          -1. * this->volume_ * this->stress_);
-    } else {
-      throw std::runtime_error("Material is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Particle<Tdim>::map_internal_force() {
+  // Compute nodal internal forces
+  // -pstress * volume
+  cell_->compute_nodal_internal_force(this->dn_dx_, mpm::ParticlePhase::Solid,
+                                      -1. * this->volume_ * this->stress_);
 }
 
 // Assign velocity to the particle

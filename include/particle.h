@@ -185,7 +185,7 @@ class Particle : public ParticleBase<Tdim> {
   void map_body_force(const VectorDim& pgravity) override;
 
   //! Map internal force
-  bool map_internal_force() override;
+  void map_internal_force() override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
