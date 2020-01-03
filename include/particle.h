@@ -1,6 +1,9 @@
 #ifndef MPM_PARTICLE_H_
 #define MPM_PARTICLE_H_
 
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+
 #include <array>
 #include <limits>
 #include <memory>
@@ -261,6 +264,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::cell_;
   //! Cell id
   using ParticleBase<Tdim>::cell_id_;
+  //! Nodes
+  using ParticleBase<Tdim>::nodes_;
   //! Status
   using ParticleBase<Tdim>::status_;
   //! Material

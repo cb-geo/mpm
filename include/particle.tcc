@@ -5,6 +5,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   this->initialise();
   // Clear cell ptr
   cell_ = nullptr;
+  // Nodes
+  nodes_.clear();
   // Set material pointer to null
   material_ = nullptr;
   // Logger
@@ -250,6 +252,11 @@ bool mpm::Particle<Tdim>::assign_cell(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // Copy nodal pointer to cell
+      nodes_.clear();
+      auto nodes = cell_->nodes();
+      for (auto node : nodes) nodes_.add(node, false);
+
       // Compute reference location of particle
       bool xi_status = this->compute_reference_location();
       if (!xi_status) return false;
@@ -511,6 +518,13 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   try {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
+      /*
+      for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+        nodes_[i]->update_mass(true, phase, shapefn_(i) * pmass);
+        nodes_[i]->update_momentum(true, phase, shapefn_(i) * pmass *
+      pvelocity);
+      }
+      */
       // Map particle mass and momentum to nodes
       this->cell_->map_mass_momentum_to_nodes(
           this->shapefn_, mpm::ParticlePhase::Solid, mass_, velocity_);

@@ -79,6 +79,11 @@ class Cell {
   //! Number of nodes
   unsigned nnodes() const { return nodes_.size(); }
 
+  //! Return nodes of the cell
+  std::vector<std::shared_ptr<mpm::NodeBase<Tdim>>> nodes() const {
+    return nodes_;
+  }
+
   //! Return nodes id in a cell
   std::set<mpm::Index> nodes_id() const {
     std::set<mpm::Index> nodes_id_lists;

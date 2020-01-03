@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "cell.h"
+#include "container.h"
 #include "data_types.h"
 #include "function_base.h"
 #include "hdf5_particle.h"
@@ -244,6 +245,8 @@ class ParticleBase {
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
+  //! Container of nodeal pointers
+  Container<NodeBase<Tdim>> nodes_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
   //! Unsigned material id
