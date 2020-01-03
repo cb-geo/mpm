@@ -5,6 +5,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   this->initialise();
   // Clear cell ptr
   cell_ = nullptr;
+  // Nodes
+  nodes_.clear();
   // Set material pointer to null
   material_ = nullptr;
   // Logger
@@ -19,6 +21,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
+  nodes_.clear();
   material_ = nullptr;
   //! Logger
   std::string logger =
@@ -88,6 +91,9 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   // Cell id
   this->cell_id_ = particle.cell_id;
   this->cell_ = nullptr;
+
+  // Clear nodes
+  this->nodes_.clear();
 
   // Material id
   this->material_id_ = particle.material_id;
@@ -250,6 +256,13 @@ bool mpm::Particle<Tdim>::assign_cell(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // dn_dx centroid
+      dn_dx_centroid_ = cell_->dn_dx_centroid();
+      // Copy nodal pointer to cell
+      nodes_.clear();
+      auto nodes = cell_->nodes();
+      for (auto node : nodes) nodes_.add(node, false);
+
       // Compute reference location of particle
       bool xi_status = this->compute_reference_location();
       if (!xi_status) return false;
@@ -278,6 +291,13 @@ bool mpm::Particle<Tdim>::assign_cell_xi(
 
       cell_ = cellptr;
       cell_id_ = cellptr->id();
+      // dn_dx centroid
+      dn_dx_centroid_ = cell_->dn_dx_centroid();
+      // Copy nodal pointer to cell
+      nodes_.clear();
+      auto nodes = cell_->nodes();
+      for (auto node : nodes) nodes_.add(node, false);
+
       // Assign the reference location of particle
       bool xi_nan = false;
 
@@ -326,6 +346,8 @@ void mpm::Particle<Tdim>::remove_cell() {
   // if a cell is not nullptr
   if (cell_ != nullptr) cell_->remove_particle_id(this->id_);
   cell_id_ = std::numeric_limits<Index>::max();
+  // Clear all the nodes
+  nodes_.clear();
 }
 
 // Assign a material to particle
@@ -511,9 +533,17 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   try {
     // Check if particle mass is set
     if (mass_ != std::numeric_limits<double>::max()) {
-      // Map particle mass and momentum to nodes
-      this->cell_->map_mass_momentum_to_nodes(
-          this->shapefn_, mpm::ParticlePhase::Solid, mass_, velocity_);
+      // Map mass and momentum to nodes
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
+                                     mass_ * shapefn_[i]);
+              nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
+                                         mass_ * shapefn_[i] * velocity_);
+            }
+          });
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -524,11 +554,72 @@ bool mpm::Particle<Tdim>::map_mass_momentum_to_nodes() {
   return status;
 }
 
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 1, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+  }
+
+  if (std::fabs(strain_rate(0)) < 1.E-15) strain_rate[0] = 0.;
+  return strain_rate;
+}
+
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 2, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+    strain_rate[1] += dn_dx(i, 1) * vel[1];
+    strain_rate[3] += dn_dx(i, 1) * vel[0] + dn_dx(i, 0) * vel[1];
+  }
+
+  if (std::fabs(strain_rate[0]) < 1.E-15) strain_rate[0] = 0.;
+  if (std::fabs(strain_rate[1]) < 1.E-15) strain_rate[1] = 0.;
+  if (std::fabs(strain_rate[3]) < 1.E-15) strain_rate[3] = 0.;
+  return strain_rate;
+}
+
+// Compute strain rate of the particle
+template <>
+inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
+    const Eigen::MatrixXd& dn_dx, unsigned phase) {
+  // Define strain rate
+  Eigen::Matrix<double, 6, 1> strain_rate;
+  strain_rate.setZero();
+
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    Eigen::Matrix<double, 3, 1> vel = nodes_[i]->velocity(phase);
+    strain_rate[0] += dn_dx(i, 0) * vel[0];
+    strain_rate[1] += dn_dx(i, 1) * vel[1];
+    strain_rate[2] += dn_dx(i, 2) * vel[2];
+    strain_rate[3] += dn_dx(i, 1) * vel[0] + dn_dx(i, 0) * vel[1];
+    strain_rate[4] += dn_dx(i, 2) * vel[1] + dn_dx(i, 1) * vel[2];
+    strain_rate[5] += dn_dx(i, 2) * vel[0] + dn_dx(i, 0) * vel[2];
+  }
+
+  for (unsigned i = 0; i < strain_rate.size(); ++i)
+    if (std::fabs(strain_rate[i]) < 1.E-15) strain_rate[i] = 0.;
+  return strain_rate;
+}
+
 // Compute strain of the particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_strain(double dt) {
   // Assign strain rate
-  strain_rate_ = cell_->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
+  strain_rate_ = this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
   // Update dstrain
   dstrain_ = strain_rate_ * dt;
   // Update strain
@@ -536,8 +627,8 @@ void mpm::Particle<Tdim>::compute_strain(double dt) {
 
   // Compute at centroid
   // Strain rate for reduced integration
-  const Eigen::VectorXd strain_rate_centroid =
-      cell_->compute_strain_rate_centroid(mpm::ParticlePhase::Solid);
+  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
+      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
 
   // Assign volumetric strain at centroid
   dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
@@ -566,34 +657,82 @@ bool mpm::Particle<Tdim>::compute_stress() {
 }
 
 //! Map body force
-//! \param[in] pgravity Gravity of a particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) {
   // Compute nodal body forces
-  cell_->compute_nodal_body_force(this->shapefn_, mpm::ParticlePhase::Solid,
-                                  this->mass_, pgravity);
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        nodes_[i]->update_external_force(
+                            true, mpm::ParticlePhase::Solid,
+                            (pgravity * mass_ * shapefn_(i)));
+                      }
+                    });
 }
 
 //! Map internal force
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::map_internal_force() {
-  bool status = true;
-  try {
-    // Check if  material ptr is valid
-    if (material_ != nullptr) {
-      // Compute nodal internal forces
-      // -pstress * volume
-      cell_->compute_nodal_internal_force(this->dn_dx_,
-                                          mpm::ParticlePhase::Solid,
-                                          -1. * this->volume_ * this->stress_);
-    } else {
-      throw std::runtime_error("Material is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+template <>
+inline void mpm::Particle<1>::map_internal_force() {
+  // Compute nodal internal forces
+  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                    [&](const tbb::blocked_range<int>& range) {
+                      for (int i = range.begin(); i != range.end(); ++i) {
+                        // Compute force: -pstress * volume
+                        Eigen::Matrix<double, 1, 1> force;
+                        force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
+
+                        nodes_[i]->update_internal_force(
+                            true, mpm::ParticlePhase::Solid, force);
+                      }
+                    });
+}
+
+//! Map internal force
+template <>
+inline void mpm::Particle<2>::map_internal_force() {
+  // Compute nodal internal forces
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) {
+          // Compute force: -pstress * volume
+          Eigen::Matrix<double, 2, 1> force;
+          force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
+          force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
+
+          force *= -1. * this->volume_;
+
+          nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid,
+                                           force);
+        }
+      });
+}
+
+//! Map internal force
+template <>
+inline void mpm::Particle<3>::map_internal_force() {
+  // Compute nodal internal forces
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) {
+          // Compute force: -pstress * volume
+          Eigen::Matrix<double, 3, 1> force;
+          force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3] +
+                     dn_dx_(i, 2) * stress_[5];
+
+          force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3] +
+                     dn_dx_(i, 2) * stress_[4];
+
+          force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
+                     dn_dx_(i, 0) * stress_[5];
+
+          force *= -1. * this->volume_;
+
+          nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid,
+                                           force);
+        }
+      });
 }
 
 // Assign velocity to the particle
@@ -638,8 +777,14 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_traction_force() {
   if (this->set_traction_) {
     // Map particle traction forces to nodes
-    cell_->compute_nodal_traction_force(
-        this->shapefn_, mpm::ParticlePhase::Solid, this->traction_);
+    tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+                      [&](const tbb::blocked_range<int>& range) {
+                        for (int i = range.begin(); i != range.end(); ++i) {
+                          nodes_[i]->update_external_force(
+                              true, mpm::ParticlePhase::Solid,
+                              (shapefn_[i] * traction_));
+                        }
+                      });
   }
 }
 
@@ -652,16 +797,21 @@ bool mpm::Particle<Tdim>::compute_updated_position(double dt,
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
       // Get interpolated nodal velocity
-      const Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-          cell_->interpolate_nodal_velocity(this->shapefn_,
-                                            mpm::ParticlePhase::Solid);
+      Eigen::Matrix<double, Tdim, 1> nodal_velocity;
+      nodal_velocity.setZero();
+
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodal_velocity +=
+            shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
       // Acceleration update
       if (!velocity_update) {
         // Get interpolated nodal acceleration
-        const Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-            cell_->interpolate_nodal_acceleration(this->shapefn_,
-                                                  mpm::ParticlePhase::Solid);
+        Eigen::Matrix<double, Tdim, 1> nodal_acceleration;
+        nodal_acceleration.setZero();
+        for (unsigned i = 0; i < nodes_.size(); ++i)
+          nodal_acceleration +=
+              shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
 
         // Update particle velocity from interpolated nodal acceleration
         this->velocity_ += nodal_acceleration * dt;
@@ -694,10 +844,17 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() {
     // Check if particle mass is set and state variable pressure is found
     if (mass_ != std::numeric_limits<double>::max() &&
         (state_variables_.find("pressure") != state_variables_.end())) {
-      // Map particle mass and momentum to nodes
-      this->cell_->map_pressure_to_nodes(this->shapefn_,
-                                         mpm::ParticlePhase::Solid, mass_,
-                                         state_variables_.at("pressure"));
+      // Map particle pressure to nodes
+      tbb::parallel_for(
+          tbb::blocked_range<int>(size_t(0), size_t(nodes_.size())),
+          [&](const tbb::blocked_range<int>& range) {
+            for (int i = range.begin(); i != range.end(); ++i) {
+              nodes_[i]->update_mass_pressure(
+                  mpm::ParticlePhase::Solid,
+                  shapefn_[i] * mass_ * state_variables_.at("pressure"));
+            }
+          });
+
     } else {
       throw std::runtime_error("Particle mass has not been computed");
     }
@@ -715,15 +872,19 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
   try {
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr &&
-        (state_variables_.find("pressure") != state_variables_.end()))
+        (state_variables_.find("pressure") != state_variables_.end())) {
+      double pressure = 0.;
       // Update particle pressure to interpolated nodal pressure
-      state_variables_.at("pressure") = cell_->interpolate_nodal_pressure(
-          this->shapefn_, mpm::ParticlePhase::Solid);
-    else
+      for (unsigned i = 0; i < this->nodes_.size(); ++i)
+        pressure +=
+            shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
+
+      state_variables_.at("pressure") = pressure;
+    } else {
       throw std::runtime_error(
           "Cell is not initialised! "
           "cannot compute pressure smoothing of the particle");
-
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -748,5 +909,6 @@ Eigen::VectorXd mpm::Particle<Tdim>::vector_data(const std::string& property) {
 //! Assign material id of this particle to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
-  cell_->append_material_id_to_nodes(material_id_);
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->append_material_id(material_id_);
 }
