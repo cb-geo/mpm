@@ -38,13 +38,11 @@ class FunctionBase {
   //! Return the value of the function at given input
   //! \param[in] input x
   //! \retval f(x)
-  virtual double value(double x_input) = 0;
+  virtual double value(double x_input) const = 0;
 
  protected:
   //! function id
   unsigned id_{std::numeric_limits<unsigned>::max()};
-  // Function properties
-  Json properties_;
 };  // FunctionBase class
 }  // namespace mpm
 

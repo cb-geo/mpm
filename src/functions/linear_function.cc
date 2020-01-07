@@ -1,15 +1,13 @@
 #include "linear_function.h"
 // Constructor
-mpm::LinearFunction::LinearFunction(unsigned id,
-                                    const Json& function_properties)
-    : mpm::FunctionBase(id, function_properties) {
-  properties_ = function_properties;
+mpm::LinearFunction::LinearFunction(unsigned id, const Json& properties)
+    : mpm::FunctionBase(id, properties) {
   // get tabular values for the linear linear relationship
-  if (properties_.at("xvalues").is_array() &&
-      properties_.at("fxvalues").is_array() &&
-      properties_.at("xvalues").size() == properties_.at("fxvalues").size()) {
-    std::vector<double> xvalue = properties_.at("xvalues");
-    std::vector<double> fx = properties_.at("fxvalues");
+  if (properties.at("xvalues").is_array() &&
+      properties.at("fxvalues").is_array() &&
+      properties.at("xvalues").size() == properties.at("fxvalues").size()) {
+    std::vector<double> xvalue = properties.at("xvalues");
+    std::vector<double> fx = properties.at("fxvalues");
     for (unsigned index = 0; index < xvalue.size(); ++index)
       x_fx_.insert({index, std::make_pair(xvalue.at(index), fx.at(index))});
   } else
@@ -18,7 +16,7 @@ mpm::LinearFunction::LinearFunction(unsigned id,
 }
 
 // Return f(x) for a given x
-double mpm::LinearFunction::value(double x_input) {
+double mpm::LinearFunction::value(double x_input) const {
   // Check if the linear relationship for the linear function is defined, if not
   // return an error
   double value = std::numeric_limits<double>::quiet_NaN();
