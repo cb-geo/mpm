@@ -135,6 +135,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/element.cc
   ${mpm_SOURCE_DIR}/src/functions/functions.cc
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
+  ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
   ${mpm_SOURCE_DIR}/src/io/io.cc
@@ -171,7 +172,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/elements/quadrilateral_quadrature_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_element_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/triangle_quadrature_test.cc
-    ${mpm_SOURCE_DIR}/tests/functions_test.cc
+    ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
+    ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc

@@ -19,24 +19,16 @@ class LinearFunction : public FunctionBase {
   LinearFunction(unsigned id, const Json& function_properties);
 
   //! Default destructor
-  ~LinearFunction() override{};
-
-  //! Delete copy constructor
-  LinearFunction(const LinearFunction&) = delete;
-
-  //! Delete assignement operator
-  LinearFunction& operator=(const LinearFunction&) = delete;
+  ~LinearFunction() override = default;
 
   //! Return the value of the linear function at given input
   //! \param[in] input x
   //! \retval f(x)
-  double value(double x) override;
+  double value(double x) const override;
 
  private:
   //! function id
   using FunctionBase::id_;
-  //! function properties
-  using FunctionBase::properties_;
   //! Tabular data of x and f(x)
   std::map<unsigned, std::pair<double, double>> x_fx_;
 };  // LinearFunction class
