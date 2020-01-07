@@ -19,13 +19,7 @@ class LinearFunction : public FunctionBase {
   LinearFunction(unsigned id, const Json& function_properties);
 
   //! Default destructor
-  ~LinearFunction() override{};
-
-  //! Delete copy constructor
-  LinearFunction(const LinearFunction&) = delete;
-
-  //! Delete assignement operator
-  LinearFunction& operator=(const LinearFunction&) = delete;
+  ~LinearFunction() override = default;
 
   //! Return the value of the linear function at given input
   //! \param[in] input x

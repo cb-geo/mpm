@@ -24,13 +24,7 @@ class FunctionBase {
   FunctionBase(unsigned id, const Json& function_properties) : id_{id} {};
 
   //! Default destructor
-  virtual ~FunctionBase(){};
-
-  //! Delete copy constructor
-  FunctionBase(const FunctionBase&) = delete;
-
-  //! Delete assignement operator
-  FunctionBase& operator=(const FunctionBase&) = delete;
+  virtual ~FunctionBase() = default;
 
   //! Return id of the function
   unsigned id() const { return id_; }

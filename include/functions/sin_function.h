@@ -18,13 +18,7 @@ class SinFunction : public FunctionBase {
   SinFunction(unsigned id, const Json& properties);
 
   //! Default destructor
-  ~SinFunction() override{};
-
-  //! Delete copy constructor
-  SinFunction(const SinFunction&) = delete;
-
-  //! Delete assignement operator
-  SinFunction& operator=(const SinFunction&) = delete;
+  ~SinFunction() override = default;
 
   //! Return the value of the sin function at given input
   //! \param[in] input x
