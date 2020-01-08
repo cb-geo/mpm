@@ -866,7 +866,7 @@ void mpm::MPMBase<Tdim>::particles_stresses(
     const Json& mesh_props,
     const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
   try {
-    if (mesh_props.find("particles_velocity_constraints") != mesh_props.end()) {
+    if (mesh_props.find("particles_stresses") != mesh_props.end()) {
       std::string fparticles_stresses =
           mesh_props["particles_stresses"].template get<std::string>();
       if (!io_->file_name(fparticles_stresses).empty()) {
