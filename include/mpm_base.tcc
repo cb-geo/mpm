@@ -463,15 +463,12 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
 
-  // TODO fix phase
-  unsigned phase = 0;
-
   for (const auto& attribute : vtk_attributes_) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
-        file, mesh_->particles_vector_data(attribute, phase), attribute);
+        file, mesh_->particles_vector_data(attribute), attribute);
     // Write a parallel MPI
 #ifdef USE_MPI
     int mpi_rank = 0;

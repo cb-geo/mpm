@@ -802,7 +802,7 @@ std::vector<Eigen::Matrix<double, 3, 1>>
 //! Return particle vector data
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
-    const std::string& attribute, unsigned phase) {
+    const std::string& attribute) {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
   try {
     // Iterate over particles
