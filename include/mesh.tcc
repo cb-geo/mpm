@@ -826,20 +826,13 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
 
 //! Return particle scalar data
 template <unsigned Tdim>
-std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
+std::vector<double> mpm::Mesh<Tdim>::particles_statevars_data(
     const std::string& attribute) {
   std::vector<double> scalar_data;
-  try {
-    // Iterate over particles
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      // Add scalar value to data
-      scalar_data.emplace_back((*pitr)->state_variables(attribute));
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
-                    attribute);
-    scalar_data.clear();
-  }
+  scalar_data.reserve(particles_.size());
+  // Iterate over particles and add scalar value to data
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    scalar_data.emplace_back((*pitr)->state_variable(attribute));
   return scalar_data;
 }
 

@@ -102,6 +102,23 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     vtk_attributes_ = vtk;
     console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
+
+  // VTK state variables
+  try {
+    if (post_process_.at("vtk_statevars").is_array() &&
+        post_process_.at("vtk_statevars").size() > 0) {
+      for (unsigned i = 0; i < post_process_.at("vtk_statevars").size(); ++i) {
+        std::string attribute =
+            post_process_["vtk_statevars"][i].template get<std::string>();
+        vtk_statevars_.emplace_back(attribute);
+      }
+    } else {
+      throw std::runtime_error(
+          "No VTK statevariable were specified, none will be generated");
+    }
+  } catch (std::exception& exception) {
+    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
+  }
 }
 
 // Initialise mesh
@@ -469,7 +486,33 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
         file, mesh_->particles_vector_data(attribute), attribute);
-    // Write a parallel MPI
+    // Write a parallel MPI VTK container file 
+#ifdef USE_MPI
+    int mpi_rank = 0;
+    int mpi_size = 1;
+    // Get MPI rank
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    bool write_mpi_rank = false;
+    auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                          max_steps, write_mpi_rank)
+                             .string();
+    if (mpi_rank == 0)
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+#endif
+  }
+  // State vars
+
+  for (const auto& attribute : vtk_statevars_) {
+    // Write state variables
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_scalar_point_data(
+        file, mesh_->particles_statevars_data(attribute), attribute);
+    // Write a parallel MPI VTK container file 
 #ifdef USE_MPI
     int mpi_rank = 0;
     int mpi_size = 1;
