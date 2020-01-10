@@ -824,6 +824,25 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
   return vector_data;
 }
 
+//! Return particle scalar data
+template <unsigned Tdim>
+std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
+    const std::string& attribute) {
+  std::vector<double> scalar_data;
+  try {
+    // Iterate over particles
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      // Add scalar value to data
+      scalar_data.emplace_back((*pitr)->state_variables(attribute));
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
+                    attribute);
+    scalar_data.clear();
+  }
+  return scalar_data;
+}
+
 //! Assign particles volumes
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
