@@ -34,9 +34,20 @@ class VtkWriter {
   void write_geometry(const std::string& filename);
 
   //! Write vector data
+  //! \param[in] filename Output file to write geometry
+  //! \param[in] data Vector data
+  //! \param[in] data_field Field name ("Displacement", "Forces")
   void write_vector_point_data(const std::string& filename,
                                const std::vector<Eigen::Vector3d>& data,
                                const std::string& data_fields);
+
+  //! \brief Write scalar data
+  //! \param[in] filename Output file to write geometry
+  //! \param[in] data Scalar field data
+  //! \param[in] data_field Field name ("Displacement", "Forces")
+  void write_scalar_point_data(const std::string& filename,
+                               const std::vector<double>& data,
+                               const std::string& data_field);
 
   //! Write mesh
   //! \param[in] filename Mesh VTP file
