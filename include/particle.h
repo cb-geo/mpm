@@ -224,7 +224,7 @@ class Particle : public ParticleBase<Tdim> {
   double state_variable(const std::string& var) const override {
     return (state_variables_.find(var) != state_variables_.end())
                ? state_variables_.at(var)
-               : std::numeric_limits<double>::max();
+               : std::numeric_limits<double>::quiet_NaN();
   }
 
   //! Map particle pressure to nodes
@@ -238,7 +238,7 @@ class Particle : public ParticleBase<Tdim> {
   double pressure() const override {
     return (state_variables_.find("pressure") != state_variables_.end())
                ? state_variables_.at("pressure")
-               : 0.;
+               : std::numeric_limits<double>::quiet_NaN();
   }
 
   //! Return vector data of particles

@@ -44,7 +44,7 @@ class VtkWriter {
   //! \brief Write scalar data
   //! \param[in] filename Output file to write geometry
   //! \param[in] data Scalar field data
-  //! \param[in] data_field Field name ("Displacement", "Forces")
+  //! \param[in] data_field Field name ("pdstrain")
   void write_scalar_point_data(const std::string& filename,
                                const std::vector<double>& data,
                                const std::string& data_field);
