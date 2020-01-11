@@ -258,28 +258,28 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   // Initialize and compute node cell map
   tsl::robin_map<mpm::Index, std::set<mpm::Index>> node_cell_map;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    // Get cell id and nodes id
-    auto cell_id = (*citr)->id();
-    const auto nodes_id_list = (*citr)->nodes_id();
     // Populate node_cell_map with the node_id and multiple cell_id
-    for (const auto& id : nodes_id_list) node_cell_map[id].insert(cell_id);
+    auto cell_id = (*citr)->id();
+    for (auto id : (*citr)->nodes_id()) node_cell_map[id].insert(cell_id);
   }
 
   // Assign neighbour to cells
-  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-    // Initiate set of neighbouring cells
-    std::set<mpm::Index> neighbouring_cell_sets;
-
-    // Loop over the current cell nodes and add ids of the initiated set
-    const auto nodes_id_list = (*citr)->nodes_id();
-    for (const auto& id : nodes_id_list)
-      neighbouring_cell_sets.insert(node_cell_map[id].begin(),
-                                    node_cell_map[id].end());
-
-    for (const auto& neighbour_id : neighbouring_cell_sets)
-      if (neighbour_id != (*citr)->id())
-        map_cells_[(*citr)->id()]->add_neighbour(neighbour_id);
-  }
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) {
+          // Iterate over each node in current cell
+          for (auto id : cells_[i]->nodes_id()) {
+            auto cell_id = cells_[i]->id();
+            // Get the cells associated with each node
+            for (auto neighbour_id : node_cell_map[id])
+              if (neighbour_id != cell_id)
+                cells_[i]->add_neighbour(neighbour_id);
+          }
+        }
+      },
+      tbb::simple_partitioner());
 }
 
 //! Find ghost cell neighbours
