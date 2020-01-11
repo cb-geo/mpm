@@ -825,6 +825,11 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             attribute = "invalid";
             REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
 
+            // State variable
+            attribute = "pdstrain";
+            REQUIRE(mesh->particles_statevars_data(attribute).size() ==
+                    mesh->nparticles());
+
             // Locate particles in mesh
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh
@@ -1999,6 +2004,11 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particle invalid data
             attribute = "invalid";
             REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
+
+            // State variable
+            attribute = "pdstrain";
+            REQUIRE(mesh->particles_statevars_data(attribute).size() ==
+                    mesh->nparticles());
 
             SECTION("Locate particles in mesh") {
               // Locate particles in a mesh

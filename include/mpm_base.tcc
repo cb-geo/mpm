@@ -480,54 +480,56 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
       io_->output_file(attribute, extension, uuid_, step, max_steps).string();
   vtk_writer->write_geometry(meshfile);
 
+  // MPI parallel vtk file
+  int mpi_rank = 0;
+  int mpi_size = 1;
+  bool write_mpi_rank = false;
+
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+  // Write VTK attributes
   for (const auto& attribute : vtk_attributes_) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
         file, mesh_->particles_vector_data(attribute), attribute);
-    // Write a parallel MPI VTK container file 
-#ifdef USE_MPI
-    int mpi_rank = 0;
-    int mpi_size = 1;
-    // Get MPI rank
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    // Get number of MPI ranks
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    bool write_mpi_rank = false;
-    auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
-                                          max_steps, write_mpi_rank)
-                             .string();
-    if (mpi_rank == 0)
+    // Write a parallel MPI VTK container file
+#ifdef USE_MPI
+    if (mpi_rank == 0 && mpi_size > 1) {
+      auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                            max_steps, write_mpi_rank)
+                               .string();
+
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
                                      max_steps);
+    }
 #endif
   }
-  // State vars
 
+  // VTK state variables
   for (const auto& attribute : vtk_statevars_) {
     // Write state variables
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_scalar_point_data(
         file, mesh_->particles_statevars_data(attribute), attribute);
-    // Write a parallel MPI VTK container file 
+    // Write a parallel MPI VTK container file
 #ifdef USE_MPI
-    int mpi_rank = 0;
-    int mpi_size = 1;
-    // Get MPI rank
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    // Get number of MPI ranks
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    if (mpi_rank == 0 && mpi_size > 1) {
+      auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                            max_steps, write_mpi_rank)
+                               .string();
 
-    bool write_mpi_rank = false;
-    auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
-                                          max_steps, write_mpi_rank)
-                             .string();
-    if (mpi_rank == 0)
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
                                      max_steps);
+    }
 #endif
   }
 }

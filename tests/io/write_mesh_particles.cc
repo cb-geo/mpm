@@ -96,6 +96,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {{"stresses", "strains", "velocity"}}},
+        {"vtk_statevars", {{"pdstrain"}}},
         {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read
