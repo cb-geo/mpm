@@ -41,10 +41,7 @@ void VtkWriter::write_geometry(const std::string& filename) {
   writer->Write();
 }
 
-//! \brief Write vector data
-//! \param[in] filename Output file to write geometry
-//! \param[in] data Vector data
-//! \param[in] data_field Field name ("Displacement", "Forces")
+//! Write vector data
 void VtkWriter::write_vector_point_data(
     const std::string& filename, const std::vector<Eigen::Vector3d>& data,
     const std::string& data_field) {
@@ -69,6 +66,43 @@ void VtkWriter::write_vector_point_data(
 
   // Add the SignedDistances to the grid
   pdata->GetPointData()->SetVectors(vectordata);
+
+  // Write file
+  auto writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+
+  writer->SetFileName(filename.c_str());
+
+  writer->SetDataModeToBinary();
+
+#if VTK_MAJOR_VERSION <= 5
+  writer->SetInput(pdata);
+#else
+  writer->SetInputData(pdata);
+#endif
+
+  writer->SetCompressor(vtkZLibDataCompressor::New());
+  writer->Write();
+}
+
+//! Write scalar data
+void VtkWriter::write_scalar_point_data(const std::string& filename,
+                                        const std::vector<double>& data,
+                                        const std::string& data_field) {
+
+  // Create an array to hold distance information
+  auto scalardata = vtkSmartPointer<vtkDoubleArray>::New();
+  scalardata->SetNumberOfComponents(1);
+  scalardata->SetName(data_field.c_str());
+
+  // Add value to scalarfield
+  for (auto value : data) scalardata->InsertNextValue(value);
+
+  // Create a polydata to store everything in it
+  auto pdata = vtkSmartPointer<vtkPolyData>::New();
+  // Add the points to the dataset
+  pdata->SetPoints(points_);
+  // Add the scalar data to the points
+  pdata->GetPointData()->SetScalars(scalardata);
 
   // Write file
   auto writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();

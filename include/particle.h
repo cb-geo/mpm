@@ -222,7 +222,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] var State variable
   //! \retval Quantity of the state history variable
   double state_variable(const std::string& var) const override {
-    return state_variables_.at(var);
+    return (state_variables_.find(var) != state_variables_.end())
+               ? state_variables_.at(var)
+               : std::numeric_limits<double>::max();
   }
 
   //! Map particle pressure to nodes

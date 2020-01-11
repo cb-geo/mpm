@@ -802,7 +802,7 @@ std::vector<Eigen::Matrix<double, 3, 1>>
 //! Return particle vector data
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
-    const std::string& attribute, unsigned phase) {
+    const std::string& attribute) {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
   try {
     // Iterate over particles
@@ -822,6 +822,18 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
     vector_data.clear();
   }
   return vector_data;
+}
+
+//! Return particle scalar data
+template <unsigned Tdim>
+std::vector<double> mpm::Mesh<Tdim>::particles_statevars_data(
+    const std::string& attribute) {
+  std::vector<double> scalar_data;
+  scalar_data.reserve(particles_.size());
+  // Iterate over particles and add scalar value to data
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    scalar_data.emplace_back((*pitr)->state_variable(attribute));
+  return scalar_data;
 }
 
 //! Assign particles volumes
