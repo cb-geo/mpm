@@ -175,22 +175,29 @@ void VtkWriter::write_mesh(
 //! Write Parallel VTK file
 void VtkWriter::write_parallel_vtk(const std::string& filename,
                                    const std::string& attribute, int mpi_size,
-                                   unsigned step, unsigned max_steps) {
+                                   unsigned step, unsigned max_steps,
+                                   unsigned ncomponents) {
+
+  // If the number of components is 1, set as scalar
+  const std::string data_type = (ncomponents == 1) ? "Scalars" : "Vectors";
 
   std::string ppolydata =
       "<?xml version=\"1.0\"?>\n<VTKFile type=\"PPolyData\" version=\"0.1\" "
       "byte_order=\"LittleEndian\" "
       "compressor=\"vtkZLibDataCompressor\">\n<PPolyData "
-      "GhostLevel=\"0\">\n\t<PPointData Vectors=\"" +
-      attribute +
+      "GhostLevel=\"0\">\n\t<PPointData " +
+      data_type + "=\"" + attribute +
       "\">\n\t\t<PDataArray "
       "type=\"Float64\" Name=\"" +
       attribute +
       "\" "
-      "NumberOfComponents=\"3\"/>\n\t</"
+      "NumberOfComponents=\"" +
+      std::to_string(ncomponents) +
+      "\"/>\n\t</"
       "PPointData>\n\n\t<PPoints>\n\t\t<PDataArray "
       "type=\"Float32\" Name=\"Points\" "
-      "NumberOfComponents=\"3\"/>\n\t</PPoints>\n";
+      "NumberOfComponents=\"" +
+      std::to_string(ncomponents) + "\"/>\n\t</PPoints>\n";
 
   for (unsigned i = 0; i < mpi_size; ++i) {
     std::stringstream file_name;
