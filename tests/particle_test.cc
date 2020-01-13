@@ -829,7 +829,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Check pressure
-    REQUIRE(particle->pressure() == Approx(0.).epsilon(Tolerance));
+    REQUIRE(std::isnan(particle->pressure()) == true);
 
     // Compute strain
     particle->compute_strain(dt);
@@ -847,7 +847,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Check updated pressure
     const double K = 8333333.333333333;
-    REQUIRE(particle->pressure() == 0.0);
+    REQUIRE(std::isnan(particle->pressure()) == true);
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
@@ -2016,7 +2016,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
     // Check pressure
-    REQUIRE(particle->pressure() == Approx(0.).epsilon(Tolerance));
+    REQUIRE(std::isnan(particle->pressure()) == true);
 
     // Compute strain
     particle->compute_strain(dt);
@@ -2034,7 +2034,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
             Approx(volumetric_strain).epsilon(Tolerance));
 
     // Check updated pressure
-    REQUIRE(particle->pressure() == 0.0);
+    REQUIRE(std::isnan(particle->pressure()) == true);
 
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
