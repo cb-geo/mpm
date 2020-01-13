@@ -58,9 +58,16 @@ class VtkWriter {
                   const std::vector<std::array<mpm::Index, 2>>& node_pairs);
 
   //! Write Parallel VTK file
+  //! \param[in] filename Mesh PVTP file name
+  //! \param[in] attribute VTK data attribute to be written
+  //! \param[in] mpi_size Number of MPI tasks
+  //! \param[in] step Current time step
+  //! \param[in] max_steps Maximum number of steps in the simulation
+  //! \param[in] ncomponents Number of components to write
   void write_parallel_vtk(const std::string& filename,
                           const std::string& attribute, int mpi_size,
-                          unsigned step, unsigned max_steps);
+                          unsigned step, unsigned max_steps,
+                          unsigned ncomponents = 3);
 
  private:
   //! Vector of nodal coordinates
