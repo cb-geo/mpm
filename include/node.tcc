@@ -86,8 +86,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_concentrated_force(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_concentrated_force(
     unsigned phase, double current_time) {
-  double scalar = 1.0;
-  if (force_function_ != nullptr) scalar = force_function_->value(current_time);
+  const double scalar =
+      (force_function_ != nullptr) ? force_function_->value(current_time) : 1.0;
   this->update_external_force(true, phase,
                               scalar * concentrated_force_.col(phase));
 }

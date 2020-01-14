@@ -129,7 +129,7 @@ class ParticleBase {
   virtual bool compute_mass() = 0;
 
   //! Map particle mass and momentum to nodes
-  virtual bool map_mass_momentum_to_nodes() = 0;
+  virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
   //! Assign material
   virtual bool assign_material(
@@ -157,7 +157,7 @@ class ParticleBase {
   virtual double pressure() const = 0;
 
   //! Compute strain
-  virtual void compute_strain(double dt) = 0;
+  virtual void compute_strain(double dt) noexcept = 0;
 
   //! Strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
@@ -175,19 +175,19 @@ class ParticleBase {
   virtual void initial_stress(const Eigen::Matrix<double, 6, 1>&) = 0;
 
   //! Compute stress
-  virtual bool compute_stress() = 0;
+  virtual void compute_stress() noexcept = 0;
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
 
   //! Map body force
-  virtual void map_body_force(const VectorDim& pgravity) = 0;
+  virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
 
   //! Map internal force
-  virtual void map_internal_force() = 0;
+  virtual void map_internal_force() noexcept = 0;
 
   //! Map particle pressure to nodes
-  virtual bool map_pressure_to_nodes() = 0;
+  virtual bool map_pressure_to_nodes() noexcept = 0;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
   virtual bool compute_pressure_smoothing() = 0;
@@ -208,11 +208,11 @@ class ParticleBase {
   virtual VectorDim traction() const = 0;
 
   //! Map traction force
-  virtual void map_traction_force() = 0;
+  virtual void map_traction_force() noexcept = 0;
 
   //! Compute updated position
-  virtual bool compute_updated_position(double dt,
-                                        bool velocity_update = false) = 0;
+  virtual void compute_updated_position(
+      double dt, bool velocity_update = false) noexcept = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

@@ -51,6 +51,7 @@ link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 # Eigen
 find_package(Eigen3 REQUIRED)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx -mfma")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # MPI
