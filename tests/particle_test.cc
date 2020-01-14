@@ -811,7 +811,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
                       0., 187.5 * 4.;
     // clang-format on
     for (unsigned i = 0; i < nodes.size(); ++i)
-      nodes.at(i)->update_momentum(false, phase, nodal_momentum.row(i));
+      REQUIRE_NOTHROW(
+          nodes.at(i)->update_momentum(false, phase, nodal_momentum.row(i)));
 
     // nodal velocity
     // clang-format off
@@ -1993,8 +1994,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
                       0., 1125. * 8., 2250. * 8.;
     // clang-format on
     for (unsigned i = 0; i < nodes.size(); ++i)
-      REQUIRE(nodes.at(i)->update_momentum(false, phase,
-                                           nodal_momentum.row(i)) == true);
+      REQUIRE_NOTHROW(
+          nodes.at(i)->update_momentum(false, phase, nodal_momentum.row(i)));
 
     // nodal velocity
     // clang-format off

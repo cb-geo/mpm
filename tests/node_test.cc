@@ -125,14 +125,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
     // Update mass to 100.5
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
     // Update mass to 201
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
     // Assign mass to 100
     mass = 100.;
-    node->update_mass(false, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
     SECTION("Check nodal pressure") {
@@ -140,10 +140,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
@@ -151,7 +151,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
@@ -171,19 +171,19 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      REQUIRE(node->update_external_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      REQUIRE(node->update_external_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      REQUIRE(node->update_external_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -191,14 +191,16 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check if exception is handled
       unsigned bad_phase = 4;
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(true, bad_phase, force) == false);
+      // TODO Assert:
+      // REQUIRE_NOTHROW(node->update_external_force(true, bad_phase, force));
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(false, bad_phase, force) == false);
+      // TODO Assert:
+      // REQUIRE_NOTHROW(node->update_external_force(false, bad_phase, force));
 
       SECTION("Check concentrated force") {
         // Set external force to zero
         force.setZero();
-        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+        REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
 
         // concentrated force
         std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
@@ -252,19 +254,19 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      REQUIRE(node->update_internal_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -272,9 +274,12 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check if exception is handled
       unsigned bad_phase = 4;
       // Exception handling invalid force dimension
-      REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
-      // Exception handling invalid force dimension
-      REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
+      // TODO Assert:
+      // REQUIRE(node->update_internal_force(true, bad_phase,
+      // force) == false); Exception handling invalid force dimension
+      // TODO Assert:
+      // REQUIRE(node->update_internal_force(false, bad_phase,
+      // force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -284,7 +289,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Nodal mass
       double mass = 100.;
       // Update mass to 100.5
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
 
       // Check internal force
@@ -292,7 +297,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * i;
       // Update force to 10.0
-      node->update_internal_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       // Internal force
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
@@ -301,7 +306,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // External force
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 5. * i;
       // Update force to 10.0
-      node->update_external_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(force(i)).epsilon(Tolerance));
@@ -363,7 +368,7 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Exception check when mass is zero
       mass = 0.;
       // Update mass to 0.
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
     }
@@ -378,17 +383,17 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
       // Check update momentum to 10
-      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check update momentum to 20
-      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
 
       // Check assign momentum to 10
-      REQUIRE(node->update_momentum(false, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(false, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
@@ -398,14 +403,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
 
       // Check mass
       double mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Compute and check velocity this should throw zero mass
       node->compute_velocity();
 
       mass = 100.;
       // Update mass to 100.5
-      node->update_mass(true, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
 
       // Compute and check velocity
@@ -416,9 +421,9 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
+      REQUIRE_NOTHROW(node->update_momentum(true, bad_phase, momentum));
       // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
+      REQUIRE_NOTHROW(node->update_momentum(false, bad_phase, momentum));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -450,19 +455,18 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
+      REQUIRE_NOTHROW(node->update_acceleration(true, Nphase, acceleration));
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid acceleration dimension
-      REQUIRE(node->update_acceleration(true, bad_phase, acceleration) ==
-              false);
+      REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase, acceleration));
 
       // Exception handling invalid acceleration dimension
-      REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
-              false);
+      REQUIRE_NOTHROW(
+          node->update_acceleration(false, bad_phase, acceleration));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -623,14 +627,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
     // Update mass to 100.5
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
     // Update mass to 201
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
     // Assign mass to 100
     mass = 100.;
-    node->update_mass(false, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
     SECTION("Check nodal pressure") {
@@ -638,10 +642,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
@@ -649,7 +653,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
@@ -663,14 +667,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->volume(Nphase) == Approx(0.0).epsilon(Tolerance));
       double volume = 100.5;
       // Update volume to 100.5
-      node->update_volume(true, Nphase, volume);
+      REQUIRE_NOTHROW(node->update_volume(true, Nphase, volume));
       REQUIRE(node->volume(Nphase) == Approx(100.5).epsilon(Tolerance));
       // Update volume to 201
-      node->update_volume(true, Nphase, volume);
+      REQUIRE_NOTHROW(node->update_volume(true, Nphase, volume));
       REQUIRE(node->volume(Nphase) == Approx(201.0).epsilon(Tolerance));
       // Assign volume to 100
       volume = 100.;
-      node->update_volume(false, Nphase, volume);
+      REQUIRE_NOTHROW(node->update_volume(false, Nphase, volume));
       REQUIRE(node->volume(Nphase) == Approx(100.0).epsilon(Tolerance));
     }
 
@@ -685,19 +689,19 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      REQUIRE(node->update_external_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      REQUIRE(node->update_external_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      REQUIRE(node->update_external_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -707,14 +711,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < force_bad.size(); ++i) force_bad(i) = 10.;
 
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(true, 1, force_bad) == false);
+      REQUIRE_NOTHROW(node->update_external_force(true, 1, force_bad));
       // Exception handling invalid force dimension
-      REQUIRE(node->update_external_force(false, 1, force_bad) == false);
+      REQUIRE_NOTHROW(node->update_external_force(false, 1, force_bad));
 
       SECTION("Check concentrated force") {
         // Set external force to zero
         force.setZero();
-        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+        REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
 
         // Concentrated force
         std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
@@ -768,19 +772,19 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      REQUIRE(node->update_internal_force(true, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      REQUIRE(node->update_internal_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -788,9 +792,11 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid force dimension
-      REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
+      // TODO Assert:
+      // REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
       // Exception handling invalid force dimension
-      REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
+      // TODO Assert:
+      // REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -800,7 +806,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Nodal mass
       double mass = 100.;
       // Update mass to 100.5
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
 
       // Check internal force
@@ -808,7 +814,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * i;
       // Update force to 10.0
-      node->update_internal_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       // Internal force
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
@@ -817,7 +823,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // External force
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 5. * i;
       // Update force to 10.0
-      node->update_external_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(force(i)).epsilon(Tolerance));
@@ -867,7 +873,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       // Exception check when mass is zero
       mass = 0.;
       // Update mass to 0.
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
     }
@@ -885,17 +891,17 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
       // Check update momentum to 10
-      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check update momentum to 20
-      REQUIRE(node->update_momentum(true, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
 
       // Check assign momentum to 10
-      REQUIRE(node->update_momentum(false, Nphase, momentum) == true);
+      REQUIRE_NOTHROW(node->update_momentum(false, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
@@ -905,14 +911,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
       // Check mass
       double mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Compute and check velocity this should throw zero mass
       node->compute_velocity();
 
       mass = 100.;
       // Update mass to 100.5
-      node->update_mass(true, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
 
       // Compute and check velocity
@@ -927,7 +933,7 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
+      REQUIRE_NOTHROW(node->update_acceleration(true, Nphase, acceleration));
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
@@ -938,15 +944,18 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
       unsigned bad_phase = 3;
       // Exception handling invalid acceleration dimension
-      REQUIRE(node->update_acceleration(true, bad_phase, acceleration_bad) ==
-              false);
+      REQUIRE_NOTHROW(
+          node->update_acceleration(true, bad_phase, acceleration_bad));
 
       // Check if exception is handled
       bad_phase = 1;
       // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(true, bad_phase, momentum) == false);
-      // Exception handling invalid momentum dimension
-      REQUIRE(node->update_momentum(false, bad_phase, momentum) == false);
+      // TODO Assert:
+      // REQUIRE_NOTHROW(node->update_momentum(true, bad_phase, momentum) ==
+      // false); Exception handling invalid momentum dimension
+      // TODO Assert:
+      // REQUIRE_NOTHROW(node->update_momentum(false, bad_phase, momentum) ==
+      // false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
@@ -1243,14 +1252,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
     // Update mass to 100.5
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.5).epsilon(Tolerance));
     // Update mass to 201
-    node->update_mass(true, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(201.0).epsilon(Tolerance));
     // Assign mass to 100
     mass = 100.;
-    node->update_mass(false, Nphase, mass);
+    REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
 
     SECTION("Check nodal pressure") {
@@ -1258,10 +1267,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      node->update_mass_pressure(Nphase, mass * pressure);
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
@@ -1269,7 +1278,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
@@ -1289,19 +1298,19 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      node->update_external_force(true, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 2.0
-      node->update_external_force(true, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 1.0
-      node->update_external_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -1309,7 +1318,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       SECTION("Check concentrated force") {
         // Set external force to zero
         force.setZero();
-        REQUIRE(node->update_external_force(false, Nphase, force) == true);
+        REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
 
         // Concentrated froce
         std::shared_ptr<mpm::FunctionBase> ffunction = nullptr;
@@ -1362,19 +1371,19 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
                 Approx(0.).epsilon(Tolerance));
 
       // Update force to 10.0
-      node->update_internal_force(true, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
       // Update force to 20.0
-      node->update_internal_force(true, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(true, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(20.).epsilon(Tolerance));
 
       // Assign force as 10.0
-      node->update_internal_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
@@ -1387,7 +1396,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Nodal mass
       double mass = 100.;
       // Update mass to 100.5
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
 
       // Check internal force
@@ -1395,7 +1404,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       Eigen::Matrix<double, Dim, 1> force;
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 10. * i;
       // Update force to 10.0
-      node->update_internal_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       // Internal force
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
@@ -1404,7 +1413,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // External force
       for (unsigned i = 0; i < force.size(); ++i) force(i) = 5. * i;
       // Update force to 10.0
-      node->update_external_force(false, Nphase, force);
+      REQUIRE_NOTHROW(node->update_external_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(force(i)).epsilon(Tolerance));
@@ -1458,7 +1467,7 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       // Exception check when mass is zero
       mass = 0.;
       // Update mass to 0.
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(mass).epsilon(Tolerance));
       REQUIRE(node->compute_acceleration_velocity(Nphase, dt) == false);
     }
@@ -1476,30 +1485,30 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->momentum(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
       // Check update momentum to 10
-      node->update_momentum(true, Nphase, momentum);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check update momentum to 20
-      node->update_momentum(true, Nphase, momentum);
+      REQUIRE_NOTHROW(node->update_momentum(true, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(20.).epsilon(Tolerance));
 
       // Check assign momentum to 10
-      node->update_momentum(false, Nphase, momentum);
+      REQUIRE_NOTHROW(node->update_momentum(false, Nphase, momentum));
       for (unsigned i = 0; i < momentum.size(); ++i)
         REQUIRE(node->momentum(Nphase)(i) == Approx(10.).epsilon(Tolerance));
 
       // Check mass
       double mass = 0.;
-      node->update_mass(false, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
       // Compute and check velocity this should throw zero mass
       node->compute_velocity();
 
       mass = 100.;
       // Update mass to 100.5
-      node->update_mass(true, Nphase, mass);
+      REQUIRE_NOTHROW(node->update_mass(true, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(100.).epsilon(Tolerance));
 
       // Check zero velocity
@@ -1518,18 +1527,20 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(0.).epsilon(Tolerance));
 
-      REQUIRE(node->update_acceleration(true, Nphase, acceleration) == true);
+      REQUIRE_NOTHROW(node->update_acceleration(true, Nphase, acceleration));
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
 
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid acceleration dimension
-      REQUIRE(node->update_acceleration(true, bad_phase, acceleration) ==
-              false);
-      // Exception handling invalid acceleration dimension
-      REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
-              false);
+      // TODO assert:
+      // REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase,
+      // acceleration) == false); Exception handling invalid acceleration
+      // dimension
+      // TODO Assert:
+      // REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
+      //       false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;

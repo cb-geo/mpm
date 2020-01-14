@@ -101,9 +101,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_external_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual void update_external_force(bool update, unsigned phase,
+                                     const VectorDim& force) noexcept = 0;
 
   //! Return external force
   //! \param[in] phase Index corresponding to the phase
@@ -113,9 +112,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_internal_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual void update_internal_force(bool update, unsigned phase,
+                                     const VectorDim& force) noexcept = 0;
 
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
@@ -124,7 +122,8 @@ class NodeBase {
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(unsigned phase, double mass_pressure) = 0;
+  virtual void update_mass_pressure(unsigned phase,
+                                    double mass_pressure) noexcept = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -140,9 +139,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_momentum(bool update, unsigned phase,
-                               const VectorDim& momentum) = 0;
+  virtual void update_momentum(bool update, unsigned phase,
+                               const VectorDim& momentum) noexcept = 0;
 
   //! Return momentum
   //! \param[in] phase Index corresponding to the phase
@@ -159,8 +157,7 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_acceleration(bool update, unsigned phase,
+  virtual void update_acceleration(bool update, unsigned phase,
                                    const VectorDim& acceleration) = 0;
 
   //! Return acceleration

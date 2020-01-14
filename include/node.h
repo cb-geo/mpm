@@ -97,9 +97,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  //! \retval status Update status
-  bool update_external_force(bool update, unsigned phase,
-                             const VectorDim& force) override;
+  void update_external_force(bool update, unsigned phase,
+                             const VectorDim& force) noexcept override;
 
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -111,9 +110,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  //! \retval status Update status
-  bool update_internal_force(bool update, unsigned phase,
-                             const VectorDim& force) override;
+  void update_internal_force(bool update, unsigned phase,
+                             const VectorDim& force) noexcept override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -124,7 +122,8 @@ class Node : public NodeBase<Tdim> {
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  void update_mass_pressure(unsigned phase, double mass_pressure) override;
+  void update_mass_pressure(unsigned phase,
+                            double mass_pressure) noexcept override;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -140,9 +139,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  //! \retval status Update status
-  bool update_momentum(bool update, unsigned phase,
-                       const VectorDim& momentum) override;
+  void update_momentum(bool update, unsigned phase,
+                       const VectorDim& momentum) noexcept override;
 
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -163,9 +161,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  //! \retval status Update status
-  bool update_acceleration(bool update, unsigned phase,
-                           const VectorDim& acceleration) override;
+  void update_acceleration(bool update, unsigned phase,
+                           const VectorDim& acceleration) noexcept override;
 
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -176,7 +173,8 @@ class Node : public NodeBase<Tdim> {
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  bool compute_acceleration_velocity(unsigned phase, double dt) noexcept override;
+  bool compute_acceleration_velocity(unsigned phase,
+                                     double dt) noexcept override;
 
   //! Compute acceleration and velocity with cundall damping factor
   //! \param[in] phase Index corresponding to the phase

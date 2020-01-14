@@ -94,92 +94,64 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_concentrated_force(
 
 //! Update external force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
-    bool update, unsigned phase, const Eigen::Matrix<double, Tdim, 1>& force) {
-  bool status = false;
-  try {
-    if (phase >= Tnphases)
-      throw std::runtime_error("Nodal external force: Invalid phase");
+void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
+  // Assert
+  assert(phase < Tnphases);
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
 
-    // Update/assign external force
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    external_force_.col(phase) = external_force_.col(phase) * factor + force;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Update/assign external force
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  external_force_.col(phase) = external_force_.col(phase) * factor + force;
 }
 
 //! Update internal force (body force / traction force)
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
-    bool update, unsigned phase, const Eigen::Matrix<double, Tdim, 1>& force) {
-  bool status = false;
-  try {
-    if (phase >= Tnphases)
-      throw std::runtime_error("Nodal internal force: Invalid phase");
+void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
+  // Assert
+  assert(phase < Tnphases);
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
 
-    // Update/assign internal force
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Update/assign internal force
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
 }
 
 //! Assign nodal momentum
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
+void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     bool update, unsigned phase,
-    const Eigen::Matrix<double, Tdim, 1>& momentum) {
-  bool status = false;
-  try {
-    if (phase >= Tnphases)
-      throw std::runtime_error("Nodal momentum: Invalid phase");
+    const Eigen::Matrix<double, Tdim, 1>& momentum) noexcept {
+  // Assert
+  assert(phase < Tnphases);
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
 
-    // Update/assign momentum
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Update/assign momentum
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
 }
 
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
-    unsigned phase, double mass_pressure) {
-  try {
-    const double tolerance = 1.E-16;
+    unsigned phase, double mass_pressure) noexcept {
+  // Assert
+  assert(phase < Tnphases);
 
-    // Compute pressure from mass*pressure
-    if (mass_(phase) > tolerance) {
-      std::lock_guard<std::mutex> guard(node_mutex_);
-      pressure_(phase) += mass_pressure / mass_(phase);
-    } else
-      throw std::runtime_error("Nodal mass is zero or below threshold");
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  const double tolerance = 1.E-16;
+  // Compute pressure from mass*pressure
+  if (mass_(phase) > tolerance) {
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    pressure_(phase) += mass_pressure / mass_(phase);
   }
 }
 
@@ -228,27 +200,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
 
 //! Update nodal acceleration
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
+void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     bool update, unsigned phase,
-    const Eigen::Matrix<double, Tdim, 1>& acceleration) {
-  bool status = false;
-  try {
-    if (phase >= Tnphases)
-      throw std::runtime_error("Nodal acceleration: Invalid phase");
+    const Eigen::Matrix<double, Tdim, 1>& acceleration) noexcept {
+  assert(phase < Tnphases);
 
-    // Decide to update or assign
-    double factor = 1.0;
-    if (!update) factor = 0.;
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
 
-    //! Update/assign acceleration
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  //! Update/assign acceleration
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
 }
 
 //! Compute acceleration and velocity
