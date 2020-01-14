@@ -105,7 +105,7 @@ class Particle : public ParticleBase<Tdim> {
   void remove_cell() override;
 
   //! Compute shape functions of a particle, based on local coordinates
-  bool compute_shapefn() override;
+  void compute_shapefn() noexcept override;
 
   //! Assign volume
   //! \param[in] volume Volume of particle

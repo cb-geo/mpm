@@ -668,7 +668,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Add cell to particle
     REQUIRE(cell->status() == false);
     // Check compute shape functions of a particle
-    REQUIRE(particle->compute_shapefn() == false);
+    // TODO Assert: REQUIRE_NOTHROW(particle->compute_shapefn());
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
     // Compute updated particle location should fail
@@ -688,7 +688,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     // Check compute shape functions of a particle
-    REQUIRE(particle->compute_shapefn() == true);
+    REQUIRE_NOTHROW(particle->compute_shapefn());
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
@@ -749,7 +749,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
-    REQUIRE(particle->compute_shapefn() == true);
+    REQUIRE_NOTHROW(particle->compute_shapefn());
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -1067,7 +1067,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
       // Assign mass to nodes
       REQUIRE(particle->compute_reference_location() == true);
-      REQUIRE(particle->compute_shapefn() == true);
+      REQUIRE_NOTHROW(particle->compute_shapefn());
 
       // Check velocity
       velocity.resize(Dim);
@@ -1836,7 +1836,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Add cell to particle
     REQUIRE(cell->status() == false);
     // Check compute shape functions of a particle
-    REQUIRE(particle->compute_shapefn() == false);
+    // TODO Assert: REQUIRE(particle->compute_shapefn() == false);
     // Compute reference location should throw
     REQUIRE(particle->compute_reference_location() == false);
     // Compute updated particle location should fail
@@ -1856,7 +1856,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     // Check compute shape functions of a particle
-    REQUIRE(particle->compute_shapefn() == true);
+    REQUIRE_NOTHROW(particle->compute_shapefn());
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
@@ -1917,7 +1917,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Assign mass to nodes
     REQUIRE(particle->compute_reference_location() == true);
-    REQUIRE(particle->compute_shapefn() == true);
+    REQUIRE_NOTHROW(particle->compute_shapefn());
 
     // Check velocity
     Eigen::VectorXd velocity;
@@ -2230,7 +2230,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
       // Assign mass to nodes
       REQUIRE(particle->compute_reference_location() == true);
-      REQUIRE(particle->compute_shapefn() == true);
+      REQUIRE_NOTHROW(particle->compute_shapefn());
 
       // Check velocity
       velocity.resize(Dim);

@@ -398,34 +398,21 @@ bool mpm::Particle<Tdim>::compute_reference_location() {
 
 // Compute shape functions and gradients
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_shapefn() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Get element ptr of a cell
-      const auto element = cell_->element_ptr();
+void mpm::Particle<Tdim>::compute_shapefn() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Get element ptr of a cell
+  const auto element = cell_->element_ptr();
 
-      // Zero matrix
-      Eigen::Matrix<double, Tdim, 1> zero;
-      zero.setZero();
+  // Zero matrix
+  Eigen::Matrix<double, Tdim, 1> zero = Eigen::Matrix<double, Tdim, 1>::Zero();
 
-      // Compute shape function of the particle
-      shapefn_ = element->shapefn(this->xi_, this->natural_size_, zero);
+  // Compute shape function of the particle
+  shapefn_ = element->shapefn(this->xi_, this->natural_size_, zero);
 
-      // Compute dN/dx
-      dn_dx_ = element->dn_dx(this->xi_, cell_->nodal_coordinates(),
-                              this->natural_size_, zero);
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute shapefns for the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Compute dN/dx
+  dn_dx_ = element->dn_dx(this->xi_, cell_->nodal_coordinates(),
+                          this->natural_size_, zero);
 }
 
 // Assign volume to the particle

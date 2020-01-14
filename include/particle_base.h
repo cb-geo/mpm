@@ -105,7 +105,7 @@ class ParticleBase {
   virtual void remove_cell() = 0;
 
   //! Compute shape functions
-  virtual bool compute_shapefn() = 0;
+  virtual void compute_shapefn() noexcept = 0;
 
   //! Assign volume
   virtual bool assign_volume(double volume) = 0;
