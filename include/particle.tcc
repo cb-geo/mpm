@@ -540,8 +540,7 @@ template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
     const Eigen::MatrixXd& dn_dx, unsigned phase) {
   // Define strain rate
-  Eigen::Matrix<double, 6, 1> strain_rate;
-  strain_rate.setZero();
+  Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 1, 1> vel = nodes_[i]->velocity(phase);
@@ -557,8 +556,7 @@ template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<2>::compute_strain_rate(
     const Eigen::MatrixXd& dn_dx, unsigned phase) {
   // Define strain rate
-  Eigen::Matrix<double, 6, 1> strain_rate;
-  strain_rate.setZero();
+  Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 2, 1> vel = nodes_[i]->velocity(phase);
@@ -578,8 +576,7 @@ template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<3>::compute_strain_rate(
     const Eigen::MatrixXd& dn_dx, unsigned phase) {
   // Define strain rate
-  Eigen::Matrix<double, 6, 1> strain_rate;
-  strain_rate.setZero();
+  Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
 
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     Eigen::Matrix<double, 3, 1> vel = nodes_[i]->velocity(phase);
@@ -701,16 +698,9 @@ inline void mpm::Particle<3>::map_internal_force() {
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_velocity(
     const Eigen::Matrix<double, Tdim, 1>& velocity) {
-  bool status = false;
-  try {
-    // Assign velocity
-    velocity_ = velocity;
-    status = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Assign velocity
+  velocity_ = velocity;
+  return true;
 }
 
 // Assign traction to the particle
