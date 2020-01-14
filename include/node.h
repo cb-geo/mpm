@@ -33,7 +33,7 @@ class Node : public NodeBase<Tdim> {
   Node& operator=(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
   //! Initialise nodal properties
-  void initialise() override;
+  void initialise() noexcept override;
 
   //! Return id of the nodebase
   Index id() const override { return id_; }
@@ -61,7 +61,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  void update_mass(bool update, unsigned phase, double mass) override;
+  void update_mass(bool update, unsigned phase, double mass) noexcept override;
 
   //! Return mass at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -71,7 +71,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  void update_volume(bool update, unsigned phase, double volume) override;
+  void update_volume(bool update, unsigned phase,
+                     double volume) noexcept override;
 
   //! Return volume at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase

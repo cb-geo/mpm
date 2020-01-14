@@ -22,7 +22,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 
 //! Initialise nodal properties
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
+void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   mass_.setZero();
   volume_.setZero();
   external_force_.setZero();
@@ -38,10 +38,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() {
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
-                                                  double mass) {
+                                                  double mass) noexcept {
   // Decide to update or assign
-  double factor = 1.0;
-  if (!update) factor = 0.;
+  const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign mass
   std::lock_guard<std::mutex> guard(node_mutex_);
@@ -51,10 +50,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
 //! Update volume at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
-                                                    double volume) {
+                                                    double volume) noexcept {
   // Decide to update or assign
-  double factor = 1.0;
-  if (!update) factor = 0.;
+  const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign volume
   std::lock_guard<std::mutex> guard(node_mutex_);

@@ -51,7 +51,7 @@ class NodeBase {
   virtual VectorDim coordinates() const = 0;
 
   //! Initialise properties
-  virtual void initialise() = 0;
+  virtual void initialise() noexcept = 0;
 
   //! Return degrees of freedom
   virtual unsigned dof() const = 0;
@@ -66,7 +66,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  virtual void update_mass(bool update, unsigned phase, double mass) = 0;
+  virtual void update_mass(bool update, unsigned phase,
+                           double mass) noexcept = 0;
 
   //! Return mass at a given node for a given phase
   virtual double mass(unsigned phase) const = 0;
@@ -75,7 +76,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  virtual void update_volume(bool update, unsigned phase, double volume) = 0;
+  virtual void update_volume(bool update, unsigned phase,
+                             double volume) noexcept = 0;
 
   //! Return volume at a given node for a given phase
   virtual double volume(unsigned phase) const = 0;
