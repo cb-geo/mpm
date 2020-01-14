@@ -254,38 +254,32 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
 //! Compute acceleration and velocity
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
-    unsigned phase, double dt) {
-  bool status = true;
+    unsigned phase, double dt) noexcept {
+  bool status = false;
   const double tolerance = 1.0E-15;
-  try {
-    if (mass_(phase) > tolerance) {
-      // acceleration = (unbalaced force / mass)
-      this->acceleration_.col(phase) = (this->external_force_.col(phase) +
-                                        this->internal_force_.col(phase)) /
-                                       this->mass_(phase);
+  if (mass_(phase) > tolerance) {
+    // acceleration = (unbalaced force / mass)
+    this->acceleration_.col(phase) =
+        (this->external_force_.col(phase) + this->internal_force_.col(phase)) /
+        this->mass_(phase);
 
-      // Apply friction constraints
-      this->apply_friction_constraints(dt);
+    // Apply friction constraints
+    this->apply_friction_constraints(dt);
 
-      // Velocity += acceleration * dt
-      this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
-      // Apply velocity constraints, which also sets acceleration to 0,
-      // when velocity is set.
-      this->apply_velocity_constraints();
+    // Velocity += acceleration * dt
+    this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
 
-      // Set a threshold
-      for (unsigned i = 0; i < Tdim; ++i) {
-        if (std::abs(velocity_.col(phase)(i)) < tolerance)
-          velocity_.col(phase)(i) = 0.;
-        if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-          acceleration_.col(phase)(i) = 0.;
-      }
-    } else
-      throw std::runtime_error("Nodal mass is zero or below threshold");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
+    // Set a threshold
+    for (unsigned i = 0; i < Tdim; ++i)
+      if (std::abs(velocity_.col(phase)(i)) < tolerance)
+        velocity_.col(phase)(i) = 0.;
+    for (unsigned i = 0; i < Tdim; ++i)
+      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
+        acceleration_.col(phase)(i) = 0.;
+    status = true;
   }
   return status;
 }
@@ -293,41 +287,35 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
 //! Compute acceleration and velocity with cundall damping factor
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
-    unsigned phase, double dt, double damping_factor) {
-  bool status = true;
+    unsigned phase, double dt, double damping_factor) noexcept {
+  bool status = false;
   const double tolerance = 1.0E-15;
-  try {
-    if (mass_(phase) > tolerance) {
-      // acceleration = (unbalaced force / mass)
-      auto unbalanced_force =
-          this->external_force_.col(phase) + this->internal_force_.col(phase);
-      this->acceleration_.col(phase) =
-          (unbalanced_force - damping_factor * unbalanced_force.norm() *
-                                  this->velocity_.col(phase).cwiseSign()) /
-          this->mass_(phase);
+  if (mass_(phase) > tolerance) {
+    // acceleration = (unbalaced force / mass)
+    auto unbalanced_force =
+        this->external_force_.col(phase) + this->internal_force_.col(phase);
+    this->acceleration_.col(phase) =
+        (unbalanced_force - damping_factor * unbalanced_force.norm() *
+                                this->velocity_.col(phase).cwiseSign()) /
+        this->mass_(phase);
 
-      // Apply friction constraints
-      this->apply_friction_constraints(dt);
+    // Apply friction constraints
+    this->apply_friction_constraints(dt);
 
-      // Velocity += acceleration * dt
-      this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
-      // Apply velocity constraints, which also sets acceleration to 0,
-      // when velocity is set.
-      this->apply_velocity_constraints();
+    // Velocity += acceleration * dt
+    this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
 
-      // Set a threshold
-      for (unsigned i = 0; i < Tdim; ++i) {
-        if (std::abs(velocity_.col(phase)(i)) < tolerance)
-          velocity_.col(phase)(i) = 0.;
-        if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-          acceleration_.col(phase)(i) = 0.;
-      }
-    } else
-      throw std::runtime_error("Nodal mass is zero or below threshold");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
+    // Set a threshold
+    for (unsigned i = 0; i < Tdim; ++i)
+      if (std::abs(velocity_.col(phase)(i)) < tolerance)
+        velocity_.col(phase)(i) = 0.;
+    for (unsigned i = 0; i < Tdim; ++i)
+      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
+        acceleration_.col(phase)(i) = 0.;
+    status = true;
   }
   return status;
 }
