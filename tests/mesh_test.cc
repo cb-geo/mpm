@@ -236,8 +236,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       // Set external force to zero
       Eigen::Matrix<double, Dim, 1> force;
       force.setZero();
-      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
-      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node0->update_external_force(false, Nphase, force));
+      REQUIRE_NOTHROW(node1->update_external_force(false, Nphase, force));
 
       const unsigned Direction = 0;
       // Check external force
@@ -1359,8 +1359,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       // Set external force to zero
       Eigen::Matrix<double, Dim, 1> force;
       force.setZero();
-      REQUIRE(node0->update_external_force(false, Nphase, force) == true);
-      REQUIRE(node1->update_external_force(false, Nphase, force) == true);
+      REQUIRE_NOTHROW(node0->update_external_force(false, Nphase, force));
+      REQUIRE_NOTHROW(node1->update_external_force(false, Nphase, force));
 
       const unsigned Direction = 0;
       // Check external force

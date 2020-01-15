@@ -98,6 +98,18 @@ if (VTK_FOUND)
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
 endif()
 
+# MKL
+find_package(MKL)
+if (MKL_FOUND)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    link_libraries(iomp5)
+  endif()
+  include_directories(${MKL_INCLUDE_DIR})
+  link_libraries(${MKL_LIBRARIES})
+  add_definitions("-DUSE_MKL")
+endif()
+
+
 # KaHIP
 if (MPI_FOUND)
   if (NO_KAHIP)
