@@ -70,7 +70,7 @@ class Particle : public ParticleBase<Tdim> {
   void initialise() override;
 
   //! Compute reference coordinates in a cell
-  bool compute_reference_location() override;
+  bool compute_reference_location() noexcept override;
 
   //! Return reference location
   VectorDim reference_location() const override { return xi_; }
@@ -118,17 +118,17 @@ class Particle : public ParticleBase<Tdim> {
   VectorDim natural_size() const override { return natural_size_; }
 
   //! Compute volume as cell volume / nparticles
-  bool compute_volume() override;
+  void compute_volume() noexcept override;
 
   //! Update volume based on centre volumetric strain rate
-  bool update_volume() override;
+  void update_volume() noexcept override;
 
   //! Return mass density
   //! \param[in] phase Index corresponding to the phase
   double mass_density() const override { return mass_density_; }
 
   //! Compute mass as volume * density
-  bool compute_mass() override;
+  void compute_mass() noexcept override;
 
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept override;
@@ -231,7 +231,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute pressure smoothing of the particle based on nodal pressure
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  bool compute_pressure_smoothing() override;
+  bool compute_pressure_smoothing() noexcept override;
 
   //! Return pressure of the particles
   double pressure() const override {

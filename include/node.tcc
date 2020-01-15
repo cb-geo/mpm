@@ -159,43 +159,32 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
-  try {
-    const double tolerance = 1.E-16;
+  const double tolerance = 1.E-16;
 
-    // Compute pressure from mass*pressure
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    pressure_(phase) = pressure;
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
+  // Compute pressure from mass*pressure
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  pressure_(phase) = pressure;
 }
 
 //! Compute velocity from momentum
 //! velocity = momentum / mass
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
-  try {
-    const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
+  const double tolerance = 1.E-16;
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    if (mass_(phase) > tolerance) {
+      velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
 
-    for (unsigned phase = 0; phase < Tnphases; ++phase) {
-      if (mass_(phase) > tolerance) {
-        velocity_.col(phase) = momentum_.col(phase) / mass_(phase);
-
-        // Check to see if value is below threshold
-        for (unsigned i = 0; i < velocity_.rows(); ++i)
-          if (std::abs(velocity_.col(phase)(i)) < 1.E-15)
-            velocity_.col(phase)(i) = 0.;
-      } else
-        throw std::runtime_error("Nodal mass is zero or below threshold");
+      // Check to see if value is below threshold
+      for (unsigned i = 0; i < velocity_.rows(); ++i)
+        if (std::abs(velocity_.col(phase)(i)) < 1.E-15)
+          velocity_.col(phase)(i) = 0.;
     }
-
-    // Apply velocity constraints, which also sets acceleration to 0,
-    // when velocity is set.
-    this->apply_velocity_constraints();
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
+
+  // Apply velocity constraints, which also sets acceleration to 0,
+  // when velocity is set.
+  this->apply_velocity_constraints();
 }
 
 //! Update nodal acceleration

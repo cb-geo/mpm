@@ -117,16 +117,16 @@ class ParticleBase {
   virtual VectorDim natural_size() const = 0;
 
   //! Compute volume of particle
-  virtual bool compute_volume() = 0;
+  virtual void compute_volume() noexcept = 0;
 
   //! Update volume based on centre volumetric strain rate
-  virtual bool update_volume() = 0;
+  virtual void update_volume() noexcept = 0;
 
   //! Return mass density
   virtual double mass_density() const = 0;
 
   //! Compute mass of particle
-  virtual bool compute_mass() = 0;
+  virtual void compute_mass() noexcept = 0;
 
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
@@ -190,7 +190,7 @@ class ParticleBase {
   virtual bool map_pressure_to_nodes() noexcept = 0;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
-  virtual bool compute_pressure_smoothing() = 0;
+  virtual bool compute_pressure_smoothing() noexcept = 0;
 
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;

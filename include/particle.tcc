@@ -371,28 +371,17 @@ bool mpm::Particle<Tdim>::assign_material(
 
 // Compute reference location cell to particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_reference_location() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Compute local coordinates
-      Eigen::Matrix<double, Tdim, 1> xi;
-      // Check if the point is in cell
-      if (cell_->is_point_in_cell(this->coordinates_, &xi)) {
-        this->xi_ = xi;
-        status = true;
-      } else
-        status = false;
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute local reference coordinates of the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
+bool mpm::Particle<Tdim>::compute_reference_location() noexcept {
+  // Set status of compute reference location
+  bool status = false;
+  // Compute local coordinates
+  Eigen::Matrix<double, Tdim, 1> xi;
+  // Check if the point is in cell
+  if (cell_ != nullptr && cell_->is_point_in_cell(this->coordinates_, &xi)) {
+    this->xi_ = xi;
+    status = true;
   }
+
   return status;
 }
 
@@ -448,67 +437,33 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
 
 // Compute volume of the particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_volume() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr) {
-      // Volume of the cell / # of particles
-      this->assign_volume(cell_->volume() / cell_->nparticles());
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute volume for the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Particle<Tdim>::compute_volume() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Volume of the cell / # of particles
+  this->assign_volume(cell_->volume() / cell_->nparticles());
 }
 
 // Update volume based on the central strain rate
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::update_volume() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr and a valid volume
-    if (cell_ != nullptr && volume_ != std::numeric_limits<double>::max()) {
-      // Compute at centroid
-      // Strain rate for reduced integration
-      this->volume_ *= (1. + dvolumetric_strain_);
-      this->mass_density_ = this->mass_density_ / (1. + dvolumetric_strain_);
-    } else {
-      throw std::runtime_error(
-          "Cell or volume is not initialised! cannot update particle volume");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Particle<Tdim>::update_volume() noexcept {
+  // Check if particle has a valid cell ptr and a valid volume
+  assert(cell_ != nullptr && volume_ != std::numeric_limits<double>::max());
+  // Compute at centroid
+  // Strain rate for reduced integration
+  this->volume_ *= (1. + dvolumetric_strain_);
+  this->mass_density_ = this->mass_density_ / (1. + dvolumetric_strain_);
 }
 
 // Compute mass of particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_mass() {
-  bool status = true;
-  try {
-    // Check if particle volume is set and material ptr is valid
-    if (volume_ != std::numeric_limits<double>::max() && material_ != nullptr) {
-      // Mass = volume of particle * mass_density
-      this->mass_density_ =
-          material_->template property<double>(std::string("density"));
-      this->mass_ = volume_ * mass_density_;
-    } else {
-      throw std::runtime_error(
-          "Cell or material is invalid! cannot compute mass for the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+void mpm::Particle<Tdim>::compute_mass() noexcept {
+  // Check if particle volume is set and material ptr is valid
+  assert(volume_ != std::numeric_limits<double>::max() && material_ != nullptr);
+  // Mass = volume of particle * mass_density
+  this->mass_density_ =
+      material_->template property<double>(std::string("density"));
+  this->mass_ = volume_ * mass_density_;
 }
 
 //! Map particle mass and momentum to nodes
@@ -754,10 +709,10 @@ void mpm::Particle<Tdim>::compute_updated_position(
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
-  bool status = true;
-  assert(mass_ != std::numeric_limits<double>::max() &&
-         (state_variables_.find("pressure") != state_variables_.end()));
+  // Mass is initialized
+  assert(mass_ != std::numeric_limits<double>::max());
 
+  bool status = false;
   // Check if particle mass is set and state variable pressure is found
   if (mass_ != std::numeric_limits<double>::max() &&
       (state_variables_.find("pressure") != state_variables_.end())) {
@@ -767,35 +722,29 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
           mpm::ParticlePhase::Solid,
           shapefn_[i] * mass_ * state_variables_.at("pressure"));
 
-  } else {
-    status = false;
+    status = true;
   }
   return status;
 }
 
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_pressure_smoothing() {
-  bool status = true;
-  try {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr &&
-        (state_variables_.find("pressure") != state_variables_.end())) {
-      double pressure = 0.;
-      // Update particle pressure to interpolated nodal pressure
-      for (unsigned i = 0; i < this->nodes_.size(); ++i)
-        pressure +=
-            shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
+bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
+  // Assert
+  assert(cell_ != nullptr);
 
-      state_variables_.at("pressure") = pressure;
-    } else {
-      throw std::runtime_error(
-          "Cell is not initialised! "
-          "cannot compute pressure smoothing of the particle");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
+  bool status = false;
+  // Check if particle has a valid cell ptr
+  if (cell_ != nullptr &&
+      (state_variables_.find("pressure") != state_variables_.end())) {
+
+    double pressure = 0.;
+    // Update particle pressure to interpolated nodal pressure
+    for (unsigned i = 0; i < this->nodes_.size(); ++i)
+      pressure += shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
+
+    state_variables_.at("pressure") = pressure;
+    status = true;
   }
   return status;
 }
