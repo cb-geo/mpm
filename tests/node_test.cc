@@ -421,9 +421,10 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid momentum dimension
-      REQUIRE_NOTHROW(node->update_momentum(true, bad_phase, momentum));
-      // Exception handling invalid momentum dimension
-      REQUIRE_NOTHROW(node->update_momentum(false, bad_phase, momentum));
+      // TODO Assert: REQUIRE_NOTHROW(node->update_momentum(true, bad_phase,
+      // momentum)); Exception handling invalid momentum dimension
+      // TODO Assert: REQUIRE_NOTHROW(node->update_momentum(false, bad_phase,
+      // momentum));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -462,11 +463,12 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       // Check if exception is handled
       unsigned bad_phase = 1;
       // Exception handling invalid acceleration dimension
-      REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase, acceleration));
+      // TODO Assert: REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase,
+      // acceleration));
 
       // Exception handling invalid acceleration dimension
-      REQUIRE_NOTHROW(
-          node->update_acceleration(false, bad_phase, acceleration));
+      // TODO Assert: REQUIRE_NOTHROW(node->update_acceleration(false,
+      // bad_phase, acceleration));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -711,9 +713,12 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < force_bad.size(); ++i) force_bad(i) = 10.;
 
       // Exception handling invalid force dimension
-      REQUIRE_NOTHROW(node->update_external_force(true, 1, force_bad));
+      // TODO Assert:    REQUIRE_NOTHROW(node->update_external_force(true, 1,
+      // force_bad));
+
       // Exception handling invalid force dimension
-      REQUIRE_NOTHROW(node->update_external_force(false, 1, force_bad));
+      // TODO Assert: REQUIRE_NOTHROW(node->update_external_force(false, 1,
+      // force_bad));
 
       SECTION("Check concentrated force") {
         // Set external force to zero
@@ -944,8 +949,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
       unsigned bad_phase = 3;
       // Exception handling invalid acceleration dimension
-      REQUIRE_NOTHROW(
-          node->update_acceleration(true, bad_phase, acceleration_bad));
+      // TODO Assert:  REQUIRE_NOTHROW(node->update_acceleration(true,
+      // bad_phase, acceleration_bad));
 
       // Check if exception is handled
       bad_phase = 1;
