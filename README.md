@@ -35,8 +35,10 @@ If you have any issues running or compiling the MPM code please open a issue on 
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
+* [MKL](https://software.intel.com/en-us/mkl)
 * [MPI](https://www.open-mpi.org/)
 * [KaHIP](https://github.com/schulzchristian/KaHIP)
+* [Partio](https://github.com/wdas/partio)
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -44,10 +46,10 @@ If you have any issues running or compiling the MPM code please open a issue on 
 Please run the following command:
 
 ```shell
-dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
-                   git hdf5 hdf5-devel hdf5-openmpi hdf5-openmpi-devel kernel-devel lcov\
-                   make ninja-build openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
-                   voro++ voro++-devel vtk vtk-devel wget
+dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cppcheck dnf-plugins-core \
+                   eigen3-devel findutils freeglut freeglut-devel gcc gcc-c++ git hdf5 hdf5-devel \
+                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar tbb tbb-devel \
+                   valgrind vim vtk vtk-devel wget
 ```
 
 ### Ubuntu installation
@@ -82,6 +84,16 @@ cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
 make -j
 sudo make install
 ```
+
+### Partio for Houdini SFX Visualization
+
+```shell
+sudo dnf install -y libnsl freeglut freeglut-devel
+mkdir -p ~/workspace && cd ~/workspace/ && git clone https://github.com/wdas/partio.git && \
+    cd partio && cmake . && make
+```
+
+Houdini supported (*.bgeo) files will be generated. These can be rendered using the non-commercial [Houdini Apprentice](https://www.sidefx.com/download/).
 
 ### KaHIP installation for domain decomposition
 
@@ -133,6 +145,10 @@ make -jN
 0. Run `mkdir build && cd build && cmake -GNinja -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `ninja`
+
+### Compile with Partio viz support
+
+Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical cmake command would look like `cmake -DCMAKE_BUILD_TYPE=Release -DPARTIO_ROOT=~/workspace/partio/ ..`
 
 ## Run tests
 

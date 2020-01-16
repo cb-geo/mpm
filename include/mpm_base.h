@@ -74,6 +74,11 @@ class MPMBase : public MPM {
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
 #endif
 
+#ifdef USE_PARTIO
+  //! Write PARTIO files
+  void write_partio(mpm::Index step, mpm::Index max_steps) override;
+#endif
+
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 

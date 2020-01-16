@@ -89,15 +89,6 @@ link_libraries(${TBB_LIBRARIES})
 find_package (Threads)
 link_libraries (${CMAKE_THREAD_LIBS_INIT})
 
-# VTK
-find_package(VTK)
-if (VTK_FOUND)
-  include_directories(${VTK_INCLUDE_DIRS})
-  link_libraries(${VTK_LIBRARIES})
-  add_definitions("-DUSE_VTK")
-  set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
-endif()
-
 # MKL
 find_package(MKL)
 if (MKL_FOUND)
@@ -122,6 +113,23 @@ if (KAHIP_FOUND)
   include_directories(${KAHIP_INCLUDE_DIRS})
   link_libraries(${KAHIP_LIBRARIES})
 endif()
+endif()
+
+# VTK
+find_package(VTK)
+if (VTK_FOUND)
+  include_directories(${VTK_INCLUDE_DIRS})
+  link_libraries(${VTK_LIBRARIES})
+  add_definitions("-DUSE_VTK")
+  set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
+endif()
+
+# Partio
+find_package(Partio)
+if (PARTIO_FOUND)
+  add_definitions("-DUSE_PARTIO")
+  include_directories(${PARTIO_INCLUDE_DIRS})
+  link_libraries(${PARTIO_LIBRARIES})
 endif()
 
 # Include directories
@@ -153,6 +161,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
+  ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc

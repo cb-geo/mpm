@@ -336,6 +336,10 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // VTK outputs
       this->write_vtk(this->step_, this->nsteps_);
 #endif
+#ifdef USE_PARTIO
+      // Partio outputs
+      this->write_partio(this->step_, this->nsteps_);
+#endif
     }
   }
   auto solver_end = std::chrono::steady_clock::now();

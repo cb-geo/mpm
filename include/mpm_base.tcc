@@ -535,6 +535,32 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 }
 #endif
 
+#ifdef USE_PARTIO
+//! Write Partio files
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::write_partio(mpm::Index step, mpm::Index max_steps) {
+
+  // MPI parallel partio file
+  int mpi_rank = 0;
+  int mpi_size = 1;
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+  // Get Partio file extensions
+  const std::string extension = ".bgeo";
+  const std::string attribute = "partio";
+  // Create filename
+  auto file =
+      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+  // Write partio file
+  mpm::partio::write_particles(file, mesh_->particles_hdf5());
+}
+#endif  // USE_PARTIO
+
 //! Return if a mesh is isoparametric
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::is_isoparametric() {
