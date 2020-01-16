@@ -355,6 +355,10 @@ class Mesh {
   //! \retval status Status of reading HDF5 output
   bool read_particles_hdf5(unsigned phase, const std::string& filename);
 
+  //! Return HDF5 particles
+  //! \retval particles_hdf5 Vector of HDF5 particles
+  std::vector<mpm::HDF5Particle> particles_hdf5() const;
+
   //! Return nodal coordinates
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
 

@@ -1231,6 +1231,20 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   return true;
 }
 
+//! Write particles to HDF5
+template <unsigned Tdim>
+std::vector<mpm::HDF5Particle> mpm::Mesh<Tdim>::particles_hdf5() const {
+  const unsigned nparticles = this->nparticles();
+
+  std::vector<mpm::HDF5Particle> particles_hdf5;
+  particles_hdf5.reserve(nparticles);
+
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    particles_hdf5.emplace_back((*pitr)->hdf5());
+
+  return particles_hdf5;
+}
+
 //! Nodal coordinates
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()

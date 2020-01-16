@@ -858,6 +858,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-2d.h5") == true);
+
+              auto phdf5 = mesh->particles_hdf5();
+              REQUIRE(phdf5.size() == mesh->nparticles());
             }
 
             // Test assign particles volumes
@@ -2073,6 +2076,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Test HDF5
             SECTION("Write particles HDF5") {
               REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+
+              auto phdf5 = mesh->particles_hdf5();
+              REQUIRE(phdf5.size() == mesh->nparticles());
             }
 
             // Test assign particles volumes
