@@ -19,6 +19,10 @@
 #include "vtk_writer.h"
 #endif
 
+#ifdef USE_PARTIO
+#include "partio_writer.h"
+#endif
+
 namespace mpm {
 //! MPM class
 //! \brief MPM class calls solver and algorithm
@@ -66,6 +70,11 @@ class MPM {
 #ifdef USE_VTK
   //! Write VTK files
   virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
+#endif
+
+#ifdef USE_PARTIO
+  //! Write PARTIO files
+  virtual void write_partio(mpm::Index step, mpm::Index max_steps) = 0;
 #endif
 
  protected:

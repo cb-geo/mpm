@@ -2,7 +2,7 @@
 #include "partio_writer.h"
 
 // Write particles
-bool mpm::partio::write_partio(
+bool mpm::partio::write_particles(
     const std::string& filename,
     const std::vector<mpm::HDF5Particle>& particles) {
   bool status = false;

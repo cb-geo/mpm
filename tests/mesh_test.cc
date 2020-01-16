@@ -2,7 +2,9 @@
 #include <limits>
 #include <memory>
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
+#include <boost/filesystem.hpp>
+
 #include "catch.hpp"
 // MPI
 #ifdef USE_MPI
@@ -15,6 +17,7 @@
 #include "linear_function.h"
 #include "mesh.h"
 #include "node.h"
+#include "partio_writer.h"
 #include "quadrilateral_element.h"
 
 //! Check mesh class for 2D case
@@ -861,6 +864,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               auto phdf5 = mesh->particles_hdf5();
               REQUIRE(phdf5.size() == mesh->nparticles());
+
+#ifdef USE_PARTIO
+              REQUIRE_NOTHROW(mpm::partio::write_particles(
+                  "partio-2d.bgeo", mesh->particles_hdf5()));
+              // Check if .bgeo exists
+              REQUIRE(boost::filesystem::exists("./partio-2d.bgeo") == true);
+#endif
             }
 
             // Test assign particles volumes
@@ -2079,6 +2089,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
               auto phdf5 = mesh->particles_hdf5();
               REQUIRE(phdf5.size() == mesh->nparticles());
+
+#ifdef USE_PARTIO
+              REQUIRE_NOTHROW(mpm::partio::write_particles(
+                  "partio-3d.bgeo", mesh->particles_hdf5()));
+              // Check if .bgeo exists
+              REQUIRE(boost::filesystem::exists("./partio-3d.bgeo") == true);
+#endif
             }
 
             // Test assign particles volumes

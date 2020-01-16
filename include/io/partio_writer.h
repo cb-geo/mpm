@@ -14,8 +14,8 @@ namespace mpm::partio {
 //! Write mesh
 //! \param[in] filename Mesh VTP file
 //! \param[in] particles HDF5 particles
-bool write_partio(const std::string& filename,
-                  const std::vector<mpm::HDF5Particle>& particles);
+bool write_particles(const std::string& filename,
+                     const std::vector<mpm::HDF5Particle>& particles);
 
 }  // namespace mpm::partio
 
