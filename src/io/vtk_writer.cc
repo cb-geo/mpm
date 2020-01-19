@@ -189,15 +189,14 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
       data_type + "=\"" + attribute +
       "\">\n\t\t<PDataArray "
       "type=\"Float64\" Name=\"" +
-      attribute +
-      "\" "
-      "NumberOfComponents=\"" +
-      std::to_string(ncomponents) +
-      "\"/>\n\t</"
+      attribute + "\"";
+  if (ncomponents != 1)
+    ppolydata += " NumberOfComponents=\"" + std::to_string(ncomponents) + "\"";
+  ppolydata +=
+      "/>\n\t</"
       "PPointData>\n\n\t<PPoints>\n\t\t<PDataArray "
       "type=\"Float32\" Name=\"Points\" "
-      "NumberOfComponents=\"" +
-      std::to_string(ncomponents) + "\"/>\n\t</PPoints>\n";
+      "NumberOfComponents=\"3\"/>\n\t</PPoints>\n";
 
   for (unsigned i = 0; i < mpi_size; ++i) {
     std::stringstream file_name;

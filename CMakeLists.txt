@@ -92,12 +92,12 @@ link_libraries (${CMAKE_THREAD_LIBS_INIT})
 # MKL
 find_package(MKL)
 if (MKL_FOUND)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     link_libraries(iomp5)
+    include_directories(${MKL_INCLUDE_DIR})
+    link_libraries(${MKL_LIBRARIES})
+    add_definitions("-DUSE_MKL")
   endif()
-  include_directories(${MKL_INCLUDE_DIR})
-  link_libraries(${MKL_LIBRARIES})
-  add_definitions("-DUSE_MKL")
 endif()
 
 
