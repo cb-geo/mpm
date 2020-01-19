@@ -129,7 +129,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->ghost_id()) = getter(node);
+        prop_get.at(node->ghost_id()) = (node->status()) ? getter(node) : 0.;
       });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
@@ -138,7 +138,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->ghost_id()));
+        if (node->status()) setter(node, prop_set.at(node->ghost_id()));
       });
 }
 #endif
@@ -157,7 +157,9 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->ghost_id()) = getter(node);
+        prop_get.at(node->ghost_id()) =
+            (node->status()) ? getter(node)
+                             : Eigen::Matrix<double, Tdim, 1>::Zero();
       });
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
@@ -166,7 +168,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
       [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->ghost_id()));
+        if (node->status()) setter(node, prop_set.at(node->ghost_id()));
       });
 }
 #endif
