@@ -12,8 +12,8 @@
 
 #include <Eigen/Dense>
 
-#include "data_types.h"
 #include "data_store.h"
+#include "data_types.h"
 #include "function_base.h"
 
 namespace mpm {

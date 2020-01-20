@@ -103,7 +103,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
 
   // Update/assign external force
   std::lock_guard<std::mutex> guard(node_mutex_);
-  ds_->external_forces[idx_] = ds_->external_forces[idx_] * factor + force;
+  ds_->external_forces[phase][idx_] =
+      ds_->external_forces[phase][idx_] * factor + force;
 }
 
 //! Update internal force (body force / traction force)
@@ -119,7 +120,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
 
   // Update/assign internal force
   std::lock_guard<std::mutex> guard(node_mutex_);
-  ds_->internal_forces[idx_] = ds_->internal_forces[idx_] * factor + force;
+  ds_->internal_forces[phase][idx_] =
+      ds_->internal_forces[phase][idx_] * factor + force;
 }
 
 //! Assign nodal momentum
@@ -208,9 +210,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
   const double tolerance = 1.0E-15;
   if (mass_(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
-    this->acceleration_.col(phase) =
-        (ds_->external_forces[idx_] + ds_->internal_forces[idx_]) /
-        this->mass_(phase);
+    this->acceleration_.col(phase) = (ds_->external_forces[phase][idx_] +
+                                      ds_->internal_forces[phase][idx_]) /
+                                     this->mass_(phase);
 
     // Apply friction constraints
     this->apply_friction_constraints(dt);
@@ -242,7 +244,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
   if (mass_(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
     auto unbalanced_force =
-        ds_->external_forces[idx_] + ds_->internal_forces[idx_];
+        ds_->external_forces[phase][idx_] + ds_->internal_forces[phase][idx_];
     this->acceleration_.col(phase) =
         (unbalanced_force - damping_factor * unbalanced_force.norm() *
                                 this->velocity_.col(phase).cwiseSign()) /

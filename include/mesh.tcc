@@ -1480,7 +1480,7 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_data_store() {
   // TODO: Add phase
   unsigned nphase = 1;
-  datastore_ = std::make_shared<DataStore<Tdim>>(nodes_.size());
+  datastore_ = std::make_shared<DataStore<Tdim>>(nodes_.size(), nphase);
   for (mpm::Index i = 0; i < nodes_.size(); ++i) {
     nodes_[i]->data_store_index(i, datastore_);
   }

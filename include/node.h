@@ -103,7 +103,7 @@ class Node : public NodeBase<Tdim> {
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim external_force(unsigned phase) const override {
-    return ds_->external_forces[idx_];
+    return ds_->external_forces[phase][idx_];
   }
 
   //! Update internal force (body force / traction force)
@@ -116,7 +116,7 @@ class Node : public NodeBase<Tdim> {
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
-    return ds_->internal_forces[idx_];
+    return ds_->internal_forces[phase][idx_];
   }
 
   //! Update pressure at the nodes from particle
@@ -266,10 +266,6 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
   Eigen::Matrix<double, 1, Tnphases> volume_;
-  //! External force
-  Eigen::Matrix<double, Tdim, Tnphases> external_force_;
-  //! Internal force
-  Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity

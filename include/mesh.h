@@ -25,8 +25,8 @@ using Json = nlohmann::json;
 
 #include "cell.h"
 #include "container.h"
-#include "factory.h"
 #include "data_store.h"
+#include "factory.h"
 #include "friction_constraint.h"
 #include "function_base.h"
 #include "geometry.h"

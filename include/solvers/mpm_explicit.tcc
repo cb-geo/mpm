@@ -152,7 +152,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();
   // Create data store
-  mesh_->create_data_store();  
+  mesh_->create_data_store();
   if (!mesh_status) {
     status = false;
     throw std::runtime_error("Initialisation of mesh failed");
