@@ -14,23 +14,30 @@ namespace mpm {
 
 //! DataStore class
 //! \brief Base class that stores information
+template <unsigned Tdim>
 class DataStore {
  public:
   //! Constructor with id, number of nodes
-  DataStore(unsigned nnodes, unsigned dim, unsigned nphases) {
-    internal_forces.resize(nnodes * dim);
-    external_forces.resize(nnodes * dim);
+  DataStore(unsigned nnodes) {
+    internal_forces.reserve(nnodes);
+    external_forces.reserve(nnodes);
+    for (unsigned i = 0; i < nnodes; ++i) {
+      internal_forces.emplace_back(Eigen::Matrix<double, Tdim, 1>::Zero());
+      external_forces.emplace_back(Eigen::Matrix<double, Tdim, 1>::Zero());
+    }
   }
 
   void initialise() {
-    internal_forces.setZero();
-    external_forces.setZero();
+    for (unsigned i = 0; i < internal_forces.size(); ++i) {
+      internal_forces[i].setZero();
+      external_forces[i].setZero();
+    }
   }
   
   //! Internal forces
-  Eigen::VectorXd internal_forces;
+  std::vector<Eigen::Matrix<double, Tdim, 1>> internal_forces;
   //! External forces
-  Eigen::VectorXd external_forces;
+  std::vector<Eigen::Matrix<double, Tdim, 1>> external_forces;
 
 };  // Datastore class
 }  // namespace mpm

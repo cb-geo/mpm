@@ -230,7 +230,10 @@ class NodeBase {
 
   //! Assign data store and index
   virtual void data_store_index(Index idx,
-                                const std::shared_ptr<DataStore>& ds) = 0;
+                                const std::shared_ptr<DataStore<Tdim>>& ds) = 0;
+
+  //! DataStore index
+  virtual Index ds_idx() const = 0;
 
 };  // NodeBase class
 }  // namespace mpm

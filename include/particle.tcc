@@ -262,6 +262,10 @@ bool mpm::Particle<Tdim>::assign_cell(
       nodes_.clear();
       nodes_ = cell_->nodes();
 
+      // Node indices
+      nidx_.clear();
+      for (auto node : nodes_) nidx_.emplace_back(node->ds_idx());
+
       // Compute reference location of particle
       bool xi_status = this->compute_reference_location();
       if (!xi_status) return false;

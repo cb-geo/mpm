@@ -254,6 +254,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
 
+  //! Assign data store and index
+  void data_store(const std::shared_ptr<DataStore<Tdim>>& ds) override {
+    ds_ = ds;
+  }
+
  private:
   //! Compute strain rate
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
@@ -280,6 +285,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
+  //! Node idx data store
+  std::vector<mpm::Index> nidx_;
   //! Volumetric mass density (mass / volume)
   double mass_density_;
   //! Mass
@@ -318,6 +325,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::MatrixXd dn_dx_;
   //! dN/dX at cell centroid
   Eigen::MatrixXd dn_dx_centroid_;
+  //! DataStore
+  std::shared_ptr<DataStore<Tdim>> ds_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties

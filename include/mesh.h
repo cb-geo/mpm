@@ -451,7 +451,7 @@ class Mesh {
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
   //! Data store
-  std::shared_ptr<DataStore> datastore_{nullptr};
+  std::shared_ptr<DataStore<Tdim>> datastore_{nullptr};
   //! Map of cells for fast retrieval
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells
