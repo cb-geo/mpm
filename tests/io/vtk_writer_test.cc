@@ -77,11 +77,10 @@ TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
         "\">\n\t\t<PDataArray "
         "type=\"Float64\" Name=\"" +
         attribute +
-        "\" "
-        "NumberOfComponents=\"1\"/>\n\t</"
+        "\"/>\n\t</"
         "PPointData>\n\n\t<PPoints>\n\t\t<PDataArray "
         "type=\"Float32\" Name=\"Points\" "
-        "NumberOfComponents=\"1\"/>\n\t</PPoints>\n";
+        "NumberOfComponents=\"3\"/>\n\t</PPoints>\n";
 
     for (unsigned i = 0; i < mpi_size; ++i)
       ppolydata += "\n\t<Piece Source=\"" + attribute + "-" +
