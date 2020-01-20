@@ -26,6 +26,7 @@ using Json = nlohmann::json;
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
+#include "data_store.h"
 #include "friction_constraint.h"
 #include "function_base.h"
 #include "geometry.h"
@@ -407,6 +408,12 @@ class Mesh {
   bool generate_particles(const std::shared_ptr<mpm::IO>& io,
                           const Json& generator);
 
+  //! Create data store
+  void create_data_store();
+
+  //! Initialise data store
+  void initialise_data_store();
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
@@ -443,6 +450,8 @@ class Mesh {
   Container<NodeBase<Tdim>> active_nodes_;
   //! Map of nodes for fast retrieval
   Map<NodeBase<Tdim>> map_nodes_;
+  //! Data store
+  std::shared_ptr<DataStore> datastore_{nullptr};
   //! Map of cells for fast retrieval
   Map<Cell<Tdim>> map_cells_;
   //! Container of cells

@@ -4,6 +4,7 @@
 #include <array>
 #include <limits>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <tuple>
@@ -12,6 +13,7 @@
 #include <Eigen/Dense>
 
 #include "data_types.h"
+#include "data_store.h"
 #include "function_base.h"
 
 namespace mpm {
@@ -225,6 +227,10 @@ class NodeBase {
 
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
+
+  //! Assign data store and index
+  virtual void data_store_index(Index idx,
+                                const std::shared_ptr<DataStore>& ds) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

@@ -1474,3 +1474,20 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
 
   return status;
 }
+
+// Create data store
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::create_data_store() {
+  // TODO: Add phase
+  unsigned nphase = 1;
+  datastore_ = std::make_shared<DataStore>(nodes_.size(), Tdim, nphase);
+  for (mpm::Index i = 0; i < nodes_.size(); ++i) {
+    nodes_[i]->data_store_index(i, datastore_);
+  }
+}
+
+// Initialise data store
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::initialise_data_store() {
+  datastore_->initialise();
+}

@@ -25,8 +25,6 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   mass_.setZero();
   volume_.setZero();
-  external_force_.setZero();
-  internal_force_.setZero();
   pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
@@ -105,7 +103,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
 
   // Update/assign external force
   std::lock_guard<std::mutex> guard(node_mutex_);
-  external_force_.col(phase) = external_force_.col(phase) * factor + force;
+  ds_->external_forces.segment(idx_, Tdim) =
+      ds_->external_forces.segment(idx_, Tdim) * factor + force;
 }
 
 //! Update internal force (body force / traction force)
@@ -121,7 +120,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
 
   // Update/assign internal force
   std::lock_guard<std::mutex> guard(node_mutex_);
-  internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
+  ds_->internal_forces.segment(idx_, Tdim) =
+      ds_->internal_forces.segment(idx_, Tdim) * factor + force;
 }
 
 //! Assign nodal momentum
@@ -211,7 +211,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
   if (mass_(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
     this->acceleration_.col(phase) =
-        (this->external_force_.col(phase) + this->internal_force_.col(phase)) /
+        (ds_->external_forces.segment(idx_, Tdim) +
+         ds_->internal_forces.segment(idx_, Tdim)) /
         this->mass_(phase);
 
     // Apply friction constraints
@@ -243,8 +244,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
   const double tolerance = 1.0E-15;
   if (mass_(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
-    auto unbalanced_force =
-        this->external_force_.col(phase) + this->internal_force_.col(phase);
+    auto unbalanced_force = ds_->external_forces.segment(idx_, Tdim) +
+                            ds_->internal_forces.segment(idx_, Tdim);
     this->acceleration_.col(phase) =
         (unbalanced_force - damping_factor * unbalanced_force.norm() *
                                 this->velocity_.col(phase).cwiseSign()) /

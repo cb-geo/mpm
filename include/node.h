@@ -103,7 +103,7 @@ class Node : public NodeBase<Tdim> {
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim external_force(unsigned phase) const override {
-    return external_force_.col(phase);
+    return ds_->external_forces.segment(idx_, Tdim);
   }
 
   //! Update internal force (body force / traction force)
@@ -116,7 +116,7 @@ class Node : public NodeBase<Tdim> {
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
-    return internal_force_.col(phase);
+    return ds_->internal_forces.segment(idx_, Tdim);
   }
 
   //! Update pressure at the nodes from particle
@@ -236,6 +236,13 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
+  //! Assign data store and index
+  void data_store_index(Index idx,
+                        const std::shared_ptr<DataStore>& ds) override {
+    idx_ = idx;
+    ds_ = ds;
+  }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -249,6 +256,10 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Index in datastore
+  Index idx_{std::numeric_limits<Index>::max()};
+  //! DataStore
+  std::shared_ptr<DataStore> ds_{nullptr};
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume

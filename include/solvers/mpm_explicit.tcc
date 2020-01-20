@@ -151,6 +151,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();
+  // Create data store
+  mesh_->create_data_store();  
   if (!mesh_status) {
     status = false;
     throw std::runtime_error("Initialisation of mesh failed");
@@ -197,6 +199,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
       mesh_->iterate_over_cells(
           std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+
+      mesh_->initialise_data_store();
     });
 
     // Spawn a task for particles
