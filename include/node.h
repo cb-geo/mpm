@@ -230,19 +230,11 @@ class Node : public NodeBase<Tdim> {
   //! Clear MPI rank
   void clear_mpi_ranks() override { mpi_ranks_.clear(); }
 
-  //! Return ghost id
-  Index ghost_id() const override { return ghost_id_; }
-
-  //! Set ghost id
-  void ghost_id(Index gid) override { ghost_id_ = gid; }
-
  private:
   //! Mutex
   std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
-  //! shared ghost id
-  Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
   VectorDim coordinates_;
   //! Degrees of freedom
