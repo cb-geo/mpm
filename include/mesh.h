@@ -468,6 +468,8 @@ class Mesh {
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
   int tbb_grain_size_{100};
+  //! node MPI comms
+  unsigned ncomms_{0};
 };  // Mesh class
 }  // namespace mpm
 
