@@ -662,12 +662,11 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   ncomms_ = 0;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     // If node has more than 1 MPI rank
-    std::set<unsigned> mpi_ranks = (*nitr)->mpi_ranks();
-    if (mpi_ranks.size() > 1) {
-      if (mpi_ranks.find(mpi_rank) != mpi_ranks.end()) {
-        (*nitr)->ghost_id(domain_shared_nodes_.size());
+    std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
+    if (nodal_mpi_ranks.size() > 1) {
+      if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
         domain_shared_nodes_.add(*nitr);
-        ncomms_ += mpi_ranks.size() - 1;
+        ncomms_ += nodal_mpi_ranks.size() - 1;
       }
     }
   }
