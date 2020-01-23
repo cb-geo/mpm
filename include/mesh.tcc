@@ -121,8 +121,8 @@ void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
 template <unsigned Tdim>
 template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
           typename Tsetfunctor>
-void mpm::Mesh<Tdim>::nodal_halo_property(Tgetfunctor getter,
-                                          Tsetfunctor setter) {
+void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
+                                                Tsetfunctor setter) {
   // Create vector of nodal vectors
   unsigned nnodes = this->domain_shared_nodes_.size();
 
@@ -133,11 +133,12 @@ void mpm::Mesh<Tdim>::nodal_halo_property(Tgetfunctor getter,
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   if (mpi_size > 1) {
+    // Vector of send requests
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ncomms_);
 
     unsigned j = 0;
-    // Synchronous send
+    // Non-blocking send
     for (unsigned i = 0; i < nnodes; ++i) {
       Ttype property = getter(domain_shared_nodes_[i]);
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
@@ -160,6 +161,7 @@ void mpm::Mesh<Tdim>::nodal_halo_property(Tgetfunctor getter,
       Ttype property = getter(domain_shared_nodes_[i]);
 
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
+      // Receive from all shared ranks
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
           Ttype value;

@@ -118,13 +118,15 @@ class Mesh {
   void iterate_over_active_nodes(Toper oper);
 
 #ifdef USE_MPI
-  //! All reduce over nodal vector property
+  //! Share nodal property in the halo region
+  //! \tparam Ttype Type of property to accumulate
+  //! \tparam Tnparam Size of individual property
   //! \tparam Tgetfunctor Functor for getter
   //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
   template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
             typename Tsetfunctor>
-  void nodal_halo_property(Tgetfunctor getter, Tsetfunctor setter);
+  void share_halo_nodal_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
 
   //! Create cells from list of nodes

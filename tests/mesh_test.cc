@@ -1569,12 +1569,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     if (mpi_size == 1) {
       // Run if there is more than a single MPI task
       // MPI all reduce nodal mass
-      mesh->template nodal_halo_property<double, 1>(
+      mesh->template share_halo_nodal_property<double, 1>(
           std::bind(&mpm::NodeBase<Dim>::mass, std::placeholders::_1, 0),
           std::bind(&mpm::NodeBase<Dim>::update_mass, std::placeholders::_1,
                     false, 0, std::placeholders::_2));
       // MPI all reduce nodal momentum
-      mesh->template nodal_halo_property<Eigen::Matrix<double, Dim, 1>, Dim>(
+      mesh->template share_halo_nodal_property<Eigen::Matrix<double, Dim, 1>,
+                                               Dim>(
           std::bind(&mpm::NodeBase<Dim>::coordinates, std::placeholders::_1),
           std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                     std::placeholders::_1, std::placeholders::_2));
