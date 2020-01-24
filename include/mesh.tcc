@@ -141,8 +141,6 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
     std::vector<MPI_Request> requests;
     requests.reserve(2 * ncomms_);
 
-    // Request id
-    unsigned rid = 0;
     // Non-blocking send / receive
     tbb::parallel_for(
         tbb::blocked_range<int>(size_t(0), size_t(domain_shared_nodes_.size()),
@@ -156,14 +154,15 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
             unsigned j = 0;
             for (auto& node_rank : node_mpi_ranks) {
               if (node_rank != mpi_rank) {
+                unsigned rid = domain_shared_nodes_[i]->ghost_id() + j;
+                // Receive
                 MPI_Irecv(&properties[i][j], Tnparam, MPI_DOUBLE, node_rank,
                           domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
                           &requests[rid]);
-                ++rid;
+                // Send
                 MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
                           domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                          &requests[rid]);
-                ++rid;
+                          &requests[ncomms_ + rid]);
                 ++j;
               }
             }
@@ -678,12 +677,17 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
                          });
 
   ncomms_ = 0;
+  unsigned ghost_id = 0;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     // If node has more than 1 MPI rank
     std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
     const unsigned nodal_mpi_ranks_size = nodal_mpi_ranks.size();
     if (nodal_mpi_ranks_size > 1) {
       if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
+        // Create Ghost ID
+        (*nitr)->ghost_id(ghost_id);
+        ghost_id += nodal_mpi_ranks_size -1;
+        // Add to list of shared nodes on local rank
         domain_shared_nodes_.add(*nitr);
         ncomms_ += nodal_mpi_ranks_size - 1;
         if (nodal_mpi_ranks_size > max_shared_nodes_)
