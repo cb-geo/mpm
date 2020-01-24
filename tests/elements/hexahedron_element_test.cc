@@ -398,6 +398,17 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                                       Eigen::Vector3d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = hex->dn_dx(xi, coords, Eigen::Vector3d::Zero(),
+                              Eigen::Vector3d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -449,6 +460,17 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
                                       Eigen::Vector3d::Zero());
       gradsf *= 2.;
 
+      // Check dN/dx
+      auto dn_dx = hex->dn_dx(xi, coords, Eigen::Vector3d::Zero(),
+                              Eigen::Vector3d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+      }
+
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
 
@@ -499,6 +521,17 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       auto gradsf = hex->grad_shapefn(xi, Eigen::Vector3d::Zero(),
                                       Eigen::Vector3d::Zero());
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = hex->dn_dx(xi, coords, Eigen::Vector3d::Zero(),
+                              Eigen::Vector3d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);
@@ -552,6 +585,17 @@ TEST_CASE("Hexahedron elements are checked", "[hex][element][3D]") {
       // Check gradient of shape functions
       auto gradsf = hex->grad_shapefn(xi, psize, defgrad);
       gradsf *= 2.;
+
+      // Check dN/dx
+      auto dn_dx = hex->dn_dx(xi, coords, Eigen::Vector3d::Zero(),
+                              Eigen::Vector3d::Zero());
+      REQUIRE(dn_dx.rows() == nfunctions);
+      REQUIRE(dn_dx.cols() == Dim);
+      for (unsigned i = 0; i < nfunctions; ++i) {
+        REQUIRE(dn_dx(i, 0) == Approx(gradsf(i, 0)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 1) == Approx(gradsf(i, 1)).epsilon(Tolerance));
+        REQUIRE(dn_dx(i, 2) == Approx(gradsf(i, 2)).epsilon(Tolerance));
+      }
 
       // Check size of B-matrix
       REQUIRE(bmatrix.size() == nfunctions);

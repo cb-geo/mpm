@@ -11,12 +11,16 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include "io.h"
+#include "io_mesh.h"
+#include "io_mesh_ascii.h"
 #include "mesh.h"
-#include "read_mesh.h"
-#include "read_mesh_ascii.h"
 
 #ifdef USE_VTK
 #include "vtk_writer.h"
+#endif
+
+#ifdef USE_PARTIO
+#include "partio_writer.h"
 #endif
 
 namespace mpm {
@@ -26,7 +30,7 @@ namespace mpm {
 class MPM {
  public:
   //! Constructor
-  MPM(std::unique_ptr<IO>&& io) : io_(std::move(io)) {
+  MPM(const std::shared_ptr<IO>& io) : io_(io) {
 
     analysis_ = io_->analysis();
 
@@ -48,11 +52,11 @@ class MPM {
   // Initialise materials
   virtual bool initialise_materials() = 0;
 
-  //! Apply nodal tractions
-  virtual bool apply_nodal_tractions() = 0;
+  // Initialise external loads
+  virtual bool initialise_loads() = 0;
 
-  //! Apply properties to particles sets (e.g: material)
-  virtual bool apply_properties_to_particles_sets() = 0;
+  // Initialise math functions
+  virtual bool initialise_math_functions(const Json&) = 0;
 
   // Solve
   virtual bool solve() = 0;
@@ -68,6 +72,11 @@ class MPM {
   virtual void write_vtk(mpm::Index step, mpm::Index max_steps) = 0;
 #endif
 
+#ifdef USE_PARTIO
+  //! Write PARTIO files
+  virtual void write_partio(mpm::Index step, mpm::Index max_steps) = 0;
+#endif
+
  protected:
   //! A unique id for the analysis
   std::string uuid_;
@@ -79,8 +88,8 @@ class MPM {
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
   //! Output steps
   mpm::Index output_steps_{std::numeric_limits<mpm::Index>::max()};
-  //! A unique ptr to IO object
-  std::unique_ptr<mpm::IO> io_;
+  //! A shared ptr to IO object
+  std::shared_ptr<mpm::IO> io_;
   //! JSON analysis object
   Json analysis_;
   //! JSON post-process object

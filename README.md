@@ -35,9 +35,10 @@ If you have any issues running or compiling the MPM code please open a issue on 
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
+* [MKL](https://software.intel.com/en-us/mkl)
 * [MPI](https://www.open-mpi.org/)
-* [METIS](http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/)
-* [ParMETIS](http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/)
+* [KaHIP](https://github.com/schulzchristian/KaHIP)
+* [Partio](https://github.com/wdas/partio)
 * [VTK](https://www.vtk.org/)
 
 ### Fedora installation
@@ -45,10 +46,10 @@ If you have any issues running or compiling the MPM code please open a issue on 
 Please run the following command:
 
 ```shell
-dnf install -y boost boost-devel clang cmake cppcheck eigen3-devel findutils gcc gcc-c++ \
-                   git hdf5 hdf5-devel hdf5-openmpi hdf5-openmpi-devel kernel-devel lcov\
-                   make ninja-build openmpi openmpi-devel sqlite sqlite-devel tar tbb tbb-devel valgrind vim \
-                   voro++ voro++-devel vtk vtk-devel wget
+dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cppcheck dnf-plugins-core \
+                   eigen3-devel findutils freeglut freeglut-devel gcc gcc-c++ git hdf5 hdf5-devel \
+                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar tbb tbb-devel \
+                   valgrind vim vtk vtk-devel wget
 ```
 
 ### Ubuntu installation
@@ -84,25 +85,22 @@ make -j
 sudo make install
 ```
 
-### METIS/ParMETIS installation
+### Partio for Houdini SFX Visualization
 
 ```shell
-# METIS and PARMETIS
-
-wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz && \
-    tar -xf metis-5.1.0.tar.gz && \
-    cd metis-5.1.0/ && mkdir -p ~/workspace/metis && \
-    make config shared=1 cc=mpicc cxx=mpic++ prefix=~/workspace/metis && \
-    make install 
-
-wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz && \
-    tar -xf parmetis-4.0.3.tar.gz && \
-    cd parmetis-4.0.3/ && mkdir -p ~/workspace/parmetis && \
-    make config shared=1 cc=mpicc cxx=mpic++ prefix=~/workspace/parmetis && \
-    make install
+sudo dnf install -y libnsl freeglut freeglut-devel
+mkdir -p ~/workspace && cd ~/workspace/ && git clone https://github.com/wdas/partio.git && \
+    cd partio && cmake . && make
 ```
 
+Houdini supported (*.bgeo) files will be generated. These can be rendered using the non-commercial [Houdini Apprentice](https://www.sidefx.com/download/).
 
+### KaHIP installation for domain decomposition
+
+```shell
+cd ~/workspace/ && git clone https://github.com/schulzchristian/KaHIP && \
+   cd KaHIP && sh ./compile_withcmake.sh
+```
 
 ## Compile
 > See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
@@ -110,6 +108,8 @@ wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz &&
 0. Run `mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `make clean && make -jN` (where N is the number of cores).
+
+> To compile without KaHIP partitioning use `cmake -DNO_KAHIP=True ..`
 
 ### Compile mpm or mpmtest
 
@@ -136,7 +136,7 @@ Compile with OpenMPI:
 ```
 mkdir build && cd build 
 export CXX_COMPILER=mpicxx
-cmake -DCMAKE_BUILD_TYPE=Release -DMETIS_DIR=~/workspace/metis/ -DPARMETIS_DIR=~/workspace/parmetis/ ..
+cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ ..
 make -jN
 ```
 
@@ -145,6 +145,10 @@ make -jN
 0. Run `mkdir build && cd build && cmake -GNinja -DCMAKE_CXX_COMPILER=g++ ..`.
 
 1. Run `ninja`
+
+### Compile with Partio viz support
+
+Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical cmake command would look like `cmake -DCMAKE_BUILD_TYPE=Release -DPARTIO_ROOT=~/workspace/partio/ ..`
 
 ## Run tests
 
@@ -169,7 +173,6 @@ For example:
 Where:
 
 ```
-
    -p <tbb_parallel>,  --tbb_parallel <tbb_parallel>
      Number of parallel TBB threads
 
@@ -206,4 +209,6 @@ mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 
 ## Citation
 
-Kumar, K., Salmond, J., Kularathna, S., Wilkes, C., Tjung, E., Biscontin, G., & Soga, K. (2019). Scalable and modular material point method for large scale simulations. 2nd International Conference on the Material Point Method. Cambridge, UK.
+If you publish results using our code, please acknowledge our work by quoting the following paper:
+
+Kumar, K., Salmond, J., Kularathna, S., Wilkes, C., Tjung, E., Biscontin, G., & Soga, K. (2019). Scalable and modular material point method for large scale simulations. 2nd International Conference on the Material Point Method. Cambridge, UK. [https://arxiv.org/abs/1909.13380](https://arxiv.org/abs/1909.13380)

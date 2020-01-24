@@ -9,15 +9,14 @@
 #include "mpi.h"
 #endif
 
-#ifdef USE_PARMETIS
-#include "parmetis.h"
+#ifdef USE_GRAPH_PARTITIONING
+#include <parhip_interface.h>
 
 #include "cell.h"
 #include "container.h"
 #include "particle.h"
 
 namespace mpm {
-const int MAXNCON = 1;
 
 //! Base class of graph
 //! \brief Base class that stores the information about graph
@@ -26,67 +25,62 @@ template <unsigned Tdim>
 class Graph {
  public:
   //! Constructor with cells, size and rank
-  Graph(Container<Cell<Tdim>> cells, int size, int rank);
-
-  //! Destructor
-  ~Graph();
+  //! \param[in] cells Container of cells
+  //! \param[in] mpi_size # of MPI tasks
+  //! \param[in] mpi_rank MPI rank
+  Graph(Container<Cell<Tdim>> cells, int mpi_size, int mpi_rank);
 
   //! Create graph partition
-  bool create_partitions(MPI_Comm* comm);
+  //! \param[in] comm MPI Communication
+  //! \param[in] mode KaHIP graph partitioning mode
+  bool create_partitions(MPI_Comm* comm, int mode);
 
   //! Collect partitions
-  void collect_partitions(int ncells, int npes, int rank, MPI_Comm* comm);
+  //! \param[in] mpi_size # of MPI tasks
+  //! \param[in] mpi_rank MPI rank
+  //! \param[in] comm MPI Communication
+  void collect_partitions(int mpi_size, int mpi_rank, MPI_Comm* comm);
 
   //! Return xadj
-  idx_t* xadj();
+  std::vector<idxtype> xadj() const;
 
   //! Return adjncy
-  idx_t* adjncy();
+  std::vector<idxtype> adjncy() const;
 
   //! Return vtxdist
-  idx_t* vtxdist();
+  std::vector<idxtype> vtxdist() const;
 
   //! Return vwgt
-  idx_t* vwgt();
+  std::vector<idxtype> vwgt() const;
 
   //! Tdim
-  void assign_ndims(idx_t a);
+  void assign_ndims(idxtype a);
 
   //! Return nparts
-  idx_t nparts();
+  int nparts();
 
  private:
   // Container of cells
   Container<Cell<Tdim>> cells_;
+  // Number of partitions
+  int nparts_ = 0;
+  // Number of dimensions
+  idxtype ndims_ = 0;
+  // Edge cut
+  int edgecut_ = 0;
 
-  idx_t numflag_ = 0;
-  idx_t wgtflag_ = 2;
-
-  idx_t ncon_ = 0;
-  idx_t nparts_ = 0;
-  real_t ubvec_[MAXNCON];
-  idx_t options_[1];
-  real_t* xyz_ = nullptr;
-  idx_t ndims_ = 0;
-  idx_t edgecut_ = 0;
-
-  real_t* tpwgts_ = nullptr;
+  // Partition ids
+  std::vector<mpm::Index> part_;
   // Array that stores the weights of the adjacency lists
-  idx_t* adjwgt_ = nullptr;
-  idx_t nvtxs_ = 0;
-  idx_t* part_ = nullptr;
-  idx_t* partition_ = nullptr;
-
+  std::vector<idxtype> adjwgt_;
   // Pointers to the locally stored vertices
-  idx_t* xadj_ = nullptr;
+  std::vector<idxtype> xadj_;
   // Vertex weights
-  idx_t* vwgt_ = nullptr;
-  // Vertex weights
-  real_t* nvwgt = nullptr;
+  std::vector<idxtype> vwgt_;
   // Array that stores the adjacency lists of nvtxs
-  idx_t* adjncy_ = nullptr;
+  std::vector<idxtype> adjncy_;
   // Distribution of vertices
-  idx_t* vtxdist_ = nullptr;
+  std::vector<idxtype> vtxdist_;
 };  // namespace graph
 }  // namespace mpm
 

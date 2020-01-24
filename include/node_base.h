@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 
 #include "data_types.h"
+#include "function_base.h"
 
 namespace mpm {
 
@@ -50,7 +51,7 @@ class NodeBase {
   virtual VectorDim coordinates() const = 0;
 
   //! Initialise properties
-  virtual void initialise() = 0;
+  virtual void initialise() noexcept = 0;
 
   //! Return degrees of freedom
   virtual unsigned dof() const = 0;
@@ -65,7 +66,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  virtual void update_mass(bool update, unsigned phase, double mass) = 0;
+  virtual void update_mass(bool update, unsigned phase,
+                           double mass) noexcept = 0;
 
   //! Return mass at a given node for a given phase
   virtual double mass(unsigned phase) const = 0;
@@ -74,26 +76,33 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  virtual void update_volume(bool update, unsigned phase, double volume) = 0;
+  virtual void update_volume(bool update, unsigned phase,
+                             double volume) noexcept = 0;
 
   //! Return volume at a given node for a given phase
   virtual double volume(unsigned phase) const = 0;
 
-  //! Assign traction force to the node
-  //! \param[in] phase Index corresponding to the phase
+  //! Assign concentrated force to the node
   //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Nodal traction in specified direction
+  //! \param[in] traction Nodal concentrated force in specified direction
+  //! \param[in] function math function
   //! \retval status Assignment status
-  virtual bool assign_traction_force(unsigned phase, unsigned direction,
-                                     double traction) = 0;
+  virtual bool assign_concentrated_force(
+      unsigned phase, unsigned direction, double traction,
+      const std::shared_ptr<FunctionBase>& function) = 0;
+
+  //! Apply concentrated force to external force
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  virtual void apply_concentrated_force(unsigned phase,
+                                        double current_time) = 0;
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_external_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual void update_external_force(bool update, unsigned phase,
+                                     const VectorDim& force) noexcept = 0;
 
   //! Return external force
   //! \param[in] phase Index corresponding to the phase
@@ -103,9 +112,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_internal_force(bool update, unsigned phase,
-                                     const VectorDim& force) = 0;
+  virtual void update_internal_force(bool update, unsigned phase,
+                                     const VectorDim& force) noexcept = 0;
 
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
@@ -114,7 +122,8 @@ class NodeBase {
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(unsigned phase, double mass_pressure) = 0;
+  virtual void update_mass_pressure(unsigned phase,
+                                    double mass_pressure) noexcept = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -130,9 +139,8 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_momentum(bool update, unsigned phase,
-                               const VectorDim& momentum) = 0;
+  virtual void update_momentum(bool update, unsigned phase,
+                               const VectorDim& momentum) noexcept = 0;
 
   //! Return momentum
   //! \param[in] phase Index corresponding to the phase
@@ -149,8 +157,7 @@ class NodeBase {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_acceleration(bool update, unsigned phase,
+  virtual void update_acceleration(bool update, unsigned phase,
                                    const VectorDim& acceleration) = 0;
 
   //! Return acceleration
@@ -159,7 +166,15 @@ class NodeBase {
 
   //! Compute acceleration
   //! \param[in] dt Time-step
-  virtual bool compute_acceleration_velocity(unsigned phase, double dt) = 0;
+  virtual bool compute_acceleration_velocity(unsigned phase,
+                                             double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity with cundall damping factor
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] damping_factor Damping factor
+  virtual bool compute_acceleration_velocity_cundall(
+      unsigned phase, double dt, double damping_factor) noexcept = 0;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -187,6 +202,13 @@ class NodeBase {
   virtual void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) = 0;
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  virtual void append_material_id(unsigned id) = 0;
+
+  //! Return material ids in node
+  virtual std::set<unsigned> material_ids() const = 0;
+
   //! Assign MPI rank to node
   //! \param[in] rank MPI Rank of the node
   virtual bool mpi_rank(unsigned rank) = 0;
@@ -194,6 +216,9 @@ class NodeBase {
   //! Assign MPI rank to node
   //! \param[in] rank MPI Rank of the node
   virtual std::set<unsigned> mpi_ranks() const = 0;
+
+  //! Clear MPI ranks on node
+  virtual void clear_mpi_ranks() = 0;
 
   //! Return ghost id
   virtual Index ghost_id() const = 0;
