@@ -123,8 +123,6 @@ template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
           typename Tsetfunctor>
 void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
                                                 Tsetfunctor setter) {
-  // Create vector of nodal vectors
-  unsigned nnodes = this->domain_shared_nodes_.size();
 
   // Get number of MPI ranks
   int mpi_size;
@@ -133,11 +131,34 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   if (mpi_size > 1) {
-    // Vector of send requests
-    std::vector<MPI_Request> send_requests;
-    send_requests.reserve(ncomms_);
+    // Create vector of nodal vectors
+    unsigned nnodes = this->domain_shared_nodes_.size();
 
-    unsigned j = 0;
+    std::vector<std::vector<Ttype>> properties(
+        nnodes, std::vector<Ttype>(max_shared_nodes_));
+
+    // Vector of send requests
+    std::vector<MPI_Request> requests;
+    requests.reserve(2 * ncomms_);
+
+    // Request id
+    unsigned rid = 0;
+    // Non-blocking receive
+    for (unsigned i = 0; i < nnodes; ++i) {
+      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
+      // Receive from all shared ranks
+      unsigned j = 0;
+      for (auto& node_rank : node_mpi_ranks) {
+        if (node_rank != mpi_rank) {
+          MPI_Irecv(&properties[i][j], Tnparam, MPI_DOUBLE, node_rank,
+                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                    &requests[rid]);
+          ++rid;
+          ++j;
+        }
+      }
+    }
+
     // Non-blocking send
     for (unsigned i = 0; i < nnodes; ++i) {
       Ttype property = getter(domain_shared_nodes_[i]);
@@ -146,30 +167,22 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
         if (node_rank != mpi_rank) {
           MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
                     domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &send_requests[j]);
-          ++j;
+                    &requests[rid]);
+          ++rid;
         }
       }
     }
 
-    // send complete
-    for (unsigned i = 0; i < ncomms_; ++i)
-      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+    // exchange complete
+    MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
 
+    // Reduce on all nodes
     for (unsigned i = 0; i < nnodes; ++i) {
       // Get value at current node
       Ttype property = getter(domain_shared_nodes_[i]);
-
-      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
-      // Receive from all shared ranks
-      for (auto& node_rank : node_mpi_ranks) {
-        if (node_rank != mpi_rank) {
-          Ttype value;
-          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank,
-                   domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                   MPI_STATUS_IGNORE);
-          property += value;
-        }
+      for (unsigned j = 0; j < domain_shared_nodes_[i]->mpi_ranks().size() - 1;
+           ++j) {
+        property += properties[i][j];
       }
       setter(domain_shared_nodes_[i], property);
     }
@@ -665,10 +678,13 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     // If node has more than 1 MPI rank
     std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
-    if (nodal_mpi_ranks.size() > 1) {
+    const unsigned nodal_mpi_ranks_size = nodal_mpi_ranks.size();
+    if (nodal_mpi_ranks_size > 1) {
       if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
         domain_shared_nodes_.add(*nitr);
-        ncomms_ += nodal_mpi_ranks.size() - 1;
+        ncomms_ += nodal_mpi_ranks_size - 1;
+        if (nodal_mpi_ranks_size > max_shared_nodes_)
+          max_shared_nodes_ = nodal_mpi_ranks_size;
       }
     }
   }

@@ -464,6 +464,8 @@ class Mesh {
   int tbb_grain_size_{100};
   //! node MPI comms
   unsigned ncomms_{0};
+  //! Max shared nodes
+  unsigned max_shared_nodes_{0};
 };  // Mesh class
 }  // namespace mpm
 
