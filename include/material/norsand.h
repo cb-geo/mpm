@@ -51,6 +51,11 @@ class NorSand : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
+  //! Compute p, q and J2
+  //! \param[in] stress Stress
+  //! \retval vector of size three, containing p, q and j2
+  Eigen::Matrix<double, 3, 1> compute_pq(const Vector6d& stress);
+
   //! Compute stress invariants (p, q, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables

@@ -126,6 +126,35 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
   return true;
 }
 
+//! Compute p and q
+template <unsigned Tdim>
+Eigen::Matrix<double, 3, 1> mpm::NorSand<Tdim>::compute_pq(
+    const Vector6d& stress) {
+
+  // Note that in this subroutine, stress is compression positive
+
+  // Compute mean stress p
+  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
+  if (mean_p < 1.0E-15) mean_p = 1.0E-15;
+
+  // Compute J2
+  double j2 = (std::pow((stress(0) - stress(1)), 2) +
+               std::pow((stress(1) - stress(2)), 2) +
+               std::pow((stress(0) - stress(2)), 2)) /
+                  6.0 +
+              std::pow(stress(3), 2);
+  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
+  if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
+
+  // Compute q
+  double deviatoric_q = std::sqrt(3 * j2);
+  if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
+
+  Eigen::Matrix<double, 3, 1> invariants(mean_p, deviatoric_q, j2);
+
+  return invariants;
+}
+
 //! Compute stress invariants
 template <unsigned Tdim>
 bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
@@ -133,10 +162,16 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
 
   // Note that in this subroutine, stress is compression positive
 
-  // Compute mean stress p
-  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
-  if (mean_p < 1.0E-15) mean_p = 1.0E-15;
+  // Compute p, q and J2
+  auto invariants = this->compute_pq(stress);
+
+  double mean_p = invariants(0);
+  double deviatoric_q = invariants(1);
+  double j2 = invariants(2);
+
   (*state_vars).at("p") = mean_p;
+  (*state_vars).at("j2") = j2;
+  (*state_vars).at("q") = deviatoric_q;
 
   // Compute the deviatoric stress
   Vector6d dev_stress = Vector6d::Zero();
@@ -149,16 +184,6 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
     dev_stress(5) = stress(5);
   }
 
-  // Compute J2
-  double j2 = (std::pow((stress(0) - stress(1)), 2) +
-               std::pow((stress(1) - stress(2)), 2) +
-               std::pow((stress(0) - stress(2)), 2)) /
-                  6.0 +
-              std::pow(stress(3), 2);
-  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
-  if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
-  (*state_vars).at("j2") = j2;
-
   // Compute J3
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
               (dev_stress(2) * std::pow(dev_stress(3), 2));
@@ -167,11 +192,6 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
            (dev_stress(0) * std::pow(dev_stress(4), 2)) -
            (dev_stress(1) * std::pow(dev_stress(5), 2)));
   (*state_vars).at("j3") = j3;
-
-  // Compute q
-  double deviatoric_q = std::sqrt(3 * j2);
-  if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
-  (*state_vars).at("q") = deviatoric_q;
 
   // Compute Lode angle value
   double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
@@ -296,21 +316,10 @@ typename mpm::NorSand<Tdim>::FailureState
                                             const mpm::dense_map* state_vars) {
 
   // Get stress invariants
-  // Compute mean stress p
-  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
-  if (mean_p < 1.0E-15) mean_p = 1.0E-15;
+  auto invariants = this->compute_pq(stress);
 
-  // Compute J2
-  double j2 = (std::pow((stress(0) - stress(1)), 2) +
-               std::pow((stress(1) - stress(2)), 2) +
-               std::pow((stress(0) - stress(2)), 2)) /
-                  6.0 +
-              std::pow(stress(3), 2);
-  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
-
-  // Compute q
-  double deviatoric_q = std::sqrt(3 * j2);
-  if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
+  const double mean_p = invariants(0);
+  const double deviatoric_q = invariants(1);
 
   // Get image pressure and M_theta
   const double p_image = (*state_vars).at("p_image");
