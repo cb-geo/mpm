@@ -131,9 +131,9 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   if (mpi_size > 1) {
-    // Create vector of nodal vectors
+    // Number of shared nodes
     unsigned nnodes = this->domain_shared_nodes_.size();
-
+    // Vector of nodal properties x max number of shared MPI tasks
     std::vector<std::vector<Ttype>> properties(
         nnodes, std::vector<Ttype>(max_shared_nodes_));
 
@@ -167,12 +167,13 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
               }
             }
           }
-        });
+        },
+        tbb::simple_partitioner());
 
     // exchange complete
     MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
 
-    // Reduce on all nodes
+    // Reduce on all shared nodes on the current MPI rank
     tbb::parallel_for(
         tbb::blocked_range<int>(size_t(0), size_t(domain_shared_nodes_.size()),
                                 tbb_grain_size_),
@@ -180,10 +181,9 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
           for (int i = range.begin(); i != range.end(); ++i) {
             // Get value at current node
             Ttype property = getter(domain_shared_nodes_[i]);
-            for (unsigned j = 0;
-                 j < domain_shared_nodes_[i]->mpi_ranks().size() - 1; ++j) {
-              property += properties[i][j];
-            }
+            unsigned nranks = domain_shared_nodes_[i]->mpi_ranks().size() - 1;
+            for (unsigned j = 0; j < nranks; ++j) property += properties[i][j];
+            // Set accummulated value at the node
             setter(domain_shared_nodes_[i], property);
           }
         },
@@ -686,7 +686,7 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
       if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
         // Create Ghost ID
         (*nitr)->ghost_id(ghost_id);
-        ghost_id += nodal_mpi_ranks_size -1;
+        ghost_id += nodal_mpi_ranks_size - 1;
         // Add to list of shared nodes on local rank
         domain_shared_nodes_.add(*nitr);
         ncomms_ += nodal_mpi_ranks_size - 1;
