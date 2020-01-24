@@ -68,8 +68,6 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"p", 0.},
       // Deviatoric stress
       {"q", 0.},
-      // Lode angle
-      {"lode_angle", 0.},
       // J2
       {"j2", 0.},
       // J3
@@ -184,7 +182,6 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   double lode_angle = (1. / 3.) * asin(lode_angle_val);
   if (lode_angle > M_PI / 6.) lode_angle = M_PI / 6.;
   if (lode_angle < -M_PI / 6.) lode_angle = -M_PI / 6.;
-  (*state_vars)["lode_angle"] = lode_angle;
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
   const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
