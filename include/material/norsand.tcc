@@ -105,18 +105,6 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"plastic_strain4", 0.},
       {"plastic_strain5", 0.}};
 
-  // Check for bond model e_image
-  double e_image;
-  if (bond_model_) {
-    e_image =
-        e_max_ -
-        (e_max_ - e_min_) /
-            log(crushing_pressure_ /
-                (p_image_initial_ + p_cohesion_initial_ + p_dilation_initial_));
-    if (e_image < 1.0E-15) e_image = 1.0E-15;
-    state_vars.at("e_image") = e_image;
-  }
-
   return state_vars;
 }
 
