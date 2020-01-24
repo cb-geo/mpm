@@ -143,8 +143,9 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
 
     // Request id
     unsigned rid = 0;
-    // Non-blocking receive
+    // Non-blocking send / receive
     for (unsigned i = 0; i < nnodes; ++i) {
+      Ttype property = getter(domain_shared_nodes_[i]);
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
       // Receive from all shared ranks
       unsigned j = 0;
@@ -154,21 +155,11 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
                     domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
                     &requests[rid]);
           ++rid;
-          ++j;
-        }
-      }
-    }
-
-    // Non-blocking send
-    for (unsigned i = 0; i < nnodes; ++i) {
-      Ttype property = getter(domain_shared_nodes_[i]);
-      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
-      for (auto& node_rank : node_mpi_ranks) {
-        if (node_rank != mpi_rank) {
           MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
                     domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
                     &requests[rid]);
           ++rid;
+          ++j;
         }
       }
     }
@@ -177,15 +168,21 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
     MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
 
     // Reduce on all nodes
-    for (unsigned i = 0; i < nnodes; ++i) {
-      // Get value at current node
-      Ttype property = getter(domain_shared_nodes_[i]);
-      for (unsigned j = 0; j < domain_shared_nodes_[i]->mpi_ranks().size() - 1;
-           ++j) {
-        property += properties[i][j];
-      }
-      setter(domain_shared_nodes_[i], property);
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(domain_shared_nodes_.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            // Get value at current node
+            Ttype property = getter(domain_shared_nodes_[i]);
+            for (unsigned j = 0;
+                 j < domain_shared_nodes_[i]->mpi_ranks().size() - 1; ++j) {
+              property += properties[i][j];
+            }
+            setter(domain_shared_nodes_[i], property);
+          }
+        },
+        tbb::simple_partitioner());
   }
 }
 #endif
