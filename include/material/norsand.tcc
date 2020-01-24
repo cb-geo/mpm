@@ -4,49 +4,50 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
     // Density
-    density_ = material_properties["density"].template get<double>();
+    density_ = material_properties.at("density").template get<double>();
     // Poisson ratio
     poisson_ratio_ =
-        material_properties["poisson_ratio"].template get<double>();
+        material_properties.at("poisson_ratio").template get<double>();
     // Reference pressure pref
     reference_pressure_ =
-        material_properties["reference_pressure"].template get<double>();
+        material_properties.at("reference_pressure").template get<double>();
     // Critical state friction angle
     friction_cs_ =
-        material_properties["friction_cs"].template get<double>() * M_PI / 180.;
+        material_properties.at("friction_cs").template get<double>() * M_PI /
+        180.;
     // Volumetric coupling (dilatancy) parameter N
-    N_ = material_properties["N"].template get<double>();
+    N_ = material_properties.at("N").template get<double>();
     // Lambda volumetric
-    lambda_ = material_properties["lambda"].template get<double>();
+    lambda_ = material_properties.at("lambda").template get<double>();
     // Kappa swelling volumetric
-    kappa_ = material_properties["kappa"].template get<double>();
+    kappa_ = material_properties.at("kappa").template get<double>();
     // Gamma void ratio at reference pressure
-    gamma_ = material_properties["gamma"].template get<double>();
+    gamma_ = material_properties.at("gamma").template get<double>();
     // Dilatancy coefficient chi
-    chi_ = material_properties["chi"].template get<double>();
+    chi_ = material_properties.at("chi").template get<double>();
     // Hardening modulus
     hardening_modulus_ =
-        material_properties["hardening_modulus"].template get<double>();
+        material_properties.at("hardening_modulus").template get<double>();
     // Initial void ratio
     void_ratio_initial_ =
-        material_properties["void_ratio_initial"].template get<double>();
+        material_properties.at("void_ratio_initial").template get<double>();
     // Initial image pressure
     p_image_initial_ =
-        material_properties["p_image_initial"].template get<double>();
+        material_properties.at("p_image_initial").template get<double>();
     // Flag for bonded model
-    bond_model_ = material_properties["bond_model"].template get<bool>();
+    bond_model_ = material_properties.at("bond_model").template get<bool>();
     // Initial p_cohesion
     p_cohesion_initial_ =
-        material_properties["p_cohesion_initial"].template get<double>();
+        material_properties.at("p_cohesion_initial").template get<double>();
     // Initial p_dilation
     p_dilation_initial_ =
-        material_properties["p_dilation_initial"].template get<double>();
+        material_properties.at("p_dilation_initial").template get<double>();
     // Cohesion degradation parameter m upon shearing
-    m_cohesion_ = material_properties["m_cohesion"].template get<double>();
+    m_cohesion_ = material_properties.at("m_cohesion").template get<double>();
     // Dilation degradation parameter m upon shearing
-    m_dilation_ = material_properties["m_dilation"].template get<double>();
+    m_dilation_ = material_properties.at("m_dilation").template get<double>();
     // Parameter for shear modulus
-    m_shear_ = material_properties["m_shear"].template get<double>();
+    m_shear_ = material_properties.at("m_shear").template get<double>();
 
     const double sin_friction_cs = sin(friction_cs_);
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
