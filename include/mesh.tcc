@@ -144,25 +144,31 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
     // Request id
     unsigned rid = 0;
     // Non-blocking send / receive
-    for (unsigned i = 0; i < nnodes; ++i) {
-      Ttype property = getter(domain_shared_nodes_[i]);
-      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
-      // Receive from all shared ranks
-      unsigned j = 0;
-      for (auto& node_rank : node_mpi_ranks) {
-        if (node_rank != mpi_rank) {
-          MPI_Irecv(&properties[i][j], Tnparam, MPI_DOUBLE, node_rank,
-                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &requests[rid]);
-          ++rid;
-          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
-                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &requests[rid]);
-          ++rid;
-          ++j;
-        }
-      }
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<int>(size_t(0), size_t(domain_shared_nodes_.size()),
+                                tbb_grain_size_),
+        [&](const tbb::blocked_range<int>& range) {
+          for (int i = range.begin(); i != range.end(); ++i) {
+            Ttype property = getter(domain_shared_nodes_[i]);
+            std::set<unsigned> node_mpi_ranks =
+                domain_shared_nodes_[i]->mpi_ranks();
+            // Receive from all shared ranks
+            unsigned j = 0;
+            for (auto& node_rank : node_mpi_ranks) {
+              if (node_rank != mpi_rank) {
+                MPI_Irecv(&properties[i][j], Tnparam, MPI_DOUBLE, node_rank,
+                          domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                          &requests[rid]);
+                ++rid;
+                MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
+                          domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                          &requests[rid]);
+                ++rid;
+                ++j;
+              }
+            }
+          }
+        });
 
     // exchange complete
     MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
