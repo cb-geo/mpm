@@ -52,6 +52,14 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     REQUIRE(node->status() == true);
   }
 
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
+  }
+
   // Check MPI Rank
   SECTION("Check MPI Rank") {
     mpm::Index id = 0;
@@ -546,6 +554,14 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
     REQUIRE(node->status() == false);
     node->assign_status(true);
     REQUIRE(node->status() == true);
+  }
+
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
   }
 
   // Check MPI Rank
@@ -1166,6 +1182,14 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
     REQUIRE(node->status() == false);
     node->assign_status(true);
     REQUIRE(node->status() == true);
+  }
+
+  SECTION("Boundary ghost id") {
+    mpm::Index id = 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
+    node->ghost_id(5);
+    REQUIRE(node->ghost_id() == 5);
   }
 
   // Check MPI Rank

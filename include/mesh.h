@@ -118,15 +118,21 @@ class Mesh {
   void iterate_over_active_nodes(Toper oper);
 
 #ifdef USE_MPI
-  //! Share nodal property in the halo region
-  //! \tparam Ttype Type of property to accumulate
-  //! \tparam Tnparam Size of individual property
+  //! All reduce over nodal scalar property
   //! \tparam Tgetfunctor Functor for getter
   //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
-  template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
-            typename Tsetfunctor>
-  void share_halo_nodal_property(Tgetfunctor getter, Tsetfunctor setter);
+  template <typename Tgetfunctor, typename Tsetfunctor>
+  void allreduce_nodal_scalar_property(Tgetfunctor getter, Tsetfunctor setter);
+#endif
+
+#ifdef USE_MPI
+  //! All reduce over nodal vector property
+  //! \tparam Tgetfunctor Functor for getter
+  //! \tparam Tsetfunctor Functor for setter
+  //! \param[in] getter Getter function
+  template <typename Tgetfunctor, typename Tsetfunctor>
+  void allreduce_nodal_vector_property(Tgetfunctor getter, Tsetfunctor setter);
 #endif
 
   //! Create cells from list of nodes
@@ -462,8 +468,6 @@ class Mesh {
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
   int tbb_grain_size_{100};
-  //! node MPI comms
-  unsigned ncomms_{0};
 };  // Mesh class
 }  // namespace mpm
 
