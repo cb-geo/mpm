@@ -519,8 +519,8 @@ template <>
 inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 64>::weights() const {
   Eigen::VectorXd weights(64);
   const double val_sqrt_30 = std::sqrt(30.);
-  const double val_0_652 = (18 + val_sqrt_30) / 36.; // Corresponds to 0.340
-  const double val_0_348 = (18 - val_sqrt_30) / 36.; // Corresponds to 0.861
+  const double val_0_652 = (18 + val_sqrt_30) / 36.;  // Corresponds to 0.340
+  const double val_0_348 = (18 - val_sqrt_30) / 36.;  // Corresponds to 0.861
 
   weights(0) = val_0_348 * val_0_348 * val_0_348;
   weights(1) = val_0_348 * val_0_348 * val_0_652;
@@ -589,7 +589,6 @@ inline Eigen::VectorXd mpm::HexahedronQuadrature<3, 64>::weights() const {
   weights(61) = val_0_348 * val_0_652 * val_0_348;
   weights(62) = val_0_348 * val_0_652 * val_0_348;
   weights(63) = val_0_348 * val_0_348 * val_0_348;
-
 
   return weights;
 }

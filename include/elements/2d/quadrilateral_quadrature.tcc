@@ -106,7 +106,8 @@ inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 9>::weights() const {
 
 // Getting the quadratures for Tnquadratures = 16
 template <>
-inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 16>::quadratures() const {
+inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 16>::quadratures()
+    const {
   Eigen::Matrix<double, 2, 16> quadratures;
   const double val_sqrt_6by5 = std::sqrt(6. / 5.);
   const double val_sqrt_0_340 = std::sqrt(3. / 7. - 2. / 7. * val_sqrt_6by5);
@@ -168,8 +169,8 @@ template <>
 inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 16>::weights() const {
   Eigen::VectorXd weights(16);
   const double val_sqrt_30 = std::sqrt(30.);
-  const double val_0_652 = (18 + val_sqrt_30) / 36.; // Corresponds to 0.340
-  const double val_0_348 = (18 - val_sqrt_30) / 36.; // Corresponds to 0.861
+  const double val_0_652 = (18 + val_sqrt_30) / 36.;  // Corresponds to 0.340
+  const double val_0_348 = (18 - val_sqrt_30) / 36.;  // Corresponds to 0.861
   const double val_0_121 = val_0_348 * val_0_348;
   const double val_0_227 = val_0_348 * val_0_652;
   const double val_0_425 = val_0_652 * val_0_652;
