@@ -103,3 +103,93 @@ inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 9>::weights() const {
 
   return weights;
 }
+
+// Getting the quadratures for Tnquadratures = 16
+template <>
+inline Eigen::MatrixXd mpm::QuadrilateralQuadrature<2, 16>::quadratures() const {
+  Eigen::Matrix<double, 2, 16> quadratures;
+  const double val_sqrt_6by5 = std::sqrt(6. / 5.);
+  const double val_sqrt_0_340 = std::sqrt(3. / 7. - 2. / 7. * val_sqrt_6by5);
+  const double val_sqrt_0_861 = std::sqrt(3. / 7. + 2. / 7. * val_sqrt_6by5);
+
+  quadratures(0, 0) = -val_sqrt_0_861;
+  quadratures(1, 0) = -val_sqrt_0_861;
+
+  quadratures(0, 1) = -val_sqrt_0_861;
+  quadratures(1, 1) = -val_sqrt_0_340;
+
+  quadratures(0, 2) = -val_sqrt_0_861;
+  quadratures(1, 2) = val_sqrt_0_340;
+
+  quadratures(0, 3) = -val_sqrt_0_861;
+  quadratures(1, 3) = val_sqrt_0_861;
+
+  quadratures(0, 4) = -val_sqrt_0_340;
+  quadratures(1, 4) = -val_sqrt_0_861;
+
+  quadratures(0, 5) = -val_sqrt_0_340;
+  quadratures(1, 5) = -val_sqrt_0_340;
+
+  quadratures(0, 6) = -val_sqrt_0_340;
+  quadratures(1, 6) = val_sqrt_0_340;
+
+  quadratures(0, 7) = -val_sqrt_0_340;
+  quadratures(1, 7) = val_sqrt_0_861;
+
+  quadratures(0, 8) = val_sqrt_0_340;
+  quadratures(1, 8) = -val_sqrt_0_861;
+
+  quadratures(0, 9) = val_sqrt_0_340;
+  quadratures(1, 9) = -val_sqrt_0_340;
+
+  quadratures(0, 10) = val_sqrt_0_340;
+  quadratures(1, 10) = val_sqrt_0_340;
+
+  quadratures(0, 11) = val_sqrt_0_340;
+  quadratures(1, 11) = val_sqrt_0_861;
+
+  quadratures(0, 12) = val_sqrt_0_861;
+  quadratures(1, 12) = -val_sqrt_0_861;
+
+  quadratures(0, 13) = val_sqrt_0_861;
+  quadratures(1, 13) = -val_sqrt_0_340;
+
+  quadratures(0, 14) = val_sqrt_0_861;
+  quadratures(1, 14) = val_sqrt_0_340;
+
+  quadratures(0, 15) = val_sqrt_0_861;
+  quadratures(1, 15) = val_sqrt_0_861;
+
+  return quadratures;
+}
+
+// Getting the weights for Tnquadratures = 16
+template <>
+inline Eigen::VectorXd mpm::QuadrilateralQuadrature<2, 16>::weights() const {
+  Eigen::VectorXd weights(16);
+  const double val_sqrt_30 = std::sqrt(30.);
+  const double val_0_652 = (18 + val_sqrt_30) / 36.; // Corresponds to 0.340
+  const double val_0_348 = (18 - val_sqrt_30) / 36.; // Corresponds to 0.861
+  const double val_0_121 = val_0_348 * val_0_348;
+  const double val_0_227 = val_0_348 * val_0_652;
+  const double val_0_425 = val_0_652 * val_0_652;
+
+  weights(0) = val_0_121;
+  weights(1) = val_0_227;
+  weights(2) = val_0_227;
+  weights(3) = val_0_121;
+  weights(4) = val_0_227;
+  weights(5) = val_0_425;
+  weights(6) = val_0_425;
+  weights(7) = val_0_227;
+  weights(8) = val_0_227;
+  weights(9) = val_0_425;
+  weights(10) = val_0_425;
+  weights(11) = val_0_227;
+  weights(12) = val_0_121;
+  weights(13) = val_0_227;
+  weights(14) = val_0_227;
+  weights(15) = val_0_121;
+
+  return weights;
+}

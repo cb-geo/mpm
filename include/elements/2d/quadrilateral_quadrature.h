@@ -21,7 +21,7 @@ class QuadrilateralQuadrature : public Quadrature<Tdim> {
   QuadrilateralQuadrature() : Quadrature<Tdim>() {
     static_assert(Tdim == 2, "Invalid dimension for a quadrilateral element");
     static_assert(
-        ((Tnquadratures == 1) || (Tnquadratures == 4) || (Tnquadratures == 9)),
+        ((Tnquadratures == 1) || (Tnquadratures == 4) || (Tnquadratures == 9) || (Tnquadratures == 16)),
         "Invalid number of quadratures");
   }
 
