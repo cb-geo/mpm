@@ -135,43 +135,39 @@ void mpm::Mesh<Tdim>::share_halo_nodal_property(Tgetfunctor getter,
     unsigned nnodes = this->domain_shared_nodes_.size();
     // Vector of nodal properties x max number of shared MPI tasks
     std::vector<Ttype> properties(ncomms_);
-
     // Vector of send requests
-    // std::vector<MPI_Request> requests;
-    // requests.reserve(2 * ncomms_);
-
+    std::vector<MPI_Request> requests(2 * ncomms_);
     // Non-blocking send / receive
-    /*
     tbb::parallel_for(
         tbb::blocked_range<int>(size_t(0), size_t(domain_shared_nodes_.size()),
                                 tbb_grain_size_),
         [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) {*/
-    std::for_each(
-        domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-        [=, &properties](const std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-          Ttype property = getter(node);
-          std::set<unsigned> node_mpi_ranks = node->mpi_ranks();
-          // Receive from all shared ranks
-          unsigned rid = node->ghost_id();
-          unsigned nid = node->id();
-          for (auto& node_rank : node_mpi_ranks) {
-            if (node_rank != mpi_rank) {
-              MPI_Sendrecv(&property, Tnparam, MPI_DOUBLE, node_rank, nid,
-                           &properties[rid], Tnparam, MPI_DOUBLE, node_rank,
-                           nid, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-              ++rid;
+          for (int i = range.begin(); i != range.end(); ++i) {
+            // for (int i = 0; i < domain_shared_nodes_.size(); ++i) {
+            Ttype property = getter(domain_shared_nodes_[i]);
+            std::set<unsigned> node_mpi_ranks =
+                domain_shared_nodes_[i]->mpi_ranks();
+            // Receive from all shared ranks
+            unsigned rid = domain_shared_nodes_[i]->ghost_id();
+            for (auto node_rank : node_mpi_ranks) {
+              if (node_rank != mpi_rank) {
+                // Receive
+                MPI_Irecv(&properties[rid], Tnparam, MPI_DOUBLE, node_rank,
+                          domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                          &requests[rid]);
+                // Send
+                MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
+                          domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                          &requests[ncomms_ + rid]);
+                ++rid;
+              }
             }
           }
-        });
-    /*
         },
         tbb::simple_partitioner());
-    */
-
     // exchange complete
-    // MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
-
+    MPI_Waitall(2 * ncomms_, requests.data(), MPI_STATUSES_IGNORE);
+    
     // Reduce on all shared nodes on the current MPI rank
     tbb::parallel_for_each(
         domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),

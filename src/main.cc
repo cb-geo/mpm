@@ -13,8 +13,9 @@
 int main(int argc, char** argv) {
 
 #ifdef USE_MPI
+  int provided;
   // Initialise MPI
-  MPI_Init(&argc, &argv);
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
   int mpi_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   // Get number of MPI ranks
