@@ -20,9 +20,9 @@ class HexahedronQuadrature : public Quadrature<Tdim> {
  public:
   HexahedronQuadrature() : mpm::Quadrature<Tdim>() {
     static_assert(Tdim == 3, "Invalid dimension for a 3D hexahedron element");
-    static_assert(
-        (Tnquadratures == 1) || (Tnquadratures == 8) || (Tnquadratures == 27),
-        "Invalid number of quadratures");
+    static_assert((Tnquadratures == 1) || (Tnquadratures == 8) ||
+                      (Tnquadratures == 27) || (Tnquadratures == 64),
+                  "Invalid number of quadratures");
   }
 
   //! Return quadrature points
