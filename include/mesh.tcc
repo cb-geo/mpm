@@ -123,8 +123,8 @@ template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
   // Create vector of nodal scalars
-  mpm::Index nnodes = this->domain_shared_nodes_.size();
-  std::vector<double> prop_get(nnodes), prop_set(nnodes);
+  std::vector<double> prop_get(nhalo_nodes_, 0.);
+  std::vector<double> prop_set(nhalo_nodes_, 0.);
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -132,8 +132,8 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
         prop_get.at(node->ghost_id()) = getter(node);
       });
 
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes, MPI_DOUBLE, MPI_SUM,
-                MPI_COMM_WORLD);
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_, MPI_DOUBLE,
+                MPI_SUM, MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -150,9 +150,10 @@ template <typename Tgetfunctor, typename Tsetfunctor>
 void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
                                                       Tsetfunctor setter) {
   // Create vector of nodal vectors
-  mpm::Index nnodes = this->domain_shared_nodes_.size();
-  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(nnodes),
-      prop_set(nnodes);
+  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(
+      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
+  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_set(
+      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -160,8 +161,8 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
         prop_get.at(node->ghost_id()) = getter(node);
       });
 
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nnodes * Tdim, MPI_DOUBLE,
-                MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tdim,
+                MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -638,7 +639,6 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
 //! Find shared nodes across MPI domains
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
-  this->domain_shared_nodes_.clear();
   // Clear MPI rank at the nodes
   tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
                          [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
@@ -655,11 +655,17 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
                            cell->assign_mpi_rank_to_nodes();
                          });
 
+  this->domain_shared_nodes_.clear();
+  nhalo_nodes_ = 0;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
     // If node has more than 1 MPI rank
-    if ((*nitr)->mpi_ranks().size() > 1) {
-      (*nitr)->ghost_id(domain_shared_nodes_.size());
-      domain_shared_nodes_.add(*nitr);
+    if (nodal_mpi_ranks.size() > 1) {
+      (*nitr)->ghost_id(nhalo_nodes_);
+      nhalo_nodes_ += 1;
+      // Add to domain shared nodes only if active on current MPI rank
+      if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end())
+        domain_shared_nodes_.add(*nitr);
     }
   }
 }
