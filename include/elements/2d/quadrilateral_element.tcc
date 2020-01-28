@@ -523,6 +523,9 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
     case 3:
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ3");
       break;
+    case 4:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ4");
+      break;
     default:
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
       break;

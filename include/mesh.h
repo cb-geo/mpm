@@ -468,6 +468,8 @@ class Mesh {
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
   int tbb_grain_size_{100};
+  //! Maximum number of halo nodes
+  unsigned nhalo_nodes_{0};
 };  // Mesh class
 }  // namespace mpm
 
