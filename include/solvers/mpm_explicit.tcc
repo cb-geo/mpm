@@ -75,7 +75,7 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
   // Run if there is more than a single MPI task
   if (mpi_size > 1) {
     // MPI all reduce nodal pressure
-    mesh_->allreduce_nodal_scalar_property(
+    mesh_->template nodal_halo_exchange<double, 1>(
         std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
         std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
                   phase, std::placeholders::_2));
@@ -223,12 +223,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce nodal mass
-      mesh_->allreduce_nodal_scalar_property(
+      mesh_->template nodal_halo_exchange<double, 1>(
           std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
           std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
                     false, phase, std::placeholders::_2));
       // MPI all reduce nodal momentum
-      mesh_->allreduce_nodal_vector_property(
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
                     phase),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
@@ -276,14 +276,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce external force
-      mesh_->allreduce_nodal_vector_property(
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
                     phase),
           std::bind(&mpm::NodeBase<Tdim>::update_external_force,
                     std::placeholders::_1, false, phase,
                     std::placeholders::_2));
       // MPI all reduce internal force
-      mesh_->allreduce_nodal_vector_property(
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
           std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
                     phase),
           std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
