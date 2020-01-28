@@ -690,6 +690,24 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
                          });
 
   this->domain_shared_nodes_.clear();
+
+#ifdef USE_HALO_EXCHANGE
+  ncomms_ = 0;
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // If node has more than 1 MPI rank
+    std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
+    const unsigned nodal_mpi_ranks_size = nodal_mpi_ranks.size();
+    if (nodal_mpi_ranks_size > 1) {
+      if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
+        // Create Ghost ID
+        (*nitr)->ghost_id(ncomms_);
+        // Add to list of shared nodes on local rank
+        domain_shared_nodes_.add(*nitr);
+        ncomms_ += nodal_mpi_ranks_size - 1;
+      }
+    }
+  }
+#else
   nhalo_nodes_ = 0;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
@@ -702,6 +720,7 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
         domain_shared_nodes_.add(*nitr);
     }
   }
+#endif
 }
 
 //! Locate particles in a cell

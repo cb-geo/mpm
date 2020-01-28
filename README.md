@@ -136,7 +136,7 @@ Compile with OpenMPI (with halo exchange):
 ```
 mkdir build && cd build 
 export CXX_COMPILER=mpicxx
-cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ -DUSE_HALO_EXCHANGE=On ..
+cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ -DHALO_EXCHANGE=On ..
 make -jN
 ```
 

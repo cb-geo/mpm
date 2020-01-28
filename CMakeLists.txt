@@ -41,6 +41,9 @@ option(MPM_BUILD_TESTING "enable testing for mpm" ON)
 # CMake option for building mpm as a shared library for CI
 option(MPM_BUILD_LIB "enable libmpm" OFF)
 
+# Halo exchange
+option(HALO_EXCHANGE "Enable halo exchange" OFF)
+
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -56,6 +59,9 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # MPI
 find_package(MPI)
 if (MPI_FOUND)
+  if(HALO_EXCHANGE)
+    add_definitions(-DUSE_HALO_EXCHANGE)
+  endif()
   add_definitions("-DUSE_MPI")
   include_directories(${MPI_CXX_INCLUDE_DIRS})
   link_libraries(${MPI_CXX_LIBRARIES})
