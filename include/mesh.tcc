@@ -117,14 +117,76 @@ void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
 }
 
 #ifdef USE_MPI
+#ifdef USE_HALO_EXCHANGE
+//! Nodal halo exchange
+template <unsigned Tdim>
+template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
+          typename Tsetfunctor>
+void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
+                                          Tsetfunctor setter) {
+  // Create vector of nodal vectors
+  unsigned nnodes = this->domain_shared_nodes_.size();
+
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+  if (mpi_size > 1) {
+    // Vector of send requests
+    std::vector<MPI_Request> send_requests;
+    send_requests.reserve(ncomms_);
+
+    unsigned j = 0;
+    // Non-blocking send
+    for (unsigned i = 0; i < nnodes; ++i) {
+      Ttype property = getter(domain_shared_nodes_[i]);
+      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
+      for (auto& node_rank : node_mpi_ranks) {
+        if (node_rank != mpi_rank) {
+          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
+                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                    &send_requests[j]);
+          ++j;
+        }
+      }
+    }
+
+    // send complete
+    for (unsigned i = 0; i < ncomms_; ++i)
+      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    for (unsigned i = 0; i < nnodes; ++i) {
+      // Get value at current node
+      Ttype property = getter(domain_shared_nodes_[i]);
+
+      std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
+      // Receive from all shared ranks
+      for (auto& node_rank : node_mpi_ranks) {
+        if (node_rank != mpi_rank) {
+          Ttype value;
+          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank,
+                   domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+                   MPI_STATUS_IGNORE);
+          property += value;
+        }
+      }
+      setter(domain_shared_nodes_[i], property);
+    }
+  }
+}
+
+#else
 //! All reduce over nodal scalar property
 template <unsigned Tdim>
-template <typename Tgetfunctor, typename Tsetfunctor>
-void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
-                                                      Tsetfunctor setter) {
+template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
+          typename Tsetfunctor>
+void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
+                                          Tsetfunctor setter) {
   // Create vector of nodal scalars
-  std::vector<double> prop_get(nhalo_nodes_, 0.);
-  std::vector<double> prop_set(nhalo_nodes_, 0.);
+  std::vector<Ttype> prop_get(nhalo_nodes_, mpm::zero<Ttype>());
+  std::vector<Ttype> prop_set(nhalo_nodes_, mpm::zero<Ttype>());
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -132,36 +194,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
         prop_get.at(node->ghost_id()) = getter(node);
       });
 
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_, MPI_DOUBLE,
-                MPI_SUM, MPI_COMM_WORLD);
-
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->ghost_id()));
-      });
-}
-#endif
-
-#ifdef USE_MPI
-//! All reduce over nodal vector property
-template <unsigned Tdim>
-template <typename Tgetfunctor, typename Tsetfunctor>
-void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
-                                                      Tsetfunctor setter) {
-  // Create vector of nodal vectors
-  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(
-      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
-  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_set(
-      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
-
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->ghost_id()) = getter(node);
-      });
-
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tdim,
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tnparam,
                 MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
@@ -170,6 +203,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
         setter(node, prop_set.at(node->ghost_id()));
       });
 }
+#endif
 #endif
 
 //! Create cells from node lists
@@ -656,6 +690,24 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
                          });
 
   this->domain_shared_nodes_.clear();
+
+#ifdef USE_HALO_EXCHANGE
+  ncomms_ = 0;
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // If node has more than 1 MPI rank
+    std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
+    const unsigned nodal_mpi_ranks_size = nodal_mpi_ranks.size();
+    if (nodal_mpi_ranks_size > 1) {
+      if (nodal_mpi_ranks.find(mpi_rank) != nodal_mpi_ranks.end()) {
+        // Create Ghost ID
+        (*nitr)->ghost_id(ncomms_);
+        // Add to list of shared nodes on local rank
+        domain_shared_nodes_.add(*nitr);
+        ncomms_ += nodal_mpi_ranks_size - 1;
+      }
+    }
+  }
+#else
   nhalo_nodes_ = 0;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     std::set<unsigned> nodal_mpi_ranks = (*nitr)->mpi_ranks();
@@ -668,6 +720,7 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
         domain_shared_nodes_.add(*nitr);
     }
   }
+#endif
 }
 
 //! Locate particles in a cell
