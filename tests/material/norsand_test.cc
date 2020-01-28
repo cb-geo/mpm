@@ -117,8 +117,6 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
 
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == false);
-      REQUIRE(state_variables.at("p") == Approx(0.).epsilon(Tolerance));
-      REQUIRE(state_variables.at("q") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("M_theta") ==
               Approx((6 * sin_friction_cs) / (3 - sin_friction_cs))
                   .epsilon(Tolerance));
@@ -274,10 +272,7 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
 
     // Check state variables
     REQUIRE(state_vars.empty() == false);
-    REQUIRE(state_vars.at("p") ==
-            Approx(1.651557251020004E+05).epsilon(Tolerance));
-    REQUIRE(state_vars.at("q") ==
-            Approx(2.439744908058628E+05).epsilon(Tolerance));
+    REQUIRE(state_vars.at("M_theta") == Approx(1.2).epsilon(Tolerance));
     REQUIRE(state_vars.at("void_ratio") ==
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") ==
@@ -401,8 +396,6 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == false);
-      REQUIRE(state_variables.at("p") == Approx(0.).epsilon(Tolerance));
-      REQUIRE(state_variables.at("q") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("void_ratio") ==
               Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("e_image") ==
@@ -555,10 +548,7 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
 
     // Check state variables
     REQUIRE(state_vars.empty() == false);
-    REQUIRE(state_vars.at("p") ==
-            Approx(1.650683476592441E+05).epsilon(Tolerance));
-    REQUIRE(state_vars.at("q") ==
-            Approx(2.921386137809105E+05).epsilon(Tolerance));
+    REQUIRE(state_vars.at("M_theta") == Approx(1.2).epsilon(Tolerance));
     REQUIRE(state_vars.at("void_ratio") ==
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") ==

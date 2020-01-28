@@ -65,14 +65,6 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
 template <unsigned Tdim>
 mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
   mpm::dense_map state_vars = {
-      // Mean stress
-      {"p", 0.},
-      // Deviatoric stress
-      {"q", 0.},
-      // J2
-      {"j2", 0.},
-      // J2
-      {"j3", 0.},
       // M_theta
       {"M_theta", Mtc_},
       // Current void ratio
@@ -494,10 +486,13 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   Vector6d stress_neg = -1 * stress;
   Vector6d dstrain_neg = -1 * dstrain;
 
+  // Get stress invariants
+  auto invariants = this->compute_stress_invariants(stress_neg, state_vars);
+  double mean_p = invariants(0);
+
   // Elastic step
   // Bulk modulus computation
-  bulk_modulus_ =
-      (1. + (*state_vars).at("void_ratio")) / kappa_ * (*state_vars).at("p");
+  bulk_modulus_ = (1. + (*state_vars).at("void_ratio")) / kappa_ * mean_p;
   // Shear modulus computation
   shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
                        (2.0 * (1. + poisson_ratio_)) +
