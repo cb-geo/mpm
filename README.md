@@ -131,14 +131,16 @@ export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
 module load mpi/openmpi-x86_64
 ```
 
-Compile with OpenMPI:
+Compile with OpenMPI (with halo exchange):
 
 ```
 mkdir build && cd build 
 export CXX_COMPILER=mpicxx
-cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ ..
+cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ -DUSE_HALO_EXCHANGE=On ..
 make -jN
 ```
+
+To enable halo exchange set `-DUSE_HALO_EXCHANGE=On` in `CMake`. Halo exchange is a better MPI communication protocol, however, use this only for larger number of MPI tasks (> 4).
 
 ### Compile with Ninja build system [Alternative to Make]
 

@@ -126,7 +126,7 @@ class Mesh {
   //! \param[in] getter Getter function
   template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
             typename Tsetfunctor>
-  void allreduce_nodal_property(Tgetfunctor getter, Tsetfunctor setter);
+  void nodal_halo_exchange(Tgetfunctor getter, Tsetfunctor setter);
 #endif
 
   //! Create cells from list of nodes
