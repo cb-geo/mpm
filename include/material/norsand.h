@@ -51,29 +51,25 @@ class NorSand : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
-  //! Compute p, q and J2
-  //! \param[in] stress Stress
-  //! \retval vector of size three, containing p, q and j2
-  Eigen::Matrix<double, 3, 1> compute_pq(const Vector6d& stress);
-
-  //! Compute stress invariants (p, q, etc)
+  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
-  //! \retval status of computation of stress invariants
-  bool compute_stress_invariants(const Vector6d& stress,
-                                 mpm::dense_map* state_vars);
+  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
+  //! M_theta
+  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
+      const Vector6d& stress, mpm::dense_map* state_vars);
 
   //! Compute p_cohesion and p_dilation
   //! \param[in] state_vars History-dependent state variables
   //! \retval status of computation of stress invariants
-  bool compute_p_bond(mpm::dense_map* state_vars);
+  void compute_p_bond(mpm::dense_map* state_vars);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
   //! \param[in] yield_type Yild type (elastic or yield)
   //! \retval status of computation of stress invariants
-  bool compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
+  void compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
                                mpm::dense_map* state_vars,
                                FailureState yield_type);
 
@@ -83,7 +79,7 @@ class NorSand : public Material<Tdim> {
   //! \retval yield_type Yield type (elastic or yield)
   FailureState compute_yield_state(double* yield_function,
                                    const Vector6d& stress,
-                                   const mpm::dense_map* state_vars);
+                                   mpm::dense_map* state_vars);
 
  protected:
   //! material id
@@ -98,7 +94,7 @@ class NorSand : public Material<Tdim> {
   bool compute_elastic_tensor();
 
   //! Compute plastic tensor
-  bool compute_plastic_tensor(const Vector6d& stress,
+  void compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
   //! Elastic stiffness matrix

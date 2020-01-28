@@ -71,7 +71,7 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"q", 0.},
       // J2
       {"j2", 0.},
-      // J3
+      // J2
       {"j3", 0.},
       // M_theta
       {"M_theta", Mtc_},
@@ -82,18 +82,10 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
        gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_)},
       // Image pressure
       {"p_image", p_image_initial_},
-      // State variable psi
-      {"psi_image",
-       void_ratio_initial_ -
-           (gamma_ - lambda_ * log(p_image_initial_ / reference_pressure_))},
       // p_cohesion
       {"p_cohesion", p_cohesion_initial_},
-      // p_cohesion degradation function
-      {"zeta_cohesion", 1.},
       // p_dilation
       {"p_dilation", p_dilation_initial_},
-      // p_dilation degradation function
-      {"zeta_dilation", 1.},
       // Equivalent plastic deviatoric strain
       {"epds", 0.},
       // Plastic strain components
@@ -127,10 +119,10 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
   return true;
 }
 
-//! Compute p and q
+//! Compute stress invariants
 template <unsigned Tdim>
-Eigen::Matrix<double, 3, 1> mpm::NorSand<Tdim>::compute_pq(
-    const Vector6d& stress) {
+Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
+    const Vector6d& stress, mpm::dense_map* state_vars) {
 
   // Note that in this subroutine, stress is compression positive
 
@@ -151,39 +143,9 @@ Eigen::Matrix<double, 3, 1> mpm::NorSand<Tdim>::compute_pq(
   double deviatoric_q = std::sqrt(3 * j2);
   if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
 
-  Eigen::Matrix<double, 3, 1> invariants(mean_p, deviatoric_q, j2);
-
-  return invariants;
-}
-
-//! Compute stress invariants
-template <unsigned Tdim>
-bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
-                                                   mpm::dense_map* state_vars) {
-
-  // Note that in this subroutine, stress is compression positive
-
-  // Compute p, q and J2
-  auto invariants = this->compute_pq(stress);
-
-  double mean_p = invariants(0);
-  double deviatoric_q = invariants(1);
-  double j2 = invariants(2);
-
-  (*state_vars).at("p") = mean_p;
-  (*state_vars).at("j2") = j2;
-  (*state_vars).at("q") = deviatoric_q;
-
   // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) - mean_p;
-  dev_stress(1) = stress(1) - mean_p;
-  dev_stress(2) = stress(2) - mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
+  Vector6d dev_stress = stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
   // Compute J3
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
@@ -192,7 +154,6 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
     j3 += ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
            (dev_stress(0) * std::pow(dev_stress(4), 2)) -
            (dev_stress(1) * std::pow(dev_stress(5), 2)));
-  (*state_vars).at("j3") = j3;
 
   // Compute Lode angle value
   double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
@@ -207,22 +168,29 @@ bool mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   // Compute M_theta (Jefferies and Shuttle, 2011)
   const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
-  (*state_vars)["M_theta"] = M_theta;
 
-  return true;
+  // Store to return
+  Eigen::Matrix<double, 6, 1> invariants;
+  invariants << mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
+
+  return invariants;
 }
 
 //! Compute state parameters
 template <unsigned Tdim>
-bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
+void mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
                                                  const Vector6d& dstrain,
                                                  mpm::dense_map* state_vars,
                                                  FailureState yield_type) {
 
-  // Get state variables
-  const double mean_p = (*state_vars).at("p");
-  const double deviatoric_q = (*state_vars).at("q");
-  const double M_theta = (*state_vars).at("M_theta");
+  // Get invariants
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
+
+  double mean_p = invariants(0);
+  double deviatoric_q = invariants(1);
+
+  // Get state variables (note that M_theta used is at current stress)
+  double M_theta = (*state_vars).at("M_theta");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
   double p_image;
@@ -250,6 +218,10 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
     if (e_image < 1.0E-15) e_image = 1.0E-15;
 
     (*state_vars).at("e_image") = e_image;
+
+    // Update M_theta at the updated stress state
+    M_theta = invariants(5);
+    (*state_vars).at("M_theta") = M_theta;
   }
 
   // Update void ratio
@@ -259,47 +231,35 @@ bool mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
                       (1 + void_ratio_initial_) * dvolumetric_strain;
   if (void_ratio < 1.0E-15) void_ratio = 1.0E-15;
   (*state_vars).at("void_ratio") = void_ratio;
-
-  // Compute and update psi
-  double psi_image = void_ratio - e_image;
-  (*state_vars).at("psi_image") = psi_image;
-
-  return true;
 }
 
 //! Compute elastic tensor
 template <unsigned Tdim>
-bool mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
+void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
 
   // Compute current zeta cohesion
   double zeta_cohesion = exp(-m_cohesion_ * (*state_vars).at("epds"));
 
   if (zeta_cohesion > 1.)
-    (*state_vars).at("zeta_cohesion") = 1.;
+    zeta_cohesion = 1.;
   else if (zeta_cohesion < 1.0E-15)
-    (*state_vars).at("zeta_cohesion") = 0.;
-  else
-    (*state_vars).at("zeta_cohesion") = zeta_cohesion;
+    zeta_cohesion = 0.;
 
   // Update p_cohesion
-  double p_cohesion = p_cohesion_initial_ * (*state_vars).at("zeta_cohesion");
+  double p_cohesion = p_cohesion_initial_ * zeta_cohesion;
   (*state_vars).at("p_cohesion") = p_cohesion;
 
   // Compute current zeta dilation
   double zeta_dilation = exp(-m_dilation_ * (*state_vars).at("epds"));
 
   if (zeta_dilation > 1.)
-    (*state_vars).at("zeta_dilation") = 1.;
+    zeta_dilation = 1.;
   else if (zeta_dilation < 1.0E-15)
-    (*state_vars).at("zeta_dilation") = 0.;
-  else
-    (*state_vars).at("zeta_dilation") = zeta_dilation;
+    zeta_dilation = 0.;
 
   // Update p_dilation
-  double p_dilation = p_dilation_initial_ * (*state_vars).at("zeta_dilation");
+  double p_dilation = p_dilation_initial_ * zeta_dilation;
   (*state_vars).at("p_dilation") = p_dilation;
-
-  return true;
 }
 
 //! Compute yield function and yield state
@@ -307,15 +267,15 @@ template <unsigned Tdim>
 typename mpm::NorSand<Tdim>::FailureState
     mpm::NorSand<Tdim>::compute_yield_state(double* yield_function,
                                             const Vector6d& stress,
-                                            const mpm::dense_map* state_vars) {
+                                            mpm::dense_map* state_vars) {
 
   // Get stress invariants
-  auto invariants = this->compute_pq(stress);
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
 
-  const double mean_p = invariants(0);
-  const double deviatoric_q = invariants(1);
+  double mean_p = invariants(0);
+  double deviatoric_q = invariants(1);
 
-  // Get image pressure and M_theta
+  // Get state variables
   const double p_image = (*state_vars).at("p_image");
   const double M_theta = (*state_vars).at("M_theta");
   const double p_cohesion = (*state_vars).at("p_cohesion");
@@ -340,21 +300,30 @@ typename mpm::NorSand<Tdim>::FailureState
 
 //! Compute plastic tensor
 template <unsigned Tdim>
-bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
+void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
                                                 mpm::dense_map* state_vars) {
 
   // Note that in this subroutine, stress is compression positive
+
+  // Get stress invariants
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
+
+  double mean_p = invariants(0);
+  double deviatoric_q = invariants(1);
+  double j2 = invariants(2);
+  double j3 = invariants(3);
+  double lode_angle = invariants(4);
+
   // Get state variables
-  const double mean_p = (*state_vars).at("p");
-  const double deviatoric_q = (*state_vars).at("q");
   const double M_theta = (*state_vars).at("M_theta");
   const double p_image = (*state_vars).at("p_image");
-  const double psi_image = (*state_vars).at("psi_image");
+  const double e_image = (*state_vars).at("e_image");
+  const double void_ratio = (*state_vars).at("void_ratio");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
   // Estimate dilatancy at peak
-  const double D_min = chi_ * psi_image;
+  const double D_min = chi_ * (void_ratio - e_image);
 
   // Estimate maximum image pressure
   double p_image_max = (mean_p + p_cohesion) *
@@ -397,9 +366,6 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
   }
 
-  const double lode_angle = (*state_vars)["lode_angle"];
-  const double j2 = (*state_vars)["j2"];
-  const double j3 = (*state_vars)["j3"];
   const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
 
   // Compute dF / dM
@@ -507,8 +473,6 @@ bool mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Construct Dp matrix
   this->dp_ = (de_ * dF_dsigma * dF_dsigma.transpose() * de_) /
               (dF_dsigma.transpose() * de_ * dF_dsigma - hardening_term);
-
-  return true;
 }
 
 //! Compute stress
@@ -529,10 +493,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Note: compression positive in all derivations
   Vector6d stress_neg = -1 * stress;
   Vector6d dstrain_neg = -1 * dstrain;
-
-  // Compute current stress invariants (need to remove this, only needed in the
-  // first step)
-  this->compute_stress_invariants(stress_neg, state_vars);
 
   // Elastic step
   // Bulk modulus computation
@@ -558,9 +518,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   // Return the updated stress in elastic state
   if (yield_type == FailureState::Elastic) {
 
-    // Update stress invariants
-    this->compute_stress_invariants(trial_stress, state_vars);
-
     // Update state variables
     this->compute_state_variables(trial_stress, dstrain_neg, state_vars,
                                   yield_type);
@@ -581,9 +538,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   // Update stress
   Vector6d updated_stress = stress_neg + D_matrix * dstrain_neg;
-
-  // Update stress invariants
-  this->compute_stress_invariants(updated_stress, state_vars);
 
   // Update state variables
   this->compute_state_variables(updated_stress, dstrain_neg, state_vars,

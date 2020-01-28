@@ -1,7 +1,4 @@
-#include <fstream>
-#include <iostream>
 #include <limits>
-#include <string>
 
 #include <cmath>
 
@@ -77,64 +74,64 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
 
     // Get material properties
     REQUIRE(material->template property<double>("density") ==
-            Approx(jmaterial["density"]).epsilon(Tolerance));
+            Approx(jmaterial.at("density")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("poisson_ratio") ==
-            Approx(jmaterial["poisson_ratio"]).epsilon(Tolerance));
+            Approx(jmaterial.at("poisson_ratio")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("reference_pressure") ==
-            Approx(jmaterial["reference_pressure"]).epsilon(Tolerance));
+            Approx(jmaterial.at("reference_pressure")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("friction_cs") ==
-            Approx(jmaterial["friction_cs"]).epsilon(Tolerance));
+            Approx(jmaterial.at("friction_cs")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("N") ==
-            Approx(jmaterial["N"]).epsilon(Tolerance));
+            Approx(jmaterial.at("N")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("lambda") ==
-            Approx(jmaterial["lambda"]).epsilon(Tolerance));
+            Approx(jmaterial.at("lambda")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("kappa") ==
-            Approx(jmaterial["kappa"]).epsilon(Tolerance));
+            Approx(jmaterial.at("kappa")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("gamma") ==
-            Approx(jmaterial["gamma"]).epsilon(Tolerance));
+            Approx(jmaterial.at("gamma")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("chi") ==
-            Approx(jmaterial["chi"]).epsilon(Tolerance));
+            Approx(jmaterial.at("chi")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("hardening_modulus") ==
-            Approx(jmaterial["hardening_modulus"]).epsilon(Tolerance));
+            Approx(jmaterial.at("hardening_modulus")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("void_ratio_initial") ==
-            Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
+            Approx(jmaterial.at("void_ratio_initial")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("p_image_initial") ==
-            Approx(jmaterial["p_image_initial"]).epsilon(Tolerance));
+            Approx(jmaterial.at("p_image_initial")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("p_cohesion_initial") ==
-            Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
+            Approx(jmaterial.at("p_cohesion_initial")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("p_dilation_initial") ==
-            Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
+            Approx(jmaterial.at("p_dilation_initial")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("m_cohesion") ==
-            Approx(jmaterial["m_cohesion"]).epsilon(Tolerance));
+            Approx(jmaterial.at("m_cohesion")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("m_dilation") ==
-            Approx(jmaterial["m_dilation"]).epsilon(Tolerance));
+            Approx(jmaterial.at("m_dilation")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("m_shear") ==
-            Approx(jmaterial["m_shear"]).epsilon(Tolerance));
+            Approx(jmaterial.at("m_shear")).epsilon(Tolerance));
     REQUIRE(material->template property<bool>("bond_model") ==
-            jmaterial["bond_model"]);
+            jmaterial.at("bond_model"));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
+      const double sin_friction_cs =
+          sin(jmaterial.at("friction_cs").template get<double>() * M_PI / 180.);
+
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == false);
       REQUIRE(state_variables.at("p") == Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("q") == Approx(0.).epsilon(Tolerance));
+      REQUIRE(state_variables.at("M_theta") ==
+              Approx((6 * sin_friction_cs) / (3 - sin_friction_cs))
+                  .epsilon(Tolerance));
       REQUIRE(state_variables.at("void_ratio") ==
               Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("e_image") ==
               Approx(0.8533924079).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_image") ==
               Approx(87014.6).epsilon(Tolerance));
-      REQUIRE(state_variables.at("psi_image") ==
-              Approx(-0.0033924079).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_cohesion") ==
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("zeta_cohesion") ==
-              Approx(1.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_dilation") ==
               Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("zeta_dilation") ==
-              Approx(1.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("epds") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
@@ -287,12 +284,8 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
             Approx(0.7649824991).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
             Approx(210645.159465475).epsilon(Tolerance));
-    REQUIRE(state_vars.at("psi_image") ==
-            Approx(0.0850175009).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") == Approx(0.000).epsilon(Tolerance));
-    REQUIRE(state_vars.at("zeta_cohesion") == Approx(1.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") == Approx(0.000).epsilon(Tolerance));
-    REQUIRE(state_vars.at("zeta_dilation") == Approx(1.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("epds") == Approx(0.0057132055).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
             Approx(0.0066549427).epsilon(Tolerance));
@@ -416,16 +409,10 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
               Approx(0.8533924079).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_image") ==
               Approx(87014.6).epsilon(Tolerance));
-      REQUIRE(state_variables.at("psi_image") ==
-              Approx(-0.0033924079).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_cohesion") ==
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("zeta_cohesion") ==
-              Approx(1.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_dilation") ==
               Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("zeta_dilation") ==
-              Approx(1.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("epds") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
@@ -578,16 +565,10 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
             Approx(0.7525868778).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
             Approx(238443.2226123022).epsilon(Tolerance));
-    REQUIRE(state_vars.at("psi_image") ==
-            Approx(0.097413122200000).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") ==
             Approx(9.277575380378101E+03).epsilon(Tolerance));
-    REQUIRE(state_vars.at("zeta_cohesion") ==
-            Approx(0.927757538037810).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") ==
             Approx(1.962856807838786E+04).epsilon(Tolerance));
-    REQUIRE(state_vars.at("zeta_dilation") ==
-            Approx(0.981428403919393).epsilon(Tolerance));
     REQUIRE(state_vars.at("epds") == Approx(0.0037492427).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
             Approx(0.0046933414).epsilon(Tolerance));
