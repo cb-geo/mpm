@@ -119,12 +119,13 @@ void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
 #ifdef USE_MPI
 //! All reduce over nodal scalar property
 template <unsigned Tdim>
-template <typename Tgetfunctor, typename Tsetfunctor>
-void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
-                                                      Tsetfunctor setter) {
+template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
+          typename Tsetfunctor>
+void mpm::Mesh<Tdim>::allreduce_nodal_property(Tgetfunctor getter,
+                                               Tsetfunctor setter) {
   // Create vector of nodal scalars
-  std::vector<double> prop_get(nhalo_nodes_, 0.);
-  std::vector<double> prop_set(nhalo_nodes_, 0.);
+  std::vector<Ttype> prop_get(nhalo_nodes_, this->template zero<Ttype>());
+  std::vector<Ttype> prop_set(nhalo_nodes_, this->template zero<Ttype>());
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -132,36 +133,7 @@ void mpm::Mesh<Tdim>::allreduce_nodal_scalar_property(Tgetfunctor getter,
         prop_get.at(node->ghost_id()) = getter(node);
       });
 
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_, MPI_DOUBLE,
-                MPI_SUM, MPI_COMM_WORLD);
-
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->ghost_id()));
-      });
-}
-#endif
-
-#ifdef USE_MPI
-//! All reduce over nodal vector property
-template <unsigned Tdim>
-template <typename Tgetfunctor, typename Tsetfunctor>
-void mpm::Mesh<Tdim>::allreduce_nodal_vector_property(Tgetfunctor getter,
-                                                      Tsetfunctor setter) {
-  // Create vector of nodal vectors
-  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_get(
-      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
-  std::vector<Eigen::Matrix<double, Tdim, 1>> prop_set(
-      nhalo_nodes_, Eigen::Matrix<double, Tdim, 1>::Zero());
-
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->ghost_id()) = getter(node);
-      });
-
-  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tdim,
+  MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tnparam,
                 MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
   tbb::parallel_for_each(
@@ -1477,4 +1449,32 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   if (!status) throw std::runtime_error("Addition of particles to mesh failed");
 
   return status;
+}
+
+//! Zero
+template <>
+template <>
+inline Eigen::Matrix<double, 2, 1> mpm::Mesh<2>::zero() const {
+  return Eigen::Matrix<double, 2, 1>::Zero();
+}
+
+//! Zero
+template <>
+template <>
+inline double mpm::Mesh<2>::zero() const {
+  return 0.;
+}
+
+//! Zero
+template <>
+template <>
+inline Eigen::Matrix<double, 3, 1> mpm::Mesh<3>::zero() const {
+  return Eigen::Matrix<double, 3, 1>::Zero();
+}
+
+//! Zero
+template <>
+template <>
+inline double mpm::Mesh<3>::zero() const {
+  return 0.;
 }
