@@ -3,8 +3,9 @@
 
 #ifdef USE_MKL
 #define EIGEN_USE_MKL_ALL
-#include <Eigen/Dense>
 #endif
+
+#include <Eigen/Dense>
 
 namespace mpm {
 
