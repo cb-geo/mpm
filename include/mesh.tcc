@@ -124,8 +124,8 @@ template <typename Ttype, unsigned Tnparam, typename Tgetfunctor,
 void mpm::Mesh<Tdim>::allreduce_nodal_property(Tgetfunctor getter,
                                                Tsetfunctor setter) {
   // Create vector of nodal scalars
-  std::vector<Ttype> prop_get(nhalo_nodes_, this->template zero<Ttype>());
-  std::vector<Ttype> prop_set(nhalo_nodes_, this->template zero<Ttype>());
+  std::vector<Ttype> prop_get(nhalo_nodes_, mpm::zero<Ttype>());
+  std::vector<Ttype> prop_set(nhalo_nodes_, mpm::zero<Ttype>());
 
   tbb::parallel_for_each(
       domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
@@ -1449,32 +1449,4 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   if (!status) throw std::runtime_error("Addition of particles to mesh failed");
 
   return status;
-}
-
-//! Zero
-template <>
-template <>
-inline Eigen::Matrix<double, 2, 1> mpm::Mesh<2>::zero() const {
-  return Eigen::Matrix<double, 2, 1>::Zero();
-}
-
-//! Zero
-template <>
-template <>
-inline double mpm::Mesh<2>::zero() const {
-  return 0.;
-}
-
-//! Zero
-template <>
-template <>
-inline Eigen::Matrix<double, 3, 1> mpm::Mesh<3>::zero() const {
-  return Eigen::Matrix<double, 3, 1>::Zero();
-}
-
-//! Zero
-template <>
-template <>
-inline double mpm::Mesh<3>::zero() const {
-  return 0.;
 }

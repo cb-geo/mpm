@@ -410,10 +410,6 @@ class Mesh {
   bool locate_particle_cells(
       const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
 
-  //! Return zero
-  template <class Ttype>
-  Ttype zero() const;
-
  private:
   //! mesh id
   unsigned id_{std::numeric_limits<unsigned>::max()};
