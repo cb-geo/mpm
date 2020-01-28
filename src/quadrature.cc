@@ -24,6 +24,10 @@ static Register<mpm::Quadrature<2>, mpm::QuadrilateralQuadrature<2, 4>>
 static Register<mpm::Quadrature<2>, mpm::QuadrilateralQuadrature<2, 9>>
     quadrilateral9("QQ3");
 
+// Quadrilateral 16
+static Register<mpm::Quadrature<2>, mpm::QuadrilateralQuadrature<2, 16>>
+    quadrilateral16("QQ4");
+
 // Hexahedron 1
 static Register<mpm::Quadrature<3>, mpm::HexahedronQuadrature<3, 1>>
     hexahedron1("QH1");
@@ -34,4 +38,8 @@ static Register<mpm::Quadrature<3>, mpm::HexahedronQuadrature<3, 8>>
 
 // Hexahedron 27
 static Register<mpm::Quadrature<3>, mpm::HexahedronQuadrature<3, 27>>
-    hexahedron("QH3");
+    hexahedron27("QH3");
+
+// Hexahedron 64
+static Register<mpm::Quadrature<3>, mpm::HexahedronQuadrature<3, 64>>
+    hexahedron64("QH4");
