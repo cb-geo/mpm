@@ -463,6 +463,22 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
             REQUIRE(local_point[j] ==
                     Approx(quadrature(j, i)).epsilon(Tolerance));
         }
+
+        // Assign quadrature 4x4
+        cell->assign_quadrature(4);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 16);
+
+        auto quad16 = std::make_shared<mpm::QuadrilateralQuadrature<Dim, 16>>();
+        quadrature = quad16->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
       }
     }
   }
@@ -1161,6 +1177,22 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
         auto quad3 = std::make_shared<mpm::HexahedronQuadrature<Dim, 27>>();
         quadrature = quad3->quadratures();
+        // Check if the output coordinates match local quadratures
+        for (unsigned i = 0; i < points.size(); ++i) {
+          auto local_point = cell->transform_real_to_unit_cell(points.at(i));
+          for (unsigned j = 0; j < Dim; ++j)
+            REQUIRE(local_point[j] ==
+                    Approx(quadrature(j, i)).epsilon(Tolerance));
+        }
+
+        // Assign quadrature 4x4x4
+        cell->assign_quadrature(4);
+
+        points = cell->generate_points();
+        REQUIRE(points.size() == 64);
+
+        auto quad4 = std::make_shared<mpm::HexahedronQuadrature<Dim, 64>>();
+        quadrature = quad4->quadratures();
         // Check if the output coordinates match local quadratures
         for (unsigned i = 0; i < points.size(); ++i) {
           auto local_point = cell->transform_real_to_unit_cell(points.at(i));
