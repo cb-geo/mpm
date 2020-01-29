@@ -99,6 +99,14 @@ class NorSand : public Material<Tdim> {
   //! \retval status of computation of stress invariants
   void compute_p_bond(mpm::dense_map* state_vars);
 
+  //! Inline ternary function to check negative or zero numbers
+  inline double check_low(double val) {
+    return (val > 1.0e-15 ? val : 1.0e-15);
+  }
+
+  //! Inline ternary function to check number not greater than one
+  inline double check_one(double val) { return (val < 1.0 ? val : 1.0); }
+
   //! Elastic stiffness matrix
   Matrix6x6 de_;
   //! Plastic stiffness matrix

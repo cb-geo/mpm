@@ -229,11 +229,8 @@ void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
 
   // Compute current zeta cohesion
   double zeta_cohesion = exp(-m_cohesion_ * (*state_vars).at("epds"));
-
-  if (zeta_cohesion > 1.)
-    zeta_cohesion = 1.;
-  else if (zeta_cohesion < 1.0E-15)
-    zeta_cohesion = 0.;
+  zeta_cohesion = check_one(zeta_cohesion);
+  zeta_cohesion = check_low(zeta_cohesion);
 
   // Update p_cohesion
   double p_cohesion = p_cohesion_initial_ * zeta_cohesion;
@@ -241,11 +238,8 @@ void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
 
   // Compute current zeta dilation
   double zeta_dilation = exp(-m_dilation_ * (*state_vars).at("epds"));
-
-  if (zeta_dilation > 1.)
-    zeta_dilation = 1.;
-  else if (zeta_dilation < 1.0E-15)
-    zeta_dilation = 0.;
+  zeta_dilation = check_one(zeta_dilation);
+  zeta_dilation = check_low(zeta_dilation);
 
   // Update p_dilation
   double p_dilation = p_dilation_initial_ * zeta_dilation;
