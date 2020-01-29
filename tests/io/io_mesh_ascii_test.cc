@@ -253,9 +253,9 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
         friction_constraints;
 
     // Constraint
-    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 10.5));
-    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, -10.5));
-    friction_constraints.emplace_back(std::make_tuple(2, 0, 1, -12.5));
+    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
+    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
+    friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
     friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
 
     // Dump constraints as an input file to be read
@@ -773,9 +773,9 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         friction_constraints;
 
     // Constraint
-    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 10.5));
-    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, -10.5));
-    friction_constraints.emplace_back(std::make_tuple(2, 2, 1, -12.5));
+    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
+    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
+    friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
     friction_constraints.emplace_back(std::make_tuple(3, 2, -1, 0.0));
 
     // Dump constraints as an input file to be read
