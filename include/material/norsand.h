@@ -53,23 +53,6 @@ class NorSand : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
-  //! Compute state variables (void ratio, p_image, e_image, etc)
-  //! \param[in] stress Stress
-  //! \param[in] state_vars History-dependent state variables
-  //! \param[in] yield_type Yild type (elastic or yield)
-  //! \retval status of computation of stress invariants
-  void compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
-                               mpm::dense_map* state_vars,
-                               mpm::norsand::FailureState yield_type);
-
-  //! Compute yield function and yield state
-  //! \param[in] state_vars History-dependent state variables
-  //! \param[in] stress Stress
-  //! \retval yield_type Yield type (elastic or yield)
-  mpm::norsand::FailureState compute_yield_state(double* yield_function,
-                                                 const Vector6d& stress,
-                                                 mpm::dense_map* state_vars);
-
  protected:
   //! material id
   using Material<Tdim>::id_;
@@ -93,6 +76,23 @@ class NorSand : public Material<Tdim> {
   //! M_theta
   Eigen::Matrix<double, 6, 1> compute_stress_invariants(
       const Vector6d& stress, mpm::dense_map* state_vars);
+
+  //! Compute state variables (void ratio, p_image, e_image, etc)
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \param[in] yield_type Yild type (elastic or yield)
+  //! \retval status of computation of stress invariants
+  void compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
+                               mpm::dense_map* state_vars,
+                               mpm::norsand::FailureState yield_type);
+
+  //! Compute yield function and yield state
+  //! \param[in] state_vars History-dependent state variables
+  //! \param[in] stress Stress
+  //! \retval yield_type Yield type (elastic or yield)
+  mpm::norsand::FailureState compute_yield_state(double* yield_function,
+                                                 const Vector6d& stress,
+                                                 mpm::dense_map* state_vars);
 
   //! Compute p_cohesion and p_dilation
   //! \param[in] state_vars History-dependent state variables

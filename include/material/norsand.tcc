@@ -120,7 +120,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
 
   // Compute mean stress p
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
-  if (mean_p < 1.0E-15) mean_p = 1.0E-15;
+  mean_p = check_low(mean_p);
 
   // Compute J2
   double j2 = (std::pow((stress(0) - stress(1)), 2) +
