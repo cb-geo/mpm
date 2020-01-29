@@ -247,6 +247,67 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
     }
   }
 
+  SECTION("Check friction constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+        friction_constraints;
+
+    // Constraint
+    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 10.5));
+    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, -10.5));
+    friction_constraints.emplace_back(std::make_tuple(2, 0, 1, -12.5));
+    friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("friction-constraints-2d.txt");
+    // Write particle coordinates
+    for (const auto& friction_constraint : friction_constraints) {
+      file << std::get<0>(friction_constraint) << "\t";
+      file << std::get<1>(friction_constraint) << "\t";
+      file << std::get<2>(friction_constraint) << "\t";
+      file << std::get<3>(friction_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read friction constraints
+    SECTION("Check friction constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constraints from a non-existant file
+      auto constraints = read_mesh->read_friction_constraints(
+          "friction-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_friction_constraints("friction-constraints-2d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == friction_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < friction_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<2>(constraints.at(i)) ==
+            Approx(std::get<2>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<3>(constraints.at(i)) ==
+            Approx(std::get<3>(friction_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check forces file") {
     // Vector of particle forces
     std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
@@ -702,6 +763,67 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check friction constraints file") {
+    // Vector of friction constraints
+    std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+        friction_constraints;
+
+    // Constraint
+    friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 10.5));
+    friction_constraints.emplace_back(std::make_tuple(1, 1, -1, -10.5));
+    friction_constraints.emplace_back(std::make_tuple(2, 2, 1, -12.5));
+    friction_constraints.emplace_back(std::make_tuple(3, 2, -1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("friction-constraints-3d.txt");
+    // Write particle coordinates
+    for (const auto& friction_constraint : friction_constraints) {
+      file << std::get<0>(friction_constraint) << "\t";
+      file << std::get<1>(friction_constraint) << "\t";
+      file << std::get<2>(friction_constraint) << "\t";
+      file << std::get<3>(friction_constraint) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read friction constraints
+    SECTION("Check friction constraints") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constraints from a non-existant file
+      auto constraints = read_mesh->read_friction_constraints(
+          "friction-constraints-missing.txt");
+      // Check number of constraints
+      REQUIRE(constraints.size() == 0);
+
+      // Check constraints
+      constraints =
+          read_mesh->read_friction_constraints("friction-constraints-3d.txt");
+      // Check number of particles
+      REQUIRE(constraints.size() == friction_constraints.size());
+
+      // Check coordinates of nodes
+      for (unsigned i = 0; i < friction_constraints.size(); ++i) {
+        REQUIRE(
+            std::get<0>(constraints.at(i)) ==
+            Approx(std::get<0>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<1>(constraints.at(i)) ==
+            Approx(std::get<1>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<2>(constraints.at(i)) ==
+            Approx(std::get<2>(friction_constraints.at(i))).epsilon(Tolerance));
+        REQUIRE(
+            std::get<3>(constraints.at(i)) ==
+            Approx(std::get<3>(friction_constraints.at(i))).epsilon(Tolerance));
       }
     }
   }

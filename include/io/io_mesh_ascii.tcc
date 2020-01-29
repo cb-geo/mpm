@@ -468,7 +468,7 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
             // Direction
             unsigned dir;
             // Sign
-            unsigned sign;
+            int sign;
             // Friction
             double friction;
             // Read stream
