@@ -129,11 +129,11 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
                   6.0 +
               std::pow(stress(3), 2) + std::pow(stress(4), 2) +
               std::pow(stress(5), 2);
-  if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
+  j2 = check_low(j2);
 
   // Compute q
   double deviatoric_q = std::sqrt(3 * j2);
-  if (deviatoric_q < 1.0E-15) deviatoric_q = 1.0E-15;
+  deviatoric_q = check_low(deviatoric_q);
 
   // Compute the deviatoric stress
   Vector6d dev_stress = stress;
