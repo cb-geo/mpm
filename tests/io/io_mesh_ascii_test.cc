@@ -247,6 +247,57 @@ TEST_CASE("IOMeshAscii is checked for 2D", "[IOMesh][IOMeshAscii][2D]") {
     }
   }
 
+  SECTION("Check forces file") {
+    // Vector of particle forces
+    std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
+
+    // Constraint
+    nodal_forces.emplace_back(std::make_tuple(0, 0, 10.5));
+    nodal_forces.emplace_back(std::make_tuple(1, 1, -10.5));
+    nodal_forces.emplace_back(std::make_tuple(2, 0, -12.5));
+    nodal_forces.emplace_back(std::make_tuple(3, 1, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("forces-2d.txt");
+    // Write particle coordinates
+    for (const auto& force : nodal_forces) {
+      file << std::get<0>(force) << "\t";
+      file << std::get<1>(force) << "\t";
+      file << std::get<2>(force) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read forces
+    SECTION("Check forces") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constrtaints from a non-existant file
+      auto forces = read_mesh->read_forces("forces-missing.txt");
+      // Check number of forces
+      REQUIRE(forces.size() == 0);
+
+      // Check forces
+      forces = read_mesh->read_forces("forces-2d.txt");
+      // Check number of nodes
+      REQUIRE(forces.size() == nodal_forces.size());
+
+      // Check forces
+      for (unsigned i = 0; i < nodal_forces.size(); ++i) {
+        REQUIRE(std::get<0>(forces.at(i)) ==
+                Approx(std::get<0>(nodal_forces.at(i))).epsilon(Tolerance));
+        REQUIRE(std::get<1>(forces.at(i)) ==
+                Approx(std::get<1>(nodal_forces.at(i))).epsilon(Tolerance));
+        REQUIRE(std::get<2>(forces.at(i)) ==
+                Approx(std::get<2>(nodal_forces.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
   SECTION("Check nodal euler angle file") {
     // Map of euler angles
     std::map<mpm::Index, Eigen::Matrix<double, dim, 1>> euler_angles;
@@ -651,6 +702,57 @@ TEST_CASE("IOMeshAscii is checked for 3D", "[IOMesh][IOMeshAscii][3D]") {
         REQUIRE(
             std::get<2>(constraints.at(i)) ==
             Approx(std::get<2>(velocity_constraints.at(i))).epsilon(Tolerance));
+      }
+    }
+  }
+
+  SECTION("Check forces file") {
+    // Vector of particle forces
+    std::vector<std::tuple<mpm::Index, unsigned, double>> nodal_forces;
+
+    // Constraint
+    nodal_forces.emplace_back(std::make_tuple(0, 0, 10.5));
+    nodal_forces.emplace_back(std::make_tuple(1, 1, -10.5));
+    nodal_forces.emplace_back(std::make_tuple(2, 0, -12.5));
+    nodal_forces.emplace_back(std::make_tuple(3, 2, 0.0));
+
+    // Dump constraints as an input file to be read
+    std::ofstream file;
+    file.open("forces-3d.txt");
+    // Write particle coordinates
+    for (const auto& force : nodal_forces) {
+      file << std::get<0>(force) << "\t";
+      file << std::get<1>(force) << "\t";
+      file << std::get<2>(force) << "\t";
+
+      file << "\n";
+    }
+
+    file.close();
+
+    // Check read forces
+    SECTION("Check forces") {
+      // Create a read_mesh object
+      auto read_mesh = std::make_unique<mpm::IOMeshAscii<dim>>();
+
+      // Try to read constrtaints from a non-existant file
+      auto forces = read_mesh->read_forces("forces-missing.txt");
+      // Check number of forces
+      REQUIRE(forces.size() == 0);
+
+      // Check forces
+      forces = read_mesh->read_forces("forces-3d.txt");
+      // Check number of nodes
+      REQUIRE(forces.size() == nodal_forces.size());
+
+      // Check forces
+      for (unsigned i = 0; i < nodal_forces.size(); ++i) {
+        REQUIRE(std::get<0>(forces.at(i)) ==
+                Approx(std::get<0>(nodal_forces.at(i))).epsilon(Tolerance));
+        REQUIRE(std::get<1>(forces.at(i)) ==
+                Approx(std::get<1>(nodal_forces.at(i))).epsilon(Tolerance));
+        REQUIRE(std::get<2>(forces.at(i)) ==
+                Approx(std::get<2>(nodal_forces.at(i))).epsilon(Tolerance));
       }
     }
   }
