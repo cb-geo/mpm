@@ -211,6 +211,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/material/mohr_coulomb_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
+    ${mpm_SOURCE_DIR}/tests/material/norsand_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
