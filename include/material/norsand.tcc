@@ -127,8 +127,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
                std::pow((stress(1) - stress(2)), 2) +
                std::pow((stress(0) - stress(2)), 2)) /
                   6.0 +
-              std::pow(stress(3), 2);
-  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
+              std::pow(stress(3), 2) + std::pow(stress(4), 2) + std::pow(stress(5), 2);
   if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
 
   // Compute q
@@ -141,9 +140,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
 
   // Compute J3
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-              (dev_stress(2) * std::pow(dev_stress(3), 2));
-  if (Tdim == 3)
-    j3 += ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+              (dev_stress(2) * std::pow(dev_stress(3), 2)) + ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
            (dev_stress(0) * std::pow(dev_stress(4), 2)) -
            (dev_stress(1) * std::pow(dev_stress(5), 2)));
 
@@ -337,15 +334,8 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double dF_dq = 1.;
 
   // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) - mean_p;
-  dev_stress(1) = stress(1) - mean_p;
-  dev_stress(2) = stress(2) - mean_p;
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
+  Vector6d dev_stress = stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
   // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
@@ -353,10 +343,8 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
   dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
   dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
-  if (Tdim == 3) {
-    dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
-    dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
-  }
+  dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
+  dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
 
   const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
 
@@ -386,6 +374,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   dev3(0) = dev_stress(5);
   dev3(1) = dev_stress(4);
   dev3(2) = dev_stress(2);
+
   Vector6d dj3_dsigma = Vector6d::Zero();
   dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
   dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;

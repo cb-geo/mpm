@@ -22,8 +22,8 @@ class NorSand : public Material<Tdim> {
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
 
   //! Failure state
-  enum FailureState { Elastic = 0, Yield = 1 };
-
+  enum class FailureState {Elastic, Yield};
+  
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties
   NorSand(unsigned id, const Json& material_properties);
