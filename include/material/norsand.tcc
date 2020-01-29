@@ -169,10 +169,9 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
 
 //! Compute state parameters
 template <unsigned Tdim>
-void mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
-                                                 const Vector6d& dstrain,
-                                                 mpm::dense_map* state_vars,
-                                                 FailureState yield_type) {
+void mpm::NorSand<Tdim>::compute_state_variables(
+    const Vector6d& stress, const Vector6d& dstrain, mpm::dense_map* state_vars,
+    mpm::norsand::FailureState yield_type) {
 
   // Get invariants
   auto invariants = this->compute_stress_invariants(stress, state_vars);
@@ -187,7 +186,7 @@ void mpm::NorSand<Tdim>::compute_state_variables(const Vector6d& stress,
   double p_image;
   double e_image;
 
-  if (yield_type == mpm::NorSand<Tdim>::FailureState::Elastic) {
+  if (yield_type == mpm::norsand::FailureState::Elastic) {
     // Keep the same pressure image and void ratio image at critical state
     p_image = (*state_vars).at("p_image");
     e_image = (*state_vars).at("e_image");
@@ -255,10 +254,9 @@ void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
 
 //! Compute yield function and yield state
 template <unsigned Tdim>
-typename mpm::NorSand<Tdim>::FailureState
-    mpm::NorSand<Tdim>::compute_yield_state(double* yield_function,
-                                            const Vector6d& stress,
-                                            mpm::dense_map* state_vars) {
+typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
+    double* yield_function, const Vector6d& stress,
+    mpm::dense_map* state_vars) {
 
   // Get stress invariants
   auto invariants = this->compute_stress_invariants(stress, state_vars);
@@ -272,8 +270,8 @@ typename mpm::NorSand<Tdim>::FailureState
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
 
-  // Initialise yield status (Elastic, Plastic)
-  auto yield_type = FailureState::Elastic;
+  // Initialise yield status (Elastic, Yield)
+  auto yield_type = mpm::norsand::FailureState::Elastic;
 
   // Compute yield functions
   (*yield_function) =
@@ -284,7 +282,8 @@ typename mpm::NorSand<Tdim>::FailureState
                                    (N_ / (1 - N_))));
 
   // Yield criterion
-  if ((*yield_function) > 1.E-15) yield_type = FailureState::Yield;
+  if ((*yield_function) > 1.E-15)
+    yield_type = mpm::norsand::FailureState::Yield;
 
   return yield_type;
 }
@@ -505,7 +504,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
       this->compute_yield_state(&yield_function, trial_stress, state_vars);
 
   // Return the updated stress in elastic state
-  if (yield_type == FailureState::Elastic) {
+  if (yield_type == mpm::norsand::FailureState::Elastic) {
 
     // Update state variables
     this->compute_state_variables(trial_stress, dstrain_neg, state_vars,

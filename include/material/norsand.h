@@ -9,6 +9,11 @@
 
 namespace mpm {
 
+namespace norsand {
+//! Failure state
+enum class FailureState { Elastic, Yield };
+}  // namespace norsand
+
 //! NorSand class
 //! \brief NorSand material model
 //! \details NorSand material model with softening
@@ -20,9 +25,6 @@ class NorSand : public Material<Tdim> {
   using Vector6d = Eigen::Matrix<double, 6, 1>;
   //! Define a Matrix of 6 x 6
   using Matrix6x6 = Eigen::Matrix<double, 6, 6>;
-
-  //! Failure state
-  enum class FailureState { Elastic, Yield };
 
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties
@@ -58,15 +60,15 @@ class NorSand : public Material<Tdim> {
   //! \retval status of computation of stress invariants
   void compute_state_variables(const Vector6d& stress, const Vector6d& dstrain,
                                mpm::dense_map* state_vars,
-                               FailureState yield_type);
+                               mpm::norsand::FailureState yield_type);
 
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
   //! \param[in] stress Stress
   //! \retval yield_type Yield type (elastic or yield)
-  FailureState compute_yield_state(double* yield_function,
-                                   const Vector6d& stress,
-                                   mpm::dense_map* state_vars);
+  mpm::norsand::FailureState compute_yield_state(double* yield_function,
+                                                 const Vector6d& stress,
+                                                 mpm::dense_map* state_vars);
 
  protected:
   //! material id
