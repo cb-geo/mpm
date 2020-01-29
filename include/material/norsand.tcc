@@ -391,9 +391,12 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
   dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
   dj3_dsigma(3) = dev1.dot(dev2);
-  if (Tdim == 3) {
-    dj3_dsigma(4) = dev2.dot(dev3);
-    dj3_dsigma(5) = dev1.dot(dev3);
+  dj3_dsigma(4) = dev2.dot(dev3);
+  dj3_dsigma(5) = dev1.dot(dev3);
+
+  if (Tdim == 2) {
+    dj3_dsigma(4) = 0.;
+    dj3_dsigma(5) = 0.;
   }
 
   // Compute dtheta / dsigma

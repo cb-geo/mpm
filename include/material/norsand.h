@@ -51,19 +51,6 @@ class NorSand : public Material<Tdim> {
                           const ParticleBase<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
-  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
-  //! \param[in] stress Stress
-  //! \param[in] state_vars History-dependent state variables
-  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
-  //! M_theta
-  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
-      const Vector6d& stress, mpm::dense_map* state_vars);
-
-  //! Compute p_cohesion and p_dilation
-  //! \param[in] state_vars History-dependent state variables
-  //! \retval status of computation of stress invariants
-  void compute_p_bond(mpm::dense_map* state_vars);
-
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
@@ -96,6 +83,19 @@ class NorSand : public Material<Tdim> {
   //! Compute plastic tensor
   void compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
+
+  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
+  //! M_theta
+  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
+      const Vector6d& stress, mpm::dense_map* state_vars);
+
+  //! Compute p_cohesion and p_dilation
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval status of computation of stress invariants
+  void compute_p_bond(mpm::dense_map* state_vars);
 
   //! Elastic stiffness matrix
   Matrix6x6 de_;
