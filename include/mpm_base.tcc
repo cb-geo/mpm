@@ -640,6 +640,7 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
             throw std::runtime_error(
                 "Nodal force file is invalid, forces are not properly "
                 "assigned");
+          set_node_concentrated_force_ = true;
         } else {
           // Get the math function
           std::shared_ptr<FunctionBase> ffunction = nullptr;

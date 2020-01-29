@@ -98,7 +98,7 @@ class IOMesh {
       read_friction_constraints(
           const std::string& friction_constraints_file) = 0;
 
-  //! Read traction file
+  //! Read forces file
   //! \param[in] forces_files file name with nodal concentrated force
   virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
       const std::string& forces_file) = 0;
