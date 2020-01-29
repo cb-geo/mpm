@@ -1531,3 +1531,102 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
 
   return status;
 }
+
+//! Assign nodal concentrated force
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>& nodal_forces) {
+  bool status = true;
+  // TODO: Remove phase
+  const unsigned phase = 0;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign traction");
+    for (const auto& nodal_force : nodal_forces) {
+      // Node id
+      mpm::Index pid = std::get<0>(nodal_force);
+      // Direction
+      unsigned dir = std::get<1>(nodal_force);
+      // Force
+      double force = std::get<2>(nodal_force);
+
+      if (map_nodes_.find(pid) != map_nodes_.end())
+        status = map_nodes_[pid]->assign_traction_force(phase, dir, force);
+
+      if (!status) throw std::runtime_error("Force is invalid for node");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign velocity constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_velocity_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+        velocity_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign velocity "
+          "constraints");
+
+    for (const auto& velocity_constraint : velocity_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(velocity_constraint);
+      // Direction
+      unsigned dir = std::get<1>(velocity_constraint);
+      // Velocity
+      double velocity = std::get<2>(velocity_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
+
+      if (!status)
+        throw std::runtime_error("Node or velocity constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign friction constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_friction_constraints(
+    const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+        friction_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign friction "
+          "constraints");
+
+    for (const auto& friction_constraint : friction_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(friction_constraint);
+      // Direction
+      unsigned dir = std::get<1>(friction_constraint);
+      // Sign
+      int sign = std::get<2>(friction_constraint);
+      // Friction
+      double friction = std::get<3>(friction_constraint);
+
+      // Apply constraint
+      status = map_nodes_[nid]->assign_friction_constraint(dir, sign, friction);
+
+      if (!status)
+        throw std::runtime_error("Node or friction constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
