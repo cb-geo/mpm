@@ -127,7 +127,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
                std::pow((stress(1) - stress(2)), 2) +
                std::pow((stress(0) - stress(2)), 2)) /
                   6.0 +
-              std::pow(stress(3), 2) + std::pow(stress(4), 2) + std::pow(stress(5), 2);
+              std::pow(stress(3), 2) + std::pow(stress(4), 2) +
+              std::pow(stress(5), 2);
   if (fabs(j2) < 1.0E-15) j2 = 1.0E-15;
 
   // Compute q
@@ -140,9 +141,10 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
 
   // Compute J3
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-              (dev_stress(2) * std::pow(dev_stress(3), 2)) + ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-           (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-           (dev_stress(1) * std::pow(dev_stress(5), 2)));
+              (dev_stress(2) * std::pow(dev_stress(3), 2)) +
+              ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+               (dev_stress(0) * std::pow(dev_stress(4), 2)) -
+               (dev_stress(1) * std::pow(dev_stress(5), 2)));
 
   // Compute Lode angle value
   double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
