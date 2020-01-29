@@ -1552,7 +1552,8 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
       double force = std::get<2>(nodal_force);
 
       if (map_nodes_.find(pid) != map_nodes_.end())
-        status = map_nodes_[pid]->assign_traction_force(phase, dir, force);
+        status = map_nodes_[pid]->assign_concentrated_force(phase, dir, force,
+                                                            nullptr);
 
       if (!status) throw std::runtime_error("Force is invalid for node");
     }

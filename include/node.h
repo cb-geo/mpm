@@ -81,11 +81,11 @@ class Node : public NodeBase<Tdim> {
   //! Assign concentrated force to the node
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Nodal concentrated force in specified direction
+  //! \param[in] force Nodal concentrated force in specified direction
   //! \param[in] function math function
   //! \retval status Assignment status
   bool assign_concentrated_force(
-      unsigned phase, unsigned direction, double traction,
+      unsigned phase, unsigned direction, double force,
       const std::shared_ptr<FunctionBase>& function) override;
 
   //! Apply concentrated force to external force
