@@ -86,6 +86,23 @@ class IOMesh {
       const std::string& particles_cells_file,
       const std::vector<std::array<mpm::Index, 2>>& particles_cells) = 0;
 
+  //! Read velocity constraints file
+  //! \param[in] velocity_constraints_files file name with constraints
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_velocity_constraints(
+          const std::string& velocity_constraints_file) = 0;
+
+  //! Read friction constraints file
+  //! \param[in] friction_constraints_files file name with frictions
+  virtual std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+      read_friction_constraints(
+          const std::string& friction_constraints_file) = 0;
+
+  //! Read forces file
+  //! \param[in] forces_files file name with nodal concentrated force
+  virtual std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
+      const std::string& forces_file) = 0;
+
 };  // IOMesh class
 }  // namespace mpm
 

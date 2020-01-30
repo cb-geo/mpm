@@ -391,3 +391,142 @@ void mpm::IOMeshAscii<Tdim>::write_particles_cells(
 
   file.close();
 }
+
+//! Return velocity constraints of nodes or particles
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::IOMeshAscii<Tdim>::read_velocity_constraints(
+        const std::string& velocity_constraints_file) {
+
+  // Nodal or particle velocity constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(velocity_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Direction
+            unsigned dir;
+            // Velocity
+            double velocity;
+            // Read stream
+            istream >> id >> dir >> velocity;
+            constraints.emplace_back(std::make_tuple(id, dir, velocity));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read velocity constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
+//! Return friction constraints of particles
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+    mpm::IOMeshAscii<Tdim>::read_friction_constraints(
+        const std::string& friction_constraints_file) {
+
+  // Nodal friction constraints
+  std::vector<std::tuple<mpm::Index, unsigned, int, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(friction_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Direction
+            unsigned dir;
+            // Sign
+            int sign;
+            // Friction
+            double friction;
+            // Read stream
+            istream >> id >> dir >> sign >> friction;
+            constraints.emplace_back(std::make_tuple(id, dir, sign, friction));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read friction constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
+//! Return particles force
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, unsigned, double>>
+    mpm::IOMeshAscii<Tdim>::read_forces(const std::string& force_file) {
+
+  // particle forces
+  std::vector<std::tuple<mpm::Index, unsigned, double>> forces;
+  forces.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(force_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Direction
+            unsigned dir;
+            // Force
+            double force;
+            // Read stream
+            istream >> id >> dir >> force;
+            forces.emplace_back(std::make_tuple(id, dir, force));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read force : {}", exception.what());
+    file.close();
+  }
+  return forces;
+}

@@ -598,8 +598,7 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     // Create a file reader
     const std::string io_type =
         io_->json_object("mesh")["io_type"].template get<std::string>();
-    auto traction_reader =
-        Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+    auto reader = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
     // Read and assign particles surface tractions
     if (loads.find("particle_surface_traction") != loads.end()) {
@@ -631,25 +630,38 @@ bool mpm::MPMBase<Tdim>::initialise_loads() {
     // Read and assign nodal concentrated forces
     if (loads.find("concentrated_nodal_forces") != loads.end()) {
       for (const auto& nforce : loads["concentrated_nodal_forces"]) {
-        // Get the math function
-        std::shared_ptr<FunctionBase> ffunction = nullptr;
-        if (nforce.find("math_function_id") != nforce.end())
-          ffunction = math_functions_.at(
-              nforce.at("math_function_id").template get<unsigned>());
-        // Set id
-        int nset_id = nforce.at("nset_id").template get<int>();
-        // Direction
-        unsigned dir = nforce.at("dir").template get<unsigned>();
-        // Traction
-        double force = nforce.at("force").template get<double>();
+        // Forces are specified in a file
+        if (nforce.find("file") != nforce.end()) {
+          std::string force_file =
+              nforce.at("file").template get<std::string>();
+          bool nodal_forces = mesh_->assign_nodal_concentrated_forces(
+              reader->read_forces(io_->file_name(force_file)));
+          if (!nodal_forces)
+            throw std::runtime_error(
+                "Nodal force file is invalid, forces are not properly "
+                "assigned");
+          set_node_concentrated_force_ = true;
+        } else {
+          // Get the math function
+          std::shared_ptr<FunctionBase> ffunction = nullptr;
+          if (nforce.find("math_function_id") != nforce.end())
+            ffunction = math_functions_.at(
+                nforce.at("math_function_id").template get<unsigned>());
+          // Set id
+          int nset_id = nforce.at("nset_id").template get<int>();
+          // Direction
+          unsigned dir = nforce.at("dir").template get<unsigned>();
+          // Traction
+          double force = nforce.at("force").template get<double>();
 
-        // Read and assign nodal concentrated forces
-        bool nodal_force = mesh_->assign_nodal_concentrated_forces(
-            ffunction, nset_id, dir, force);
-        if (!nodal_force)
-          throw std::runtime_error(
-              "Concentrated nodal forces are not properly assigned");
-        set_node_concentrated_force_ = true;
+          // Read and assign nodal concentrated forces
+          bool nodal_force = mesh_->assign_nodal_concentrated_forces(
+              ffunction, nset_id, dir, force);
+          if (!nodal_force)
+            throw std::runtime_error(
+                "Concentrated nodal forces are not properly assigned");
+          set_node_concentrated_force_ = true;
+        }
       }
     } else
       console_->warn("No concentrated nodal force is defined for the analysis");
@@ -760,17 +772,29 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
       // Iterate over velocity constraints
       for (const auto& constraints :
            mesh_props["boundary_conditions"]["velocity_constraints"]) {
+        // Velocity constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string velocity_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool velocity_constraints = mesh_->assign_nodal_velocity_constraints(
+              mesh_io->read_velocity_constraints(
+                  io_->file_name(velocity_constraints_file)));
+          if (!velocity_constraints)
+            throw std::runtime_error(
+                "Velocity constraints are not properly assigned");
 
-        // Set id
-        int nset_id = constraints.at("nset_id").template get<int>();
-        // Direction
-        unsigned dir = constraints.at("dir").template get<unsigned>();
-        // Velocity
-        double velocity = constraints.at("velocity").template get<double>();
-        // Add velocity constraint to mesh
-        auto velocity_constraint =
-            std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-        mesh_->assign_nodal_velocity_constraint(nset_id, velocity_constraint);
+        } else {
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Direction
+          unsigned dir = constraints.at("dir").template get<unsigned>();
+          // Velocity
+          double velocity = constraints.at("velocity").template get<double>();
+          // Add velocity constraint to mesh
+          auto velocity_constraint =
+              std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
+          mesh_->assign_nodal_velocity_constraint(nset_id, velocity_constraint);
+        }
       }
     } else
       throw std::runtime_error("Velocity constraints JSON not found");
@@ -792,19 +816,33 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
       // Iterate over velocity constraints
       for (const auto& constraints :
            mesh_props["boundary_conditions"]["friction_constraints"]) {
+        // Friction constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string friction_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool friction_constraints = mesh_->assign_nodal_friction_constraints(
+              mesh_io->read_friction_constraints(
+                  io_->file_name(friction_constraints_file)));
+          if (!friction_constraints)
+            throw std::runtime_error(
+                "Friction constraints are not properly assigned");
 
-        // Set id
-        int nset_id = constraints.at("nset_id").template get<int>();
-        // Direction
-        unsigned dir = constraints.at("dir").template get<unsigned>();
-        // Sign n
-        int sign_n = constraints.at("sign_n").template get<int>();
-        // Friction
-        double friction = constraints.at("friction").template get<double>();
-        // Add friction constraint to mesh
-        auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
-            nset_id, dir, sign_n, friction);
-        mesh_->assign_nodal_frictional_constraint(nset_id, friction_constraint);
+        } else {
+
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Direction
+          unsigned dir = constraints.at("dir").template get<unsigned>();
+          // Sign n
+          int sign_n = constraints.at("sign_n").template get<int>();
+          // Friction
+          double friction = constraints.at("friction").template get<double>();
+          // Add friction constraint to mesh
+          auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
+              nset_id, dir, sign_n, friction);
+          mesh_->assign_nodal_frictional_constraint(nset_id,
+                                                    friction_constraint);
+        }
       }
     } else
       throw std::runtime_error("Friction constraints JSON not found");

@@ -1098,6 +1098,68 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                       set_id, friction_constraint) == false);
         }
 
+        // Test assign velocity constraints to nodes
+        SECTION("Check assign velocity constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+          velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
+          velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->assign_nodal_velocity_constraints(
+                      velocity_constraints) == true);
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
+          REQUIRE(mesh->assign_nodal_velocity_constraints(
+                      velocity_constraints) == false);
+        }
+
+        // Test assign friction constraints to nodes
+        SECTION("Check assign friction constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+              friction_constraints;
+          // Constraint
+          friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
+          friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
+          friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
+          friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
+
+          REQUIRE(mesh->assign_nodal_friction_constraints(
+                      friction_constraints) == true);
+          // When constraints fail
+          friction_constraints.emplace_back(std::make_tuple(3, 2, -1, 0.0));
+          REQUIRE(mesh->assign_nodal_friction_constraints(
+                      friction_constraints) == false);
+        }
+
+        // Test assign nodes concentrated_forces
+        SECTION("Check assign nodes concentrated_forces") {
+          // Vector of node coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              nodes_concentrated_forces;
+          // Concentrated_Forces
+          nodes_concentrated_forces.emplace_back(std::make_tuple(0, 0, 10.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(1, 1, -10.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(2, 0, -12.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->nnodes() == 6);
+
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == true);
+          // When concentrated_forces fail
+          nodes_concentrated_forces.emplace_back(std::make_tuple(3, 2, 0.0));
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == false);
+          nodes_concentrated_forces.emplace_back(std::make_tuple(300, 0, 0.0));
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == false);
+        }
+
         // Test assign rotation matrices to nodes
         SECTION("Check assign rotation matrices to nodes") {
           // Map of nodal id and euler angles
@@ -2337,6 +2399,68 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
               set_id, dir, sign_n, friction);
           REQUIRE(mesh->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == false);
+        }
+
+        // Test assign velocity constraints to nodes
+        SECTION("Check assign velocity constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              velocity_constraints;
+          // Constraint
+          velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
+          velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
+          velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
+          velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->assign_nodal_velocity_constraints(
+                      velocity_constraints) == true);
+          // When constraints fail
+          velocity_constraints.emplace_back(std::make_tuple(3, 3, 0.0));
+          REQUIRE(mesh->assign_nodal_velocity_constraints(
+                      velocity_constraints) == false);
+        }
+
+        // Test assign friction constraints to nodes
+        SECTION("Check assign friction constraints to nodes") {
+          // Vector of particle coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+              friction_constraints;
+          // Constraint
+          friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
+          friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
+          friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
+          friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
+
+          REQUIRE(mesh->assign_nodal_friction_constraints(
+                      friction_constraints) == true);
+          // When constraints fail
+          friction_constraints.emplace_back(std::make_tuple(3, 3, -1, 0.0));
+          REQUIRE(mesh->assign_nodal_friction_constraints(
+                      friction_constraints) == false);
+        }
+
+        // Test assign nodes concentrated_forces
+        SECTION("Check assign nodes concentrated_forces") {
+          // Vector of node coordinates
+          std::vector<std::tuple<mpm::Index, unsigned, double>>
+              nodes_concentrated_forces;
+          // Concentrated_Forces
+          nodes_concentrated_forces.emplace_back(std::make_tuple(0, 0, 10.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(1, 1, -10.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(2, 0, -12.5));
+          nodes_concentrated_forces.emplace_back(std::make_tuple(3, 1, 0.0));
+
+          REQUIRE(mesh->nnodes() == 12);
+
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == true);
+          // When concentrated_forces fail
+          nodes_concentrated_forces.emplace_back(std::make_tuple(3, 3, 0.0));
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == false);
+          nodes_concentrated_forces.emplace_back(std::make_tuple(300, 0, 0.0));
+          REQUIRE(mesh->assign_nodal_concentrated_forces(
+                      nodes_concentrated_forces) == false);
         }
 
         // Test assign rotation matrices to nodes

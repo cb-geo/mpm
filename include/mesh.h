@@ -275,6 +275,25 @@ class Mesh {
       int nset_id,
       const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
 
+  //! Assign velocity constraints to nodes
+  //! \param[in] velocity_constraints Constraint at node, dir, and velocity
+  bool assign_nodal_velocity_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          velocity_constraints);
+
+  //! Assign friction constraints to nodes
+  //! \param[in] friction_constraints Constraint at node, dir, sign, and
+  //! friction
+  bool assign_nodal_friction_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+          friction_constraints);
+
+  //! Assign nodal concentrated force
+  //! \param[in] nodal_forces Force at dir on nodes
+  bool assign_nodal_concentrated_forces(
+      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
+          nodal_forces);
+
   //! Assign nodal concentrated force
   //! \param[in] mfunction Math function if defined
   //! \param[in] setid Node set id

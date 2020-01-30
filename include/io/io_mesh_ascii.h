@@ -74,6 +74,23 @@ class IOMeshAscii : public IOMesh<Tdim> {
       const std::string& particles_cells_file,
       const std::vector<std::array<mpm::Index, 2>>& particles_cells) override;
 
+  //! Read constraints file
+  //! \param[in] velocity_constraints_files file name with constraints
+  std::vector<std::tuple<mpm::Index, unsigned, double>>
+      read_velocity_constraints(
+          const std::string& velocity_constraints_file) override;
+
+  //! Read friction constraints file
+  //! \param[in] friction_constraints_files file name with frictions
+  std::vector<std::tuple<mpm::Index, unsigned, int, double>>
+      read_friction_constraints(
+          const std::string& friction_constraints_file) override;
+
+  //! Read traction file
+  //! \param[in] forces_files file name with nodal concentrated force
+  std::vector<std::tuple<mpm::Index, unsigned, double>> read_forces(
+      const std::string& forces_file) override;
+
  private:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
