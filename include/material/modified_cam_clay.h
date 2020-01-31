@@ -1,5 +1,5 @@
-#ifndef MPM_MATERIAL_CAM_CLAY_H_
-#define MPM_MATERIAL_CAM_CLAY_H_
+#ifndef MPM_MATERIAL_MODIFIED_CAM_CLAY_H_
+#define MPM_MATERIAL_MODIFIED_CAM_CLAY_H_
 
 #include <limits>
 
@@ -11,11 +11,11 @@
 
 namespace mpm {
 
-//! CamClay class
-//! \brief Cam Clay material model
+//! ModifiedCamClay class
+//! \brief Modified Cam Clay material model
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class CamClay : public Material<Tdim> {
+class ModifiedCamClay : public Material<Tdim> {
  public:
   //! Define a vector of 6 dof
   using Vector6d = Eigen::Matrix<double, 6, 1>;
@@ -27,16 +27,16 @@ class CamClay : public Material<Tdim> {
 
   //! Constructor with id and material properties
   //! \param[in] material_properties Material properties
-  CamClay(unsigned id, const Json& material_properties);
+  ModifiedCamClay(unsigned id, const Json& material_properties);
 
   //! Destructor
-  ~CamClay() override{};
+  ~ModifiedCamClay() override{};
 
   //! Delete copy constructor
-  CamClay(const CamClay&) = delete;
+  ModifiedCamClay(const ModifiedCamClay&) = delete;
 
   //! Delete assignement operator
-  CamClay& operator=(const CamClay&) = delete;
+  ModifiedCamClay& operator=(const ModifiedCamClay&) = delete;
 
   //! Initialise history variables
   //! \retval state_vars State variables with history
@@ -133,7 +133,7 @@ class CamClay : public Material<Tdim> {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Cam Clay parameters
+  //! Modified Cam Clay parameters
   //! Reference mean pressure
   double p_ref_{std::numeric_limits<double>::max()};
   //! Reference void ratio
@@ -174,9 +174,9 @@ class CamClay : public Material<Tdim> {
   double m_shear_ = {std::numeric_limits<double>::epsilon()};
   //! Hydrate saturation
   double s_h_{std::numeric_limits<double>::epsilon()};
-};  // CamClay class
+};  // ModifiedCamClay class
 }  // namespace mpm
 
-#include "cam_clay.tcc"
+#include "modified_cam_clay.tcc"
 
-#endif  // MPM_MATERIAL_CAM_CLAY_H_
+#endif  // MPM_MATERIAL_MODIFIED_CAM_CLAY_H_

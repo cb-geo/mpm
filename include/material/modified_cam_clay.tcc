@@ -1,6 +1,7 @@
 //! Constructor with id and material properties
 template <unsigned Tdim>
-mpm::CamClay<Tdim>::CamClay(unsigned id, const Json& material_properties)
+mpm::ModifiedCamClay<Tdim>::ModifiedCamClay(unsigned id,
+                                            const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
     // General parameters--------------------------------------------
@@ -14,7 +15,7 @@ mpm::CamClay<Tdim>::CamClay(unsigned id, const Json& material_properties)
         material_properties["poisson_ratio"].template get<double>();
     // Properties
     properties_ = material_properties;
-    // Cam Clay parameters-------------------------------------------
+    // Modified Cam Clay parameters-------------------------------------------
     // Reference void ratio
     e_ref_ = material_properties["e_ref"].template get<double>();
     // Reference mean pressure
@@ -69,7 +70,7 @@ mpm::CamClay<Tdim>::CamClay(unsigned id, const Json& material_properties)
 
 //! Initialise state variables
 template <unsigned Tdim>
-mpm::dense_map mpm::CamClay<Tdim>::initialise_state_variables() {
+mpm::dense_map mpm::ModifiedCamClay<Tdim>::initialise_state_variables() {
   mpm::dense_map state_vars = {
       // Elastic modulus
       // Bulk modulus
@@ -86,7 +87,7 @@ mpm::dense_map mpm::CamClay<Tdim>::initialise_state_variables() {
       {"q", 0.},
       // Lode's angle
       {"theta", 0.},
-      // Cam clay parameters
+      // Modified Cam clay parameters
       // Preconsolidation pressure
       {"pc", pc0_},
       // void_ratio
@@ -116,7 +117,8 @@ mpm::dense_map mpm::CamClay<Tdim>::initialise_state_variables() {
 
 //! Compute elastic tensor
 template <unsigned Tdim>
-bool mpm::CamClay<Tdim>::compute_elastic_tensor(mpm::dense_map* state_vars) {
+bool mpm::ModifiedCamClay<Tdim>::compute_elastic_tensor(
+    mpm::dense_map* state_vars) {
   if ((*state_vars).at("p") > 0) {
     // Bulk modulus
     (*state_vars).at("bulk_modulus") =
@@ -147,8 +149,8 @@ bool mpm::CamClay<Tdim>::compute_elastic_tensor(mpm::dense_map* state_vars) {
 
 //! Compute plastic tensor (used for drained test)
 template <unsigned Tdim>
-bool mpm::CamClay<Tdim>::compute_plastic_tensor(const Vector6d& stress,
-                                                mpm::dense_map* state_vars) {
+bool mpm::ModifiedCamClay<Tdim>::compute_plastic_tensor(
+    const Vector6d& stress, mpm::dense_map* state_vars) {
   // Current stress
   const double p = (*state_vars).at("p");
   const double q = (*state_vars).at("q");
@@ -256,9 +258,8 @@ bool mpm::CamClay<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
 //! Compute stress invariants
 template <unsigned Tdim>
-bool mpm::CamClay<Tdim>::compute_stress_invariants(const Vector6d& stress,
-                                                   Vector6d& n,
-                                                   mpm::dense_map* state_vars) {
+bool mpm::ModifiedCamClay<Tdim>::compute_stress_invariants(
+    const Vector6d& stress, Vector6d& n, mpm::dense_map* state_vars) {
   // Compute volumetic stress
   (*state_vars).at("p") = -(stress(0) + stress(1) + stress(2)) / 3.;
   // Compute the deviatoric stress
@@ -313,8 +314,9 @@ bool mpm::CamClay<Tdim>::compute_stress_invariants(const Vector6d& stress,
 
 //! Compute yield function and yield state
 template <unsigned Tdim>
-typename mpm::CamClay<Tdim>::FailureState
-    mpm::CamClay<Tdim>::compute_yield_state(mpm::dense_map* state_vars) {
+typename mpm::ModifiedCamClay<Tdim>::FailureState
+    mpm::ModifiedCamClay<Tdim>::compute_yield_state(
+        mpm::dense_map* state_vars) {
   // Get stress invariants
   const double p = (*state_vars).at("p");
   const double q = (*state_vars).at("q");
@@ -339,7 +341,7 @@ typename mpm::CamClay<Tdim>::FailureState
 
 //! Compute bonding parameters
 template <unsigned Tdim>
-void mpm::CamClay<Tdim>::compute_bonding_parameters(
+void mpm::ModifiedCamClay<Tdim>::compute_bonding_parameters(
     const double chi, mpm::dense_map* state_vars) {
   // Compute chi
   (*state_vars).at("chi") =
@@ -354,7 +356,7 @@ void mpm::CamClay<Tdim>::compute_bonding_parameters(
 
 //! Compute subloading parameters
 template <unsigned Tdim>
-void mpm::CamClay<Tdim>::compute_subloading_parameters(
+void mpm::ModifiedCamClay<Tdim>::compute_subloading_parameters(
     const double subloading_r, mpm::dense_map* state_vars) {
   const double p = (*state_vars).at("p");
   // Preconsolidation pressure
@@ -381,8 +383,8 @@ void mpm::CamClay<Tdim>::compute_subloading_parameters(
 
 //! Compute dF/dmul
 template <unsigned Tdim>
-void mpm::CamClay<Tdim>::compute_df_dmul(const mpm::dense_map* state_vars,
-                                         double* df_dmul) {
+void mpm::ModifiedCamClay<Tdim>::compute_df_dmul(
+    const mpm::dense_map* state_vars, double* df_dmul) {
   // Stress invariants
   const double p = (*state_vars).at("p");
   const double q = (*state_vars).at("q");
@@ -442,9 +444,9 @@ void mpm::CamClay<Tdim>::compute_df_dmul(const mpm::dense_map* state_vars,
 
 //! Compute dg/dpc
 template <unsigned Tdim>
-void mpm::CamClay<Tdim>::compute_dg_dpc(const mpm::dense_map* state_vars,
-                                        const double pc_n, const double p_trial,
-                                        double* g_function, double* dg_dpc) {
+void mpm::ModifiedCamClay<Tdim>::compute_dg_dpc(
+    const mpm::dense_map* state_vars, const double pc_n, const double p_trial,
+    double* g_function, double* dg_dpc) {
   // Upsilon
   const double upsilon =
       (1 + (*state_vars).at("void_ratio")) / (lambda_ - kappa_);
@@ -466,9 +468,9 @@ void mpm::CamClay<Tdim>::compute_dg_dpc(const mpm::dense_map* state_vars,
 
 //! Compute dF/dSigma
 template <unsigned Tdim>
-void mpm::CamClay<Tdim>::compute_df_dsigma(const mpm::dense_map* state_vars,
-                                           const Vector6d& stress,
-                                           Vector6d* df_dsigma) {
+void mpm::ModifiedCamClay<Tdim>::compute_df_dsigma(
+    const mpm::dense_map* state_vars, const Vector6d& stress,
+    Vector6d* df_dsigma) {
   // Get stress invariants
   const double j3 = (*state_vars).at("j3");
   const double p = (*state_vars).at("p");
@@ -571,7 +573,7 @@ void mpm::CamClay<Tdim>::compute_df_dsigma(const mpm::dense_map* state_vars,
 
 //! Compute stress
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::CamClay<Tdim>::compute_stress(
+Eigen::Matrix<double, 6, 1> mpm::ModifiedCamClay<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
   // Tolerance for yield function

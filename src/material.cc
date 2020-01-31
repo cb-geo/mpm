@@ -1,7 +1,7 @@
 #include "material/material.h"
 #include "material/bingham.h"
-#include "material/cam_clay.h"
 #include "material/linear_elastic.h"
+#include "material/modified_cam_clay.h"
 #include "material/mohr_coulomb.h"
 #include "material/newtonian.h"
 #include "material/norsand.h"
@@ -38,13 +38,15 @@ static Register<mpm::Material<2>, mpm::Newtonian<2>, unsigned, const Json&>
 static Register<mpm::Material<3>, mpm::Newtonian<3>, unsigned, const Json&>
     newtonian_3d("Newtonian3D");
 
-// CamClay 2D
-static Register<mpm::Material<2>, mpm::CamClay<2>, unsigned, const Json&>
-    cam_clay_2d("CamClay2D");
+// ModifiedCamClay 2D
+static Register<mpm::Material<2>, mpm::ModifiedCamClay<2>, unsigned,
+                const Json&>
+    modified_cam_clay_2d("ModifiedCamClay2D");
 
-// CamClay 3D
-static Register<mpm::Material<3>, mpm::CamClay<3>, unsigned, const Json&>
-    cam_clay_3d("CamClay3D");
+// ModifiedCamClay 3D
+static Register<mpm::Material<3>, mpm::ModifiedCamClay<3>, unsigned,
+                const Json&>
+    modified_cam_clay_3d("CamClay3D");
 
 // Norsand 2D
 static Register<mpm::Material<2>, mpm::NorSand<2>, unsigned, const Json&>
