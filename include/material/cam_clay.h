@@ -42,13 +42,6 @@ class CamClay : public Material<Tdim> {
   //! \retval state_vars State variables with history
   mpm::dense_map initialise_state_variables() override;
 
-  //! Thermodynamic pressure
-  //! \param[in] volumetric_strain dVolumetric_strain
-  //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain) const override {
-    return 0;
-  };
-
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
@@ -75,8 +68,13 @@ class CamClay : public Material<Tdim> {
   //! Compute bonding parameters
   //! \param[in] chi Degredation
   //! \param[in] state_vars History-dependent state variables
-  void compute_bonding_parameters(const double* chi,
-                                  mpm::dense_map* state_vars);
+  void compute_bonding_parameters(const double chi, mpm::dense_map* state_vars);
+
+  //! Compute subloading parameters
+  //! \param[in] subloading_r Subloading ratio
+  //! \param[in] state_vars History-dependent state variables
+  void compute_subloading_parameters(const double subloading_r,
+                                     mpm::dense_map* state_vars);
 
   //! Compute dF/dmul
   //! \param[in] state_vars History-dependent state variables
@@ -111,6 +109,10 @@ class CamClay : public Material<Tdim> {
   bool compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
+  Matrix6x6& de() { return de_; }
+
+  Matrix6x6& dp() { return dp_; }
+
  protected:
   //! material id
   using Material<Tdim>::id_;
@@ -131,13 +133,13 @@ class CamClay : public Material<Tdim> {
   double youngs_modulus_{std::numeric_limits<double>::max()};
   //! Poisson ratio
   double poisson_ratio_{std::numeric_limits<double>::max()};
-  //! Initial void_ratio
-  double e0_{std::numeric_limits<double>::max()};
   //! Cam Clay parameters
   //! Reference mean pressure
   double p_ref_{std::numeric_limits<double>::max()};
   //! Reference void ratio
   double e_ref_{std::numeric_limits<double>::max()};
+  //! Initial void ratio
+  double e0_{std::numeric_limits<double>::max()};
   //! Initial preconsolidation pressure
   double pc0_{std::numeric_limits<double>::max()};
   //! OCR
@@ -150,21 +152,28 @@ class CamClay : public Material<Tdim> {
   double kappa_{std::numeric_limits<double>::max()};
   //! Three invariants
   bool three_invariants_{false};
+  //! Subloading surface properties
+  //! Subloading status
+  bool subloading_{false};
+  //! Material constant controling plastic deformation
+  double subloading_u_{std::numeric_limits<double>::epsilon()};
   //! Bonding properties
   //! Bonding status
   bool bonding_{false};
   //! Material constants a
-  double mc_a_{std::numeric_limits<double>::max()};
+  double mc_a_{std::numeric_limits<double>::epsilon()};
   //! Material constants b
-  double mc_b_{std::numeric_limits<double>::max()};
+  double mc_b_{std::numeric_limits<double>::epsilon()};
   //! Material constants c
-  double mc_c_{std::numeric_limits<double>::max()};
+  double mc_c_{std::numeric_limits<double>::epsilon()};
   //! Material constants d
-  double mc_d_{std::numeric_limits<double>::max()};
+  double mc_d_{std::numeric_limits<double>::epsilon()};
   //! Degradation
-  double degradation_{std::numeric_limits<double>::max()};
+  double m_degradation_{std::numeric_limits<double>::epsilon()};
+  // Increment in shear modulus
+  double m_shear_ = {std::numeric_limits<double>::epsilon()};
   //! Hydrate saturation
-  double s_h_{std::numeric_limits<double>::max()};
+  double s_h_{std::numeric_limits<double>::epsilon()};
 };  // CamClay class
 }  // namespace mpm
 
