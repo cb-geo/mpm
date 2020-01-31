@@ -292,6 +292,25 @@ inline Eigen::Matrix<double, Tdim, Tdim>
                         deformation_gradient);
 }
 
+//! Compute Jacobian
+template <unsigned Tdim, unsigned Tnfunctions>
+inline Eigen::MatrixXd mpm::QuadrilateralElement<Tdim, Tnfunctions>::dn_dx(
+    const VectorDim& xi, const Eigen::MatrixXd& nodal_coordinates,
+    const VectorDim& particle_size,
+    const VectorDim& deformation_gradient) const {
+  // Get gradient shape functions
+  Eigen::MatrixXd grad_sf =
+      this->grad_shapefn(xi, particle_size, deformation_gradient);
+
+  // Jacobian dx_i/dxi_j
+  Eigen::Matrix<double, Tdim, Tdim> jacobian =
+      (grad_sf.transpose() * nodal_coordinates);
+
+  // Gradient shapefn of the cell
+  // dN/dx = [J]^-1 * dN/dxi
+  return grad_sf * (jacobian.inverse()).transpose();
+}
+
 //! Return the B-matrix of a Quadrilateral Element at a given local
 //! coordinate for a real cell
 template <unsigned Tdim, unsigned Tnfunctions>
@@ -503,6 +522,9 @@ inline std::shared_ptr<mpm::Quadrature<Tdim>>
       break;
     case 3:
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ3");
+      break;
+    case 4:
+      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ4");
       break;
     default:
       return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");

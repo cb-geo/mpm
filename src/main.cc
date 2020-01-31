@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #ifdef USE_MPI
@@ -10,11 +11,6 @@
 #include "mpm.h"
 
 int main(int argc, char** argv) {
-  // Logger level (trace, debug, info, warn, error, critical, off)
-  spdlog::set_level(spdlog::level::trace);
-
-  // Initialise logger
-  auto console = spdlog::stdout_color_mt("main");
 
 #ifdef USE_MPI
   // Initialise MPI
@@ -27,8 +23,14 @@ int main(int argc, char** argv) {
 #endif
 
   try {
+    // Logger level (trace, debug, info, warn, error, critical, off)
+    spdlog::set_level(spdlog::level::trace);
+
+    // Initialise logger
+    auto console = spdlog::stdout_color_mt("main");
+
     // Create an IO object
-    auto io = std::make_unique<mpm::IO>(argc, argv);
+    auto io = std::make_shared<mpm::IO>(argc, argv);
 
     // Set TBB threads
     unsigned nthreads = tbb::task_scheduler_init::default_num_threads();
@@ -41,16 +43,17 @@ int main(int argc, char** argv) {
 
     // Create an MPM analysis
     auto mpm =
-        Factory<mpm::MPM, std::unique_ptr<mpm::IO>&&>::instance()->create(
+        Factory<mpm::MPM, const std::shared_ptr<mpm::IO>&>::instance()->create(
             analysis, std::move(io));
     // Solve
     mpm->solve();
 
   } catch (std::exception& exception) {
-    console->error("MPM main: {}", exception.what());
+    std::cerr << "MPM main: " << exception.what() << std::endl;
 #ifdef USE_MPI
     MPI_Abort(MPI_COMM_WORLD, 1);
 #endif
+    std::terminate();
   }
 
 #ifdef USE_MPI

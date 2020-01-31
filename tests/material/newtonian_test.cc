@@ -67,17 +67,11 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
-
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
-      REQUIRE(state_variables.empty() == true);
+      REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 
@@ -92,7 +86,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -137,9 +131,9 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -151,8 +145,8 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     dstrain(5) = 0.0000000;
 
     // Compute updated stress
+    mpm::dense_map state_vars = material->initialise_state_variables();
     mpm::Material<Dim>::Vector6d stress;
-    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -165,6 +159,15 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     REQUIRE(check_stress(3) == Approx(0.000002255).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = -0.00625;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
+    REQUIRE(state_vars.at("pressure") ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 }
 
@@ -222,17 +225,11 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     REQUIRE(material->template property<double>("density") ==
             Approx(jmaterial["density"]).epsilon(Tolerance));
 
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
-
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
-      REQUIRE(state_variables.empty() == true);
+      REQUIRE(state_variables.size() == 1);
+      REQUIRE(state_variables.at("pressure") == 0.0);
     }
   }
 
@@ -248,7 +245,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     mpm::Index pid = 0;
     Eigen::Matrix<double, Dim, 1> coords;
     coords << 0.5, 0.5, 0.5;
-    auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+    auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
@@ -309,9 +306,9 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     REQUIRE(cell->is_initialised() == true);
 
     particle->assign_cell(cell);
-    particle->assign_material(phase, material);
+    particle->assign_material(material);
     particle->compute_shapefn();
-    particle->compute_strain(phase, dt);
+    particle->compute_strain(dt);
 
     // Initialise dstrain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -323,8 +320,8 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     dstrain(5) = 0.0000300;
 
     // Compute updated stress
+    mpm::dense_map state_vars = material->initialise_state_variables();
     mpm::Material<Dim>::Vector6d stress;
-    mpm::dense_map state_vars;
     stress.setZero();
     auto check_stress =
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
@@ -337,5 +334,14 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     REQUIRE(check_stress(3) == Approx(0.000000451).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000000902).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000001353).epsilon(Tolerance));
+
+    // Calculate modulus values
+    const double K = 8333333.333333333;
+    // Calculate pressure
+    const double volumetric_strain = -0.001875;
+    REQUIRE(particle->dvolumetric_strain() ==
+            Approx(volumetric_strain).epsilon(Tolerance));
+    REQUIRE(state_vars.at("pressure") ==
+            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 }

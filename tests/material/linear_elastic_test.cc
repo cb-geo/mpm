@@ -20,7 +20,7 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -79,30 +79,6 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == true);
     }
-  }
-
-  //! Check thermodynamic pressure
-  SECTION("LinearElastic check thermodynamic pressure") {
-    unsigned id = 0;
-    auto material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic2D", std::move(id), jmaterial);
-    REQUIRE(material->id() == 0);
-
-    // Get material properties
-    REQUIRE(material->template property<double>("density") ==
-            Approx(jmaterial["density"]).epsilon(Tolerance));
-
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    const double G = 3846153.846153846;
-    const double a1 = 13461538.461566667;
-    const double a2 = 5769230.769166667;
-
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 
   SECTION("LinearElastic check stresses") {
@@ -181,7 +157,7 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -240,30 +216,6 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == true);
     }
-  }
-
-  //! Check thermodynamic pressure
-  SECTION("LinearElastic check thermodynamic pressure") {
-    unsigned id = 0;
-    auto material =
-        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic3D", std::move(id), jmaterial);
-    REQUIRE(material->id() == 0);
-
-    // Get material properties
-    REQUIRE(material->template property<double>("density") ==
-            Approx(jmaterial["density"]).epsilon(Tolerance));
-
-    // Calculate modulus values
-    const double K = 8333333.333333333;
-    const double G = 3846153.846153846;
-    const double a1 = 13461538.461566667;
-    const double a2 = 5769230.769166667;
-
-    // Calculate pressure
-    const double volumetric_strain = 1.0E-5;
-    REQUIRE(material->thermodynamic_pressure(volumetric_strain) ==
-            Approx(-K * volumetric_strain).epsilon(Tolerance));
   }
 
   SECTION("LinearElastic check stresses") {

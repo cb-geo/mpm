@@ -1,19 +1,10 @@
 #ifndef MPM_NODE_H_
 #define MPM_NODE_H_
 
-#include <array>
-#include <limits>
-#include <mutex>
-#include <tuple>
-#include <vector>
-
 #include "logger.h"
 #include "node_base.h"
 
 namespace mpm {
-
-//! Global index type for the node
-using Index = unsigned long long;
 
 // Node base class
 //! \brief Base class that stores the information about nodes
@@ -42,7 +33,7 @@ class Node : public NodeBase<Tdim> {
   Node& operator=(const Node<Tdim, Tdof, Tnphases>&) = delete;
 
   //! Initialise nodal properties
-  void initialise() override;
+  void initialise() noexcept override;
 
   //! Return id of the nodebase
   Index id() const override { return id_; }
@@ -70,7 +61,7 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass Mass from the particles in a cell
-  void update_mass(bool update, unsigned phase, double mass) override;
+  void update_mass(bool update, unsigned phase, double mass) noexcept override;
 
   //! Return mass at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -80,27 +71,34 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] volume Volume from the particles in a cell
-  void update_volume(bool update, unsigned phase, double volume) override;
+  void update_volume(bool update, unsigned phase,
+                     double volume) noexcept override;
 
   //! Return volume at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   double volume(unsigned phase) const override { return volume_(phase); }
 
-  //! Assign traction force to the node
+  //! Assign concentrated force to the node
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Nodal traction in specified direction
+  //! \param[in] force Nodal concentrated force in specified direction
+  //! \param[in] function math function
   //! \retval status Assignment status
-  bool assign_traction_force(unsigned phase, unsigned direction,
-                             double traction) override;
+  bool assign_concentrated_force(
+      unsigned phase, unsigned direction, double force,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Apply concentrated force to external force
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current time
+  void apply_concentrated_force(unsigned phase, double current_time) override;
 
   //! Update external force (body force / traction force)
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force External force from the particles in a cell
-  //! \retval status Update status
-  bool update_external_force(bool update, unsigned phase,
-                             const VectorDim& force) override;
+  void update_external_force(bool update, unsigned phase,
+                             const VectorDim& force) noexcept override;
 
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -112,9 +110,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] force Internal force from the particles in a cell
-  //! \retval status Update status
-  bool update_internal_force(bool update, unsigned phase,
-                             const VectorDim& force) override;
+  void update_internal_force(bool update, unsigned phase,
+                             const VectorDim& force) noexcept override;
 
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -125,7 +122,8 @@ class Node : public NodeBase<Tdim> {
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  void update_mass_pressure(unsigned phase, double mass_pressure) override;
+  void update_mass_pressure(unsigned phase,
+                            double mass_pressure) noexcept override;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -141,9 +139,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] momentum Momentum from the particles in a cell
-  //! \retval status Update status
-  bool update_momentum(bool update, unsigned phase,
-                       const VectorDim& momentum) override;
+  void update_momentum(bool update, unsigned phase,
+                       const VectorDim& momentum) noexcept override;
 
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -164,9 +161,8 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] acceleration Acceleration from the particles in a cell
-  //! \retval status Update status
-  bool update_acceleration(bool update, unsigned phase,
-                           const VectorDim& acceleration) override;
+  void update_acceleration(bool update, unsigned phase,
+                           const VectorDim& acceleration) noexcept override;
 
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -177,7 +173,15 @@ class Node : public NodeBase<Tdim> {
   //! Compute acceleration and velocity
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  bool compute_acceleration_velocity(unsigned phase, double dt) override;
+  bool compute_acceleration_velocity(unsigned phase,
+                                     double dt) noexcept override;
+
+  //! Compute acceleration and velocity with cundall damping factor
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] damping_factor Damping factor
+  bool compute_acceleration_velocity_cundall(
+      unsigned phase, double dt, double damping_factor) noexcept override;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -208,11 +212,37 @@ class Node : public NodeBase<Tdim> {
     generic_boundary_constraints_ = true;
   }
 
+  //! Add material id from material points to list of materials in materials_
+  //! \param[in] id Material id to be stored at the node
+  void append_material_id(unsigned id) override;
+
+  //! Return material ids in node
+  std::set<unsigned> material_ids() const override { return material_ids_; }
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  bool mpi_rank(unsigned rank) override;
+
+  //! Assign MPI rank to node
+  //! \param[in] rank MPI Rank of the node
+  std::set<unsigned> mpi_ranks() const override { return mpi_ranks_; }
+
+  //! Clear MPI rank
+  void clear_mpi_ranks() override { mpi_ranks_.clear(); }
+
+  //! Return ghost id
+  Index ghost_id() const override { return ghost_id_; }
+
+  //! Set ghost id
+  void ghost_id(Index gid) override { ghost_id_ = gid; }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
+  //! shared ghost id
+  Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
   VectorDim coordinates_;
   //! Degrees of freedom
@@ -239,14 +269,22 @@ class Node : public NodeBase<Tdim> {
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
+  //! Material ids whose information was passed to this node
+  std::set<unsigned> material_ids_;
   //! A general velocity (non-Cartesian/inclined) constraint is specified at the
   //! node
   bool generic_boundary_constraints_{false};
   //! Frictional constraints
   bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
+  //! Concentrated force
+  Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
+  //! Mathematical function for force
+  std::shared_ptr<FunctionBase> force_function_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! MPI ranks
+  std::set<unsigned> mpi_ranks_;
 };  // Node class
 }  // namespace mpm
 

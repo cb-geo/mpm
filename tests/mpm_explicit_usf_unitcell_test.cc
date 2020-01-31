@@ -9,14 +9,16 @@ using Json = nlohmann::json;
 
 // Check MPM Explicit USF
 TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
-          "[MPM][2D][Explicit][1Phase][unitcell]") {
+          "[MPM][2D][USF][Explicit][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 2;
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  const std::string analysis = "MPMExplicitUSF2D";
-  REQUIRE(mpm_test::write_json_unitcell(2, analysis, fname) == true);
+  const std::string analysis = "MPMExplicit2D";
+  const std::string stress_update = "usf";
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_2d_unitcell() == true);
@@ -38,16 +40,15 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
+    // Initialise materials
+    REQUIRE(mpm->initialise_materials() == true);
+
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
     REQUIRE(mpm->initialise_particles() == true);
 
-    // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
-
-    // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
+    // Initialise external loading
+    REQUIRE(mpm->initialise_loads() == true);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);
@@ -71,8 +72,10 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
 
   // Write JSON file
   const std::string fname = "mpm-explicit-usf";
-  const std::string analysis = "MPMExplicitUSF3D";
-  REQUIRE(mpm_test::write_json_unitcell(3, analysis, fname) == true);
+  const std::string analysis = "MPMExplicit3D";
+  const std::string stress_update = "usf";
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, stress_update, fname) ==
+          true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_3d_unitcell() == true);
@@ -94,16 +97,12 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
     // Run explicit MPM
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
-    // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
-
     // Initialise materials
     REQUIRE(mpm->initialise_materials() == true);
 
-    // Reinitialise mesh
-    REQUIRE(mpm->initialise_mesh() == false);
-    REQUIRE(mpm->initialise_particles() == false);
+    // Initialise mesh and particles
+    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE(mpm->initialise_particles() == true);
 
     // Renitialise materials
     REQUIRE(mpm->initialise_materials() == false);

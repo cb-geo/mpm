@@ -14,16 +14,29 @@
 #endif
 #include "tbb/task_group.h"
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
 #include "container.h"
-#include "mpi_wrapper.h"
+#include "friction_constraint.h"
 #include "mpm.h"
 #include "particle.h"
+#include "velocity_constraint.h"
 
 namespace mpm {
+
+//! Stress update method
+//! USF: Update Stress First
+//! USL: Update Stress Last
+//! MUSL: Modified Stress Last
+enum class StressUpdate { USF, USL, MUSL };
+extern std::map<std::string, StressUpdate> stress_update;
+
+//! Damping type
+//! None: No damping is specified
+//! Cundall: Cundall damping
+enum class Damping { None, Cundall };
 
 //! MPMBase class
 //! \brief A class that implements the fully base one phase mpm
@@ -33,7 +46,7 @@ template <unsigned Tdim>
 class MPMBase : public MPM {
  public:
   //! Default constructor
-  MPMBase(std::unique_ptr<IO>&& io);
+  MPMBase(const std::shared_ptr<IO>& io);
 
   //! Initialise mesh
   bool initialise_mesh() override;
@@ -44,11 +57,11 @@ class MPMBase : public MPM {
   //! Initialise materials
   bool initialise_materials() override;
 
-  //! Apply nodal tractions
-  bool apply_nodal_tractions() override;
+  //! Initialise loading
+  bool initialise_loads() override;
 
-  //! Apply properties to particles sets (e.g: material)
-  bool apply_properties_to_particles_sets() override;
+  //! Initialise math functions
+  bool initialise_math_functions(const Json&) override;
 
   //! Solve
   bool solve() override { return true; }
@@ -61,6 +74,11 @@ class MPMBase : public MPM {
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
 #endif
 
+#ifdef USE_PARTIO
+  //! Write PARTIO files
+  void write_partio(mpm::Index step, mpm::Index max_steps) override;
+#endif
+
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
@@ -68,6 +86,69 @@ class MPMBase : public MPM {
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
   bool is_isoparametric();
+
+  //! Node entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void node_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Node Euler angles
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void node_euler_angles(const Json& mesh_prop,
+                         const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Nodal velocity constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_velocity_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Nodal frictional constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_frictional_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
+  //! Cell entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void cell_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Particles cells
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_cells(const Json& mesh_prop,
+                       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particles volumes
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_volumes(const Json& mesh_prop,
+                         const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particle velocity constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particle_velocity_constraints(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particles stresses
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] particle_io Particle IO handle
+  void particles_stresses(
+      const Json& mesh_prop,
+      const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
+
+  //! Particle entity sets
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] check Check duplicates
+  void particle_entity_sets(const Json& mesh_prop, bool check);
+
+  //! Initialise damping
+  //! \param[in] damping_props Damping properties
+  bool initialise_damping(const Json& damping_props);
 
  protected:
   // Generate a unique id for the analysis
@@ -89,6 +170,8 @@ class MPMBase : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
+  //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
+  mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
@@ -97,12 +180,20 @@ class MPMBase : public MPM {
   std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
+  //! Mathematical functions
+  std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
   //! VTK attributes
   std::vector<std::string> vtk_attributes_;
-  //! Bool nodal tractions
-  bool nodal_tractions_{true};
+  //! VTK state variables
+  std::vector<std::string> vtk_statevars_;
+  //! Set node concentrated force
+  bool set_node_concentrated_force_{false};
+  //! Damping type
+  mpm::Damping damping_type_{mpm::Damping::None};
+  //! Damping factor
+  double damping_factor_{0.};
 
-#ifdef USE_PARMETIS
+#ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
   std::shared_ptr<Graph<Tdim>> graph_{nullptr};
 #endif

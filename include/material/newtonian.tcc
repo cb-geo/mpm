@@ -15,6 +15,13 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
   }
 }
 
+//! Initialise history variables
+template <unsigned Tdim>
+mpm::dense_map mpm::Newtonian<Tdim>::initialise_state_variables() {
+  mpm::dense_map state_vars = {{"pressure", 0.0}};
+  return state_vars;
+}
+
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Newtonian<Tdim>::thermodynamic_pressure(
@@ -29,9 +36,11 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
     mpm::dense_map* state_vars) {
 
-  const unsigned phase = 0;
-
-  const double pressure = ptr->pressure(phase);
+  // const double pressure = ptr->pressure();
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+  const double pressure = (*state_vars).at("pressure");
 
   const double volumetric_strain = dstrain(0) + dstrain(1);
 
@@ -55,9 +64,10 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
     mpm::dense_map* state_vars) {
 
-  const unsigned phase = 0;
-
-  const double pressure = ptr->pressure(phase);
+  // Update pressure
+  (*state_vars).at("pressure") +=
+      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+  const double pressure = (*state_vars).at("pressure");
 
   const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
 

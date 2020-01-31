@@ -7,10 +7,9 @@
 // TBB
 #include <tbb/concurrent_vector.h>
 
-namespace mpm {
+#include "data_types.h"
 
-// Global index type for the node
-using Index = unsigned long long;
+namespace mpm {
 
 // container class
 //! \brief A class that offers a container and iterators
@@ -50,6 +49,9 @@ class Container {
       const {
     return elements_.cend();
   }
+
+  //! Return value at a given index
+  std::shared_ptr<T> operator[](Index id) const { return elements_.at(id); }
 
   //! Iterate over elements in the container
   //! \tparam T A class with a template argument Tdim
