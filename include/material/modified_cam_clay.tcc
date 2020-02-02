@@ -74,7 +74,7 @@ mpm::dense_map mpm::ModifiedCamClay<Tdim>::initialise_state_variables() {
   mpm::dense_map state_vars = {
       // Elastic modulus
       // Bulk modulus
-      {"bulk_modulus", youngs_modulus_},
+      {"bulk_modulus", youngs_modulus_ / (2 * (1 + poisson_ratio_))},
       // Shear modulus
       {"shear_modulus", 3 * youngs_modulus_ * (1 - 2 * poisson_ratio_) /
                             (2 * (1 + poisson_ratio_))},

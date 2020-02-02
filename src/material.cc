@@ -46,7 +46,7 @@ static Register<mpm::Material<2>, mpm::ModifiedCamClay<2>, unsigned,
 // ModifiedCamClay 3D
 static Register<mpm::Material<3>, mpm::ModifiedCamClay<3>, unsigned,
                 const Json&>
-    modified_cam_clay_3d("CamClay3D");
+    modified_cam_clay_3d("ModifiedCamClay3D");
 
 // Norsand 2D
 static Register<mpm::Material<2>, mpm::NorSand<2>, unsigned, const Json&>

@@ -11,8 +11,8 @@
 #include "node.h"
 #include "particle.h"
 
-//! Check Modified cam clay undrained condition for hardening in 3D
-TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
+//! Check Modified cam clay undrained condition in 3D
+TEST_CASE("Modified cam clay undrained condition is checked in 3D",
           "[material][modified_cam_clay][3D]") {
   // Tolerance
   const double Tolerance = 1.E-7;
@@ -23,7 +23,7 @@ TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
   mpm::Index pid = 0;
   Eigen::Matrix<double, Dim, 1> coords;
   coords.setZero();
-  auto particle = std::make_shared<mpm::Particle<Dim, 1>>(pid, coords);
+  auto particle = std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
   // Initialise material
   Json jmaterial;
@@ -91,28 +91,22 @@ TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
+
+      mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.at("bulk_modulus") ==
-              Approx(jmaterial["bulk_modulus"]).epsilon(Tolerance));
+              Approx(3846153.8460000).epsilon(Tolerance));
       REQUIRE(state_variables.at("shear_modulus") ==
-              Approx(3 * jmaterial["bulk_modulus"] *
-                     (1 - 2 * jmaterial["poisson_ratio"]) /
-                     (2 * (1 + jmaterial["poisson_ratio"])))
-                  .epsilon(Tolerance));
+              Approx(4615384.61538462).epsilon(Tolerance));
       REQUIRE(state_variables.at("j3") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("p") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("q") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("theta") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("pc") ==
-              Approx(jmaterial["pc0"]).epsilon(Tolerance));
-      REQUIRE(
-          state_variables.at("void_ratio") ==
-          Approx(jmaterial["e_ref"] -
-                 jmaterial["lambda"] * log(jmaterial["pc0"] / jmaterial["ocr"] /
-                                           jmaterial["p_ref"]) -
-                 jmaterial["kappa"] * log(jmaterial["ocr"]))
-              .epsilon(Tolerance));
+              Approx(jmaterial.at("pc0")).epsilon(Tolerance));
+      REQUIRE(state_variables.at("void_ratio") ==
+              Approx(1.0385213287).epsilon(Tolerance));
       REQUIRE(state_variables.at("m_theta") ==
-              Approx(jmaterial["m"]).epsilon(Tolerance));
+              Approx(jmaterial.at("m")).epsilon(Tolerance));
       REQUIRE(state_variables.at("f_function") ==
               Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("dpvstrain") ==
@@ -128,13 +122,11 @@ TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
   }
 
   //! Check compute stress in elastic status
-  SECTION("CamClay check stresses") {
+  SECTION("CamClay check stresses in elastic status") {
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "ModifiedCamClay3D", std::move(id), jmaterial);
-
-    auto cam_clay = std::make_shared<mpm::CamClay<Dim>>(id, jmaterial);
 
     REQUIRE(material->id() == 0);
 
@@ -153,15 +145,6 @@ TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
 
     // Compute stress invariants
     mpm::dense_map state_vars = material->initialise_state_variables();
-    mpm::Material<Dim>::Vector6d n;
-    cam_clay->compute_stress_invariants(stress, n, &state_vars);
-
-    // Compute elastic modulus
-    cam_clay->compute_elastic_tensor(&state_vars);
-    REQUIRE(state_vars.at("bulk_modulus") ==
-            Approx(7370964.511104).epsilon(Tolerance));
-    REQUIRE(state_vars.at("shear_modulus") ==
-            Approx(3902275.329408).epsilon(Tolerance));
 
     // Initialise strain
     mpm::Material<Dim>::Vector6d dstrain;
@@ -175,12 +158,64 @@ TEST_CASE("Modified cam clay undrained condition hardening is checked in 3D",
 
     // Compute stress
     stress =
-        cam_clay->compute_stress(stress, dstrain, particle.get(), &state_vars);
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stresses
-    REQUIRE(stress(0) == Approx(3902.27532941).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(3902.27532941).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(-7804.55065882).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(-193727.6266809207).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-193727.6266809207).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-212544.7466381585).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
+  }
+
+  //! Check compute stress in plastic status
+  SECTION("CamClay check stresses in plastic status") {
+
+    jmaterial["pc0"] = 200000;
+    jmaterial["ocr"] = 1.;
+
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "ModifiedCamClay3D", std::move(id), jmaterial);
+
+    REQUIRE(material->id() == 0);
+
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
+    stress.setZero();
+    stress(0) = -200000;
+    stress(1) = -200000;
+    stress(2) = -200000;
+    REQUIRE(stress(0) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Compute stress invariants
+    mpm::dense_map state_vars = material->initialise_state_variables();
+
+    // Initialise strain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain.setZero();
+    dstrain(0) = 0.00050000;
+    dstrain(1) = 0.00050000;
+    dstrain(2) = -0.00100000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
+
+    // Compute stress
+    stress =
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
+
+    // Check stresses
+    REQUIRE(stress(0) == Approx(-192882.4825752268).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-192882.4825752268).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-211655.0108685302).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
