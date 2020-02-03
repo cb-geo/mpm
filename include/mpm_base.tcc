@@ -323,9 +323,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Read and assign particles volumes
     this->particles_volumes(mesh_props, particle_io);
 
-    // Read and assign particles velocity constraints
-    this->particle_velocity_constraints(mesh_props, particle_io);
-
     // Read and assign particles stresses
     this->particles_stresses(mesh_props, particle_io);
 
@@ -340,6 +337,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     auto particles_sets_begin = std::chrono::steady_clock::now();
     this->particle_entity_sets(mesh_props, check_duplicates);
     auto particles_sets_end = std::chrono::steady_clock::now();
+
+    // Read and assign particles velocity constraints
+    this->particle_velocity_constraints(mesh_props, particle_io);
+
     console_->info("Rank {} Create particle sets: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_volume_end - particles_volume_begin)
