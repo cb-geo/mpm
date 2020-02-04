@@ -80,6 +80,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   bool pressure_smoothing_{false};
   //! Interface
   bool interface_{false};
+  //! duration
+  double mpi_duration_{0.};
 
 };  // MPMExplicit class
 }  // namespace mpm
