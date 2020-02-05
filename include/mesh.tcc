@@ -1551,7 +1551,7 @@ void mpm::Mesh<Tdim>::inject_particles() {
                            static_cast<mpm::Index>(pid), coordinates);
 
           // Add particle to mesh
-          status = this->add_particle(particle, checks);
+          unsigned status = this->add_particle(particle, checks);
           if (status) {
             map_particles_[pid]->assign_cell(*citr);
             map_particles_[pid]->assign_material(material);

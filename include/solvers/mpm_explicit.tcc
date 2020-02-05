@@ -208,6 +208,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     task_group.wait();
 
+    // Inject particles
+    mesh_->inject_particles();
+
     // Assign material ids to node
     if (interface_)
       mesh_->iterate_over_particles(
