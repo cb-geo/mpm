@@ -186,6 +186,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
+    // Inject particles
+    mesh_->inject_particles();
+
     // Create a TBB task group
     tbb::task_group task_group;
 
@@ -207,9 +210,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     });
 
     task_group.wait();
-
-    // Inject particles
-    mesh_->inject_particles();
 
     // Assign material ids to node
     if (interface_)

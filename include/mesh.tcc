@@ -1523,6 +1523,10 @@ void mpm::Mesh<Tdim>::inject_particles() {
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
+  console_->error("Number of particles: {}", this->nparticles());
+  // Container of new injected particles
+  std::vector<std::shared_ptr<ParticleBase<Tdim>>> injected_particles;
+  // Iterate over all injection cells
   for (auto injection : particle_injections_) {
     unsigned pid = this->nparticles();
     bool checks = false;
@@ -1556,10 +1560,14 @@ void mpm::Mesh<Tdim>::inject_particles() {
             map_particles_[pid]->assign_cell(*citr);
             map_particles_[pid]->assign_material(material);
             ++pid;
+            injected_particles.emplace_back(particle);
           }
         }
       }
     }
+    for (auto particle : injected_particles) particle->compute_volume();
+    console_->error("Number of particles after injection: {}",
+                    this->nparticles());
   }
 }
 
