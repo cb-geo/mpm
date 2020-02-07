@@ -11,7 +11,7 @@ struct Injection {
   // Cell id
   int cell_set_id;
   // Particle velocity
-  std::vector<double> particle_velocity;
+  std::vector<double> velocity;
 };
 }  // namespace mpm
 

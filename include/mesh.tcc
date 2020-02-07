@@ -1501,6 +1501,13 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       // Cell set id
       inject.cell_set_id = generator["cset_id"].template get<int>();
 
+      // Velocity
+      inject.velocity.resize(Tdim, 0.);
+      if (generator["velocity"].is_array() &&
+          generator["velocity"].size() == Tdim) {
+        for (unsigned i = 0; i < Tdim; ++i)
+          inject.velocity[i] = generator["velocity"].at(i);
+      }
       // Add to particle injections
       particle_injections_.emplace_back(inject);
     }
@@ -1553,6 +1560,10 @@ void mpm::Mesh<Tdim>::inject_particles() {
                       const Eigen::Matrix<double, Tdim, 1>&>::instance()
                   ->create(injection.particle_type,
                            static_cast<mpm::Index>(pid), coordinates);
+
+          // particle velocity
+          Eigen::Matrix<double, Tdim, 1> pvelocity(injection.velocity.data());
+          particle->assign_velocity(pvelocity);
 
           // Add particle to mesh
           unsigned status = this->add_particle(particle, checks);
