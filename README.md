@@ -78,7 +78,7 @@ sudo apt-get install freeglut3-dev libxt-dev
 
 > VTK
 ```
-git clone git://vtk.org/VTK.git VTK
+git clone https://gitlab.kitware.com/vtk/vtk.git VTK
 cd VTK && mkdir build && cd build/
 cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
 make -j
