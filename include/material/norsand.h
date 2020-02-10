@@ -161,8 +161,8 @@ class NorSand : public Material<Tdim> {
   double m_cohesion_{std::numeric_limits<double>::max()};
   //! Dilation degradation parameter m upon shearing
   double m_dilation_{std::numeric_limits<double>::max()};
-  //! Parameter for shear modulus
-  double m_shear_{std::numeric_limits<double>::max()};
+  //! Parameter for modulus
+  double m_modulus_{std::numeric_limits<double>::max()};
 
 };  // NorSand class
 }  // namespace mpm
