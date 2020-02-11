@@ -128,9 +128,15 @@ bool mpm::ModifiedCamClay<Tdim>::compute_elastic_tensor(
                                         (1 - 2 * poisson_ratio_) /
                                         (2 * (1 + poisson_ratio_));
   }
-  if (bonding_)
+  if (bonding_) {
+    // Bonded shear modulus
     (*state_vars).at("shear_modulus") +=
         m_shear_ * (*state_vars).at("chi") * s_h_;
+    // Bonded bulk modulus
+    (*state_vars).at("bulk_modulus") = (*state_vars).at("shear_modulus") *
+                                       (2 * (1 + poisson_ratio_)) /
+                                       (1 - 2 * poisson_ratio_) / 3;
+  }
   // Components in stiffness matrix
   const double G = (*state_vars).at("shear_modulus");
   const double a1 = (*state_vars).at("bulk_modulus") + (4.0 / 3.0) * G;
