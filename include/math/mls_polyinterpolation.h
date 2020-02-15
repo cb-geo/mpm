@@ -20,13 +20,7 @@ class MLSPolyInterpolation : public PolynomialInterpolation<Tdim> {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor
-  //! \param[in] pcoord Coordinates of the point of interest
-  //! \param[in] data_points Coordinates of the set of data points
-  //! \param[in] spline_order Qeight spline order
-  //! \param[in] poly_order Order of polynomial to be interpolated
-  MLSPolyInterpolation(const VectorDim& pcoord,
-                       const std::vector<VectorDim>& data_points,
-                       unsigned spline_order, unsigned poly_order, double span);
+  MLSPolyInterpolation();
 
   //! Destructor
   ~MLSPolyInterpolation() override{};
@@ -38,6 +32,57 @@ class MLSPolyInterpolation : public PolynomialInterpolation<Tdim> {
   MLSPolyInterpolation& operator=(
       const MLSPolyInterpolation<Tdim, Tnmonomials>&) = delete;
 
+  //! Initialise interpolator
+  //! \param[in] pcoord Coordinates of the point of interest
+  //! \param[in] data_points Coordinates of the set of data points
+  //! \param[in] spline_order Weight spline order
+  //! \param[in] poly_order Order of polynomial to be interpolated
+  //! \param[in] span Distance from the point of interest
+  void initialise(const VectorDim& pcoord,
+                  const std::vector<VectorDim>& data_points,
+                  unsigned spline_order, unsigned poly_order,
+                  double span) override;
+
+ private:
+  //! Initialise M matrix
+  //! \param[in] datapoints Coordinates and values of data points
+  //! \param[in] poly_order Polynomial order
+  void initialise_M_matrix(const std::vector<VectorDim>& data_points,
+                           unsigned poly_order);
+
+  //! Initialise B matrix
+  //! \param[in] datapoints Coordinates and values of data points
+  //! \param[in] poly_order Polynomial order
+  void initialise_B_vector(const std::vector<VectorDim>& data_points,
+                           unsigned poly_order);
+
+  //! Compute weights
+  //! \param[in] pcoord Coordinates of the point of interest
+  //! \param[in] data_points Coordinates of the set of data points
+  //! \param[in] spline_order Qeight spline order
+  void compute_weights(const VectorDim& pcoord,
+                       const std::vector<VectorDim>& data_points,
+                       unsigned spline_order, double span);
+
+  //! Compute and return weight of a data point using cubic spline
+  //! \param[in] distance Positive distance from the point of interest
+  //! \retval Associated weight
+  double cubic_spline_weight(const VectorDim& distance) const;
+
+  //! Compute and return weight of a data point using quadratic spline
+  //! \param[in] distance Positive distance from the point of interest
+  //! \retval Associated weight
+  double quadratic_spline_weight(const VectorDim& distance) const;
+
+ private:
+  //! M matrix
+  Eigen::Matrix<double, Tnmonomials, Tnmonomials> M_matrix_;
+  //! B matrix
+  std::vector<Eigen::Matrix<double, Tnmonomials, 1>> B_vector_;
+  //! Weights associated with each data point
+  std::vector<double> weights_;
+  //! Monomials at the point of interest
+  Eigen::Matrix<double, Tnmonomials, 1> point_monomials_;
 };  // MLSPolyInterpolation class
 }  // namespace mpm
 
