@@ -219,5 +219,128 @@ TEST_CASE("Modified cam clay undrained condition is checked in 3D",
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
+
+    // Check pc
+    REQUIRE(state_vars.at("pc") ==
+            Approx(200368.9146817101).epsilon(Tolerance));
+  }
+
+  //! Check compute stress in plastic status with bonded properties
+  SECTION("CamClay check stresses in plastic status with bonded properties") {
+
+    jmaterial["bonding"] = true;
+    jmaterial["s_h"] = 0.5;
+    jmaterial["mc_a"] = 25000;
+    jmaterial["mc_b"] = 1;
+    jmaterial["mc_c"] = 25000;
+    jmaterial["mc_d"] = 1;
+    jmaterial["m_degradation"] = 1;
+    jmaterial["m_shear"] = 0;
+
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "ModifiedCamClay3D", std::move(id), jmaterial);
+
+    REQUIRE(material->id() == 0);
+
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
+    stress.setZero();
+    stress(0) = -200000;
+    stress(1) = -200000;
+    stress(2) = -200000;
+    REQUIRE(stress(0) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Compute stress invariants
+    mpm::dense_map state_vars = material->initialise_state_variables();
+
+    // Initialise strain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain.setZero();
+    dstrain(0) = 0.00050000;
+    dstrain(1) = 0.00050000;
+    dstrain(2) = -0.00100000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
+
+    // Compute stress
+    stress =
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
+
+    // Check stresses
+    REQUIRE(stress(0) == Approx(-193727.6266809207).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-193727.6266809207).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-212544.7466381585).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
+
+    // Check pc
+    REQUIRE(state_vars.at("pc") == Approx(300000).epsilon(Tolerance));
+  }
+
+  //! Check compute stress in plastic status with subloading properties
+  SECTION("CamClay check stresses in plastic status with bonded properties") {
+
+    jmaterial["subloading"] = true;
+    jmaterial["subloading_u"] = 0.5;
+
+    unsigned id = 0;
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "ModifiedCamClay3D", std::move(id), jmaterial);
+
+    REQUIRE(material->id() == 0);
+
+    // Initialise stress
+    mpm::Material<Dim>::Vector6d stress;
+    stress.setZero();
+    stress(0) = -200000;
+    stress(1) = -200000;
+    stress(2) = -200000;
+    REQUIRE(stress(0) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-200000.).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.).epsilon(Tolerance));
+
+    // Compute stress invariants
+    mpm::dense_map state_vars = material->initialise_state_variables();
+
+    // Initialise strain
+    mpm::Material<Dim>::Vector6d dstrain;
+    dstrain.setZero();
+    dstrain(0) = 0.00050000;
+    dstrain(1) = 0.00050000;
+    dstrain(2) = -0.00100000;
+    dstrain(3) = 0.0000000;
+    dstrain(4) = 0.0000000;
+    dstrain(5) = 0.0000000;
+
+    // Compute stress
+    stress =
+        material->compute_stress(stress, dstrain, particle.get(), &state_vars);
+
+    // Check stresses
+    REQUIRE(stress(0) == Approx(-162537.902087049).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-162537.902087049).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-162537.90208594).epsilon(Tolerance));
+    REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
+    REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
+
+    // Check pc
+    REQUIRE(state_vars.at("pc") ==
+            Approx(325075.8041776047).epsilon(Tolerance));
+    // Check subloading_r
+    REQUIRE(state_vars.at("subloading_r") == Approx(0.5).epsilon(Tolerance));
   }
 }

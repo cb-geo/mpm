@@ -216,7 +216,7 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
   ppolydata += "\n</PPolyData>\n\n</VTKFile>";
 
   // Write parallel VTK file
-  ofstream pvtk;
+  std::ofstream pvtk;
   pvtk.open(filename);
   pvtk << ppolydata;
   pvtk.close();
