@@ -242,24 +242,20 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
-//! Clone neighbour particle material state variables from HDF5
+//! Clone material state variables from neighbour particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::clone_neighbour_material_state_vars(
-    const HDF5Particle& particle,
+    const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
   bool status = true;
   if (material != nullptr) {
     if (this->material_id_ == material->id() ||
         this->material_id_ == std::numeric_limits<unsigned>::max()) {
       material_ = material;
-      // Reinitialize state variables
+      // Clone state variables
       auto mat_state_vars = material_->initialise_state_variables();
-      if (mat_state_vars.size() == particle.nstate_vars) {
-        unsigned i = 0;
-        for (const auto& mat_state_var : mat_state_vars) {
-          this->state_variables_[mat_state_var.first] = particle.svars[i];
-          ++i;
-        }
+      if (mat_state_vars.size() == state_vars.size()) {
+        this->state_variables_ = state_vars;
       } else {
         status = false;
         throw std::runtime_error(
