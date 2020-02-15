@@ -373,13 +373,15 @@ void mpm::ModifiedCamClay<Tdim>::compute_subloading_parameters(
   // Plastic strain
   const double dpvstrain = (*state_vars).at("dpvstrain");
   const double dpdstrain = (*state_vars).at("dpdstrain");
-  // Method 1: Update subloading surface ratio
-  (*state_vars).at("subloading_r") =
-      subloading_r -
-      subloading_u_ * (1 + (pcd + pcc) / pc) * log(subloading_r) *
-          std::sqrt(dpvstrain * dpvstrain + dpdstrain * dpdstrain);
-  // Method 2: Update
-  //(*state_vars).at("subloading_r") = p / (pc + pcd + pcc);
+  // Initialise subloading surface ratio
+  if ((*state_vars).at("subloading_r") == 1.0)
+    (*state_vars).at("subloading_r") = p / (pc + pcd + pcc);
+  else
+    // Update subloading surface ratio
+    (*state_vars).at("subloading_r") =
+        subloading_r -
+        subloading_u_ * (1 + (pcd + pcc) / pc) * log(subloading_r) *
+            std::sqrt(dpvstrain * dpvstrain + dpdstrain * dpdstrain);
   // Threshhold
   if ((*state_vars).at("subloading_r") < std::numeric_limits<double>::epsilon())
     (*state_vars).at("subloading_r") = 1.E-5;
@@ -664,12 +666,6 @@ Eigen::Matrix<double, 6, 1> mpm::ModifiedCamClay<Tdim>::compute_stress(
       ++counter_g;
     }
     // Update mean pressure p
-    // Type 1 - Euqation (3.10a)
-    // (*state_vars).at("p") =
-    //     p_trial - (*state_vars).at("bulk_modulus") *
-    //                   (*state_vars).at("delta_phi") *
-    //                   (2 * (*state_vars).at("p") - (*state_vars).at("pc"));
-    // Type 2 - Equation (3.14)
     (*state_vars).at("p") =
         (p_trial + (*state_vars).at("bulk_modulus") *
                        (*state_vars).at("delta_phi") * (*state_vars).at("pc")) /
@@ -715,17 +711,8 @@ Eigen::Matrix<double, 6, 1> mpm::ModifiedCamClay<Tdim>::compute_stress(
   }
 
   // Update stress
-  // Type-1 Equation(3.16)
   updated_stress = (*state_vars).at("q") * n_trial;
   for (int i = 0; i < 3; ++i) updated_stress(i) -= (*state_vars).at("p");
-  // Type-2
-  // Vector6d df_dsigma = Vector6d::Zero();
-  // this->compute_df_dsigma(state_vars, trial_stress, &df_dsigma);
-  // updated_stress =
-  //     trial_stress - (*state_vars).at("delta_phi") * this->de_ * df_dsigma;
-  // Type-3
-  // this->compute_plastic_tensor(stress, state_vars);
-  // updated_stress = trial_stress - this->dp_ * dstrain;
 
   // Update void_ratio
   (*state_vars).at("void_ratio") +=

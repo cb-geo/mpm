@@ -109,10 +109,6 @@ class ModifiedCamClay : public Material<Tdim> {
   bool compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
-  Matrix6x6& de() { return de_; }
-
-  Matrix6x6& dp() { return dp_; }
-
  protected:
   //! material id
   using Material<Tdim>::id_;
