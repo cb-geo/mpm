@@ -43,6 +43,12 @@ class MLSPolyInterpolation : public PolynomialInterpolation<Tdim> {
                   unsigned spline_order, unsigned poly_order,
                   double span) override;
 
+  //! Interpolate polynomial at a given point
+  //! \param[in] data_values Known values associated with data points
+  //! \retval Interpolated value at the point of interest
+  double interpolate_polynomial(
+      const std::vector<double>& data_values) const override;
+
  private:
   //! Initialise M matrix
   //! \param[in] datapoints Coordinates and values of data points

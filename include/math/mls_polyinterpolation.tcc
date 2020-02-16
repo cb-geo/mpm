@@ -113,7 +113,7 @@ void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_M_matrix(
 template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_B_vector(
     const std::vector<VectorDim>& data_points, unsigned poly_order) {
-      
+
   B_vector_.clear();
   unsigned p = 0;
   for (const auto& pdata_coord : data_points) {
@@ -124,4 +124,25 @@ void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_B_vector(
     B_vector_.emplace_back(weights_[p] * monomials);
     ++p;
   }
+}
+
+// Compute polynomial interpolation at the point of interest
+template <unsigned Tdim, unsigned Tnmonomials>
+double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::interpolate_polynomial(
+    const std::vector<double>& data_values) const {
+  double pvalue = std::numeric_limits<double>::max();
+
+  if (data_values.size() != weights_.size() ||
+      data_values.size() != B_vector_.size())
+    throw std::runtime_error("MLS Data points are invalid");
+
+  // B Matrix
+  Eigen::Matrix<double, Tnmonomials, 1> B_matrix;
+  B_matrix.setZero();
+  for (unsigned i = 0; i < data_values.size(); ++i)
+    B_matrix += data_values[i] * B_vector_[i];
+
+  // Compute interpolated value at the point of interest
+  pvalue = point_monomials_.transpose() * M_matrix_.inverse() * B_matrix;
+  return pvalue;
 }
