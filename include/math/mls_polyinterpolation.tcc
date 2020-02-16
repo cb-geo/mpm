@@ -12,6 +12,12 @@ template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise(
     const VectorDim& pcoord, const std::vector<VectorDim>& data_points,
     unsigned spline_order, unsigned poly_order, double span) {
+  // Check spline order
+  if (spline_order < 2 || spline_order > 3)
+    throw std::runtime_error("MLS spline order is invalid");
+  // Check coordinates list of data points
+  if (data_points.empty())
+    throw std::runtime_error("MLS Data points coordinates are empty");
   // Initialise monomial values of the polynomial at the given point
   this->point_monomials_ =
       mpm::Polynomial::evaluate_monomials<Tdim>(poly_order, pcoord);
@@ -28,12 +34,7 @@ template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::compute_weights(
     const VectorDim& point, const std::vector<VectorDim>& data_points,
     unsigned spline_order, double span) {
-  // Check spline order
-  if (spline_order < 2 || spline_order > 3)
-    throw std::runtime_error("MLS spline order is invalid");
-  // Check coordinates list of data points
-  if (data_points.empty())
-    throw std::runtime_error("MLS Data points coordinates are empty");
+
   // Iterate over each data point and compute the associated weight
   for (const auto& pdata : data_points) {
     // Distance to data point
@@ -85,4 +86,36 @@ double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::quadratic_spline_weight(
       weights(dim) = 0.;
   }
   return weights.prod();
+}
+
+// Initialise M matrix
+template <unsigned Tdim, unsigned Tnmonomials>
+void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_M_matrix(
+    const std::vector<VectorDim>& data_points, unsigned poly_order) {
+  unsigned p = 0;
+  for (const auto& pdata_coord : data_points) {
+    // Monomials
+    Eigen::VectorXd monomials =
+        mpm::Polynomial::evaluate_monomials<Tdim>(poly_order, pdata_coord);
+    // Compute M matrix
+    this->M_matrix_ += this->weights_[p] * monomials * monomials.transpose();
+    ++p;
+  }
+  if (!std::fabs(M_matrix_.determinant()) > 0.)
+    throw std::runtime_error("MLS M-matrix is non-invertible!");
+}
+
+// Initialise B vector
+template <unsigned Tdim, unsigned Tnmonomials>
+void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_B_vector(
+    const std::vector<VectorDim>& data_points, unsigned poly_order) {
+  unsigned p = 0;
+  for (const auto& pdata_coord : data_points) {
+    // Monomials
+    Eigen::VectorXd monomials =
+        mpm::Polynomial::evaluate_monomials<Tdim>(poly_order, pdata_coord);
+    // Compute M matrix
+    B_vector_.emplace_back(weights_[p] * monomials);
+    ++p;
+  }
 }
