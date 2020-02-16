@@ -54,11 +54,17 @@ class ModifiedCamClay : public Material<Tdim> {
 
   //! Compute stress invariants (j3, q, theta, and epsilon)
   //! \param[in] stress Stress
-  //! \param[in] direction of deviatoric stress
   //! \param[in] state_vars History-dependent state variables
   //! \retval status of computation of stress invariants
-  bool compute_stress_invariants(const Vector6d& stress, Vector6d& n,
+  bool compute_stress_invariants(const Vector6d& stress,
                                  mpm::dense_map* state_vars);
+
+  //! Compute deviatoric stress tensor
+  //! \param[in] stress Stress
+  //! \param[in] state_vars History-dependent state variables
+  //! \retval Deviatoric stress tensor
+  Eigen::Matrix<double, 6, 1> compute_deviatoric_stress_tensor(
+      const Vector6d& stress, mpm::dense_map* state_vars);
 
   //! Compute yield function and yield state
   //! \param[in] state_vars History-dependent state variables
