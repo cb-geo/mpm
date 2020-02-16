@@ -28,6 +28,23 @@ class PolynomialInterpolation {
   PolynomialInterpolation& operator=(const PolynomialInterpolation<Tdim>&) =
       delete;
 
+  //! Initialise interpolator
+  //! \param[in] pcoord Coordinates of the point of interest
+  //! \param[in] data_points Coordinates of the set of data points
+  //! \param[in] spline_order Weight spline order
+  //! \param[in] poly_order Order of polynomial to be interpolated
+  //! \param[in] span Distance from the point of interest
+  virtual void initialise(const VectorDim& pcoord,
+                          const std::vector<VectorDim>& data_points,
+                          unsigned spline_order, unsigned poly_order,
+                          double span) = 0;
+
+  //! Interpolate polynomial at a given point
+  //! \param[in] data_values Known values of data points
+  //! \retval Interpolated value at the point of interest
+  virtual double interpolate_polynomial(
+      const std::vector<double>& data_values) const = 0;
+
 };  // PolynomialInterpolation class
 }  // namespace mpm
 
