@@ -12,6 +12,7 @@ template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise(
     const VectorDim& pcoord, const std::vector<VectorDim>& data_points,
     unsigned spline_order, unsigned poly_order, double span) {
+
   // Check spline order
   if (spline_order < 2 || spline_order > 3)
     throw std::runtime_error("MLS spline order is invalid");
@@ -35,6 +36,7 @@ void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::compute_weights(
     const VectorDim& point, const std::vector<VectorDim>& data_points,
     unsigned spline_order, double span) {
 
+  weights_.clear();
   // Iterate over each data point and compute the associated weight
   for (const auto& pdata : data_points) {
     // Distance to data point
@@ -53,9 +55,9 @@ void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::compute_weights(
 template <unsigned Tdim, unsigned Tnmonomials>
 double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::cubic_spline_weight(
     const Eigen::Matrix<double, Tdim, 1>& distance) const {
+
   Eigen::Matrix<double, Tdim, 1> weights;
   weights.setZero();
-
   for (unsigned dim = 0; dim < Tdim; ++dim) {
     if (distance(dim) <= 0.5)
       weights(dim) = 2. / 3. - (4. * distance(dim) * distance(dim)) +
@@ -74,9 +76,9 @@ double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::cubic_spline_weight(
 template <unsigned Tdim, unsigned Tnmonomials>
 double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::quadratic_spline_weight(
     const Eigen::Matrix<double, Tdim, 1>& distance) const {
+
   Eigen::Matrix<double, Tdim, 1> weights;
   weights.setZero();
-
   for (unsigned dim = 0; dim < Tdim; ++dim) {
     if (distance(dim) <= 0.5)
       weights(dim) = 3. / 4. - (distance(dim) * distance(dim));
@@ -92,6 +94,8 @@ double mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::quadratic_spline_weight(
 template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_M_matrix(
     const std::vector<VectorDim>& data_points, unsigned poly_order) {
+
+  M_matrix_.setZero();
   unsigned p = 0;
   for (const auto& pdata_coord : data_points) {
     // Monomials
@@ -109,6 +113,8 @@ void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_M_matrix(
 template <unsigned Tdim, unsigned Tnmonomials>
 void mpm::MLSPolyInterpolation<Tdim, Tnmonomials>::initialise_B_vector(
     const std::vector<VectorDim>& data_points, unsigned poly_order) {
+      
+  B_vector_.clear();
   unsigned p = 0;
   for (const auto& pdata_coord : data_points) {
     // Monomials
