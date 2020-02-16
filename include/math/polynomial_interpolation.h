@@ -15,6 +15,9 @@ namespace mpm {
 template <unsigned Tdim>
 class PolynomialInterpolation {
  public:
+  //! Define a vector of size dimension
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
+
   //! Constructor
   PolynomialInterpolation(){};
 
