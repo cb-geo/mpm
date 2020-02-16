@@ -66,7 +66,11 @@ class ParticleBase {
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Clone material history variables from a given neighbouring particle
+<<<<<<< HEAD
   //! \param[in] state_vars Neighbour particle state variables
+=======
+  //! \param[in] state_vars State variables from the neighbour particle
+>>>>>>> clone_particledata
   //! \param[in] material Material associated with the particle
   //! \retval status Status of cloning HDF5 particle
   virtual bool clone_neighbour_material_state_vars(
