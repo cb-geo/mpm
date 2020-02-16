@@ -108,7 +108,6 @@ endif()
 
 
 # KaHIP
-if (MPI_FOUND)
   if (NO_KAHIP)
     find_package(KaHIP)
   else()
@@ -119,7 +118,7 @@ if (KAHIP_FOUND)
   include_directories(${KAHIP_INCLUDE_DIRS})
   link_libraries(${KAHIP_LIBRARIES})
 endif()
-endif()
+#endif()
 
 # VTK
 find_package(VTK)
@@ -150,6 +149,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/material/
   ${mpm_SOURCE_DIR}/include/solvers/
+  ${mpm_SOURCE_DIR}/include/math/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
 )
@@ -163,7 +163,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
-  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
