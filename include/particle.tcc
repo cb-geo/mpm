@@ -242,9 +242,9 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
-//! Clone material state variables from neighbour particle
+//! Assign material state variables from neighbour particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::clone_neighbour_material_state_vars(
+bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
   bool status = false;
@@ -252,7 +252,7 @@ bool mpm::Particle<Tdim>::clone_neighbour_material_state_vars(
     if (this->material_id_ == material->id() ||
         this->material_id_ == std::numeric_limits<unsigned>::max()) {
       // Assign material
-      material_ = material;
+      // material_ = material;
       // Clone state variables
       auto mat_state_vars = material_->initialise_state_variables();
       if (mat_state_vars.size() == state_vars.size()) {
