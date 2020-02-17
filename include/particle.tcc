@@ -248,17 +248,14 @@ bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
   bool status = false;
-  if (material != nullptr) {
-    if (this->material_id_ == material->id() ||
-        this->material_id_ == std::numeric_limits<unsigned>::max()) {
-      // Assign material
-      // material_ = material;
-      // Clone state variables
-      auto mat_state_vars = material_->initialise_state_variables();
-      if (mat_state_vars.size() == state_vars.size()) {
-        this->state_variables_ = state_vars;
-        status = true;
-      }
+  if (material != nullptr && this->material_ != nullptr &&
+      this->material_id_ == material->id()) {
+    // Clone state variables
+    auto mat_state_vars = material_->initialise_state_variables();
+    if (this->state_variables_.size() == state_vars.size() &&
+        mat_state_vars.size() == state_vars.size()) {
+      this->state_variables_ = state_vars;
+      status = true;
     }
   }
   return status;
