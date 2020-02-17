@@ -208,6 +208,9 @@ For example to run the code on 4 compute nodes (MPI tasks):
 mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 ```
 
+## Authors
+
+Please refer to the [list of contributors to the CB-Geo MPM code](AUTHORS.md).
 
 ## Citation
 
