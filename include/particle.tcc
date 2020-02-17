@@ -242,34 +242,21 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
-//! Clone material state variables from neighbour particle
+//! Assign material state variables from neighbour particle
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::clone_neighbour_material_state_vars(
+bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
-  bool status = true;
-  if (material != nullptr) {
-    if (this->material_id_ == material->id() ||
-        this->material_id_ == std::numeric_limits<unsigned>::max()) {
-      material_ = material;
-      // Clone state variables
-      auto mat_state_vars = material_->initialise_state_variables();
-      if (mat_state_vars.size() == state_vars.size()) {
-        this->state_variables_ = state_vars;
-      } else {
-        status = false;
-        throw std::runtime_error(
-            "# of state variables do not match! Cannot clone material history");
-      }
-    } else {
-      status = false;
-      throw std::runtime_error(
-          "Particle material is invalid! Cannot assign a new material");
+  bool status = false;
+  if (material != nullptr && this->material_ != nullptr &&
+      this->material_id_ == material->id()) {
+    // Clone state variables
+    auto mat_state_vars = material_->initialise_state_variables();
+    if (this->state_variables_.size() == state_vars.size() &&
+        mat_state_vars.size() == state_vars.size()) {
+      this->state_variables_ = state_vars;
+      status = true;
     }
-  } else {
-    status = false;
-    throw std::runtime_error(
-        "Material is invalid! cannot clone material history");
   }
   return status;
 }

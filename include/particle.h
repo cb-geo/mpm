@@ -62,11 +62,11 @@ class Particle : public ParticleBase<Tdim> {
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) override;
 
-  //! Clone material history variables from a given neighbouring particle
-  //! \param[in] state_vars Neighbour particle state variables 
+  //! Assign material history variables
+  //! \param[in] state_vars State variables
   //! \param[in] material Material associated with the particle
   //! \retval status Status of cloning HDF5 particle
-  bool clone_neighbour_material_state_vars(
+  bool assign_material_state_vars(
       const mpm::dense_map& state_vars,
       const std::shared_ptr<mpm::Material<Tdim>>& material) override;
 
