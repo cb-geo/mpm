@@ -1096,6 +1096,94 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE_NOTHROW(particle->map_pressure_to_nodes());
       REQUIRE(particle->compute_pressure_smoothing() == true);
     }
+
+    SECTION("Particle assign state variables") {
+      SECTION("Assign state variable fail") {
+        unsigned mid = 0;
+        Json jmaterial;
+        jmaterial["density"] = 1000.;
+        jmaterial["youngs_modulus"] = 1.0E+7;
+        jmaterial["poisson_ratio"] = 0.3;
+        jmaterial["softening"] = false;
+        jmaterial["friction"] = 0.;
+        jmaterial["dilation"] = 0.;
+        jmaterial["cohesion"] = 2000.;
+        jmaterial["residual_friction"] = 0.;
+        jmaterial["residual_dilation"] = 0.;
+        jmaterial["residual_cohesion"] = 1000.;
+        jmaterial["peak_pdstrain"] = 0.;
+        jmaterial["residual_pdstrain"] = 0.;
+        jmaterial["tension_cutoff"] = 0.;
+
+        auto mc_material =
+            Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                ->create("MohrCoulomb2D", std::move(id), jmaterial);
+        REQUIRE(mc_material->id() == 0);
+
+        mpm::dense_map state_variables =
+            mc_material->initialise_state_variables();
+        REQUIRE(state_variables.at("phi") ==
+                Approx(jmaterial["friction"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("psi") ==
+                Approx(jmaterial["dilation"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("cohesion") ==
+                Approx(jmaterial["cohesion"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("j3") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("epsilon") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("rho") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("theta") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("pdstrain") ==
+                Approx(0.).epsilon(Tolerance));
+
+        SECTION("Assign state variables") {
+          // Assign material properties
+          REQUIRE(particle->assign_material(mc_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == true);
+        }
+
+        SECTION("Assign state variables fail on state variables size") {
+          // Assign material
+          unsigned mid1 = 0;
+          // Initialise material
+          Json jmaterial1;
+          jmaterial1["density"] = 1000.;
+          jmaterial1["bulk_modulus"] = 8333333.333333333;
+          jmaterial1["mu"] = 0.0451;
+
+          auto newtonian_material =
+              Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                  ->create("Newtonian2D", std::move(mid1), jmaterial1);
+
+          // Assign material properties
+          REQUIRE(particle->assign_material(newtonian_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == false);
+        }
+
+        SECTION("Assign state variables fail on material id") {
+          // Assign material
+          unsigned mid1 = 1;
+          // Initialise material
+          Json jmaterial1;
+          jmaterial1["density"] = 1000.;
+          jmaterial1["bulk_modulus"] = 8333333.333333333;
+          jmaterial1["mu"] = 0.0451;
+
+          auto newtonian_material =
+              Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                  ->create("Newtonian2D", std::move(mid1), jmaterial1);
+
+          // Assign material properties
+          REQUIRE(particle->assign_material(newtonian_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == false);
+        }
+      }
+    }
   }
 
   SECTION("Check assign material to particle") {
@@ -2260,6 +2348,94 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
       REQUIRE_NOTHROW(particle->map_pressure_to_nodes());
       REQUIRE(particle->compute_pressure_smoothing() == true);
+    }
+
+    SECTION("Particle assign state variables") {
+      SECTION("Assign state variable fail") {
+        unsigned mid = 0;
+        Json jmaterial;
+        jmaterial["density"] = 1000.;
+        jmaterial["youngs_modulus"] = 1.0E+7;
+        jmaterial["poisson_ratio"] = 0.3;
+        jmaterial["softening"] = false;
+        jmaterial["friction"] = 0.;
+        jmaterial["dilation"] = 0.;
+        jmaterial["cohesion"] = 2000.;
+        jmaterial["residual_friction"] = 0.;
+        jmaterial["residual_dilation"] = 0.;
+        jmaterial["residual_cohesion"] = 1000.;
+        jmaterial["peak_pdstrain"] = 0.;
+        jmaterial["residual_pdstrain"] = 0.;
+        jmaterial["tension_cutoff"] = 0.;
+
+        auto mc_material =
+            Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                ->create("MohrCoulomb3D", std::move(id), jmaterial);
+        REQUIRE(mc_material->id() == 0);
+
+        mpm::dense_map state_variables =
+            mc_material->initialise_state_variables();
+        REQUIRE(state_variables.at("phi") ==
+                Approx(jmaterial["friction"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("psi") ==
+                Approx(jmaterial["dilation"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("cohesion") ==
+                Approx(jmaterial["cohesion"]).epsilon(Tolerance));
+        REQUIRE(state_variables.at("j3") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("epsilon") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("rho") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("theta") == Approx(0.).epsilon(Tolerance));
+        REQUIRE(state_variables.at("pdstrain") ==
+                Approx(0.).epsilon(Tolerance));
+
+        SECTION("Assign state variables") {
+          // Assign material properties
+          REQUIRE(particle->assign_material(mc_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == true);
+        }
+
+        SECTION("Assign state variables fail on state variables size") {
+          // Assign material
+          unsigned mid1 = 0;
+          // Initialise material
+          Json jmaterial1;
+          jmaterial1["density"] = 1000.;
+          jmaterial1["bulk_modulus"] = 8333333.333333333;
+          jmaterial1["mu"] = 0.0451;
+
+          auto newtonian_material =
+              Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                  ->create("Newtonian3D", std::move(mid1), jmaterial1);
+
+          // Assign material properties
+          REQUIRE(particle->assign_material(newtonian_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == false);
+        }
+
+        SECTION("Assign state variables fail on material id") {
+          // Assign material
+          unsigned mid1 = 1;
+          // Initialise material
+          Json jmaterial1;
+          jmaterial1["density"] = 1000.;
+          jmaterial1["bulk_modulus"] = 8333333.333333333;
+          jmaterial1["mu"] = 0.0451;
+
+          auto newtonian_material =
+              Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
+                  ->create("Newtonian3D", std::move(mid1), jmaterial1);
+
+          // Assign material properties
+          REQUIRE(particle->assign_material(newtonian_material) == true);
+          // Assing state variables
+          REQUIRE(particle->assign_material_state_vars(state_variables,
+                                                       mc_material) == false);
+        }
+      }
     }
 
     // Compute updated particle location
