@@ -30,6 +30,7 @@ using Json = nlohmann::json;
 #include "function_base.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
+#include "interface.h"
 #include "io.h"
 #include "io_mesh.h"
 #include "logger.h"

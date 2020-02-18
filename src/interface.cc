@@ -1,3 +1,5 @@
+#include "interface.h"
+
 //! Read interface properties
 mpm::Interface::Interface(unsigned id, const Json& interface_properties)
     : id_{id} {

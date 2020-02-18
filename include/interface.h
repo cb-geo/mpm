@@ -50,6 +50,4 @@ class Interface {
 };  // Interface class
 }  // namespace mpm
 
-#include "interface.tcc"
-
 #endif  // MPM_INTERFACE_INTERFACE_H_
