@@ -317,12 +317,20 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
 
 //! Find particle neighbours for all particle
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_particle_neighbours() {
+void mpm::Mesh<Tdim>::compute_particle_neighbours(const Cell<Tdim>& cell) {
+  // Check argument passed
+  Container<Cell<Tdim>> cell_ctr;
+  cell_ctr.add(cell);
+  auto& cells = (cell_ctr == nullptr) ? cells_ : cell_ctr;
+
   // Check whether cells have been assigned with neighbours
-  if ((*cells_.cbegin())->nneighbours() == 0) this->compute_cell_neighbours();
+  if ((*cells_.cbegin())->nneighbours() == 0)
+    throw std::runtime_error(
+        "No neighbours have been assigned to cell, cannot "
+        "compute_particle_neighbours for single cell");
 
   // Loop over cells
-  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+  for (auto citr = cells.cbegin(); citr != cells.cend(); ++citr) {
     // Loop over the neighbouring cell particles
     std::vector<mpm::Index> neighbour_particles = (*citr)->particles();
     for (const auto& neighbour_cell_id : (*citr)->neighbours())
@@ -339,32 +347,6 @@ void mpm::Mesh<Tdim>::compute_particle_neighbours() {
       if (!status)
         throw std::runtime_error("Cannot assign valid particle neighbours");
     }
-  }
-}
-
-//! Find particle neighbours for all particle in a given cell
-template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_particle_neighbours(const Cell<Tdim>& cell) {
-  // Check whether cells have been assigned with neighbours
-  if ((*cells_.cbegin())->nneighbours() == 0)
-    throw std::runtime_error(
-        "No neighbours have been assigned to cell, cannot "
-        "compute_particle_neighbours for single cell");
-
-  // Loop over the neighbouring cell particles
-  std::vector<mpm::Index> neighbour_particles = cell->particles();
-  for (const auto& neighbour_cell_id : cell->neighbours())
-    neighbour_particles.insert(
-        neighbour_particles.end(),
-        map_cells_[neighbour_cell_id]->particles().begin(),
-        map_cells_[neighbour_cell_id]->particles().end());
-
-  // Loop over the particles in the current cells and assign particle
-  // neighbours
-  for (const auto& p_id : cell->particles()) {
-    bool status = map_particles_[p_id]->assign_neighbours(neighbour_particles);
-    if (!status)
-      throw std::runtime_error("Cannot assign valid particle neighbours");
   }
 }
 
