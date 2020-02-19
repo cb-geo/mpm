@@ -342,6 +342,17 @@ class Mesh {
   //! Find cell neighbours
   void compute_cell_neighbours();
 
+  //! Find particle neighbours for all particle
+  void compute_particle_neighbours();
+
+  //! Find particle neighbours
+  //! \param[in] cell of interest
+  void compute_particle_neighbours(const Cell<Tdim>& cell);
+
+  //! Find particle neighbours
+  //! \param[in] particle of interest
+  void compute_particle_neighbours(const ParticleBase<Tdim>& particle);
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh

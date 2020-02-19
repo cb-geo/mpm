@@ -117,6 +117,9 @@ class Cell {
   //! \retval insertion_status Return the successful addition of a node
   bool add_neighbour(mpm::Index neighbour_id);
 
+  //! Has neighbours
+  bool has_neighbours() const { return neighbours_.size(); }
+
   //! Number of neighbours
   unsigned nneighbours() const { return neighbours_.size(); }
 

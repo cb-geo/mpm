@@ -788,3 +788,41 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i]->append_material_id(material_id_);
 }
+
+//! Add a neighbour particle and return the status of addition
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::add_neighbour(mpm::Index neighbour_id) {
+  bool insertion_status = false;
+  try {
+    // If particle id is not the same as the current particle
+    if (neighbour_id != this->id())
+      insertion_status = (neighbours_.insert(neighbour_id)).second;
+    else
+      throw std::runtime_error("Invalid local id of a neighbour particle");
+
+  } catch (std::exception& exception) {
+    console_->error("{} {}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return insertion_status;
+}
+
+//! Assign neighbour particles
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_neighbours(
+    const std::vector<mpm::Index>& neighbours_set) {
+  bool status = true;
+  try {
+    // Remove the existing neighbours' id
+    neighbours_.clear();
+
+    // Loop over neighbours and check if the id is the same the current particle
+    // id
+    for (const auto neighbour_id : neighbours_set)
+      if (neighbour_id != this->id()) neighbours_.insert(neighbour_id);
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

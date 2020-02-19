@@ -262,6 +262,26 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
 
+  //! Has neighbour particles
+  bool has_neighbours() const override { return neighbours_.size(); };
+
+  //! Return the number of neighbour particles
+  unsigned nneighbours() const override { return neighbours_.size(); };
+
+  //! Add a neighbour particle
+  //! \param[in] neighbour_id id of the neighbouring particle
+  //! \retval insertion_status Return the successful addition of a node
+  bool add_neighbour(mpm::Index neighbour_id) override;
+
+  //! Assign neighbour particles
+  //! \param[in] neighbours set of id of the neighbouring particles
+  //! \retval insertion_status Return the successful addition of a node
+  bool assign_neighbours(
+      const std::vector<mpm::Index>& neighbours_set) override;
+
+  //! Return neighbour ids
+  std::set<mpm::Index> neighbours() const override { return neighbours_; };
+
  private:
   //! Compute strain rate
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
@@ -330,6 +350,8 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  //! Container of particle neighbour ids
+  std::set<mpm::Index> neighbours_;
 
 };  // Particle class
 }  // namespace mpm
