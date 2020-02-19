@@ -276,7 +276,7 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_neighbours(const std::vector<mpm::Index>& neighbours) override;
 
   //! Return neighbour ids
-  std::set<mpm::Index> neighbours() const override { return neighbours_; };
+  std::vector<mpm::Index> neighbours() const override { return neighbours_; };
 
  private:
   //! Compute strain rate
@@ -347,7 +347,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
   //! Container of particle neighbour ids
-  std::set<mpm::Index> neighbours_;
+  std::vector<mpm::Index> neighbours_;
 
 };  // Particle class
 }  // namespace mpm

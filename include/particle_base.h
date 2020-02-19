@@ -253,7 +253,7 @@ class ParticleBase {
   virtual bool assign_neighbours(const std::vector<mpm::Index>& neighbours) = 0;
 
   //! Return neighbour ids
-  virtual std::set<mpm::Index> neighbours() const = 0;
+  virtual std::vector<mpm::Index> neighbours() const = 0;
 
  protected:
   //! particleBase id
