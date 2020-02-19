@@ -11,7 +11,6 @@
 #include "function_base.h"
 #include "hdf5_particle.h"
 #include "material.h"
-#include "polynomial_interpolation.h"
 
 namespace mpm {
 
@@ -72,16 +71,6 @@ class ParticleBase {
   virtual bool assign_material_state_vars(
       const mpm::dense_map& state_vars,
       const std::shared_ptr<mpm::Material<Tdim>>& material) = 0;
-
-  //! Interpolate properties from neighbour particles
-  //! \param[in] interpolator Interpolator
-  //! \param[in] poly_order Order of polynomial
-  //! \param[in] neighbour_properties Neighbour particles HDF5 data
-  //! \retval status
-  virtual bool interpolate_neighbour_properties(
-      const std::shared_ptr<mpm::PolynomialInterpolation<Tdim>>& interpolator,
-      unsigned poly_order,
-      const std::vector<mpm::HDF5Particle>& neighbour_properties) = 0;
 
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
