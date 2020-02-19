@@ -190,6 +190,19 @@ class Mesh {
   //! \param[in] pids Vector of particle ids
   void remove_particles(const std::vector<mpm::Index>& pids);
 
+  //! Linear search for nearest particle of a point
+  //! \param[in] pcoord Coordinates of the point of interest
+  //! \param[in] neighbour_particles Neighbour particles to the given point
+  //! \retval Global index of the nearest particle
+  mpm::Index nearest_particle(
+      const VectorDim& pcoord,
+      const std::vector<mpm::Index>& neighbour_particles);
+
+  //! Linear search for nearest particle of a given particle
+  //! \param[in] pid Global index of the particle of interest
+  //! \retval Global index of the nearest particle
+  mpm::Index nearest_particle(mpm::Index pid);
+
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 
