@@ -1731,3 +1731,120 @@ bool mpm::Mesh<Tdim>::assign_nodal_friction_constraints(
   }
   return status;
 }
+
+//! TODO: Move this to cut mesh class
+//! Interpolate neighbour particle properties
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::interpolate_neighbour_particle_properties(
+    mpm::Index pid) {
+  bool status = true;
+
+  try {
+    // Get neighbour particles
+    auto neighbour_particles = map_particles_[pid]->neighbours();
+    // Number of data points
+    unsigned num_data = neighbour_particles.size();
+
+    // Coordinates of neighbour data points
+    std::vector<VectorDim> data_points;
+    data_points.reserve(neighbour_particles.size());
+
+    // Velocities
+    std::vector<std::vector<double>> velocity_data(
+        Tdim, std::vector<double>(num_data));
+    // Displacements
+    std::vector<std::vector<double>> displacement_data(
+        Tdim, std::vector<double>(num_data));
+
+    // Stress
+    std::vector<std::vector<double>> stress_data(6,
+                                                 std::vector<double>(num_data));
+    // Strain
+    std::vector<std::vector<double>> strain_data(6,
+                                                 std::vector<double>(num_data));
+
+    // Iterate over each data point and get values
+    unsigned num = 0;
+    for (const auto& npid : neighbour_particles) {
+      // Get hdf5 data
+      mpm::HDF5Particle pdata = map_particles_[pid]->hdf5();
+      // Coordinates
+      VectorDim coordinates;
+      if (Tdim == 2) coordinates << pdata.coord_x, pdata.coord_y;
+      if (Tdim == 3) coordinates << pdata.coord_x, pdata.coord_y, pdata.coord_z;
+      data_points.emplace_back(coordinates);
+
+      // velocity
+      Eigen::Vector3d velocity;
+      velocity << pdata.velocity_x, pdata.velocity_y, pdata.velocity_z;
+      // displacement
+      Eigen::Vector3d displacement;
+      displacement << pdata.displacement_x, pdata.displacement_y,
+          pdata.displacement_z;
+
+      // fill velocity and displacement data
+      for (unsigned dim = 0; dim < Tdim; ++dim) {
+        velocity_data[dim][num] = velocity[dim];
+        displacement_data[dim][num] = displacement[dim];
+      }
+
+      // fill stress data
+      stress_data[0][num] = pdata.stress_xx;
+      stress_data[1][num] = pdata.stress_yy;
+      stress_data[2][num] = pdata.stress_zz;
+      stress_data[3][num] = pdata.tau_xy;
+      stress_data[4][num] = pdata.tau_yz;
+      stress_data[5][num] = pdata.tau_xz;
+
+      // fill strain data
+      strain_data[0][num] = pdata.strain_xx;
+      strain_data[1][num] = pdata.strain_yy;
+      strain_data[2][num] = pdata.strain_zz;
+      strain_data[3][num] = pdata.gamma_xy;
+      strain_data[4][num] = pdata.gamma_yz;
+      strain_data[5][num] = pdata.gamma_xz;
+
+      ++num;
+    }
+    // TODO: These variables can be decided by the user, if not default
+    // Interpolator data: Spline order (Cubic spline weights are used)
+    unsigned spline_order = 3;
+    // TODO: These variables can be decided by the user, if not default
+    // Interpolator data: Polynomial order
+    unsigned poly_order = 2;
+    // TODO
+    // Number of monomials of 2nd order polynomial
+    const unsigned Tnmonomials = pow(3, Tdim);
+    // TODO:
+    // Moving Least Squares (MLS) function interpolator
+    std::shared_ptr<mpm::PolynomialInterpolation<Tdim>> interpolator =
+        std::make_shared<mpm::MLSPolyInterpolation<Tdim, Tnmonomials>>();
+    // Initialise the interpolator
+    interpolator->initialise(map_particles_[pid]->coordinates(), data_points,
+                             spline_order, poly_order,
+                             map_cells_[map_particles_[pid]]->mean_length());
+
+    // Interpolate velocity and displacement
+    Eigen::Matrix<double, Tdim, 1> velocity, displacement;
+    for (unsigned dim = 0; dim < Tdim; ++dim) {
+      // interpolate velocity
+      velocity(dim) = interpolator->interpolate_polynomial(velocity_data[dim]);
+      // interpolate displacement
+      displacement(dim) =
+          interpolator->interpolate_polynomial(displacement_data[dim]);
+    }
+
+    // Interpolate stress and strain
+    Eigen::Matrix<double, 6, 1> stress, strain;
+    for (unsigned dim = 0; dim < 6; ++dim) {
+      // interpolate stress
+      stress(dim) = interpolator->interpolate_polynomial(stress_data[dim]);
+      // interpolate strain
+      strain(dim) = interpolator->interpolate_polynomial(strain_data[dim]);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

@@ -34,10 +34,12 @@ using Json = nlohmann::json;
 #include "io_mesh.h"
 #include "logger.h"
 #include "material/material.h"
+#include "mls_polyinterpolation.h"
 #include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "polynomial_interpolation.h"
 #include "traction.h"
 #include "velocity_constraint.h"
 
@@ -210,6 +212,10 @@ class Mesh {
   //! \retval Status of inserting a new particle
   bool insert_new_particle(const VectorDim& pcoord, mpm::Index cell_id,
                            bool check_duplicates);
+
+  //! TODO: Move this to cut mesh class
+  //! Interpolate neighbour particle properties
+  bool interpolate_neighbour_particle_properties(mpm::Index pid);
 
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
