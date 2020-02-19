@@ -250,6 +250,9 @@ class ParticleBase {
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
+  //! Return global indices of neighboour particles
+  std::set<mpm::Index> neighbours() const { return neighbours_; }
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
@@ -271,6 +274,8 @@ class ParticleBase {
   unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Neighbour particles
+  std::set<mpm::Index> neighbours_;
 };  // ParticleBase class
 }  // namespace mpm
 
