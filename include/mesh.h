@@ -203,6 +203,14 @@ class Mesh {
   //! \retval Global index of the nearest particle
   mpm::Index nearest_particle(mpm::Index pid);
 
+  //! Create and insert a new particle to the domain
+  //! \param[in] pcoord Coordinates of the new particle
+  //! \param[in] cell_id Global index of the cell
+  //! \param[in] check_duplicates
+  //! \retval Status of inserting a new particle
+  bool insert_new_particle(const VectorDim& pcoord, mpm::Index cell_id,
+                           bool check_duplicates);
+
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 

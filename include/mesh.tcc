@@ -530,7 +530,7 @@ void mpm::Mesh<Tdim>::remove_particles(const std::vector<mpm::Index>& pids) {
   }
 }
 
-// Linear search for the nearest particle of a given point coordinates
+//! Linear search for the nearest particle of a given point coordinates
 template <unsigned Tdim>
 mpm::Index mpm::Mesh<Tdim>::nearest_particle(
     const VectorDim& pcoord,
@@ -549,7 +549,7 @@ mpm::Index mpm::Mesh<Tdim>::nearest_particle(
   return nearest_id;
 }
 
-// Linear search for the nearest particle of a given particle
+//! Linear search for the nearest particle of a given particle
 // TODO: Not currently used, added for completeness
 template <unsigned Tdim>
 mpm::Index mpm::Mesh<Tdim>::nearest_particle(mpm::Index pid) {
@@ -570,6 +570,66 @@ mpm::Index mpm::Mesh<Tdim>::nearest_particle(mpm::Index pid) {
     if (length1 < length2) nearest_id = npid;
   }
   return nearest_id;
+}
+
+//! Create and insert a new particle from a given coordinates
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::insert_new_particle(const VectorDim& pcoord,
+                                          mpm::Index cell_id,
+                                          bool check_duplicates) {
+
+  // Check if the given point is inside the cell
+  Eigen::Matrix<double, Tdim, 1> xi;
+  if (!map_cells_[cell_id]->is_point_in_cell(pcoord, &xi)) return false;
+
+  bool status = true;
+  try {
+    // Initialise neighbour particles to the given point
+    std::vector<mpm::Index> neighbour_particles =
+        map_cells_[cell_id]->particles();
+
+    // Iterate over neighbour cells and get neighbour particles
+    auto neighbour_cells = map_cells_[cell_id]->neighbours();
+    for (const auto& nid : neighbour_cells) {
+      auto cparticles = map_cells_[nid]->particles();
+      neighbour_particles.insert(neighbour_particles.end(), cparticles.begin(),
+                                 cparticles.end());
+    }
+
+    // Find the material of the nearest particle to the point
+    unsigned material_id =
+        map_particles_[this->nearest_particle(pcoord, neighbour_particles)]
+            ->material_id();
+
+    // TODO: get particle type (from neighbour particle or input file)
+    std::string particle_type = "P2D";
+    // Get material
+    auto material = materials_.at(material_id);
+    // Particle id
+    mpm::Index pid = particles_.size();
+
+    // Create a particle
+    auto particle =
+        Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                const Eigen::Matrix<double, Tdim, 1>&>::instance()
+            ->create(particle_type, static_cast<mpm::Index>(pid), pcoord);
+
+    // Assign cell and local coordinates to the new particle
+    particle->assign_cell_xi(map_cells_[cell_id], xi);
+
+    // Add particle to mesh
+    bool insert_status = this->add_particle(particle, false);
+
+    // If insertion is successful, assign material
+    if (insert_status)
+      map_particles_[pid]->assign_material(material);
+    else
+      throw std::runtime_error("Addition of a new particle to mesh failed!");
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }
 
 //! Remove all particles in a cell given cell id
