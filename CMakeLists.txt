@@ -108,6 +108,7 @@ endif()
 
 
 # KaHIP
+if (MPI_FOUND)
   if (NO_KAHIP)
     find_package(KaHIP)
   else()
@@ -118,7 +119,7 @@ if (KAHIP_FOUND)
   include_directories(${KAHIP_INCLUDE_DIRS})
   link_libraries(${KAHIP_LIBRARIES})
 endif()
-#endif()
+endif()
 
 # VTK
 find_package(VTK)
