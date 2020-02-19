@@ -34,14 +34,14 @@ using Json = nlohmann::json;
 #include "io_mesh.h"
 #include "logger.h"
 #include "material/material.h"
-#include "mls_polyinterpolation.h"
 #include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
-#include "polynomial_interpolation.h"
 #include "traction.h"
 #include "velocity_constraint.h"
+#include "polynomial_interpolation.h"
+#include "mls_polyinterpolation.h"
 
 namespace mpm {
 
@@ -210,10 +210,10 @@ class Mesh {
   //! \param[in] cell_id Global index of the cell
   //! \param[in] check_duplicates
   //! \retval Status of inserting a new particle
-  bool insert_new_particle(const VectorDim& pcoord, mpm::Index cell_id,
-                           bool check_duplicates);
+  bool insert_new_particle(const VectorDim& pcoord, mpm::Index cell_id, bool check_duplicates);
 
-  //! TODO: Move this to cut mesh class
+  //! TODO: temporary implementation
+  //! TODO: Move this to cut mesh class if there's no use for general MPM
   //! Interpolate neighbour particle properties
   bool interpolate_neighbour_particle_properties(mpm::Index pid);
 
