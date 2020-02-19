@@ -809,7 +809,7 @@ bool mpm::Particle<Tdim>::add_neighbour(mpm::Index neighbour_id) {
 //! Assign neighbour particles
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_neighbours(
-    const std::vector<mpm::Index>& neighbours_set) {
+    const std::vector<mpm::Index>& neighbours) {
   bool status = true;
   try {
     // Remove the existing neighbours' id
@@ -817,7 +817,7 @@ bool mpm::Particle<Tdim>::assign_neighbours(
 
     // Loop over neighbours and check if the id is the same the current particle
     // id
-    for (const auto neighbour_id : neighbours_set)
+    for (const auto neighbour_id : neighbours)
       if (neighbour_id != this->id()) neighbours_.insert(neighbour_id);
 
   } catch (std::exception& exception) {

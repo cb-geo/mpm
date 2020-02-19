@@ -319,15 +319,15 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_particle_neighbours() {
   // Check whether cells have been assigned with neighbours
-  if (!(*cells_.cbegin())->has_neighbours()) this->compute_cell_neighbours();
+  if ((*cells_.cbegin())->nneighbours() == 0) this->compute_cell_neighbours();
 
   // Loop over cells
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Loop over the neighbouring cell particles
-    std::vector<mpm::Index> neighbouring_particle_sets = (*citr)->particles();
+    std::vector<mpm::Index> neighbour_particles = (*citr)->particles();
     for (const auto& neighbour_cell_id : (*citr)->neighbours())
-      neighbouring_particle_sets.insert(
-          neighbouring_particle_sets.end(),
+      neighbour_particles.insert(
+          neighbour_particles.end(),
           map_cells_[neighbour_cell_id]->particles().begin(),
           map_cells_[neighbour_cell_id]->particles().end());
 
@@ -335,7 +335,7 @@ void mpm::Mesh<Tdim>::compute_particle_neighbours() {
     // neighbours
     for (const auto& p_id : (*citr)->particles()) {
       bool status =
-          map_particles_[p_id]->assign_neighbours(neighbouring_particle_sets);
+          map_particles_[p_id]->assign_neighbours(neighbour_particles);
       if (!status)
         throw std::runtime_error("Cannot assign valid particle neighbours");
     }
@@ -346,24 +346,23 @@ void mpm::Mesh<Tdim>::compute_particle_neighbours() {
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_particle_neighbours(const Cell<Tdim>& cell) {
   // Check whether cells have been assigned with neighbours
-  if (!cell->has_neighbours())
+  if ((*cells_.cbegin())->nneighbours() == 0)
     throw std::runtime_error(
         "No neighbours have been assigned to cell, cannot "
         "compute_particle_neighbours for single cell");
 
   // Loop over the neighbouring cell particles
-  std::vector<mpm::Index> neighbouring_particle_sets = cell->particles();
+  std::vector<mpm::Index> neighbour_particles = cell->particles();
   for (const auto& neighbour_cell_id : cell->neighbours())
-    neighbouring_particle_sets.insert(
-        neighbouring_particle_sets.end(),
+    neighbour_particles.insert(
+        neighbour_particles.end(),
         map_cells_[neighbour_cell_id]->particles().begin(),
         map_cells_[neighbour_cell_id]->particles().end());
 
   // Loop over the particles in the current cells and assign particle
   // neighbours
   for (const auto& p_id : cell->particles()) {
-    bool status =
-        map_particles_[p_id]->assign_neighbours(neighbouring_particle_sets);
+    bool status = map_particles_[p_id]->assign_neighbours(neighbour_particles);
     if (!status)
       throw std::runtime_error("Cannot assign valid particle neighbours");
   }
@@ -377,22 +376,21 @@ void mpm::Mesh<Tdim>::compute_particle_neighbours(
   const auto& current_cell = map_cells_[particle->cell_id()];
 
   // Check whether cell neighbour has been computed
-  if (!current_cell->has_neighbours())
+  if ((*cells_.cbegin())->nneighbours() == 0)
     throw std::runtime_error(
         "No neighbours have been assigned to cell, cannot "
         "compute_particle_neighbours for single particle");
 
   // Loop over the neighbouring cell particles
-  std::vector<mpm::Index> neighbouring_particle_sets =
-      (current_cell)->particles();
+  std::vector<mpm::Index> neighbour_particles = (current_cell)->particles();
   for (const auto& neighbour_cell_id : (current_cell)->neighbours())
-    neighbouring_particle_sets.insert(
-        neighbouring_particle_sets.end(),
+    neighbour_particles.insert(
+        neighbour_particles.end(),
         map_cells_[neighbour_cell_id]->particles().begin(),
         map_cells_[neighbour_cell_id]->particles().end());
 
   // Assign particle neighbours
-  bool status = particle->assign_neighbours(neighbouring_particle_sets);
+  bool status = particle->assign_neighbours(neighbour_particles);
 
   if (!status)
     throw std::runtime_error("Cannot assign valid particle neighbours");

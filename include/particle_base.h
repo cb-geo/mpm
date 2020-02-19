@@ -239,9 +239,6 @@ class ParticleBase {
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
-  //! Has neighbour particles
-  virtual bool has_neighbours() const = 0;
-
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;
 
