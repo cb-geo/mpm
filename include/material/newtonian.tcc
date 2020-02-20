@@ -4,9 +4,11 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
     : Material<Tdim>(id, material_properties) {
   try {
     density_ = material_properties.at("density").template get<double>();
-    bulk_modulus_ =
+    bulk_viscosity_ =
         material_properties.at("bulk_modulus").template get<double>();
-    mu_ = material_properties.at("mu").template get<double>();
+    dynamic_viscosity_ = material_properties.at("mu").template get<double>();
+    incompressible_ =
+        material_properties.at("incompressible").template get<bool>();
 
     properties_ = material_properties;
   } catch (Json::exception& except) {
@@ -25,9 +27,9 @@ mpm::dense_map mpm::Newtonian<Tdim>::initialise_state_variables() {
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Newtonian<Tdim>::thermodynamic_pressure(
-    double volumetric_strain) const {
+    double volumetric_strain_rate) const {
   // Bulk modulus
-  return (-bulk_modulus_ * volumetric_strain);
+  return (-bulk_viscosity_ * volumetric_strain_rate);
 }
 
 //! Compute stress in 2D
@@ -36,26 +38,36 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
     mpm::dense_map* state_vars) {
 
-  // const double pressure = ptr->pressure();
-  // Update pressure
-  (*state_vars).at("pressure") +=
-      this->thermodynamic_pressure(ptr->dvolumetric_strain());
-  const double pressure = (*state_vars).at("pressure");
-
-  const double volumetric_strain = dstrain(0) + dstrain(1);
+  // Get strain rate
+  const auto& strain_rate = ptr->strain_rate();
 
   // Update volumetric and deviatoric stress
   Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) =
-      -pressure + (2. * mu_ * dstrain(0)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(1) =
-      -pressure + (2. * mu_ * dstrain(1)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(2) = -pressure - (2. * mu_ * volumetric_strain / 3.);
-  pstress(3) = mu_ * dstrain(2);
-  pstress(4) = 0.0;
-  pstress(5) = 0.0;
+  pstress(0) = 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = 0.;
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = 0.;
+  pstress(5) = 0.;
 
-  return pstress;
+  // If weakly compressible
+  if (!incompressible_) {
+    // Update pressure
+    const double volumetric_strain_rate =
+        strain_rate(0) + strain_rate(1) + strain_rate(2);
+
+    (*state_vars).at("pressure") +=
+        this->thermodynamic_pressure(volumetric_strain_rate);
+    const double pressure = (*state_vars).at("pressure");
+
+    // Update volumetric and deviatoric stress
+    pstress(0) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+    pstress(1) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+    pstress(2) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+  }
 }
 
 //! Compute stress in 3D
@@ -64,24 +76,36 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
     mpm::dense_map* state_vars) {
 
-  // Update pressure
-  (*state_vars).at("pressure") +=
-      this->thermodynamic_pressure(ptr->dvolumetric_strain());
-  const double pressure = (*state_vars).at("pressure");
-
-  const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
+  // Get strain rate
+  const auto& strain_rate = ptr->strain_rate();
 
   // Update volumetric and deviatoric stress
   Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) =
-      -pressure + (2. * mu_ * dstrain(0)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(1) =
-      -pressure + (2. * mu_ * dstrain(1)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(2) =
-      -pressure + (2. * mu_ * dstrain(2)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(3) = mu_ * dstrain(3);
-  pstress(4) = mu_ * dstrain(4);
-  pstress(5) = mu_ * dstrain(5);
+  pstress(0) = 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = 2. * dynamic_viscosity_ * strain_rate(2);
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = dynamic_viscosity_ * strain_rate(4);
+  pstress(5) = dynamic_viscosity_ * strain_rate(5);
+
+  // If weakly compressible
+  if (!incompressible_) {
+    // Update pressure
+    const double volumetric_strain_rate =
+        strain_rate(0) + strain_rate(1) + strain_rate(2);
+
+    (*state_vars).at("pressure") +=
+        this->thermodynamic_pressure(volumetric_strain_rate);
+    const double pressure = (*state_vars).at("pressure");
+
+    // Update volumetric and deviatoric stress
+    pstress(0) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+    pstress(1) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+    pstress(2) =
+        -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
+  }
 
   return pstress;
 }
