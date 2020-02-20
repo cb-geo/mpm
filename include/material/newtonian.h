@@ -61,12 +61,12 @@ class Newtonian : public Material<Tdim> {
   //! Thermodynamic pressure
   //! \param[in] volumetric_strain dVolumetric_strain
   //! \retval pressure Pressure for volumetric strain
-  double thermodynamic_pressure(double volumetric_strain_rate) const;
+  double thermodynamic_pressure(double volumetric_strain) const;
 
   //! Density
   double density_{std::numeric_limits<double>::max()};
-  //! Fluid Bulk viscosity
-  double bulk_viscosity_{std::numeric_limits<double>::max()};
+  //! Fluid Bulk modulus
+  double bulk_modulus_{std::numeric_limits<double>::max()};
   //! Fluid Dynamic viscosity
   double dynamic_viscosity_{std::numeric_limits<double>::max()};
   //! Fluid Incompressibility
