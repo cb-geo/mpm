@@ -1042,8 +1042,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       // Initialise material
       Json jmaterial1;
       jmaterial1["density"] = 1000.;
-      jmaterial1["bulk_modulus"] = 8333333.333333333;
-      jmaterial1["mu"] = 0.0451;
+      jmaterial1["bulk_viscosity"] = 8333333.333333333;
+      jmaterial1["dynamic_viscosity"] = 0.0451;
+      jmaterial1["incompressible"] = false;
 
       auto material1 =
           Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
@@ -1149,8 +1150,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           // Initialise material
           Json jmaterial1;
           jmaterial1["density"] = 1000.;
-          jmaterial1["bulk_modulus"] = 8333333.333333333;
-          jmaterial1["mu"] = 0.0451;
+          jmaterial1["bulk_viscosity"] = 8333333.333333333;
+          jmaterial1["dynamic_viscosity"] = 0.0451;
+          jmaterial1["incompressible"] = false;
 
           auto newtonian_material =
               Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
@@ -1169,8 +1171,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           // Initialise material
           Json jmaterial1;
           jmaterial1["density"] = 1000.;
-          jmaterial1["bulk_modulus"] = 8333333.333333333;
-          jmaterial1["mu"] = 0.0451;
+          jmaterial1["bulk_viscosity"] = 8333333.333333333;
+          jmaterial1["dynamic_viscosity"] = 0.0451;
+          jmaterial1["incompressible"] = false;
 
           auto newtonian_material =
               Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
@@ -2295,8 +2298,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       // Initialise material
       Json jmaterial1;
       jmaterial1["density"] = 1000.;
-      jmaterial1["bulk_modulus"] = 8333333.333333333;
-      jmaterial1["mu"] = 0.0451;
+      jmaterial1["bulk_viscosity"] = 8333333.333333333;
+      jmaterial1["dynamic_viscosity"] = 0.0451;
+      jmaterial1["incompressible"] = false;
 
       auto material1 =
           Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
@@ -2402,8 +2406,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           // Initialise material
           Json jmaterial1;
           jmaterial1["density"] = 1000.;
-          jmaterial1["bulk_modulus"] = 8333333.333333333;
-          jmaterial1["mu"] = 0.0451;
+          jmaterial1["bulk_viscosity"] = 8333333.333333333;
+          jmaterial1["dynamic_viscosity"] = 0.0451;
+          jmaterial1["incompressible"] = false;
 
           auto newtonian_material =
               Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
@@ -2422,8 +2427,9 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           // Initialise material
           Json jmaterial1;
           jmaterial1["density"] = 1000.;
-          jmaterial1["bulk_modulus"] = 8333333.333333333;
-          jmaterial1["mu"] = 0.0451;
+          jmaterial1["bulk_viscosity"] = 8333333.333333333;
+          jmaterial1["dynamic_viscosity"] = 0.0451;
+          jmaterial1["incompressible"] = false;
 
           auto newtonian_material =
               Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()

@@ -22,8 +22,9 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
-  jmaterial["bulk_modulus"] = 8333333.333333333;
-  jmaterial["mu"] = 0.0451;
+  jmaterial["bulk_viscosity"] = 8333333.333333333;
+  jmaterial["dynamic_viscosity"] = 0.0451;
+  jmaterial["incompressible"] = false;
 
   //! Check for id = 0
   SECTION("Newtonian id is zero") {
@@ -48,7 +49,8 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     unsigned id = 0;
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["mu"] = 0.0451;
+    jmaterial["dynamic_viscosity"] = 0.0451;
+    jmaterial["incompressible"] = false;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
@@ -180,8 +182,9 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
-  jmaterial["bulk_modulus"] = 8333333.333333333;
-  jmaterial["mu"] = 0.0451;
+  jmaterial["bulk_viscosity"] = 8333333.333333333;
+  jmaterial["dynamic_viscosity"] = 0.0451;
+  jmaterial["incompressible"] = false;
 
   //! Check for id = 0
   SECTION("Newtonian id is zero") {
@@ -206,7 +209,8 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     unsigned id = 0;
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["mu"] = 0.0451;
+    jmaterial["dynamic_viscosity"] = 0.0451;
+    jmaterial["incompressible"] = false;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
