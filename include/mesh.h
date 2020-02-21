@@ -23,6 +23,7 @@
 #include "json.hpp"
 using Json = nlohmann::json;
 
+#include "boundary_segment.h"
 #include "cell.h"
 #include "container.h"
 #include "factory.h"
@@ -40,7 +41,6 @@ using Json = nlohmann::json;
 #include "particle_base.h"
 #include "traction.h"
 #include "velocity_constraint.h"
-#include "boundary_segment.h"
 
 namespace mpm {
 
