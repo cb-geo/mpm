@@ -6,7 +6,8 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
     density_ = material_properties.at("density").template get<double>();
     bulk_modulus_ =
         material_properties.at("bulk_modulus").template get<double>();
-    dynamic_viscosity_ = material_properties.at("mu").template get<double>();
+    dynamic_viscosity_ =
+        material_properties.at("dynamic_viscosity").template get<double>();
     incompressible_ =
         material_properties.at("incompressible").template get<bool>();
 
@@ -53,11 +54,10 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
   // If weakly compressible
   if (!incompressible_) {
     // Update pressure
-    const double volumetric_strain = dstrain(0) + dstrain(1);
     const double volumetric_strain_rate = strain_rate(0) + strain_rate(1);
 
     (*state_vars).at("pressure") +=
-        this->thermodynamic_pressure(volumetric_strain);
+        this->thermodynamic_pressure(ptr->dvolumetric_strain());
     double pressure = (*state_vars).at("pressure");
 
     // Update volumetric and deviatoric stress
@@ -68,6 +68,8 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     pstress(2) +=
         -pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.);
   }
+
+  return pstress;
 }
 
 //! Compute stress in 3D
@@ -91,12 +93,11 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
   // If weakly compressible
   if (!incompressible_) {
     // Update pressure
-    const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
     const double volumetric_strain_rate =
         strain_rate(0) + strain_rate(1) + strain_rate(2);
 
     (*state_vars).at("pressure") +=
-        this->thermodynamic_pressure(volumetric_strain);
+        this->thermodynamic_pressure(ptr->dvolumetric_strain());
     double pressure = (*state_vars).at("pressure");
 
     // Update volumetric and deviatoric stress
