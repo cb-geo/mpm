@@ -18,6 +18,9 @@ namespace mpm {
 template <unsigned Tdim>
 class Material;
 
+//! Particle Type
+enum class ParticleType { boundary, body };
+
 //! Particle phases
 enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
 

@@ -40,6 +40,12 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] status Particle status (active / inactive)
   Particle(Index id, const VectorDim& coord, bool status);
 
+  //! Constructor with id, coordinates and particle type
+  //! \param[in] id Particle id
+  //! \param[in] coord coordinates of the particle
+  //! \param[in] type Particle type
+  Particle(Index id, const VectorDim& coord, mpm::ParticleType type);
+
   //! Destructor
   ~Particle() override{};
 
@@ -330,6 +336,8 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  //! Particle type
+  mpm::ParticleType particle_type_{mpm::ParticleType::body};
 
 };  // Particle class
 }  // namespace mpm

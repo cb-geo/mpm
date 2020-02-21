@@ -29,6 +29,22 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
+//! Construct a particle with id,coordinates and type
+template <unsigned Tdim>
+mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord,
+                              mpm::ParticleType type)
+    : mpm::ParticleBase<Tdim>(id, coord) {
+  particle_type_ = type;
+  this->initialise();
+  cell_ = nullptr;
+  nodes_.clear();
+  material_ = nullptr;
+  //! Logger
+  std::string logger =
+      "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+}
+
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
