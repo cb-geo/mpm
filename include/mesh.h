@@ -420,6 +420,11 @@ class Mesh {
   bool generate_particles(const std::shared_ptr<mpm::IO>& io,
                           const Json& generator);
 
+  //! Iterate over boundary particles
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_boundary_particles(Toper oper);
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
@@ -485,6 +490,9 @@ class Mesh {
   unsigned nhalo_nodes_{0};
   //! Maximum number of halo nodes
   unsigned ncomms_{0};
+  //! Container of boundary particles
+  Container<ParticleBase<Tdim>> boundary_particles_;
+
 };  // Mesh class
 }  // namespace mpm
 
