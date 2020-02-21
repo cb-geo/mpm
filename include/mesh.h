@@ -425,6 +425,11 @@ class Mesh {
   template <typename Toper>
   void iterate_over_boundary_particles(Toper oper);
 
+  //! Iterate over boundary segments
+  //! \tparam Toper Callable object typically a baseclass functor
+  template <typename Toper>
+  void iterate_over_boundary_segments(Toper oper);
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
@@ -492,7 +497,8 @@ class Mesh {
   unsigned ncomms_{0};
   //! Container of boundary particles
   Container<ParticleBase<Tdim>> boundary_particles_;
-
+  //! Container of boundary line segments
+  Container<BoundarySegment<Tdim>> boundary_segments_;
 };  // Mesh class
 }  // namespace mpm
 

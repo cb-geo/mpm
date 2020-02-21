@@ -1637,3 +1637,11 @@ template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_boundary_particles(Toper oper) {
   std::for_each(boundary_particles_.cbegin(), boundary_particles_.cend(), oper);
 }
+
+//! Iterate over boundary segments
+//! TODO:parallel
+template <unsigned Tdim>
+template <typename Toper>
+void mpm::Mesh<Tdim>::iterate_over_boundary_segments(Toper oper) {
+  std::for_each(boundary_segments_.cbegin(), boundary_segments_.cend(), oper);
+}
