@@ -304,6 +304,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::material_id_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
+  //! Neighbour particles
+  using ParticleBase<Tdim>::neighbours_;
   //! Volumetric mass density (mass / volume)
   double mass_density_;
   //! Mass
@@ -346,8 +348,6 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
-  //! Container of particle neighbour ids
-  std::vector<mpm::Index> neighbours_;
 
 };  // Particle class
 }  // namespace mpm

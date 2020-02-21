@@ -276,6 +276,8 @@ class ParticleBase {
   unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Container of particle neighbour ids
+  std::vector<mpm::Index> neighbours_;
 };  // ParticleBase class
 }  // namespace mpm
 
