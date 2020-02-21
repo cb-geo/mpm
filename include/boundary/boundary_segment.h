@@ -60,7 +60,7 @@ class BoundarySegment {
   // Points which defines the boundary segment
   std::vector<std::shared_ptr<ParticleBase<Tdim>>> points_;
   // cells
-std::set<mpm::Index> cells_;
+  std::set<mpm::Index> cells_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 
