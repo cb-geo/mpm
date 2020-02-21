@@ -148,6 +148,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
+  ${mpm_SOURCE_DIR}/include/boundary/
   ${mpm_SOURCE_DIR}/include/material/
   ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/external/

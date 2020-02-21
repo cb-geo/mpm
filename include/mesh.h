@@ -40,6 +40,7 @@ using Json = nlohmann::json;
 #include "particle_base.h"
 #include "traction.h"
 #include "velocity_constraint.h"
+#include "boundary_segment.h"
 
 namespace mpm {
 
