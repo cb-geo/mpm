@@ -8,8 +8,11 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
         material_properties.at("bulk_modulus").template get<double>();
     dynamic_viscosity_ =
         material_properties.at("dynamic_viscosity").template get<double>();
-    incompressible_ =
-        material_properties.at("incompressible").template get<bool>();
+
+    // Special material properties
+    if (material_properties.contains("incompressible"))
+      incompressible_ =
+          material_properties.at("incompressible").template get<bool>();
 
     properties_ = material_properties;
   } catch (Json::exception& except) {
