@@ -325,15 +325,60 @@ void mpm::Mesh<Tdim>::find_particle_neighbours(const Cell<Tdim>& cell) {
   cell_container.add(cell);
   auto& cells = (cell_container == nullptr) ? cells_ : cell_container;
 
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
   for (auto citr = cells.cbegin(); citr != cells.cend(); ++citr) {
     // Particles in current cell
     std::vector<mpm::Index> neighbour_particles = (*citr)->particles();
     // Loop over all neighboring cells, and append particle ids from each cell
     for (const auto& neighbour_cell_id : (*citr)->neighbours()) {
-      // Get particle ids from each cell
-      auto& particle_ids = map_cells_[neighbour_cell_id]->particles();
-      neighbour_particles.insert(neighbour_particles.end(),
-                                 particle_ids.begin(), particle_ids.end());
+      // Get the MPI rank of the neighbour cell
+      int neighbour_cell_rank = map_cells_[neighbour_cell_id]->mpi_rank();
+      if (neighbour_cell_rank != (*citr)->mpi_rank()) {
+#ifdef USE_MPI
+        // Send particle ids
+        if (neighbour_cell_rank == mpi_rank) {
+          // Get particle ids from each cell
+          auto& send_particle_ids = map_cells_[neighbour_cell_id]->particles();
+          // Get size of the particle ids
+          int pid_size = send_particle_ids.size();
+          // Send the size of the particles in cell
+          MPI_Send(&pid_size, 1, MPI_INT, (*citr)->mpi_rank(),
+                   neighbour_cell_id, MPI_COMM_WORLD);
+
+          // Send particle ids if it is not empty
+          if (pid_size > 0)
+            MPI_Send(send_particle_ids.data(), pid_size, MPI_UNSIGNED_LONG_LONG,
+                     (*citr)->rank(), neighbour_cell_id, MPI_COMM_WORLD);
+        }
+        // Receive particle ids in the current MPI rank
+        if ((*citr)->mpi_rank() == mpi_rank) {
+          // Particle ids at local cell MPI rank
+          std::vector<mpm::Index> received_particle_ids;
+          int nparticles = 0;
+          MPI_Recv(&nparticles, 1, MPI_INT, neighbour_cell_rank,
+                   neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+          if (nparticles > 0) {
+            received_particle_ids.resize(nparticles);
+            MPI_Recv(received_particle_ids.data(), nparticles,
+                     MPI_UNSIGNED_LONG_LONG, neighbour_cell_rank,
+                     neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+          }
+
+          neighbour_particles.insert(neighbour_particles.end(),
+                                     received_particle_ids.begin(),
+                                     received_particle_ids.end());
+        }
+#endif
+      } else {
+        auto& particle_ids = map_cells_[neighbour_cell_id]->particles();
+        neighbour_particles.insert(neighbour_particles.end(),
+                                   particle_ids.begin(), particle_ids.end());
+      }
     }
 
     // Assign neighbouring particle ids to particles in the current cell
