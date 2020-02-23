@@ -265,11 +265,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Return the number of neighbour particles
   unsigned nneighbours() const override { return neighbours_.size(); };
 
-  //! Add a neighbour particle
-  //! \param[in] neighbour_id id of the neighbouring particle
-  //! \retval insertion_status Return the successful addition of a node
-  bool add_neighbour(mpm::Index neighbour_id) override;
-
   //! Assign neighbour particles
   //! \param[in] neighbours set of id of the neighbouring particles
   //! \retval insertion_status Return the successful addition of a node

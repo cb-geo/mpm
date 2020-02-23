@@ -242,11 +242,6 @@ class ParticleBase {
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;
 
-  //! Add a neighbour particle
-  //! \param[in] neighbour_id id of the neighbouring particle
-  //! \retval insertion_status Return the successful addition of a node
-  virtual bool add_neighbour(mpm::Index neighbour_id) = 0;
-
   //! Assign neighbour particles
   //! \param[in] neighbours set of id of the neighbouring particles
   //! \retval insertion_status Return the successful addition of a node

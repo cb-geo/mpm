@@ -789,23 +789,6 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
     nodes_[i]->append_material_id(material_id_);
 }
 
-//! Add a neighbour particle and return the status of addition
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::add_neighbour(mpm::Index neighbour_id) {
-  bool status = false;
-  try {
-    // If particle id is not the same as the current particle
-    if (neighbour_id != this->id()) {
-      neighbours_.emplace_back(neighbour_id);
-      status = true;
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Assign neighbour particles
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_neighbours(
