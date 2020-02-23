@@ -344,11 +344,7 @@ class Mesh {
 
   //! Find particle neighbours
   //! \param[in] cell of interest
-  void compute_particle_neighbours(const Cell<Tdim>& cell = nullptr);
-
-  //! Find particle neighbours
-  //! \param[in] particle of interest
-  void compute_particle_neighbours(const ParticleBase<Tdim>& particle);
+  void find_particle_neighbours(const Cell<Tdim>& cell = nullptr);
 
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer

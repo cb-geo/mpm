@@ -69,26 +69,27 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
-                                            tbb_grain_size_),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(nodes_[i]);
-                    },
-                    tbb::simple_partitioner());
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over nodes
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
-                                            tbb_grain_size_),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        if (pred(nodes_[i])) oper(nodes_[i]);
-                    },
-                    tbb::simple_partitioner());
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i)
+          if (pred(nodes_[i])) oper(nodes_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create a list of active nodes in mesh
@@ -277,13 +278,13 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
-                                            tbb_grain_size_),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(cells_[i]);
-                    },
-                    tbb::simple_partitioner());
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(cells_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Create cells from node lists
@@ -298,84 +299,47 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
   }
 
   // Assign neighbour to cells
-  tbb::parallel_for(tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
-                                            tbb_grain_size_),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i) {
-                        // Iterate over each node in current cell
-                        for (auto id : cells_[i]->nodes_id()) {
-                          auto cell_id = cells_[i]->id();
-                          // Get the cells associated with each node
-                          for (auto neighbour_id : node_cell_map[id])
-                            if (neighbour_id != cell_id)
-                              cells_[i]->add_neighbour(neighbour_id);
-                        }
-                      }
-                    },
-                    tbb::simple_partitioner());
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) {
+          // Iterate over each node in current cell
+          for (auto id : cells_[i]->nodes_id()) {
+            auto cell_id = cells_[i]->id();
+            // Get the cells associated with each node
+            for (auto neighbour_id : node_cell_map[id])
+              if (neighbour_id != cell_id)
+                cells_[i]->add_neighbour(neighbour_id);
+          }
+        }
+      },
+      tbb::simple_partitioner());
 }
 
 //! Find particle neighbours for all particle
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_particle_neighbours(const Cell<Tdim>& cell) {
-  // Check argument passed
-  Container<Cell<Tdim>> cell_ctr;
-  cell_ctr.add(cell);
-  auto& cells = (cell_ctr == nullptr) ? cells_ : cell_ctr;
+void mpm::Mesh<Tdim>::find_particle_neighbours(const Cell<Tdim>& cell) {
+  // Find particle neighbours in all cells or a prescribed cell
+  Container<Cell<Tdim>> cell_container;
+  cell_container.add(cell);
+  auto& cells = (cell_container == nullptr) ? cells_ : cell_container;
 
-  // Check whether cells have been assigned with neighbours
-  if ((*cells_.cbegin())->nneighbours() == 0)
-    throw std::runtime_error(
-        "No neighbours have been assigned to cell, cannot "
-        "compute_particle_neighbours for single cell");
-
-  // Loop over cells
   for (auto citr = cells.cbegin(); citr != cells.cend(); ++citr) {
-    // Loop over the neighbouring cell particles
+    // Particles in current cell
     std::vector<mpm::Index> neighbour_particles = (*citr)->particles();
-    for (const auto& neighbour_cell_id : (*citr)->neighbours())
-      neighbour_particles.insert(
-          neighbour_particles.end(),
-          map_cells_[neighbour_cell_id]->particles().begin(),
-          map_cells_[neighbour_cell_id]->particles().end());
-
-    // Loop over the particles in the current cells and assign particle
-    // neighbours
-    for (const auto& p_id : (*citr)->particles()) {
-      bool status =
-          map_particles_[p_id]->assign_neighbours(neighbour_particles);
-      if (!status)
-        throw std::runtime_error("Cannot assign valid particle neighbours");
+    // Loop over all neighboring cells, and append particle ids from each cell
+    for (const auto& neighbour_cell_id : (*citr)->neighbours()) {
+      // Get particle ids from each cell
+      auto& particle_ids = map_cells_[neighbour_cell_id]->particles();
+      neighbour_particles.insert(neighbour_particles.end(),
+                                 particle_ids.begin(), particle_ids.end());
     }
+
+    // Assign neighbouring particle ids to particles in the current cell
+    for (auto particle_id : (*citr)->particles())
+      map_particles_[particle_id]->assign_neighbours(neighbour_particles);
   }
-}
-
-//! Find particle neighbours for a given particle
-template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_particle_neighbours(
-    const ParticleBase<Tdim>& particle) {
-  // Get the current particle's cell
-  const auto& current_cell = map_cells_[particle->cell_id()];
-
-  // Check whether cell neighbour has been computed
-  if ((*cells_.cbegin())->nneighbours() == 0)
-    throw std::runtime_error(
-        "No neighbours have been assigned to cell, cannot "
-        "compute_particle_neighbours for single particle");
-
-  // Loop over the neighbouring cell particles
-  std::vector<mpm::Index> neighbour_particles = (current_cell)->particles();
-  for (const auto& neighbour_cell_id : (current_cell)->neighbours())
-    neighbour_particles.insert(
-        neighbour_particles.end(),
-        map_cells_[neighbour_cell_id]->particles().begin(),
-        map_cells_[neighbour_cell_id]->particles().end());
-
-  // Assign particle neighbours
-  bool status = particle->assign_neighbours(neighbour_particles);
-
-  if (!status)
-    throw std::runtime_error("Cannot assign valid particle neighbours");
 }
 
 //! Find ghost cell neighbours
@@ -846,13 +810,13 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-  tbb::parallel_for(tbb::blocked_range<int>(
-                        size_t(0), size_t(particles_.size()), tbb_grain_size_),
-                    [&](const tbb::blocked_range<int>& range) {
-                      for (int i = range.begin(); i != range.end(); ++i)
-                        oper(particles_[i]);
-                    },
-                    tbb::simple_partitioner());
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i) oper(particles_[i]);
+      },
+      tbb::simple_partitioner());
 }
 
 //! Iterate over particle set
