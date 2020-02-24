@@ -69,8 +69,8 @@ class Newtonian : public Material<Tdim> {
   double bulk_modulus_{std::numeric_limits<double>::max()};
   //! Fluid Dynamic viscosity
   double dynamic_viscosity_{std::numeric_limits<double>::max()};
-  //! Fluid Incompressibility
-  bool incompressible_{false};
+  //! Compressibility multiplier
+  double compressibility_multiplier_{1.0};
 
 };  // Newtonian class
 }  // namespace mpm
