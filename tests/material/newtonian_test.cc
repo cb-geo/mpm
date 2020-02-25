@@ -23,7 +23,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
   Json jmaterial;
   jmaterial["density"] = 1000.;
   jmaterial["bulk_modulus"] = 8333333.333333333;
-  jmaterial["dynamic_viscosity"] = 0.89E6;
+  jmaterial["dynamic_viscosity"] = 8.9E-4;
 
   //! Check for id = 0
   SECTION("Newtonian id is zero") {
@@ -48,7 +48,7 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     unsigned id = 0;
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["dynamic_viscosity"] = 0.89E6;
+    jmaterial["dynamic_viscosity"] = 8.9E-4;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
@@ -153,10 +153,10 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
 
     // Check stresses
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-52639.5833333333).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-54308.3333333333).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-49302.0833333333).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-4171.875).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-52083.3333338896).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-52083.3333355583).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-52083.3333305521).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-0.0000041719).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
 
@@ -249,10 +249,10 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
 
     // Check stresses
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-3337.5).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-5006.25).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-0.0000033375).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-0.00000500625).epsilon(Tolerance));
     REQUIRE(check_stress(2) == Approx(0.000e+00).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-4171.875).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-0.0000041719).epsilon(Tolerance));
     REQUIRE(check_stress(4) == Approx(0.000e+00).epsilon(Tolerance));
     REQUIRE(check_stress(5) == Approx(0.000e+00).epsilon(Tolerance));
 
@@ -271,7 +271,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
   Json jmaterial;
   jmaterial["density"] = 1000.;
   jmaterial["bulk_modulus"] = 8333333.333333333;
-  jmaterial["dynamic_viscosity"] = 0.89E6;
+  jmaterial["dynamic_viscosity"] = 8.9E-4;
 
   //! Check for id = 0
   SECTION("Newtonian id is zero") {
@@ -296,7 +296,7 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
     unsigned id = 0;
     Json jmaterial;
     jmaterial["density"] = 1000.;
-    jmaterial["dynamic_viscosity"] = 0.89E6;
+    jmaterial["dynamic_viscosity"] = 8.9E-4;
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
@@ -418,12 +418,12 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
 
     // Check stresses
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-16250.78125).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(-12287.5).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-18336.71875).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-938.671875).epsilon(Tolerance));
-    REQUIRE(check_stress(4) == Approx(-312.890625).epsilon(Tolerance));
-    REQUIRE(check_stress(5) == Approx(-3128.90625).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-15625.0000006258).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(-15624.9999966625).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-15625.0000027117).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-0.0000009387).epsilon(Tolerance));
+    REQUIRE(check_stress(4) == Approx(-0.0000003129).epsilon(Tolerance));
+    REQUIRE(check_stress(5) == Approx(-0.0000031289).epsilon(Tolerance));
 
     // Calculate modulus values
     const double K = 8333333.333333333;
@@ -531,12 +531,12 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
 
     // Check stresses
     REQUIRE(check_stress.size() == 6);
-    REQUIRE(check_stress(0) == Approx(-2085.9375).epsilon(Tolerance));
-    REQUIRE(check_stress(1) == Approx(1877.34375).epsilon(Tolerance));
-    REQUIRE(check_stress(2) == Approx(-4171.875).epsilon(Tolerance));
-    REQUIRE(check_stress(3) == Approx(-938.671875).epsilon(Tolerance));
-    REQUIRE(check_stress(4) == Approx(-312.890625).epsilon(Tolerance));
-    REQUIRE(check_stress(5) == Approx(-3128.90625).epsilon(Tolerance));
+    REQUIRE(check_stress(0) == Approx(-0.0000020859).epsilon(Tolerance));
+    REQUIRE(check_stress(1) == Approx(0.0000018773).epsilon(Tolerance));
+    REQUIRE(check_stress(2) == Approx(-0.0000041719).epsilon(Tolerance));
+    REQUIRE(check_stress(3) == Approx(-0.0000009387).epsilon(Tolerance));
+    REQUIRE(check_stress(4) == Approx(-0.0000003129).epsilon(Tolerance));
+    REQUIRE(check_stress(5) == Approx(-0.0000031289).epsilon(Tolerance));
 
     // Check pressure value
     REQUIRE(state_vars.at("pressure") == Approx(0.000e+00).epsilon(Tolerance));
