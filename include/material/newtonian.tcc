@@ -46,34 +46,27 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
 
   // Get strain rate
   const auto& strain_rate = ptr->strain_rate();
-
-  // Deviatoric stress component
-  Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) = 2. * dynamic_viscosity_ * strain_rate(0);
-  pstress(1) = 2. * dynamic_viscosity_ * strain_rate(1);
-  pstress(2) = 0.;
-  pstress(3) = dynamic_viscosity_ * strain_rate(3);
-  pstress(4) = 0.;
-  pstress(5) = 0.;
-
-  // Update pressure
   const double volumetric_strain_rate = strain_rate(0) + strain_rate(1);
 
+  // Update pressure
   (*state_vars).at("pressure") +=
       (compressibility_multiplier_ *
        this->thermodynamic_pressure(ptr->dvolumetric_strain()));
-  double pressure = (*state_vars).at("pressure");
 
   // Volumetric stress component
-  pstress(0) +=
+  const double volumetric_component =
       compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
-  pstress(1) +=
-      compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
-  pstress(2) +=
-      compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
+      (-(*state_vars).at("pressure") -
+       (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
+
+  // Update stress component
+  Eigen::Matrix<double, 6, 1> pstress;
+  pstress(0) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = volumetric_component;
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = 0.;
+  pstress(5) = 0.;
 
   return pstress;
 }
@@ -86,35 +79,28 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
 
   // Get strain rate
   const auto& strain_rate = ptr->strain_rate();
-
-  // Deviatoric stress component
-  Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) = 2. * dynamic_viscosity_ * strain_rate(0);
-  pstress(1) = 2. * dynamic_viscosity_ * strain_rate(1);
-  pstress(2) = 2. * dynamic_viscosity_ * strain_rate(2);
-  pstress(3) = dynamic_viscosity_ * strain_rate(3);
-  pstress(4) = dynamic_viscosity_ * strain_rate(4);
-  pstress(5) = dynamic_viscosity_ * strain_rate(5);
-
-  // Update pressure
   const double volumetric_strain_rate =
       strain_rate(0) + strain_rate(1) + strain_rate(2);
 
+  // Update pressure
   (*state_vars).at("pressure") +=
       (compressibility_multiplier_ *
        this->thermodynamic_pressure(ptr->dvolumetric_strain()));
-  double pressure = (*state_vars).at("pressure");
 
   // Volumetric stress component
-  pstress(0) +=
+  const double volumetric_component =
       compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
-  pstress(1) +=
-      compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
-  pstress(2) +=
-      compressibility_multiplier_ *
-      (-pressure - (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
+      (-(*state_vars).at("pressure") -
+       (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
+
+  // Update stress component
+  Eigen::Matrix<double, 6, 1> pstress;
+  pstress(0) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(2);
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = dynamic_viscosity_ * strain_rate(4);
+  pstress(5) = dynamic_viscosity_ * strain_rate(5);
 
   return pstress;
 }
