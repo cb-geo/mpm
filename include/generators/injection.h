@@ -10,6 +10,10 @@ struct Injection {
   unsigned material_id;
   // Cell id
   int cell_set_id;
+  // Start
+  double start_time{0.};
+  // End
+  double end_time{std::numeric_limits<double>::max()};
   // Particle velocity
   std::vector<double> velocity;
 };

@@ -422,7 +422,7 @@ class Mesh {
                           const Json& generator);
 
   //! Inject particles
-  void inject_particles();
+  void inject_particles(double current_time);
 
  private:
   // Read particles from file

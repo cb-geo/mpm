@@ -187,7 +187,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
     // Inject particles
-    mesh_->inject_particles();
+    mesh_->inject_particles(this->step_ * this->dt_);
 
     // Create a TBB task group
     tbb::task_group task_group;
