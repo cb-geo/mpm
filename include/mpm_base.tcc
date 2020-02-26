@@ -284,9 +284,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       if (!gen_status) status = false;
     }
 
-    // Inject particles
-    mesh_->inject_particles();
-
     auto particles_gen_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Generate particles: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
