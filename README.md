@@ -78,7 +78,7 @@ sudo apt-get install freeglut3-dev libxt-dev
 
 > VTK
 ```
-git clone git://vtk.org/VTK.git VTK
+git clone https://gitlab.kitware.com/vtk/vtk.git VTK
 cd VTK && mkdir build && cd build/
 cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
 make -j
@@ -208,6 +208,9 @@ For example to run the code on 4 compute nodes (MPI tasks):
 mpirun -N 4 ./mpm -f ~/benchmarks/3d/uniaxial-stress -i mpm.json
 ```
 
+## Authors
+
+Please refer to the [list of contributors to the CB-Geo MPM code](AUTHORS.md).
 
 ## Citation
 

@@ -35,6 +35,7 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     p_image_initial_ =
         material_properties.at("p_image_initial").template get<double>();
     // Flag for bonded model
+
     bond_model_ = material_properties.at("bond_model").template get<bool>();
     // Initial p_cohesion
     p_cohesion_initial_ =
@@ -47,7 +48,7 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     // Dilation degradation parameter m upon shearing
     m_dilation_ = material_properties.at("m_dilation").template get<double>();
     // Parameter for shear modulus
-    m_shear_ = material_properties.at("m_shear").template get<double>();
+    m_modulus_ = material_properties.at("m_modulus").template get<double>();
 
     const double sin_friction_cs = sin(friction_cs_);
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
@@ -466,7 +467,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     (*state_vars).at("p_dilation") = 0.0;
     m_cohesion_ = 0.0;
     m_dilation_ = 0.0;
-    m_shear_ = 0.0;
+    m_modulus_ = 0.0;
   }
 
   // Note: compression positive in all derivations
@@ -479,12 +480,12 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
 
   // Elastic step
   // Bulk modulus computation
-  bulk_modulus_ = (1. + (*state_vars).at("void_ratio")) / kappa_ * mean_p;
+  bulk_modulus_ = (1. + (*state_vars).at("void_ratio")) / kappa_ * mean_p +
+                  m_modulus_ * ((*state_vars).at("p_cohesion") +
+                                (*state_vars).at("p_dilation"));
   // Shear modulus computation
   shear_modulus_ = 3. * bulk_modulus_ * (1. - 2. * poisson_ratio_) /
-                       (2.0 * (1. + poisson_ratio_)) +
-                   m_shear_ * ((*state_vars).at("p_cohesion") +
-                               (*state_vars).at("p_dilation"));
+                   (2.0 * (1. + poisson_ratio_));
 
   // Set elastic tensor
   this->compute_elastic_tensor();
