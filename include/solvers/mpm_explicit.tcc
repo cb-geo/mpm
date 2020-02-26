@@ -223,8 +223,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                   std::placeholders::_1));
 
 #ifdef USE_MPI
-    auto mpi_comms_begin = std::chrono::steady_clock::now();
-
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce nodal mass
@@ -240,10 +238,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, false, phase,
                     std::placeholders::_2));
     }
-    auto mpi_comms_end = std::chrono::steady_clock::now();
-    mpi_duration_ += std::chrono::duration_cast<std::chrono::milliseconds>(
-                         mpi_comms_end - mpi_comms_begin)
-                         .count();
 #endif
 
     // Compute nodal velocity
@@ -282,7 +276,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     task_group.wait();
 
 #ifdef USE_MPI
-    mpi_comms_begin = std::chrono::steady_clock::now();
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
       // MPI all reduce external force
@@ -300,10 +293,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
                     std::placeholders::_1, false, phase,
                     std::placeholders::_2));
     }
-    mpi_comms_end = std::chrono::steady_clock::now();
-    mpi_duration_ += std::chrono::duration_cast<std::chrono::milliseconds>(
-                         mpi_comms_end - mpi_comms_begin)
-                         .count();
 #endif
 
     // Check if damping has been specified and accordingly Iterate over
@@ -339,13 +328,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
-    mpi_comms_begin = std::chrono::steady_clock::now();
-
     mesh_->transfer_nonrank_particles();
-    mpi_comms_end = std::chrono::steady_clock::now();
-    mpi_duration_ += std::chrono::duration_cast<std::chrono::milliseconds>(
-                         mpi_comms_end - mpi_comms_begin)
-                         .count();
 #endif
 #endif
 
@@ -369,7 +352,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
                                                             solver_begin)
           .count());
-  console_->info("Rank {}, MPI duration: {} ms", mpi_rank, mpi_duration_);
 
   return status;
 }
