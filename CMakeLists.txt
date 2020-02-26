@@ -163,14 +163,14 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
-  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
-  ${mpm_SOURCE_DIR}/src/interface.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
+  ${mpm_SOURCE_DIR}/src/nodal_properties.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
@@ -221,6 +221,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/node_container_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
