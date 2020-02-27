@@ -42,9 +42,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property_data(property1, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, j) ==
                   Approx(0.0).epsilon(tolerance));
-          REQUIRE(nodal_properties.property_data(property2, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, j) ==
                   Approx(0.0).epsilon(tolerance));
         }
       }
@@ -65,9 +65,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         REQUIRE(nodal_properties.assign_property(
-            property1, data1.block<dim, 1>(i * dim, j), i, j, dim));
+            property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
         REQUIRE(nodal_properties.assign_property(
-            property2, data2.block<dim, 1>(i * dim, j), i, j, dim));
+            property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
 
@@ -75,9 +75,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property_data(property1, i, j, dim)(k, 0) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
                   Approx(data1(i * dim + k, j)).epsilon(tolerance));
-          REQUIRE(nodal_properties.property_data(property2, i, j, dim)(k, 0) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(data2(i * dim + k, j)).epsilon(tolerance));
         }
       }
@@ -114,9 +114,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property_data(property1, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, j) ==
                   Approx(0.0).epsilon(tolerance));
-          REQUIRE(nodal_properties.property_data(property2, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, j) ==
                   Approx(0.0).epsilon(tolerance));
         }
       }
@@ -143,9 +143,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         REQUIRE(nodal_properties.assign_property(
-            property1, data1.block<dim, 1>(i * dim, j), i, j, dim));
+            property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
         REQUIRE(nodal_properties.assign_property(
-            property2, data2.block<dim, 1>(i * dim, j), i, j, dim));
+            property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
 
@@ -153,9 +153,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property_data(property1, i, j, dim)(k, 0) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
                   Approx(data1(i * dim + k, j)).epsilon(tolerance));
-          REQUIRE(nodal_properties.property_data(property2, i, j, dim)(k, 0) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(data2(i * dim + k, j)).epsilon(tolerance));
         }
       }

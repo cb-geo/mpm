@@ -1,11 +1,5 @@
 #include "nodal_properties.h"
 
-// Constructor
-mpm::NodalProperties::NodalProperties() {
-  // Initialize map of properties as an empty map
-  properties_ = std::map<std::string, Eigen::MatrixXd>();
-}
-
 // Function to create new property with given name and size (rows x cols)
 bool mpm::NodalProperties::create_property(const std::string& property,
                                            unsigned rows, unsigned columns) {
@@ -17,20 +11,20 @@ bool mpm::NodalProperties::create_property(const std::string& property,
   return true;
 }
 
-// Fetch data in the nodal properties map
-Eigen::MatrixXd mpm::NodalProperties::property_data(const std::string& property,
-                                                    unsigned id_node,
-                                                    unsigned id_mat,
-                                                    unsigned nprops = 1) {
-  return properties_.at(property).block(id_node * nprops, id_mat, nprops, 1);
+// Return data in the nodal properties map at a specific index
+Eigen::MatrixXd mpm::NodalProperties::property(const std::string& property,
+                                               unsigned node_id,
+                                               unsigned mat_id,
+                                               unsigned nprops = 1) const {
+  return properties_.at(property).block(node_id * nprops, mat_id, nprops, 1);
 }
 
 // Assign property value to a pair of node and material
 bool mpm::NodalProperties::assign_property(const std::string& property,
+                                           unsigned node_id, unsigned mat_id,
                                            Eigen::MatrixXd property_value,
-                                           unsigned id_node, unsigned id_mat,
                                            unsigned nprops = 1) {
-  properties_.at(property).block(id_node * nprops, id_mat, nprops, 1) =
+  properties_.at(property).block(node_id * nprops, mat_id, nprops, 1) =
       property_value;
   return true;
 }
