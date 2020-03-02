@@ -186,6 +186,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
+    // Inject particles
+    mesh_->inject_particles(this->step_ * this->dt_);
+
     // Create a TBB task group
     tbb::task_group task_group;
 
@@ -292,8 +295,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
 #endif
 
-    // Check if damping has been specified and accordingly Iterate over active
-    // nodes to compute acceleratation and velocity
+    // Check if damping has been specified and accordingly Iterate over
+    // active nodes to compute acceleratation and velocity
     if (damping_type_ == mpm::Damping::Cundall)
       mesh_->iterate_over_nodes_predicate(
           std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_cundall,

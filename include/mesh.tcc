@@ -1557,6 +1557,37 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
                                               material_id, cset_id);
     }
 
+    // Generate material points at the Gauss location in all cells
+    else if (generator_type == "inject") {
+      mpm::Injection inject;
+      // Number of particles per dir
+      inject.nparticles_dir =
+          generator["nparticles_per_dir"].template get<unsigned>();
+      // Particle type
+      inject.particle_type =
+          generator["particle_type"].template get<std::string>();
+      // Material id
+      inject.material_id = generator["material_id"].template get<unsigned>();
+      // Cell set id
+      inject.cell_set_id = generator["cset_id"].template get<int>();
+      // Duration of injection
+      if (generator.contains("duration") && generator["duration"].is_array() &&
+          generator["duration"].size() == 2) {
+        inject.start_time = generator["duration"].at(0);
+        inject.end_time = generator["duration"].at(1);
+      }
+
+      // Velocity
+      inject.velocity.resize(Tdim, 0.);
+      if (generator["velocity"].is_array() &&
+          generator["velocity"].size() == Tdim) {
+        for (unsigned i = 0; i < Tdim; ++i)
+          inject.velocity[i] = generator["velocity"].at(i);
+      }
+      // Add to particle injections
+      particle_injections_.emplace_back(inject);
+    }
+
     else
       throw std::runtime_error(
           "Particle generator type is not properly specified");
@@ -1566,6 +1597,68 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
     status = false;
   }
   return status;
+}
+
+//! Generate particles
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::inject_particles(double current_time) {
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  // Container of new injected particles
+  std::vector<std::shared_ptr<ParticleBase<Tdim>>> injected_particles;
+  // Iterate over all injection cells
+  for (auto injection : particle_injections_) {
+    unsigned pid = this->nparticles();
+    bool checks = false;
+    // Get material
+    auto material = materials_.at(injection.material_id);
+    // Check if duration is within the current time
+    if (injection.start_time <= current_time &&
+        injection.end_time > current_time) {
+      // If set id is -1, use all cells
+      auto cset = (injection.cell_set_id == -1)
+                      ? this->cells_
+                      : cell_sets_.at(injection.cell_set_id);
+      // Iterate over each cell to generate points
+      for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
+        if ((*citr)->rank() == mpi_rank && (*citr)->nparticles() == 0) {
+          // Assign quadratures based on number of particles
+          (*citr)->assign_quadrature(injection.nparticles_dir);
+
+          // Genereate particles at the Gauss points
+          const auto cpoints = (*citr)->generate_points();
+          // Iterate over each coordinate to generate material points
+          for (const auto& coordinates : cpoints) {
+            // Create particle
+            auto particle =
+                Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                        const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                    ->create(injection.particle_type,
+                             static_cast<mpm::Index>(pid), coordinates);
+
+            // particle velocity
+            Eigen::Matrix<double, Tdim, 1> pvelocity(injection.velocity.data());
+            particle->assign_velocity(pvelocity);
+
+            // Add particle to mesh
+            unsigned status = this->add_particle(particle, checks);
+            if (status) {
+              map_particles_[pid]->assign_cell(*citr);
+              map_particles_[pid]->assign_material(material);
+              ++pid;
+              injected_particles.emplace_back(particle);
+            }
+          }
+        }
+      }
+    }
+    for (auto particle : injected_particles) {
+      particle->compute_volume();
+      particle->compute_mass();
+    }
+  }
 }
 
 // Read particles file
