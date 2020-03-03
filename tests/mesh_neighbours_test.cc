@@ -263,7 +263,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
     }
 
     SECTION("Compute cell neighbours") {
-      mesh->compute_cell_neighbours();
+      mesh->find_cell_neighbours();
       REQUIRE(cell0->nneighbours() == 3);
       REQUIRE(cell1->nneighbours() == 5);
       REQUIRE(cell2->nneighbours() == 8);
@@ -700,7 +700,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
 
     // Compute cell neighbours
     SECTION("Compute cell neighbours") {
-      mesh->compute_cell_neighbours();
+      mesh->find_cell_neighbours();
       REQUIRE(cell0->nneighbours() == 3);
       REQUIRE(cell1->nneighbours() == 5);
       REQUIRE(cell2->nneighbours() == 8);

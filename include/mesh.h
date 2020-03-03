@@ -341,7 +341,7 @@ class Mesh {
   }
 
   //! Find cell neighbours
-  void compute_cell_neighbours();
+  void find_cell_neighbours();
 
   //! Find particle neighbours
   //! \param[in] cell of interest

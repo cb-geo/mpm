@@ -480,7 +480,7 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
     REQUIRE(mesh->add_cell(cell3) == true);
 
     // Compute cell neighbours
-    mesh->compute_cell_neighbours();
+    mesh->find_cell_neighbours();
 
     SECTION("Decompose mesh graph") {
       if (mpi_rank == 4) {
@@ -733,7 +733,7 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
     REQUIRE(mesh->add_cell(cell3) == true);
 
     // Compute cell neighbours
-    mesh->compute_cell_neighbours();
+    mesh->find_cell_neighbours();
 
     SECTION("Decompose mesh graph") {
       if (mpi_rank == 4) {
