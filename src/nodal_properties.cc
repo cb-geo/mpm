@@ -15,7 +15,7 @@ Eigen::MatrixXd mpm::NodalProperties::property(const std::string& property,
                                                unsigned node_id,
                                                unsigned mat_id,
                                                unsigned nprops) const {
-  double* position = &properties_.at(property)(node_id * nprops, mat_id);
+  const double* position = &properties_.at(property)(node_id * nprops, mat_id);
   mpm::MapProperty property_map(position, nprops);
   return property_map;
 }
