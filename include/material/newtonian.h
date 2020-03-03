@@ -65,10 +65,12 @@ class Newtonian : public Material<Tdim> {
 
   //! Density
   double density_{std::numeric_limits<double>::max()};
-  //! Bulk modulus
+  //! Fluid Bulk modulus
   double bulk_modulus_{std::numeric_limits<double>::max()};
-  //! mu - constant plastic viscosity [N s / m^2 or kg / m / s]
-  double mu_{std::numeric_limits<double>::max()};
+  //! Fluid Dynamic viscosity
+  double dynamic_viscosity_{std::numeric_limits<double>::max()};
+  //! Compressibility multiplier
+  double compressibility_multiplier_{1.0};
 
 };  // Newtonian class
 }  // namespace mpm
