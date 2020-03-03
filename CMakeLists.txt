@@ -163,7 +163,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/linear_function.cc
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
-  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc  
+  ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
@@ -212,7 +212,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/material/mohr_coulomb_test.cc
     ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/material/norsand_test.cc
-    ${mpm_SOURCE_DIR}/tests/mesh_cell_neighbours_test.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
