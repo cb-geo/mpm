@@ -5,6 +5,11 @@
 #include <map>
 
 namespace mpm {
+
+// Define Eigen map type
+typedef Eigen::Matrix<double, Eigen::Dynamic, 1> MatrixProperty;
+typedef Eigen::Map<MatrixProperty> MapProperty;
+
 // \brief Multimaterial parameters on each node
 struct NodalProperties {
 
@@ -13,7 +18,7 @@ struct NodalProperties {
   //! \param[in] rows Number of nodes times the number of the dimension of the
   //! property (1 if scalar, Tdim if vector)
   //! \param[in] columns Number of materials
-  bool create_property(const std::string& property, unsigned rows,
+  void create_property(const std::string& property, unsigned rows,
                        unsigned columns);
 
   // Return data in the nodal properties map at a specific index
@@ -30,7 +35,7 @@ struct NodalProperties {
   // \param[in] mat_id Id of the material within the property data
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   // \param[in] property Property name
-  bool assign_property(const std::string& property, unsigned node_id,
+  void assign_property(const std::string& property, unsigned node_id,
                        unsigned mat_id, Eigen::MatrixXd property_value,
                        unsigned nprops = 1);
 

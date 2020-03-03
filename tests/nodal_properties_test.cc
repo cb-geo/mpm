@@ -27,8 +27,10 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     const unsigned dim = 1;
 
     // Check property creation
-    REQUIRE(nodal_properties.create_property(property1, nnodes, nmaterials));
-    REQUIRE(nodal_properties.create_property(property2, nnodes, nmaterials));
+    REQUIRE_NOTHROW(
+        nodal_properties.create_property(property1, nnodes, nmaterials));
+    REQUIRE_NOTHROW(
+        nodal_properties.create_property(property2, nnodes, nmaterials));
 
     // Check size of matrix of property data
     REQUIRE(nodal_properties.properties_.at(property1).rows() == 3);
@@ -64,9 +66,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     // Update values in the property data matrix and check update
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
-        REQUIRE(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.assign_property(
             property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
-        REQUIRE(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.assign_property(
             property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
@@ -97,9 +99,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     const unsigned dim = 2;
 
     // Check property creation
-    REQUIRE(
+    REQUIRE_NOTHROW(
         nodal_properties.create_property(property1, nnodes * dim, nmaterials));
-    REQUIRE(
+    REQUIRE_NOTHROW(
         nodal_properties.create_property(property2, nnodes * dim, nmaterials));
 
     // Check size of matrix of property data
@@ -142,9 +144,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     // Update values in the property data matrix and check update
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
-        REQUIRE(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.assign_property(
             property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
-        REQUIRE(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.assign_property(
             property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
