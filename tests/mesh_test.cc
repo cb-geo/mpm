@@ -555,15 +555,6 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     }
 
     SECTION("Check material point generation") {
-      // Generator property
-      Json jgen;
-      jgen["type"] = "gauss";
-      jgen["material_id"] = mid;
-      jgen["cset_id"] = 1;
-      jgen["particle_type"] = "P2D";
-      jgen["check_duplicates"] = false;
-      jgen["nparticles_per_dir"] = 2;
-
       // Assign argc and argv to nput arguments of MPM
       int argc = 7;
       char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
@@ -579,10 +570,50 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
 
       REQUIRE(mesh->nparticles() == 0);
-      // Generate
-      REQUIRE(mesh->generate_particles(io, jgen) == true);
-      // Number of particles
-      REQUIRE(mesh->nparticles() == 4);
+
+      SECTION("Gauss point generation") {
+        // Gauss point generation
+        Json jgen;
+        jgen["type"] = "gauss";
+        jgen["material_id"] = mid;
+        jgen["cset_id"] = 1;
+        jgen["particle_type"] = "P2D";
+        jgen["check_duplicates"] = false;
+        jgen["nparticles_per_dir"] = 2;
+
+        // Generate
+        REQUIRE(mesh->generate_particles(io, jgen) == true);
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 4);
+      }
+
+      SECTION("Inject points") {
+        // Gauss point generation
+        Json jgen;
+        jgen["type"] = "inject";
+        jgen["material_id"] = mid;
+        jgen["cset_id"] = 1;
+        jgen["particle_type"] = "P2D";
+        jgen["check_duplicates"] = false;
+        jgen["nparticles_per_dir"] = 2;
+        jgen["velocity"] = {0., 0.};
+        jgen["duration"] = {0.1, 0.2};
+
+        // Generate
+        REQUIRE(mesh->generate_particles(io, jgen) == true);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.05));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 0);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.25));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 0);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.15));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 4);
+      }
     }
 
     // Particle 1
@@ -1804,15 +1835,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     }
 
     SECTION("Check material point generation") {
-      // Generator property
-      Json jgen;
-      jgen["type"] = "gauss";
-      jgen["material_id"] = mid;
-      jgen["cset_id"] = 1;
-      jgen["particle_type"] = "P3D";
-      jgen["check_duplicates"] = false;
-      jgen["nparticles_per_dir"] = 2;
-
       // Assign argc and argv to nput arguments of MPM
       int argc = 7;
       char* argv[] = {(char*)"./mpm",   (char*)"-f", (char*)"./",
@@ -1828,10 +1850,50 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
       REQUIRE(mesh->create_cell_sets(cell_sets, true) == true);
 
       REQUIRE(mesh->nparticles() == 0);
-      // Generate
-      REQUIRE(mesh->generate_particles(io, jgen) == true);
-      // Number of particles
-      REQUIRE(mesh->nparticles() == 8);
+
+      SECTION("Gauss point generation") {
+        // Gauss point generation
+        Json jgen;
+        jgen["type"] = "gauss";
+        jgen["material_id"] = mid;
+        jgen["cset_id"] = 1;
+        jgen["particle_type"] = "P3D";
+        jgen["check_duplicates"] = false;
+        jgen["nparticles_per_dir"] = 2;
+
+        // Generate
+        REQUIRE(mesh->generate_particles(io, jgen) == true);
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 8);
+      }
+
+      SECTION("Inject points") {
+        // Gauss point generation
+        Json jgen;
+        jgen["type"] = "inject";
+        jgen["material_id"] = mid;
+        jgen["cset_id"] = 1;
+        jgen["particle_type"] = "P3D";
+        jgen["check_duplicates"] = false;
+        jgen["nparticles_per_dir"] = 2;
+        jgen["velocity"] = {0., 0.};
+        jgen["duration"] = {0.1, 0.2};
+
+        // Generate
+        REQUIRE(mesh->generate_particles(io, jgen) == true);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.05));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 0);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.25));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 0);
+        // Inject particles
+        REQUIRE_NOTHROW(mesh->inject_particles(0.15));
+        // Number of particles
+        REQUIRE(mesh->nparticles() == 8);
+      }
     }
 
     // Particle 1
