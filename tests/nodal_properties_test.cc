@@ -23,14 +23,14 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     std::string property1 = "masses";
     std::string property2 = "areas";
 
-    // Define dimentsion (1D for scalar)
+    // Define dimension (1D for scalar)
     const unsigned dim = 1;
 
     // Check property creation
     REQUIRE_NOTHROW(
-        nodal_properties.create_property(property1, nnodes, nmaterials));
+        nodal_properties.create_property(property1, nnodes * dim, nmaterials));
     REQUIRE_NOTHROW(
-        nodal_properties.create_property(property2, nnodes, nmaterials));
+        nodal_properties.create_property(property2, nnodes * dim, nmaterials));
 
     // Check size of matrix of property data
     REQUIRE(nodal_properties.properties_.at(property1).rows() == 3);
@@ -44,9 +44,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
                   Approx(0.0).epsilon(tolerance));
-          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(0.0).epsilon(tolerance));
         }
       }
@@ -116,9 +116,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
         for (int k = 0; k < dim; ++k) {
-          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
                   Approx(0.0).epsilon(tolerance));
-          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, j) ==
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(0.0).epsilon(tolerance));
         }
       }
