@@ -8,7 +8,7 @@ namespace mpm {
 
 // Define Eigen map type
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1> MatrixProperty;
-typedef Eigen::Map<MatrixProperty> MapProperty;
+typedef Eigen::Map<const MatrixProperty> MapProperty;
 
 // \brief Multimaterial parameters on each node
 struct NodalProperties {
