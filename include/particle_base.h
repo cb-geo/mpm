@@ -245,7 +245,7 @@ class ParticleBase {
   //! Assign neighbour particles
   //! \param[in] neighbours set of id of the neighbouring particles
   //! \retval insertion_status Return the successful addition of a node
-  virtual bool assign_neighbours(const std::vector<mpm::Index>& neighbours) = 0;
+  virtual void assign_neighbours(const std::vector<mpm::Index>& neighbours) = 0;
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;

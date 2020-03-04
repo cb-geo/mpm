@@ -791,16 +791,9 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
 
 //! Assign neighbour particles
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::assign_neighbours(
+void mpm::Particle<Tdim>::assign_neighbours(
     const std::vector<mpm::Index>& neighbours) {
-  bool status = true;
-  try {
-    neighbours_ = neighbours;
-    neighbours_.erase(std::remove(neighbours_.begin(), neighbours_.end(), id_),
-                      neighbours_.end());
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  neighbours_ = neighbours;
+  neighbours_.erase(std::remove(neighbours_.begin(), neighbours_.end(), id_),
+                    neighbours_.end());
 }

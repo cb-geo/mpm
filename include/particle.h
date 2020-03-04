@@ -268,7 +268,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign neighbour particles
   //! \param[in] neighbours set of id of the neighbouring particles
   //! \retval insertion_status Return the successful addition of a node
-  bool assign_neighbours(const std::vector<mpm::Index>& neighbours) override;
+  void assign_neighbours(const std::vector<mpm::Index>& neighbours) override;
 
   //! Return neighbour ids
   std::vector<mpm::Index> neighbours() const override { return neighbours_; };
