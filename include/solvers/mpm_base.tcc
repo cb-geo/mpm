@@ -219,7 +219,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     }
 
     // Compute cell neighbours
-    mesh_->compute_cell_neighbours();
+    mesh_->find_cell_neighbours();
 
     // Read and assign cell sets
     this->cell_entity_sets(mesh_props, check_duplicates);
