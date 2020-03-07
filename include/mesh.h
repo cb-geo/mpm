@@ -341,7 +341,15 @@ class Mesh {
   }
 
   //! Find cell neighbours
-  void compute_cell_neighbours();
+  void find_cell_neighbours();
+
+  //! Find particle neighbours
+  //! \param[in] cell of interest
+  void find_particle_neighbours();
+
+  //! Find particle neighbours
+  //! \param[in] cell of interest
+  void find_particle_neighbours(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
 
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer

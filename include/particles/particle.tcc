@@ -788,3 +788,12 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i]->append_material_id(material_id_);
 }
+
+//! Assign neighbour particles
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::assign_neighbours(
+    const std::vector<mpm::Index>& neighbours) {
+  neighbours_ = neighbours;
+  neighbours_.erase(std::remove(neighbours_.begin(), neighbours_.end(), id_),
+                    neighbours_.end());
+}
