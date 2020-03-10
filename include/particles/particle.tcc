@@ -242,6 +242,25 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
+//! Assign material state variables from neighbour particle
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_material_state_vars(
+    const mpm::dense_map& state_vars,
+    const std::shared_ptr<mpm::Material<Tdim>>& material) {
+  bool status = false;
+  if (material != nullptr && this->material_ != nullptr &&
+      this->material_id_ == material->id()) {
+    // Clone state variables
+    auto mat_state_vars = material_->initialise_state_variables();
+    if (this->state_variables_.size() == state_vars.size() &&
+        mat_state_vars.size() == state_vars.size()) {
+      this->state_variables_ = state_vars;
+      status = true;
+    }
+  }
+  return status;
+}
+
 // Assign a cell to particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_cell(
@@ -768,4 +787,13 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i]->append_material_id(material_id_);
+}
+
+//! Assign neighbour particles
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::assign_neighbours(
+    const std::vector<mpm::Index>& neighbours) {
+  neighbours_ = neighbours;
+  neighbours_.erase(std::remove(neighbours_.begin(), neighbours_.end(), id_),
+                    neighbours_.end());
 }

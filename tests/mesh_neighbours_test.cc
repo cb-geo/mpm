@@ -14,7 +14,7 @@
 #include "quadrilateral_element.h"
 #include "quadrilateral_quadrature.h"
 
-TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
+TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D][mpi]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -244,7 +244,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
           REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
     }
 
-    SECTION("Check add neighbours") {
+    SECTION("Check add cell neighbours") {
       // Add neighbours to cell 0
       REQUIRE(cell0->nneighbours() == 0);
       REQUIRE(cell0->add_neighbour(1) == true);
@@ -262,8 +262,8 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
       for (auto n : cell1->neighbours()) REQUIRE(n == 0);
     }
 
-    SECTION("Compute cell neighbours") {
-      mesh->compute_cell_neighbours();
+    SECTION("Find cell neighbours") {
+      mesh->find_cell_neighbours();
       REQUIRE(cell0->nneighbours() == 3);
       REQUIRE(cell1->nneighbours() == 5);
       REQUIRE(cell2->nneighbours() == 8);
@@ -311,11 +311,257 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D]") {
         // Should find all particles in mesh
         REQUIRE(particles.size() == 0);
       }
+
+      SECTION("Find particle neighbours") {
+        // Get number of MPI ranks
+        int mpi_size, mpi_rank;
+#ifdef USE_MPI
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+        MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+        if (mpi_size == 4) {
+          cell0->rank(0);
+          cell1->rank(0);
+          cell4->rank(0);
+          cell2->rank(1);
+          cell3->rank(1);
+          cell5->rank(1);
+          cell8->rank(2);
+          cell7->rank(2);
+          cell6->rank(3);
+
+          std::shared_ptr<mpm::ParticleBase<Dim>> particle0, particle1,
+              particle2, particle3, particle4, particle5, particle6, particle7,
+              particle8, particle9, particle10, particle11, particle12,
+              particle13, particle14, particle15, particle16, particle17;
+
+          if (mpi_rank == 0) {
+            coords << 1.0, 1.0;
+            particle0 = std::make_shared<mpm::Particle<Dim>>(0, coords);
+            REQUIRE(mesh->add_particle(particle0, false) == true);
+
+            coords << 1.5, 1.5;
+            particle1 = std::make_shared<mpm::Particle<Dim>>(1, coords);
+            REQUIRE(mesh->add_particle(particle1, false) == true);
+
+            coords << 2.1, 1.0;
+            particle2 = std::make_shared<mpm::Particle<Dim>>(2, coords);
+            REQUIRE(mesh->add_particle(particle2, false) == true);
+
+            coords << 3.0, 1.5;
+            particle3 = std::make_shared<mpm::Particle<Dim>>(3, coords);
+            REQUIRE(mesh->add_particle(particle3, false) == true);
+
+            coords << 4.1, 1.0;
+            particle4 = std::make_shared<mpm::Particle<Dim>>(4, coords);
+            REQUIRE(mesh->add_particle(particle4, false) == true);
+
+            coords << 4.5, 1.5;
+            particle5 = std::make_shared<mpm::Particle<Dim>>(5, coords);
+            REQUIRE(mesh->add_particle(particle5, false) == true);
+          }
+          if (mpi_rank == 1) {
+            coords << 1.0, 2.5;
+            particle6 = std::make_shared<mpm::Particle<Dim>>(6, coords);
+            REQUIRE(mesh->add_particle(particle6, false) == true);
+
+            coords << 1.5, 2.5;
+            particle7 = std::make_shared<mpm::Particle<Dim>>(7, coords);
+            REQUIRE(mesh->add_particle(particle7, false) == true);
+
+            coords << 2.1, 2.5;
+            particle8 = std::make_shared<mpm::Particle<Dim>>(8, coords);
+            REQUIRE(mesh->add_particle(particle8, false) == true);
+
+            coords << 3.0, 2.5;
+            particle9 = std::make_shared<mpm::Particle<Dim>>(9, coords);
+            REQUIRE(mesh->add_particle(particle9, false) == true);
+
+            coords << 4.1, 2.5;
+            particle10 = std::make_shared<mpm::Particle<Dim>>(10, coords);
+            REQUIRE(mesh->add_particle(particle10, false) == true);
+
+            coords << 4.5, 2.5;
+            particle11 = std::make_shared<mpm::Particle<Dim>>(11, coords);
+            REQUIRE(mesh->add_particle(particle11, false) == true);
+          }
+          if (mpi_rank == 2) {
+            coords << 1.0, 4.5;
+            particle12 = std::make_shared<mpm::Particle<Dim>>(12, coords);
+            REQUIRE(mesh->add_particle(particle12, false) == true);
+
+            coords << 1.5, 4.5;
+            particle13 = std::make_shared<mpm::Particle<Dim>>(13, coords);
+            REQUIRE(mesh->add_particle(particle13, false) == true);
+
+            coords << 2.1, 4.5;
+            particle14 = std::make_shared<mpm::Particle<Dim>>(14, coords);
+            REQUIRE(mesh->add_particle(particle14, false) == true);
+
+            coords << 3.0, 4.5;
+            particle15 = std::make_shared<mpm::Particle<Dim>>(15, coords);
+            REQUIRE(mesh->add_particle(particle15, false) == true);
+          }
+          if (mpi_rank == 3) {
+            coords << 4.1, 4.5;
+            particle16 = std::make_shared<mpm::Particle<Dim>>(16, coords);
+            REQUIRE(mesh->add_particle(particle16, false) == true);
+
+            coords << 4.5, 4.5;
+            particle17 = std::make_shared<mpm::Particle<Dim>>(17, coords);
+            REQUIRE(mesh->add_particle(particle17, false) == true);
+          }
+
+          // Locate particles in a mesh
+          auto particles = mesh->locate_particles_mesh();
+
+          // Should find all particles in mesh
+          REQUIRE(particles.size() == 0);
+
+          // Check particles inside cells
+          if (mpi_rank == 0) {
+            REQUIRE(cell0->nparticles() == 2);
+            REQUIRE(cell1->nparticles() == 2);
+            REQUIRE(cell4->nparticles() == 2);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(cell2->nparticles() == 2);
+            REQUIRE(cell3->nparticles() == 2);
+            REQUIRE(cell5->nparticles() == 2);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(cell7->nparticles() == 2);
+            REQUIRE(cell8->nparticles() == 2);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(cell6->nparticles() == 2);
+          }
+
+          // Check solutions
+          std::vector<mpm::Index> p0 = {0, 1};
+          std::vector<mpm::Index> p1 = {2, 3};
+          std::vector<mpm::Index> p2 = {8, 9};
+          std::vector<mpm::Index> p3 = {6, 7};
+          std::vector<mpm::Index> p4 = {4, 5};
+          std::vector<mpm::Index> p5 = {10, 11};
+          std::vector<mpm::Index> p6 = {16, 17};
+          std::vector<mpm::Index> p7 = {14, 15};
+          std::vector<mpm::Index> p8 = {12, 13};
+
+          // Check whether particle id inside cells are as intended
+          if (mpi_rank == 0) {
+            REQUIRE(cell0->particles() == p0);
+            REQUIRE(cell1->particles() == p1);
+            REQUIRE(cell4->particles() == p4);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(cell2->particles() == p2);
+            REQUIRE(cell3->particles() == p3);
+            REQUIRE(cell5->particles() == p5);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(cell7->particles() == p7);
+            REQUIRE(cell8->particles() == p8);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(cell6->particles() == p6);
+          }
+
+          // Find particle neighbours
+          mesh->find_particle_neighbours();
+
+          // Check particle neighbours
+          if (mpi_rank == 0) {
+            REQUIRE(particle0->nneighbours() == 7);
+            REQUIRE(particle1->nneighbours() == 7);
+            REQUIRE(particle2->nneighbours() == 11);
+            REQUIRE(particle3->nneighbours() == 11);
+            REQUIRE(particle4->nneighbours() == 7);
+            REQUIRE(particle5->nneighbours() == 7);
+          }
+
+          if (mpi_rank == 1) {
+            REQUIRE(particle6->nneighbours() == 11);
+            REQUIRE(particle7->nneighbours() == 11);
+            REQUIRE(particle8->nneighbours() == 17);
+            REQUIRE(particle9->nneighbours() == 17);
+            REQUIRE(particle10->nneighbours() == 11);
+            REQUIRE(particle11->nneighbours() == 11);
+          }
+
+          if (mpi_rank == 2) {
+            REQUIRE(particle12->nneighbours() == 7);
+
+            REQUIRE(particle13->nneighbours() == 7);
+            REQUIRE(particle14->nneighbours() == 11);
+            REQUIRE(particle15->nneighbours() == 11);
+          }
+
+          if (mpi_rank == 3) {
+            REQUIRE(particle16->nneighbours() == 7);
+            REQUIRE(particle17->nneighbours() == 7);
+          }
+
+          // Check solutions
+          std::vector<mpm::Index> np0 = {1, 2, 3, 8, 9, 6, 7};
+          std::vector<mpm::Index> np1 = {0, 2, 3, 8, 9, 6, 7};
+          std::vector<mpm::Index> np2 = {3, 0, 1, 8, 9, 6, 7, 4, 5, 10, 11};
+          std::vector<mpm::Index> np3 = {2, 0, 1, 8, 9, 6, 7, 4, 5, 10, 11};
+          std::vector<mpm::Index> np4 = {5, 2, 3, 8, 9, 10, 11};
+          std::vector<mpm::Index> np5 = {4, 2, 3, 8, 9, 10, 11};
+          std::vector<mpm::Index> np6 = {7, 0, 1, 2, 3, 8, 9, 14, 15, 12, 13};
+          std::vector<mpm::Index> np7 = {6, 0, 1, 2, 3, 8, 9, 14, 15, 12, 13};
+          std::vector<mpm::Index> np8 = {9,  0,  1,  2,  3,  6,  7,  4, 5,
+                                         10, 11, 16, 17, 14, 15, 12, 13};
+          std::vector<mpm::Index> np9 = {8,  0,  1,  2,  3,  6,  7,  4, 5,
+                                         10, 11, 16, 17, 14, 15, 12, 13};
+          std::vector<mpm::Index> np10 = {11, 2, 3, 8, 9, 4, 5, 16, 17, 14, 15};
+          std::vector<mpm::Index> np11 = {10, 2, 3, 8, 9, 4, 5, 16, 17, 14, 15};
+          std::vector<mpm::Index> np12 = {13, 8, 9, 6, 7, 14, 15};
+          std::vector<mpm::Index> np13 = {12, 8, 9, 6, 7, 14, 15};
+          std::vector<mpm::Index> np14 = {15, 8,  9,  6,  7, 10,
+                                          11, 16, 17, 12, 13};
+          std::vector<mpm::Index> np15 = {14, 8,  9,  6,  7, 10,
+                                          11, 16, 17, 12, 13};
+          std::vector<mpm::Index> np16 = {17, 8, 9, 10, 11, 14, 15};
+          std::vector<mpm::Index> np17 = {16, 8, 9, 10, 11, 14, 15};
+
+          // Check whether particle id inside cells are as intended
+          if (mpi_rank == 0) {
+            REQUIRE(particle0->neighbours() == np0);
+            REQUIRE(particle1->neighbours() == np1);
+            REQUIRE(particle2->neighbours() == np2);
+            REQUIRE(particle3->neighbours() == np3);
+            REQUIRE(particle4->neighbours() == np4);
+            REQUIRE(particle5->neighbours() == np5);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(particle6->neighbours() == np6);
+            REQUIRE(particle7->neighbours() == np7);
+            REQUIRE(particle8->neighbours() == np8);
+            REQUIRE(particle9->neighbours() == np9);
+            REQUIRE(particle10->neighbours() == np10);
+            REQUIRE(particle11->neighbours() == np11);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(particle12->neighbours() == np12);
+            REQUIRE(particle13->neighbours() == np13);
+            REQUIRE(particle14->neighbours() == np14);
+            REQUIRE(particle15->neighbours() == np15);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(particle16->neighbours() == np16);
+            REQUIRE(particle17->neighbours() == np17);
+          }
+#endif
+        }
+      }
     }
   }
 }
 
-TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
+TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D][mpi]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -680,7 +926,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
           REQUIRE(fnodes.at(i).at(j) == fnodes_check.at(i).at(j));
     }
 
-    SECTION("Check assign neighbours") {
+    SECTION("Check assign cell neighbours") {
       // Add neighbours to cell 0
       REQUIRE(cell0->nneighbours() == 0);
       REQUIRE(cell0->add_neighbour(1) == true);
@@ -699,8 +945,8 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
     }
 
     // Compute cell neighbours
-    SECTION("Compute cell neighbours") {
-      mesh->compute_cell_neighbours();
+    SECTION("Find cell neighbours") {
+      mesh->find_cell_neighbours();
       REQUIRE(cell0->nneighbours() == 3);
       REQUIRE(cell1->nneighbours() == 5);
       REQUIRE(cell2->nneighbours() == 8);
@@ -757,6 +1003,248 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D]") {
 
         // Should find all particles in mesh
         REQUIRE(particles.size() == 0);
+      }
+
+      SECTION("Find particle neighbours") {
+        // Get number of MPI ranks
+        int mpi_size, mpi_rank;
+#ifdef USE_MPI
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+        MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+        if (mpi_size == 4) {
+          // Assign cell ranks
+          cell0->rank(0);
+          cell1->rank(0);
+          cell4->rank(0);
+          cell2->rank(1);
+          cell3->rank(1);
+          cell5->rank(1);
+          cell7->rank(2);
+          cell8->rank(2);
+          cell6->rank(3);
+
+          std::shared_ptr<mpm::ParticleBase<Dim>> particle0, particle1,
+              particle2, particle3, particle4, particle5, particle6, particle7,
+              particle8, particle9, particle10, particle11, particle12,
+              particle13, particle14, particle15, particle16, particle17;
+
+          if (mpi_rank == 0) {
+            coords << 1.0, 1.0, 1.5;
+            particle0 = std::make_shared<mpm::Particle<Dim>>(0, coords);
+            REQUIRE(mesh->add_particle(particle0, false) == true);
+
+            coords << 1.5, 1.5, 1.5;
+            particle1 = std::make_shared<mpm::Particle<Dim>>(1, coords);
+            REQUIRE(mesh->add_particle(particle1, false) == true);
+
+            coords << 2.1, 1.0, 1.5;
+            particle2 = std::make_shared<mpm::Particle<Dim>>(2, coords);
+            REQUIRE(mesh->add_particle(particle2, false) == true);
+
+            coords << 3.0, 1.5, 1.5;
+            particle3 = std::make_shared<mpm::Particle<Dim>>(3, coords);
+            REQUIRE(mesh->add_particle(particle3, false) == true);
+
+            coords << 4.1, 1.0, 1.5;
+            particle4 = std::make_shared<mpm::Particle<Dim>>(4, coords);
+            REQUIRE(mesh->add_particle(particle4, false) == true);
+
+            coords << 4.5, 1.5, 1.5;
+            particle5 = std::make_shared<mpm::Particle<Dim>>(5, coords);
+            REQUIRE(mesh->add_particle(particle5, false) == true);
+          }
+          if (mpi_rank == 1) {
+            coords << 1.0, 2.5, 1.5;
+            particle6 = std::make_shared<mpm::Particle<Dim>>(6, coords);
+            REQUIRE(mesh->add_particle(particle6, false) == true);
+
+            coords << 1.5, 2.5, 1.5;
+            particle7 = std::make_shared<mpm::Particle<Dim>>(7, coords);
+            REQUIRE(mesh->add_particle(particle7, false) == true);
+
+            coords << 2.1, 2.5, 1.5;
+            particle8 = std::make_shared<mpm::Particle<Dim>>(8, coords);
+            REQUIRE(mesh->add_particle(particle8, false) == true);
+
+            coords << 3.0, 2.5, 1.5;
+            particle9 = std::make_shared<mpm::Particle<Dim>>(9, coords);
+            REQUIRE(mesh->add_particle(particle9, false) == true);
+
+            coords << 4.1, 2.5, 1.5;
+            particle10 = std::make_shared<mpm::Particle<Dim>>(10, coords);
+            REQUIRE(mesh->add_particle(particle10, false) == true);
+
+            coords << 4.5, 2.5, 1.5;
+            particle11 = std::make_shared<mpm::Particle<Dim>>(11, coords);
+            REQUIRE(mesh->add_particle(particle11, false) == true);
+          }
+          if (mpi_rank == 2) {
+            coords << 1.0, 4.5, 1.5;
+            particle12 = std::make_shared<mpm::Particle<Dim>>(12, coords);
+            REQUIRE(mesh->add_particle(particle12, false) == true);
+
+            coords << 1.5, 4.5, 1.5;
+            particle13 = std::make_shared<mpm::Particle<Dim>>(13, coords);
+            REQUIRE(mesh->add_particle(particle13, false) == true);
+
+            coords << 2.1, 4.5, 1.5;
+            particle14 = std::make_shared<mpm::Particle<Dim>>(14, coords);
+            REQUIRE(mesh->add_particle(particle14, false) == true);
+
+            coords << 3.0, 4.5, 1.5;
+            particle15 = std::make_shared<mpm::Particle<Dim>>(15, coords);
+            REQUIRE(mesh->add_particle(particle15, false) == true);
+          }
+          if (mpi_rank == 3) {
+            coords << 4.1, 4.5, 1.5;
+            particle16 = std::make_shared<mpm::Particle<Dim>>(16, coords);
+            REQUIRE(mesh->add_particle(particle16, false) == true);
+
+            coords << 4.5, 4.5, 1.5;
+            particle17 = std::make_shared<mpm::Particle<Dim>>(17, coords);
+            REQUIRE(mesh->add_particle(particle17, false) == true);
+          }
+
+          // Locate particles in a mesh
+          auto particles = mesh->locate_particles_mesh();
+
+          // Should find all particles in mesh
+          REQUIRE(particles.size() == 0);
+
+          // Check particles inside cells
+          if (mpi_rank == 0) {
+            REQUIRE(cell0->nparticles() == 2);
+            REQUIRE(cell1->nparticles() == 2);
+            REQUIRE(cell4->nparticles() == 2);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(cell2->nparticles() == 2);
+            REQUIRE(cell3->nparticles() == 2);
+            REQUIRE(cell5->nparticles() == 2);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(cell7->nparticles() == 2);
+            REQUIRE(cell8->nparticles() == 2);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(cell6->nparticles() == 2);
+          }
+
+          // Check solutions
+          std::vector<mpm::Index> p0 = {0, 1};
+          std::vector<mpm::Index> p1 = {2, 3};
+          std::vector<mpm::Index> p2 = {8, 9};
+          std::vector<mpm::Index> p3 = {6, 7};
+          std::vector<mpm::Index> p4 = {4, 5};
+          std::vector<mpm::Index> p5 = {10, 11};
+          std::vector<mpm::Index> p6 = {16, 17};
+          std::vector<mpm::Index> p7 = {14, 15};
+          std::vector<mpm::Index> p8 = {12, 13};
+
+          // Check whether particle id inside cells are as intended
+          if (mpi_rank == 0) {
+            REQUIRE(cell0->particles() == p0);
+            REQUIRE(cell1->particles() == p1);
+            REQUIRE(cell4->particles() == p4);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(cell2->particles() == p2);
+            REQUIRE(cell3->particles() == p3);
+            REQUIRE(cell5->particles() == p5);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(cell7->particles() == p7);
+            REQUIRE(cell8->particles() == p8);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(cell6->particles() == p6);
+          }
+          // Find particle neighbours
+          mesh->find_particle_neighbours();
+
+          // Check particle neighbours
+          if (mpi_rank == 0) {
+            REQUIRE(particle0->nneighbours() == 7);
+            REQUIRE(particle1->nneighbours() == 7);
+            REQUIRE(particle2->nneighbours() == 11);
+            REQUIRE(particle3->nneighbours() == 11);
+            REQUIRE(particle4->nneighbours() == 7);
+            REQUIRE(particle5->nneighbours() == 7);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(particle6->nneighbours() == 11);
+            REQUIRE(particle7->nneighbours() == 11);
+            REQUIRE(particle8->nneighbours() == 17);
+            REQUIRE(particle9->nneighbours() == 17);
+            REQUIRE(particle10->nneighbours() == 11);
+            REQUIRE(particle11->nneighbours() == 11);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(particle12->nneighbours() == 7);
+            REQUIRE(particle13->nneighbours() == 7);
+            REQUIRE(particle14->nneighbours() == 11);
+            REQUIRE(particle15->nneighbours() == 11);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(particle16->nneighbours() == 7);
+            REQUIRE(particle17->nneighbours() == 7);
+          }
+
+          // Check solutions
+          std::vector<mpm::Index> np0 = {1, 2, 3, 8, 9, 6, 7};
+          std::vector<mpm::Index> np1 = {0, 2, 3, 8, 9, 6, 7};
+          std::vector<mpm::Index> np2 = {3, 0, 1, 8, 9, 6, 7, 4, 5, 10, 11};
+          std::vector<mpm::Index> np3 = {2, 0, 1, 8, 9, 6, 7, 4, 5, 10, 11};
+          std::vector<mpm::Index> np4 = {5, 2, 3, 8, 9, 10, 11};
+          std::vector<mpm::Index> np5 = {4, 2, 3, 8, 9, 10, 11};
+          std::vector<mpm::Index> np6 = {7, 0, 1, 2, 3, 8, 9, 14, 15, 12, 13};
+          std::vector<mpm::Index> np7 = {6, 0, 1, 2, 3, 8, 9, 14, 15, 12, 13};
+          std::vector<mpm::Index> np8 = {9,  0,  1,  2,  3,  6,  7,  4, 5,
+                                         10, 11, 16, 17, 14, 15, 12, 13};
+          std::vector<mpm::Index> np9 = {8,  0,  1,  2,  3,  6,  7,  4, 5,
+                                         10, 11, 16, 17, 14, 15, 12, 13};
+          std::vector<mpm::Index> np10 = {11, 2, 3, 8, 9, 4, 5, 16, 17, 14, 15};
+          std::vector<mpm::Index> np11 = {10, 2, 3, 8, 9, 4, 5, 16, 17, 14, 15};
+          std::vector<mpm::Index> np12 = {13, 8, 9, 6, 7, 14, 15};
+          std::vector<mpm::Index> np13 = {12, 8, 9, 6, 7, 14, 15};
+          std::vector<mpm::Index> np14 = {15, 8,  9,  6,  7, 10,
+                                          11, 16, 17, 12, 13};
+          std::vector<mpm::Index> np15 = {14, 8,  9,  6,  7, 10,
+                                          11, 16, 17, 12, 13};
+          std::vector<mpm::Index> np16 = {17, 8, 9, 10, 11, 14, 15};
+          std::vector<mpm::Index> np17 = {16, 8, 9, 10, 11, 14, 15};
+
+          // Check whether particle id inside cells are as intended
+          if (mpi_rank == 0) {
+            REQUIRE(particle0->neighbours() == np0);
+            REQUIRE(particle1->neighbours() == np1);
+            REQUIRE(particle2->neighbours() == np2);
+            REQUIRE(particle3->neighbours() == np3);
+            REQUIRE(particle4->neighbours() == np4);
+            REQUIRE(particle5->neighbours() == np5);
+          }
+          if (mpi_rank == 1) {
+            REQUIRE(particle6->neighbours() == np6);
+            REQUIRE(particle7->neighbours() == np7);
+            REQUIRE(particle8->neighbours() == np8);
+            REQUIRE(particle9->neighbours() == np9);
+            REQUIRE(particle10->neighbours() == np10);
+            REQUIRE(particle11->neighbours() == np11);
+          }
+          if (mpi_rank == 2) {
+            REQUIRE(particle12->neighbours() == np12);
+            REQUIRE(particle13->neighbours() == np13);
+            REQUIRE(particle14->neighbours() == np14);
+            REQUIRE(particle15->neighbours() == np15);
+          }
+          if (mpi_rank == 3) {
+            REQUIRE(particle16->neighbours() == np16);
+            REQUIRE(particle17->neighbours() == np17);
+          }
+        }
+#endif
       }
     }
   }

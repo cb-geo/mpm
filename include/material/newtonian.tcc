@@ -6,7 +6,15 @@ mpm::Newtonian<Tdim>::Newtonian(unsigned id, const Json& material_properties)
     density_ = material_properties.at("density").template get<double>();
     bulk_modulus_ =
         material_properties.at("bulk_modulus").template get<double>();
-    mu_ = material_properties.at("mu").template get<double>();
+    dynamic_viscosity_ =
+        material_properties.at("dynamic_viscosity").template get<double>();
+
+    // Special material properties
+    if (material_properties.contains("incompressible")) {
+      bool incompressible =
+          material_properties.at("incompressible").template get<bool>();
+      if (incompressible) compressibility_multiplier_ = 0.0;
+    }
 
     properties_ = material_properties;
   } catch (Json::exception& except) {
@@ -36,24 +44,29 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
     mpm::dense_map* state_vars) {
 
-  // const double pressure = ptr->pressure();
+  // Get strain rate
+  const auto& strain_rate = ptr->strain_rate();
+  const double volumetric_strain_rate = strain_rate(0) + strain_rate(1);
+
   // Update pressure
   (*state_vars).at("pressure") +=
-      this->thermodynamic_pressure(ptr->dvolumetric_strain());
-  const double pressure = (*state_vars).at("pressure");
+      (compressibility_multiplier_ *
+       this->thermodynamic_pressure(ptr->dvolumetric_strain()));
 
-  const double volumetric_strain = dstrain(0) + dstrain(1);
+  // Volumetric stress component
+  const double volumetric_component =
+      compressibility_multiplier_ *
+      (-(*state_vars).at("pressure") -
+       (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
 
-  // Update volumetric and deviatoric stress
+  // Update stress component
   Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) =
-      -pressure + (2. * mu_ * dstrain(0)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(1) =
-      -pressure + (2. * mu_ * dstrain(1)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(2) = -pressure - (2. * mu_ * volumetric_strain / 3.);
-  pstress(3) = mu_ * dstrain(2);
-  pstress(4) = 0.0;
-  pstress(5) = 0.0;
+  pstress(0) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = volumetric_component;
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = 0.;
+  pstress(5) = 0.;
 
   return pstress;
 }
@@ -64,24 +77,30 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
     mpm::dense_map* state_vars) {
 
+  // Get strain rate
+  const auto& strain_rate = ptr->strain_rate();
+  const double volumetric_strain_rate =
+      strain_rate(0) + strain_rate(1) + strain_rate(2);
+
   // Update pressure
   (*state_vars).at("pressure") +=
-      this->thermodynamic_pressure(ptr->dvolumetric_strain());
-  const double pressure = (*state_vars).at("pressure");
+      (compressibility_multiplier_ *
+       this->thermodynamic_pressure(ptr->dvolumetric_strain()));
 
-  const double volumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
+  // Volumetric stress component
+  const double volumetric_component =
+      compressibility_multiplier_ *
+      (-(*state_vars).at("pressure") -
+       (2. * dynamic_viscosity_ * volumetric_strain_rate / 3.));
 
-  // Update volumetric and deviatoric stress
+  // Update stress component
   Eigen::Matrix<double, 6, 1> pstress;
-  pstress(0) =
-      -pressure + (2. * mu_ * dstrain(0)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(1) =
-      -pressure + (2. * mu_ * dstrain(1)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(2) =
-      -pressure + (2. * mu_ * dstrain(2)) - (2. * mu_ * volumetric_strain / 3.);
-  pstress(3) = mu_ * dstrain(3);
-  pstress(4) = mu_ * dstrain(4);
-  pstress(5) = mu_ * dstrain(5);
+  pstress(0) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(0);
+  pstress(1) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(1);
+  pstress(2) = volumetric_component + 2. * dynamic_viscosity_ * strain_rate(2);
+  pstress(3) = dynamic_viscosity_ * strain_rate(3);
+  pstress(4) = dynamic_viscosity_ * strain_rate(4);
+  pstress(5) = dynamic_viscosity_ * strain_rate(5);
 
   return pstress;
 }

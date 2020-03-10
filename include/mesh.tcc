@@ -289,7 +289,7 @@ void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
 
 //! Create cells from node lists
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::compute_cell_neighbours() {
+void mpm::Mesh<Tdim>::find_cell_neighbours() {
   // Initialize and compute node cell map
   tsl::robin_map<mpm::Index, std::set<mpm::Index>> node_cell_map;
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
@@ -315,6 +315,77 @@ void mpm::Mesh<Tdim>::compute_cell_neighbours() {
         }
       },
       tbb::simple_partitioner());
+}
+
+//! Find particle neighbours for all particle
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_particle_neighbours() {
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+    find_particle_neighbours(*citr);
+}
+
+//! Find particle neighbours for specific cell particle
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_particle_neighbours(
+    const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
+  // Particles in current cell
+  std::vector<mpm::Index> neighbour_particles = cell->particles();
+  // Loop over all neighboring cells, and append particle ids from each cell
+  for (const auto& neighbour_cell_id : cell->neighbours()) {
+    // Get the MPI rank of the neighbour cell
+    int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
+    if (neighbour_cell_rank != cell->rank()) {
+#ifdef USE_MPI
+      // Send particle ids
+      if (neighbour_cell_rank == mpi_rank) {
+        // Get particle ids from each cell
+        auto send_particle_ids = map_cells_[neighbour_cell_id]->particles();
+        // Get size of the particle ids
+        int pid_size = send_particle_ids.size();
+        // Send the size of the particles in cell
+        MPI_Send(&pid_size, 1, MPI_INT, cell->rank(), neighbour_cell_id,
+                 MPI_COMM_WORLD);
+
+        // Send particle ids if it is not empty
+        if (pid_size > 0)
+          MPI_Send(send_particle_ids.data(), pid_size, MPI_UNSIGNED_LONG_LONG,
+                   cell->rank(), neighbour_cell_id, MPI_COMM_WORLD);
+      }
+      // Receive particle ids in the current MPI rank
+      if (cell->rank() == mpi_rank) {
+        // Particle ids at local cell MPI rank
+        std::vector<mpm::Index> received_particle_ids;
+        int nparticles = 0;
+        MPI_Recv(&nparticles, 1, MPI_INT, neighbour_cell_rank,
+                 neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        if (nparticles > 0) {
+          received_particle_ids.resize(nparticles);
+          MPI_Recv(received_particle_ids.data(), nparticles,
+                   MPI_UNSIGNED_LONG_LONG, neighbour_cell_rank,
+                   neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+
+        neighbour_particles.insert(neighbour_particles.end(),
+                                   received_particle_ids.begin(),
+                                   received_particle_ids.end());
+      }
+#endif
+    } else {
+      const auto& particle_ids = map_cells_[neighbour_cell_id]->particles();
+      neighbour_particles.insert(neighbour_particles.end(),
+                                 particle_ids.begin(), particle_ids.end());
+    }
+  }
+
+  // Assign neighbouring particle ids to particles in the current cell
+  for (auto particle_id : cell->particles())
+    map_particles_[particle_id]->assign_neighbours(neighbour_particles);
 }
 
 //! Find ghost cell neighbours
@@ -1487,6 +1558,37 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
                                               material_id, cset_id);
     }
 
+    // Generate material points at the Gauss location in all cells
+    else if (generator_type == "inject") {
+      mpm::Injection inject;
+      // Number of particles per dir
+      inject.nparticles_dir =
+          generator["nparticles_per_dir"].template get<unsigned>();
+      // Particle type
+      inject.particle_type =
+          generator["particle_type"].template get<std::string>();
+      // Material id
+      inject.material_id = generator["material_id"].template get<unsigned>();
+      // Cell set id
+      inject.cell_set_id = generator["cset_id"].template get<int>();
+      // Duration of injection
+      if (generator.contains("duration") && generator["duration"].is_array() &&
+          generator["duration"].size() == 2) {
+        inject.start_time = generator["duration"].at(0);
+        inject.end_time = generator["duration"].at(1);
+      }
+
+      // Velocity
+      inject.velocity.resize(Tdim, 0.);
+      if (generator["velocity"].is_array() &&
+          generator["velocity"].size() == Tdim) {
+        for (unsigned i = 0; i < Tdim; ++i)
+          inject.velocity[i] = generator["velocity"].at(i);
+      }
+      // Add to particle injections
+      particle_injections_.emplace_back(inject);
+    }
+
     else
       throw std::runtime_error(
           "Particle generator type is not properly specified");
@@ -1496,6 +1598,68 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
     status = false;
   }
   return status;
+}
+
+//! Generate particles
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::inject_particles(double current_time) {
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  // Container of new injected particles
+  std::vector<std::shared_ptr<ParticleBase<Tdim>>> injected_particles;
+  // Iterate over all injection cells
+  for (auto injection : particle_injections_) {
+    unsigned pid = this->nparticles();
+    bool checks = false;
+    // Get material
+    auto material = materials_.at(injection.material_id);
+    // Check if duration is within the current time
+    if (injection.start_time <= current_time &&
+        injection.end_time > current_time) {
+      // If set id is -1, use all cells
+      auto cset = (injection.cell_set_id == -1)
+                      ? this->cells_
+                      : cell_sets_.at(injection.cell_set_id);
+      // Iterate over each cell to generate points
+      for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
+        if ((*citr)->rank() == mpi_rank && (*citr)->nparticles() == 0) {
+          // Assign quadratures based on number of particles
+          (*citr)->assign_quadrature(injection.nparticles_dir);
+
+          // Genereate particles at the Gauss points
+          const auto cpoints = (*citr)->generate_points();
+          // Iterate over each coordinate to generate material points
+          for (const auto& coordinates : cpoints) {
+            // Create particle
+            auto particle =
+                Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                        const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                    ->create(injection.particle_type,
+                             static_cast<mpm::Index>(pid), coordinates);
+
+            // particle velocity
+            Eigen::Matrix<double, Tdim, 1> pvelocity(injection.velocity.data());
+            particle->assign_velocity(pvelocity);
+
+            // Add particle to mesh
+            unsigned status = this->add_particle(particle, checks);
+            if (status) {
+              map_particles_[pid]->assign_cell(*citr);
+              map_particles_[pid]->assign_material(material);
+              ++pid;
+              injected_particles.emplace_back(particle);
+            }
+          }
+        }
+      }
+    }
+    for (auto particle : injected_particles) {
+      particle->compute_volume();
+      particle->compute_mass();
+    }
+  }
 }
 
 // Read particles file

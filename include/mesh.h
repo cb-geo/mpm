@@ -28,6 +28,7 @@ using Json = nlohmann::json;
 #include "factory.h"
 #include "friction_constraint.h"
 #include "function_base.h"
+#include "generators/injection.h"
 #include "geometry.h"
 #include "hdf5_particle.h"
 #include "io.h"
@@ -340,7 +341,15 @@ class Mesh {
   }
 
   //! Find cell neighbours
-  void compute_cell_neighbours();
+  void find_cell_neighbours();
+
+  //! Find particle neighbours
+  //! \param[in] cell of interest
+  void find_particle_neighbours();
+
+  //! Find particle neighbours
+  //! \param[in] cell of interest
+  void find_particle_neighbours(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
 
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
@@ -420,6 +429,9 @@ class Mesh {
   bool generate_particles(const std::shared_ptr<mpm::IO>& io,
                           const Json& generator);
 
+  //! Inject particles
+  void inject_particles(double current_time);
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
@@ -477,6 +489,8 @@ class Mesh {
   //! Particle velocity constraints
   std::vector<std::shared_ptr<mpm::VelocityConstraint>>
       particle_velocity_constraints_;
+  //! Vector of generators for particle injections
+  std::vector<mpm::Injection> particle_injections_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size

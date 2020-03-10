@@ -64,6 +64,14 @@ class ParticleBase {
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
+  //! Assign material history variables
+  //! \param[in] state_vars State variables
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of cloning HDF5 particle
+  virtual bool assign_material_state_vars(
+      const mpm::dense_map& state_vars,
+      const std::shared_ptr<mpm::Material<Tdim>>& material) = 0;
+
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
   virtual HDF5Particle hdf5() const = 0;
@@ -231,6 +239,17 @@ class ParticleBase {
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
+  //! Return the number of neighbour particles
+  virtual unsigned nneighbours() const = 0;
+
+  //! Assign neighbour particles
+  //! \param[in] neighbours set of id of the neighbouring particles
+  //! \retval insertion_status Return the successful addition of a node
+  virtual void assign_neighbours(const std::vector<mpm::Index>& neighbours) = 0;
+
+  //! Return neighbour ids
+  virtual std::vector<mpm::Index> neighbours() const = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
@@ -252,6 +271,8 @@ class ParticleBase {
   unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Container of particle neighbour ids
+  std::vector<mpm::Index> neighbours_;
 };  // ParticleBase class
 }  // namespace mpm
 
