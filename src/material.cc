@@ -1,9 +1,10 @@
-#include "material/material.h"
-#include "material/bingham.h"
-#include "material/linear_elastic.h"
-#include "material/mohr_coulomb.h"
-#include "material/newtonian.h"
-#include "material/norsand.h"
+#include "material.h"
+#include "bingham.h"
+#include "linear_elastic.h"
+#include "modified_cam_clay.h"
+#include "mohr_coulomb.h"
+#include "newtonian.h"
+#include "norsand.h"
 
 // Bingham 2D
 static Register<mpm::Material<2>, mpm::Bingham<2>, unsigned, const Json&>
@@ -20,6 +21,16 @@ static Register<mpm::Material<2>, mpm::LinearElastic<2>, unsigned, const Json&>
 // LinearElastic 3D
 static Register<mpm::Material<3>, mpm::LinearElastic<3>, unsigned, const Json&>
     linear_elastic_3d("LinearElastic3D");
+
+// ModifiedCamClay 2D
+static Register<mpm::Material<2>, mpm::ModifiedCamClay<2>, unsigned,
+                const Json&>
+    modified_cam_clay_2d("ModifiedCamClay2D");
+
+// ModifiedCamClay 3D
+static Register<mpm::Material<3>, mpm::ModifiedCamClay<3>, unsigned,
+                const Json&>
+    modified_cam_clay_3d("ModifiedCamClay3D");
 
 // MohrCoulomb 2D
 static Register<mpm::Material<2>, mpm::MohrCoulomb<2>, unsigned, const Json&>

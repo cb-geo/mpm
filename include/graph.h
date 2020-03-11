@@ -13,8 +13,8 @@
 #include <parhip_interface.h>
 
 #include "cell.h"
-#include "container.h"
 #include "particle.h"
+#include "vector.h"
 
 namespace mpm {
 
@@ -25,10 +25,10 @@ template <unsigned Tdim>
 class Graph {
  public:
   //! Constructor with cells, size and rank
-  //! \param[in] cells Container of cells
+  //! \param[in] cells Vector of cells
   //! \param[in] mpi_size # of MPI tasks
   //! \param[in] mpi_rank MPI rank
-  Graph(Container<Cell<Tdim>> cells, int mpi_size, int mpi_rank);
+  Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank);
 
   //! Create graph partition
   //! \param[in] comm MPI Communication
@@ -60,8 +60,8 @@ class Graph {
   int nparts();
 
  private:
-  // Container of cells
-  Container<Cell<Tdim>> cells_;
+  // Vector of cells
+  Vector<Cell<Tdim>> cells_;
   // Number of partitions
   int nparts_ = 0;
   // Number of dimensions

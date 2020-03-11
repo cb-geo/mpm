@@ -5,12 +5,11 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "container.h"
 #include "particle.h"
+#include "vector.h"
 
-//! \brief Check particle container class for 2D case
-TEST_CASE("Particle container is checked for 2D case",
-          "[particlecontainer][2D]") {
+//! \brief Check particle vector class for 2D case
+TEST_CASE("Particle vector is checked for 2D case", "[particlevector][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Tolerance
@@ -27,45 +26,44 @@ TEST_CASE("Particle container is checked for 2D case",
   std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
       std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
-  // Particle container
-  auto particlecontainer =
-      std::make_shared<mpm::Container<mpm::ParticleBase<Dim>>>();
+  // Particle vector
+  auto particlevector = std::make_shared<mpm::Vector<mpm::ParticleBase<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
     // Add particle 1 and check
-    REQUIRE(particlecontainer->add(particle1, false) == true);
+    REQUIRE(particlevector->add(particle1, false) == true);
     // Add particle 2 and check
-    REQUIRE(particlecontainer->add(particle2, false) == true);
+    REQUIRE(particlevector->add(particle2, false) == true);
     // Try and particle 2 again and check
-    REQUIRE(particlecontainer->add(particle2) == false);
+    REQUIRE(particlevector->add(particle2) == false);
 
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 2);
+    REQUIRE(particlevector->size() == 2);
 
     // Remove particle 2 and check
-    REQUIRE(particlecontainer->remove(particle2) == true);
+    REQUIRE(particlevector->remove(particle2) == true);
     // Try and remove particle 2 again and check
-    REQUIRE(particlecontainer->remove(particle2) == false);
+    REQUIRE(particlevector->remove(particle2) == false);
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 1);
+    REQUIRE(particlevector->size() == 1);
 
-    // Clear particle container
-    particlecontainer->clear();
+    // Clear particle vector
+    particlevector->clear();
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 0);
+    REQUIRE(particlevector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check particle range iterator") {
     // Add particle 1
-    particlecontainer->add(particle1);
+    particlevector->add(particle1);
     // Add particle 2
-    particlecontainer->add(particle2);
+    particlevector->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -80,15 +78,15 @@ TEST_CASE("Particle container is checked for 2D case",
   // Check for_each
   SECTION("Check particle for_each") {
     // Add particle 1
-    particlecontainer->add(particle1);
+    particlevector->add(particle1);
     // Add particle 2
-    particlecontainer->add(particle2);
+    particlevector->add(particle2);
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 2);
+    REQUIRE(particlevector->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -98,14 +96,14 @@ TEST_CASE("Particle container is checked for 2D case",
     // Set coordinates to unity
     coords << 1., 1.;
 
-    // Iterate through particle container to update coordinaates
-    particlecontainer->for_each(  // function structure
+    // Iterate through particle vector to update coordinaates
+    particlevector->for_each(  // function structure
         std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -114,9 +112,8 @@ TEST_CASE("Particle container is checked for 2D case",
   }
 }
 
-//! \brief Check particle container class for 3D case
-TEST_CASE("Particle container is checked for 3D case",
-          "[particlecontainer][3D]") {
+//! \brief Check particle vector class for 3D case
+TEST_CASE("Particle vector is checked for 3D case", "[particlevector][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Phases
@@ -136,45 +133,44 @@ TEST_CASE("Particle container is checked for 3D case",
   std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
       std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
-  // Particle container
-  auto particlecontainer =
-      std::make_shared<mpm::Container<mpm::ParticleBase<Dim>>>();
+  // Particle vector
+  auto particlevector = std::make_shared<mpm::Vector<mpm::ParticleBase<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
     // Add particle 1 and check
-    REQUIRE(particlecontainer->add(particle1, false) == true);
+    REQUIRE(particlevector->add(particle1, false) == true);
     // Add particle 2 and check
-    REQUIRE(particlecontainer->add(particle2, false) == true);
+    REQUIRE(particlevector->add(particle2, false) == true);
     // Try and particle 2 again and check
-    REQUIRE(particlecontainer->add(particle2, true) == false);
+    REQUIRE(particlevector->add(particle2, true) == false);
 
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 2);
+    REQUIRE(particlevector->size() == 2);
 
     // Remove particle 2 and check
-    REQUIRE(particlecontainer->remove(particle2) == true);
+    REQUIRE(particlevector->remove(particle2) == true);
     // Try and remove particle 2 again and check
-    REQUIRE(particlecontainer->remove(particle2) == false);
+    REQUIRE(particlevector->remove(particle2) == false);
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 1);
+    REQUIRE(particlevector->size() == 1);
 
-    // Clear particle container
-    particlecontainer->clear();
+    // Clear particle vector
+    particlevector->clear();
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 0);
+    REQUIRE(particlevector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check particle range iterator") {
     // Add particle 1
-    particlecontainer->add(particle1);
+    particlevector->add(particle1);
     // Add particle 2
-    particlecontainer->add(particle2);
+    particlevector->add(particle2);
     // Check size of particle hanlder
     std::size_t counter = 0;
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -189,14 +185,14 @@ TEST_CASE("Particle container is checked for 3D case",
   // Check for_each
   SECTION("Check particle for_each") {
     // Add particle 1
-    particlecontainer->add(particle1);
+    particlevector->add(particle1);
     // Add particle 2
-    particlecontainer->add(particle2);
+    particlevector->add(particle2);
     // Check size of particle hanlder
-    REQUIRE(particlecontainer->size() == 2);
+    REQUIRE(particlevector->size() == 2);
 
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -206,14 +202,14 @@ TEST_CASE("Particle container is checked for 3D case",
     // Set coordinates to unity
     coords << 1., 1., 1.;
 
-    // Iterate through particle container to update coordinaates
-    particlecontainer->for_each(
+    // Iterate through particle vector to update coordinaates
+    particlevector->for_each(
         std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = particlecontainer->cbegin();
-         itr != particlecontainer->cend(); ++itr) {
+    for (auto itr = particlevector->cbegin(); itr != particlevector->cend();
+         ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each particle is zero
       for (unsigned i = 0; i < coords.size(); ++i)
