@@ -35,9 +35,6 @@ class FluidParticle : public mpm::Particle<Tdim> {
   //! Delete assignment operator
   FluidParticle& operator=(const FluidParticle<Tdim>&) = delete;
 
-  //! Compute both solid and liquid mass
-  void compute_mass() noexcept override;
-
   //! Compute stress
   void compute_stress() noexcept override;
 

@@ -19,17 +19,6 @@ mpm::FluidParticle<Tdim>::FluidParticle(Index id, const VectorDim& coord)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
-// Compute mass of fluid particle
-template <unsigned Tdim>
-void mpm::FluidParticle<Tdim>::compute_mass() noexcept {
-  // Check if particle volume is set and material ptr is valid
-  assert(volume_ != std::numeric_limits<double>::max() && material_ != nullptr);
-  // Mass = volume of particle * mass_density
-  this->mass_density_ =
-      material_->template property<double>(std::string("density"));
-  this->mass_ = volume_ * mass_density_;
-}
-
 // Compute stress
 template <unsigned Tdim>
 void mpm::FluidParticle<Tdim>::compute_stress() noexcept {

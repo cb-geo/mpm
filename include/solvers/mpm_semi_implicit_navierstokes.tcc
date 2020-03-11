@@ -18,78 +18,76 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   int mpi_rank = 0;
   int mpi_size = 1;
 
-  // #ifdef USE_MPI
-  //   // Get MPI rank
-  //   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  //   // Get number of MPI ranks
-  //   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-  // #endif
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
 
-  //   // This solver consider only fluid variables
-  //   // NOTE: Due to indexing purposes
-  //   const unsigned fluid = mpm::ParticlePhase::SinglePhase;
+  // This solver consider only fluid variables
+  // NOTE: Due to indexing purposes
+  const unsigned fluid = mpm::ParticlePhase::SinglePhase;
 
-  //   // Test if checkpoint resume is needed
-  //   bool resume = false;
-  //   if (analysis_.find("resume") != analysis_.end())
-  //     resume = analysis_["resume"]["resume"].template get<bool>();
+  // Test if checkpoint resume is needed
+  bool resume = false;
+  if (analysis_.find("resume") != analysis_.end())
+    resume = analysis_["resume"]["resume"].template get<bool>();
 
-  //   // Pressure smoothing
-  //   if (analysis_.find("pressure_smoothing") != analysis_.end())
-  //     pressure_smoothing_ = analysis_["pressure_smoothing"].template
-  //     get<bool>();
+  // Pressure smoothing
+  if (analysis_.find("pressure_smoothing") != analysis_.end())
+    pressure_smoothing_ = analysis_["pressure_smoothing"].template get<bool>();
 
-  //   // Projection method parameter (beta)
-  //   if (analysis_.find("semi_implicit") != analysis_.end())
-  //     beta_ = analysis_["semi_implicit"]["beta"].template get<double>();
+  // Projection method parameter (beta)
+  if (analysis_.find("semi_implicit") != analysis_.end())
+    beta_ = analysis_["semi_implicit"]["beta"].template get<double>();
 
-  //   // Initialise material
-  //   bool mat_status = this->initialise_materials();
-  //   if (!mat_status) {
-  //     status = false;
-  //     throw std::runtime_error("Initialisation of materials failed");
-  //   }
+  // Initialise material
+  bool mat_status = this->initialise_materials();
+  if (!mat_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of materials failed");
+  }
 
-  //   // Initialise mesh
-  //   bool mesh_status = this->initialise_mesh();
-  //   if (!mesh_status) {
-  //     status = false;
-  //     throw std::runtime_error("Initialisation of mesh failed");
-  //   }
+  // Initialise mesh
+  bool mesh_status = this->initialise_mesh();
+  if (!mesh_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of mesh failed");
+  }
 
-  //   // Initialise particles
-  //   bool particle_status = this->initialise_particles();
-  //   if (!particle_status) {
-  //     status = false;
-  //     throw std::runtime_error("Initialisation of particles failed");
-  //   }
+  // Initialise particles
+  bool particle_status = this->initialise_particles();
+  if (!particle_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of particles failed");
+  }
 
-  //   // Initialise loading conditions
-  //   bool loading_status = this->initialise_loads();
-  //   if (!loading_status) {
-  //     status = false;
-  //     throw std::runtime_error("Initialisation of loads failed");
-  //   }
+  // Initialise loading conditions
+  bool loading_status = this->initialise_loads();
+  if (!loading_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of loads failed");
+  }
 
-  //   // Initialise matrix
-  //   bool matrix_status = this->initialise_matrix();
-  //   if (!matrix_status) {
-  //     status = false;
-  //     throw std::runtime_error("Initialisation of matrix failed");
-  //   }
+  // Initialise matrix
+  bool matrix_status = this->initialise_matrix();
+  if (!matrix_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of matrix failed");
+  }
 
-  //   // Compute mass for each phase
-  //   mesh_->iterate_over_particles(
-  //       std::bind(&mpm::ParticleBase<Tdim>::compute_mass,
-  //       std::placeholders::_1));
+  // Compute mass for each phase
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
-  //   // Assign beta to each particle
-  //   mesh_->iterate_over_particles(
-  //       std::bind(&mpm::ParticleBase<Tdim>::assign_semi_implicit_param,
-  //                 std::placeholders::_1, beta_));
+  // Assign beta to each particle
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::assign_projection_parameter,
+                std::placeholders::_1, beta_));
 
-  //   // Check point resume
-  //   if (resume) this->checkpoint_resume();
+  // Check point resume
+  if (resume) this->checkpoint_resume();
 
   auto solver_begin = std::chrono::steady_clock::now();
   //   // Main loop
@@ -269,7 +267,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
   //       Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
   //   // Create matrix solver
   //   matrix_solver_ =
-  //       Factory<mpm::SolverBase<Tdim>, unsigned, double>::instance()->create(
+  //       Factory<mpm::SolverBase<Tdim>, unsigned,
+  //       double>::instance()->create(
   //           solver_type, std::move(max_iter), std::move(tolerance));
   //   // Transfer the mesh pointer
   //   matrix_assembler_->assign_mesh_pointer(mesh_);
@@ -294,11 +293,13 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
 
   //   // Assign pressure cpnstraints
   //   matrix_assembler_->assign_pressure_constraints(this->beta_,
-  //                                                  this->step_ * this->dt_);
+  //                                                  this->step_ *
+  //                                                  this->dt_);
 
   //   // Initialise element matrix
   //   mesh_->iterate_over_cells(std::bind(
-  //       &mpm::Cell<Tdim>::initialise_element_matrix, std::placeholders::_1));
+  //       &mpm::Cell<Tdim>::initialise_element_matrix,
+  //       std::placeholders::_1));
 
   // } catch (std::exception& exception) {
   //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -378,7 +379,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_corrected_force() {
   bool status = true;
   // try {
   //   mesh_->iterate_over_particles(std::bind(
-  //       &mpm::ParticleBase<Tdim>::map_K_cor_to_cell, std::placeholders::_1));
+  //       &mpm::ParticleBase<Tdim>::map_K_cor_to_cell,
+  //       std::placeholders::_1));
   //   // Assemble corrected force matrix
   //   matrix_assembler_->assemble_K_cor_matrix(mesh_, dt_);
   //   // Assign corrected force
