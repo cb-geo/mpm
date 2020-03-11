@@ -141,6 +141,7 @@ endif()
 # Include directories
 include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/
+  ${mpm_SOURCE_DIR}/include/containers/
   ${mpm_SOURCE_DIR}/include/elements/
   ${mpm_SOURCE_DIR}/include/elements/2d
   ${mpm_SOURCE_DIR}/include/elements/3d
@@ -148,7 +149,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
-  ${mpm_SOURCE_DIR}/include/material/
+  ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
   ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/external/
@@ -188,8 +189,8 @@ endif()
 if(MPM_BUILD_TESTING)
   SET(test_src
     ${mpm_SOURCE_DIR}/tests/test_main.cc
-    ${mpm_SOURCE_DIR}/tests/cell_container_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
+    ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
@@ -208,12 +209,12 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
-    ${mpm_SOURCE_DIR}/tests/material/bingham_test.cc
-    ${mpm_SOURCE_DIR}/tests/material/linear_elastic_test.cc
-    ${mpm_SOURCE_DIR}/tests/material/mohr_coulomb_test.cc
-    ${mpm_SOURCE_DIR}/tests/material/newtonian_test.cc
-    ${mpm_SOURCE_DIR}/tests/material/norsand_test.cc
-    ${mpm_SOURCE_DIR}/tests/material/modified_cam_clay_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/mohr_coulomb_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/newtonian_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
@@ -222,13 +223,13 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_container_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_container_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
+    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   if(MPM_BUILD_LIB)

@@ -1191,7 +1191,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
           "force");
 
     // Set id of -1, is all nodes
-    Container<NodeBase<Tdim>> nodes =
+    Vector<NodeBase<Tdim>> nodes =
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
     tbb::parallel_for(
@@ -1465,8 +1465,8 @@ bool mpm::Mesh<Tdim>::create_node_sets(
   try {
     // Create container for each node set
     for (auto sitr = node_sets.begin(); sitr != node_sets.end(); ++sitr) {
-      // Create a container for the set
-      Container<NodeBase<Tdim>> nodes;
+      // Create a vector for the set
+      Vector<NodeBase<Tdim>> nodes;
       // Reserve the size of the container
       nodes.reserve((sitr->second).size());
       // Add nodes to the container
@@ -1474,9 +1474,9 @@ bool mpm::Mesh<Tdim>::create_node_sets(
         bool insertion_status = nodes.add(map_nodes_[pid], check_duplicates);
       }
 
-      // Create the map of the container
+      // Create the map of the vector
       status = this->node_sets_
-                   .insert(std::pair<mpm::Index, Container<NodeBase<Tdim>>>(
+                   .insert(std::pair<mpm::Index, Vector<NodeBase<Tdim>>>(
                        sitr->first, nodes))
                    .second;
     }
@@ -1488,7 +1488,7 @@ bool mpm::Mesh<Tdim>::create_node_sets(
 
 // Return cells
 template <unsigned Tdim>
-mpm::Container<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
+mpm::Vector<mpm::Cell<Tdim>> mpm::Mesh<Tdim>::cells() {
   return this->cells_;
 }
 
@@ -1502,7 +1502,7 @@ bool mpm::Mesh<Tdim>::create_cell_sets(
     // Create container for each cell set
     for (auto sitr = cell_sets.begin(); sitr != cell_sets.end(); ++sitr) {
       // Create a container for the set
-      Container<Cell<Tdim>> cells;
+      Vector<Cell<Tdim>> cells;
       // Reserve the size of the container
       cells.reserve((sitr->second).size());
       // Add cells to the container
@@ -1512,7 +1512,7 @@ bool mpm::Mesh<Tdim>::create_cell_sets(
 
       // Create the map of the container
       status = this->cell_sets_
-                   .insert(std::pair<mpm::Index, Container<Cell<Tdim>>>(
+                   .insert(std::pair<mpm::Index, Vector<Cell<Tdim>>>(
                        sitr->first, cells))
                    .second;
     }
