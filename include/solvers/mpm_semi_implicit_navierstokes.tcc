@@ -12,11 +12,11 @@ template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   bool status = true;
 
-  //   console_->info("MPM analysis type {}", io_->analysis_type());
+  console_->info("MPM analysis type {}", io_->analysis_type());
 
-  //   // Initialise MPI rank and size
-  //   int mpi_rank = 0;
-  //   int mpi_size = 1;
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
 
   // #ifdef USE_MPI
   //   // Get MPI rank
@@ -91,7 +91,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   //   // Check point resume
   //   if (resume) this->checkpoint_resume();
 
-  //   auto solver_begin = std::chrono::steady_clock::now();
+  auto solver_begin = std::chrono::steady_clock::now();
   //   // Main loop
   //   for (; step_ < nsteps_; ++step_) {
   //     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);

@@ -5,7 +5,7 @@
 #include "graph.h"
 #endif
 
-#include "solvers/mpm_base.h"
+#include "mpm_base.h"
 
 #include "matrix/assembler_base.h"
 #include "matrix/assembler_eigen_semi_implicit_navierstokes.h"
@@ -33,7 +33,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
 
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase) override;
+  void pressure_smoothing(unsigned phase);
 
   //! Class private functions
  private:
