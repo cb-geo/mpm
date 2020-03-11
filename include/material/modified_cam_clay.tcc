@@ -230,10 +230,10 @@ bool mpm::ModifiedCamClay<Tdim>::compute_plastic_tensor(
   auto dev_stress = stress;
   for (unsigned i = 0; i < 3; ++i) dev_stress(i) += (*state_vars).at("p");
   // Initialise matrix
-  auto n_l = Matrix6x6::Zero();
-  auto l_n = Matrix6x6::Zero();
-  auto l_l = Matrix6x6::Zero();
-  auto n_n = Matrix6x6::Zero();
+  Eigen::Matrix<double, 6, 6> n_l = Matrix6x6::Zero();
+  Eigen::Matrix<double, 6, 6> l_n = Matrix6x6::Zero();
+  Eigen::Matrix<double, 6, 6> l_l = Matrix6x6::Zero();
+  Eigen::Matrix<double, 6, 6> n_n = Matrix6x6::Zero();
   // Norm of deviatoric stress tensor
   const double xi = q / std::sqrt(1.5);
   // lxn
