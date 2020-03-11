@@ -6,7 +6,7 @@
 #include "element.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
-#include "material/material.h"
+#include "material.h"
 #include "mesh.h"
 #include "node.h"
 #include "particle.h"

@@ -8,18 +8,18 @@
 #include "catch.hpp"
 
 #include "cell.h"
-#include "container.h"
 #include "data_types.h"
 #include "element.h"
 #include "graph.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
-#include "material/material.h"
+#include "material.h"
 #include "mesh.h"
 #include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
+#include "vector.h"
 
 // MPI
 #ifdef USE_MPI
@@ -184,33 +184,33 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   cell14->add_neighbour(id13);
 
   // adding neighour complete
-  // Cell container
-  auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
+  // Cell vector
+  auto cellvector = std::make_shared<mpm::Vector<mpm::Cell<Dim>>>();
 
-  // add cells into container
-  cellcontainer->add(cell0);
-  cellcontainer->add(cell1);
-  cellcontainer->add(cell2);
-  cellcontainer->add(cell3);
-  cellcontainer->add(cell4);
-  cellcontainer->add(cell5);
-  cellcontainer->add(cell6);
-  cellcontainer->add(cell7);
-  cellcontainer->add(cell8);
-  cellcontainer->add(cell9);
-  cellcontainer->add(cell10);
-  cellcontainer->add(cell11);
-  cellcontainer->add(cell12);
-  cellcontainer->add(cell13);
-  cellcontainer->add(cell14);
+  // add cells into vector
+  cellvector->add(cell0);
+  cellvector->add(cell1);
+  cellvector->add(cell2);
+  cellvector->add(cell3);
+  cellvector->add(cell4);
+  cellvector->add(cell5);
+  cellvector->add(cell6);
+  cellvector->add(cell7);
+  cellvector->add(cell8);
+  cellvector->add(cell9);
+  cellvector->add(cell10);
+  cellvector->add(cell11);
+  cellvector->add(cell12);
+  cellvector->add(cell13);
+  cellvector->add(cell14);
 
   // simluate number of tasks
   int num_threads = 3;
 
   // initialize graph
-  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellcontainer, num_threads, 0);
-  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellcontainer, num_threads, 1);
-  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellcontainer, num_threads, 2);
+  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellvector, num_threads, 0);
+  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellvector, num_threads, 1);
+  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellvector, num_threads, 2);
 
   // Check graph structure
   SECTION("Check graph initialize function") {
