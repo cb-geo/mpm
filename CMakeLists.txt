@@ -211,6 +211,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
+    ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/mohr_coulomb_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/newtonian_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
