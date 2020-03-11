@@ -1,7 +1,6 @@
 //! Constructor with cells, size and rank
 template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph(Container<Cell<Tdim>> cells, int mpi_size,
-                        int mpi_rank) {
+mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
 
   this->cells_ = cells;
 

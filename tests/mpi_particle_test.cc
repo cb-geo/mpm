@@ -4,7 +4,7 @@
 
 #include "data_types.h"
 #include "hdf5_particle.h"
-#include "material/material.h"
+#include "material.h"
 #include "mpi_datatypes.h"
 #include "particle.h"
 

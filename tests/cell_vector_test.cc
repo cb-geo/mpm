@@ -6,14 +6,14 @@
 #include "catch.hpp"
 
 #include "cell.h"
-#include "container.h"
 #include "element.h"
 #include "hexahedron_element.h"
 #include "node.h"
 #include "quadrilateral_element.h"
+#include "vector.h"
 
-//! \brief Check cell container class for 2D case
-TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
+//! \brief Check cell vector class for 2D case
+TEST_CASE("Cell vector is checked for 2D case", "[cellvector][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -38,44 +38,43 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   mpm::Index id2 = 1;
   auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
-  // Cell container
-  auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
+  // Cell vector
+  auto cellvector = std::make_shared<mpm::Vector<mpm::Cell<Dim>>>();
 
   // Check add cell
   SECTION("Check add cell functionality") {
     // Add cell 1 and check
-    REQUIRE(cellcontainer->add(cell1, false) == true);
+    REQUIRE(cellvector->add(cell1, false) == true);
     // Add cell 2 and check
-    REQUIRE(cellcontainer->add(cell2, false) == true);
+    REQUIRE(cellvector->add(cell2, false) == true);
     // Try and cell 2 again and check
-    REQUIRE(cellcontainer->add(cell2) == false);
+    REQUIRE(cellvector->add(cell2) == false);
 
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 2);
+    REQUIRE(cellvector->size() == 2);
 
     // Remove cell 2 and check
-    REQUIRE(cellcontainer->remove(cell2) == true);
+    REQUIRE(cellvector->remove(cell2) == true);
     // Try and remove cell 2 again and check
-    REQUIRE(cellcontainer->remove(cell2) == false);
+    REQUIRE(cellvector->remove(cell2) == false);
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 1);
+    REQUIRE(cellvector->size() == 1);
 
-    // Clear cell container
-    cellcontainer->clear();
+    // Clear cell vector
+    cellvector->clear();
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 0);
+    REQUIRE(cellvector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check cell range iterator") {
     // Add cell 1
-    cellcontainer->add(cell1);
+    cellvector->add(cell1);
     // Add cell 2
-    cellcontainer->add(cell2);
+    cellvector->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr) {
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr) {
       REQUIRE((*itr)->nnodes() == 0);
       ++counter;
     }
@@ -87,14 +86,13 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
   // Check for_each
   SECTION("Check cell for_each") {
     // Add cell 1
-    cellcontainer->add(cell1);
+    cellvector->add(cell1);
     // Add cell 2
-    cellcontainer->add(cell2);
+    cellvector->add(cell2);
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 2);
+    REQUIRE(cellvector->size() == 2);
 
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr) {
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr) {
       REQUIRE((*itr)->nfunctions() == 4);
     }
 
@@ -137,23 +135,21 @@ TEST_CASE("Cell container is checked for 2D case", "[cellcontainer][2D]") {
     REQUIRE(cell2->nnodes() == 4);
 
     // Check if cell has been initialised
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr)
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr)
       REQUIRE((*itr)->is_initialised() == false);
 
-    // Iterate through cell container to initialise
-    cellcontainer->for_each(
+    // Iterate through cell vector to initialise
+    cellvector->for_each(
         std::bind(&mpm::Cell<Dim>::initialise, std::placeholders::_1));
 
     // Check if update has gone through
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr)
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr)
       REQUIRE((*itr)->is_initialised() == true);
   }
 }
 
-//! \brief Check cell container class for 3D case
-TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
+//! \brief Check cell vector class for 3D case
+TEST_CASE("Cell vector is checked for 3D case", "[cellvector][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -178,44 +174,43 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   mpm::Index id2 = 1;
   auto cell2 = std::make_shared<mpm::Cell<Dim>>(id2, Nnodes, element);
 
-  // Cell container
-  auto cellcontainer = std::make_shared<mpm::Container<mpm::Cell<Dim>>>();
+  // Cell vector
+  auto cellvector = std::make_shared<mpm::Vector<mpm::Cell<Dim>>>();
 
   // Check add cell
   SECTION("Check add cell functionality") {
     // Add cell 1 and check
-    REQUIRE(cellcontainer->add(cell1, false) == true);
+    REQUIRE(cellvector->add(cell1, false) == true);
     // Add cell 2 and check
-    REQUIRE(cellcontainer->add(cell2, false) == true);
+    REQUIRE(cellvector->add(cell2, false) == true);
     // Try and cell 2 again and check
-    REQUIRE(cellcontainer->add(cell2) == false);
+    REQUIRE(cellvector->add(cell2) == false);
 
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 2);
+    REQUIRE(cellvector->size() == 2);
 
     // Remove cell 2 and check
-    REQUIRE(cellcontainer->remove(cell2) == true);
+    REQUIRE(cellvector->remove(cell2) == true);
     // Try and remove cell 2 again and check
-    REQUIRE(cellcontainer->remove(cell2) == false);
+    REQUIRE(cellvector->remove(cell2) == false);
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 1);
+    REQUIRE(cellvector->size() == 1);
 
-    // Clear cell container
-    cellcontainer->clear();
+    // Clear cell vector
+    cellvector->clear();
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 0);
+    REQUIRE(cellvector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check cell range iterator") {
     // Add cell 1
-    cellcontainer->add(cell1);
+    cellvector->add(cell1);
     // Add cell 2
-    cellcontainer->add(cell2);
+    cellvector->add(cell2);
     // Check size of cell hanlder
     std::size_t counter = 0;
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr) {
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr) {
       REQUIRE((*itr)->nnodes() == 0);
       ++counter;
     }
@@ -227,14 +222,13 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
   // Check for_each
   SECTION("Check cell for_each") {
     // Add cell 1
-    cellcontainer->add(cell1);
+    cellvector->add(cell1);
     // Add cell 2
-    cellcontainer->add(cell2);
+    cellvector->add(cell2);
     // Check size of cell hanlder
-    REQUIRE(cellcontainer->size() == 2);
+    REQUIRE(cellvector->size() == 2);
 
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr) {
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr) {
       REQUIRE((*itr)->nfunctions() == 8);
     }
 
@@ -312,17 +306,15 @@ TEST_CASE("Cell container is checked for 3D case", "[cellcontainer][3D]") {
     REQUIRE(cell2->nnodes() == 8);
 
     // Check if cell has been initialised
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr)
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr)
       REQUIRE((*itr)->is_initialised() == false);
 
-    // Iterate through cell container to initialise
-    cellcontainer->for_each(
+    // Iterate through cell vector to initialise
+    cellvector->for_each(
         std::bind(&mpm::Cell<Dim>::initialise, std::placeholders::_1));
 
     // Check if update has gone through
-    for (auto itr = cellcontainer->cbegin(); itr != cellcontainer->cend();
-         ++itr)
+    for (auto itr = cellvector->cbegin(); itr != cellvector->cend(); ++itr)
       REQUIRE((*itr)->is_initialised() == true);
   }
 }
