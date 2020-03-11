@@ -170,6 +170,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
   ${mpm_SOURCE_DIR}/src/material.cc
+  ${mpm_SOURCE_DIR}/src/matrix.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
