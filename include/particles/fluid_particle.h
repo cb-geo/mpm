@@ -44,51 +44,39 @@ class FluidParticle : public mpm::Particle<Tdim> {
   //! Map internal force
   inline void map_internal_force() noexcept override;
 
-  // FIXME: NAMING ERROR
   //! Initial pressure
   //! \param[in] pressure Initial pressure
-  void initial_pore_pressure(double pressure) override {
+  void initial_pressure(double pressure) override {
     state_variables_.at("pressure") = pressure;
   }
 
-  // //! Map drag force coefficient
-  // bool map_drag_force_coefficient() override;
+  //! ----------------------------------------------------------------
+  //! Semi-Implicit integration functions based on Chorin's Projection
+  //! ----------------------------------------------------------------
 
-  // //! Update particle permeability
-  // //! \retval status Update status
-  // bool update_permeability() override;
-
-  // //! Assign particle pressure constraints
-  // //! \retval status Assignment status
-  // bool assign_particle_pressure_constraint(double pressure) override;
-
-  //------------------------------------------------------------
-  //! Semi-implict mpm
   //! Assigning beta parameter to particle
-  void assign_semi_implicit_param(double parameter) override {
-    this->beta_ = parameter;
+  //! \param[in] pressure parameter determining type of projection
+  void assign_projection_parameter(double parameter) override {
+    this->projection_param_ = parameter;
   };
 
-  //! Map laplacian element matrix to cell
-  bool map_L_to_cell() override;
+  //! Map laplacian element matrix to cell (used in poisson equation LHS)
+  bool map_laplacian_to_cell() override;
 
-  //! Map F element matrix to cell (used in poisson equation RHS)
-  bool map_F_to_cell() override;
+  //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
+  bool map_poisson_rhs_to_cell() override;
 
-  //! Map K_cor element matrix to cell
-  bool map_K_cor_to_cell() override;
+  //! Map correction matrix element matrix to cell (used to correct velocity)
+  bool map_correction_matrix_to_cell() override;
 
+  //! Update pressure after solving poisson equation
   bool compute_updated_pressure() override;
 
  private:
-  // //! Assign particle permeability
-  // //! \retval status Assignment status
-  // virtual bool assign_permeability();
-
-  //! Compute stress
+  //! Compute turbulent stress
   virtual Eigen::Matrix<double, 6, 1> compute_turbulent_stress();
 
- protected:
+ private:
   //! Cell
   using ParticleBase<Tdim>::cell_;
   //! Nodes
@@ -111,22 +99,12 @@ class FluidParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::mass_;
   //! Particle total volume
   using Particle<Tdim>::volume_;
-  //! Porosity
-  using Particle<Tdim>::porosity_;
-  //! Beta parameter for semi-implicit update
-  double beta_{0.0};
+  //! Projection parameter for semi-implicit update
+  double projection_param_{0.0};
   //! Pressure constraint
   double pressure_constraint_{std::numeric_limits<unsigned>::max()};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  //! ---------------------------------------------------------------------
-  //! semi-implicit
-  //! Degree of saturation
-  double liquid_saturation_{1.0};
-  //! Permeability
-  VectorDim permeability_;
-  //! Permeability parameter
-  VectorDim c1_;
 };  // FluidParticle class
 }  // namespace mpm
 
