@@ -1,6 +1,6 @@
+#include "particle.h"
 #include "factory.h"
 #include "particle_base.h"
-#include "particle.h"
 #include "fluid_particle.h"
 
 // Particle2D (2 Dim)

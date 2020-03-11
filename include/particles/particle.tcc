@@ -789,6 +789,35 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
     nodes_[i]->append_material_id(material_id_);
 }
 
+//! Compute free surface
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::compute_free_surface() {
+  bool status = true;
+  try {
+    this->free_surface_ = false;
+    // Check if particle has a valid cell ptr
+    if (cell_ != nullptr) {
+      // TODO: Tobe uncomment when free surface is implemented
+      // 1. Simple approach of density comparison (Hamad, 2015)
+      // Get interpolated nodal density
+      // double nodal_mass_density = 0;
+
+      // for (unsigned i = 0; i < nodes_.size(); ++i)
+      //   nodal_mass_density +=
+      //       shapefn_[i] * nodes_[i]->density(mpm::ParticlePhase::Solid);
+
+      // // Compare smoothen density to actual particle mass density
+      // if ((nodal_mass_density / mass_density_) <= 0.65)
+      //   if (cell_->free_surface()) this->free_surface_ = true;
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+};
+
 //! Assign neighbour particles
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::assign_neighbours(

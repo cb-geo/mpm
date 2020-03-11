@@ -19,7 +19,12 @@ template <unsigned Tdim>
 class Material;
 
 //! Particle phases
-enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
+enum ParticlePhase : unsigned int {
+  SinglePhase = 0,
+  Solid = 0,
+  Liquid = 1,
+  Gas = 2
+};
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -180,7 +185,7 @@ class ParticleBase {
   virtual double dvolumetric_strain() const = 0;
 
   //! Initial stress
-  virtual void initial_stress(const Eigen::Matrix<double, 6, 1>&) = 0;
+  virtual void initial_stress(const Eigen::Matrix<double, 6, 1>& stress) = 0;
 
   //! Compute stress
   virtual void compute_stress() noexcept = 0;
@@ -239,6 +244,15 @@ class ParticleBase {
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
+  //! Assign particle free surface
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Assign particle free surface
+  virtual bool free_surface() = 0;
+
+  //! Compute free surface
+  virtual bool compute_free_surface() = 0;
+
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;
 
@@ -249,6 +263,58 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  //! Initial pressure
+  //! \param[in] pressure Initial pressure
+  virtual void initial_pressure(double pressure) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initial_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assigning beta parameter to particle
+  //! \param[in] pressure parameter determining type of projection
+  virtual void assign_projection_parameter(double parameter) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_projection_parameter) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Map laplacian element matrix to cell (used in poisson equation LHS)
+  virtual bool map_laplacian_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_laplacian_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  };
+
+  //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
+  virtual bool map_poisson_rhs_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_poisson_rhs_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  };
+
+  //! Map correction matrix element matrix to cell (used to correct velocity)
+  virtual bool map_correction_matrix_to_cell() {
+    throw std::runtime_error(
+        "Calling the base class function (map_correction_matrix_to_cell) in "
+        "ParticleBase:: "
+        "illegal operation!");
+    return 0;
+  };
+
+  //! Update pressure after solving poisson equation
+  virtual bool compute_updated_pressure() {
+    throw std::runtime_error(
+        "Calling the base class function (compute_updated_pressure) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
 
  protected:
   //! particleBase id

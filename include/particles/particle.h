@@ -132,7 +132,6 @@ class Particle : public ParticleBase<Tdim> {
   void update_volume() noexcept override;
 
   //! Return mass density
-  //! \param[in] phase Index corresponding to the phase
   double mass_density() const override { return mass_density_; }
 
   //! Compute mass as volume * density
@@ -213,7 +212,6 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_traction(unsigned direction, double traction) override;
 
   //! Return traction of the particle
-  //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
   //! Map traction force
@@ -262,6 +260,17 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
 
+  //! Assign free surface
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  };
+
+  //! Return free surface bool
+  bool free_surface() override { return free_surface_; };
+
+  //! Compute free surface
+  bool compute_free_surface() override;
+
   //! Return the number of neighbour particles
   unsigned nneighbours() const override { return neighbours_.size(); };
 
@@ -278,7 +287,7 @@ class Particle : public ParticleBase<Tdim> {
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
@@ -343,6 +352,8 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  //! Free surface
+  bool free_surface_{false};
 
 };  // Particle class
 }  // namespace mpm
