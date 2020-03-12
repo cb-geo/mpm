@@ -237,9 +237,9 @@ void mpm::Particle<Tdim>::initialise() {
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
-  this->properties_["shear_stresses"] = [&]() { return shear_stress(); };
+  this->properties_["shear_stresses"] = [&]() { return stress().tail(3); };
   this->properties_["strains"] = [&]() { return strain(); };
-  this->properties_["shear_strains"] = [&]() { return shear_strain(); };
+  this->properties_["shear_strains"] = [&]() { return strain().tail(3); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
 }

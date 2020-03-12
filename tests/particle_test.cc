@@ -846,10 +846,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain()(i) == Approx(strain(i)).epsilon(Tolerance));
 
-    // Check shear strains
-    for (unsigned i = 0; i < 3; ++i)
-      REQUIRE(particle->shear_strain()(i) == Approx(strain(i + 3)).epsilon(Tolerance));    
-
     // Check volumetric strain at centroid
     double volumetric_strain = 0.2;
     REQUIRE(particle->volumetric_strain_centroid() ==
@@ -2125,13 +2121,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     strain << 0.00000, 0.07500, 0.40000, -0.02500, 0.35000, -0.05000;
 
     // Check strains
-    
     for (unsigned i = 0; i < strain.rows(); ++i)
       REQUIRE(particle->strain()(i) == Approx(strain(i)).epsilon(Tolerance));
-
-    // Check shear strains
-    for (unsigned i = 0; i < 3; ++i)
-      REQUIRE(particle->shear_strain()(i) == Approx(strain(i + 3)).epsilon(Tolerance));    
 
     // Check volumetric strain at centroid
     double volumetric_strain = 0.5;
