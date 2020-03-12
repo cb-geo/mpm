@@ -18,7 +18,7 @@ struct NodalProperties {
   //! \param[in] rows Number of nodes times the number of the dimension of the
   //! property (1 if scalar, Tdim if vector)
   //! \param[in] columns Number of materials
-  void create_property(const std::string& property, unsigned rows,
+  bool create_property(const std::string& property, unsigned rows,
                        unsigned columns);
 
   // Return data in the nodal properties map at a specific index

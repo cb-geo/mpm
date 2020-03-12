@@ -27,9 +27,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     const unsigned dim = 1;
 
     // Check property creation
-    REQUIRE_NOTHROW(
+    REQUIRE(
         nodal_properties.create_property(property1, nnodes * dim, nmaterials));
-    REQUIRE_NOTHROW(
+    REQUIRE(
         nodal_properties.create_property(property2, nnodes * dim, nmaterials));
 
     // Check size of matrix of property data
@@ -99,9 +99,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     const unsigned dim = 2;
 
     // Check property creation
-    REQUIRE_NOTHROW(
+    REQUIRE(
         nodal_properties.create_property(property1, nnodes * dim, nmaterials));
-    REQUIRE_NOTHROW(
+    REQUIRE(
         nodal_properties.create_property(property2, nnodes * dim, nmaterials));
 
     // Check size of matrix of property data
