@@ -103,74 +103,66 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       mesh_->iterate_over_nodes(
           std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
-      //       mesh_->iterate_over_cells(
-      //           std::bind(&mpm::Cell<Tdim>::activate_nodes,
-      //           std::placeholders::_1));
-      //     });
-      //     task_group.wait();
+      mesh_->iterate_over_cells(
+          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+    });
+    task_group.wait();
 
-      //     // Spawn a task for particles
-      //     task_group.run([&] {
-      //       // Iterate over each particle to compute shapefn
-      //       mesh_->iterate_over_particles(std::bind(
-      //           &mpm::ParticleBase<Tdim>::compute_shapefn,
-      //           std::placeholders::_1));
+    // Spawn a task for particles
+    task_group.run([&] {
+      // Iterate over each particle to compute shapefn
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
     });
 
-    //     task_group.wait();
+    task_group.wait();
 
-    //     // Assign mass and momentum to nodes
-    //     // Solid skeleton
-    //     mesh_->iterate_over_particles(
-    //         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-    //                   std::placeholders::_1));
+    // Assign mass and momentum to nodes
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+                  std::placeholders::_1));
 
-    //     // Compute nodal velocity at the begining of time step
-    //     mesh_->iterate_over_nodes_predicate(
-    //         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
-    //                   std::placeholders::_1),
-    //         std::bind(&mpm::NodeBase<Tdim>::status,
-    //         std::placeholders::_1));
+    // Compute nodal velocity at the begining of time step
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
+                  std::placeholders::_1),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    //     // Iterate over each particle to compute strain rate
-    //     mesh_->iterate_over_particles(std::bind(
-    //         &mpm::ParticleBase<Tdim>::compute_strain,
-    //         std::placeholders::_1, dt_));
+    // Iterate over each particle to compute strain rate
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
-    //     // Iterate over each particle to compute shear (deviatoric) stress
-    //     mesh_->iterate_over_particles(std::bind(
-    //         &mpm::ParticleBase<Tdim>::compute_stress,
-    //         std::placeholders::_1));
+    // Iterate over each particle to compute shear (deviatoric) stress
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
 
-    //     // Spawn a task for external force
-    //     task_group.run([&] {
-    //       // Iterate over particles to compute nodal body force
-    //       mesh_->iterate_over_particles(
-    //           std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-    //                     std::placeholders::_1, this->gravity_));
+    // Spawn a task for external force
+    task_group.run([&] {
+      // Iterate over particles to compute nodal body force
+      mesh_->iterate_over_particles(
+          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                    std::placeholders::_1, this->gravity_));
 
-    //       // Apply particle traction and map to nodes
-    //       mesh_->apply_traction_on_particles(this->step_ * this->dt_);
-    //     });
+      // Apply particle traction and map to nodes
+      mesh_->apply_traction_on_particles(this->step_ * this->dt_);
+    });
 
-    //     // Spawn a task for internal force
-    //     task_group.run([&] {
-    //       // Iterate over particles to compute nodal internal force
-    //       mesh_->iterate_over_particles(std::bind(
-    //           &mpm::ParticleBase<Tdim>::map_internal_force,
-    //           std::placeholders::_1));
-    //     });
-    //     task_group.wait();
+    // Spawn a task for internal force
+    task_group.run([&] {
+      // Iterate over particles to compute nodal internal force
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
+    });
+    task_group.wait();
 
-    //     // Compute free surface cells, nodes, and particles
-    //     mesh_->compute_free_surface(volume_tolerance_);
+    // // Compute free surface cells, nodes, and particles
+    // mesh_->compute_free_surface(volume_tolerance_);
 
-    //     // Compute intermediate velocity
-    //     mesh_->iterate_over_nodes_predicate(
-    //         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-    //                   std::placeholders::_1, fluid, this->dt_),
-    //         std::bind(&mpm::NodeBase<Tdim>::status,
-    //         std::placeholders::_1));
+    // Compute intermediate velocity
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
+                  std::placeholders::_1, fluid, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     //     // Reinitialise system matrix to perform PPE
     //     bool matrix_reinitialization_status = this->reinitialise_matrix();
@@ -258,8 +250,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
   //   get<double>();
   //   // Get matrix assembler type
   //   std::string assembler_type =
-  //       analysis_["matrix"]["assembler_type"].template
-  //       get<std::string>();
+  //       analysis_["matrix"]["assembler_type"].template get<std::string>();
   //   // Get matrix solver type
   //   std::string solver_type =
   //       analysis_["matrix"]["solver_type"].template get<std::string>();
@@ -272,15 +263,14 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
   //       Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
   //   // Create matrix solver
   //   matrix_solver_ =
-  //       Factory<mpm::SolverBase<Tdim>, unsigned,
-  //       double>::instance()->create(
+  //       Factory<mpm::SolverBase<Tdim>, unsigned, double>::instance()->create(
   //           solver_type, std::move(max_iter), std::move(tolerance));
   //   // Transfer the mesh pointer
   //   matrix_assembler_->assign_mesh_pointer(mesh_);
 
   // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__,
-  //   exception.what()); status = false;
+  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  //   status = false;
   // }
   return status;
 }
