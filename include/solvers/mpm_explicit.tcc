@@ -323,7 +323,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
 
-    if (!unlocatable_particles.empty())
+    if (!unlocatable_particles.empty() && this->locate_particles_)
       throw std::runtime_error("Particle outside the mesh domain");
 
 #ifdef USE_MPI
