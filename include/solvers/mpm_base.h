@@ -177,7 +177,7 @@ class MPMBase : public MPM {
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
-  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
+  std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
