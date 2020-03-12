@@ -938,8 +938,11 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
       Eigen::Vector3d data;
       data.setZero();
       auto pdata = (*pitr)->vector_data(attribute);
-      // Fill data attributes to size of 3 regardless of dimensions
-      for (unsigned i = 0; i < 3; ++i) data(i) = pdata(i);
+      // Fill data attributes to size of 3
+      const unsigned attribute_size =
+          std::min(static_cast<unsigned int>(data.size()),
+                   std::max(Tdim, static_cast<unsigned int>(pdata.size())));
+      for (unsigned i = 0; i < attribute_size; ++i) data(i) = pdata(i);
 
       // Add to a vector of data
       vector_data.emplace_back(data);
