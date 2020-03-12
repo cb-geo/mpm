@@ -120,10 +120,12 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
 
     auto pstress_data = particle->vector_data("stresses");
+    REQUIRE(particle->vector_data("stresses").size() == stress.size());
     for (unsigned i = 0; i < pstress_data.size(); ++i)
       REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
 
     auto pshear_stress_data = particle->vector_data("shear_stresses");
+    REQUIRE(particle->vector_data("shear_stresses").size() == 3);
     for (unsigned i = 0; i < pshear_stress_data.size(); ++i)
       REQUIRE(pshear_stress_data[i] ==
               Approx(stress[i + 3]).epsilon(Tolerance));
