@@ -763,6 +763,10 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
       pressure += shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
 
     state_variables_.at("pressure") = pressure;
+
+    // If free_surface particle, overwrite pressure to zero
+    if (free_surface_) state_variables_.at("pressure") = 0.0;
+
     status = true;
   }
   return status;
@@ -797,18 +801,16 @@ bool mpm::Particle<Tdim>::compute_free_surface() {
     this->free_surface_ = false;
     // Check if particle has a valid cell ptr
     if (cell_ != nullptr) {
-      // TODO: Tobe uncomment when free surface is implemented
       // 1. Simple approach of density comparison (Hamad, 2015)
       // Get interpolated nodal density
-      // double nodal_mass_density = 0;
+      double nodal_mass_density = 0;
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodal_mass_density +=
+            shapefn_[i] * nodes_[i]->density(mpm::ParticlePhase::Solid);
 
-      // for (unsigned i = 0; i < nodes_.size(); ++i)
-      //   nodal_mass_density +=
-      //       shapefn_[i] * nodes_[i]->density(mpm::ParticlePhase::Solid);
-
-      // // Compare smoothen density to actual particle mass density
-      // if ((nodal_mass_density / mass_density_) <= 0.65)
-      //   if (cell_->free_surface()) this->free_surface_ = true;
+      // Compare smoothen density to actual particle mass density
+      if ((nodal_mass_density / mass_density_) <= 0.65)
+        if (cell_->free_surface()) this->free_surface_ = true;
     }
 
   } catch (std::exception& exception) {

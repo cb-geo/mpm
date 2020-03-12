@@ -1,7 +1,7 @@
 #include "particle.h"
 #include "factory.h"
-#include "particle_base.h"
 #include "fluid_particle.h"
+#include "particle_base.h"
 
 // Particle2D (2 Dim)
 static Register<mpm::ParticleBase<2>, mpm::Particle<2>, mpm::Index,

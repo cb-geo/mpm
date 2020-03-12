@@ -432,6 +432,25 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
+  //! Compute free surface
+  bool compute_free_surface(
+      double tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! Get free surface node set
+  std::set<mpm::Index> free_surface_nodes();
+
+  //! Get free surface cell set
+  std::set<mpm::Index> free_surface_cells();
+
+  //! Get free surface particle set
+  std::set<mpm::Index> free_surface_particles();
+
+  //! Assign id for active node
+  unsigned assign_active_node_id();
+
+  //! Return container of active nodes
+  mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,

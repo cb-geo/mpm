@@ -155,8 +155,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     });
     task_group.wait();
 
-    // // Compute free surface cells, nodes, and particles
-    // mesh_->compute_free_surface(volume_tolerance_);
+    // Compute free surface cells, nodes, and particles
+    mesh_->compute_free_surface(volume_tolerance_);
 
     // Compute intermediate velocity
     mesh_->iterate_over_nodes_predicate(
