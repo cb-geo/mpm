@@ -226,6 +226,41 @@ class NodeBase {
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
 
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) = 0;
+
+  //! Update pore pressure increment at the node
+  virtual void update_pressure_increment(
+      const Eigen::VectorXd& pressure_increment, unsigned phase,
+      double current_time = 0.) = 0;
+
+  //! Return real density at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double density(unsigned phase) = 0;
+
+  //! Compute nodal density
+  virtual void compute_density() = 0;
+
+  //! Compute nodal corrector force term
+  virtual bool compute_nodal_corrected_force(
+      VectorDim& force_cor_part_water) = 0;
+
+  //! Assign free surface
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Return free surface bool
+  virtual bool free_surface() = 0;
+
+  //! Assign active id
+  virtual void assign_active_id(Index id) = 0;
+
+  //! Return active id
+  virtual mpm::Index active_id() = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 

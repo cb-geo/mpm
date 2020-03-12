@@ -31,6 +31,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
+  free_surface_ = false;
+  pressure_increment_ = 0.;
+  force_cor_.setZero();
   status_ = false;
   material_ids_.clear();
 }
@@ -517,4 +520,100 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   std::lock_guard<std::mutex> guard(node_mutex_);
   auto status = this->mpi_ranks_.insert(rank);
   return status.second;
+}
+
+//! Compute mass density (Z. Wiezckowski, 2004)
+//! density = mass / lumped volume
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
+  try {
+    const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
+
+    for (unsigned phase = 0; phase < Tnphases; ++phase) {
+      if (mass_(phase) > tolerance) {
+        if (volume_(phase) > tolerance)
+          density_(phase) = mass_(phase) / volume_(phase);
+
+        // Check to see if value is below threshold
+        if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
+
+      } else
+        throw std::runtime_error("Nodal mass is zero or below threshold");
+    }
+
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+}
+
+//! Compute nodal corrected force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_corrected_force(
+    VectorDim& force_cor_part_water) {
+  bool status = true;
+
+  try {
+    // Compute corrected force for water phase
+    force_cor_.col(0) = force_cor_part_water;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+//! Update pore pressure increment at the node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
+    const Eigen::VectorXd& pressure_increment, unsigned phase,
+    double current_time) {
+  this->pressure_increment_ = pressure_increment(active_id_);
+
+  // If pressure boundary, increment is zero
+  if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
+      this->free_surface())
+    this->pressure_increment_ = 0;
+}
+
+//! Compute semi-implicit acceleration and velocity
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::
+    compute_acceleration_velocity_navierstokes_semi_implicit(unsigned phase,
+                                                             double dt) {
+  bool status = true;
+  const double tolerance = std::numeric_limits<double>::min();
+  try {
+
+    // Semi-implicit solver
+    Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
+        force_cor_.col(phase) / mass_(phase);
+
+    // Acceleration
+    this->acceleration_.col(phase) += acceleration_corrected;
+
+    // Update velocity
+    velocity_.col(phase) += acceleration_corrected * dt;
+
+    // Apply friction constraints
+    this->apply_friction_constraints(dt);
+
+    // Apply velocity constraints, which also sets acceleration to 0,
+    // when velocity is set.
+    this->apply_velocity_constraints();
+
+    // Set a threshold
+    for (unsigned i = 0; i < Tdim; ++i) {
+      if (std::abs(velocity_.col(phase)(i)) < tolerance)
+        velocity_.col(phase)(i) = 0.;
+      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
+        acceleration_.col(phase)(i) = 0.;
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }

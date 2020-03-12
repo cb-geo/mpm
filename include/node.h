@@ -236,6 +236,42 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) override;
+
+  //! Update pore pressure increment at the node
+  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
+                                 unsigned phase,
+                                 double current_time = 0.) override;
+
+  //! Return real density at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double density(unsigned phase) override { return density_(phase); }
+
+  //! Compute nodal density
+  void compute_density() override;
+
+  //! Compute nodal corrector force term
+  bool compute_nodal_corrected_force(VectorDim& force_cor_part_water) override;
+
+  //! Assign free surface
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  }
+
+  //! Return free surface bool
+  bool free_surface() override { return free_surface_; }
+
+  //! Assign active id
+  void assign_active_id(Index id) override { active_id_ = id; }
+
+  //! Return active id
+  mpm::Index active_id() override { return active_id_; }
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -267,6 +303,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
+  //! Pressure constraint
+  std::map<unsigned, double> pressure_constraints_;
   //! Rotation matrix for general velocity constraints
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
@@ -285,6 +323,16 @@ class Node : public NodeBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
+  //! Global index for active node
+  Index active_id_{std::numeric_limits<Index>::max()};
+  //! Interpolated density
+  Eigen::Matrix<double, 1, Tnphases> density_;
+  //! p^(t+1) - beta * p^(t)
+  double pressure_increment_;
+  //! Correction force
+  Eigen::Matrix<double, Tdim, Tnphases> force_cor_;
+  //! Free surface
+  bool free_surface_{false};
 };  // Node class
 }  // namespace mpm
 
