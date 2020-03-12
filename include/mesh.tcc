@@ -438,10 +438,12 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
                                                const std::string& particle_type,
                                                unsigned material_id,
-                                               int cset_id) {
+                                               int cset_id, unsigned pset_id) {
   bool status = true;
   try {
     if (cells_.size() > 0) {
+      // Particle ids
+      tbb::concurrent_vector<mpm::Index> pids;
       unsigned before_generation = this->nparticles();
       bool checks = false;
       // Get material
@@ -470,12 +472,22 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
           if (status) {
             map_particles_[pid]->assign_cell(*citr);
             map_particles_[pid]->assign_material(material);
+            pids.emplace_back(pid);
           } else
             throw std::runtime_error("Generate particles in mesh failed");
         }
       }
       if (before_generation == this->nparticles())
         throw std::runtime_error("No particles were generated!");
+
+      // Add particles to set
+      status =
+          this->particle_sets_
+              .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
+                  pset_id, pids))
+              .second;
+      if (!status) throw std::runtime_error("Particle set creation failed");
+
       console_->info(
           "Generate points:\n# of cells: {}\nExpected # of points: {}\n"
           "# of points generated: {}",
@@ -1554,8 +1566,10 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       unsigned material_id = generator["material_id"].template get<unsigned>();
       // Cell set id
       int cset_id = generator["cset_id"].template get<int>();
+      // Particle set id
+      unsigned pset_id = generator["pset_id"].template get<unsigned>();
       status = this->generate_material_points(nparticles_dir, particle_type,
-                                              material_id, cset_id);
+                                              material_id, cset_id, pset_id);
     }
 
     // Generate material points at the Gauss location in all cells
