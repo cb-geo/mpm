@@ -125,7 +125,8 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     auto pshear_stress_data = particle->vector_data("shear_stresses");
     for (unsigned i = 0; i < pshear_stress_data.size(); ++i)
-      REQUIRE(pshear_stress_data[i] == Approx(stress[i + 3]).epsilon(Tolerance));
+      REQUIRE(pshear_stress_data[i] ==
+              Approx(stress[i + 3]).epsilon(Tolerance));
   }
 
   //! Test particles velocity constraints
