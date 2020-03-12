@@ -161,6 +161,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Return strain of the particle
   Eigen::Matrix<double, 6, 1> strain() const override { return strain_; }
 
+  //! Return shear strain of the particle
+  Eigen::Matrix<double, 3, 1> shear_strain() const override {
+    return strain_.tail(3);
+  }
+
   //! Return strain rate of the particle
   Eigen::Matrix<double, 6, 1> strain_rate() const override {
     return strain_rate_;
@@ -187,6 +192,11 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return stress of the particle
   Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
+
+  //! Return shear stress of the particle
+  Eigen::Matrix<double, 3, 1> shear_stress() const override {
+    return stress_.tail(3);
+  }
 
   //! Map body force
   //! \param[in] pgravity Gravity of a particle

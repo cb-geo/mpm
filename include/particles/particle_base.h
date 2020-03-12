@@ -167,8 +167,11 @@ class ParticleBase {
   //! Compute strain
   virtual void compute_strain(double dt) noexcept = 0;
 
-  //! Strain
+  //! Return strain
   virtual Eigen::Matrix<double, 6, 1> strain() const = 0;
+
+  //! Return shear train
+  virtual Eigen::Matrix<double, 3, 1> shear_strain() const = 0;
 
   //! Strain rate
   virtual Eigen::Matrix<double, 6, 1> strain_rate() const = 0;
@@ -187,6 +190,9 @@ class ParticleBase {
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
+
+  //! Return shear stress
+  virtual Eigen::Matrix<double, 3, 1> shear_stress() const = 0;
 
   //! Map body force
   virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
