@@ -506,9 +506,11 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
     const std::string& particle_type, const std::vector<VectorDim>& coordinates,
-    unsigned material_id, bool check_duplicates) {
+    unsigned material_id, unsigned pset_id, bool check_duplicates) {
   bool status = true;
   try {
+    // Particle ids
+    tbb::concurrent_vector<mpm::Index> pids;
     // Get material
     auto material = materials_.at(material_id);
     // Check if particle coordinates is empty
@@ -528,11 +530,19 @@ bool mpm::Mesh<Tdim>::create_particles(
       bool insert_status = this->add_particle(particle, check_duplicates);
 
       // If insertion is successful
-      if (insert_status)
+      if (insert_status) {
         map_particles_[pid]->assign_material(material);
-      else
+        pids.emplace_back(pid);
+      } else
         throw std::runtime_error("Addition of particle to mesh failed!");
     }
+    // Add particles to set
+    status =
+        this->particle_sets_
+            .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
+                pset_id, pids))
+            .second;
+    if (!status) throw std::runtime_error("Particle set creation failed");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1551,7 +1561,9 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
 
     // Generate particles from file
     if (generator_type == "file") {
-      status = this->read_particles_file(io, generator);
+      // Particle set id
+      unsigned pset_id = generator["pset_id"].template get<unsigned>();
+      status = this->read_particles_file(io, generator, pset_id);
     }
 
     // Generate material points at the Gauss location in all cells
@@ -1679,7 +1691,8 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
 // Read particles file
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
-                                          const Json& generator) {
+                                          const Json& generator,
+                                          unsigned pset_id) {
   // Particle type
   auto particle_type = generator["particle_type"].template get<std::string>();
 
@@ -1703,7 +1716,7 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
 
   // Create particles from coordinates
   bool status = this->create_particles(particle_type, coords, material_id,
-                                       check_duplicates);
+                                       pset_id, check_duplicates);
 
   if (!status) throw std::runtime_error("Addition of particles to mesh failed");
 

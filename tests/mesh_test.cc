@@ -780,7 +780,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particle type 2D
             const std::string particle_type = "P2D";
             // Create particles from file
-            mesh->create_particles(particle_type, coordinates, mid, false);
+            mesh->create_particles(particle_type, coordinates, mid, 0, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
 
@@ -839,7 +839,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(particle_type, coordinates, mid, false);
+            mesh->create_particles(particle_type, coordinates, mid, 0, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             const unsigned phase = 0;
@@ -2101,7 +2101,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             // Particle type 3D
             const std::string particle_type = "P3D";
             // Create particles from file
-            mesh->create_particles(particle_type, coordinates, mid, false);
+            mesh->create_particles(particle_type, coordinates, mid, 0, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
             // Clear coordinates and try creating a list of particles with an
@@ -2109,7 +2109,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(particle_type, coordinates, mid, false);
+            mesh->create_particles(particle_type, coordinates, mid, 1, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             // Test assign particles cells again should fail

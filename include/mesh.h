@@ -165,11 +165,13 @@ class Mesh {
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
   //! \param[in] material_id ID of the material
+  //! \param[in] pset_id Set ID of the particles
   //! \param[in] check_duplicates Parameter to check duplicates
   //! \retval status Create particle status
   bool create_particles(const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates,
-                        unsigned material_id, bool check_duplicates = true);
+                        unsigned material_id, unsigned pset_id,
+                        bool check_duplicates = true);
 
   //! Add a particle to the mesh
   //! \param[in] particle A shared pointer to particle
@@ -436,8 +438,9 @@ class Mesh {
 
  private:
   // Read particles from file
+  //! \param[in] pset_id Set ID of the particles
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,
-                           const Json& generator);
+                           const Json& generator, unsigned pset_id);
 
   // Locate a particle in mesh cells
   bool locate_particle_cells(
