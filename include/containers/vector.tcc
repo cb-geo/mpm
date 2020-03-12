@@ -1,10 +1,9 @@
 //! Add an element pointer
 template <class T>
-bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr,
-                            bool check_duplicates) {
+bool mpm::Vector<T>::add(const std::shared_ptr<T>& ptr, bool check_duplicates) {
   bool insertion_status = false;
   if (check_duplicates) {
-    // Check if it is found in the container
+    // Check if it is found in the Vector
     auto itr = std::find_if(this->cbegin(), this->cend(),
                             [ptr](std::shared_ptr<T> const& element) {
                               return element->id() == ptr->id();
@@ -23,10 +22,10 @@ bool mpm::Container<T>::add(const std::shared_ptr<T>& ptr,
 
 //! Remove a pointer
 template <class T>
-bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
+bool mpm::Vector<T>::remove(const std::shared_ptr<T>& ptr) {
   bool removal_status = false;
 
-  // Check if it is found in the container
+  // Check if it is found in the Vector
   auto itr = std::find_if(this->cbegin(), this->cend(),
                           [ptr](std::shared_ptr<T> const& element) {
                             return element->id() == ptr->id();
@@ -48,9 +47,9 @@ bool mpm::Container<T>::remove(const std::shared_ptr<T>& ptr) {
   return removal_status;
 }
 
-//! Iterate over elements in the container
+//! Iterate over elements in the Vector
 template <class T>
 template <class Tunaryfn>
-Tunaryfn mpm::Container<T>::for_each(Tunaryfn fn) {
+Tunaryfn mpm::Vector<T>::for_each(Tunaryfn fn) {
   return std::for_each(elements_.begin(), elements_.end(), fn);
 }

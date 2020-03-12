@@ -239,6 +239,17 @@ class ParticleBase {
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
 
+  //! Return the number of neighbour particles
+  virtual unsigned nneighbours() const = 0;
+
+  //! Assign neighbour particles
+  //! \param[in] neighbours set of id of the neighbouring particles
+  //! \retval insertion_status Return the successful addition of a node
+  virtual void assign_neighbours(const std::vector<mpm::Index>& neighbours) = 0;
+
+  //! Return neighbour ids
+  virtual std::vector<mpm::Index> neighbours() const = 0;
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
@@ -252,7 +263,7 @@ class ParticleBase {
   Eigen::Matrix<double, Tdim, 1> xi_;
   //! Cell
   std::shared_ptr<Cell<Tdim>> cell_;
-  //! Container of nodeal pointers
+  //! Vector of nodal pointers
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Material
   std::shared_ptr<Material<Tdim>> material_;
@@ -260,6 +271,8 @@ class ParticleBase {
   unsigned material_id_{std::numeric_limits<unsigned>::max()};
   //! Material state history variables
   mpm::dense_map state_variables_;
+  //! Vector of particle neighbour ids
+  std::vector<mpm::Index> neighbours_;
 };  // ParticleBase class
 }  // namespace mpm
 

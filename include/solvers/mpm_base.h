@@ -18,10 +18,10 @@
 #include "graph.h"
 #endif
 
-#include "container.h"
 #include "friction_constraint.h"
 #include "mpm.h"
 #include "particle.h"
+#include "vector.h"
 #include "velocity_constraint.h"
 
 namespace mpm {

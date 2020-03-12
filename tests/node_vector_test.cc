@@ -5,11 +5,11 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "container.h"
 #include "node.h"
+#include "vector.h"
 
-//! \brief Check node container class for 2D case
-TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
+//! \brief Check node vector class for 2D case
+TEST_CASE("Node vector is checked for 2D case", "[nodevector][2D]") {
   // Dimension
   const unsigned Dim = 2;
   // Degrees of freedom
@@ -31,44 +31,43 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
-  // Node container
-  auto nodecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
+  // Node vector
+  auto nodevector = std::make_shared<mpm::Vector<mpm::NodeBase<Dim>>>();
 
   // Check add node
   SECTION("Check add node functionality") {
     // Add node 1 and check
-    REQUIRE(nodecontainer->add(node1, true) == true);
+    REQUIRE(nodevector->add(node1, true) == true);
     // Add node 2 and check
-    REQUIRE(nodecontainer->add(node2, false) == true);
+    REQUIRE(nodevector->add(node2, false) == true);
     // Try and node 2 again and check
-    REQUIRE(nodecontainer->add(node2) == false);
+    REQUIRE(nodevector->add(node2) == false);
 
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 2);
+    REQUIRE(nodevector->size() == 2);
 
     // Remove node 2 and check
-    REQUIRE(nodecontainer->remove(node2) == true);
+    REQUIRE(nodevector->remove(node2) == true);
     // Try and remove node 2 again and check
-    REQUIRE(nodecontainer->remove(node2) == false);
+    REQUIRE(nodevector->remove(node2) == false);
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 1);
+    REQUIRE(nodevector->size() == 1);
 
-    // Clear node container
-    nodecontainer->clear();
+    // Clear node vector
+    nodevector->clear();
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 0);
+    REQUIRE(nodevector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check node range iterator") {
     // Add node 1
-    nodecontainer->add(node1);
+    nodevector->add(node1);
     // Add node 2
-    nodecontainer->add(node2);
+    nodevector->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -83,15 +82,14 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   // Check for_each
   SECTION("Check node for_each") {
     // Add node 1
-    nodecontainer->add(node1);
+    nodevector->add(node1);
     // Add node 2
-    nodecontainer->add(node2);
+    nodevector->add(node2);
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 2);
+    REQUIRE(nodevector->size() == 2);
 
     // Check coordinates before updating
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -101,14 +99,13 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
     // Set coordinates to unity
     coords << 1., 1.;
 
-    // Iterate through node container to update coordinaates
-    nodecontainer->for_each(  // function structure
+    // Iterate through node vector to update coordinaates
+    nodevector->for_each(  // function structure
         std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -117,8 +114,8 @@ TEST_CASE("Node container is checked for 2D case", "[nodecontainer][2D]") {
   }
 }
 
-//! \brief Check node container class for 3D case
-TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
+//! \brief Check node vector class for 3D case
+TEST_CASE("Node vector is checked for 3D case", "[nodevector][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -140,44 +137,43 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
   std::shared_ptr<mpm::NodeBase<Dim>> node2 =
       std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id2, coords);
 
-  // Node container
-  auto nodecontainer = std::make_shared<mpm::Container<mpm::NodeBase<Dim>>>();
+  // Node vector
+  auto nodevector = std::make_shared<mpm::Vector<mpm::NodeBase<Dim>>>();
 
   // Check add node
   SECTION("Check add node functionality") {
     // Add node 1 and check
-    REQUIRE(nodecontainer->add(node1) == true);
+    REQUIRE(nodevector->add(node1) == true);
     // Add node 2 and check
-    REQUIRE(nodecontainer->add(node2) == true);
+    REQUIRE(nodevector->add(node2) == true);
     // Try and node 2 again and check
-    REQUIRE(nodecontainer->add(node2) == false);
+    REQUIRE(nodevector->add(node2) == false);
 
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 2);
+    REQUIRE(nodevector->size() == 2);
 
     // Remove node 2 and check
-    REQUIRE(nodecontainer->remove(node2) == true);
+    REQUIRE(nodevector->remove(node2) == true);
     // Try and remove node 2 again and check
-    REQUIRE(nodecontainer->remove(node2) == false);
+    REQUIRE(nodevector->remove(node2) == false);
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 1);
+    REQUIRE(nodevector->size() == 1);
 
-    // Clear node container
-    nodecontainer->clear();
+    // Clear node vector
+    nodevector->clear();
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 0);
+    REQUIRE(nodevector->size() == 0);
   }
 
   // Check iterator
   SECTION("Check node range iterator") {
     // Add node 1
-    nodecontainer->add(node1);
+    nodevector->add(node1);
     // Add node 2
-    nodecontainer->add(node2);
+    nodevector->add(node2);
     // Check size of node hanlder
     std::size_t counter = 0;
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -192,14 +188,13 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
   // Check for_each
   SECTION("Check node for_each") {
     // Add node 1
-    nodecontainer->add(node1);
+    nodevector->add(node1);
     // Add node 2
-    nodecontainer->add(node2);
+    nodevector->add(node2);
     // Check size of node hanlder
-    REQUIRE(nodecontainer->size() == 2);
+    REQUIRE(nodevector->size() == 2);
 
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
@@ -209,15 +204,14 @@ TEST_CASE("Node container is checked for 3D case", "[nodecontainer][3D]") {
     // Set coordinates to unity
     coords << 1., 1., 1.;
 
-    // Iterate through node container to update coordinaates
-    nodecontainer->for_each(
+    // Iterate through node vector to update coordinaates
+    nodevector->for_each(
         // function structure
         std::bind(&mpm::NodeBase<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
-    for (auto itr = nodecontainer->cbegin(); itr != nodecontainer->cend();
-         ++itr) {
+    for (auto itr = nodevector->cbegin(); itr != nodevector->cend(); ++itr) {
       auto coords = (*itr)->coordinates();
       // Check if coordinates for each node is zero
       for (unsigned i = 0; i < coords.size(); ++i)
