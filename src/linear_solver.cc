@@ -1,8 +1,8 @@
-#include "matrix/assembler_base.h"
-#include "matrix/assembler_eigen_semi_implicit_navierstokes.h"
+#include "assembler_base.h"
+#include "assembler_eigen_semi_implicit_navierstokes.h"
 
-#include "matrix/cg_eigen.h"
-#include "matrix/solver_base.h"
+#include "cg_eigen.h"
+#include "solver_base.h"
 
 // Assembler collections
 // Asssembler 2D

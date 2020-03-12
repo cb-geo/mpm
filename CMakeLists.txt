@@ -148,6 +148,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
+  ${mpm_SOURCE_DIR}/include/linear_solvers/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
@@ -170,8 +171,8 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
+  ${mpm_SOURCE_DIR}/src/linear_solver.cc
   ${mpm_SOURCE_DIR}/src/material.cc
-  ${mpm_SOURCE_DIR}/src/matrix.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
