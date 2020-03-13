@@ -230,6 +230,11 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
       const std::string& attribute);
 
+  //! Return particles tensor data
+  //! \param[in] attribute Name of the tensor data attribute
+  std::vector<Eigen::Matrix<double, 6, 1>> particles_tensor_data(
+      const std::string& attribute);
+
   //! Return particles scalar data
   //! \param[in] attribute Name of the scalar data attribute
   std::vector<double> particles_statevars_data(const std::string& attribute);

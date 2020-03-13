@@ -951,6 +951,31 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
+//! Return particle tensor data
+template <unsigned Tdim>
+std::vector<Eigen::Matrix<double, 6, 1>> mpm::Mesh<Tdim>::particles_tensor_data(
+    const std::string& attribute) {
+  std::vector<Eigen::Matrix<double, 6, 1>> tensor_data;
+  try {
+    // Iterate over particles
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      Eigen::Matrix<double, 6, 1> data;
+      data.setZero();
+      auto pdata = (*pitr)->tensor_data(attribute);
+      // Fill stresses to the size of dimensions
+      for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
+
+      // Add to a tensor of data
+      tensor_data.emplace_back(data);
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
+                    attribute);
+    tensor_data.clear();
+  }
+  return tensor_data;
+}
+
 //! Return particle vector data
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(

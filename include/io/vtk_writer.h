@@ -33,6 +33,15 @@ class VtkWriter {
   //! Write coordinates
   void write_geometry(const std::string& filename);
 
+  //! Write tensor data
+  //! \param[in] filename Output file to write geometry
+  //! \param[in] data Tensor data
+  //! \param[in] data_field Field name ("Displacement", "Forces")
+  void write_tensor_point_data(
+      const std::string& filename,
+      const std::vector<Eigen::Matrix<double, 6, 1>>& data,
+      const std::string& data_fields);
+
   //! Write vector data
   //! \param[in] filename Output file to write geometry
   //! \param[in] data Vector data
