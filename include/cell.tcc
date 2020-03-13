@@ -841,3 +841,58 @@ bool mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
   }
   return status;
 }
+
+//! Initialise element matrix
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::initialise_element_matrix() {
+  bool status = true;
+  if (this->status()) {
+    try {
+      // // Initialse K_inter matrix (NxN)
+      // K_inter_element_.resize(nnodes_, nnodes_);
+      // K_inter_element_.setZero();
+
+      // // Initialse Laplacian matrix (NxN)
+      // L_element_.resize(nnodes_, nnodes_);
+      // L_element_.setZero();
+
+      // // Initialse Fs matrix (NxTdim)
+      // F_s_element_.resize(nnodes_, nnodes_ * Tdim);
+      // F_s_element_.setZero();
+
+      // // Initialse Fm matrix (NxTdim)
+      // F_m_element_.resize(nnodes_, nnodes_ * Tdim);
+      // F_m_element_.setZero();
+
+      // K_cor_s_element_.resize(nnodes_, nnodes_ * Tdim);
+      // K_cor_s_element_.setZero();
+
+      // K_cor_w_element_.resize(nnodes_, nnodes_ * Tdim);
+      // K_cor_w_element_.setZero();
+
+    } catch (std::exception& exception) {
+      console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+      status = false;
+    }
+  }
+  return status;
+}
+
+//! Return local node indices
+template <unsigned Tdim>
+Eigen::VectorXi mpm::Cell<Tdim>::local_node_indices() {
+  Eigen::VectorXi indices;
+  try {
+    indices.resize(nodes_.size());
+    indices.setZero();
+    unsigned node_idx = 0;
+    for (auto node_itr = nodes_.cbegin(); node_itr != nodes_.cend();
+         ++node_itr) {
+      indices(node_idx) = (*node_itr)->active_id();
+      node_idx++;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return indices;
+}

@@ -223,8 +223,14 @@ class Cell {
   double volume_fraction() { return volume_fraction_; };
 
   //! Map cell volume to the nodes
-  //! \retval phase to map volume
+  //! \param[in] phase to map volume
   bool map_cell_volume_to_nodes(unsigned phase);
+
+  //! Initialize local elemental matrices
+  bool initialise_element_matrix();
+
+  //! Return local node indices
+  Eigen::VectorXi local_node_indices();
 
  private:
   //! Approximately check if a point is in a cell

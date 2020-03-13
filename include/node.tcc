@@ -549,6 +549,46 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
   }
 }
 
+//! Assign pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
+    const unsigned phase, const double pressure,
+    const std::shared_ptr<FunctionBase>& function) {
+  bool status = true;
+  try {
+    // Constrain directions can take values between 0 and Tnphases
+    if (phase < Tnphases) {
+      this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(phase), static_cast<double>(pressure)));
+      // Assign pressure function
+      if (function != nullptr)
+        this->pressure_function_.insert(
+            std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
+                static_cast<unsigned>(phase),
+                static_cast<std::shared_ptr<FunctionBase>>(function)));
+    } else
+      throw std::runtime_error("Pressure constraint phase is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Update pore pressure increment at the node
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
+    const Eigen::VectorXd& pressure_increment, unsigned phase,
+    double current_time) {
+  this->pressure_increment_ = pressure_increment(active_id_);
+
+  // If pressure boundary, increment is zero
+  if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
+      this->free_surface())
+    this->pressure_increment_ = 0;
+}
+
 //! Compute nodal corrected force
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_corrected_force(
@@ -563,18 +603,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_corrected_force(
     status = false;
   }
   return status;
-}
-//! Update pore pressure increment at the node
-template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
-    const Eigen::VectorXd& pressure_increment, unsigned phase,
-    double current_time) {
-  this->pressure_increment_ = pressure_increment(active_id_);
-
-  // If pressure boundary, increment is zero
-  if (pressure_constraints_.find(phase) != pressure_constraints_.end() ||
-      this->free_surface())
-    this->pressure_increment_ = 0;
 }
 
 //! Compute semi-implicit acceleration and velocity

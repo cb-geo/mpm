@@ -10,17 +10,18 @@ mpm::AssemblerEigenSemiImplicitNavierStokes<
 //! Assign global node indices
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<
-    Tdim>::assign_global_node_indices(unsigned active_dof) {
+    Tdim>::assign_global_node_indices(unsigned nactive_node) {
   bool status = true;
-  // try {
-  //   active_dof_ = active_dof;
+  try {
+    // Total number of active node
+    active_dof_ = nactive_node;
 
-  //   global_node_indices_ = mesh_->global_node_indices();
+    global_node_indices_ = mesh_->global_node_indices();
 
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }
 
@@ -246,30 +247,28 @@ template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<
     Tdim>::assign_pressure_constraints(double beta, const double current_time) {
   bool status = false;
-  // try {
-  //   // Phase index
-  //   const unsigned pore_liquid = mpm::ParticlePhase::Liquid;
-  //   // Resize pressure constraints vector
-  //   pressure_constraints_.resize(active_dof_);
-  //   pressure_constraints_.reserve(int(0.5 * active_dof_));
+  try {
+    // Resize pressure constraints vector
+    pressure_constraints_.resize(active_dof_);
+    pressure_constraints_.reserve(int(0.5 * active_dof_));
 
-  //   // Nodes container
-  //   const auto& nodes = mesh_->active_nodes();
-  //   // Iterate over nodes to get pressure constraints
-  //   for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
-  //     // Assign total pressure constraint
-  //     const double pressure_constraint =
-  //         (*node)->pressure_constraint(1, current_time);
-  //     // Check if there is a pressure constraint
-  //     if (pressure_constraint != std::numeric_limits<double>::max()) {
-  //       // Insert the pressure constraints
-  //       pressure_constraints_.insert((*node)->active_id()) =
-  //           pressure_constraint;
-  //     }
-  //   }
-  //   status = true;
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  // }
+    // Nodes container
+    const auto& nodes = mesh_->active_nodes();
+    // Iterate over nodes to get pressure constraints
+    for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
+      // Assign total pressure constraint
+      const double pressure_constraint =
+          (*node)->pressure_constraint(1, current_time);
+      // Check if there is a pressure constraint
+      if (pressure_constraint != std::numeric_limits<double>::max()) {
+        // Insert the pressure constraints
+        pressure_constraints_.insert((*node)->active_id()) =
+            pressure_constraint;
+      }
+    }
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
   return status;
 }

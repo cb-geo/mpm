@@ -1956,3 +1956,22 @@ unsigned mpm::Mesh<Tdim>::assign_active_node_id() {
 
   return active_id;
 }
+
+//! Return global node indices
+template <unsigned Tdim>
+std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
+  // Vector of node_pairs
+  std::vector<Eigen::VectorXi> node_indices;
+  try {
+    // Iterate over cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      if ((*citr)->status()) {
+        node_indices.emplace_back((*citr)->local_node_indices());
+      }
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return node_indices;
+}

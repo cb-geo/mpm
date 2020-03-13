@@ -14,9 +14,9 @@
 
 namespace mpm {
 
-// Matrix assembler base class
-//! \brief Assemble matrixs (stiffness matrix)
-//! \details Get local stiffness matrix and node ids from cell
+// Linear solver assembler base class
+//! \brief Perform matrix assembly procedures
+//! \details Build global matrices considering local element matrices
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class AssemblerBase {
@@ -25,25 +25,34 @@ class AssemblerBase {
     //! Global degrees of freedom
     active_dof_ = 0;
   }
+
   // Virtual destructor
   virtual ~AssemblerBase() = default;
 
   //! Copy constructor
-  // AssemblerBase(const AssemblerBase<Tdim>&) = default;
+  AssemblerBase(const AssemblerBase<Tdim>&) = default;
 
   //! Assignment operator
-  // AssemblerBase& operator=(const AssemblerBase<Tdim>&) = default;
+  AssemblerBase& operator=(const AssemblerBase<Tdim>&) = default;
 
   //! Move constructor
-  // AssemblerBase(AssemblerBase<Tdim>&&) = default;
+  AssemblerBase(AssemblerBase<Tdim>&&) = default;
 
   //! Assign mesh pointer
+  //! \param[in] mesh mesh pointer
   void assign_mesh_pointer(std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
     mesh_ = mesh;
   }
 
   //! Create a pair between nodes and index in Matrix / Vector
   virtual bool assign_global_node_indices(unsigned active_dof) = 0;
+
+  //! Assign pressure constraints
+  virtual bool assign_pressure_constraints(double beta,
+                                           const double current_time) = 0;
+
+  //! Apply pressure constraints to poisson equation
+  virtual void apply_pressure_constraints() = 0;
 
   //! Assemble displacement vector
   // virtual void assemble_disp_vector() = 0;
@@ -80,11 +89,6 @@ class AssemblerBase {
   virtual Eigen::VectorXd& force_laplacian_matrix() = 0;
 
   virtual Eigen::VectorXd& pressure_increment() = 0;
-
-  virtual void apply_pressure_constraints() = 0;
-
-  virtual bool assign_pressure_constraints(double beta,
-                                           const double current_time) = 0;
 
   virtual std::set<mpm::Index> free_surface() = 0;
 
@@ -168,7 +172,7 @@ class AssemblerBase {
   };
 
  protected:
-  //! Active node number
+  //! Number of total active_dof
   unsigned active_dof_;
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;

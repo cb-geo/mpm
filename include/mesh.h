@@ -451,6 +451,9 @@ class Mesh {
   //! Return container of active nodes
   mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
 
+  //! Return global node indices
+  std::vector<Eigen::VectorXi> global_node_indices() const;
+
  private:
   // Read particles from file
   bool read_particles_file(const std::shared_ptr<mpm::IO>& io,

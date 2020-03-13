@@ -164,12 +164,12 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                   std::placeholders::_1, fluid, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    //     // Reinitialise system matrix to perform PPE
-    //     bool matrix_reinitialization_status = this->reinitialise_matrix();
-    //     if (!matrix_reinitialization_status) {
-    //       status = false;
-    //       throw std::runtime_error("Reinitialisation of matrix failed");
-    //     }
+    // Reinitialise system matrix to perform PPE
+    bool matrix_reinitialization_status = this->reinitialise_matrix();
+    if (!matrix_reinitialization_status) {
+      status = false;
+      throw std::runtime_error("Reinitialisation of matrix failed");
+    }
 
     //     // Compute poisson equation
     //     this->compute_poisson_equation();
@@ -241,37 +241,35 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
   bool status = true;
-  // try {
-  //   // Max iteration steps
-  //   unsigned max_iter =
-  //       analysis_["matrix"]["max_iter"].template get<unsigned>();
-  //   // Tolerance
-  //   double tolerance = analysis_["matrix"]["tolerance"].template
-  //   get<double>();
-  //   // Get matrix assembler type
-  //   std::string assembler_type =
-  //       analysis_["matrix"]["assembler_type"].template get<std::string>();
-  //   // Get matrix solver type
-  //   std::string solver_type =
-  //       analysis_["matrix"]["solver_type"].template get<std::string>();
-  //   // TODO: Check if this is usefull, or remove.
-  //   // Get volume tolerance for free surface
-  //   volume_tolerance_ =
-  //       analysis_["matrix"]["volume_tolerance"].template get<double>();
-  //   // Create matrix assembler
-  //   matrix_assembler_ =
-  //       Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
-  //   // Create matrix solver
-  //   matrix_solver_ =
-  //       Factory<mpm::SolverBase<Tdim>, unsigned, double>::instance()->create(
-  //           solver_type, std::move(max_iter), std::move(tolerance));
-  //   // Transfer the mesh pointer
-  //   matrix_assembler_->assign_mesh_pointer(mesh_);
+  try {
+    // Max iteration steps
+    unsigned max_iter =
+        analysis_["matrix"]["max_iter"].template get<unsigned>();
+    // Tolerance
+    double tolerance = analysis_["matrix"]["tolerance"].template get<double>();
+    // Get matrix assembler type
+    std::string assembler_type =
+        analysis_["matrix"]["assembler_type"].template get<std::string>();
+    // Get matrix solver type
+    std::string solver_type =
+        analysis_["matrix"]["solver_type"].template get<std::string>();
+    // Get volume tolerance for free surface
+    volume_tolerance_ =
+        analysis_["matrix"]["volume_tolerance"].template get<double>();
+    // Create matrix assembler
+    matrix_assembler_ =
+        Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
+    // Create matrix solver
+    matrix_solver_ =
+        Factory<mpm::SolverBase<Tdim>, unsigned, double>::instance()->create(
+            solver_type, std::move(max_iter), std::move(tolerance));
+    // Assign mesh pointer to assembler
+    matrix_assembler_->assign_mesh_pointer(mesh_);
 
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }
 
@@ -279,27 +277,25 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
   bool status = true;
-  // try {
-  //   // Assigning matrix id
-  //   const auto active_dof = mesh_->assign_active_node_id();
+  try {
+    // Assigning matrix id
+    const auto nactive_node = mesh_->assign_active_node_id();
 
-  //   // Assign global node indice
-  //   matrix_assembler_->assign_global_node_indices(active_dof);
+    // Assign global node indice
+    matrix_assembler_->assign_global_node_indices(nactive_node);
 
-  //   // Assign pressure cpnstraints
-  //   matrix_assembler_->assign_pressure_constraints(this->beta_,
-  //                                                  this->step_ *
-  //                                                  this->dt_);
+    // Assign pressure cpnstraints
+    matrix_assembler_->assign_pressure_constraints(this->beta_,
+                                                   this->step_ * this->dt_);
 
-  //   // Initialise element matrix
-  //   mesh_->iterate_over_cells(std::bind(
-  //       &mpm::Cell<Tdim>::initialise_element_matrix,
-  //       std::placeholders::_1));
+    // Initialise element matrix
+    mesh_->iterate_over_cells(std::bind(
+        &mpm::Cell<Tdim>::initialise_element_matrix, std::placeholders::_1));
 
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }
 

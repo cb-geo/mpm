@@ -236,18 +236,6 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
-  //! Compute navier-stokes semi-implicit acceleration and velocity
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  bool compute_acceleration_velocity_navierstokes_semi_implicit(
-      unsigned phase, double dt) override;
-
-  //! Update pore pressure increment at the node
-  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
-                                 unsigned phase,
-                                 double current_time = 0.) override;
-
   //! Return real density at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   double density(unsigned phase) override { return density_(phase); }
@@ -271,6 +259,43 @@ class Node : public NodeBase<Tdim> {
 
   //! Return active id
   mpm::Index active_id() override { return active_id_; }
+
+  //! Return nodal pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] current_time current time of the analysis
+  //! \retval pressure constraint at proper time for given phase
+  double pressure_constraint(const unsigned phase,
+                             const double current_time) override {
+    if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
+      const double scalar =
+          (pressure_function_.find(phase) != pressure_function_.end())
+              ? pressure_function_[phase]->value(current_time)
+              : 1.0;
+
+      return scalar * pressure_constraints_[phase];
+    } else
+      return std::numeric_limits<double>::max();
+  }
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      const unsigned phase, const double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Update pore pressure increment at the node
+  void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
+                                 unsigned phase,
+                                 double current_time = 0.) override;
+
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) override;
 
  private:
   //! Mutex
@@ -319,6 +344,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
   //! Mathematical function for force
   std::shared_ptr<FunctionBase> force_function_{nullptr};
+  //! Mathematical function for pressure
+  std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks

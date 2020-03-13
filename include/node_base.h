@@ -226,18 +226,6 @@ class NodeBase {
   //! Set ghost id
   virtual void ghost_id(Index gid) = 0;
 
-  //! Compute navier-stokes semi-implicit acceleration and velocity
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] dt Timestep in analysis
-  //! \retval status Computation status
-  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
-      unsigned phase, double dt) = 0;
-
-  //! Update pore pressure increment at the node
-  virtual void update_pressure_increment(
-      const Eigen::VectorXd& pressure_increment, unsigned phase,
-      double current_time = 0.) = 0;
-
   //! Return real density at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   virtual double density(unsigned phase) = 0;
@@ -260,6 +248,30 @@ class NodeBase {
 
   //! Return active id
   virtual mpm::Index active_id() = 0;
+
+  //! Compute navier-stokes semi-implicit acceleration and velocity
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \retval status Computation status
+  virtual bool compute_acceleration_velocity_navierstokes_semi_implicit(
+      unsigned phase, double dt) = 0;
+
+  //! Return pressure constraint
+  virtual double pressure_constraint(const unsigned phase,
+                                     const double current_time) = 0;
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  virtual bool assign_pressure_constraint(
+      const unsigned phase, double pressure,
+      const std::shared_ptr<FunctionBase>& function) = 0;
+
+  //! Update pore pressure increment at the node
+  virtual void update_pressure_increment(
+      const Eigen::VectorXd& pressure_increment, unsigned phase,
+      double current_time = 0.) = 0;
 
 };  // NodeBase class
 }  // namespace mpm
