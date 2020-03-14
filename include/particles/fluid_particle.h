@@ -61,7 +61,7 @@ class FluidParticle : public mpm::Particle<Tdim> {
   bool map_laplacian_to_cell() override;
 
   //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
-  bool map_poisson_rhs_to_cell() override;
+  bool map_poisson_right_to_cell() override;
 
   //! Map correction matrix element matrix to cell (used to correct velocity)
   bool map_correction_matrix_to_cell() override;

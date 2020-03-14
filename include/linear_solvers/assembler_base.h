@@ -51,8 +51,28 @@ class AssemblerBase {
   virtual bool assign_pressure_constraints(double beta,
                                            const double current_time) = 0;
 
+  //! Assemble laplacian matrix
+  virtual Eigen::SparseMatrix<double>& laplacian_matrix() = 0;
+
+  //! Assemble laplacian matrix
+  virtual bool assemble_laplacian_matrix(double dt) = 0;
+
+  //! Assemble poisson RHS vector
+  virtual Eigen::VectorXd& poisson_rhs_vector() = 0;
+
+  //! Assemble poisson RHS vector
+  virtual bool assemble_poisson_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
+                                      double dt) = 0;
+
+  //! Assign free surface node id
+  virtual void assign_free_surface(
+      const std::set<mpm::Index>& free_surface_id) = 0;
+
   //! Apply pressure constraints to poisson equation
   virtual void apply_pressure_constraints() = 0;
+
+  virtual void assign_pressure_increment(
+      Eigen::VectorXd pressure_increment) = 0;
 
   //! Assemble displacement vector
   // virtual void assemble_disp_vector() = 0;
@@ -72,28 +92,11 @@ class AssemblerBase {
   virtual bool assemble_K_cor_matrix(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
                                      double dt) = 0;
 
-  //! Assemble laplacian matrix
-  virtual bool assemble_laplacian_matrix(double dt) = 0;
-
-  //! Assemble poisson right
-  virtual bool assemble_poisson_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
-                                      double dt) = 0;
-
-  virtual void assign_pressure_increment(
-      Eigen::VectorXd pressure_increment) = 0;
-
   virtual Eigen::SparseMatrix<double>& K_cor_matrix() = 0;
-
-  virtual Eigen::SparseMatrix<double>& laplacian_matrix() = 0;
-
-  virtual Eigen::VectorXd& force_laplacian_matrix() = 0;
 
   virtual Eigen::VectorXd& pressure_increment() = 0;
 
   virtual std::set<mpm::Index> free_surface() = 0;
-
-  virtual void assign_free_surface(
-      const std::set<mpm::Index>& free_surface_id) = 0;
 
   virtual unsigned active_dof() { return active_dof_; };
 

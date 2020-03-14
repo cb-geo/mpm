@@ -291,9 +291,9 @@ class ParticleBase {
   };
 
   //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
-  virtual bool map_poisson_rhs_to_cell() {
+  virtual bool map_poisson_right_to_cell() {
     throw std::runtime_error(
-        "Calling the base class function (map_poisson_rhs_to_cell) in "
+        "Calling the base class function (map_poisson_right_to_cell) in "
         "ParticleBase:: "
         "illegal operation!");
     return 0;

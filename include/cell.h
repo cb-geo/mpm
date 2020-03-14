@@ -232,6 +232,30 @@ class Cell {
   //! Return local node indices
   Eigen::VectorXi local_node_indices();
 
+  //! Return local laplacian
+  const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
+
+  //! Compute local laplacian matrix
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  //! \param[in] multiplier multiplier
+  void compute_local_laplacian(const Eigen::MatrixXd& grad_shapefn,
+                               double pvolume,
+                               double multiplier = 1.0) noexcept;
+
+  //! Return local laplacian RHS matrix
+  const Eigen::MatrixXd& poisson_right_matrix() {
+    return poisson_right_matrix_;
+  };
+
+  //! Compute local poisson RHS matrix (Used in poisson equation)
+  //! \param[in] shapefn shape function
+  //! \param[in] grad_shapefn shape function gradient
+  //! \param[in] pvolume volume weight
+  void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
+                                   const Eigen::MatrixXd& grad_shapefn,
+                                   double pvolume) noexcept;
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -279,6 +303,10 @@ class Cell {
   bool free_surface_{false};
   //! Volume fraction
   double volume_fraction_{0.0};
+  //! Local laplacian matrix
+  Eigen::MatrixXd laplacian_matrix_;
+  //! Local poisson RHS matrix
+  Eigen::MatrixXd poisson_right_matrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class

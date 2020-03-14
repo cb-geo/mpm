@@ -1937,6 +1937,7 @@ std::set<mpm::Index> mpm::Mesh<Tdim>::free_surface_particles() {
   return id_set;
 }
 
+//! FIXME: This function is essentially the same as find_active_nodes()
 //! Create a list of active nodes in mesh and assign active node id
 template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_active_node_id() {

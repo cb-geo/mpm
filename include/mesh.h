@@ -99,6 +99,9 @@ class Mesh {
   //! Return the number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
 
+  //! Return container of nodes
+  mpm::Vector<NodeBase<Tdim>> nodes() { return nodes_; }
+
   //! Iterate over nodes
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>

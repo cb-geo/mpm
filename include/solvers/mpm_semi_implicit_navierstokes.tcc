@@ -171,8 +171,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       throw std::runtime_error("Reinitialisation of matrix failed");
     }
 
-    //     // Compute poisson equation
-    //     this->compute_poisson_equation();
+    // Compute poisson equation
+    this->compute_poisson_equation();
 
     //     // Assign pore pressure to nodes
     //     mesh_->iterate_over_nodes_predicate(
@@ -338,29 +338,38 @@ template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
     std::string solver_type) {
   bool status = true;
-  // try {
-  //   // Map Laplacian elements
-  //   mesh_->iterate_over_particles(std::bind(
-  //       &mpm::ParticleBase<Tdim>::map_L_to_cell, std::placeholders::_1));
-  //   // Assemble laplacian matrix
-  //   matrix_assembler_->assemble_laplacian_matrix(dt_);
-  //   // Map Fs & Fm matrix
-  //   mesh_->iterate_over_particles(std::bind(
-  //       &mpm::ParticleBase<Tdim>::map_F_to_cell, std::placeholders::_1));
-  //   // Assemble force vector
-  //   matrix_assembler_->assemble_poisson_right(mesh_, dt_);
-  //   // Assign free surface
-  //   matrix_assembler_->assign_free_surface(mesh_->free_surface_nodes());
-  //   // Apply constraints
-  //   matrix_assembler_->apply_pressure_constraints();
-  //   // Solve matrix equation (compute pore pressure)
-  //   matrix_assembler_->assign_pressure_increment(matrix_solver_->solve(
-  //       matrix_assembler_->laplacian_matrix(),
-  //       matrix_assembler_->force_laplacian_matrix(), solver_type));
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+  try {
+    // Construct local cell laplacian matrix
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_laplacian_to_cell,
+                  std::placeholders::_1));
+
+    // Assemble global laplacian matrix
+    matrix_assembler_->assemble_laplacian_matrix(dt_);
+
+    // Map Poisson RHS matrix
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_poisson_right_to_cell,
+                  std::placeholders::_1));
+
+    // Assemble poisson RHS vector
+    matrix_assembler_->assemble_poisson_right(mesh_, dt_);
+
+    // Assign free surface to assembler
+    matrix_assembler_->assign_free_surface(mesh_->free_surface_nodes());
+
+    // Apply constraints
+    matrix_assembler_->apply_pressure_constraints();
+
+    // Solve matrix equation
+    matrix_assembler_->assign_pressure_increment(matrix_solver_->solve(
+        matrix_assembler_->laplacian_matrix(),
+        matrix_assembler_->poisson_rhs_vector(), solver_type));
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }
 

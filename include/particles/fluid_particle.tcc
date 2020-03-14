@@ -116,9 +116,8 @@ template <unsigned Tdim>
 bool mpm::FluidParticle<Tdim>::map_laplacian_to_cell() {
   bool status = true;
   try {
-    // TODO: Tobe uncomment once cell is implemented
     // Compute local matrix of Laplacian
-    // cell_->compute_L_element(dn_dx_, volume_, 1.0);
+    cell_->compute_local_laplacian(dn_dx_, volume_);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -128,15 +127,13 @@ bool mpm::FluidParticle<Tdim>::map_laplacian_to_cell() {
 
 //! Map poisson rhs element matrix to cell (used in poisson equation RHS)
 template <unsigned Tdim>
-bool mpm::FluidParticle<Tdim>::map_poisson_rhs_to_cell() {
+bool mpm::FluidParticle<Tdim>::map_poisson_right_to_cell() {
   bool status = true;
   try {
-    // TODO: Tobe uncomment once cell is implemented
-    // Compute local matrix of F
-    // cell_->compute_F_element(
-    //     shapefn_, dn_dx_,
-    //     material_->template property<double>(std::string("density")) *
-    //     volume_);
+    // Compute local poisson rhs matrix
+    cell_->compute_local_poisson_right(
+        shapefn_, dn_dx_,
+        material_->template property<double>(std::string("density")) * volume_);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
