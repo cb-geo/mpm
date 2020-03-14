@@ -498,7 +498,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   std::vector<std::string> vtk_tensor_data = {"stresses", "strains"};
 
   // Write VTK attributes
-  for (const auto& attribute : vtk_vector_data) {
+  for (const auto& attribute : vtk_tensor_data) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
