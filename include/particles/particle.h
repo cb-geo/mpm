@@ -248,10 +248,10 @@ class Particle : public ParticleBase<Tdim> {
                : std::numeric_limits<double>::quiet_NaN();
   }
 
-  //! Return vector data of particles
+  //! Return tensor data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Vector data of particle property
-  Eigen::VectorXd vector_data(const std::string& property) override;
+  //! \retval vecdata Tensor data of particle property
+  Eigen::VectorXd tensor_data(const std::string& property) override;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint

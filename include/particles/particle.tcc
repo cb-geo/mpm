@@ -776,9 +776,9 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
   this->velocity_(dir) = velocity;
 }
 
-//! Return particle vector data
+//! Return particle tensor data
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Particle<Tdim>::vector_data(const std::string& property) {
+Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
   return this->properties_.at(property)();
 }
 
