@@ -25,6 +25,10 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
+    // Locate particles
+    if (analysis_.find("locate_particles") != analysis_.end())
+      locate_particles_ = analysis_["locate_particles"].template get<bool>();
+
     // Stress update method (USF/USL/MUSL)
     try {
       if (analysis_.find("stress_update") != analysis_.end())
