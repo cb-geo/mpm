@@ -4,8 +4,41 @@
 
 #include "vtk_writer.h"
 
-// Check ReadMeshAscii
+// Check Write VTK
 TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
+
+  SECTION("Check scalar/vector/tensor file ") {
+    std::vector<Eigen::Matrix<double, 3, 1>> coordinates;
+    // VTK PolyData writer
+    auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
+
+    SECTION("Write scalar data") {
+      const std::string vtk_file = "scalar_vtk.vtp";
+      const std::string attribute = "mass";
+      std::vector<double> data;
+
+      REQUIRE_NOTHROW(
+          vtk_writer->write_scalar_point_data(vtk_file, data, attribute));
+    }
+
+    SECTION("Write vector data") {
+      const std::string vtk_file = "vector_vtk.vtp";
+      const std::string attribute = "displacements";
+      std::vector<Eigen::Vector3d> data;
+
+      REQUIRE_NOTHROW(
+          vtk_writer->write_vector_point_data(vtk_file, data, attribute));
+    }
+
+    SECTION("Write tensor data") {
+      const std::string vtk_file = "tensor_vtk.vtp";
+      const std::string attribute = "stresses";
+      std::vector<Eigen::Matrix<double, 6, 1>> data;
+
+      REQUIRE_NOTHROW(
+          vtk_writer->write_tensor_point_data(vtk_file, data, attribute));
+    }
+  }
 
   SECTION("Check parallel vtk vector file ") {
     std::vector<Eigen::Matrix<double, 3, 1>> coordinates;
