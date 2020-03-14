@@ -224,11 +224,18 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
                                    unsigned ncomponents) {
 
   // If the number of components is 1, set as scalar or vector / tensor
-  std::string data_type = "Vectors";
-  if (ncomponents == 1)
-    data_type = "Scalars";
-  else if (ncomponents == 9)
-    data_type = "Tensors";
+  std::string data_type;
+  switch (ncomponents) {
+    case 1:
+      data_type = "Scalars";
+      break;
+    case 9:
+      data_type = "Tensors";
+      break;
+    default:
+      data_type = "Vectors";
+      break;
+  }
 
   std::string ppolydata =
       "<?xml version=\"1.0\"?>\n<VTKFile type=\"PPolyData\" version=\"0.1\" "
