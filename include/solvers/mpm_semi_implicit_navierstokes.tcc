@@ -174,22 +174,21 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Compute poisson equation
     this->compute_poisson_equation();
 
-    //     // Assign pore pressure to nodes
-    //     mesh_->iterate_over_nodes_predicate(
-    //         std::bind(&mpm::NodeBase<Tdim>::update_pressure_increment,
-    //                   std::placeholders::_1,
-    //                   matrix_assembler_->pressure_increment(), fluid,
-    //                   this->step_ * this->dt_),
-    //         std::bind(&mpm::NodeBase<Tdim>::status,
-    //         std::placeholders::_1));
+    // Assign pore pressure to nodes
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::update_pressure_increment,
+                  std::placeholders::_1,
+                  matrix_assembler_->pressure_increment(), fluid,
+                  this->step_ * this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    //     // Use nodal pressure to update particle pressure
-    //     mesh_->iterate_over_particles(
-    //         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_pressure,
-    //                   std::placeholders::_1));
+    // Use nodal pressure to update particle pressure
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_pressure,
+                  std::placeholders::_1));
 
-    //     // Compute corrected force
-    //     this->compute_corrected_force();
+    // // Compute corrected force
+    // this->compute_corrected_force();
 
     //     // Compute corrected acceleration and velocity
     //     mesh_->iterate_over_nodes_predicate(

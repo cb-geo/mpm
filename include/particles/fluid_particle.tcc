@@ -162,10 +162,9 @@ bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
 
   try {
     double pressure_increment = 0;
-    // TODO: Tobe uncomment once node is implemented
-    // for (unsigned i = 0; i < nodes_.size(); ++i) {
-    //   pressure_increment += shapefn_(i) * nodes_[i]->pressure_increment();
-    // }
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      pressure_increment += shapefn_(i) * nodes_[i]->pressure_increment();
+    }
     // Get interpolated nodal pore pressure
     state_variables_.at("pressure") =
         state_variables_.at("pressure") * projection_param_ +

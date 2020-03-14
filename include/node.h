@@ -285,10 +285,13 @@ class Node : public NodeBase<Tdim> {
       const unsigned phase, const double pressure,
       const std::shared_ptr<FunctionBase>& function) override;
 
-  //! Update pore pressure increment at the node
+  //! Update pressure increment at the node
   void update_pressure_increment(const Eigen::VectorXd& pressure_increment,
                                  unsigned phase,
                                  double current_time = 0.) override;
+
+  //! Return nodal pressure increment
+  double pressure_increment() const override { return pressure_increment_; }
 
   //! Compute navier-stokes semi-implicit acceleration and velocity
   //! \param[in] phase Index corresponding to the phase

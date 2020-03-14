@@ -273,6 +273,9 @@ class NodeBase {
       const Eigen::VectorXd& pressure_increment, unsigned phase,
       double current_time = 0.) = 0;
 
+  //! Return nodal pressure increment
+  virtual double pressure_increment() const = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
