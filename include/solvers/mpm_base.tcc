@@ -474,7 +474,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-  //! VTK state variables
+  //! VTK vector variables
   std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
 
   // Write VTK attributes
@@ -498,7 +498,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 #endif
   }
 
-  //! VTK state variables
+  //! VTK tensor variables
   std::vector<std::string> vtk_tensor_data = {"stresses", "strains"};
 
   // Write VTK attributes
@@ -517,7 +517,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
                                .string();
 
       vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
-                                     max_steps);
+                                     max_steps, 9);
     }
 #endif
   }
