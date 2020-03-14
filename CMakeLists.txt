@@ -174,6 +174,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/linear_solver.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
+  ${mpm_SOURCE_DIR}/src/nodal_properties.cc
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
@@ -225,6 +226,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/node_test.cc
     ${mpm_SOURCE_DIR}/tests/node_vector_test.cc

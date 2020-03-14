@@ -192,6 +192,8 @@ class MPMBase : public MPM {
   mpm::Damping damping_type_{mpm::Damping::None};
   //! Damping factor
   double damping_factor_{0.};
+  //! Locate particles
+  bool locate_particles_{true};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
