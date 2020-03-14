@@ -13,7 +13,7 @@ TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
     auto vtk_writer = std::make_unique<VtkWriter>(coordinates);
 
     const std::string parallel_vtk_file = "parallel_vector_vtk.pvtp";
-    const std::string attribute = "stress";
+    const std::string attribute = "displacements";
     int mpi_size = 2;
     unsigned step = 1000;
     unsigned max_steps = 10000;
@@ -37,8 +37,8 @@ TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
         "NumberOfComponents=\"3\"/>\n\t</PPoints>\n";
 
     for (unsigned i = 0; i < mpi_size; ++i)
-      ppolydata += "\n\t<Piece Source=\"stress-" + std::to_string(i) + "_" +
-                   std::to_string(mpi_size) + "-01000.vtp\"/>";
+      ppolydata += "\n\t<Piece Source=\"displacements-" + std::to_string(i) +
+                   "_" + std::to_string(mpi_size) + "-01000.vtp\"/>";
 
     ppolydata += "\n</PPolyData>\n\n</VTKFile>";
 
