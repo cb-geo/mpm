@@ -13,7 +13,9 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
+#include <vtkTensorGlyph.h>
 #include <vtkVersion.h>
+#include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkZLibDataCompressor.h>
 

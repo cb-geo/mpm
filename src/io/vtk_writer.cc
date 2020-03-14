@@ -55,18 +55,19 @@ void VtkWriter::write_tensor_point_data(
 
   // Create an array to hold distance information
   auto tensordata = vtkSmartPointer<vtkDoubleArray>::New();
-  tensordata->SetNumberOfComponents(6);
+  tensordata->SetNumberOfComponents(9);
   tensordata->SetNumberOfTuples(pdata->GetNumberOfPoints());
   tensordata->SetName(data_field.c_str());
 
   // Evaluate the signed distance function at all of the grid points
   for (vtkIdType id = 0; id < pdata->GetNumberOfPoints(); ++id) {
     const double* vdata = data.at(id).data();
-    tensordata->SetTuple(id, vdata);
+    tensordata->InsertTuple9(id, vdata[0], vdata[3], vdata[4], vdata[3],
+                             vdata[1], vdata[5], vdata[4], vdata[5], vdata[2]);
   }
 
   // Add the SignedDistances to the grid
-  pdata->GetPointData()->SetVectors(tensordata);
+  pdata->GetPointData()->SetTensors(tensordata);
 
   // Write file
   auto writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();

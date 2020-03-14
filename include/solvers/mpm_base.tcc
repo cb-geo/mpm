@@ -80,29 +80,6 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     abort();
   }
 
-  // Default VTK attributes
-  std::vector<std::string> vtk = {"velocities", "stresses", "strains",
-                                  "displacements"};
-  try {
-    if (post_process_.at("vtk").is_array() &&
-        post_process_.at("vtk").size() > 0) {
-      for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
-        std::string attribute =
-            post_process_["vtk"][i].template get<std::string>();
-        if (std::find(vtk.begin(), vtk.end(), attribute) != vtk.end())
-          vtk_attributes_.emplace_back(attribute);
-        else
-          throw std::runtime_error("Specificed VTK argument is incorrect");
-      }
-    } else {
-      throw std::runtime_error(
-          "Specificed VTK arguments are incorrect, using defaults");
-    }
-  } catch (std::exception& exception) {
-    vtk_attributes_ = vtk;
-    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
-  }
-
   // VTK state variables
   try {
     if (post_process_.at("vtk_statevars").is_array() &&
@@ -493,13 +470,40 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
+  //! VTK state variables
+  std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
+
   // Write VTK attributes
-  for (const auto& attribute : vtk_attributes_) {
+  for (const auto& attribute : vtk_vector_data) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
         file, mesh_->particles_vector_data(attribute), attribute);
+
+    // Write a parallel MPI VTK container file
+#ifdef USE_MPI
+    if (mpi_rank == 0 && mpi_size > 1) {
+      auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                            max_steps, write_mpi_rank)
+                               .string();
+
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+    }
+#endif
+  }
+
+  //! VTK state variables
+  std::vector<std::string> vtk_tensor_data = {"stresses", "strains"};
+
+  // Write VTK attributes
+  for (const auto& attribute : vtk_vector_data) {
+    // Write vector
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_tensor_point_data(
+        file, mesh_->particles_tensor_data(attribute), attribute);
 
     // Write a parallel MPI VTK container file
 #ifdef USE_MPI

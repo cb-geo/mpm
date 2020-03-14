@@ -182,8 +182,6 @@ class MPMBase : public MPM {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
   std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
-  //! VTK attributes
-  std::vector<std::string> vtk_attributes_;
   //! VTK state variables
   std::vector<std::string> vtk_statevars_;
   //! Set node concentrated force

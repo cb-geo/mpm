@@ -961,7 +961,7 @@ std::vector<Eigen::Matrix<double, 6, 1>> mpm::Mesh<Tdim>::particles_tensor_data(
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       Eigen::Matrix<double, 6, 1> data;
       data.setZero();
-      auto pdata = (*pitr)->tensor_data(attribute);
+      auto pdata = (*pitr)->vector_data(attribute);
       // Fill stresses to the size of dimensions
       for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
 
