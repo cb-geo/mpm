@@ -172,7 +172,7 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
   return status;
 }
 
-//! Assemble K_cor_matrix
+//! Assemble corrector right matrix
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<
     Tdim>::assemble_corrector_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,

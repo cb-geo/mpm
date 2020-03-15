@@ -243,8 +243,9 @@ class Node : public NodeBase<Tdim> {
   //! Compute nodal density
   void compute_density() override;
 
-  //! Compute nodal corrector force term
-  bool compute_nodal_corrected_force(VectorDim& force_cor_part_water) override;
+  //! Compute nodal correction force term
+  bool compute_nodal_correction_force(
+      const VectorDim& correction_force) override;
 
   //! Assign free surface
   void assign_free_surface(bool free_surface) override {
@@ -360,7 +361,7 @@ class Node : public NodeBase<Tdim> {
   //! p^(t+1) - beta * p^(t)
   double pressure_increment_;
   //! Correction force
-  Eigen::Matrix<double, Tdim, Tnphases> force_cor_;
+  Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
   //! Free surface
   bool free_surface_{false};
 };  // Node class

@@ -33,7 +33,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   acceleration_.setZero();
   free_surface_ = false;
   pressure_increment_ = 0.;
-  force_cor_.setZero();
+  correction_force_.setZero();
   status_ = false;
   material_ids_.clear();
 }
@@ -591,13 +591,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
 
 //! Compute nodal corrected force
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_corrected_force(
-    VectorDim& force_cor_part_water) {
+bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
+    const VectorDim& correction_force) {
   bool status = true;
 
   try {
     // Compute corrected force for water phase
-    force_cor_.col(0) = force_cor_part_water;
+    correction_force_.col(0) = correction_force;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -616,7 +616,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
 
     // Semi-implicit solver
     Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
-        force_cor_.col(phase) / mass_(phase);
+        correction_force_.col(phase) / mass_(phase);
 
     // Acceleration
     this->acceleration_.col(phase) += acceleration_corrected;

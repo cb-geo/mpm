@@ -10,6 +10,7 @@
 
 // Eigen
 #include "Eigen/Dense"
+#include <Eigen/Sparse>
 // MPI
 #ifdef USE_MPI
 #include "mpi.h"
@@ -460,6 +461,10 @@ class Mesh {
 
   //! Return global node indices
   std::vector<Eigen::VectorXi> global_node_indices() const;
+
+  bool compute_nodal_correction_force(
+      Eigen::SparseMatrix<double>& correction_matrix,
+      Eigen::VectorXd& pressure_increment, double dt);
 
  private:
   // Read particles from file

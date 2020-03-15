@@ -233,10 +233,6 @@ class NodeBase {
   //! Compute nodal density
   virtual void compute_density() = 0;
 
-  //! Compute nodal corrector force term
-  virtual bool compute_nodal_corrected_force(
-      VectorDim& force_cor_part_water) = 0;
-
   //! Assign free surface
   virtual void assign_free_surface(bool free_surface) = 0;
 
@@ -275,6 +271,10 @@ class NodeBase {
 
   //! Return nodal pressure increment
   virtual double pressure_increment() const = 0;
+
+  //! Compute nodal correction force term
+  virtual bool compute_nodal_correction_force(
+      const VectorDim& correction_force) = 0;
 
 };  // NodeBase class
 }  // namespace mpm

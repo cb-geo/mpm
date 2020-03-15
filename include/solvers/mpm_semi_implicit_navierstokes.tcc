@@ -384,10 +384,10 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
     // Assemble correction matrix
     matrix_assembler_->assemble_corrector_right(mesh_, dt_);
 
-    // // Assign corrected force
-    // mesh_->compute_nodal_corrected_force_navierstokes(
-    //     matrix_assembler_->K_cor_matrix(),
-    //     matrix_assembler_->pressure_increment(), dt_);
+    // Assign corrected force
+    mesh_->compute_nodal_correction_force(
+        matrix_assembler_->correction_matrix(),
+        matrix_assembler_->pressure_increment(), dt_);
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
