@@ -1833,7 +1833,7 @@ bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
     //! Active node size
     const auto nactive_node = active_nodes_.size();
 
-    // Part of nodal corrected force of one direction
+    // Part of nodal correction force of one direction
     Eigen::MatrixXd correction_force;
     correction_force.resize(nactive_node, Tdim);
 

@@ -33,17 +33,13 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::VectorXd& poisson_rhs_vector() override { return poisson_rhs_vector_; }
 
   //! Assemble poisson RHS vector
-  bool assemble_poisson_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
-                              double dt) override;
+  bool assemble_poisson_right(double dt) override;
 
   //! Assign free surface node id
   void assign_free_surface(
       const std::set<mpm::Index>& free_surface_id) override {
     free_surface_ = free_surface_id;
   }
-
-  //! Return free surface node id
-  std::set<mpm::Index> free_surface() override { return free_surface_; }
 
   //! Assign pressure constraints
   bool assign_pressure_constraints(double beta,
@@ -66,8 +62,7 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   }
 
   //! Assemble corrector RHS
-  bool assemble_corrector_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
-                                double dt) override;
+  bool assemble_corrector_right(double dt) override;
 
  protected:
   //! Logger
@@ -90,15 +85,8 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::VectorXd pressure_increment_;
   //! correction_matrix
   Eigen::SparseMatrix<double> correction_matrix_;
-
-  //! Laplacian coefficient
-  Eigen::VectorXd poisson_right_vector_;
-  //! Solver base
-  std::shared_ptr<mpm::SolverBase<Tdim>> solver_;
   //! Global node indices
   std::vector<Eigen::VectorXi> global_node_indices_;
-  //! Velocity constraints
-  Eigen::SparseMatrix<double> velocity_constraints_;
 };
 }  // namespace mpm
 

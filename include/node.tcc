@@ -589,14 +589,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
     this->pressure_increment_ = 0;
 }
 
-//! Compute nodal corrected force
+//! Compute nodal correction force
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::compute_nodal_correction_force(
     const VectorDim& correction_force) {
   bool status = true;
 
   try {
-    // Compute corrected force for water phase
+    // Compute correction force for water phase
     correction_force_.col(0) = correction_force;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

@@ -86,7 +86,7 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
 
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
-    std::shared_ptr<mpm::Mesh<Tdim>>& mesh_, double dt) {
+    double dt) {
   bool status = true;
   try {
     // Initialise Poisson RHS matrix
@@ -175,8 +175,7 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
 //! Assemble corrector right matrix
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<
-    Tdim>::assemble_corrector_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
-                                    double dt) {
+    Tdim>::assemble_corrector_right(double dt) {
   bool status = true;
   try {
     // Resize correction matrix
@@ -286,6 +285,7 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<
       // Assign total pressure constraint
       const double pressure_constraint =
           (*node)->pressure_constraint(1, current_time);
+
       // Check if there is a pressure constraint
       if (pressure_constraint != std::numeric_limits<double>::max()) {
         // Insert the pressure constraints

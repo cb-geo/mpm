@@ -187,7 +187,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_pressure,
                   std::placeholders::_1));
 
-    // Compute corrected force
+    // Compute correction force
     this->compute_correction_force();
 
     // Compute corrected acceleration and velocity
@@ -297,8 +297,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
   return status;
 }
 
-// FIXME: This is a copy of pressure_smoothing in explicit two-phase
-//! MPM Explicit two-phase pressure smoothing
+// FIXME: This is a copy of pressure_smoothing in MPM explicit
+//! Pressure smoothing
 template <unsigned Tdim>
 void mpm::MPMSemiImplicitNavierStokes<Tdim>::pressure_smoothing(
     unsigned phase) {
@@ -349,7 +349,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
                   std::placeholders::_1));
 
     // Assemble poisson RHS vector
-    matrix_assembler_->assemble_poisson_right(mesh_, dt_);
+    matrix_assembler_->assemble_poisson_right(dt_);
 
     // Assign free surface to assembler
     matrix_assembler_->assign_free_surface(mesh_->free_surface_nodes());
@@ -369,7 +369,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
   return status;
 }
 
-//! Compute corrected force
+//! Compute correction force
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
   bool status = true;
@@ -379,9 +379,9 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
                   std::placeholders::_1));
 
     // Assemble correction matrix
-    matrix_assembler_->assemble_corrector_right(mesh_, dt_);
+    matrix_assembler_->assemble_corrector_right(dt_);
 
-    // Assign corrected force
+    // Assign correction force
     mesh_->compute_nodal_correction_force(
         matrix_assembler_->correction_matrix(),
         matrix_assembler_->pressure_increment(), dt_);
