@@ -206,8 +206,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Apply particle velocity constraints
     mesh_->apply_particle_velocity_constraints();
 
-    //     // Pressure smoothing
-    //     if (pressure_smoothing_) this->pressure_smoothing(fluid);
+    // Pressure smoothing
+    if (pressure_smoothing_) this->pressure_smoothing(fluid);
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
@@ -303,32 +303,30 @@ template <unsigned Tdim>
 void mpm::MPMSemiImplicitNavierStokes<Tdim>::pressure_smoothing(
     unsigned phase) {
 
-  //   // Map pressures to nodes
-  //   mesh_->iterate_over_particles(
-  //       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
-  //                 std::placeholders::_1, this->step_ * this->dt_));
+  // Map pressures to nodes
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
 
-  // #ifdef USE_MPI
-  //   int mpi_size = 1;
+#ifdef USE_MPI
+  int mpi_size = 1;
 
-  //   // Get number of MPI ranks
-  //   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  //   // Run if there is more than a single MPI task
-  //   if (mpi_size > 1) {
-  //     // MPI all reduce nodal pressure
-  //     mesh_->template nodal_halo_exchange<double, 1>(
-  //         std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1,
-  //         phase), std::bind(&mpm::NodeBase<Tdim>::assign_pressure,
-  //         std::placeholders::_1,
-  //                   phase, std::placeholders::_2));
-  //   }
-  // #endif
+  // Run if there is more than a single MPI task
+  if (mpi_size > 1) {
+    // MPI all reduce nodal pressure
+    mesh_->template nodal_halo_exchange<double, 1>(
+        std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
+        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
+                  phase, std::placeholders::_2));
+  }
+#endif
 
-  //   // Map Pressure back to particles
-  //   mesh_->iterate_over_particles(
-  //       std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-  //                 std::placeholders::_1));
+  // Map Pressure back to particles
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                std::placeholders::_1));
 }
 
 // Compute poisson equation
