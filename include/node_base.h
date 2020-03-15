@@ -268,7 +268,7 @@ class NodeBase {
       const unsigned phase, double pressure,
       const std::shared_ptr<FunctionBase>& function) = 0;
 
-  //! Update pore pressure increment at the node
+  //! Update pressure increment at the node
   virtual void update_pressure_increment(
       const Eigen::VectorXd& pressure_increment, unsigned phase,
       double current_time = 0.) = 0;

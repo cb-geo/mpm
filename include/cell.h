@@ -235,7 +235,7 @@ class Cell {
   //! Return local laplacian
   const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
 
-  //! Compute local laplacian matrix
+  //! Compute local laplacian matrix (Used in poisson equation)
   //! \param[in] grad_shapefn shape function gradient
   //! \param[in] pvolume volume weight
   //! \param[in] multiplier multiplier
@@ -255,6 +255,14 @@ class Cell {
   void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
                                    const Eigen::MatrixXd& grad_shapefn,
                                    double pvolume) noexcept;
+
+  //! Return local correction matrix
+  const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };
+
+  //! Compute local correction matrix (Used to correct velocity)
+  void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
+                                       const Eigen::MatrixXd& grad_shapefn,
+                                       double pvolume) noexcept;
 
  private:
   //! Approximately check if a point is in a cell
@@ -307,6 +315,8 @@ class Cell {
   Eigen::MatrixXd laplacian_matrix_;
   //! Local poisson RHS matrix
   Eigen::MatrixXd poisson_right_matrix_;
+  //! Local correction RHS matrix
+  Eigen::MatrixXd correction_matrix_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class

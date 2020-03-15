@@ -47,7 +47,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   bool compute_poisson_equation(std::string solver_type = "cg");
 
   //! Compute corrected velocity
-  bool compute_corrected_force();
+  bool compute_correction_force();
 
   //! Class private variables
  private:

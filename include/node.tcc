@@ -576,7 +576,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
   return status;
 }
 
-//! Update pore pressure increment at the node
+//! Update pressure increment at the node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure_increment(
     const Eigen::VectorXd& pressure_increment, unsigned phase,

@@ -174,7 +174,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Compute poisson equation
     this->compute_poisson_equation();
 
-    // Assign pore pressure to nodes
+    // Assign pressure to nodes
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::update_pressure_increment,
                   std::placeholders::_1,
@@ -187,8 +187,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_pressure,
                   std::placeholders::_1));
 
-    // // Compute corrected force
-    // this->compute_corrected_force();
+    // Compute corrected force
+    this->compute_correction_force();
 
     //     // Compute corrected acceleration and velocity
     //     mesh_->iterate_over_nodes_predicate(
@@ -283,7 +283,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
     // Assign global node indice
     matrix_assembler_->assign_global_node_indices(nactive_node);
 
-    // Assign pressure cpnstraints
+    // Assign pressure constraints
     matrix_assembler_->assign_pressure_constraints(this->beta_,
                                                    this->step_ * this->dt_);
 
@@ -374,22 +374,24 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
 
 //! Compute corrected force
 template <unsigned Tdim>
-bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_corrected_force() {
+bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
   bool status = true;
-  // try {
-  //   mesh_->iterate_over_particles(std::bind(
-  //       &mpm::ParticleBase<Tdim>::map_K_cor_to_cell,
-  //       std::placeholders::_1));
-  //   // Assemble corrected force matrix
-  //   matrix_assembler_->assemble_K_cor_matrix(mesh_, dt_);
-  //   // Assign corrected force
-  //   mesh_->compute_nodal_corrected_force_navierstokes(
-  //       matrix_assembler_->K_cor_matrix(),
-  //       matrix_assembler_->pressure_increment(), dt_);
+  try {
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::map_correction_matrix_to_cell,
+                  std::placeholders::_1));
 
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+    // Assemble correction matrix
+    matrix_assembler_->assemble_corrector_right(mesh_, dt_);
+
+    // // Assign corrected force
+    // mesh_->compute_nodal_corrected_force_navierstokes(
+    //     matrix_assembler_->K_cor_matrix(),
+    //     matrix_assembler_->pressure_increment(), dt_);
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }

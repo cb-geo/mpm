@@ -45,25 +45,29 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Return free surface node id
   std::set<mpm::Index> free_surface() override { return free_surface_; }
 
+  //! Assign pressure constraints
+  bool assign_pressure_constraints(double beta,
+                                   const double current_time) override;
+
   //! Apply pressure constraints to poisson equation
   void apply_pressure_constraints();
+
+  //! Return pressure increment
+  Eigen::VectorXd& pressure_increment() override { return pressure_increment_; }
 
   //! Assign pressure increment
   void assign_pressure_increment(Eigen::VectorXd pressure_increment) override {
     pressure_increment_ = pressure_increment;
   }
 
-  //! Return pressure increment
-  Eigen::VectorXd& pressure_increment() override { return pressure_increment_; }
+  //! Return correction matrix
+  Eigen::SparseMatrix<double>& correction_matrix() override {
+    return correction_matrix_;
+  }
 
-  Eigen::SparseMatrix<double>& K_cor_matrix() override { return K_cor_matrix_; }
-
-  bool assign_pressure_constraints(double beta,
-                                   const double current_time) override;
-
-  //! Assemble K_cor matrix (used in correcting nodal velocity)
-  bool assemble_K_cor_matrix(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
-                             double dt) override;
+  //! Assemble corrector RHS
+  bool assemble_corrector_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
+                                double dt) override;
 
  protected:
   //! Logger
@@ -84,9 +88,9 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::SparseVector<double> pressure_constraints_;
   //! \delta p^(t+1) = p^(t+1) - beta * p^(t)
   Eigen::VectorXd pressure_increment_;
+  //! correction_matrix
+  Eigen::SparseMatrix<double> correction_matrix_;
 
-  //! K_cor_matrix
-  Eigen::SparseMatrix<double> K_cor_matrix_;
   //! Laplacian coefficient
   Eigen::VectorXd poisson_right_vector_;
   //! Solver base

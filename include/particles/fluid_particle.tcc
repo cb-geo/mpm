@@ -141,21 +141,7 @@ bool mpm::FluidParticle<Tdim>::map_poisson_right_to_cell() {
   return status;
 }
 
-//! Map correction matrix element matrix to cell (used to correct velocity)
-template <unsigned Tdim>
-bool mpm::FluidParticle<Tdim>::map_correction_matrix_to_cell() {
-  bool status = true;
-  try {
-    // TODO: Tobe uncomment once cell is implemented
-    // cell_->compute_K_cor_element(shapefn_, dn_dx_, volume_);
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return status;
-}
-
-// Compute updated pore pressure of the particle based on nodal pressure
+// Compute updated pressure of the particle based on nodal pressure
 template <unsigned Tdim>
 bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
   bool status = true;
@@ -165,7 +151,8 @@ bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
     for (unsigned i = 0; i < nodes_.size(); ++i) {
       pressure_increment += shapefn_(i) * nodes_[i]->pressure_increment();
     }
-    // Get interpolated nodal pore pressure
+
+    // Get interpolated nodal pressure
     state_variables_.at("pressure") =
         state_variables_.at("pressure") * projection_param_ +
         pressure_increment;
@@ -174,6 +161,19 @@ bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
+  }
+  return status;
+}
+
+//! Map correction matrix element matrix to cell (used to correct velocity)
+template <unsigned Tdim>
+bool mpm::FluidParticle<Tdim>::map_correction_matrix_to_cell() {
+  bool status = true;
+  try {
+    cell_->compute_local_correction_matrix(shapefn_, dn_dx_, volume_);
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }

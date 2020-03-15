@@ -875,15 +875,9 @@ bool mpm::Cell<Tdim>::initialise_element_matrix() {
       poisson_right_matrix_.resize(nnodes_, nnodes_ * Tdim);
       poisson_right_matrix_.setZero();
 
-      // // Initialse Fm matrix (NxTdim)
-      // F_m_element_.resize(nnodes_, nnodes_ * Tdim);
-      // F_m_element_.setZero();
-
-      // K_cor_s_element_.resize(nnodes_, nnodes_ * Tdim);
-      // K_cor_s_element_.setZero();
-
-      // K_cor_w_element_.resize(nnodes_, nnodes_ * Tdim);
-      // K_cor_w_element_.setZero();
+      // Initialse correction RHS matrix (NxTdim)
+      correction_matrix_.resize(nnodes_, nnodes_ * Tdim);
+      correction_matrix_.setZero();
 
     } catch (std::exception& exception) {
       console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -898,7 +892,7 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_local_laplacian(
     const Eigen::MatrixXd& grad_shapefn, double pvolume,
     double multiplier) noexcept {
-  // Lock the storage
+
   std::lock_guard<std::mutex> guard(cell_mutex_);
   laplacian_matrix_ +=
       grad_shapefn * grad_shapefn.transpose() * multiplier * pvolume;
@@ -910,13 +904,24 @@ template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_local_poisson_right(
     const Eigen::VectorXd& shapefn, const Eigen::MatrixXd& grad_shapefn,
     double pvolume) noexcept {
-  // Lock the storage
-  std::lock_guard<std::mutex> guard(cell_mutex_);
 
-  // Compute components at nodes
+  std::lock_guard<std::mutex> guard(cell_mutex_);
   for (unsigned i = 0; i < Tdim; i++) {
-    // F_s_element
     poisson_right_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
+        shapefn * grad_shapefn.col(i).transpose() * pvolume;
+  }
+}
+
+//! Compute local correction matrix
+//! Used to compute corrector of nodal velocity for Navier Stokes solver
+template <unsigned Tdim>
+void mpm::Cell<Tdim>::compute_local_correction_matrix(
+    const Eigen::VectorXd& shapefn, const Eigen::MatrixXd& grad_shapefn,
+    double pvolume) noexcept {
+
+  std::lock_guard<std::mutex> guard(cell_mutex_);
+  for (unsigned i = 0; i < Tdim; i++) {
+    correction_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
         shapefn * grad_shapefn.col(i).transpose() * pvolume;
   }
 }

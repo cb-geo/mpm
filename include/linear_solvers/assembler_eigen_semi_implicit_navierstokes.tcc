@@ -174,42 +174,58 @@ bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_poisson_right(
 
 //! Assemble K_cor_matrix
 template <unsigned Tdim>
-bool mpm::AssemblerEigenSemiImplicitNavierStokes<Tdim>::assemble_K_cor_matrix(
-    std::shared_ptr<mpm::Mesh<Tdim>>& mesh_, double dt) {
+bool mpm::AssemblerEigenSemiImplicitNavierStokes<
+    Tdim>::assemble_corrector_right(std::shared_ptr<mpm::Mesh<Tdim>>& mesh_,
+                                    double dt) {
   bool status = true;
-  // try {
-  //   K_cor_matrix_.resize(active_dof_, active_dof_ * Tdim);
-  //   K_cor_matrix_.setZero();
+  try {
+    // Resize correction matrix
+    correction_matrix_.resize(active_dof_, active_dof_ * Tdim);
+    correction_matrix_.setZero();
 
-  //   K_cor_matrix_.reserve(Eigen::VectorXi::Constant(active_dof_ * Tdim, 20));
+    // Reserve storage for sparse matrix
+    switch (Tdim) {
+      // For 2d: 10 entries /column
+      case (2): {
+        correction_matrix_.reserve(
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 10));
+        break;
+      }
+      // For 3d: 30 entries /column
+      case (3): {
+        correction_matrix_.reserve(
+            Eigen::VectorXi::Constant(active_dof_ * Tdim, 30));
+        break;
+      }
+    }
 
-  //   unsigned nnodes_per_cell = global_node_indices_.at(0).size();
+    // Cell pointer
+    unsigned nnodes_per_cell = global_node_indices_.at(0).size();
+    const auto& cells = mesh_->cells();
 
-  //   const auto& cell = mesh_->cells();
-
-  //   unsigned cid = 0;
-  //   for (auto cell_itr = cell.cbegin(); cell_itr != cell.cend(); ++cell_itr)
-  //   {
-  //     if ((*cell_itr)->status()) {
-  //       auto k_cor_element_water = (*cell_itr)->K_cor_w_element();
-  //       for (unsigned k = 0; k < Tdim; k++) {
-  //         for (unsigned i = 0; i < nnodes_per_cell; i++) {
-  //           for (unsigned j = 0; j < nnodes_per_cell; j++) {
-  //             // Fluid
-  //             K_cor_matrix_.coeffRef(
-  //                 global_node_indices_.at(cid)(i),
-  //                 k * active_dof_ + global_node_indices_.at(cid)(j)) +=
-  //                 k_cor_element_water(i, j + k * nnodes_per_cell);
-  //           }
-  //         }
-  //       }
-  //       cid++;
-  //     }
-  //   }
-  // } catch (std::exception& exception) {
-  //   console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  //   status = false;
-  // }
+    // Iterate over cells
+    unsigned cid = 0;
+    for (auto cell_itr = cells.cbegin(); cell_itr != cells.cend(); ++cell_itr) {
+      if ((*cell_itr)->status()) {
+        auto cell_correction_matrix = (*cell_itr)->correction_matrix();
+        for (unsigned k = 0; k < Tdim; k++) {
+          for (unsigned i = 0; i < nnodes_per_cell; i++) {
+            for (unsigned j = 0; j < nnodes_per_cell; j++) {
+              // Fluid
+              correction_matrix_.coeffRef(
+                  global_node_indices_.at(cid)(i),
+                  k * active_dof_ + global_node_indices_.at(cid)(j)) +=
+                  cell_correction_matrix(i, j + k * nnodes_per_cell);
+            }
+          }
+        }
+        cid++;
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
   return status;
 }
 
