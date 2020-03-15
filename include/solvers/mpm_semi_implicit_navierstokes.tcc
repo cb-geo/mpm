@@ -190,40 +190,39 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Compute corrected force
     this->compute_correction_force();
 
-    //     // Compute corrected acceleration and velocity
-    //     mesh_->iterate_over_nodes_predicate(
-    //         std::bind(
-    //             &mpm::NodeBase<
-    //                 Tdim>::compute_acceleration_velocity_navierstokes_semi_implicit,
-    //             std::placeholders::_1, fluid, this->dt_),
-    //         std::bind(&mpm::NodeBase<Tdim>::status,
-    //         std::placeholders::_1));
+    // Compute corrected acceleration and velocity
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(
+            &mpm::NodeBase<
+                Tdim>::compute_acceleration_velocity_navierstokes_semi_implicit,
+            std::placeholders::_1, fluid, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    //     // Update particle position and kinematics
-    //     mesh_->iterate_over_particles(
-    //         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-    //                   std::placeholders::_1, this->dt_, velocity_update_));
+    // Update particle position and kinematics
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+                  std::placeholders::_1, this->dt_, velocity_update_));
 
-    //     // Apply particle velocity constraints
-    //     mesh_->apply_particle_velocity_constraints();
+    // Apply particle velocity constraints
+    mesh_->apply_particle_velocity_constraints();
 
     //     // Pressure smoothing
     //     if (pressure_smoothing_) this->pressure_smoothing(fluid);
 
-    //     // Locate particles
-    //     auto unlocatable_particles = mesh_->locate_particles_mesh();
+    // Locate particles
+    auto unlocatable_particles = mesh_->locate_particles_mesh();
 
-    //     if (!unlocatable_particles.empty())
-    //       throw std::runtime_error("Particle outside the mesh domain");
+    if (!unlocatable_particles.empty())
+      throw std::runtime_error("Particle outside the mesh domain");
 
-    //     if (step_ % output_steps_ == 0) {
-    //       // HDF5 outputs
-    //       this->write_hdf5(this->step_, this->nsteps_);
-    // #ifdef USE_VTK
-    //       // VTK outputs
-    //       this->write_vtk(this->step_, this->nsteps_);
-    // #endif
-    //     }
+    if (step_ % output_steps_ == 0) {
+      // HDF5 outputs
+      this->write_hdf5(this->step_, this->nsteps_);
+#ifdef USE_VTK
+      // VTK outputs
+      this->write_vtk(this->step_, this->nsteps_);
+#endif
+    }
   }
   auto solver_end = std::chrono::steady_clock::now();
   console_->info("Rank {}, SemiImplicit_NavierStokes {} solver duration: {} ms",

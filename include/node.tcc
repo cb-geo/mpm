@@ -614,7 +614,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   const double tolerance = std::numeric_limits<double>::min();
   try {
 
-    // Semi-implicit solver
     Eigen::Matrix<double, Tdim, 1> acceleration_corrected =
         correction_force_.col(phase) / mass_(phase);
 
