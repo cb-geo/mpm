@@ -14,7 +14,7 @@ TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
 
     SECTION("Write scalar data") {
       const std::string vtk_file = "scalar_vtk.vtp";
-      const std::string attribute = "mass";
+      const std::string attribute = "epds";
       std::vector<double> data;
 
       REQUIRE_NOTHROW(
