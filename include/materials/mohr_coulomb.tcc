@@ -63,8 +63,6 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
                                // Cohesion
                                {"cohesion", this->cohesion_peak_},
                                // Stress invariants
-                               // Equivalent (Von-Misses) stress
-                               {"evms", 0.},
                                // j3
                                {"j3", 0.},
                                // Epsilon
@@ -114,8 +112,6 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
                         6.0 +
                     std::pow(stress(3), 2) + std::pow(stress(4), 2) +
                     std::pow(stress(5), 2);
-  // Compute equivalent (Von-Mises) stress
-  (*state_vars).at("evms") = std::sqrt(3 * j2);
   // Compute J3
   (*state_vars).at("j3") = dev_stress(0) * dev_stress(1) * dev_stress(2) -
                            dev_stress(2) * std::pow(dev_stress(3), 2) +
