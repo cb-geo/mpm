@@ -951,29 +951,30 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
-//! Return particle vector data
+//! Return particle tensor data
 template <unsigned Tdim>
-std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
-    const std::string& attribute) {
-  std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
+template <unsigned Tsize>
+std::vector<Eigen::Matrix<double, Tsize, 1>>
+    mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) {
+  std::vector<Eigen::Matrix<double, Tsize, 1>> tensor_data;
   try {
     // Iterate over particles
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      Eigen::Vector3d data;
+      Eigen::Matrix<double, Tsize, 1> data;
       data.setZero();
-      auto pdata = (*pitr)->vector_data(attribute);
+      auto pdata = (*pitr)->tensor_data(attribute);
       // Fill stresses to the size of dimensions
-      for (unsigned i = 0; i < Tdim; ++i) data(i) = pdata(i);
+      for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
 
-      // Add to a vector of data
-      vector_data.emplace_back(data);
+      // Add to a tensor of data
+      tensor_data.emplace_back(data);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
                     attribute);
-    vector_data.clear();
+    tensor_data.clear();
   }
-  return vector_data;
+  return tensor_data;
 }
 
 //! Return particle scalar data
