@@ -80,6 +80,8 @@ class Bingham : public Material<Tdim> {
   double mu_{std::numeric_limits<double>::max()};
   //! Critical yielding shear rate
   double critical_shear_rate_{std::numeric_limits<double>::max()};
+  //! Compressibility multiplier
+  double compressibility_multiplier_{1.0};
 
 };  // Bingham class
 }  // namespace mpm
