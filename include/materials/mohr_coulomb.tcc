@@ -63,6 +63,8 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
                                // Cohesion
                                {"cohesion", this->cohesion_peak_},
                                // Stress invariants
+                               // Equivalent (Von-Misses) stress
+                               {"evms", 0.},
                                // j3
                                {"j3", 0.},
                                // Epsilon
@@ -112,6 +114,8 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
                         6.0 +
                     std::pow(stress(3), 2) + std::pow(stress(4), 2) +
                     std::pow(stress(5), 2);
+  // Compute equivalent (Von-Mises) stress
+  (*state_vars).at("evms") = std::sqrt(3 * j2);
   // Compute J3
   (*state_vars).at("j3") = dev_stress(0) * dev_stress(1) * dev_stress(2) -
                            dev_stress(2) * std::pow(dev_stress(3), 2) +
@@ -127,14 +131,15 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   if (theta_val > 1.0) theta_val = 1.0;
   if (theta_val < -1.0) theta_val = -1.0;
   // Compute theta
-  (*state_vars)["theta"] = (1. / 3.) * acos(theta_val);
+  (*state_vars).at("theta") = (1. / 3.) * acos(theta_val);
   // Check theta
-  if ((*state_vars).at("theta") > M_PI / 3.) (*state_vars)["theta"] = M_PI / 3.;
-  if ((*state_vars).at("theta") < 0.0) (*state_vars)["theta"] = 0.;
+  if ((*state_vars).at("theta") > M_PI / 3.)
+    (*state_vars).at("theta") = M_PI / 3.;
+  if ((*state_vars).at("theta") < 0.0) (*state_vars).at("theta") = 0.;
   // Compute rho
-  (*state_vars)["rho"] = std::sqrt(2. * (j2));
+  (*state_vars).at("rho") = std::sqrt(2. * (j2));
   // Compute epsilon
-  (*state_vars)["epsilon"] =
+  (*state_vars).at("epsilon") =
       (1. / std::sqrt(3.)) * (stress(0) + stress(1) + stress(2));
 
   return true;
@@ -409,22 +414,22 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
   // Update MC parameters using a linear softening rule
   if (softening_ && pdstrain > pdstrain_peak_) {
     if (pdstrain < pdstrain_residual_) {
-      (*state_vars)["phi"] =
+      (*state_vars).at("phi") =
           phi_residual_ +
           ((phi_peak_ - phi_residual_) * (pdstrain - pdstrain_residual_) /
            (pdstrain_peak_ - pdstrain_residual_));
-      (*state_vars)["psi"] =
+      (*state_vars).at("psi") =
           psi_residual_ +
           ((psi_peak_ - psi_residual_) * (pdstrain - pdstrain_residual_) /
            (pdstrain_peak_ - pdstrain_residual_));
-      (*state_vars)["cohesion"] =
+      (*state_vars).at("cohesion") =
           cohesion_residual_ + ((cohesion_peak_ - cohesion_residual_) *
                                 (pdstrain - pdstrain_residual_) /
                                 (pdstrain_peak_ - pdstrain_residual_));
     } else {
-      (*state_vars)["phi"] = phi_residual_;
-      (*state_vars)["psi"] = psi_residual_;
-      (*state_vars)["cohesion"] = cohesion_residual_;
+      (*state_vars).at("phi") = phi_residual_;
+      (*state_vars).at("psi") = psi_residual_;
+      (*state_vars).at("cohesion") = cohesion_residual_;
     }
   }
   //-------------------------------------------------------------------------
@@ -531,6 +536,8 @@ Eigen::Matrix<double, 6, 1> mpm::MohrCoulomb<Tdim>::compute_stress(
     // Update incremental of plastic deviatoric strain
     dpdstrain += lambda_trial * dp_dq_trial;
   }
+  // Compute stress invariants based on updated stress
+  this->compute_stress_invariants(updated_stress, state_vars);
   // Update plastic deviatoric strain
   (*state_vars).at("pdstrain") += dpdstrain;
 
