@@ -15,6 +15,13 @@ mpm::Bingham<Tdim>::Bingham(unsigned id, const Json& material_properties)
     // Calculate bulk modulus
     bulk_modulus_ = youngs_modulus_ / (3.0 * (1. - 2. * poisson_ratio_));
 
+    // Special material properties
+    if (material_properties.contains("incompressible")) {
+      bool incompressible =
+          material_properties.at("incompressible").template get<bool>();
+      if (incompressible) compressibility_multiplier_ = 0.0;
+    }
+
     properties_ = material_properties;
   } catch (Json::exception& except) {
     console_->error("Material parameter not set: {} {}\n", except.what(),
@@ -83,14 +90,17 @@ Eigen::Matrix<double, 6, 1> mpm::Bingham<Tdim>::compute_stress(
 
   // Update pressure
   (*state_vars).at("pressure") +=
-      this->thermodynamic_pressure(ptr->dvolumetric_strain());
+      (compressibility_multiplier_ *
+       this->thermodynamic_pressure(ptr->dvolumetric_strain()));
 
   // Update volumetric and deviatoric stress
   // thermodynamic pressure is from material point
   // stress = -thermodynamic_pressure I + tau, where I is identity matrix or
   // direc_delta in Voigt notation
   const Eigen::Matrix<double, 6, 1> updated_stress =
-      -(*state_vars).at("pressure") * this->dirac_delta() + tau;
+      -(*state_vars).at("pressure") * this->dirac_delta() *
+          compressibility_multiplier_ +
+      tau;
 
   return updated_stress;
 }
