@@ -79,8 +79,6 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::mesh_;
   //! Materials
   using mpm::MPMBase<Tdim>::materials_;
-  //! VTK attributes
-  using mpm::MPMBase<Tdim>::vtk_attributes_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
   // Projection method paramter (beta)
