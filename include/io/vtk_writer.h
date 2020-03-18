@@ -13,7 +13,9 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
+#include <vtkTensorGlyph.h>
 #include <vtkVersion.h>
+#include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkZLibDataCompressor.h>
 
@@ -33,6 +35,13 @@ class VtkWriter {
   //! Write coordinates
   void write_geometry(const std::string& filename);
 
+  //! \brief Write scalar data
+  //! \param[in] filename Output file to write geometry
+  //! \param[in] data Scalar field data
+  //! \param[in] data_field Field name ("pdstrain")
+  void write_scalar_point_data(const std::string& filename,
+                               const std::vector<double>& data,
+                               const std::string& data_field);
   //! Write vector data
   //! \param[in] filename Output file to write geometry
   //! \param[in] data Vector data
@@ -41,13 +50,14 @@ class VtkWriter {
                                const std::vector<Eigen::Vector3d>& data,
                                const std::string& data_fields);
 
-  //! \brief Write scalar data
+  //! Write tensor data
   //! \param[in] filename Output file to write geometry
-  //! \param[in] data Scalar field data
-  //! \param[in] data_field Field name ("pdstrain")
-  void write_scalar_point_data(const std::string& filename,
-                               const std::vector<double>& data,
-                               const std::string& data_field);
+  //! \param[in] data Tensor data
+  //! \param[in] data_field Field name ("Displacement", "Forces")
+  void write_tensor_point_data(
+      const std::string& filename,
+      const std::vector<Eigen::Matrix<double, 6, 1>>& data,
+      const std::string& data_fields);
 
   //! Write mesh
   //! \param[in] filename Mesh VTP file

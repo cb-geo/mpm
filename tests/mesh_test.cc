@@ -847,19 +847,20 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
             std::string attribute = "stresses";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<6>(attribute).size() ==
                     mesh->nparticles());
             // Particle strains
             attribute = "strains";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<6>(attribute).size() ==
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
                     mesh->nparticles());
             // Particle invalid data
             attribute = "invalid";
-            REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
+            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
+                    0);
 
             // State variable
             attribute = "pdstrain";
@@ -2132,19 +2133,20 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             REQUIRE(mesh->particle_coordinates().size() == mesh->nparticles());
             // Particle stresses
             std::string attribute = "stresses";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<6>(attribute).size() ==
                     mesh->nparticles());
             // Particle strains
             attribute = "strains";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<6>(attribute).size() ==
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
                     mesh->nparticles());
             // Particle invalid data
             attribute = "invalid";
-            REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
+            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
+                    0);
 
             // State variable
             attribute = "pdstrain";

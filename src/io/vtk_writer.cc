@@ -41,6 +41,51 @@ void VtkWriter::write_geometry(const std::string& filename) {
   writer->Write();
 }
 
+//! Write Tensor data
+void VtkWriter::write_tensor_point_data(
+    const std::string& filename,
+    const std::vector<Eigen::Matrix<double, 6, 1>>& data,
+    const std::string& data_field) {
+
+  // Create a polydata to store everything in it
+  auto pdata = vtkSmartPointer<vtkPolyData>::New();
+
+  // Add the points to the dataset
+  pdata->SetPoints(points_);
+
+  // Create an array to hold distance information
+  auto tensordata = vtkSmartPointer<vtkDoubleArray>::New();
+  tensordata->SetNumberOfComponents(9);
+  tensordata->SetNumberOfTuples(pdata->GetNumberOfPoints());
+  tensordata->SetName(data_field.c_str());
+
+  // Evaluate the signed distance function at all of the grid points
+  for (vtkIdType id = 0; id < pdata->GetNumberOfPoints(); ++id) {
+    const double* vdata = data.at(id).data();
+    tensordata->InsertTuple9(id, vdata[0], vdata[3], vdata[5], vdata[3],
+                             vdata[1], vdata[4], vdata[5], vdata[4], vdata[2]);
+  }
+
+  // Add the SignedDistances to the grid
+  pdata->GetPointData()->SetTensors(tensordata);
+
+  // Write file
+  auto writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+
+  writer->SetFileName(filename.c_str());
+
+  writer->SetDataModeToBinary();
+
+#if VTK_MAJOR_VERSION <= 5
+  writer->SetInput(pdata);
+#else
+  writer->SetInputData(pdata);
+#endif
+
+  writer->SetCompressor(vtkZLibDataCompressor::New());
+  writer->Write();
+}
+
 //! Write vector data
 void VtkWriter::write_vector_point_data(
     const std::string& filename, const std::vector<Eigen::Vector3d>& data,
@@ -178,8 +223,19 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
                                    unsigned step, unsigned max_steps,
                                    unsigned ncomponents) {
 
-  // If the number of components is 1, set as scalar
-  const std::string data_type = (ncomponents == 1) ? "Scalars" : "Vectors";
+  // If the number of components is 1, set as scalar or vector / tensor
+  std::string data_type;
+  switch (ncomponents) {
+    case 1:
+      data_type = "Scalars";
+      break;
+    case 9:
+      data_type = "Tensors";
+      break;
+    default:
+      data_type = "Vectors";
+      break;
+  }
 
   std::string ppolydata =
       "<?xml version=\"1.0\"?>\n<VTKFile type=\"PPolyData\" version=\"0.1\" "
