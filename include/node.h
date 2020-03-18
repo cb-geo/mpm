@@ -2,6 +2,7 @@
 #define MPM_NODE_H_
 
 #include "logger.h"
+#include "nodal_properties.h"
 #include "node_base.h"
 
 namespace mpm {
@@ -236,11 +237,25 @@ class Node : public NodeBase<Tdim> {
   //! Set ghost id
   void ghost_id(Index gid) override { ghost_id_ = gid; }
 
+  //! Update nodal property at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Property name
+  //! \param[in] property_value Property quantity from the particles in the cell
+  //! \param[in] mat_id Id of the material within the property data
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  void update_nodal_property(bool update, unsigned phase,
+                             const std::string& property,
+                             Eigen::MatrixXd property_value, unsigned mat_id,
+                             unsigned nprops) noexcept override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
+  //! nodal property id
+  unsigned nodal_prop_id_{std::numeric_limits<unsigned>::max()};
   //! shared ghost id
   Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
@@ -281,6 +296,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;
   //! Mathematical function for force
   std::shared_ptr<FunctionBase> force_function_{nullptr};
+  //! Nodal property pool
+  std::shared_ptr<NodalProperties> nodal_properties_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
