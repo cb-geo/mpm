@@ -500,6 +500,27 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
   }
 }
 
+//! Map nodal properties to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_nodal_properties_to_nodes() noexcept {
+  // Check if particle mass is set
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  // Unit 1x1 Eigen matrix to be used with scalar quantities
+  Eigen::Matrix<double, 1, 1> unit_scalar;
+  unit_scalar << 1.0;
+
+  // Map mass and momentum to nodal property taking into account the material id
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    nodes_[i]->update_nodal_property(true, mpm::ParticlePhase::Solid, "masses",
+                                     mass_ * shapefn_[i] * unit_scalar,
+                                     material_id_, 1);
+    nodes_[i]->update_nodal_property(true, mpm::ParticlePhase::Solid, "momenta",
+                                     mass_ * shapefn_[i] * velocity_,
+                                     material_id_, Tdim);
+  }
+}
+
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(
