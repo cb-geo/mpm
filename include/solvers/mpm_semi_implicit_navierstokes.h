@@ -31,10 +31,6 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   //! Solve
   bool solve() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase);
-
   //! Class private functions
  private:
   //! Initialise matrix

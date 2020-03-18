@@ -455,7 +455,7 @@ class Mesh {
   std::set<mpm::Index> free_surface_particles();
 
   //! Assign id for active node
-  unsigned assign_active_node_id();
+  unsigned assign_active_nodes_id();
 
   //! Return container of active nodes
   mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }

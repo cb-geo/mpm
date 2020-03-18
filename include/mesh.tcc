@@ -102,6 +102,45 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
     if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
+//! Create a list of active nodes in mesh and assign active node id
+template <unsigned Tdim>
+unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
+  // Clear existing list of active nodes
+  this->active_nodes_.clear();
+  Index active_id = 0;
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      (*nitr)->assign_active_id(active_id);
+      active_id++;
+    } else {
+      (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
+    }
+  }
+
+  return active_id;
+}
+
+//! Return global node indices
+template <unsigned Tdim>
+std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
+  // Vector of node_pairs
+  std::vector<Eigen::VectorXi> node_indices;
+  try {
+    // Iterate over cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      if ((*citr)->status()) {
+        node_indices.emplace_back((*citr)->local_node_indices());
+      }
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return node_indices;
+}
+
 //! Iterate over active nodes
 template <unsigned Tdim>
 template <typename Toper>
@@ -2003,44 +2042,4 @@ std::set<mpm::Index> mpm::Mesh<Tdim>::free_surface_particles() {
        ++pitr)
     if ((*pitr)->free_surface()) id_set.insert((*pitr)->id());
   return id_set;
-}
-
-//! FIXME: This function is essentially the same as find_active_nodes()
-//! Create a list of active nodes in mesh and assign active node id
-template <unsigned Tdim>
-unsigned mpm::Mesh<Tdim>::assign_active_node_id() {
-  // Clear existing list of active nodes
-  this->active_nodes_.clear();
-  Index active_id = 0;
-
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
-    if ((*nitr)->status()) {
-      this->active_nodes_.add(*nitr);
-      (*nitr)->assign_active_id(active_id);
-      active_id++;
-    } else {
-      (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
-    }
-  }
-
-  return active_id;
-}
-
-//! Return global node indices
-template <unsigned Tdim>
-std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
-  // Vector of node_pairs
-  std::vector<Eigen::VectorXi> node_indices;
-  try {
-    // Iterate over cells
-    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      if ((*citr)->status()) {
-        node_indices.emplace_back((*citr)->local_node_indices());
-      }
-    }
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return node_indices;
 }
