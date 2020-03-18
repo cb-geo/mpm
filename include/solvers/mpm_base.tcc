@@ -105,8 +105,6 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
 
   try {
@@ -222,8 +220,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
 
   try {

@@ -3,16 +3,6 @@ template <unsigned Tdim>
 mpm::FluidParticle<Tdim>::FluidParticle(Index id, const VectorDim& coord)
     : mpm::Particle<Tdim>(id, coord) {
 
-  // Initialize vector data properties
-  this->properties_["pressure"] = [&]() {
-    Eigen::VectorXd vec_pressure = Eigen::VectorXd::Zero(3);
-    vec_pressure[0] = this->pressure();
-    // FIXME: This is to check free surface particles
-    // TODO: To be removed somewhere
-    vec_pressure[1] = this->free_surface();
-    return vec_pressure;
-  };
-
   // Logger
   std::string logger =
       "FluidParticle" + std::to_string(Tdim) + "d::" + std::to_string(id);

@@ -1033,7 +1033,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
     const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
   bool status = true;
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -1280,8 +1279,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_stresses(
     const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
