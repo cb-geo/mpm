@@ -35,6 +35,7 @@ using Json = nlohmann::json;
 #include "logger.h"
 #include "material.h"
 #include "mpi_datatypes.h"
+#include "nodal_properties.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -496,6 +497,8 @@ class Mesh {
       particle_velocity_constraints_;
   //! Vector of generators for particle injections
   std::vector<mpm::Injection> particle_injections_;
+  //! Nodal property pool
+  mpm::NodalProperties nodal_properties_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
