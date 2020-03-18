@@ -119,7 +119,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
 
-    auto pstress_data = particle->vector_data("stresses");
+    auto pstress_data = particle->tensor_data("stresses");
     for (unsigned i = 0; i < pstress_data.size(); ++i)
       REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
   }

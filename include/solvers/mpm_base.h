@@ -182,8 +182,6 @@ class MPMBase : public MPM {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
   std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
-  //! VTK attributes
-  std::vector<std::string> vtk_attributes_;
   //! VTK state variables
   std::vector<std::string> vtk_statevars_;
   //! Set node concentrated force
@@ -192,6 +190,8 @@ class MPMBase : public MPM {
   mpm::Damping damping_type_{mpm::Damping::None};
   //! Damping factor
   double damping_factor_{0.};
+  //! Locate particles
+  bool locate_particles_{true};
 
 #ifdef USE_GRAPH_PARTITIONING
   // graph pass the address of the container of cell
