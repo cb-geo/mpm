@@ -27,7 +27,29 @@ Eigen::Matrix<double, 6, 1>
   Eigen::Matrix<double, 6, 1> tstress;
   tstress.setZero();
 
-  // TODO: To be implemented
+  // Apply LES Smagorinsky closure
+  const double smagorinsky_constant = 0.2;
+  const double grid_spacing = std::pow(cell_->volume(), 1 / (double)Tdim);
+  const auto strain_rate = this->strain_rate();
+  double local_strain_rate = 0.0;
+  local_strain_rate +=
+      2 * (strain_rate[0] * strain_rate[0] + strain_rate[1] * strain_rate[1] +
+           strain_rate[2] * strain_rate[2]) +
+      strain_rate[3] * strain_rate[3] + strain_rate[4] * strain_rate[4] +
+      strain_rate[5] * strain_rate[5];
+  local_strain_rate = std::sqrt(local_strain_rate);
+
+  // Turbulent Eddy Viscosity
+  const double turbulent_viscosity =
+      std::pow(smagorinsky_constant * grid_spacing, 2) * local_strain_rate;
+
+  // Turbulent stress
+  tstress(0) = 2. * turbulent_viscosity / mass_density_ * strain_rate(0);
+  tstress(1) = 2. * turbulent_viscosity / mass_density_ * strain_rate(1);
+  tstress(2) = 2. * turbulent_viscosity / mass_density_ * strain_rate(2);
+  tstress(3) = turbulent_viscosity / mass_density_ * strain_rate(3);
+  tstress(4) = turbulent_viscosity / mass_density_ * strain_rate(4);
+  tstress(5) = turbulent_viscosity / mass_density_ * strain_rate(5);
 
   return tstress;
 }
