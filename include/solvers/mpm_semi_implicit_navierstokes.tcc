@@ -209,11 +209,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Pressure smoothing
     if (pressure_smoothing_) this->pressure_smoothing(fluid);
 
-    // Locate particles
-    auto unlocatable_particles = mesh_->locate_particles_mesh();
-
-    if (!unlocatable_particles.empty())
-      throw std::runtime_error("Particle outside the mesh domain");
+    // Locate particle
+    this->locate_particle();
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs

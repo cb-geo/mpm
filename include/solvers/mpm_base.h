@@ -69,10 +69,6 @@ class MPMBase : public MPM {
   //! Checkpoint resume
   bool checkpoint_resume() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase);
-
 #ifdef USE_VTK
   //! Write VTK files
   void write_vtk(mpm::Index step, mpm::Index max_steps) override;
@@ -85,6 +81,14 @@ class MPMBase : public MPM {
 
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
+
+ protected:
+  //! Pressure smoothing
+  //! \param[in] phase Phase to smooth pressure
+  void pressure_smoothing(unsigned phase);
+
+  //! Locate particle
+  void locate_particle();
 
  private:
   //! Return if a mesh will be isoparametric or not

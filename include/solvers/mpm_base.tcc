@@ -1075,3 +1075,17 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
       std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
                 std::placeholders::_1));
 }
+
+//! Locate particle
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::locate_particle() {
+  // Locate particle
+  auto unlocatable_particles = mesh_->locate_particles_mesh();
+
+  if (!unlocatable_particles.empty() && this->locate_particles_)
+    throw std::runtime_error("Particle outside the mesh domain");
+  // If unable to locate particles remove particles
+  if (!unlocatable_particles.empty() && !this->locate_particles_)
+    for (const auto& remove_particle : unlocatable_particles)
+      mesh_->remove_particle(remove_particle);
+}
