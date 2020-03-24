@@ -502,7 +502,7 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
 
 //! Map nodal properties to nodes
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_nodal_properties_to_nodes() noexcept {
+void mpm::Particle<Tdim>::map_properties_to_nodes() noexcept {
   // Check if particle mass is set
   assert(mass_ != std::numeric_limits<double>::max());
 
@@ -512,12 +512,10 @@ void mpm::Particle<Tdim>::map_nodal_properties_to_nodes() noexcept {
 
   // Map mass and momentum to nodal property taking into account the material id
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodes_[i]->update_nodal_property(true, mpm::ParticlePhase::Solid, "masses",
-                                     mass_ * shapefn_[i] * unit_scalar,
-                                     material_id_, 1);
-    nodes_[i]->update_nodal_property(true, mpm::ParticlePhase::Solid, "momenta",
-                                     mass_ * shapefn_[i] * velocity_,
-                                     material_id_, Tdim);
+    nodes_[i]->update_property(
+        true, "masses", mass_ * shapefn_[i] * unit_scalar, material_id_, 1);
+    nodes_[i]->update_property(true, "momenta", mass_ * shapefn_[i] * velocity_,
+                               material_id_, Tdim);
   }
 }
 

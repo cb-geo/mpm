@@ -239,15 +239,13 @@ class Node : public NodeBase<Tdim> {
 
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] property Property name
   //! \param[in] property_value Property quantity from the particles in the cell
   //! \param[in] mat_id Id of the material within the property data
   //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
-  void update_nodal_property(bool update, unsigned phase,
-                             const std::string& property,
-                             Eigen::MatrixXd property_value, unsigned mat_id,
-                             unsigned nprops) noexcept override;
+  void update_property(bool update, const std::string& property,
+                       const Eigen::MatrixXd& property_value, unsigned mat_id,
+                       unsigned nprops) noexcept override;
 
  private:
   //! Mutex
@@ -255,7 +253,7 @@ class Node : public NodeBase<Tdim> {
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal property id
-  unsigned nodal_prop_id_{std::numeric_limits<unsigned>::max()};
+  unsigned prop_id_{std::numeric_limits<unsigned>::max()};
   //! shared ghost id
   Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates

@@ -521,19 +521,20 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
 
 //! Update nodal property at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::update_nodal_property(
-    bool update, unsigned phase, const std::string& property,
-    Eigen::MatrixXd property_value, unsigned mat_id, unsigned nprops) noexcept {
+void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
+    bool update, const std::string& property,
+    const Eigen::MatrixXd& property_value, unsigned mat_id,
+    unsigned nprops) noexcept {
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
   // Calculate updated property
   Eigen::MatrixXd updated_property =
-      nodal_properties_->property(property, nodal_prop_id_, mat_id, nprops) +
+      nodal_properties_->property(property, prop_id_, mat_id, nprops) +
       factor * property_value;
 
   // Update/assign property
   std::lock_guard<std::mutex> guard(node_mutex_);
-  nodal_properties_->assign_property(property, nodal_prop_id_, mat_id,
+  nodal_properties_->assign_property(property, prop_id_, mat_id,
                                      updated_property, nprops);
 }
