@@ -13,6 +13,7 @@
 
 #include "data_types.h"
 #include "function_base.h"
+#include "nodal_properties.h"
 
 namespace mpm {
 
@@ -42,6 +43,12 @@ class NodeBase {
 
   //! Return id of the nodebase
   virtual Index id() const = 0;
+
+  //! Initialise shared pointer to nodal properties pool
+  //! \param[in] nodal_properties Shared pointer to nodal properties pool
+  virtual void initialise_property_handle(
+      const std::shared_ptr<mpm::NodalProperties>&
+          property_handle) noexcept = 0;
 
   //! Assign coordinates
   virtual void assign_coordinates(const VectorDim& coord) = 0;

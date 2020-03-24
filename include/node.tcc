@@ -35,6 +35,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   material_ids_.clear();
 }
 
+//! Initialise shared pointer to nodal properties pool
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
+    const std::shared_ptr<mpm::NodalProperties>& property_handle) noexcept {
+  this->property_handle_ = property_handle;
+}
+
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
@@ -530,11 +537,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
 
   // Calculate updated property
   Eigen::MatrixXd updated_property =
-      nodal_properties_->property(property, prop_id_, mat_id, nprops) +
+      property_handle_->property(property, prop_id_, mat_id, nprops) +
       factor * property_value;
 
   // Update/assign property
   std::lock_guard<std::mutex> guard(node_mutex_);
-  nodal_properties_->assign_property(property, prop_id_, mat_id,
-                                     updated_property, nprops);
+  property_handle_->assign_property(property, prop_id_, mat_id,
+                                    updated_property, nprops);
 }

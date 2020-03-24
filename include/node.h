@@ -39,6 +39,11 @@ class Node : public NodeBase<Tdim> {
   //! Return id of the nodebase
   Index id() const override { return id_; }
 
+  //! Initialise shared pointer to nodal properties pool
+  //! \param[in] nodal_properties Shared pointer to nodal properties pool
+  void initialise_property_handle(const std::shared_ptr<mpm::NodalProperties>&
+                                      property_handle) noexcept override;
+
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase
   void assign_coordinates(const VectorDim& coord) override {
@@ -295,7 +300,7 @@ class Node : public NodeBase<Tdim> {
   //! Mathematical function for force
   std::shared_ptr<FunctionBase> force_function_{nullptr};
   //! Nodal property pool
-  std::shared_ptr<NodalProperties> nodal_properties_{nullptr};
+  std::shared_ptr<mpm::NodalProperties> property_handle_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
