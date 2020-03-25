@@ -38,8 +38,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
 //! Initialise shared pointer to nodal properties pool
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
+    const unsigned prop_id,
     const std::shared_ptr<mpm::NodalProperties>& property_handle) noexcept {
+  // the property handle and the property id is set in the node
   this->property_handle_ = property_handle;
+  this->prop_id_ = prop_id;
 }
 
 //! Update mass at the nodes from particle
