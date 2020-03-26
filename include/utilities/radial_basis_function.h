@@ -11,6 +11,7 @@ namespace mpm {
 
 // Namespace for radial basis function handling
 namespace RadialBasisFunction {
+
 //! Cubic Spline Radial Basis Function
 //! Source: Monaghan, 1985; Monaghan, 1992
 template <unsigned Tdim>
@@ -124,6 +125,30 @@ double super_gaussian_kernel(const double& smoothing_length,
     basis_function = 0.0;
 
   return basis_function;
+}
+
+//! General Radial Basis Function Kernel call
+template <unsigned Tdim>
+double kernel(const double& smoothing_length, const double& norm_distance,
+              const std::string type) {
+  if (type == "cubic_spline") {
+    return mpm::RadialBasisFunction::cubic_spline<Tdim>(smoothing_length,
+                                                        norm_distance);
+  } else if (type == "quintic_spline") {
+    return mpm::RadialBasisFunction::quintic_spline<Tdim>(smoothing_length,
+                                                          norm_distance);
+  } else if (type == "gaussian") {
+    return mpm::RadialBasisFunction::gaussian_kernel<Tdim>(smoothing_length,
+                                                           norm_distance);
+  } else if (type == "super_gaussian") {
+    return mpm::RadialBasisFunction::super_gaussian_kernel<Tdim>(
+        smoothing_length, norm_distance);
+  } else {
+    throw std::runtime_error(
+        "RadialBasisFunction kernel type is invalid. Available types are: "
+        "\"cubic_spline\", \"quintic_spline\", \"gaussian\", and, "
+        "\"super_gaussian\".");
+  }
 }
 
 }  // namespace RadialBasisFunction

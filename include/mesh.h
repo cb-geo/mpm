@@ -39,6 +39,7 @@ using Json = nlohmann::json;
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
+#include "radial_basis_function.h"
 #include "traction.h"
 #include "vector.h"
 #include "velocity_constraint.h"
