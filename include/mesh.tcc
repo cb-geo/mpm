@@ -1909,6 +1909,8 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_free_surface,
                                        std::placeholders::_1, false));
 
+    // First, we detect the cell with possible free surfaces through volume
+    // fraction
     // Reset volume fraction
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_volume_fraction,
                                        std::placeholders::_1, 0.0));
@@ -1928,90 +1930,213 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     }
 
     // Compute boundary cells and nodes based on geometry
-    std::set<mpm::Index> boundary_cells;
-    std::set<mpm::Index> boundary_nodes;
+    std::set<mpm::Index> free_surface_candidate_cells;
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
-
+      // Cell contains particles
       if ((*citr)->status()) {
-        bool cell_at_interface = false;
-        const auto& node_id = (*citr)->nodes_id();
-        bool internal = true;
-
-        //! Check internal cell
-        for (const auto c_id : (*citr)->neighbours()) {
-          if (!map_cells_[c_id]->status()) {
-            internal = false;
-            break;
+        bool candidate_cell = false;
+        // Check volume fraction only for boundary cell
+        if ((*citr)->volume_fraction() < tolerance) {
+          candidate_cell = true;
+        } else {
+          // Loop over neighbouring cells, if volume fraction is above
+          // tolerance, but a free surface cell
+          for (const auto n_id : (*citr)->neighbours()) {
+            if (map_cells_[n_id]->volume_fraction() < tolerance) {
+              candidate_cell = true;
+              break;
+            }
           }
         }
 
-        //! Check volume fraction only for boundary cell
-        if (!internal) {
-          if ((*citr)->volume_fraction() < tolerance) {
-            cell_at_interface = true;
-            for (const auto id : node_id) {
-              map_nodes_[id]->assign_free_surface(cell_at_interface);
-              boundary_nodes.insert(id);
-            }
-          } else {
-            for (const auto n_id : (*citr)->neighbours()) {
-              if (map_cells_[n_id]->volume_fraction() < tolerance) {
-                cell_at_interface = true;
-                const auto& n_node_id = map_cells_[n_id]->nodes_id();
+        // Assign free surface cell
+        if (candidate_cell) {
+          (*citr)->assign_free_surface(candidate_cell);
+          free_surface_candidate_cells.insert((*citr)->id());
 
-                // Detect common node id
-                std::set<mpm::Index> common_node_id;
-                std::set_intersection(
-                    node_id.begin(), node_id.end(), n_node_id.begin(),
-                    n_node_id.end(),
-                    std::inserter(common_node_id, common_node_id.begin()));
-
-                // Assign free surface nodes
-                if (!common_node_id.empty()) {
-                  for (const auto common_id : common_node_id) {
-                    map_nodes_[common_id]->assign_free_surface(
-                        cell_at_interface);
-                    boundary_nodes.insert(common_id);
-                  }
-                }
-              }
-            }
-          }
-
-          // Assign free surface cell
-          if (cell_at_interface) {
-            (*citr)->assign_free_surface(cell_at_interface);
-            boundary_cells.insert((*citr)->id());
+          // FIXME: Assigned all FS Cell nodes to be free surface node (to be
+          // removed/optimized)
+          const auto& node_id = (*citr)->nodes_id();
+          for (const auto id : node_id) {
+            map_nodes_[id]->assign_free_surface(candidate_cell);
           }
         }
       }
     }
 
-    // Compute boundary particles based on density function
-    // Lump cell volume to nodes
-    this->iterate_over_cells(std::bind(
-        &mpm::Cell<Tdim>::map_cell_volume_to_nodes, std::placeholders::_1, 0));
+    // Compute particle neighbours for particles at candidate cells
+    std::vector<mpm::Index> free_surface_candidate_particles;
+    for (const auto cell_id : free_surface_candidate_cells) {
+      this->find_particle_neighbours(map_cells_[cell_id]);
+      const auto& particle_ids = map_cells_[cell_id]->particles();
+      free_surface_candidate_particles.insert(
+          free_surface_candidate_particles.end(), particle_ids.begin(),
+          particle_ids.end());
+    }
 
-    // Compute nodal value of mass density
-    this->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_density, std::placeholders::_1),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    // Find free surface particles through geometry
+    std::set<mpm::Index> free_surface_particles;
+    for (const auto p_id : free_surface_candidate_particles) {
+      // Initialize renormalization matrix
+      Eigen::Matrix<double, Tdim, Tdim> renormalization_matrix;
+      renormalization_matrix.setZero();
 
-    // Evaluate free surface particles
-    this->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_free_surface, std::placeholders::_1));
+      // Loop over neighbours
+      const auto& p_coord = map_particles_[p_id]->coordinates();
+      const auto& neighbour_particles = map_particles_[p_id]->neighbours();
+      for (const auto n_id : neighbour_particles) {
+        const auto& n_coord = map_particles_[n_id]->coordinates();
+        const VectorDim rel_coord = n_coord - p_coord;
+        const double rel_distance = rel_coord.norm();
+      }
 
-    // Assign pressure at free surface to be zero
-    std::set<mpm::Index> boundary_particles = this->free_surface_particles();
-    for (const auto boundary_particle : boundary_particles)
-      map_particles_[boundary_particle]->initial_pressure(0.0);
+      // Matrix inversion to get renormalization_matrix
+
+      // Find matrix eigenvalue
+
+      // Categorize based on lambda
+      double lambda = 0;
+      bool secondary_check = false;
+      if (lambda <= 0.2)
+        free_surface_particles.insert(p_id);
+      else if (lambda > 0.2 && lambda <= 0.75)
+        secondary_check = true;
+
+      // If secondary check is needed
+      if (secondary_check) {
+        // Compute numerical normal vector
+        VectorDim normal;
+        for (const auto n_id : neighbour_particles) {
+          const auto& n_coord = map_particles_[n_id]->coordinates();
+          const VectorDim rel_coord = n_coord - p_coord;
+          const double rel_distance = rel_coord.norm();
+        }
+        normal *= 1. / normal.norm();
+      }
+    }
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
 }
+
+// //! Compute free surface cells, nodes, and particles
+// template <unsigned Tdim>
+// bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
+//   bool status = true;
+//   try {
+//     // Reset free surface cell
+//     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_free_surface,
+//                                        std::placeholders::_1, false));
+
+//     // Reset volume fraction
+//     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_volume_fraction,
+//                                        std::placeholders::_1, 0.0));
+
+//     // Compute and assign volume fraction to each cell
+//     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
+//          ++citr) {
+//       if ((*citr)->status()) {
+//         // Compute volume fraction
+//         double cell_volume_fraction = 0.0;
+//         for (const auto p_id : (*citr)->particles())
+//           cell_volume_fraction += map_particles_[p_id]->volume();
+
+//         cell_volume_fraction = cell_volume_fraction / (*citr)->volume();
+//         (*citr)->assign_volume_fraction(cell_volume_fraction);
+//       }
+//     }
+
+//     // Compute boundary cells and nodes based on geometry
+//     std::set<mpm::Index> boundary_cells;
+//     std::set<mpm::Index> boundary_nodes;
+//     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
+//          ++citr) {
+
+//       if ((*citr)->status()) {
+//         bool cell_at_interface = false;
+//         const auto& node_id = (*citr)->nodes_id();
+//         bool internal = true;
+
+//         //! Check internal cell
+//         for (const auto c_id : (*citr)->neighbours()) {
+//           if (!map_cells_[c_id]->status()) {
+//             internal = false;
+//             break;
+//           }
+//         }
+
+//         //! Check volume fraction only for boundary cell
+//         if (!internal) {
+//           if ((*citr)->volume_fraction() < tolerance) {
+//             cell_at_interface = true;
+//             for (const auto id : node_id) {
+//               map_nodes_[id]->assign_free_surface(cell_at_interface);
+//               boundary_nodes.insert(id);
+//             }
+//           } else {
+//             for (const auto n_id : (*citr)->neighbours()) {
+//               if (map_cells_[n_id]->volume_fraction() < tolerance) {
+//                 cell_at_interface = true;
+//                 const auto& n_node_id = map_cells_[n_id]->nodes_id();
+
+//                 // Detect common node id
+//                 std::set<mpm::Index> common_node_id;
+//                 std::set_intersection(
+//                     node_id.begin(), node_id.end(), n_node_id.begin(),
+//                     n_node_id.end(),
+//                     std::inserter(common_node_id, common_node_id.begin()));
+
+//                 // Assign free surface nodes
+//                 if (!common_node_id.empty()) {
+//                   for (const auto common_id : common_node_id) {
+//                     map_nodes_[common_id]->assign_free_surface(
+//                         cell_at_interface);
+//                     boundary_nodes.insert(common_id);
+//                   }
+//                 }
+//               }
+//             }
+//           }
+
+//           // Assign free surface cell
+//           if (cell_at_interface) {
+//             (*citr)->assign_free_surface(cell_at_interface);
+//             boundary_cells.insert((*citr)->id());
+//           }
+//         }
+//       }
+//     }
+
+//     // Compute boundary particles based on density function
+//     // Lump cell volume to nodes
+//     this->iterate_over_cells(std::bind(
+//         &mpm::Cell<Tdim>::map_cell_volume_to_nodes, std::placeholders::_1,
+//         0));
+
+//     // Compute nodal value of mass density
+//     this->iterate_over_nodes_predicate(
+//         std::bind(&mpm::NodeBase<Tdim>::compute_density,
+//         std::placeholders::_1), std::bind(&mpm::NodeBase<Tdim>::status,
+//         std::placeholders::_1));
+
+//     // Evaluate free surface particles
+//     this->iterate_over_particles(std::bind(
+//         &mpm::ParticleBase<Tdim>::compute_free_surface,
+//         std::placeholders::_1));
+
+//     // Assign pressure at free surface to be zero
+//     std::set<mpm::Index> boundary_particles = this->free_surface_particles();
+//     for (const auto boundary_particle : boundary_particles)
+//       map_particles_[boundary_particle]->initial_pressure(0.0);
+
+//   } catch (std::exception& exception) {
+//     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+//   }
+//   return status;
+// }
 
 //! Get free surface node set
 template <unsigned Tdim>
