@@ -31,9 +31,9 @@ double cubic_spline(const double smoothing_length, const double norm_distance) {
   const double radius = norm_distance / smoothing_length;
   if (radius >= 0.0 && radius < 1.0)
     basis_function *=
-        2.0 / 3.0 - std::pow(radius, 2) + 0.5 * std::pow(radius, 3);
+        (2.0 / 3.0 - std::pow(radius, 2) + 0.5 * std::pow(radius, 3));
   else if (radius >= 1.0 && radius < 2.0)
-    basis_function *= 1.0 / 6.0 * std::pow((2.0 - radius), 3);
+    basis_function *= (1.0 / 6.0 * std::pow((2.0 - radius), 3));
   else
     basis_function = 0.0;
 
@@ -59,7 +59,7 @@ double cubic_spline_derivative(const double smoothing_length,
   double dw_dr = multiplier;
   const double radius = norm_distance / smoothing_length;
   if (radius >= 0.0 && radius < 1.0)
-    dw_dr *= -2.0 * radius + 1.5 * std::pow(radius, 2);
+    dw_dr *= (-2.0 * radius + 1.5 * std::pow(radius, 2));
   else if (radius >= 1.0 && radius < 2.0)
     dw_dr *= -0.5 * std::pow((2.0 - radius), 2);
   else
@@ -242,7 +242,7 @@ double super_gaussian_derivative(const double smoothing_length,
 //! General Radial Basis Function Kernel call
 template <unsigned Tdim>
 double kernel(const double smoothing_length, const double norm_distance,
-              const std::string type) {
+              const std::string type = "cubic_spline") {
   if (type == "cubic_spline") {
     return mpm::RadialBasisFunction::cubic_spline<Tdim>(smoothing_length,
                                                         norm_distance);
@@ -268,7 +268,7 @@ template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> gradient(
     const double smoothing_length,
     const Eigen::Matrix<double, Tdim, 1>& relative_distance,
-    const std::string type) {
+    const std::string type = "cubic_spline") {
 
   // Compute norm distance
   const double norm_distance = relative_distance.norm();
