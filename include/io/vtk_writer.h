@@ -1,6 +1,7 @@
 #ifndef VTK_WRITER_H_
 #define VTK_WRITER_H_
 
+#ifdef USE_VTK
 #include <fstream>
 
 #include <Eigen/Dense>
@@ -84,4 +85,5 @@ class VtkWriter {
   vtkSmartPointer<vtkPoints> points_;
 };
 
+#endif
 #endif  // VTK_WRITER_H_

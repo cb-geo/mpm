@@ -1,3 +1,4 @@
+#ifdef USE_MPI
 #include <boost/filesystem.hpp>
 
 #include "catch.hpp"
@@ -134,3 +135,4 @@ TEST_CASE("VTK Writer is checked", "[vtk][writer]") {
     REQUIRE(content == ppolydata);
   }
 }
+#endif

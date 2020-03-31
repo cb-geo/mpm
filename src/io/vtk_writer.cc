@@ -1,5 +1,7 @@
 #include "vtk_writer.h"
 
+#ifdef USE_VTK
+
 //! VTK Writer class Constructor with coordniates
 //! \param[in] coordinate Point coordinates
 //! \param[in] node_pairs Node ID pairs to form elements
@@ -277,3 +279,5 @@ void VtkWriter::write_parallel_vtk(const std::string& filename,
   pvtk << ppolydata;
   pvtk.close();
 }
+
+#endif
