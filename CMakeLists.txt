@@ -25,7 +25,7 @@ endif()
 
 # Clang specific settings
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Weverything -Wno-undefined-var-template")
 endif()
 
 # Check if Ninja
@@ -128,6 +128,7 @@ if (VTK_FOUND)
   link_libraries(${VTK_LIBRARIES})
   add_definitions("-DUSE_VTK")
   set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
+  set(test_vtk ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc)
 endif()
 
 # Partio
@@ -207,7 +208,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc
-    ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
@@ -235,12 +235,12 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   if(MPM_BUILD_LIB)
-    add_executable(mpmtest ${test_src})
+    add_executable(mpmtest ${test_src} ${test_vtk})
     target_link_libraries(mpmtest lmpm)
     add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
     enable_testing()
   else()
-    add_executable(mpmtest ${test_src} ${mpm_src} ${mpm_vtk})
+    add_executable(mpmtest ${test_src} ${test_vtk} ${mpm_src} ${mpm_vtk})
     add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
     enable_testing()
   endif()
@@ -249,6 +249,6 @@ endif()
 # Coverage
 find_package(codecov)
 if(ENABLE_COVERAGE)
-  add_executable(mpmtest_coverage ${mpm_vtk} ${mpm_src} ${test_src})
+  add_executable(mpmtest_coverage ${mpm_vtk} ${mpm_src} ${test_src} ${test_vtk})
   add_coverage(mpmtest_coverage)
 endif()
