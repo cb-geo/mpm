@@ -251,6 +251,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   if (fabs(rho) > std::numeric_limits<int>::epsilon()) {
     // Compute dRho / dSigma
     drho_dsigma = 1. / rho * dev_stress;
+    drho_dsigma(3) *= 2.0;
+    drho_dsigma(4) *= 2.0;
+    drho_dsigma(5) *= 2.0;
     // Compute r value
     r_val = (3. * std::sqrt(6.)) * (j3 / std::pow(rho, 3));
     // Compute dr / dJ2
@@ -264,6 +267,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double dtheta_dr = -1 / (3. * std::sqrt(divider));
   // Compute dJ2 / dSigma
   Vector6d dj2_dsigma = dev_stress;
+  dj2_dsigma(3) *= 2.0;
+  dj2_dsigma(4) *= 2.0;
+  dj2_dsigma(5) *= 2.0;
   // Compute dJ3 / dSigma
   Eigen::Matrix<double, 3, 1> dev1;
   dev1(0) = dev_stress(0);
@@ -281,9 +287,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   dj3_dsigma(0) = dev1.dot(dev1) - (1. / 3.) * rho * rho;
   dj3_dsigma(1) = dev2.dot(dev2) - (1. / 3.) * rho * rho;
   dj3_dsigma(2) = dev3.dot(dev3) - (1. / 3.) * rho * rho;
-  dj3_dsigma(3) = dev1.dot(dev2);
-  dj3_dsigma(4) = dev2.dot(dev3);
-  dj3_dsigma(5) = dev1.dot(dev3);
+  dj3_dsigma(3) = 2.0 * dev1.dot(dev2);
+  dj3_dsigma(4) = 2.0 * dev2.dot(dev3);
+  dj3_dsigma(5) = 2.0 * dev1.dot(dev3);
   // Compute dtheta / dsigma
   Vector6d dtheta_dsigma = Vector6d::Zero();
   dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
