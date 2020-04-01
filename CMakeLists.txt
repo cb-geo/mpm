@@ -124,11 +124,9 @@ endif()
 # VTK
 find_package(VTK)
 if (VTK_FOUND)
+  add_definitions("-DUSE_VTK")
   include_directories(${VTK_INCLUDE_DIRS})
   link_libraries(${VTK_LIBRARIES})
-  add_definitions("-DUSE_VTK")
-  set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
-  set(test_vtk ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc)
 endif()
 
 # Partio
@@ -171,6 +169,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
+  ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
   ${mpm_SOURCE_DIR}/src/nodal_properties.cc
@@ -208,6 +207,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc
+    ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
     ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
