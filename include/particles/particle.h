@@ -277,6 +277,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute free surface
   bool compute_free_surface() override;
 
+  //! Assign normal vector
+  void assign_normal(const VectorDim& normal) override { normal_ = normal; };
+
+  //! Return normal vector
+  VectorDim normal() override { return normal_; };
+
   //! Return the number of neighbour particles
   unsigned nneighbours() const override { return neighbours_.size(); };
 
@@ -360,6 +366,8 @@ class Particle : public ParticleBase<Tdim> {
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
   //! Free surface
   bool free_surface_{false};
+  //! Free surface
+  Eigen::Matrix<double, Tdim, 1> normal_;
 
 };  // Particle class
 }  // namespace mpm

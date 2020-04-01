@@ -256,6 +256,12 @@ class ParticleBase {
   //! Compute free surface
   virtual bool compute_free_surface() = 0;
 
+  //! Assign normal vector
+  virtual void assign_normal(const VectorDim& normal) = 0;
+
+  //! Return normal vector
+  virtual VectorDim normal() = 0;
+
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;
 

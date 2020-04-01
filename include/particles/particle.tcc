@@ -232,6 +232,7 @@ void mpm::Particle<Tdim>::initialise() {
   stress_.setZero();
   traction_.setZero();
   velocity_.setZero();
+  normal_.setZero();
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
 
@@ -240,6 +241,7 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
+  this->properties_["normals"] = [&]() { return normal(); };
 }
 
 //! Assign material state variables from neighbour particle
