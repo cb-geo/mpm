@@ -126,6 +126,9 @@ class ParticleBase {
   //! Return volume
   virtual double volume() const = 0;
 
+  //! Return the approximate particle diameter
+  virtual double diameter() const = 0;
+
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 

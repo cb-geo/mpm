@@ -122,6 +122,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Return volume
   double volume() const override { return volume_; }
 
+  //! Return the approximate particle diameter
+  double diameter() const override {
+    if (Tdim == 2) return 2.0 * std::sqrt(volume_ / M_PI);
+    if (Tdim == 3) return 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
+  }
+
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
