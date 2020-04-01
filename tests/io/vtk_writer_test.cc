@@ -1,4 +1,4 @@
-#ifdef USE_MPI
+#ifdef USE_VTK
 #include <boost/filesystem.hpp>
 
 #include "catch.hpp"
