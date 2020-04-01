@@ -1979,24 +1979,33 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     std::set<mpm::Index> free_surface_particles;
     for (const auto p_id : free_surface_candidate_particles) {
       // Initialize renormalization matrix
-      Eigen::Matrix<double, Tdim, Tdim> renormalization_matrix;
-      renormalization_matrix.setZero();
+      Eigen::Matrix<double, Tdim, Tdim> renormalization_matrix_inv;
+      renormalization_matrix_inv.setZero();
 
       // Loop over neighbours
-      const auto& p_coord = map_particles_[p_id]->coordinates();
-      const auto& neighbour_particles = map_particles_[p_id]->neighbours();
+      const auto& particle = map_particles_[p_id];
+      const auto& p_coord = particle->coordinates();
+      const auto& neighbour_particles = particle->neighbours();
       for (const auto n_id : neighbour_particles) {
         const auto& n_coord = map_particles_[n_id]->coordinates();
         const VectorDim rel_coord = n_coord - p_coord;
-        const double rel_distance = rel_coord.norm();
+
+        // Compute kernel gradient
+        const double smoothing_length = 1.33 * particle->diameter();
+        const VectorDim kernel_gradient =
+            mpm::RadialBasisFunction::gradient<Tdim>(smoothing_length,
+                                                     -rel_coord, "gaussian");
+
+        // Inverse of renormalization matrix B
+        renormalization_matrix_inv +=
+            (particle->mass() / particle->mass_density()) * kernel_gradient *
+            rel_coord.transpose();
       }
 
-      // Matrix inversion to get renormalization_matrix
-
-      // Find matrix eigenvalue
-
       // Categorize based on lambda
-      double lambda = 0;
+      Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(
+          renormalization_matrix_inv);
+      double lambda = es.eigenvalues().minCoeff();
       bool secondary_check = false;
       if (lambda <= 0.2)
         free_surface_particles.insert(p_id);
@@ -2006,13 +2015,25 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
       // If secondary check is needed
       if (secondary_check) {
         // Compute numerical normal vector
-        VectorDim normal;
+        VectorDim temporary_vec;
+        temporary_vec.setZero();
         for (const auto n_id : neighbour_particles) {
           const auto& n_coord = map_particles_[n_id]->coordinates();
           const VectorDim rel_coord = n_coord - p_coord;
-          const double rel_distance = rel_coord.norm();
+
+          // Compute kernel gradient
+          const double smoothing_length = 1.33 * particle->diameter();
+          const VectorDim kernel_gradient =
+              mpm::RadialBasisFunction::gradient<Tdim>(smoothing_length,
+                                                       -rel_coord, "gaussian");
+
+          // Sum of kernel by volume
+          temporary_vec +=
+              (particle->mass() / particle->mass_density()) * kernel_gradient;
         }
-        normal *= 1. / normal.norm();
+        const VectorDim direction_vector =
+            -renormalization_matrix_inv.inverse() * temporary_vec;
+        const VectorDim normal = direction_vector / direction_vector.norm();
       }
     }
 
