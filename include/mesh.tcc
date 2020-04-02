@@ -1919,9 +1919,13 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
   bool status = true;
   try {
-    // Reset free surface cell
+    // Reset free surface cell and particles
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_free_surface,
                                        std::placeholders::_1, false));
+
+    this->iterate_over_particles(
+        std::bind(&mpm::ParticleBase<Tdim>::assign_free_surface,
+                  std::placeholders::_1, false));
 
     // First, we detect the cell with possible free surfaces through volume
     // fraction
