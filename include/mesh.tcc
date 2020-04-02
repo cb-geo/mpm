@@ -926,6 +926,20 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
       tbb::simple_partitioner());
 }
 
+//! Iterate over particles
+template <unsigned Tdim>
+template <typename Toper, typename Tpred>
+void mpm::Mesh<Tdim>::iterate_over_particles_predicate(Toper oper, Tpred pred) {
+  tbb::parallel_for(
+      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
+                              tbb_grain_size_),
+      [&](const tbb::blocked_range<int>& range) {
+        for (int i = range.begin(); i != range.end(); ++i)
+          if (pred(particles_[i])) oper(particles_[i]);
+      },
+      tbb::simple_partitioner());
+}
+
 //! Iterate over particle set
 template <unsigned Tdim>
 template <typename Toper>
@@ -2074,7 +2088,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
       if (free_surface) {
         particle->assign_free_surface(free_surface);
         particle->assign_normal(normal);
-        particle->initial_pressure(0.0);
         free_surface_particles.insert(p_id);
       }
     }

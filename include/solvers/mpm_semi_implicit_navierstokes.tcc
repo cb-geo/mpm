@@ -117,6 +117,19 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
 
     task_group.wait();
 
+    // Compute free surface cells, nodes, and particles
+    task_group.run([&] {
+      mesh_->compute_free_surface(volume_tolerance_);
+
+      // Assign initial pressure
+      mesh_->iterate_over_particles_predicate(
+          std::bind(&mpm::ParticleBase<Tdim>::initial_pressure,
+                    std::placeholders::_1, 0.0),
+          std::bind(&mpm::ParticleBase<Tdim>::free_surface,
+                    std::placeholders::_1));
+    });
+    task_group.wait();
+
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -154,9 +167,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
-
-    // Compute free surface cells, nodes, and particles
-    mesh_->compute_free_surface(volume_tolerance_);
 
     // Compute intermediate velocity
     mesh_->iterate_over_nodes_predicate(

@@ -221,6 +221,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_particles(Toper oper);
 
+  //! Iterate over particles with predicate
+  //! \tparam Toper Callable object typically a baseclass functor
+  //! \tparam Tpred Predicate
+  template <typename Toper, typename Tpred>
+  void iterate_over_particles_predicate(Toper oper, Tpred pred);
+
   //! Iterate over particle set
   //! \tparam Toper Callable object typically a baseclass functor
   //! \param[in] set_id particle set id
