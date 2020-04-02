@@ -1986,12 +1986,12 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
       const auto& particle = map_particles_[p_id];
       const auto& p_coord = particle->coordinates();
       const auto& neighbour_particles = particle->neighbours();
+      const double smoothing_length = 1.33 * particle->diameter();
       for (const auto n_id : neighbour_particles) {
         const auto& n_coord = map_particles_[n_id]->coordinates();
         const VectorDim rel_coord = n_coord - p_coord;
 
         // Compute kernel gradient
-        const double smoothing_length = 1.33 * particle->diameter();
         const VectorDim kernel_gradient =
             mpm::RadialBasisFunction::gradient<Tdim>(smoothing_length,
                                                      -rel_coord, "gaussian");
@@ -2028,7 +2028,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
           const VectorDim rel_coord = n_coord - p_coord;
 
           // Compute kernel gradient
-          const double smoothing_length = 1.33 * particle->diameter();
           const VectorDim kernel_gradient =
               mpm::RadialBasisFunction::gradient<Tdim>(smoothing_length,
                                                        -rel_coord, "gaussian");
@@ -2037,19 +2036,46 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
           temporary_vec +=
               (particle->mass() / particle->mass_density()) * kernel_gradient;
         }
-        const VectorDim direction_vector =
-            -renormalization_matrix_inv.inverse() * temporary_vec;
-        normal = direction_vector / direction_vector.norm();
+        normal = -renormalization_matrix_inv.inverse() * temporary_vec;
+        normal.normalize();
       }
 
       // If secondary check is needed
       if (secondary_check) {
+        // Construct scanning region
+        // TODO: spacing distance should be a function of porosity
+        const double spacing_distance = smoothing_length;
+        VectorDim t_coord = p_coord + spacing_distance * normal;
+
+        // Check all neighbours
+        for (const auto n_id : neighbour_particles) {
+          const auto& n_coord = map_particles_[n_id]->coordinates();
+          const VectorDim rel_coord_np = n_coord - p_coord;
+          const double distance_np = rel_coord_np.norm();
+          const VectorDim rel_coord_nt = n_coord - t_coord;
+          const double distance_nt = rel_coord_nt.norm();
+
+          free_surface = true;
+          if (distance_np < std::sqrt(2) * spacing_distance) {
+            if (std::acos(normal.dot(rel_coord_np) / distance_np) < M_PI / 4) {
+              free_surface = false;
+              break;
+            }
+          } else {
+            if (distance_nt < spacing_distance) {
+              free_surface = false;
+              break;
+            }
+          }
+        }
       }
 
       // Assign normal only to validated free surface
       if (free_surface) {
-        free_surface_particles.insert(p_id);
+        particle->assign_free_surface(free_surface);
         particle->assign_normal(normal);
+        particle->initial_pressure(0.0);
+        free_surface_particles.insert(p_id);
       }
     }
 
