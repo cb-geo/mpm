@@ -2002,19 +2002,25 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
             rel_coord.transpose();
       }
 
-      // Categorize based on lambda
+      // Compute lambda: minimum eigenvalue of B_inverse
       Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(
           renormalization_matrix_inv);
       double lambda = es.eigenvalues().minCoeff();
+
+      // Categorize particle based on lambda
+      bool free_surface = false;
       bool secondary_check = false;
+      bool interior = false;
       if (lambda <= 0.2)
-        free_surface_particles.insert(p_id);
+        free_surface = true;
       else if (lambda > 0.2 && lambda <= 0.75)
         secondary_check = true;
+      else
+        interior = true;
 
-      // If secondary check is needed
-      if (secondary_check) {
-        // Compute numerical normal vector
+      // Compute numerical normal vector
+      VectorDim normal;
+      if (!interior) {
         VectorDim temporary_vec;
         temporary_vec.setZero();
         for (const auto n_id : neighbour_particles) {
@@ -2033,7 +2039,17 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         }
         const VectorDim direction_vector =
             -renormalization_matrix_inv.inverse() * temporary_vec;
-        const VectorDim normal = direction_vector / direction_vector.norm();
+        normal = direction_vector / direction_vector.norm();
+      }
+
+      // If secondary check is needed
+      if (secondary_check) {
+      }
+
+      // Assign normal only to validated free surface
+      if (free_surface) {
+        free_surface_particles.insert(p_id);
+        particle->assign_normal(normal);
       }
     }
 
