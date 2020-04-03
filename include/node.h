@@ -42,9 +42,9 @@ class Node : public NodeBase<Tdim> {
   //! Initialise shared pointer to nodal properties pool
   //! \param[in] prop_id Property id in the nodal property pool
   //! \param[in] nodal_properties Shared pointer to nodal properties pool
-  void initialise_property_handle(const unsigned prop_id,
-                                  const std::shared_ptr<mpm::NodalProperties>&
-                                      property_handle) noexcept override;
+  void initialise_property_handle(
+      unsigned prop_id,
+      std::shared_ptr<mpm::NodalProperties> property_handle) noexcept override;
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase

@@ -48,8 +48,8 @@ class NodeBase {
   //! \param[in] prop_id Property id in the nodal property pool
   //! \param[in] nodal_properties Shared pointer to nodal properties pool
   virtual void initialise_property_handle(
-      const unsigned prop_id, const std::shared_ptr<mpm::NodalProperties>&
-                                  property_handle) noexcept = 0;
+      unsigned prop_id,
+      std::shared_ptr<mpm::NodalProperties> property_handle) noexcept = 0;
 
   //! Assign coordinates
   virtual void assign_coordinates(const VectorDim& coord) = 0;

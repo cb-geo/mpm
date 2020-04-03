@@ -499,7 +499,7 @@ class Mesh {
   //! Vector of generators for particle injections
   std::vector<mpm::Injection> particle_injections_;
   //! Nodal property pool
-  mpm::NodalProperties nodal_properties_;
+  std::shared_ptr<mpm::NodalProperties> nodal_properties_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
