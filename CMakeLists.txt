@@ -124,10 +124,9 @@ endif()
 # VTK
 find_package(VTK)
 if (VTK_FOUND)
+  add_definitions("-DUSE_VTK")
   include_directories(${VTK_INCLUDE_DIRS})
   link_libraries(${VTK_LIBRARIES})
-  add_definitions("-DUSE_VTK")
-  set(mpm_vtk ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc)
 endif()
 
 # Partio
@@ -172,6 +171,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
   ${mpm_SOURCE_DIR}/src/io/partio_writer.cc
+  ${mpm_SOURCE_DIR}/src/io/vtk_writer.cc
   ${mpm_SOURCE_DIR}/src/linear_solver.cc
   ${mpm_SOURCE_DIR}/src/material.cc
   ${mpm_SOURCE_DIR}/src/mpm.cc
@@ -243,7 +243,7 @@ if(MPM_BUILD_TESTING)
     add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
     enable_testing()
   else()
-    add_executable(mpmtest ${test_src} ${mpm_src} ${mpm_vtk})
+    add_executable(mpmtest ${mpm_src} ${test_src})
     add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
     enable_testing()
   endif()
@@ -252,6 +252,6 @@ endif()
 # Coverage
 find_package(codecov)
 if(ENABLE_COVERAGE)
-  add_executable(mpmtest_coverage ${mpm_vtk} ${mpm_src} ${test_src})
+  add_executable(mpmtest_coverage ${mpm_src} ${test_src})
   add_coverage(mpmtest_coverage)
 endif()
