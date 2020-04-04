@@ -1923,6 +1923,14 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_free_surface,
                                        std::placeholders::_1, false));
 
+    VectorDim temp_normal;
+    temp_normal.setZero();
+    this->iterate_over_particles_predicate(
+        std::bind(&mpm::ParticleBase<Tdim>::assign_normal,
+                  std::placeholders::_1, temp_normal),
+        std::bind(&mpm::ParticleBase<Tdim>::free_surface,
+                  std::placeholders::_1));
+
     this->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::assign_free_surface,
                   std::placeholders::_1, false));
