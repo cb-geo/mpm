@@ -1935,26 +1935,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         std::bind(&mpm::ParticleBase<Tdim>::assign_free_surface,
                   std::placeholders::_1, false));
 
-    // First, we detect the cell with possible free surfaces through volume
-    // fraction
-    // Reset volume fraction
-    this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_volume_fraction,
-                                       std::placeholders::_1, 0.0));
-
-    // Compute and assign volume fraction to each cell
-    for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
-         ++citr) {
-      if ((*citr)->status()) {
-        // Compute volume fraction
-        double cell_volume_fraction = 0.0;
-        for (const auto p_id : (*citr)->particles())
-          cell_volume_fraction += map_particles_[p_id]->volume();
-
-        cell_volume_fraction = cell_volume_fraction / (*citr)->volume();
-        (*citr)->assign_volume_fraction(cell_volume_fraction);
-      }
-    }
-
+    // First, we detect the cell with possible free surfaces
     // Compute boundary cells and nodes based on geometry
     std::set<mpm::Index> free_surface_candidate_cells;
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
@@ -1962,16 +1943,25 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
       // Cell contains particles
       if ((*citr)->status()) {
         bool candidate_cell = false;
-        // Check volume fraction only for boundary cell
-        if ((*citr)->volume_fraction() < tolerance) {
-          candidate_cell = true;
-        } else {
-          // Loop over neighbouring cells, if volume fraction is above
-          // tolerance, but a free surface cell
-          for (const auto n_id : (*citr)->neighbours()) {
-            if (map_cells_[n_id]->volume_fraction() < tolerance) {
-              candidate_cell = true;
-              break;
+        const auto& node_id = (*citr)->nodes_id();
+        // Loop over neighbouring cells
+        for (const auto n_id : (*citr)->neighbours()) {
+          if (!map_cells_[n_id]->status()) {
+            candidate_cell = true;
+            const auto& n_node_id = map_cells_[n_id]->nodes_id();
+
+            // Detect common node id
+            std::set<mpm::Index> common_node_id;
+            std::set_intersection(
+                node_id.begin(), node_id.end(), n_node_id.begin(),
+                n_node_id.end(),
+                std::inserter(common_node_id, common_node_id.begin()));
+
+            // Assign free surface nodes
+            if (!common_node_id.empty()) {
+              for (const auto common_id : common_node_id) {
+                map_nodes_[common_id]->assign_free_surface(candidate_cell);
+              }
             }
           }
         }
@@ -1980,13 +1970,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         if (candidate_cell) {
           (*citr)->assign_free_surface(candidate_cell);
           free_surface_candidate_cells.insert((*citr)->id());
-
-          // FIXME: Assigned all FS Cell nodes to be free surface node (to be
-          // removed/optimized)
-          const auto& node_id = (*citr)->nodes_id();
-          for (const auto id : node_id) {
-            map_nodes_[id]->assign_free_surface(candidate_cell);
-          }
         }
       }
     }
@@ -2046,6 +2029,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 
       // Compute numerical normal vector
       VectorDim normal;
+      normal.setZero();
       if (!interior) {
         VectorDim temporary_vec;
         temporary_vec.setZero();
