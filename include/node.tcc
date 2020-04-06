@@ -526,26 +526,18 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
 //! density = mass / lumped volume
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::compute_density() {
-  try {
-    const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
+  const double tolerance = 1.E-16;  // std::numeric_limits<double>::lowest();
 
-    for (unsigned phase = 0; phase < Tnphases; ++phase) {
-      if (mass_(phase) > tolerance) {
-        if (volume_(phase) > tolerance)
-          density_(phase) = mass_(phase) / volume_(phase);
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    if (mass_(phase) > tolerance) {
+      if (volume_(phase) > tolerance)
+        density_(phase) = mass_(phase) / volume_(phase);
 
-        // Check to see if value is below threshold
-        if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
+      // Check to see if value is below threshold
+      if (std::abs(density_(phase)) < 1.E-15) density_(phase) = 0.;
 
-      } else
-        throw std::runtime_error("Nodal mass is zero or below threshold");
-    }
-
-    // Apply velocity constraints, which also sets acceleration to 0,
-    // when velocity is set.
-    this->apply_velocity_constraints();
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    } else
+      throw std::runtime_error("Nodal mass is zero or below threshold");
   }
 }
 
