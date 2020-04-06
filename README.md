@@ -10,13 +10,13 @@
 [![Coverity](https://scan.coverity.com/projects/14389/badge.svg)](https://scan.coverity.com/projects/14389/badge.svg)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/cb-geo/mpm.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cb-geo/mpm/context:cpp)
 [![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/cb-geo/mpm/projects/)
-[![Discourse forum](https://img.shields.io/badge/forum-mpm-blueviolet.svg)](https://forum.cb-geo.com/c/mpm)
+[![Discourse forum](https://img.shields.io/badge/forum-mpm-blueviolet.svg)](https://cb-geo.discourse.group/c/mpm/)
 
 ## Documentation
 
 Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for information on compiling, and running the code. The documentation also include the MPM theory.
 
-If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://forum.cb-geo.com/c/mpm). 
+If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://cb-geo.discourse.group/c/mpm/). 
 
 ## Running code on Docker
 
