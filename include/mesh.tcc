@@ -1984,9 +1984,26 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
           particle_ids.end());
     }
 
+    // Compute boundary particles based on density function
+    // Lump cell volume to nodes
+    this->iterate_over_cells(std::bind(
+        &mpm::Cell<Tdim>::map_cell_volume_to_nodes, std::placeholders::_1, 0));
+
+    // Compute nodal value of mass density
+    this->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::compute_density, std::placeholders::_1),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    std::set<mpm::Index> free_surface_candidate_particles_second;
+    for (const auto p_id : free_surface_candidate_particles) {
+      const auto& particle = map_particles_[p_id];
+      bool status = particle->compute_free_surface();
+      if (status) free_surface_candidate_particles_second.insert(p_id);
+    }
+
     // Find free surface particles through geometry
     std::set<mpm::Index> free_surface_particles;
-    for (const auto p_id : free_surface_candidate_particles) {
+    for (const auto p_id : free_surface_candidate_particles_second) {
       // Initialize renormalization matrix
       Eigen::Matrix<double, Tdim, Tdim> renormalization_matrix_inv;
       renormalization_matrix_inv.setZero();
@@ -2107,6 +2124,11 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 //     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_volume_fraction,
 //                                        std::placeholders::_1, 0.0));
 
+//     // Reset free surface particle
+//     this->iterate_over_particles(
+//         std::bind(&mpm::ParticleBase<Tdim>::assign_free_surface,
+//                   std::placeholders::_1, false));
+
 //     // Compute and assign volume fraction to each cell
 //     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
 //          ++citr) {
@@ -2195,14 +2217,16 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 //         std::placeholders::_1));
 
 //     // Evaluate free surface particles
-//     this->iterate_over_particles(std::bind(
-//         &mpm::ParticleBase<Tdim>::compute_free_surface,
-//         std::placeholders::_1));
-
-//     // Assign pressure at free surface to be zero
-//     std::set<mpm::Index> boundary_particles = this->free_surface_particles();
-//     for (const auto boundary_particle : boundary_particles)
-//       map_particles_[boundary_particle]->initial_pressure(0.0);
+//     std::set<mpm::Index> boundary_particles;
+//     for (auto pitr = this->particles_.cbegin(); pitr !=
+//     this->particles_.cend();
+//          ++pitr) {
+//       bool status = (*pitr)->compute_free_surface();
+//       if (status) {
+//         (*pitr)->assign_free_surface(status);
+//         boundary_particles.insert((*pitr)->id());
+//       }
+//     }
 
 //   } catch (std::exception& exception) {
 //     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
