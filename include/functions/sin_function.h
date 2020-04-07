@@ -32,6 +32,8 @@ class SinFunction : public FunctionBase {
   double x0_{0.};
   //! a_
   double a_{0.};
+  //! xrange_
+  std::vector<double> xrange_{0., 0.};
 };  // SinFunction class
 }  // namespace mpm
 
