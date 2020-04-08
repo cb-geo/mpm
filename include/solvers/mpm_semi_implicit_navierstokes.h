@@ -8,7 +8,6 @@
 #include "mpm_base.h"
 
 #include "assembler_base.h"
-#include "assembler_eigen_semi_implicit_navierstokes.h"
 #include "cg_eigen.h"
 #include "solver_base.h"
 
