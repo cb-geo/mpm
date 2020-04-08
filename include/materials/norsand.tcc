@@ -345,7 +345,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
 
   // Compute dF / dM
-  double dF_dM = -1.0 / N_ *
+  double dF_dM = -1.0 / N_ * (mean_p + p_cohesion) *
                  (1 + (N_ - 1) * std::pow(((mean_p + p_cohesion) /
                                            (p_image + p_cohesion + p_dilation)),
                                           (N_ / (1 - N_))));
