@@ -358,7 +358,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   Vector6d dj2_dsigma = dev_stress;
   dj2_dsigma(3) *= 2.0;
   dj2_dsigma(4) *= 2.0;
-  dj2_dsigma(5) *= 2.0;  
+  dj2_dsigma(5) *= 2.0;
 
   // Compute dj3 / dsigma
   Eigen::Matrix<double, 3, 1> dev1;
@@ -387,18 +387,28 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dj3_dsigma(5) = 0.;
   }
 
-  // Define R
-  double R = j3 / 2.0 * pow(j2 / 3.0, -1.5);
+  // Declare R as zero to avoid division by zero J2
+  double R = 0.0;
 
   // Define derivatives of R in terms of J2 and J3
-  double dR_dj2 = -9.0 / 4.0 * sqrt(3.0) * j3 * pow(j2, -2.5);
-  double dR_dj3 = 3.0 / 2.0 * sqrt(3.0) * pow(j2, -1.5);
+  double dR_dj2 = -9.0 / 4.0 * sqrt(3.0) * j3;
+  double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
+
+  // Update when J2 is non zero
+  if (abs(j2) > 1E-6) {
+    // Update R
+    R = j3 / 2.0 * pow(j2 / 3.0, -1.5);
+    // Update derivatives of R
+    dR_dj2 *= pow(j2, -2.5);
+    dR_dj3 *= pow(j2, -1.5);
+  }
 
   // Compute derivative of theta in terms of R
   double dtheta_dR = 1.0 / 3.0 / sqrt(1 - pow(R, 2.0));
 
   // Compute dtheta / dsigma
-  Vector6d dtheta_dsigma = dtheta_dR * ((dR_dj2 * dj2_dsigma) + (dR_dj3 * dj3_dsigma));
+  Vector6d dtheta_dsigma =
+      dtheta_dR * ((dR_dj2 * dj2_dsigma) + (dR_dj3 * dj3_dsigma));
 
   if (Tdim == 2) {
     dtheta_dsigma(4) = 0.;
