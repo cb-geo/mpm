@@ -245,9 +245,9 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Initialise r value
   double r_val = 0.;
   // Initialise dr / dJ2
-  double dr_dj2 = (-9 * std::sqrt(6.)) * j3;
+  double dr_dj2 = (-9.0 / 4.0 * std::sqrt(3.)) * j3;
   // Initialise dr / dJ3
-  double dr_dj3 = 3. * std::sqrt(6.);
+  double dr_dj3 = 3.0 / 2.0 * std::sqrt(3.);
   if (fabs(rho) > std::numeric_limits<int>::epsilon()) {
     // Compute dRho / dSigma
     drho_dsigma = 1. / rho * dev_stress;
