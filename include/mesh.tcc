@@ -1960,7 +1960,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
             // Assign free surface nodes
             if (!common_node_id.empty()) {
               for (const auto common_id : common_node_id) {
-                map_nodes_[common_id]->assign_free_surface(candidate_cell);
+                map_nodes_[common_id]->assign_free_surface(true);
               }
             }
           }
@@ -1968,7 +1968,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 
         // Assign free surface cell
         if (candidate_cell) {
-          (*citr)->assign_free_surface(candidate_cell);
+          (*citr)->assign_free_surface(true);
           free_surface_candidate_cells.insert((*citr)->id());
         }
       }
@@ -2099,7 +2099,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 
       // Assign normal only to validated free surface
       if (free_surface) {
-        particle->assign_free_surface(free_surface);
+        particle->assign_free_surface(true);
         particle->assign_normal(normal);
         free_surface_particles.insert(p_id);
       }
