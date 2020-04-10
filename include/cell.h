@@ -254,7 +254,8 @@ class Cell {
   //! \param[in] pvolume volume weight
   void compute_local_poisson_right(const Eigen::VectorXd& shapefn,
                                    const Eigen::MatrixXd& grad_shapefn,
-                                   double pvolume) noexcept;
+                                   double pvolume,
+                                   double multiplier = 1.0) noexcept;
 
   //! Return local correction matrix
   const Eigen::MatrixXd& correction_matrix() { return correction_matrix_; };

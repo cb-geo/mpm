@@ -144,8 +144,8 @@ bool mpm::FluidParticle<Tdim>::map_poisson_right_to_cell() {
   try {
     // Compute local poisson rhs matrix
     cell_->compute_local_poisson_right(
-        shapefn_, dn_dx_,
-        material_->template property<double>(std::string("density")) * volume_);
+        shapefn_, dn_dx_, volume_,
+        material_->template property<double>(std::string("density")));
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

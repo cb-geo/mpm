@@ -903,12 +903,12 @@ void mpm::Cell<Tdim>::compute_local_laplacian(
 template <unsigned Tdim>
 void mpm::Cell<Tdim>::compute_local_poisson_right(
     const Eigen::VectorXd& shapefn, const Eigen::MatrixXd& grad_shapefn,
-    double pvolume) noexcept {
+    double pvolume, double multiplier) noexcept {
 
   std::lock_guard<std::mutex> guard(cell_mutex_);
   for (unsigned i = 0; i < Tdim; i++) {
     poisson_right_matrix_.block(0, i * nnodes_, nnodes_, nnodes_) +=
-        shapefn * grad_shapefn.col(i).transpose() * pvolume;
+        shapefn * grad_shapefn.col(i).transpose() * multiplier * pvolume;
   }
 }
 
