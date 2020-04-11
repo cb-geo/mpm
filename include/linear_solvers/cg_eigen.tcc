@@ -1,4 +1,4 @@
-//! Conjugate Gradient Solver
+//! Conjugate Gradient with default initial guess
 template <typename Traits>
 Eigen::VectorXd mpm::CGEigen<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
@@ -16,7 +16,7 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
       x = solver.solve(b);
 
       if (solver.info() != Eigen::Success) {
-        throw std::runtime_error("Fail to solve intermediate acceleration\n");
+        throw std::runtime_error("Fail to solve linear systems!\n");
       }
 
     } else if (solver_type == "lscg") {
@@ -32,7 +32,7 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
       x = solver.solve(b);
 
       if (solver.info() != Eigen::Success) {
-        throw std::runtime_error("Fail to solve intermediate acceleration\n");
+        throw std::runtime_error("Fail to solve linear systems!\n");
       }
     }
 
@@ -42,7 +42,7 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
   return x;
 }
 
-//! Conjugate Gradient Solver
+//! Conjugate Gradient with defined initial guess
 template <typename Traits>
 Eigen::VectorXd mpm::CGEigen<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
@@ -60,7 +60,7 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
       x = solver.solveWithGuess(b, initial_guess);
 
       if (solver.info() != Eigen::Success) {
-        throw std::runtime_error("Fail to solve intermediate acceleration\n");
+        throw std::runtime_error("Fail to solve linear systems!\n");
       }
 
     } else if (solver_type == "lscg") {
@@ -73,7 +73,7 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
       x = solver.solveWithGuess(b, initial_guess);
 
       if (solver.info() != Eigen::Success) {
-        throw std::runtime_error("Fail to solve intermediate acceleration\n");
+        throw std::runtime_error("Fail to solve linear systems!\n");
       }
     }
 
@@ -82,38 +82,3 @@ Eigen::VectorXd mpm::CGEigen<Traits>::solve(
   }
   return x;
 }
-
-/*
-//! Precondition Jacobian
-template <typename Traits>
-typename mpm::CGEigen<Traits>::Eigen::VectorXd
-    mpm::CGEigen<Traits>::precondition_jacobian() {
-  const size_t n = vec_b_->size();
-  Eigen::VectorXd vm(n);
-
-  vm.setZero();
-  for (auto& mat_a : *mat_a_) {
-    for (size_t i = 0; i < n; ++i) {
-      vm[i] += mat_a.coeff(i, i);
-    }
-  }
-  for (size_t i = 0; i < n; ++i) {
-    vm[i] = 1 / vm[i];
-    // When beta is zero, the stiffness matrix will have zero value elements
-    if (!std::isfinite(vm[i])) vm[i] = 1.0;
-  }
-  vm = vm.array() * vrestraints_.array();
-  return vm;
-}
-
-//! Cholesky solver
-template <typename Traits>
-bool mpm::CGEigen<Traits>::cholesky() {
-  SparseMatrix stiff;
-  for (auto& mat_a : *mat_a_) stiff += mat_a;
-
-  Eigen::SimplicialCholesky<SparseMatrix> cholesky(stiff);
-  *vec_x_ = cholesky.solve(*vec_b_);
-  return (cholesky.info() == Eigen::Success);
-}
-*/
