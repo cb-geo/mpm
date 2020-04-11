@@ -1,8 +1,8 @@
 //! Conjugate Gradient Solver
-template <unsigned Tdim>
-Eigen::VectorXd mpm::CGEigen<Tdim>::solve(const Eigen::SparseMatrix<double>& A,
-                                          const Eigen::VectorXd& b,
-                                          std::string solver_type) {
+template <typename Traits>
+Eigen::VectorXd mpm::CGEigen<Traits>::solve(
+    const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
+    std::string solver_type) {
   Eigen::VectorXd x;
   try {
 
@@ -43,8 +43,8 @@ Eigen::VectorXd mpm::CGEigen<Tdim>::solve(const Eigen::SparseMatrix<double>& A,
 }
 
 //! Conjugate Gradient Solver
-template <unsigned Tdim>
-Eigen::VectorXd mpm::CGEigen<Tdim>::solve(
+template <typename Traits>
+Eigen::VectorXd mpm::CGEigen<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
     std::string solver_type, const Eigen::VectorXd& initial_guess) {
   Eigen::VectorXd x;
@@ -85,9 +85,9 @@ Eigen::VectorXd mpm::CGEigen<Tdim>::solve(
 
 /*
 //! Precondition Jacobian
-template <unsigned Tdim>
-typename mpm::CGEigen<Tdim>::Eigen::VectorXd
-    mpm::CGEigen<Tdim>::precondition_jacobian() {
+template <typename Traits>
+typename mpm::CGEigen<Traits>::Eigen::VectorXd
+    mpm::CGEigen<Traits>::precondition_jacobian() {
   const size_t n = vec_b_->size();
   Eigen::VectorXd vm(n);
 
@@ -107,8 +107,8 @@ typename mpm::CGEigen<Tdim>::Eigen::VectorXd
 }
 
 //! Cholesky solver
-template <unsigned Tdim>
-bool mpm::CGEigen<Tdim>::cholesky() {
+template <typename Traits>
+bool mpm::CGEigen<Traits>::cholesky() {
   SparseMatrix stiff;
   for (auto& mat_a : *mat_a_) stiff += mat_a;
 

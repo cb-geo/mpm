@@ -28,9 +28,7 @@ static Register<mpm::AssemblerBase<3>,
         "ParallelSemiImplicitNavierStokes3D");
 
 // Linear Solver collections
-// Solver 2D
-static Register<mpm::SolverBase<2>, mpm::CGEigen<2>, unsigned, double>
-    solver_eigen_cg_2d("EigenCG2D");
-// Solver 3D
-static Register<mpm::SolverBase<3>, mpm::CGEigen<3>, unsigned, double>
-    solver_eigen_cg_3d("EigenCG3D");
+// Eigen Conjugate Gradient
+static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
+                mpm::CGEigen<Eigen::SparseMatrix<double>>, unsigned, double>
+    solver_eigen_cg("EigenCG");

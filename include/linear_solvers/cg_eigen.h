@@ -14,15 +14,15 @@ namespace mpm {
 
 //! MPM Eigen CG class
 //! \brief Conjugate Gradient solver class using Eigen
-template <unsigned Tdim>
-class CGEigen : public SolverBase<Tdim> {
+template <typename Traits>
+class CGEigen : public SolverBase<Traits> {
  public:
   //! Constructor
   //! \param[in] max_iter Maximum number of iterations
 
   //! \param[in] tolerance Tolerance for solver to achieve convergence
   CGEigen(unsigned max_iter, double tolerance)
-      : mpm::SolverBase<Tdim>(max_iter, tolerance) {
+      : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
     console_ = spdlog::stdout_color_mt("EigenSolver");
   };
@@ -42,11 +42,11 @@ class CGEigen : public SolverBase<Tdim> {
 
  protected:
   //! Maximum number of iterations
-  using SolverBase<Tdim>::max_iter_;
+  using SolverBase<Traits>::max_iter_;
   //! Tolerance
-  using SolverBase<Tdim>::tolerance_;
+  using SolverBase<Traits>::tolerance_;
   //! Logger
-  using SolverBase<Tdim>::console_;
+  using SolverBase<Traits>::console_;
   //! cg_type_ (leastSquaresConjugateGradient or ConjugateGradient)
   std::string cg_type_;
 };

@@ -81,7 +81,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   //! Matrix assembler object
   std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler_;
   //! Matrix solver object
-  std::shared_ptr<mpm::SolverBase<Tdim>> matrix_solver_;
+  std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>> matrix_solver_;
   //! Volume tolerance for free surface
   double volume_tolerance_{0};
 
