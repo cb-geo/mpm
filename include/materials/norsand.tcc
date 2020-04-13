@@ -400,15 +400,15 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Update when J2 is non zero
   if (abs(j2) > 1.0E-6) {
     // Update R
-    R = j3 / 2.0 * pow(j2 / 3.0, -1.5);
+    R = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
     // Update derivatives of R
-    dR_dj2 *= pow(j2, -2.5);
-    dR_dj3 *= pow(j2, -1.5);
+    dR_dj2 *= std::pow(j2, -2.5);
+    dR_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
-    if (abs(1 - pow(R, 2.0)) < 1.0E-6) {
+    if (abs(1 - R * R) < 1.0E-6) {
       dtheta_dR = 1.0 / 3.0 / sqrt(1.0E-6);
     } else {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1 - pow(R, 2.0));
+      dtheta_dR = 1.0 / 3.0 / sqrt(1 - R * R);
     }
   }
 
