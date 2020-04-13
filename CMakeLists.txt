@@ -106,6 +106,12 @@ if (MKL_FOUND)
   endif()
 endif()
 
+# PETSc
+find_package(PETSc COMPONENTS C)
+if (PETSC_FOUND)
+  include_directories(${PETSC_INCLUDES})
+  link_libraries(${PETSC_LIBRARIES})
+endif()
 
 # KaHIP
 if (MPI_FOUND)
