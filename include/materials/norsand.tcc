@@ -80,7 +80,7 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       // p_dilation
       {"p_dilation", p_dilation_initial_},
       // Equivalent plastic deviatoric strain
-      {"epds", 0.},
+      {"pdstrain", 0.},
       // Plastic strain components
       {"plastic_strain0", 0.},
       {"plastic_strain1", 0.},
@@ -229,7 +229,7 @@ template <unsigned Tdim>
 void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
 
   // Compute current zeta cohesion
-  double zeta_cohesion = exp(-m_cohesion_ * (*state_vars).at("epds"));
+  double zeta_cohesion = exp(-m_cohesion_ * (*state_vars).at("pdstrain"));
   zeta_cohesion = check_one(zeta_cohesion);
   zeta_cohesion = check_low(zeta_cohesion);
 
@@ -238,7 +238,7 @@ void mpm::NorSand<Tdim>::compute_p_bond(mpm::dense_map* state_vars) {
   (*state_vars).at("p_cohesion") = p_cohesion;
 
   // Compute current zeta dilation
-  double zeta_dilation = exp(-m_dilation_ * (*state_vars).at("epds"));
+  double zeta_dilation = exp(-m_dilation_ * (*state_vars).at("pdstrain"));
   zeta_dilation = check_one(zeta_dilation);
   zeta_dilation = check_low(zeta_dilation);
 
@@ -459,7 +459,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
     const double dpcohesion_depsd =
         -p_cohesion_initial_ * m_cohesion_ *
-        exp(-m_cohesion_ * (*state_vars).at("epds"));
+        exp(-m_cohesion_ * (*state_vars).at("pdstrain"));
 
     // Derivatives in respect to p_dilation
     const double dF_dpdilation =
@@ -469,7 +469,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
     const double dpdilation_depsd =
         -p_dilation_initial_ * m_dilation_ *
-        exp(-m_dilation_ * (*state_vars).at("epds"));
+        exp(-m_dilation_ * (*state_vars).at("pdstrain"));
 
     hardening_term = dF_dpi * dpi_depsd * dF_dsigma_deviatoric +
                      dF_dpcohesion * dpcohesion_depsd * dF_dsigma_deviatoric +
@@ -568,7 +568,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   (*state_vars).at("plastic_strain5") += dpstrain(5);
 
   // Update equivalent plastic deviatoric strain
-  (*state_vars).at("epds") =
+  (*state_vars).at("pdstrain") =
       std::sqrt(2. / 9. *
                     (std::pow(((*state_vars).at("plastic_strain0") -
                                (*state_vars).at("plastic_strain1")),
