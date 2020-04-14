@@ -14,7 +14,7 @@
 
 ## Documentation
 
-Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for information on compiling, and running the code. The documentation also include the MPM theory.
+Please refer to [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for information on compiling, and running the code. The documentation also include the MPM theory.
 
 If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://cb-geo.discourse.group/c/mpm/).
 
@@ -103,7 +103,7 @@ cd ~/workspace/ && git clone https://github.com/schulzchristian/KaHIP && \
 ```
 
 ## Compile
-> See [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for more detailed instructions.
+> See [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for more detailed instructions.
 
 0. Run `mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=g++ ..`.
 
@@ -157,7 +157,7 @@ Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical 
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
 
 ## Run MPM
-> See [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for more detailed instructions.
+> See [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for more detailed instructions.
 
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
