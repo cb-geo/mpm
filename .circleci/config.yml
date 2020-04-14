@@ -16,6 +16,8 @@ jobs:
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
+            export PETSC_ARCH=arch-linux2-c-opt
+            export PETSC_DIR=/home/cbgeo/petsc/
             cmake -GNinja -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             ninja -j2
             ctest -VV
@@ -32,6 +34,8 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
+            export PETSC_ARCH=arch-linux2-c-opt
+            export PETSC_DIR=/home/cbgeo/petsc/
             scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             scan-build -k -V ninja -j2
             ctest -VV
@@ -64,6 +68,8 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
+            export PETSC_ARCH=arch-linux2-c-opt
+            export PETSC_DIR=/home/cbgeo/petsc/
             cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
