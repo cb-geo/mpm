@@ -147,18 +147,21 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
                (dev_stress(0) * std::pow(dev_stress(4), 2)) -
                (dev_stress(1) * std::pow(dev_stress(5), 2)));
 
-  // Compute Lode angle value
-  double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
+  // Compute Lode angle value, check for J2
+  double lode_angle_val = 0.0;
+  if (abs(j2) > 1.0E-6) {
+    lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
+  }
   if (lode_angle_val > 1.0) lode_angle_val = 1.0;
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
-  // Compute Lode angle (sin convention)
-  double lode_angle = (1. / 3.) * asin(lode_angle_val);
-  if (lode_angle > M_PI / 6.) lode_angle = M_PI / 6.;
-  if (lode_angle < -M_PI / 6.) lode_angle = -M_PI / 6.;
+  // Compute Lode angle (cos convention)
+  double lode_angle = (1. / 3.) * acos(lode_angle_val);
+  if (lode_angle > M_PI / 3.) lode_angle = M_PI / 3.;
+  if (lode_angle < 0.) lode_angle = 0.;
 
-  // Compute M_theta (Jefferies and Shuttle, 2011)
-  const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
+  // Compute M_theta (Jefferies and Shuttle, 2011 - paper in sin lode angle)
+  const double cos_lode_angle = cos(3.0 / 2.0 * lode_angle);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
 
   // Store to return
@@ -342,7 +345,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
   dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
 
-  const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
+  const double sin_lode_angle = sin(3.0 / 2.0 * lode_angle);
 
   // Compute dF / dM
   double dF_dM = -1.0 / N_ * (mean_p + p_cohesion) *
@@ -352,7 +355,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Compute dM / dtehta
   const double dM_dtheta =
-      3. / 2. * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
+      3.0 / 2.0 * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
 
   // Compute dj2 / dsigma
   Vector6d dj2_dsigma = dev_stress;
@@ -395,7 +398,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
 
   // Compute derivative of theta in terms of R
-  double dtheta_dR = 1.0 / 3.0;
+  double dtheta_dR = -1.0 / 3.0;
 
   // Update when J2 is non zero
   if (abs(j2) > 1.0E-6) {
@@ -406,9 +409,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dR_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
     if (abs(1 - R * R) < 1.0E-6) {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1.0E-6);
+      dtheta_dR = -1.0 / 3.0 / sqrt(1.0E-6);
     } else {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1 - R * R);
+      dtheta_dR = -1.0 / 3.0 / sqrt(1 - R * R);
     }
   }
 
