@@ -130,7 +130,7 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_dilation") ==
               Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("epds") == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
@@ -281,7 +281,8 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
             Approx(210645.159465475).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") == Approx(0.000).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") == Approx(0.000).epsilon(Tolerance));
-    REQUIRE(state_vars.at("epds") == Approx(0.0057132055).epsilon(Tolerance));
+    REQUIRE(state_vars.at("pdstrain") ==
+            Approx(0.0057132055).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
             Approx(0.0066549427).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain1") ==
@@ -406,7 +407,7 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
               Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_dilation") ==
               Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
-      REQUIRE(state_variables.at("epds") == Approx(0.0).epsilon(Tolerance));
+      REQUIRE(state_variables.at("pdstrain") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain1") ==
@@ -539,9 +540,9 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stresses
-    REQUIRE(stress(0) == Approx(-3.576646312808445E+05).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(-0.687049973252265E+05).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(-0.687049973252265E+05).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(-3.576645613537115E+05).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-0.687043551372619E+05).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-0.687043551372619E+05).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
@@ -552,14 +553,15 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
     REQUIRE(state_vars.at("void_ratio") ==
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") ==
-            Approx(0.7546094734).epsilon(Tolerance));
+            Approx(0.7546089207).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
-            Approx(233668.9257179402).epsilon(Tolerance));
+            Approx(233670.2172514587).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") ==
-            Approx(9.3275267945403E+03).epsilon(Tolerance));
+            Approx(9.3275328975429E+03).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") ==
-            Approx(1.96549354554184E+04).epsilon(Tolerance));
-    REQUIRE(state_vars.at("epds") == Approx(0.0034807597).epsilon(Tolerance));
+            Approx(1.96549386704747E+04).epsilon(Tolerance));
+    REQUIRE(state_vars.at("pdstrain") ==
+            Approx(0.0034807597).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
             Approx(0.0044035862).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain1") ==
