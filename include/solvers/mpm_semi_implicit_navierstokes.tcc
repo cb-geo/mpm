@@ -266,8 +266,9 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
         Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
     // Create matrix solver
     matrix_solver_ =
-        Factory<mpm::SolverBase<Tdim>, unsigned, double>::instance()->create(
-            solver_type, std::move(max_iter), std::move(tolerance));
+        Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
+                double>::instance()
+            ->create(solver_type, std::move(max_iter), std::move(tolerance));
     // Assign mesh pointer to assembler
     matrix_assembler_->assign_mesh_pointer(mesh_);
 

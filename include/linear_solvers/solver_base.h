@@ -3,7 +3,7 @@
 
 #include "spdlog/spdlog.h"
 namespace mpm {
-template <unsigned Tdim>
+template <typename Traits>
 class SolverBase {
  public:
   //! Constructor with min and max iterations and tolerance
