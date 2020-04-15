@@ -1,19 +1,16 @@
 //! Compute mean stress p
-inline double mpm::tensor::compute_mean_p(
+inline const double mpm::tensor::compute_mean_p(
     const Eigen::Matrix<double, 6, 1>& stress) {
-
   // Compute mean p in tension positive
-  double mean_p = 1. / 3. * (stress(0) + stress(1) + stress(2));
-
-  return mean_p;
+  return (1. / 3. * (stress(0) + stress(1) + stress(2)));
 }
 
 //! Compute deviatoric stress
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_deviatoric_stress(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_deviatoric_stress(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute mean p in tension positive
-  double mean_p = compute_mean_p(stress);
+  const double mean_p = compute_mean_p(stress);
 
   // Compute deviatoric by subtracting volumetric part
   Eigen::Matrix<double, 6, 1> dev_stress = stress;
@@ -23,21 +20,21 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_deviatoric_stress(
 }
 
 //! Compute J2 invariant
-inline double mpm::tensor::compute_j2(
+inline const double mpm::tensor::compute_j2(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
-  double j2 = (std::pow((stress(0) - stress(1)), 2) +
-               std::pow((stress(1) - stress(2)), 2) +
-               std::pow((stress(0) - stress(2)), 2)) /
-                  6.0 +
-              std::pow(stress(3), 2) + std::pow(stress(4), 2) +
-              std::pow(stress(5), 2);
+  const double j2 = (std::pow((stress(0) - stress(1)), 2) +
+                     std::pow((stress(1) - stress(2)), 2) +
+                     std::pow((stress(0) - stress(2)), 2)) /
+                        6.0 +
+                    std::pow(stress(3), 2) + std::pow(stress(4), 2) +
+                    std::pow(stress(5), 2);
 
   return j2;
 }
 
 //! Compute J3 invariant
-inline double mpm::tensor::compute_j3(
+inline const double mpm::tensor::compute_j3(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute deviatoric stress
@@ -54,24 +51,24 @@ inline double mpm::tensor::compute_j3(
 }
 
 //! Compute deviatoric q
-inline double mpm::tensor::compute_deviatoric_q(
+inline const double mpm::tensor::compute_deviatoric_q(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2 from
-  double j2 = compute_j2(stress);
+  const double j2 = compute_j2(stress);
 
-  double deviatoric_q = std::sqrt(3 * j2);
+  const double deviatoric_q = std::sqrt(3 * j2);
 
   return deviatoric_q;
 }
 
 //! Compute Lode angle
-inline double mpm::tensor::compute_lode_angle(
+inline const double mpm::tensor::compute_lode_angle(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute j2 and j3
-  double j2 = compute_j2(stress);
-  double j3 = compute_j3(stress);
+  const double j2 = compute_j2(stress);
+  const double j3 = compute_j3(stress);
 
   // Compute Lode angle value
   double lode_angle_val = 0.0;
@@ -90,7 +87,7 @@ inline double mpm::tensor::compute_lode_angle(
 }
 
 //! Compute derivative of p in terms of stress sigma
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dp_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dp_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   Eigen::Matrix<double, 6, 1> dp_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
@@ -102,11 +99,11 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dp_dsigma(
 }
 
 //! Compute derivative of q in terms of stress sigma
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dq_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dq_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute q
-  double deviatoric_q = compute_deviatoric_q(stress);
+  const double deviatoric_q = compute_deviatoric_q(stress);
 
   // Compute deviatoric stress
   Eigen::Matrix<double, 6, 1> dev_stress = compute_deviatoric_stress(stress);
@@ -126,7 +123,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dq_dsigma(
 }
 
 //! Compute derivative of J2 in terms of stress sigma
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj2_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj2_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute deviatoric stress
@@ -142,14 +139,15 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj2_dsigma(
 }
 
 //! Compute derivative of J3 in terms of stress sigma
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj3_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj3_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2
-  double j2 = compute_j2(stress);
+  const double j2 = compute_j2(stress);
 
   // Compute deviatoric stress
-  Eigen::Matrix<double, 6, 1> dev_stress = compute_deviatoric_stress(stress);
+  const Eigen::Matrix<double, 6, 1> dev_stress =
+      compute_deviatoric_stress(stress);
 
   // Compute dj3 / dsigma
   Eigen::Matrix<double, 3, 1> dev1;
@@ -177,20 +175,20 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj3_dsigma(
 }
 
 //! Compute derivative of Lode angle theta in terms of stress sigma
-inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dtheta_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2
-  double j2 = compute_j2(stress);
+  const double j2 = compute_j2(stress);
 
   // Compute J3
-  double j3 = compute_j3(stress);
+  const double j3 = compute_j3(stress);
 
   // Compute dj2_dsigma
-  Eigen::Matrix<double, 6, 1> dj2_dsigma = compute_dj2_dsigma(stress);
+  const Eigen::Matrix<double, 6, 1> dj2_dsigma = compute_dj2_dsigma(stress);
 
   // Compute dj3_dsigma
-  Eigen::Matrix<double, 6, 1> dj3_dsigma = compute_dj3_dsigma(stress);
+  const Eigen::Matrix<double, 6, 1> dj3_dsigma = compute_dj3_dsigma(stress);
 
   // Declare R as zero to avoid division by zero J2
   // R is defined as R = cos(3 theta)
@@ -219,7 +217,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dtheta_dsigma(
   }
 
   // Compute dtheta / dsigma
-  Eigen::Matrix<double, 6, 1> dtheta_dsigma =
+  const Eigen::Matrix<double, 6, 1> dtheta_dsigma =
       dtheta_dR * ((dR_dj2 * dj2_dsigma) + (dR_dj3 * dj3_dsigma));
 
   return dtheta_dsigma;
