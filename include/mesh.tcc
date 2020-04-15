@@ -1938,6 +1938,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     // First, we detect the cell with possible free surfaces
     // Compute boundary cells and nodes based on geometry
     std::set<mpm::Index> free_surface_candidate_cells;
+    std::set<mpm::Index> free_surface_candidate_nodes;
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
       // Cell contains particles
@@ -1970,6 +1971,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         if (candidate_cell) {
           (*citr)->assign_free_surface(true);
           free_surface_candidate_cells.insert((*citr)->id());
+          free_surface_candidate_nodes.insert(node_id.begin(), node_id.end());
         }
       }
     }
@@ -2064,7 +2066,10 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
               (particle->mass() / particle->mass_density()) * kernel_gradient;
         }
         normal = -renormalization_matrix_inv.inverse() * temporary_vec;
-        normal.normalize();
+        if (normal.norm() > std::numeric_limits<double>::epsilon())
+          normal.normalize();
+        else
+          normal.setZero();
       }
 
       // If secondary check is needed
@@ -2103,6 +2108,29 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         particle->assign_normal(normal);
         free_surface_particles.insert(p_id);
       }
+    }
+
+    // Compute node sign distance function
+    for (const auto node_id : free_surface_candidate_nodes) {
+      const auto& node_coord = map_nodes_[node_id]->coordinates();
+      double closest_distance = std::numeric_limits<double>::max();
+      double sign_distance = std::numeric_limits<double>::max();
+      for (const auto fs_id : free_surface_particles) {
+        const auto& fs_particle = map_particles_[fs_id];
+        const VectorDim fs_coord =
+            fs_particle->coordinates() +
+            0.5 * fs_particle->diameter() * fs_particle->normal();
+        const VectorDim rel_coord = fs_coord - node_coord;
+        const double distance = rel_coord.norm();
+        if (distance < closest_distance) {
+          closest_distance = distance;
+          sign_distance = (rel_coord).dot(fs_particle->normal());
+        }
+      }
+
+      // If sign distance is negative, node is outside the body
+      if (sign_distance <= std::numeric_limits<double>::epsilon())
+        map_nodes_[node_id]->assign_free_surface(true);
     }
 
   } catch (std::exception& exception) {
