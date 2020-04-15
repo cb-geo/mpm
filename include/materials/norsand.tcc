@@ -164,7 +164,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   const double cos_lode_angle = cos(3.0 / 2.0 * lode_angle);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
 
-  // Store to return
+  // Store to return (note only mean_p is stored as compression positive)
   Eigen::Matrix<double, 6, 1> invariants;
   invariants << -1.0 * mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
 
@@ -178,7 +178,7 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     mpm::norsand::FailureState yield_type) {
 
   // Get invariants
-  auto invariants = this->compute_stress_invariants(stress, state_vars);
+  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
@@ -257,7 +257,7 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
     mpm::dense_map* state_vars) {
 
   // Get stress invariants
-  auto invariants = this->compute_stress_invariants(stress, state_vars);
+  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
@@ -294,7 +294,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Note that in this subroutine, stress is compression positive
 
   // Get stress invariants
-  auto invariants = this->compute_stress_invariants(stress, state_vars);
+  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
