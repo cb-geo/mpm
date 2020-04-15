@@ -255,6 +255,14 @@ class Node : public NodeBase<Tdim> {
   //! Return free surface bool
   bool free_surface() override { return free_surface_; }
 
+  //! Assign signed distance
+  void assign_signed_distance(double signed_distance) override {
+    signed_distance_ = signed_distance;
+  }
+
+  //! Return signed distance
+  double signed_distance() override { return signed_distance_; }
+
   //! Assign active id
   void assign_active_id(Index id) override { active_id_ = id; }
 
@@ -364,6 +372,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> correction_force_;
   //! Free surface
   bool free_surface_{false};
+  //! Signed distance
+  double signed_distance_;
 };  // Node class
 }  // namespace mpm
 

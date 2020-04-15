@@ -2114,7 +2114,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     for (const auto node_id : free_surface_candidate_nodes) {
       const auto& node_coord = map_nodes_[node_id]->coordinates();
       double closest_distance = std::numeric_limits<double>::max();
-      double sign_distance = std::numeric_limits<double>::max();
+      double signed_distance = std::numeric_limits<double>::max();
       for (const auto fs_id : free_surface_particles) {
         const auto& fs_particle = map_particles_[fs_id];
         const VectorDim fs_coord =
@@ -2124,12 +2124,15 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         const double distance = rel_coord.norm();
         if (distance < closest_distance) {
           closest_distance = distance;
-          sign_distance = (rel_coord).dot(fs_particle->normal());
+          signed_distance = (rel_coord).dot(fs_particle->normal());
         }
       }
 
+      // Assign signed distance to node
+      map_nodes_[node_id]->assign_signed_distance(signed_distance);
+
       // If sign distance is negative, node is outside the body
-      if (sign_distance <= std::numeric_limits<double>::epsilon())
+      if (signed_distance <= std::numeric_limits<double>::epsilon())
         map_nodes_[node_id]->assign_free_surface(true);
     }
 

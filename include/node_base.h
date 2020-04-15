@@ -239,6 +239,12 @@ class NodeBase {
   //! Return free surface bool
   virtual bool free_surface() = 0;
 
+  //! Assign signed distance
+  virtual void assign_signed_distance(double signed_distance) = 0;
+
+  //! Return signed distance
+  virtual double signed_distance() = 0;
+
   //! Assign active id
   virtual void assign_active_id(Index id) = 0;
 
