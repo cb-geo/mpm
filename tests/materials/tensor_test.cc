@@ -32,7 +32,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(mean_p == Approx(0.).epsilon(Tolerance));
 
     // Compute deviatoric stress
-    Eigen::Matrix<double, 6, 1> dev_stress = mpm::tensor::compute_deviatoric_stress(stress);
+    Eigen::Matrix<double, 6, 1> dev_stress =
+        mpm::tensor::compute_deviatoric_stress(stress);
     REQUIRE(dev_stress(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dev_stress(1) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dev_stress(2) == Approx(0.).epsilon(Tolerance));
@@ -57,16 +58,18 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(lode_angle == Approx(M_PI / 6.).epsilon(Tolerance));
 
     // Compute dp_dsigma
-    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::tensor::compute_dp_dsigma(stress);
-    REQUIRE(dp_dsigma(0) == Approx(1./3.).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(1./3.).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(1./3.).epsilon(Tolerance));
+    Eigen::Matrix<double, 6, 1> dp_dsigma =
+        mpm::tensor::compute_dp_dsigma(stress);
+    REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(1. / 3.).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
     // Compute dq_disgma
-    Eigen::Matrix<double, 6, 1> dq_dsigma = mpm::tensor::compute_dq_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dq_dsigma =
+        mpm::tensor::compute_dq_dsigma(stress);
     REQUIRE(dq_dsigma(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dq_dsigma(1) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dq_dsigma(2) == Approx(0.).epsilon(Tolerance));
@@ -75,7 +78,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dq_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
     // Compute dj2_dsigma
-    Eigen::Matrix<double, 6, 1> dj2_dsigma = mpm::tensor::compute_dj2_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dj2_dsigma =
+        mpm::tensor::compute_dj2_dsigma(stress);
     REQUIRE(dj2_dsigma(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dj2_dsigma(1) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dj2_dsigma(2) == Approx(0.).epsilon(Tolerance));
@@ -84,7 +88,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dj2_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
     // Compute dj3_dsigma
-    Eigen::Matrix<double, 6, 1> dj3_dsigma = mpm::tensor::compute_dj3_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dj3_dsigma =
+        mpm::tensor::compute_dj3_dsigma(stress);
     REQUIRE(dj3_dsigma(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dj3_dsigma(1) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dj3_dsigma(2) == Approx(0.).epsilon(Tolerance));
@@ -93,14 +98,14 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dj3_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
     // Compute dtheta_dsigma
-    Eigen::Matrix<double, 6, 1> dtheta_dsigma = mpm::tensor::compute_dtheta_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dtheta_dsigma =
+        mpm::tensor::compute_dtheta_dsigma(stress);
     REQUIRE(dtheta_dsigma(0) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(1) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(2) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(5) == Approx(0.).epsilon(Tolerance));
-
   }
 
   SECTION("Check for non-zero stresses") {
@@ -110,7 +115,7 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     stress(0) = -200.;
     stress(1) = -150.2;
     stress(2) = -150.2;
-    stress(3) =  52.;
+    stress(3) = 52.;
     stress(4) = -14.5;
     stress(5) = -33.;
 
@@ -127,7 +132,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(mean_p == Approx(-166.8).epsilon(Tolerance));
 
     // Compute deviatoric stress
-    Eigen::Matrix<double, 6, 1> dev_stress = mpm::tensor::compute_deviatoric_stress(stress);
+    Eigen::Matrix<double, 6, 1> dev_stress =
+        mpm::tensor::compute_deviatoric_stress(stress);
     REQUIRE(dev_stress(0) == Approx(-33.2).epsilon(Tolerance));
     REQUIRE(dev_stress(1) == Approx(16.6).epsilon(Tolerance));
     REQUIRE(dev_stress(2) == Approx(16.6).epsilon(Tolerance));
@@ -152,16 +158,18 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(lode_angle == Approx(0.563342522771415).epsilon(Tolerance));
 
     // Compute dp_dsigma
-    Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::tensor::compute_dp_dsigma(stress);
-    REQUIRE(dp_dsigma(0) == Approx(1./3.).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(1) == Approx(1./3.).epsilon(Tolerance));
-    REQUIRE(dp_dsigma(2) == Approx(1./3.).epsilon(Tolerance));
+    Eigen::Matrix<double, 6, 1> dp_dsigma =
+        mpm::tensor::compute_dp_dsigma(stress);
+    REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(1) == Approx(1. / 3.).epsilon(Tolerance));
+    REQUIRE(dp_dsigma(2) == Approx(1. / 3.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dp_dsigma(5) == Approx(0.).epsilon(Tolerance));
 
     // Compute dq_disgma
-    Eigen::Matrix<double, 6, 1> dq_dsigma = mpm::tensor::compute_dq_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dq_dsigma =
+        mpm::tensor::compute_dq_dsigma(stress);
     REQUIRE(dq_dsigma(0) == Approx(-0.413712170536900).epsilon(Tolerance));
     REQUIRE(dq_dsigma(1) == Approx(0.206856085268450).epsilon(Tolerance));
     REQUIRE(dq_dsigma(2) == Approx(0.206856085268450).epsilon(Tolerance));
@@ -170,7 +178,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dq_dsigma(5) == Approx(-0.822439857091427).epsilon(Tolerance));
 
     // Compute dj2_dsigma
-    Eigen::Matrix<double, 6, 1> dj2_dsigma = mpm::tensor::compute_dj2_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dj2_dsigma =
+        mpm::tensor::compute_dj2_dsigma(stress);
     REQUIRE(dj2_dsigma(0) == Approx(-33.2).epsilon(Tolerance));
     REQUIRE(dj2_dsigma(1) == Approx(16.6).epsilon(Tolerance));
     REQUIRE(dj2_dsigma(2) == Approx(16.6).epsilon(Tolerance));
@@ -179,7 +188,8 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dj2_dsigma(5) == Approx(-66.).epsilon(Tolerance));
 
     // Compute dj3_dsigma
-    Eigen::Matrix<double, 6, 1> dj3_dsigma = mpm::tensor::compute_dj3_dsigma(stress);
+    Eigen::Matrix<double, 6, 1> dj3_dsigma =
+        mpm::tensor::compute_dj3_dsigma(stress);
     REQUIRE(dj3_dsigma(0) == Approx(1675.28666666667).epsilon(Tolerance));
     REQUIRE(dj3_dsigma(1) == Approx(-30.1433333333333).epsilon(Tolerance));
     REQUIRE(dj3_dsigma(2) == Approx(-1645.14333333333).epsilon(Tolerance));
@@ -188,11 +198,15 @@ TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
     REQUIRE(dj3_dsigma(5) == Approx(-412.4).epsilon(Tolerance));
 
     // Compute dtheta_dsigma
-    Eigen::Matrix<double, 6, 1> dtheta_dsigma = mpm::tensor::compute_dtheta_dsigma(stress);
-    REQUIRE(dtheta_dsigma(0) == Approx(-0.00394140286438774).epsilon(Tolerance));
-    REQUIRE(dtheta_dsigma(1) == Approx(-0.00012754374859611).epsilon(Tolerance));
+    Eigen::Matrix<double, 6, 1> dtheta_dsigma =
+        mpm::tensor::compute_dtheta_dsigma(stress);
+    REQUIRE(dtheta_dsigma(0) ==
+            Approx(-0.00394140286438774).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma(1) ==
+            Approx(-0.00012754374859611).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(2) == Approx(0.00406894661298385).epsilon(Tolerance));
-    REQUIRE(dtheta_dsigma(3) == Approx(0.000709459104494452).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma(3) ==
+            Approx(0.000709459104494452).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(4) == Approx(0.0117793023407611).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(5) == Approx(0.00189011673149042).epsilon(Tolerance));
   }
