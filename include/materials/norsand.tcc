@@ -117,7 +117,7 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
     const Vector6d& stress, mpm::dense_map* state_vars) {
 
-  // Note that in this subroutine, stress is compression positive
+  // Note that in this subroutine, stress is tension positive
 
   // Compute mean stress p
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
@@ -137,8 +137,8 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   deviatoric_q = check_low(deviatoric_q);
 
   // Compute the deviatoric stress
-  Vector6d dev_stress = -1.0 * stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= -1.0 * mean_p;
+  Vector6d dev_stress = stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
   // Compute J3
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
@@ -166,7 +166,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
 
   // Store to return
   Eigen::Matrix<double, 6, 1> invariants;
-  invariants << mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
+  invariants << -1.0 * mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
 
   return invariants;
 }
@@ -338,12 +338,14 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
-  dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
-  dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
-  dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
-  dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
-  dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
+  if (abs(deviatoric_q) > 1.E-6) {
+    dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
+    dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
+    dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
+    dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
+    dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
+    dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
+  }
 
   const double sin_lode_angle = sin(3.0 / 2.0 * lode_angle);
 
