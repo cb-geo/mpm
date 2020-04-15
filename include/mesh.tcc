@@ -1935,6 +1935,24 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         std::bind(&mpm::ParticleBase<Tdim>::assign_free_surface,
                   std::placeholders::_1, false));
 
+    // Reset volume fraction
+    this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_volume_fraction,
+                                       std::placeholders::_1, 0.0));
+
+    // Compute and assign volume fraction to each cell
+    for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
+         ++citr) {
+      if ((*citr)->status()) {
+        // Compute volume fraction
+        double cell_volume_fraction = 0.0;
+        for (const auto p_id : (*citr)->particles())
+          cell_volume_fraction += map_particles_[p_id]->volume();
+
+        cell_volume_fraction = cell_volume_fraction / (*citr)->volume();
+        (*citr)->assign_volume_fraction(cell_volume_fraction);
+      }
+    }
+
     // First, we detect the cell with possible free surfaces
     // Compute boundary cells and nodes based on geometry
     std::set<mpm::Index> free_surface_candidate_cells;
@@ -1945,23 +1963,30 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
       if ((*citr)->status()) {
         bool candidate_cell = false;
         const auto& node_id = (*citr)->nodes_id();
-        // Loop over neighbouring cells
-        for (const auto n_id : (*citr)->neighbours()) {
-          if (!map_cells_[n_id]->status()) {
-            candidate_cell = true;
-            const auto& n_node_id = map_cells_[n_id]->nodes_id();
+        if ((*citr)->volume_fraction() < tolerance) {
+          candidate_cell = true;
+          for (const auto id : node_id) {
+            map_nodes_[id]->assign_free_surface(true);
+          }
+        } else {
+          // Loop over neighbouring cells
+          for (const auto n_id : (*citr)->neighbours()) {
+            if (!map_cells_[n_id]->status()) {
+              candidate_cell = true;
+              const auto& n_node_id = map_cells_[n_id]->nodes_id();
 
-            // Detect common node id
-            std::set<mpm::Index> common_node_id;
-            std::set_intersection(
-                node_id.begin(), node_id.end(), n_node_id.begin(),
-                n_node_id.end(),
-                std::inserter(common_node_id, common_node_id.begin()));
+              // Detect common node id
+              std::set<mpm::Index> common_node_id;
+              std::set_intersection(
+                  node_id.begin(), node_id.end(), n_node_id.begin(),
+                  n_node_id.end(),
+                  std::inserter(common_node_id, common_node_id.begin()));
 
-            // Assign free surface nodes
-            if (!common_node_id.empty()) {
-              for (const auto common_id : common_node_id) {
-                map_nodes_[common_id]->assign_free_surface(true);
+              // Assign free surface nodes
+              if (!common_node_id.empty()) {
+                for (const auto common_id : common_node_id) {
+                  map_nodes_[common_id]->assign_free_surface(true);
+                }
               }
             }
           }
@@ -2130,10 +2155,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
 
       // Assign signed distance to node
       map_nodes_[node_id]->assign_signed_distance(signed_distance);
-
-      // If sign distance is negative, node is outside the body
-      if (signed_distance <= std::numeric_limits<double>::epsilon())
-        map_nodes_[node_id]->assign_free_surface(true);
     }
 
   } catch (std::exception& exception) {
