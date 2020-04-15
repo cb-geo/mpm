@@ -321,7 +321,7 @@ void mpm::Mesh<Tdim>::find_cell_neighbours() {
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_particle_neighbours() {
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
-    find_particle_neighbours(*citr);
+    this->find_particle_neighbours(*citr);
 }
 
 //! Find particle neighbours for specific cell particle
@@ -431,6 +431,49 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
     }
   }
 #endif
+}
+
+//! Find ncells in rank
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::ncells_rank(bool active_cells) {
+  unsigned ncells_rank = 0;
+
+  int mpi_rank = 0;
+  int mpi_size = 1;
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
+  if (active_cells) {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+      if ((*citr)->rank() == mpi_rank && (*citr)->nparticles() > 0)
+        ncells_rank += 1;
+  } else {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+      if ((*citr)->rank() == mpi_rank) ncells_rank += 1;
+  }
+  return ncells_rank;
+}
+
+//! Find nnodes in rank
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::nnodes_rank() {
+  unsigned nnodes_rank = 0;
+
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // Get MPI ranks for the node
+    auto mpi_ranks = (*nitr)->mpi_ranks();
+    // Check if the local rank is in the list of ranks for the node
+    const bool local_node = mpi_ranks.find(mpi_rank) != mpi_ranks.end();
+    if (local_node) nnodes_rank += 1;
+  }
+  return nnodes_rank;
 }
 
 //! Create cells from node lists

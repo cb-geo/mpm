@@ -77,6 +77,9 @@ class MPM {
   virtual void write_partio(mpm::Index step, mpm::Index max_steps) = 0;
 #endif
 
+  //! Write parallel info
+  virtual void write_parallel_info(mpm::Index step) = 0;
+
  protected:
   //! A unique id for the analysis
   std::string uuid_;
