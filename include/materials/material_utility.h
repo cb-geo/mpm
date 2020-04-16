@@ -1,12 +1,12 @@
-#ifndef MPM_TENSOR_H_
-#define MPM_TENSOR_H_
+#ifndef MPM_MATERIAL_UTILITY_H_
+#define MPM_MATERIAL_UTILITY_H_
 
 #include <cmath>
 
 #include "Eigen/Dense"
 
 namespace mpm {
-namespace tensor {
+namespace material_utility {
 
 //! Compute mean stress p
 //! \param[in] stress Stress in Voigt notation where positive is tension
@@ -60,9 +60,9 @@ inline const Eigen::Matrix<double, 6, 1> compute_dj3_dsigma(
 inline const Eigen::Matrix<double, 6, 1> compute_dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
-}  // namespace tensor
+}  // namespace material_utility
 }  // namespace mpm
 
-#include "tensor.tcc"
+#include "material_utility.tcc"
 
-#endif  // MPM_TENSOR_H_
+#endif  // MPM_MATERIAL_UTILITY_H_

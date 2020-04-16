@@ -5,10 +5,10 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "tensor.h"
+#include "material_utility.h"
 
 //! \brief Check tensor class for 3D case
-TEST_CASE("Tensor is checked for 3D case", "[tensor][3D]") {
+TEST_CASE("Material utility is checked for 3D case", "[material_utility][3D]") {
 
   // Tolerance
   const double Tolerance = 1.E-6;

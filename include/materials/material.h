@@ -11,7 +11,7 @@
 #include "map.h"
 #include "particle.h"
 #include "particle_base.h"
-#include "tensor.h"
+#include "material_utility.h"
 
 // JSON
 using Json = nlohmann::json;
