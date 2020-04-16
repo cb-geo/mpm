@@ -1,8 +1,8 @@
 //! Compute mean stress p
 inline const double mpm::material_utility::compute_mean_p(
     const Eigen::Matrix<double, 6, 1>& stress) {
-  // Compute mean p in tension positive
-  return (1. / 3. * (stress(0) + stress(1) + stress(2)));
+  // Compute mean p in compresion positive
+  return (-1. / 3. * (stress(0) + stress(1) + stress(2)));
 }
 
 //! Compute deviatoric stress
@@ -11,7 +11,7 @@ inline const Eigen::Matrix<double, 6, 1>
         const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute mean p in tension positive
-  const double mean_p = compute_mean_p(stress);
+  const double mean_p = -1.0 * compute_mean_p(stress);
 
   // Compute deviatoric by subtracting volumetric part
   Eigen::Matrix<double, 6, 1> dev_stress = stress;
