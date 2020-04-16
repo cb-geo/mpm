@@ -177,6 +177,8 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     const Vector6d& stress, const Vector6d& dstrain, mpm::dense_map* state_vars,
     mpm::norsand::FailureState yield_type) {
 
+  // Note that in this subroutine, stress is compression positive
+
   // Get invariants
   auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
 
