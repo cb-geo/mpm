@@ -1,12 +1,12 @@
 //! Compute mean stress p
-inline const double mpm::tensor::compute_mean_p(
+inline const double mpm::material_utility::compute_mean_p(
     const Eigen::Matrix<double, 6, 1>& stress) {
   // Compute mean p in tension positive
   return (1. / 3. * (stress(0) + stress(1) + stress(2)));
 }
 
 //! Compute deviatoric stress
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_deviatoric_stress(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_deviatoric_stress(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute mean p in tension positive
@@ -20,7 +20,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_deviatoric_stress(
 }
 
 //! Compute J2 invariant
-inline const double mpm::tensor::compute_j2(
+inline const double mpm::material_utility::compute_j2(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   const double j2 = (std::pow((stress(0) - stress(1)), 2) +
@@ -34,7 +34,7 @@ inline const double mpm::tensor::compute_j2(
 }
 
 //! Compute J3 invariant
-inline const double mpm::tensor::compute_j3(
+inline const double mpm::material_utility::compute_j3(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute deviatoric stress
@@ -51,7 +51,7 @@ inline const double mpm::tensor::compute_j3(
 }
 
 //! Compute deviatoric q
-inline const double mpm::tensor::compute_deviatoric_q(
+inline const double mpm::material_utility::compute_deviatoric_q(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2 from
@@ -63,7 +63,7 @@ inline const double mpm::tensor::compute_deviatoric_q(
 }
 
 //! Compute Lode angle
-inline const double mpm::tensor::compute_lode_angle(
+inline const double mpm::material_utility::compute_lode_angle(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute j2 and j3
@@ -87,7 +87,7 @@ inline const double mpm::tensor::compute_lode_angle(
 }
 
 //! Compute derivative of p in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dp_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_dp_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   Eigen::Matrix<double, 6, 1> dp_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
@@ -99,7 +99,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dp_dsigma(
 }
 
 //! Compute derivative of q in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dq_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_dq_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute q
@@ -123,7 +123,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dq_dsigma(
 }
 
 //! Compute derivative of J2 in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj2_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_dj2_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute deviatoric stress
@@ -139,7 +139,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj2_dsigma(
 }
 
 //! Compute derivative of J3 in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj3_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_dj3_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2
@@ -175,7 +175,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dj3_dsigma(
 }
 
 //! Compute derivative of Lode angle theta in terms of stress sigma
-inline const Eigen::Matrix<double, 6, 1> mpm::tensor::compute_dtheta_dsigma(
+inline const Eigen::Matrix<double, 6, 1> mpm::material_utility::compute_dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2
