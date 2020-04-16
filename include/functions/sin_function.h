@@ -33,7 +33,8 @@ class SinFunction : public FunctionBase {
   //! a_
   double a_{0.};
   //! xrange_
-  std::vector<double> xrange_{0., 0.};
+  std::vector<double> xrange_{std::numeric_limits<double>::min(),
+                              std::numeric_limits<double>::max()};
 };  // SinFunction class
 }  // namespace mpm
 

@@ -4,13 +4,14 @@ mpm::SinFunction::SinFunction(unsigned id, const Json& properties)
     : mpm::FunctionBase(id, properties) {
   x0_ = properties.at("x0");
   a_ = properties.at("a");
-  if (properties.at("xrange").is_array() &&
-      properties.at("xrange").size() == 2) {
-    for (unsigned index = 0; index < 2; ++index)
-      xrange_[index] = properties.at("xrange").at(index);
-  } else
-    throw std::runtime_error(
-        "Cannot initialise sine function; x range is invalid");
+  if (properties.contains("xrange"))
+    if (properties.at("xrange").is_array() &&
+        properties.at("xrange").size() == 2) {
+      for (unsigned index = 0; index < 2; ++index)
+        xrange_.at(index) = properties.at("xrange").at(index);
+    } else
+      throw std::runtime_error(
+          "Cannot initialise sine function; x range is invalid");
 }
 
 // Return f(x) for a given x
