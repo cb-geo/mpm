@@ -1,15 +1,16 @@
 //! Compute mean stress p (compression positive)
 inline const double mpm::material::p(
     const Eigen::Matrix<double, 6, 1>& stress) {
-  return (-1. / 3. * (stress(0) + stress(1) + stress(2)));
+  // Compute and return mean p
+  return (1. / 3. * (stress(0) + stress(1) + stress(2)));
 }
 
 //! Compute deviatoric stress
 inline const Eigen::Matrix<double, 6, 1> mpm::material::deviatoric_stress(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
-  // Compute mean p in tension positive
-  const double p = -1.0 * mpm::material::p(stress);
+  // Compute mean p
+  const double p = mpm::material::p(stress);
 
   // Compute deviatoric by subtracting volumetric part
   Eigen::Matrix<double, 6, 1> deviatoric_stress = stress;
@@ -59,6 +60,7 @@ inline const double mpm::material::q(
   // Compute J2 from
   const double j2 = mpm::material::j2(stress);
 
+  // Compute and return q
   return (std::sqrt(3 * j2));
 }
 
@@ -78,10 +80,8 @@ inline const double mpm::material::lode_angle(
   if (lode_angle_val > 1.0) lode_angle_val = 1.0;
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
-  // Compute Lode angle (sin convention, between 0 and pi/3)
-  double lode_angle = (1. / 3.) * acos(lode_angle_val);
-
-  return lode_angle;
+  // Compute and return Lode angle (cos convention, between 0 and pi/3)
+  return (1. / 3.) * acos(lode_angle_val);
 }
 
 //! Compute derivative of p in terms of stress sigma
@@ -187,10 +187,6 @@ inline const Eigen::Matrix<double, 6, 1> mpm::material::dtheta_dsigma(
   // Compute dj3_dsigma
   const auto dj3_dsigma = mpm::material::dj3_dsigma(stress);
 
-  // Declare R as zero to avoid division by zero J2
-  // R is defined as R = cos(3 theta)
-  double r = 0.0;
-
   // Define derivatives of R in terms of J2 and J3
   double dr_dj2 = -9.0 / 4.0 * sqrt(3.0) * j3;
   double dr_dj3 = 3.0 / 2.0 * sqrt(3.0);
@@ -200,22 +196,19 @@ inline const Eigen::Matrix<double, 6, 1> mpm::material::dtheta_dsigma(
 
   // Update when J2 is non zero
   if (std::abs(j2) > std::numeric_limits<double>::epsilon()) {
-    // Update R
-    r = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
+    // Declare R defined as R = cos(3 theta)
+    double r = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
     // Update derivatives of R
     dr_dj2 *= std::pow(j2, -2.5);
     dr_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
-    if (std::abs(1 - r * r) < std::numeric_limits<double>::epsilon()) {
-      dtheta_dr = -1.0 / (3.0 * sqrt(std::numeric_limits<double>::epsilon()));
-    } else {
-      dtheta_dr = -1.0 / (3.0 * sqrt(1 - r * r));
-    }
+    const double factor =
+        (std::abs(1 - r * r) < std::numeric_limits<double>::epsilon())
+            ? std::numeric_limits<double>::epsilon()
+            : (1 - r * r);
+    dtheta_dr = -1.0 / (3.0 * sqrt(factor));
   }
 
-  // Compute dtheta / dsigma
-  const Eigen::Matrix<double, 6, 1> dtheta_dsigma =
-      dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
-
-  return dtheta_dsigma;
+  // Compute and return dtheta / dsigma
+  return (dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma)));
 }

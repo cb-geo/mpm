@@ -124,7 +124,7 @@ TEST_CASE("Material utility is checked", "[material]") {
 
     // Compute mean p
     double p = mpm::material::p(stress);
-    REQUIRE(p == Approx(166.8).epsilon(Tolerance));
+    REQUIRE(p == Approx(-166.8).epsilon(Tolerance));
 
     // Compute deviatoric stress
     Eigen::Matrix<double, 6, 1> deviatoric_stress =

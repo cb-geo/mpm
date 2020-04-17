@@ -8,7 +8,7 @@
 namespace mpm {
 namespace material {
 
-//! Compute mean stress p (compression positive)
+//! Compute mean stress p (tension positive)
 //! \param[in] stress Stress in Voigt notation where positive is tension
 inline const double p(const Eigen::Matrix<double, 6, 1>& stress);
 

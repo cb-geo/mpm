@@ -16,19 +16,25 @@ using Index = unsigned long long;
 template <typename Ttype>
 Ttype zero();
 
-//! Zero
+//! Zero for vector dimension 2
 template <>
 inline Eigen::Matrix<double, 2, 1> zero() {
   return Eigen::Matrix<double, 2, 1>::Zero();
 }
 
-//! Zero
+//! Zero for vector dimension 3
 template <>
 inline Eigen::Matrix<double, 3, 1> zero() {
   return Eigen::Matrix<double, 3, 1>::Zero();
 }
 
-//! Zero
+//! Zero for vector dimension 6
+template <>
+inline Eigen::Matrix<double, 6, 1> zero() {
+  return Eigen::Matrix<double, 6, 1>::Zero();
+}
+
+//! Zero for a double
 template <>
 inline double zero() {
   return 0.;
