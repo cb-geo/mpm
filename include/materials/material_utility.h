@@ -6,7 +6,7 @@
 #include "data_types.h"
 
 namespace mpm {
-namespace material {
+namespace materials {
 
 //! Compute mean stress p (tension positive)
 //! \param[in] stress Stress in Voigt notation where positive is tension
@@ -58,7 +58,7 @@ inline const Eigen::Matrix<double, 6, 1> dj3_dsigma(
 inline const Eigen::Matrix<double, 6, 1> dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
-}  // namespace material
+}  // namespace materials
 }  // namespace mpm
 
 #include "material_utility.tcc"
