@@ -114,8 +114,8 @@ if (USE_PETSC)
   find_package(PETSc COMPONENTS C)
 endif()
 if (PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  link_libraries(${PETSC_LIBRARIES})
+  include_directories(${PETSC_INC})
+  link_libraries(${PETSC_LIB})
 endif()
 
 # KaHIP
