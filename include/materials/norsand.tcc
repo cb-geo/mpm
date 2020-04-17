@@ -329,8 +329,8 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double dF_dq = 1.;
 
   // Compute the deviatoric stress
-  Vector6d dev_stress = stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
+  Vector6d dev_stress = -1.0 * stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) += mean_p;
 
   // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
@@ -394,7 +394,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
 
   // Compute derivative of theta in terms of R
-  double dtheta_dR = 1.0 / 3.0;
+  double dtheta_dR = -1.0 / 3.0;
 
   // Update when J2 is non zero
   if (abs(j2) > 1.0E-6) {
@@ -405,9 +405,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dR_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
     if (abs(1 - R * R) < 1.0E-6) {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1.0E-6);
+      dtheta_dR = -1.0 / 3.0 / sqrt(1.0E-6);
     } else {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1 - R * R);
+      dtheta_dR = -1.0 / 3.0 / sqrt(1 - R * R);
     }
   }
 
