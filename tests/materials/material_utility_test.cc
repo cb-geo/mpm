@@ -4,7 +4,7 @@
 #include "Eigen/Dense"
 #include "catch.hpp"
 
-#include "materials.h"
+#include "material_utility.h"
 
 //! \brief Check materials namespace functions
 TEST_CASE("materials utility is checked", "[materials]") {

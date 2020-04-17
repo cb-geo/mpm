@@ -88,8 +88,7 @@ inline const double mpm::materials::lode_angle(
 inline const Eigen::Matrix<double, 6, 1> mpm::materials::dp_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress) {
 
-  Eigen::Matrix<double, 6, 1> dp_dsigma;
-  dp_dsigma.setZero();
+  Eigen::Matrix<double, 6, 1> dp_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
   dp_dsigma(0) = 1. / 3.;
   dp_dsigma(1) = 1. / 3.;
   dp_dsigma(2) = 1. / 3.;
@@ -108,8 +107,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dq_dsigma(
   const auto deviatoric_stress = mpm::materials::deviatoric_stress(stress);
 
   // Compute dq / dsigma
-  Eigen::Matrix<double, 6, 1> dq_dsigma;
-  dq_dsigma.setZero();
+  Eigen::Matrix<double, 6, 1> dq_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
   if (std::abs(q) > std::numeric_limits<double>::epsilon()) {
     dq_dsigma(0) = 3. / (2. * q) * deviatoric_stress(0);
     dq_dsigma(1) = 3. / (2. * q) * deviatoric_stress(1);
@@ -159,8 +157,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dj3_dsigma(
   dev3(1) = deviatoric_stress(4);
   dev3(2) = deviatoric_stress(2);
 
-  Eigen::Matrix<double, 6, 1> dj3_dsigma;
-  dj3_dsigma.setZero();
+  Eigen::Matrix<double, 6, 1> dj3_dsigma = Eigen::Matrix<double, 6, 1>::Zero();
   dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
   dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
   dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
