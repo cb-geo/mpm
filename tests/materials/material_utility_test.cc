@@ -6,8 +6,8 @@
 
 #include "material.h"
 
-//! \brief Check material class for 3D case
-TEST_CASE("Material utility is checked for 3D case", "[material][3D]") {
+//! \brief Check material namespace functions
+TEST_CASE("Material utility is checked", "[material]") {
 
   // Tolerance
   const double Tolerance = 1.E-6;
