@@ -3,64 +3,62 @@
 
 #include <cmath>
 
-#include "Eigen/Dense"
+#include "data_types.h"
 
 namespace mpm {
-namespace material_utility {
+namespace material {
 
-//! Compute mean stress p
+//! Compute mean stress p (compression positive)
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double compute_mean_p(const Eigen::Matrix<double, 6, 1>& stress);
+inline const double p(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute deviatoric stress
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_deviatoric_stress(
+inline const Eigen::Matrix<double, 6, 1> deviatoric_stress(
     const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute J2 invariant
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double compute_j2(const Eigen::Matrix<double, 6, 1>& stress);
+inline const double j2(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute J3 invariant
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double compute_j3(const Eigen::Matrix<double, 6, 1>& stress);
+inline const double j3(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute deviatoric q
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double compute_deviatoric_q(
-    const Eigen::Matrix<double, 6, 1>& stress);
+inline const double q(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute Lode angle theta (cosine convention)
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double compute_lode_angle(
-    const Eigen::Matrix<double, 6, 1>& stress);
+inline const double lode_angle(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute derivative of p in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_dp_dsigma(
+inline const Eigen::Matrix<double, 6, 1> dp_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute derivative of q in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_dq_dsigma(
+inline const Eigen::Matrix<double, 6, 1> dq_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute derivative of J2 in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_dj2_dsigma(
+inline const Eigen::Matrix<double, 6, 1> dj2_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute derivative of J3 in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_dj3_dsigma(
+inline const Eigen::Matrix<double, 6, 1> dj3_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute derivative of Lode angle theta in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> compute_dtheta_dsigma(
+inline const Eigen::Matrix<double, 6, 1> dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress);
 
-}  // namespace material_utility
+}  // namespace material
 }  // namespace mpm
 
 #include "material_utility.tcc"
