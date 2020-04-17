@@ -81,6 +81,9 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
+  // Domain decompose
+  this->mpi_domain_decompose();
+
   // Assign beta to each particle
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_projection_parameter,

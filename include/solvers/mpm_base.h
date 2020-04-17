@@ -87,6 +87,9 @@ class MPMBase : public MPM {
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
+  //! Domain decomposition
+  void mpi_domain_decompose();
+
   //! Locate particle
   void locate_particle();
 

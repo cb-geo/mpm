@@ -19,9 +19,6 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Default constructor
   MPMExplicit(const std::shared_ptr<IO>& io);
 
-  //! Domain decomposition
-  void mpi_domain_decompose();
-
   //! Solve
   bool solve() override;
 
