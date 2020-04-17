@@ -117,7 +117,7 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
     const Vector6d& stress, mpm::dense_map* state_vars) {
 
-  // Note that in this subroutine, stress is tension positive
+  // Note that in this subroutine, stress is compression positive
 
   // Compute mean stress p
   double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
@@ -140,33 +140,29 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   Vector6d dev_stress = stress;
   for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
-  // Compute J3
+  // Compute J3 (multiplied by -1 for compression positive)
   double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
               (dev_stress(2) * std::pow(dev_stress(3), 2)) +
               ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
                (dev_stress(0) * std::pow(dev_stress(4), 2)) -
                (dev_stress(1) * std::pow(dev_stress(5), 2)));
+  j3 *= -1.0;
 
-  // Compute Lode angle value, check for J2
-  double lode_angle_val = 0.0;
-  if (abs(j2) > 1.0E-6) {
-    lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
-  }
+  // Compute Lode angle value
+  double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
   if (lode_angle_val > 1.0) lode_angle_val = 1.0;
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
-  // Compute Lode angle (cos convention)
+  // Compute Lode angle (sin convention)
   double lode_angle = (1. / 3.) * acos(lode_angle_val);
-  if (lode_angle > M_PI / 3.) lode_angle = M_PI / 3.;
-  if (lode_angle < 0.) lode_angle = 0.;
 
-  // Compute M_theta (Jefferies and Shuttle, 2011 - paper in neg sin lode angle)
-  const double cos_lode_angle = cos(3.0 / 2.0 * lode_angle);
+  // Compute M_theta (Jefferies and Shuttle, 2011)
+  const double cos_lode_angle = cos(3. / 2. * lode_angle);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
 
-  // Store to return (note only mean_p is stored as compression positive)
+  // Store to return
   Eigen::Matrix<double, 6, 1> invariants;
-  invariants << -1.0 * mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
+  invariants << mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
 
   return invariants;
 }
@@ -177,10 +173,8 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     const Vector6d& stress, const Vector6d& dstrain, mpm::dense_map* state_vars,
     mpm::norsand::FailureState yield_type) {
 
-  // Note that in this subroutine, stress is compression positive
-
   // Get invariants
-  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
@@ -259,7 +253,7 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
     mpm::dense_map* state_vars) {
 
   // Get stress invariants
-  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
@@ -296,7 +290,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Note that in this subroutine, stress is compression positive
 
   // Get stress invariants
-  auto invariants = this->compute_stress_invariants(-1.0 * stress, state_vars);
+  auto invariants = this->compute_stress_invariants(stress, state_vars);
 
   double mean_p = invariants(0);
   double deviatoric_q = invariants(1);
@@ -340,16 +334,14 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
-  if (abs(deviatoric_q) > 1.E-6) {
-    dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
-    dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
-    dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
-    dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
-    dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
-    dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
-  }
+  dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
+  dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
+  dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
+  dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
+  dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
+  dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
 
-  const double sin_lode_angle = sin(3.0 / 2.0 * lode_angle);
+  const double sin_lode_angle = sin(3. / 2. * lode_angle);
 
   // Compute dF / dM
   double dF_dM = -1.0 / N_ * (mean_p + p_cohesion) *
@@ -359,7 +351,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Compute dM / dtehta
   const double dM_dtheta =
-      3.0 / 2.0 * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
+      3. / 2. * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
 
   // Compute dj2 / dsigma
   Vector6d dj2_dsigma = dev_stress;
@@ -402,7 +394,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
 
   // Compute derivative of theta in terms of R
-  double dtheta_dR = -1.0 / 3.0;
+  double dtheta_dR = 1.0 / 3.0;
 
   // Update when J2 is non zero
   if (abs(j2) > 1.0E-6) {
@@ -413,9 +405,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dR_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
     if (abs(1 - R * R) < 1.0E-6) {
-      dtheta_dR = -1.0 / 3.0 / sqrt(1.0E-6);
+      dtheta_dR = 1.0 / 3.0 / sqrt(1.0E-6);
     } else {
-      dtheta_dR = -1.0 / 3.0 / sqrt(1 - R * R);
+      dtheta_dR = 1.0 / 3.0 / sqrt(1 - R * R);
     }
   }
 
