@@ -56,6 +56,10 @@ TEST_CASE("materials utility is checked", "[materials]") {
     double lode_angle = mpm::materials::lode_angle(stress);
     REQUIRE(lode_angle == Approx(M_PI / 6.).epsilon(Tolerance));
 
+    // Compute Lode angle theta with tolerance
+    double lode_angle_tolerance = mpm::materials::lode_angle(stress, Tolerance);
+    REQUIRE(lode_angle_tolerance == Approx(M_PI / 6.).epsilon(Tolerance));
+
     // Compute dp_dsigma
     Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma(stress);
     REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
@@ -101,6 +105,16 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(dtheta_dsigma(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(5) == Approx(0.).epsilon(Tolerance));
+
+    // Compute dtheta_dsigma with tolerance
+    Eigen::Matrix<double, 6, 1> dtheta_dsigma_tolerance =
+        mpm::materials::dtheta_dsigma(stress, Tolerance);
+    REQUIRE(dtheta_dsigma_tolerance(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(5) == Approx(0.).epsilon(Tolerance));
   }
 
   SECTION("Check for non-zero stresses") {
@@ -152,6 +166,11 @@ TEST_CASE("materials utility is checked", "[materials]") {
     double lode_angle = mpm::materials::lode_angle(stress);
     REQUIRE(lode_angle == Approx(0.563342522771415).epsilon(Tolerance));
 
+    // Compute Lode angle theta with tolerance
+    double lode_angle_tolerance = mpm::materials::lode_angle(stress, Tolerance);
+    REQUIRE(lode_angle_tolerance ==
+            Approx(0.563342522771415).epsilon(Tolerance));
+
     // Compute dp_dsigma
     Eigen::Matrix<double, 6, 1> dp_dsigma = mpm::materials::dp_dsigma(stress);
     REQUIRE(dp_dsigma(0) == Approx(1. / 3.).epsilon(Tolerance));
@@ -200,5 +219,21 @@ TEST_CASE("materials utility is checked", "[materials]") {
             Approx(0.000709459104494452).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(4) == Approx(0.0117793023407611).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma(5) == Approx(0.00189011673149042).epsilon(Tolerance));
+
+    // Compute dtheta_dsigma with tolerance
+    Eigen::Matrix<double, 6, 1> dtheta_dsigma_tolerance =
+        mpm::materials::dtheta_dsigma(stress, Tolerance);
+    REQUIRE(dtheta_dsigma_tolerance(0) ==
+            Approx(-0.00394140286438774).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(1) ==
+            Approx(-0.00012754374859611).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(2) ==
+            Approx(0.00406894661298385).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(3) ==
+            Approx(0.000709459104494452).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(4) ==
+            Approx(0.0117793023407611).epsilon(Tolerance));
+    REQUIRE(dtheta_dsigma_tolerance(5) ==
+            Approx(0.00189011673149042).epsilon(Tolerance));
   }
 }
