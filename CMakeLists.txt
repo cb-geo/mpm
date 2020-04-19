@@ -116,6 +116,7 @@ endif()
 if (PETSC_FOUND)
   include_directories(${PETSC_INC})
   link_libraries(${PETSC_LIB})
+  add_definitions("-DUSE_PETSC")
 endif()
 
 # KaHIP
@@ -246,6 +247,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/petsc_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   if(MPM_BUILD_LIB)
