@@ -35,6 +35,8 @@ static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
     solver_eigen_cg("EigenCG");
 
 // Krylov Methods PTSC
+#ifdef USE_PETSC
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
                 mpm::KrylovPETSC<Eigen::SparseMatrix<double>>, unsigned, double>
     solver_krylov_petsc("KrylovPETSC");
+#endif
