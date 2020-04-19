@@ -6,8 +6,8 @@
 TEST_CASE("PETSC Solver checked", "[solver][petsc]") {
     SECTION("PESTC Solver's results are consistent with EigenCG") {
         // TODO: pick suitable constants
-        constexpr unsigned max_iter = 1000;
-        constexpr double tolerance = 0.1;
+        constexpr unsigned max_iter = 100;
+        constexpr double tolerance = 10e-5;
         auto petsc_matrix_solver =
             Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned, double>::instance()
                 ->create("KrylovPETSC", std::move(max_iter), std::move(tolerance));
