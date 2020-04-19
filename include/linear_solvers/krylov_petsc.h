@@ -1,6 +1,8 @@
 #ifndef MPM_KRYLOV_PETSC_H_
 #define MPM_KRYLOV_PETSC_H_
 
+#ifdef USE_PETSC
+
 #include <cmath>
 
 #include "factory.h"
@@ -48,4 +50,5 @@ class KrylovPETSC : public SolverBase<Traits> {
 
 #include "krylov_petsc.tcc"
 
+#endif  // PETSC
 #endif  // MPM_KRYLOV_PETSC_H_
