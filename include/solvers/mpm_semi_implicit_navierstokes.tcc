@@ -7,7 +7,7 @@ mpm::MPMSemiImplicitNavierStokes<Tdim>::MPMSemiImplicitNavierStokes(
   console_ = spdlog::get("MPMSemiImplicitNavierStokes");
 }
 
-//! MPM semi-implicit two phase solver
+//! MPM semi-implicit navier-stokes solver
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
   bool status = true;
@@ -77,17 +77,17 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     throw std::runtime_error("Initialisation of matrix failed");
   }
 
-  // Compute mass for each phase
+  // Compute mass for single phase fluid
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
-
-  // Domain decompose
-  this->mpi_domain_decompose();
 
   // Assign beta to each particle
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::assign_projection_parameter,
                 std::placeholders::_1, beta_));
+
+  // Domain decompose
+  this->mpi_domain_decompose();
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -138,6 +138,30 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     });
     task_group.wait();
 
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce nodal mass
+      mesh_->template nodal_halo_exchange<double, 1>(
+          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
+                    false, fluid, std::placeholders::_2));
+      // MPI all reduce nodal momentum
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
+                    fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
+                    std::placeholders::_1, false, fluid,
+                    std::placeholders::_2));
+      // TODO: Check if nodal free-surface condition needs all reduce
+      // MPI all reduce nodal momentum
+      mesh_->template nodal_halo_exchange<bool, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::free_surface, std::placeholders::_1),
+          std::bind(&mpm::NodeBase<Tdim>::assign_free_surface,
+                    std::placeholders::_1, std::placeholders::_2));
+    }
+#endif
+
     // Compute nodal velocity at the begining of time step
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
@@ -170,6 +194,26 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
+
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce external force
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
+                    fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
+                    std::placeholders::_1, false, fluid,
+                    std::placeholders::_2));
+      // MPI all reduce internal force
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
+                    fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
+                    std::placeholders::_1, false, fluid,
+                    std::placeholders::_2));
+    }
+#endif
 
     // Compute intermediate velocity
     mesh_->iterate_over_nodes_predicate(
@@ -224,6 +268,12 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
 
     // Locate particle
     this->locate_particle();
+
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    mesh_->transfer_nonrank_particles();
+#endif
+#endif
 
     if (step_ % output_steps_ == 0) {
       // HDF5 outputs
