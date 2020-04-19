@@ -15,7 +15,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     Mat petsc_A;
     Vec petsc_b, petsc_x;
     PetscErrorCode ierr;
-    MPI_comm comm;
+    MPI_Comm comm;
     PetscInt dim = b.size();
     PetscInt rank, vi, mi, mj;
     PetscScalar v, m;
@@ -25,7 +25,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
     
     int petsc_argc = 1;
-    char* petsc_argv = "petsc_argv";
+    char* petsc_arg = "petsc_argv";
+    char **petsc_argv = &petsc_arg;
     PetscInitialize(&petsc_argc,&petsc_argv,0,0);
     
     comm = PETSC_COMM_WORLD;
@@ -36,7 +37,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecSetType(petsc_b, VECMPI);
     VecDuplicate(petsc_b,&petsc_x);
 
-    MatCreat(PETSC_COMM_WORLD, &petsc_A);
+    MatCreate(PETSC_COMM_WORLD, &petsc_A);
     MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
     MatSetType(petsc_A, MATSEQAIJ);
 
@@ -49,8 +50,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
         //This for loop should be optimized for sparse A
         for(mi = 0; mi < dim; mi++){
           for(mj = 0; mj < dim; mj++){
-            m = A.coeffRef(mi, mj);
-            MatSetValue(petsc_A, 1, &mi, 1, &mj, &m, INSERT_VALUES);
+            m = A.coeff(mi, mj);
+            MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
           }
         }
     }
@@ -92,18 +93,18 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     //     throw std::runtime_error("Fail to solve linear systems!\n");
     //   }
     KSPCreate(comm, &solver);
-    KSPSetOperators(solver, A, A);
+    KSPSetOperators(solver, petsc_A, petsc_A);
     KSPSetType(solver, KSPCG);
     KSPSolve(solver, petsc_b, petsc_x);
     KSPGetConvergedReason(solver,&reason);
-    if (reason < 0>){
+    if (reason < 0){
         PetscPrintf(PETSC_COMM_WORLD,
         "\nKSPCG solver Diverged;\n");
     }
 
     if (rank == 0) {
         for(vi = 0; vi < dim; vi++){
-          VecGetValues(petsc_x, 1, &vi, v);
+          VecGetValues(petsc_x, 1, &vi, &v);
           x(vi) = v;
         }
     }
