@@ -225,6 +225,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles.cc
     ${mpm_SOURCE_DIR}/tests/io/write_mesh_particles_unitcell.cc
+    ${mpm_SOURCE_DIR}/tests/linear_solver_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/bingham_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/linear_elastic_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/modified_cam_clay_test.cc
@@ -247,7 +248,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/petsc_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
   if(MPM_BUILD_LIB)

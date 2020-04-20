@@ -1,15 +1,16 @@
 #ifndef MPM_KRYLOV_PETSC_H_
 #define MPM_KRYLOV_PETSC_H_
 
-#ifdef USE_PETSC
-
 #include <cmath>
 
 #include "factory.h"
 #include "mpi.h"
 #include "solver_base.h"
 #include <iostream>
+
+#ifdef USE_PETSC
 #include <petscksp.h>
+#endif
 
 namespace mpm {
 
@@ -49,6 +50,4 @@ class KrylovPETSC : public SolverBase<Traits> {
 }  // namespace mpm
 
 #include "krylov_petsc.tcc"
-
-#endif  // PETSC
 #endif  // MPM_KRYLOV_PETSC_H_

@@ -7,6 +7,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
   try {
 
+#if USE_PETSC
     // Task
     // 1. Convert eigen to PETSC type
     // 2. Call PETSC solver
@@ -101,25 +102,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
           x(vi) = v;
         }
       }
-
-    } else if (solver_type == "lscg") {
-
-      //   // Another option is LDLT, but not accurate as lscg
-      //   // Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
-      //   Eigen::LeastSquaresConjugateGradient<Eigen::SparseMatrix<double>>
-      //   solver;
-
-      //   solver.setMaxIterations(max_iter_);
-      //   solver.setTolerance(tolerance_);
-      //   solver.compute(A);
-
-      //   x = solver.solve(b);
-
-      //   if (solver.info() != Eigen::Success) {
-      //     throw std::runtime_error("Fail to solve linear systems!\n");
-      //   }
     }
-
+#endif
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
