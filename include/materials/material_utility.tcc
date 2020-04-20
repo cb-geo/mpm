@@ -1,6 +1,5 @@
-//! Compute mean stress p (compression positive)
-inline const double mpm::materials::p(
-    const Eigen::Matrix<double, 6, 1>& stress) {
+//! Compute mean stress p (tension positive)
+inline double mpm::materials::p(const Eigen::Matrix<double, 6, 1>& stress) {
   // Compute and return mean p
   return (1. / 3. * (stress(0) + stress(1) + stress(2)));
 }
@@ -20,8 +19,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::deviatoric_stress(
 }
 
 //! Compute J2 invariant
-inline const double mpm::materials::j2(
-    const Eigen::Matrix<double, 6, 1>& stress) {
+inline double mpm::materials::j2(const Eigen::Matrix<double, 6, 1>& stress) {
 
   const double j2 = (std::pow((stress(0) - stress(1)), 2) +
                      std::pow((stress(1) - stress(2)), 2) +
@@ -34,8 +32,7 @@ inline const double mpm::materials::j2(
 }
 
 //! Compute J3 invariant
-inline const double mpm::materials::j3(
-    const Eigen::Matrix<double, 6, 1>& stress) {
+inline double mpm::materials::j3(const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute deviatoric stress
   Eigen::Matrix<double, 6, 1> deviatoric_stress =
@@ -54,8 +51,7 @@ inline const double mpm::materials::j3(
 }
 
 //! Compute deviatoric q
-inline const double mpm::materials::q(
-    const Eigen::Matrix<double, 6, 1>& stress) {
+inline double mpm::materials::q(const Eigen::Matrix<double, 6, 1>& stress) {
 
   // Compute J2 from
   const double j2 = mpm::materials::j2(stress);
@@ -65,7 +61,7 @@ inline const double mpm::materials::q(
 }
 
 //! Compute Lode angle
-inline const double mpm::materials::lode_angle(
+inline double mpm::materials::lode_angle(
     const Eigen::Matrix<double, 6, 1>& stress, const double tolerance) {
 
   // Compute j2 and j3
