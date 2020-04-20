@@ -66,8 +66,7 @@ inline const double mpm::materials::q(
 
 //! Compute Lode angle
 inline const double mpm::materials::lode_angle(
-    const Eigen::Matrix<double, 6, 1>& stress,
-    const double tolerance = std::numeric_limits<double>::epsilon()) {
+    const Eigen::Matrix<double, 6, 1>& stress, const double tolerance) {
 
   // Compute j2 and j3
   const double j2 = mpm::materials::j2(stress);
@@ -171,8 +170,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dj3_dsigma(
 
 //! Compute derivative of Lode angle theta in terms of stress sigma
 inline const Eigen::Matrix<double, 6, 1> mpm::materials::dtheta_dsigma(
-    const Eigen::Matrix<double, 6, 1>& stress,
-    const double tolerance = std::numeric_limits<double>::epsilon()) {
+    const Eigen::Matrix<double, 6, 1>& stress, const double tolerance) {
 
   // Compute J2
   const double j2 = mpm::materials::j2(stress);
