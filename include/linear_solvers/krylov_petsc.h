@@ -6,10 +6,10 @@
 #include <cmath>
 
 #include "factory.h"
+#include "mpi.h"
 #include "solver_base.h"
 #include <iostream>
 #include <petscksp.h>
-#include "mpi.h"
 
 namespace mpm {
 

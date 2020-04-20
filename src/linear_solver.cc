@@ -3,8 +3,8 @@
 #include "assembler_parallel_semi_implicit_navierstokes.h"
 
 #include "cg_eigen.h"
-#include "solver_base.h"
 #include "krylov_petsc.h"
+#include "solver_base.h"
 
 // Assembler collections
 // Asssembler 2D
