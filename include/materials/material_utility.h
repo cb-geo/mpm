@@ -31,13 +31,10 @@ inline const double q(const Eigen::Matrix<double, 6, 1>& stress);
 
 //! Compute Lode angle theta (cosine convention)
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const double lode_angle(const Eigen::Matrix<double, 6, 1>& stress);
-
-//! Compute Lode angle theta (cosine convention)
-//! \param[in] stress Stress in Voigt notation where positive is tension
 //! \param[in] tolerance Default tolerance value specified by user
-inline const double lode_angle(const Eigen::Matrix<double, 6, 1>& stress,
-                               const double tolerance);
+inline const double lode_angle(
+    const Eigen::Matrix<double, 6, 1>& stress,
+    const double tolerance = std::numeric_limits<double>::epsilon());
 
 //! Compute derivative of p in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
@@ -61,14 +58,10 @@ inline const Eigen::Matrix<double, 6, 1> dj3_dsigma(
 
 //! Compute derivative of Lode angle theta in terms of stress sigma
 //! \param[in] stress Stress in Voigt notation where positive is tension
-inline const Eigen::Matrix<double, 6, 1> dtheta_dsigma(
-    const Eigen::Matrix<double, 6, 1>& stress);
-
-//! Compute derivative of Lode angle theta in terms of stress sigma
-//! \param[in] stress Stress in Voigt notation where positive is tension
 //! \param[in] tolerance Default tolerance value specified by user
 inline const Eigen::Matrix<double, 6, 1> dtheta_dsigma(
-    const Eigen::Matrix<double, 6, 1>& stress, const double tolerance);
+    const Eigen::Matrix<double, 6, 1>& stress,
+    const double tolerance = std::numeric_limits<double>::epsilon());
 
 }  // namespace materials
 }  // namespace mpm
