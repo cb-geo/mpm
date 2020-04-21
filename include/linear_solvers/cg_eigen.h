@@ -24,7 +24,8 @@ class CGEigen : public SolverBase<Traits> {
   CGEigen(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
-    console_ = spdlog::stdout_color_mt("EigenSolver");
+    console_ =
+        std::make_unique<spdlog::logger>("EigenCGSolver", mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess

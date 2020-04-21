@@ -26,7 +26,8 @@ class KrylovPETSC : public SolverBase<Traits> {
   KrylovPETSC(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
-    console_ = spdlog::stdout_color_mt("PETSCSolver");
+    console_ =
+        std::make_unique<spdlog::logger>("PETSCKrylovSolver", mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess
