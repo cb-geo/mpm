@@ -17,6 +17,7 @@ TEST_CASE("Sin function is checked", "[sinfn]") {
 
   // Sin function properties
   unsigned id = 0;
+  std::vector<double> range{{0.0, 3.0}};
 
   // Json property
   Json jfunctionproperties;
@@ -39,6 +40,7 @@ TEST_CASE("Sin function is checked", "[sinfn]") {
       // Initialize
       jfunctionproperties["x0"] = 0.0;
       jfunctionproperties["a"] = 2.0;
+      jfunctionproperties["xrange"] = range;
       std::shared_ptr<mpm::FunctionBase> sinfn =
           std::make_shared<mpm::SinFunction>(id, jfunctionproperties);
     } catch (std::exception& exception) {
@@ -51,6 +53,7 @@ TEST_CASE("Sin function is checked", "[sinfn]") {
     // Initialize
     jfunctionproperties["x0"] = 0.0;
     jfunctionproperties["a"] = 2.0;
+    jfunctionproperties["xrange"] = range;
     std::shared_ptr<mpm::FunctionBase> sinfn =
         std::make_shared<mpm::SinFunction>(id, jfunctionproperties);
     // check id
@@ -65,12 +68,15 @@ TEST_CASE("Sin function is checked", "[sinfn]") {
     REQUIRE(sinfn->value(x) == Approx(0.9092974268).epsilon(Tolerance));
     x = 2.5;
     REQUIRE(sinfn->value(x) == Approx(-0.9589242747).epsilon(Tolerance));
+    x = 3.7;
+    REQUIRE(sinfn->value(x) == Approx(0.0).epsilon(Tolerance));
   }
 
   SECTION("Check sin function for x0 = 0.5") {
     // Initialize
     jfunctionproperties["x0"] = 0.5;
     jfunctionproperties["a"] = 2.0;
+    jfunctionproperties["xrange"] = range;
     std::shared_ptr<mpm::FunctionBase> sinfn =
         std::make_shared<mpm::SinFunction>(id, jfunctionproperties);
     // check id
@@ -85,5 +91,7 @@ TEST_CASE("Sin function is checked", "[sinfn]") {
     REQUIRE(sinfn->value(x) == Approx(0.8414709848).epsilon(Tolerance));
     x = 2.5;
     REQUIRE(sinfn->value(x) == Approx(-0.7568024953).epsilon(Tolerance));
+    x = 3.7;
+    REQUIRE(sinfn->value(x) == Approx(0.0).epsilon(Tolerance));
   }
 }
