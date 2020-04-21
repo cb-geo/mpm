@@ -535,16 +535,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     bool update, const std::string& property,
     const Eigen::MatrixXd& property_value, unsigned mat_id,
     unsigned nprops) noexcept {
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Calculate updated property
-  Eigen::MatrixXd updated_property =
-      property_handle_->property(property, prop_id_, mat_id, nprops) +
-      factor * property_value;
-
   // Update/assign property
   std::lock_guard<std::mutex> guard(node_mutex_);
-  property_handle_->assign_property(property, prop_id_, mat_id,
-                                    updated_property, nprops);
+  property_handle_->update_property(property, prop_id_, mat_id, property_value,
+                                    nprops);
 }

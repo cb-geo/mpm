@@ -507,14 +507,13 @@ void mpm::Particle<Tdim>::map_properties_to_nodes() noexcept {
   assert(mass_ != std::numeric_limits<double>::max());
 
   // Unit 1x1 Eigen matrix to be used with scalar quantities
-  Eigen::Matrix<double, 1, 1> unit_scalar;
-  unit_scalar << 1.0;
+  Eigen::Matrix<double, 1, 1> nodal_mass;
 
   // Map mass and momentum to nodal property taking into account the material id
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodes_[i]->update_property(
-        true, "masses", mass_ * shapefn_[i] * unit_scalar, material_id_, 1);
-    nodes_[i]->update_property(true, "momenta", mass_ * shapefn_[i] * velocity_,
+    nodal_mass(0, 0) = mass_ * shapefn_[i];
+    nodes_[i]->update_property(true, "masses", nodal_mass, material_id_, 1);
+    nodes_[i]->update_property(true, "momenta", nodal_mass(0, 0) * velocity_,
                                material_id_, Tdim);
   }
 }

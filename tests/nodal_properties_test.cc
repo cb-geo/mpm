@@ -66,9 +66,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     // Update values in the property data matrix and check update
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
-        REQUIRE_NOTHROW(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.update_property(
             property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
-        REQUIRE_NOTHROW(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.update_property(
             property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
@@ -144,9 +144,9 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     // Update values in the property data matrix and check update
     for (int i = 0; i < nnodes; ++i) {
       for (int j = 0; j < nmaterials; ++j) {
-        REQUIRE_NOTHROW(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.update_property(
             property1, i, j, data1.block<dim, 1>(i * dim, j), dim));
-        REQUIRE_NOTHROW(nodal_properties.assign_property(
+        REQUIRE_NOTHROW(nodal_properties.update_property(
             property2, i, j, data2.block<dim, 1>(i * dim, j), dim));
       }
     }
