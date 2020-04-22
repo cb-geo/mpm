@@ -3,8 +3,8 @@
 #include "assembler_parallel_semi_implicit_navierstokes.h"
 
 #include "cg_eigen.h"
-#include "solver_base.h"
 #include "krylov_petsc.h"
+#include "solver_base.h"
 
 // Assembler collections
 // Asssembler 2D
@@ -35,6 +35,8 @@ static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
     solver_eigen_cg("EigenCG");
 
 // Krylov Methods PTSC
+#ifdef USE_PETSC
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
                 mpm::KrylovPETSC<Eigen::SparseMatrix<double>>, unsigned, double>
     solver_krylov_petsc("KrylovPETSC");
+#endif

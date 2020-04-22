@@ -4,9 +4,13 @@
 #include <cmath>
 
 #include "factory.h"
+#include "mpi.h"
 #include "solver_base.h"
 #include <iostream>
+
+#ifdef USE_PETSC
 #include <petscksp.h>
+#endif
 
 namespace mpm {
 
@@ -22,7 +26,8 @@ class KrylovPETSC : public SolverBase<Traits> {
   KrylovPETSC(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
-    console_ = spdlog::stdout_color_mt("PETSCSolver");
+    console_ =
+        std::make_unique<spdlog::logger>("PETSCKrylovSolver", mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess
@@ -46,5 +51,4 @@ class KrylovPETSC : public SolverBase<Traits> {
 }  // namespace mpm
 
 #include "krylov_petsc.tcc"
-
 #endif  // MPM_KRYLOV_PETSC_H_

@@ -1,17 +1,17 @@
 #ifndef MPM_SOLVER_BASE_H_
 #define MPM_SOLVER_BASE_H_
 
-#include "spdlog/spdlog.h"
+#include "logger.h"
 namespace mpm {
 template <typename Traits>
 class SolverBase {
  public:
   //! Constructor with min and max iterations and tolerance
   SolverBase(unsigned max_iter, double tolerance) {
-    //! Logger
     max_iter_ = max_iter;
     tolerance_ = tolerance;
-    console_ = spdlog::stdout_color_mt("SolverBase");
+    //! Logger
+    console_ = std::make_unique<spdlog::logger>("SolverBase", mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess
