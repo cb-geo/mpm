@@ -53,7 +53,7 @@ TEST_CASE("Linear solver conjugate gradient", "[linear_solver]") {
       b << 6.0, 3.0, -9.0;
 
       // Solve
-      const auto& x_eigen = eigen_matrix_solver->solve(A, b, "cg");
+      const auto& x_eigen = eigen_matrix_solver->solve(A, b, solver_type);
 
       // Check
       REQUIRE(x_eigen(0) == Approx(2.).epsilon(Tolerance));
@@ -81,7 +81,7 @@ TEST_CASE("Linear solver conjugate gradient", "[linear_solver]") {
       b << 6.0, 3.0, -9.0;
 
       // Solve
-      const auto& x_eigen = petsc_matrix_solver->solve(A, b, "cg");
+      const auto& x_eigen = petsc_matrix_solver->solve(A, b, solver_type);
 
       // Check
       REQUIRE(x_eigen(0) == Approx(2.).epsilon(Tolerance));
