@@ -83,7 +83,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       KSPSetOperators(solver, petsc_A, petsc_A);
       KSPSetType(solver, KSPCG);
       KSPSolve(solver, petsc_b, petsc_x);
-      KSPGetConvergedReason(solver, &reason);git 
+      KSPGetConvergedReason(solver, &reason);
       if (reason < 0) {
         PetscPrintf(PETSC_COMM_WORLD, "\nKSPCG solver Diverged;\n");
       }
