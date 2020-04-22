@@ -68,8 +68,8 @@ TEST_CASE("Linear solver conjugate gradient", "[linear_solver]") {
         petsc_matrix_solver =
             Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
                     double>::instance()
-                ->create("KrylovPETSC", std::move(&&max_iter),
-                         std::move(&&tolerance));
+                ->create("KrylovPETSC", std::move(max_iter),
+                         std::move(solve_tolerance));
 
     SECTION("PETSC 3x3 solver") {
       // Initiate solver_type
