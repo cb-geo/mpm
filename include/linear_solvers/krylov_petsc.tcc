@@ -104,6 +104,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       }
     }
 #endif
+
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
