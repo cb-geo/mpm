@@ -4,6 +4,7 @@
 
 #include "cg_eigen.h"
 #include "solver_base.h"
+#include "krylov_petsc.h"
 
 // Assembler collections
 // Asssembler 2D
@@ -32,3 +33,8 @@ static Register<mpm::AssemblerBase<3>,
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
                 mpm::CGEigen<Eigen::SparseMatrix<double>>, unsigned, double>
     solver_eigen_cg("EigenCG");
+
+// Krylov Methods PTSC
+static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
+                mpm::KrylovPETSC<Eigen::SparseMatrix<double>>, unsigned, double>
+    solver_krylov_petsc("KrylovPETSC");

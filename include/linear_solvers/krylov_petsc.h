@@ -1,30 +1,28 @@
-#ifndef MPM_CG_EIGEN_H_
-#define MPM_CG_EIGEN_H_
+#ifndef MPM_KRYLOV_PETSC_H_
+#define MPM_KRYLOV_PETSC_H_
 
 #include <cmath>
 
 #include "factory.h"
 #include "solver_base.h"
-#include <Eigen/IterativeLinearSolvers>
-#include <Eigen/Sparse>
-#include <Eigen/SparseCholesky>
 #include <iostream>
+#include <petscksp.h>
 
 namespace mpm {
 
 //! MPM Eigen CG class
 //! \brief Conjugate Gradient solver class using Eigen
 template <typename Traits>
-class CGEigen : public SolverBase<Traits> {
+class KrylovPETSC : public SolverBase<Traits> {
  public:
   //! Constructor
   //! \param[in] max_iter Maximum number of iterations
 
   //! \param[in] tolerance Tolerance for solver to achieve convergence
-  CGEigen(unsigned max_iter, double tolerance)
+  KrylovPETSC(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
-    console_ = spdlog::stdout_color_mt("EigenSolver");
+    console_ = spdlog::stdout_color_mt("PETSCSolver");
   };
 
   //! Matrix solver with default initial guess
@@ -33,7 +31,7 @@ class CGEigen : public SolverBase<Traits> {
                         std::string solver_type) override;
 
   //! Return the type of solver
-  std::string solver_type() const { return "Eigen"; }
+  std::string solver_type() const { return "PETSC"; }
 
  protected:
   //! Maximum number of iterations
@@ -47,6 +45,6 @@ class CGEigen : public SolverBase<Traits> {
 };
 }  // namespace mpm
 
-#include "cg_eigen.tcc"
+#include "krylov_petsc.tcc"
 
-#endif  // MPM_CG_EIGEN_H_
+#endif  // MPM_KRYLOV_PETSC_H_
