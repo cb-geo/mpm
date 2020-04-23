@@ -125,7 +125,7 @@ const  double mean_p = check_low(-1. * mpm::materials::p(-stress));
   mean_p = check_low(mean_p);
 
   // Compute q
-  double deviatoric_q = mpm::materials::q(-stress);
+  const double deviatoric_q = check_low(mpm::materials::q(-stress));
   deviatoric_q = check_low(deviatoric_q);
 
   // Compute Lode angle (cos convetion)
