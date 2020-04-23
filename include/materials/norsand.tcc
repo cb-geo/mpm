@@ -121,7 +121,7 @@ Eigen::Matrix<double, 4, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   // Note that in this subroutine, stress is compression positive
 
   // Compute mean stress p
-  double mean_p = -1. * mpm::materials::p(-stress);
+const  double mean_p = check_low(-1. * mpm::materials::p(-stress));
   mean_p = check_low(mean_p);
 
   // Compute q
