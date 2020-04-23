@@ -178,7 +178,7 @@ void mpm::NorSand<Tdim>::compute_state_variables(
 
     // Compute and update void ratio image
     // e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
-    e_image = gamma_ - lambda_ * log(p_image / reference_pressure_);
+    e_image = check_low(gamma_ - lambda_ * log(p_image / reference_pressure_));
     e_image = check_low(e_image);
 
     (*state_vars).at("e_image") = e_image;
