@@ -163,6 +163,8 @@ class NorSand : public Material<Tdim> {
   double m_dilation_{std::numeric_limits<double>::max()};
   //! Parameter for modulus
   double m_modulus_{std::numeric_limits<double>::max()};
+  //! Default tolerance
+  double tolerance_{std::numeric_limits<double>::epsilon()};
 
 };  // NorSand class
 }  // namespace mpm

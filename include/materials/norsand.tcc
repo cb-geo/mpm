@@ -49,6 +49,8 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     m_dilation_ = material_properties.at("m_dilation").template get<double>();
     // Parameter for shear modulus
     m_modulus_ = material_properties.at("m_modulus").template get<double>();
+    // Default tolerance
+    tolerance_ = material_properties.at("tolerance").template get<double>();
 
     const double sin_friction_cs = sin(friction_cs_);
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
