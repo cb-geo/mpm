@@ -35,7 +35,6 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     p_image_initial_ =
         material_properties.at("p_image_initial").template get<double>();
     // Flag for bonded model
-
     bond_model_ = material_properties.at("bond_model").template get<bool>();
     // Initial p_cohesion
     p_cohesion_initial_ =
