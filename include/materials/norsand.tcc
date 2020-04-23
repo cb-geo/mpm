@@ -140,12 +140,12 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   Vector6d dev_stress = stress;
   for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
-  // Compute J3
-  double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-              (dev_stress(2) * std::pow(dev_stress(3), 2)) +
-              ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-               (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-               (dev_stress(1) * std::pow(dev_stress(5), 2)));
+  // Compute J3 (multiplied by -1 for compression positive)
+  double j3 = -1. * ((dev_stress(0) * dev_stress(1) * dev_stress(2)) -
+                     (dev_stress(2) * std::pow(dev_stress(3), 2)) +
+                     ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+                      (dev_stress(0) * std::pow(dev_stress(4), 2)) -
+                      (dev_stress(1) * std::pow(dev_stress(5), 2))));
 
   // Compute Lode angle value
   double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
@@ -153,12 +153,10 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
   // Compute Lode angle (sin convention)
-  double lode_angle = (1. / 3.) * asin(lode_angle_val);
-  if (lode_angle > M_PI / 6.) lode_angle = M_PI / 6.;
-  if (lode_angle < -M_PI / 6.) lode_angle = -M_PI / 6.;
+  const double lode_angle = (1. / 3.) * acos(lode_angle_val);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
-  const double cos_lode_angle = cos(3. / 2. * lode_angle + M_PI / 4.);
+  const double cos_lode_angle = cos(3. / 2. * lode_angle);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
 
   // Store to return
@@ -330,8 +328,8 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double dF_dq = 1.;
 
   // Compute the deviatoric stress
-  Vector6d dev_stress = stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
+  Vector6d dev_stress = -1.0 * stress;
+  for (unsigned i = 0; i < 3; ++i) dev_stress(i) += mean_p;
 
   // Compute dq / dsigma
   Vector6d dq_dsigma = Vector6d::Zero();
@@ -342,7 +340,7 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
   dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
 
-  const double sin_lode_angle = sin(3. / 2. * lode_angle + M_PI / 4.);
+  const double sin_lode_angle = sin(3. / 2. * lode_angle);
 
   // Compute dF / dM
   double dF_dM = -1.0 / N_ * (mean_p + p_cohesion) *
@@ -387,28 +385,25 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dj3_dsigma(5) = 0.;
   }
 
-  // Declare R as zero to avoid division by zero J2
-  double R = 0.0;
-
   // Define derivatives of R in terms of J2 and J3
   double dR_dj2 = -9.0 / 4.0 * sqrt(3.0) * j3;
   double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
 
   // Compute derivative of theta in terms of R
-  double dtheta_dR = 1.0 / 3.0;
+  double dtheta_dR = -1.0 / 3.0;
 
   // Update when J2 is non zero
   if (abs(j2) > 1.0E-6) {
     // Update R
-    R = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
+    double r = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
     // Update derivatives of R
     dR_dj2 *= std::pow(j2, -2.5);
     dR_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
-    if (abs(1 - R * R) < 1.0E-6) {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1.0E-6);
+    if (abs(1 - r * r) < 1.0E-6) {
+      dtheta_dR = -1.0 / (3.0 * sqrt(1.0E-6));
     } else {
-      dtheta_dR = 1.0 / 3.0 / sqrt(1 - R * R);
+      dtheta_dR = -1.0 / (3.0 * sqrt(1 - r * r));
     }
   }
 
@@ -421,8 +416,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dtheta_dsigma(5) = 0.;
   }
 
-  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) +
-                       (dF_dM * dM_dtheta * dtheta_dsigma);
+  // dF_dsigma is in compression negative
+  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
+                       (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
 
   // Derivatives in respect to p_image
   double dF_dpi =
