@@ -420,8 +420,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
     dtheta_dsigma(5) = 0.;
   }
 
-  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (dF_dq * dq_dsigma) +
-                       (dF_dM * dM_dtheta * dtheta_dsigma);
+  // dF_dsigma is in compression negative
+  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
+                       (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
 
   // Derivatives in respect to p_image
   double dF_dpi =
