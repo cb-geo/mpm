@@ -141,12 +141,11 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
 
   // Compute J3 (multiplied by -1 for compression positive)
-  double j3 = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-              (dev_stress(2) * std::pow(dev_stress(3), 2)) +
-              ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-               (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-               (dev_stress(1) * std::pow(dev_stress(5), 2)));
-  j3 *= -1.0;
+  double j3 = -1. * ((dev_stress(0) * dev_stress(1) * dev_stress(2)) -
+                     (dev_stress(2) * std::pow(dev_stress(3), 2)) +
+                     ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
+                      (dev_stress(0) * std::pow(dev_stress(4), 2)) -
+                      (dev_stress(1) * std::pow(dev_stress(5), 2))));
 
   // Compute Lode angle value
   double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
@@ -154,7 +153,7 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   if (lode_angle_val < -1.0) lode_angle_val = -1.0;
 
   // Compute Lode angle (sin convention)
-  double lode_angle = (1. / 3.) * acos(lode_angle_val);
+  const double lode_angle = (1. / 3.) * acos(lode_angle_val);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
   const double cos_lode_angle = cos(3. / 2. * lode_angle);
