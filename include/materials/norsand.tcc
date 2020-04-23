@@ -116,54 +116,29 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
 
 //! Compute stress invariants
 template <unsigned Tdim>
-Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
+Eigen::Matrix<double, 4, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
     const Vector6d& stress, mpm::dense_map* state_vars) {
 
   // Note that in this subroutine, stress is compression positive
 
   // Compute mean stress p
-  double mean_p = (stress(0) + stress(1) + stress(2)) / 3.;
+  double mean_p = -1. * mpm::materials::p(-stress);
   mean_p = check_low(mean_p);
 
-  // Compute J2
-  double j2 = (std::pow((stress(0) - stress(1)), 2) +
-               std::pow((stress(1) - stress(2)), 2) +
-               std::pow((stress(0) - stress(2)), 2)) /
-                  6.0 +
-              std::pow(stress(3), 2) + std::pow(stress(4), 2) +
-              std::pow(stress(5), 2);
-  j2 = check_low(j2);
-
   // Compute q
-  double deviatoric_q = std::sqrt(3 * j2);
+  double deviatoric_q = mpm::materials::q(-stress);
   deviatoric_q = check_low(deviatoric_q);
 
-  // Compute the deviatoric stress
-  Vector6d dev_stress = stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
-
-  // Compute J3 (multiplied by -1 for compression positive)
-  double j3 = -1. * ((dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-                     (dev_stress(2) * std::pow(dev_stress(3), 2)) +
-                     ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-                      (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-                      (dev_stress(1) * std::pow(dev_stress(5), 2))));
-
-  // Compute Lode angle value
-  double lode_angle_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
-  if (lode_angle_val > 1.0) lode_angle_val = 1.0;
-  if (lode_angle_val < -1.0) lode_angle_val = -1.0;
-
-  // Compute Lode angle (sin convention)
-  const double lode_angle = (1. / 3.) * acos(lode_angle_val);
+  // Compute Lode angle (cos convetion)
+  const double lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
   const double cos_lode_angle = cos(3. / 2. * lode_angle);
   double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
 
   // Store to return
-  Eigen::Matrix<double, 6, 1> invariants;
-  invariants << mean_p, deviatoric_q, j2, j3, lode_angle, M_theta;
+  Eigen::Matrix<double, 4, 1> invariants;
+  invariants << mean_p, deviatoric_q, lode_angle, M_theta;
 
   return invariants;
 }
@@ -177,11 +152,11 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   // Get invariants
   auto invariants = this->compute_stress_invariants(stress, state_vars);
 
-  double mean_p = invariants(0);
-  double deviatoric_q = invariants(1);
+  const double mean_p = invariants(0);
+  const double deviatoric_q = invariants(1);
 
   // Get state variables (note that M_theta used is at current stress)
-  double M_theta = (*state_vars).at("M_theta");
+  const double M_theta = (*state_vars).at("M_theta");
   const double p_cohesion = (*state_vars).at("p_cohesion");
   const double p_dilation = (*state_vars).at("p_dilation");
   double p_image;
@@ -205,22 +180,20 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     // Compute and update void ratio image
     // e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
     e_image = gamma_ - lambda_ * log(p_image / reference_pressure_);
-
-    if (e_image < 1.0E-15) e_image = 1.0E-15;
+    e_image = check_low(e_image);
 
     (*state_vars).at("e_image") = e_image;
-
-    // Update M_theta at the updated stress state
-    M_theta = invariants(5);
-    (*state_vars).at("M_theta") = M_theta;
   }
+
+  // Update M_theta at the updated stress state
+  (*state_vars).at("M_theta") = invariants(3);
 
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
   double void_ratio = (*state_vars).at("void_ratio") -
                       (1 + void_ratio_initial_) * dvolumetric_strain;
-  if (void_ratio < 1.0E-15) void_ratio = 1.0E-15;
+  void_ratio = check_low(void_ratio);
   (*state_vars).at("void_ratio") = void_ratio;
 }
 
@@ -277,7 +250,7 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
                                    (N_ / (1 - N_))));
 
   // Yield criterion
-  if ((*yield_function) > 1.E-15)
+  if ((*yield_function) > tolerance_)
     yield_type = mpm::norsand::FailureState::Yield;
 
   return yield_type;
@@ -293,11 +266,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   // Get stress invariants
   auto invariants = this->compute_stress_invariants(stress, state_vars);
 
-  double mean_p = invariants(0);
-  double deviatoric_q = invariants(1);
-  double j2 = invariants(2);
-  double j3 = invariants(3);
-  double lode_angle = invariants(4);
+  const double mean_p = invariants(0);
+  const double deviatoric_q = invariants(1);
+  const double lode_angle = invariants(2);
 
   // Get state variables
   const double M_theta = (*state_vars).at("M_theta");
@@ -311,127 +282,57 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const double D_min = chi_ * (void_ratio - e_image);
 
   // Estimate maximum image pressure
-  double p_image_max = (mean_p + p_cohesion) *
-                       std::pow((1 + D_min * N_ / M_theta), ((N_ - 1) / N_));
+  const double p_image_max =
+      (mean_p + p_cohesion) *
+      std::pow((1 + D_min * N_ / M_theta), ((N_ - 1) / N_));
 
   // Compute derivatives
   // Compute dF / dp
-  double dF_dp = -1. * M_theta / N_ *
-                 (1 - std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion)),
-                               (N_ / (1 - N_))));
+  const double dF_dp =
+      -1. * M_theta / N_ *
+      (1 - std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion)),
+                    (N_ / (1 - N_))));
 
   // Compute dp / dsigma
-  Vector6d dp_dsigma = Vector6d::Zero();
-  dp_dsigma(0) = 1. / 3.;
-  dp_dsigma(1) = 1. / 3.;
-  dp_dsigma(2) = 1. / 3.;
+  const Vector6d dp_dsigma = mpm::materials::dp_dsigma(-stress);
 
   // Compute dF / dq
   const double dF_dq = 1.;
 
-  // Compute the deviatoric stress
-  Vector6d dev_stress = -1.0 * stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) += mean_p;
-
   // Compute dq / dsigma
-  Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma(0) = 3. / 2. / deviatoric_q * dev_stress(0);
-  dq_dsigma(1) = 3. / 2. / deviatoric_q * dev_stress(1);
-  dq_dsigma(2) = 3. / 2. / deviatoric_q * dev_stress(2);
-  dq_dsigma(3) = 3. / deviatoric_q * dev_stress(3);
-  dq_dsigma(4) = 3. / deviatoric_q * dev_stress(4);
-  dq_dsigma(5) = 3. / deviatoric_q * dev_stress(5);
-
-  const double sin_lode_angle = sin(3. / 2. * lode_angle);
+  const Vector6d dq_dsigma = mpm::materials::dq_dsigma(-stress);
 
   // Compute dF / dM
-  double dF_dM = -1.0 / N_ * (mean_p + p_cohesion) *
-                 (1 + (N_ - 1) * std::pow(((mean_p + p_cohesion) /
-                                           (p_image + p_cohesion + p_dilation)),
-                                          (N_ / (1 - N_))));
+  const double dF_dM =
+      -1.0 / N_ * (mean_p + p_cohesion) *
+      (1 + (N_ - 1) * std::pow(((mean_p + p_cohesion) /
+                                (p_image + p_cohesion + p_dilation)),
+                               (N_ / (1 - N_))));
+
+  // Use current lode angle to compute dtheta
+  const double sin_lode_angle = sin(3. / 2. * lode_angle);
 
   // Compute dM / dtehta
   const double dM_dtheta =
       3. / 2. * std::pow(Mtc_, 2) / (3. + Mtc_) * sin_lode_angle;
 
-  // Compute dj2 / dsigma
-  Vector6d dj2_dsigma = dev_stress;
-  dj2_dsigma(3) *= 2.0;
-  dj2_dsigma(4) *= 2.0;
-  dj2_dsigma(5) *= 2.0;
-
-  // Compute dj3 / dsigma
-  Eigen::Matrix<double, 3, 1> dev1;
-  dev1(0) = dev_stress(0);
-  dev1(1) = dev_stress(3);
-  dev1(2) = dev_stress(5);
-  Eigen::Matrix<double, 3, 1> dev2;
-  dev2(0) = dev_stress(3);
-  dev2(1) = dev_stress(1);
-  dev2(2) = dev_stress(4);
-  Eigen::Matrix<double, 3, 1> dev3;
-  dev3(0) = dev_stress(5);
-  dev3(1) = dev_stress(4);
-  dev3(2) = dev_stress(2);
-
-  Vector6d dj3_dsigma = Vector6d::Zero();
-  dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
-  dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
-  dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
-  dj3_dsigma(3) = 2.0 * dev1.dot(dev2);
-  dj3_dsigma(4) = 2.0 * dev2.dot(dev3);
-  dj3_dsigma(5) = 2.0 * dev1.dot(dev3);
-
-  if (Tdim == 2) {
-    dj3_dsigma(4) = 0.;
-    dj3_dsigma(5) = 0.;
-  }
-
-  // Define derivatives of R in terms of J2 and J3
-  double dR_dj2 = -9.0 / 4.0 * sqrt(3.0) * j3;
-  double dR_dj3 = 3.0 / 2.0 * sqrt(3.0);
-
-  // Compute derivative of theta in terms of R
-  double dtheta_dR = -1.0 / 3.0;
-
-  // Update when J2 is non zero
-  if (abs(j2) > 1.0E-6) {
-    // Update R
-    double r = j3 / 2.0 * std::pow(j2 / 3.0, -1.5);
-    // Update derivatives of R
-    dR_dj2 *= std::pow(j2, -2.5);
-    dR_dj3 *= std::pow(j2, -1.5);
-    // Update derivative of theta in terms of R, check for sqrt of zero
-    if (abs(1 - r * r) < 1.0E-6) {
-      dtheta_dR = -1.0 / (3.0 * sqrt(1.0E-6));
-    } else {
-      dtheta_dR = -1.0 / (3.0 * sqrt(1 - r * r));
-    }
-  }
-
   // Compute dtheta / dsigma
-  Vector6d dtheta_dsigma =
-      dtheta_dR * ((dR_dj2 * dj2_dsigma) + (dR_dj3 * dj3_dsigma));
-
-  if (Tdim == 2) {
-    dtheta_dsigma(4) = 0.;
-    dtheta_dsigma(5) = 0.;
-  }
+  const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(-stress);
 
   // dF_dsigma is in compression negative
-  Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
-                       (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
+  const Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
+                             (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
 
   // Derivatives in respect to p_image
-  double dF_dpi =
+  const double dF_dpi =
       -1. * M_theta *
       std::pow(((mean_p + p_cohesion) / (p_image + p_cohesion + p_dilation)),
                (1 / (1 - N_)));
 
-  double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
+  const double dpi_depsd = hardening_modulus_ * (p_image_max - p_image);
 
   const double dF_dsigma_v = (dF_dsigma(0) + dF_dsigma(1) + dF_dsigma(2)) / 3;
-  double dF_dsigma_deviatoric =
+  const double dF_dsigma_deviatoric =
       std::sqrt(2. / 3.) *
       std::sqrt(std::pow(dF_dsigma(0) - dF_dsigma_v, 2) +
                 std::pow(dF_dsigma(1) - dF_dsigma_v, 2) +

@@ -69,12 +69,12 @@ class NorSand : public Material<Tdim> {
   void compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
-  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
+  //! Compute stress invariants (p, q, lode_angle and M_theta)
   //! \param[in] stress Stress
   //! \param[in] state_vars History-dependent state variables
-  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
+  //! \retval vector of size six, containing p, q, lode_angle and
   //! M_theta
-  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
+  Eigen::Matrix<double, 4, 1> compute_stress_invariants(
       const Vector6d& stress, mpm::dense_map* state_vars);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
