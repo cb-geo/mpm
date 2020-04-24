@@ -121,21 +121,21 @@ double* mpm::NorSand<Tdim>::compute_stress_invariants(
 
   // Note that in this subroutine, stress is compression positive
 
+  // Store to return
+  static double invariants[4];
+
   // Compute mean stress p
-  const double mean_p = check_low(-1. * mpm::materials::p(-stress));
+  invariants[0] = check_low(-1. * mpm::materials::p(-stress));
 
   // Compute q
-  const double deviatoric_q = check_low(mpm::materials::q(-stress));
+  invariants[1] = check_low(mpm::materials::q(-stress));
 
   // Compute Lode angle (cos convetion)
-  const double lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
+  invariants[2] = mpm::materials::lode_angle(-stress, tolerance_);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
-  const double cos_lode_angle = cos(3. / 2. * lode_angle);
-  double M_theta = Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos_lode_angle;
-
-  // Store to return
-  static double invariants[4] = {mean_p, deviatoric_q, lode_angle, M_theta};
+  invariants[3] =
+      Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * invariants[2]);
 
   return invariants;
 }
