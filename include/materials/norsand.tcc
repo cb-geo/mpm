@@ -49,7 +49,8 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     // Parameter for shear modulus
     m_modulus_ = material_properties.at("m_modulus").template get<double>();
     // Default tolerance
-    tolerance_ = material_properties.at("tolerance").template get<double>();
+    if (material_properties.find("tolerance") != material_properties.end())
+      tolerance_ = material_properties.at("tolerance").template get<double>();
 
     const double sin_friction_cs = sin(friction_cs_);
     Mtc_ = (6 * sin_friction_cs) / (3 - sin_friction_cs);
@@ -121,12 +122,10 @@ Eigen::Matrix<double, 4, 1> mpm::NorSand<Tdim>::compute_stress_invariants(
   // Note that in this subroutine, stress is compression positive
 
   // Compute mean stress p
-const  double mean_p = check_low(-1. * mpm::materials::p(-stress));
-  mean_p = check_low(mean_p);
+  const double mean_p = check_low(-1. * mpm::materials::p(-stress));
 
   // Compute q
   const double deviatoric_q = check_low(mpm::materials::q(-stress));
-  deviatoric_q = check_low(deviatoric_q);
 
   // Compute Lode angle (cos convetion)
   const double lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
@@ -179,7 +178,6 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     // Compute and update void ratio image
     // e_image = e_max_ - (e_max_ - e_min_) / log(crushing_pressure_ / p_image);
     e_image = check_low(gamma_ - lambda_ * log(p_image / reference_pressure_));
-    e_image = check_low(e_image);
 
     (*state_vars).at("e_image") = e_image;
   }
@@ -190,9 +188,8 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
-  double void_ratio = (*state_vars).at("void_ratio") -
-                      (1 + void_ratio_initial_) * dvolumetric_strain;
-  void_ratio = check_low(void_ratio);
+  double void_ratio = check_low((*state_vars).at("void_ratio") -
+                                (1 + void_ratio_initial_) * dvolumetric_strain);
   (*state_vars).at("void_ratio") = void_ratio;
 }
 
