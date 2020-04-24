@@ -272,6 +272,6 @@ TEST_CASE("materials utility is checked", "[materials]") {
 
     // Compute pdstrain
     double pdstrain = mpm::materials::pdstrain(plastic_strain);
-    REQUIRE(pdstrain == Approx(3.99777777777E-6).epsilon(Tolerance)); 
+    REQUIRE(pdstrain == Approx(0.001999444367263).epsilon(Tolerance)); 
 
 }
