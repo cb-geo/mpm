@@ -187,9 +187,9 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
   double dvolumetric_strain = dstrain(0) + dstrain(1) + dstrain(2);
-  double void_ratio = check_low((*state_vars).at("void_ratio") -
-                                (1 + void_ratio_initial_) * dvolumetric_strain);
-  (*state_vars).at("void_ratio") = void_ratio;
+  (*state_vars).at("void_ratio") =
+      check_low((*state_vars).at("void_ratio") -
+                (1 + void_ratio_initial_) * dvolumetric_strain);
 }
 
 //! Compute elastic tensor
