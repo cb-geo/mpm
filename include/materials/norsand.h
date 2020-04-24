@@ -69,13 +69,14 @@ class NorSand : public Material<Tdim> {
   void compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
-  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
+  //! Compute stress invariants (p, q, lode_angle and M_theta)
   //! \param[in] stress Stress
-  //! \param[in] state_vars History-dependent state variables
-  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
-  //! M_theta
-  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
-      const Vector6d& stress, mpm::dense_map* state_vars);
+  //! \param[in|out] p Mean stress
+  //! \param[in|out] q Deviatoric stress
+  //! \param[in|out] lode_angle Lode angle
+  //! \param[in|out] M_theta Critical state M lode angle
+  void compute_stress_invariants(const Vector6d& stress, double* p, double* q,
+                                 double* lode_angle, double* M_theta);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
@@ -163,6 +164,8 @@ class NorSand : public Material<Tdim> {
   double m_dilation_{std::numeric_limits<double>::max()};
   //! Parameter for modulus
   double m_modulus_{std::numeric_limits<double>::max()};
+  //! Default tolerance
+  double tolerance_{std::numeric_limits<double>::epsilon()};
 
 };  // NorSand class
 }  // namespace mpm
