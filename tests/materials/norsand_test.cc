@@ -45,6 +45,7 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
   jmaterial["m_cohesion"] = 0.0;
   jmaterial["m_dilation"] = 0.0;
   jmaterial["m_modulus"] = 0.0;
+  jmaterial["tolerance"] = 1.0E-15;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -109,6 +110,8 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
             Approx(jmaterial.at("m_modulus")).epsilon(Tolerance));
     REQUIRE(material->template property<bool>("bond_model") ==
             jmaterial.at("bond_model"));
+    REQUIRE(material->template property<double>("tolerance") ==
+            Approx(jmaterial.at("tolerance")).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
@@ -328,6 +331,7 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
   jmaterial["m_cohesion"] = 20.0;
   jmaterial["m_dilation"] = 5.0;
   jmaterial["m_modulus"] = 10;
+  jmaterial["tolerance"] = 1.0E-15;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -392,6 +396,8 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
             Approx(jmaterial["m_modulus"]).epsilon(Tolerance));
     REQUIRE(material->template property<bool>("bond_model") ==
             jmaterial["bond_model"]);
+    REQUIRE(material->template property<double>("tolerance") ==
+            Approx(jmaterial.at("tolerance")).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
