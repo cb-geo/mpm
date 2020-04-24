@@ -74,8 +74,7 @@ class NorSand : public Material<Tdim> {
   //! \param[in|out] p Mean stress
   //! \param[in|out] q Deviatoric stress
   //! \param[in|out] lode_angle Lode angle
-  //! \param[in|out] M_theta Theta(?)
-  //! \retval 4 variables, namely p, q, lode_angle and M_theta
+  //! \param[in|out] M_theta Critical state M lode angle
   void compute_stress_invariants(const Vector6d& stress, double* p, double* q,
                                  double* lode_angle, double* M_theta);
 
