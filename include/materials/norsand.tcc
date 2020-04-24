@@ -116,28 +116,24 @@ bool mpm::NorSand<Tdim>::compute_elastic_tensor() {
 
 //! Compute stress invariants
 template <unsigned Tdim>
-double* mpm::NorSand<Tdim>::compute_stress_invariants(
-    const Vector6d& stress, mpm::dense_map* state_vars) {
-
+void mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
+                                                   double* p, double* q,
+                                                   double* lode_angle,
+                                                   double* M_theta) {
   // Note that in this subroutine, stress is compression positive
 
-  // Store to return
-  static double invariants[4];
-
   // Compute mean stress p
-  invariants[0] = check_low(-1. * mpm::materials::p(-stress));
+  *p = check_low(-1. * mpm::materials::p(-stress));
 
   // Compute q
-  invariants[1] = check_low(mpm::materials::q(-stress));
+  *q = check_low(mpm::materials::q(-stress));
 
   // Compute Lode angle (cos convetion)
-  invariants[2] = mpm::materials::lode_angle(-stress, tolerance_);
+  *lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
-  invariants[3] =
-      Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * invariants[2]);
-
-  return invariants;
+  *M_theta =
+      Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * *lode_angle);
 }
 
 //! Compute state parameters
@@ -146,11 +142,15 @@ void mpm::NorSand<Tdim>::compute_state_variables(
     const Vector6d& stress, const Vector6d& dstrain, mpm::dense_map* state_vars,
     mpm::norsand::FailureState yield_type) {
 
-  // Get invariants
-  auto* invariants = this->compute_stress_invariants(stress, state_vars);
+  // Initialize invariants
+  double mean_p = 0.;
+  double deviatoric_q = 0.;
+  double lode_angle = 0.;
+  double mtheta = 0.;
 
-  const double mean_p = invariants[0];
-  const double deviatoric_q = invariants[1];
+  // Get invariants
+  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+                                  &mtheta);
 
   // Get state variables (note that M_theta used is at current stress)
   const double M_theta = (*state_vars).at("M_theta");
@@ -182,7 +182,7 @@ void mpm::NorSand<Tdim>::compute_state_variables(
   }
 
   // Update M_theta at the updated stress state
-  (*state_vars).at("M_theta") = invariants[3];
+  (*state_vars).at("M_theta") = mtheta;
 
   // Update void ratio
   // Note that dstrain is in tension positive - depsv = de / (1 + e_initial)
@@ -221,11 +221,15 @@ typename mpm::norsand::FailureState mpm::NorSand<Tdim>::compute_yield_state(
     double* yield_function, const Vector6d& stress,
     mpm::dense_map* state_vars) {
 
-  // Get stress invariants
-  auto* invariants = this->compute_stress_invariants(stress, state_vars);
+  // Initialize invariants
+  double mean_p = 0.;
+  double deviatoric_q = 0.;
+  double lode_angle = 0.;
+  double mtheta = 0.;
 
-  double mean_p = invariants[0];
-  double deviatoric_q = invariants[1];
+  // Get invariants
+  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+                                  &mtheta);
 
   // Get state variables
   const double p_image = (*state_vars).at("p_image");
@@ -258,12 +262,15 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
 
   // Note that in this subroutine, stress is compression positive
 
-  // Get stress invariants
-  auto* invariants = this->compute_stress_invariants(stress, state_vars);
+  // Initialize invariants
+  double mean_p = 0.;
+  double deviatoric_q = 0.;
+  double lode_angle = 0.;
+  double mtheta = 0.;
 
-  const double mean_p = invariants[0];
-  const double deviatoric_q = invariants[1];
-  const double lode_angle = invariants[2];
+  // Get invariants
+  this->compute_stress_invariants(stress, &mean_p, &deviatoric_q, &lode_angle,
+                                  &mtheta);
 
   // Get state variables
   const double M_theta = (*state_vars).at("M_theta");

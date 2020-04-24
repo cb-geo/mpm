@@ -71,10 +71,9 @@ class NorSand : public Material<Tdim> {
 
   //! Compute stress invariants (p, q, lode_angle and M_theta)
   //! \param[in] stress Stress
-  //! \param[in] state_vars History-dependent state variables
-  //! \retval vector of size six, containing p, q, lode_angle and M_theta
-  double* compute_stress_invariants(const Vector6d& stress,
-                                    mpm::dense_map* state_vars);
+  //! \param[in] 4 variables to update: p, q, lode_angle and M_theta
+  void compute_stress_invariants(const Vector6d& stress, double* p, double* q,
+                                 double* lode_angle, double* M_theta);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
