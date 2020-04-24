@@ -115,6 +115,22 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(dtheta_dsigma_tolerance(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise plastic_strain
+    Eigen::Matrix<double, 6, 1> plastic_strain;
+    plastic_strain.setZero();
+
+    // Check plastic_strain
+    REQUIRE(plastic_strain(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(plastic_strain(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(plastic_strain(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(plastic_strain(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(plastic_strain(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(plastic_strain(5) == Approx(0.).epsilon(Tolerance));
+
+    // Compute pdstrain
+    double pdstrain = mpm::materials::pdstrain(plastic_strain);
+    REQUIRE(pdstrain == Approx(0.).epsilon(Tolerance));    
   }
 
   SECTION("Check for non-zero stresses") {
@@ -236,4 +252,26 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(dtheta_dsigma_tolerance(5) ==
             Approx(0.00189011673149042).epsilon(Tolerance));
   }
+
+    // Initialise plastic_strain
+    Eigen::Matrix<double, 6, 1> plastic_strain;
+    plastic_strain(0) = 0.001;
+    plastic_strain(1) = -0.002;
+    plastic_strain(2) = -0.0015;
+    plastic_strain(3) = 0.0007;
+    plastic_strain(4) = -0.0006;
+    plastic_strain(5) = 0.0009;
+
+    // Check plastic_strain
+    REQUIRE(plastic_strain(0) == Approx(0.001).epsilon(Tolerance));
+    REQUIRE(plastic_strain(1) == Approx(-0.002).epsilon(Tolerance));
+    REQUIRE(plastic_strain(2) == Approx(-0.0015).epsilon(Tolerance));
+    REQUIRE(plastic_strain(3) == Approx(0.0007).epsilon(Tolerance));
+    REQUIRE(plastic_strain(4) == Approx(-0.0006).epsilon(Tolerance));
+    REQUIRE(plastic_strain(5) == Approx(0.0009).epsilon(Tolerance));
+
+    // Compute pdstrain
+    double pdstrain = mpm::materials::pdstrain(plastic_strain);
+    REQUIRE(pdstrain == Approx(3.99777777777E-6).epsilon(Tolerance)); 
+
 }
