@@ -116,21 +116,47 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(dtheta_dsigma_tolerance(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(5) == Approx(0.).epsilon(Tolerance));
 
-    // Initialise plastic_strain
-    Eigen::Matrix<double, 6, 1> plastic_strain;
-    plastic_strain.setZero();
+    // Initialise dstrain
+    Eigen::Matrix<double, 6, 1> dstrain;
+    dstrain.setZero();
 
-    // Check plastic_strain
-    REQUIRE(plastic_strain(0) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(plastic_strain(1) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(plastic_strain(2) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(plastic_strain(3) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(plastic_strain(4) == Approx(0.).epsilon(Tolerance));
-    REQUIRE(plastic_strain(5) == Approx(0.).epsilon(Tolerance));
+    // Check dstrain
+    REQUIRE(dstrain(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dstrain(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dstrain(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dstrain(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dstrain(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dstrain(5) == Approx(0.).epsilon(Tolerance));
 
-    // Compute pdstrain
-    double pdstrain = mpm::materials::pdstrain(plastic_strain);
-    REQUIRE(pdstrain == Approx(0.).epsilon(Tolerance));    
+    // Initialise de elastic stiffness matrix
+    Eigen::Matrix<double, 6, 6> de;
+    const double K = 1.0E+7;
+    const double G = 6.0E+6;
+    const double a1 = K + (4.0 / 3.0) * G;
+    const double a2 = K - (2.0 / 3.0) * G;
+
+    // clang-format off
+    de(0,0)=a1;    de(0,1)=a2;    de(0,2)=a2;    de(0,3)=0;    de(0,4)=0;    de(0,5)=0;
+    de(1,0)=a2;    de(1,1)=a1;    de(1,2)=a2;    de(1,3)=0;    de(1,4)=0;    de(1,5)=0;
+    de(2,0)=a2;    de(2,1)=a2;    de(2,2)=a1;    de(2,3)=0;    de(2,4)=0;    de(2,5)=0;
+    de(3,0)= 0;    de(3,1)= 0;    de(3,2)= 0;    de(3,3)=G;    de(3,4)=0;    de(3,5)=0;
+    de(4,0)= 0;    de(4,1)= 0;    de(4,2)= 0;    de(4,3)=0;    de(4,4)=G;    de(4,5)=0;
+    de(5,0)= 0;    de(5,1)= 0;    de(5,2)= 0;    de(5,3)=0;    de(5,4)=0;    de(5,5)=G;
+    // clang-format on
+
+    // Check dplastic strain
+    Eigen::Matrix<double, 6, 1> dplastic_strain =
+        mpm::materials::dplastic_strain(stress, dstrain, de);
+    REQUIRE(dplastic_strain(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(5) == Approx(0.).epsilon(Tolerance));
+
+    // Check pdstrain
+    double pdstrain = mpm::materials::pdstrain(dstrain);
+    REQUIRE(pdstrain == Approx(0.).epsilon(Tolerance));
   }
 
   SECTION("Check for non-zero stresses") {
@@ -251,27 +277,55 @@ TEST_CASE("materials utility is checked", "[materials]") {
             Approx(0.0117793023407611).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(5) ==
             Approx(0.00189011673149042).epsilon(Tolerance));
+
+    // Initialise dstrain
+    Eigen::Matrix<double, 6, 1> dstrain;
+    dstrain(0) = 0.001;
+    dstrain(1) = -0.002;
+    dstrain(2) = -0.0015;
+    dstrain(3) = 0.0007;
+    dstrain(4) = -0.0006;
+    dstrain(5) = 0.0009;
+
+    // Check dstrain
+    REQUIRE(dstrain(0) == Approx(0.001).epsilon(Tolerance));
+    REQUIRE(dstrain(1) == Approx(-0.002).epsilon(Tolerance));
+    REQUIRE(dstrain(2) == Approx(-0.0015).epsilon(Tolerance));
+    REQUIRE(dstrain(3) == Approx(0.0007).epsilon(Tolerance));
+    REQUIRE(dstrain(4) == Approx(-0.0006).epsilon(Tolerance));
+    REQUIRE(dstrain(5) == Approx(0.0009).epsilon(Tolerance));
+
+    // Initialise de elastic stiffness matrix
+    Eigen::Matrix<double, 6, 6> de;
+    const double K = 1.0E+7;
+    const double G = 6.0E+6;
+    const double a1 = K + (4.0 / 3.0) * G;
+    const double a2 = K - (2.0 / 3.0) * G;
+
+    // clang-format off
+    de(0,0)=a1;    de(0,1)=a2;    de(0,2)=a2;    de(0,3)=0;    de(0,4)=0;    de(0,5)=0;
+    de(1,0)=a2;    de(1,1)=a1;    de(1,2)=a2;    de(1,3)=0;    de(1,4)=0;    de(1,5)=0;
+    de(2,0)=a2;    de(2,1)=a2;    de(2,2)=a1;    de(2,3)=0;    de(2,4)=0;    de(2,5)=0;
+    de(3,0)= 0;    de(3,1)= 0;    de(3,2)= 0;    de(3,3)=G;    de(3,4)=0;    de(3,5)=0;
+    de(4,0)= 0;    de(4,1)= 0;    de(4,2)= 0;    de(4,3)=0;    de(4,4)=G;    de(4,5)=0;
+    de(5,0)= 0;    de(5,1)= 0;    de(5,2)= 0;    de(5,3)=0;    de(5,4)=0;    de(5,5)=G;
+    // clang-format on
+
+    // Check dplastic strain
+    Eigen::Matrix<double, 6, 1> dplastic_strain =
+        mpm::materials::dplastic_strain(stress, dstrain, de);
+    REQUIRE(dplastic_strain(0) == Approx(0.001008326666667).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(1) ==
+            Approx(-0.001995823333333).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(2) ==
+            Approx(-0.001495823333333).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(3) == Approx(0.000691333333333).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(4) ==
+            Approx(-0.000597583333333).epsilon(Tolerance));
+    REQUIRE(dplastic_strain(5) == Approx(0.000905500000000).epsilon(Tolerance));
+
+    // Check pdstrain
+    double pdstrain = mpm::materials::pdstrain(dstrain);
+    REQUIRE(pdstrain == Approx(0.001999444367263).epsilon(Tolerance));
   }
-
-    // Initialise plastic_strain
-    Eigen::Matrix<double, 6, 1> plastic_strain;
-    plastic_strain(0) = 0.001;
-    plastic_strain(1) = -0.002;
-    plastic_strain(2) = -0.0015;
-    plastic_strain(3) = 0.0007;
-    plastic_strain(4) = -0.0006;
-    plastic_strain(5) = 0.0009;
-
-    // Check plastic_strain
-    REQUIRE(plastic_strain(0) == Approx(0.001).epsilon(Tolerance));
-    REQUIRE(plastic_strain(1) == Approx(-0.002).epsilon(Tolerance));
-    REQUIRE(plastic_strain(2) == Approx(-0.0015).epsilon(Tolerance));
-    REQUIRE(plastic_strain(3) == Approx(0.0007).epsilon(Tolerance));
-    REQUIRE(plastic_strain(4) == Approx(-0.0006).epsilon(Tolerance));
-    REQUIRE(plastic_strain(5) == Approx(0.0009).epsilon(Tolerance));
-
-    // Compute pdstrain
-    double pdstrain = mpm::materials::pdstrain(plastic_strain);
-    REQUIRE(pdstrain == Approx(0.001999444367263).epsilon(Tolerance)); 
-
 }

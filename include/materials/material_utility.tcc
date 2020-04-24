@@ -204,6 +204,15 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dtheta_dsigma(
   return (dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma)));
 }
 
+//! Compute incremental dplastic_strain
+inline const Eigen::Matrix<double, 6, 1> mpm::materials::dplastic_strain(
+    const Eigen::Matrix<double, 6, 1>& dstress,
+    const Eigen::Matrix<double, 6, 1>& dstrain,
+    const Eigen::Matrix<double, 6, 6>& de) {
+  // Compute and return dplastic_strain
+  return (dstrain - de.inverse() * dstress);
+}
+
 //! Compute plastic deviatoric strain
 inline double mpm::materials::pdstrain(
     const Eigen::Matrix<double, 6, 1>& plastic_strain) {

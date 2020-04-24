@@ -74,9 +74,20 @@ inline const Eigen::Matrix<double, 6, 1> dtheta_dsigma(
     const Eigen::Matrix<double, 6, 1>& stress,
     double tolerance = std::numeric_limits<double>::epsilon());
 
+//! Compute incremental dplastic_strain
+//! \param[in] dstress Incremental stress in Voigt notation where positive is
+//! tension \param[in] dstrain Incremental total strain in Voigt notation where
+//! positive is tension \param[in] de Elastic stiffness matrix \param[in]
+//! tolerance Default tolerance value specified by user \retval dplastic_strain
+inline const Eigen::Matrix<double, 6, 1> dplastic_strain(
+    const Eigen::Matrix<double, 6, 1>& dstress,
+    const Eigen::Matrix<double, 6, 1>& dstrain,
+    const Eigen::Matrix<double, 6, 6>& de);
+
 //! Compute plastic deviatoric strain
 //! \param[in] plastic_strain Plastic strain in Voigt notation where positive is
-//! tension \retval plastic deviatoric strain
+//! tension
+//! \retval plastic deviatoric strain
 inline double pdstrain(const Eigen::Matrix<double, 6, 1>& plastic_strain);
 
 }  // namespace materials
