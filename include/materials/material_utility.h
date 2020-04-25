@@ -37,7 +37,7 @@ inline double q(const Eigen::Matrix<double, 6, 1>& stress);
 //! Compute Lode angle theta (cosine convention)
 //! \param[in] stress Stress in Voigt notation where positive is tension
 //! \param[in] tolerance Default tolerance value specified by user
-//! \retval Lode angle theta (cosine convention)
+//! \retval theta Lode angle theta (cosine convention)
 inline double lode_angle(
     const Eigen::Matrix<double, 6, 1>& stress,
     double tolerance = std::numeric_limits<double>::epsilon());
