@@ -41,6 +41,9 @@ class LinearElastic : public Material<Tdim> {
     return state_vars;
   }
 
+  //! State variables
+  std::vector<std::string> state_variables() const override { return {}; }
+
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain

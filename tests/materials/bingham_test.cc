@@ -81,6 +81,9 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
       REQUIRE(state_variables.at("pressure") == 0.0);
+      const std::vector<std::string> state_vars = {"pressure"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 
@@ -529,6 +532,9 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
       REQUIRE(state_variables.at("pressure") == 0.0);
+      const std::vector<std::string> state_vars = {"pressure"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 

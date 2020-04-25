@@ -94,6 +94,18 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
   return state_vars;
 }
 
+//! Initialise state variables
+template <unsigned Tdim>
+std::vector<std::string> mpm::NorSand<Tdim>::state_variables() const {
+  const std::vector<std::string> state_vars = {
+      "M_theta",         "void_ratio",      "e_image",
+      "p_image",         "p_cohesion",      "p_dilation",
+      "pdstrain",        "plastic_strain0", "plastic_strain1",
+      "plastic_strain2", "plastic_strain3", "plastic_strain4",
+      "plastic_strain5"};
+  return state_vars;
+}
+
 //! Compute elastic tensor
 template <unsigned Tdim>
 bool mpm::NorSand<Tdim>::compute_elastic_tensor() {

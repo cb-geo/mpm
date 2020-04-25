@@ -118,6 +118,26 @@ TEST_CASE("Modified cam clay undrained condition is checked in 3D",
       REQUIRE(state_variables.at("pcc") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("subloading_r") ==
               Approx(1.0).epsilon(Tolerance));
+
+      const std::vector<std::string> state_vars = {"bulk_modulus",
+                                                   "shear_modulus",
+                                                   "j3",
+                                                   "p",
+                                                   "q",
+                                                   "theta",
+                                                   "pc",
+                                                   "void_ratio",
+                                                   "delta_phi",
+                                                   "m_theta",
+                                                   "f_function",
+                                                   "dpvstrain",
+                                                   "dpdstrain",
+                                                   "chi",
+                                                   "pcd",
+                                                   "pcc",
+                                                   "subloading_r"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 

@@ -76,6 +76,14 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
   return state_vars;
 }
 
+//! Initialise state variables
+template <unsigned Tdim>
+std::vector<std::string> mpm::MohrCoulomb<Tdim>::state_variables() const {
+  const std::vector<std::string> state_vars = {
+      "phi", "psi", "cohesion", "j3", "epsilon", "rho", "theta", "pdstrain"};
+  return state_vars;
+}
+
 //! Compute elastic tensor
 template <unsigned Tdim>
 bool mpm::MohrCoulomb<Tdim>::compute_elastic_tensor() {
