@@ -13,7 +13,10 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   // Set mesh as isoparametric
   bool isoparametric = is_isoparametric();
 
-  mesh_ = std::make_unique<mpm::Mesh<Tdim>>(id, isoparametric);
+  mesh_ = std::make_shared<mpm::Mesh<Tdim>>(id, isoparametric);
+
+  // Create constraints
+  constraints_ = std::make_shared<mpm::Constraints<Tdim>>(mesh_);
 
   // Empty all materials
   materials_.clear();
@@ -785,9 +788,10 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
         if (constraints.find("file") != constraints.end()) {
           std::string velocity_constraints_file =
               constraints.at("file").template get<std::string>();
-          bool velocity_constraints = mesh_->assign_nodal_velocity_constraints(
-              mesh_io->read_velocity_constraints(
-                  io_->file_name(velocity_constraints_file)));
+          bool velocity_constraints =
+              constraints_->assign_nodal_velocity_constraints(
+                  mesh_io->read_velocity_constraints(
+                      io_->file_name(velocity_constraints_file)));
           if (!velocity_constraints)
             throw std::runtime_error(
                 "Velocity constraints are not properly assigned");
@@ -802,7 +806,8 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          mesh_->assign_nodal_velocity_constraint(nset_id, velocity_constraint);
+          constraints_->assign_nodal_velocity_constraint(nset_id,
+                                                         velocity_constraint);
         }
       }
     } else

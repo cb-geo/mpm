@@ -18,11 +18,10 @@
 #include "graph.h"
 #endif
 
-#include "friction_constraint.h"
+#include "constraints.h"
 #include "mpm.h"
 #include "particle.h"
 #include "vector.h"
-#include "velocity_constraint.h"
 
 namespace mpm {
 
@@ -177,7 +176,9 @@ class MPMBase : public MPM {
   //! Gravity
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
-  std::unique_ptr<mpm::Mesh<Tdim>> mesh_;
+  std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
+  //! Constraints object
+  std::shared_ptr<mpm::Constraints<Tdim>> constraints_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions

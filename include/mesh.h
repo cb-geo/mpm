@@ -110,6 +110,17 @@ class Mesh {
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
 
+  //! Return a vector of nodes
+  //! \param[in] set_id Set of id of nodes (-1 for all nodes)
+  Vector<NodeBase<Tdim>> nodes(unsigned set_id) const {
+    return (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+  }
+
+  //! Return a nodal shared_ptr
+  std::shared_ptr<NodeBase<Tdim>> node(unsigned node_id) {
+    return map_nodes_[node_id];
+  }
+
   //! Create a list of active nodes in mesh
   void find_active_nodes();
 
@@ -266,24 +277,12 @@ class Mesh {
   //! Apply particles velocity constraints
   void apply_particle_velocity_constraints();
 
-  //! Assign nodal velocity constraints
-  //! \param[in] setid Node set id
-  //! \param[in] velocity_constraints Velocity constraint at node, dir, velocity
-  bool assign_nodal_velocity_constraint(
-      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
-
   //! Assign nodal frictional constraints
   //! \param[in] setid Node set id
   //! \param[in] friction_constraints Constraint at node, dir, sign, friction
   bool assign_nodal_frictional_constraint(
       int nset_id,
       const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
-
-  //! Assign velocity constraints to nodes
-  //! \param[in] velocity_constraints Constraint at node, dir, and velocity
-  bool assign_nodal_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          velocity_constraints);
 
   //! Assign friction constraints to nodes
   //! \param[in] friction_constraints Constraint at node, dir, sign, and

@@ -11,6 +11,7 @@
 #include "mpi.h"
 #endif
 
+#include "constraints.h"
 #include "element.h"
 #include "function_base.h"
 #include "hexahedron_element.h"
@@ -1057,13 +1058,16 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
           int set_id = 0;
           int dir = 0;
           double constraint = 10.5;
           // Add velocity constraint to mesh
           auto velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           set_id = 1;
@@ -1072,13 +1076,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Add velocity constraint to mesh
           velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // Add velocity constraint to all nodes in mesh
           velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(-1, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // When constraints fail
@@ -1086,7 +1090,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Add velocity constraint to mesh
           velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == false);
         }
 
@@ -1137,17 +1141,19 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, double>>
               velocity_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
           // Constraint
           velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
           velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
           velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
           velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
 
-          REQUIRE(mesh->assign_nodal_velocity_constraints(
+          REQUIRE(constraints->assign_nodal_velocity_constraints(
                       velocity_constraints) == true);
           // When constraints fail
           velocity_constraints.emplace_back(std::make_tuple(3, 2, 0.0));
-          REQUIRE(mesh->assign_nodal_velocity_constraints(
+          REQUIRE(constraints->assign_nodal_velocity_constraints(
                       velocity_constraints) == false);
         }
 
@@ -2394,13 +2400,16 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
           int set_id = 0;
           int dir = 0;
           double constraint = 10.5;
           // Add velocity constraint to mesh
           auto velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           set_id = 1;
@@ -2409,13 +2418,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add velocity constraint to mesh
           velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // Add velocity constraint to all nodes in mesh
           velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(-1, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == true);
 
           // When constraints fail
@@ -2423,7 +2432,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add velocity constraint to mesh
           velocity_constraint = std::make_shared<mpm::VelocityConstraint>(
               set_id, dir, constraint);
-          REQUIRE(mesh->assign_nodal_velocity_constraint(
+          REQUIRE(constraints->assign_nodal_velocity_constraint(
                       set_id, velocity_constraint) == false);
         }
 
@@ -2474,17 +2483,19 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, double>>
               velocity_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
           // Constraint
           velocity_constraints.emplace_back(std::make_tuple(0, 0, 10.5));
           velocity_constraints.emplace_back(std::make_tuple(1, 1, -10.5));
           velocity_constraints.emplace_back(std::make_tuple(2, 0, -12.5));
           velocity_constraints.emplace_back(std::make_tuple(3, 1, 0.0));
 
-          REQUIRE(mesh->assign_nodal_velocity_constraints(
+          REQUIRE(constraints->assign_nodal_velocity_constraints(
                       velocity_constraints) == true);
           // When constraints fail
           velocity_constraints.emplace_back(std::make_tuple(3, 3, 0.0));
-          REQUIRE(mesh->assign_nodal_velocity_constraints(
+          REQUIRE(constraints->assign_nodal_velocity_constraints(
                       velocity_constraints) == false);
         }
 
