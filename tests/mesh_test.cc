@@ -1101,6 +1101,9 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
           int set_id = 0;
           int dir = 0;
           int sign_n = 1;
@@ -1108,7 +1111,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           set_id = 1;
@@ -1118,13 +1121,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Add friction constraint to mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           // Add friction constraint to all nodes in mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               -1, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           // When constraints fail
@@ -1132,7 +1135,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Add friction constraint to mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == false);
         }
 
@@ -1162,17 +1165,19 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, int, double>>
               friction_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
           // Constraint
           friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
           friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
           friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
           friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
 
-          REQUIRE(mesh->assign_nodal_friction_constraints(
+          REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == true);
           // When constraints fail
           friction_constraints.emplace_back(std::make_tuple(3, 2, -1, 0.0));
-          REQUIRE(mesh->assign_nodal_friction_constraints(
+          REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == false);
         }
 
@@ -2443,6 +2448,9 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
           REQUIRE(mesh->create_node_sets(node_sets, true) == true);
 
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
+
           int set_id = 0;
           int dir = 0;
           int sign_n = 1;
@@ -2450,7 +2458,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           set_id = 1;
@@ -2460,13 +2468,13 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add friction constraint to mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           // Add friction constraint to all nodes in mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               -1, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == true);
 
           // When constraints fail
@@ -2474,7 +2482,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Add friction constraint to mesh
           friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               set_id, dir, sign_n, friction);
-          REQUIRE(mesh->assign_nodal_frictional_constraint(
+          REQUIRE(constraints->assign_nodal_frictional_constraint(
                       set_id, friction_constraint) == false);
         }
 
@@ -2504,17 +2512,19 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
           // Vector of particle coordinates
           std::vector<std::tuple<mpm::Index, unsigned, int, double>>
               friction_constraints;
+          //! Constraints object
+          auto constraints = std::make_shared<mpm::Constraints<Dim>>(mesh);
           // Constraint
           friction_constraints.emplace_back(std::make_tuple(0, 0, 1, 0.5));
           friction_constraints.emplace_back(std::make_tuple(1, 1, -1, 0.5));
           friction_constraints.emplace_back(std::make_tuple(2, 0, 1, 0.25));
           friction_constraints.emplace_back(std::make_tuple(3, 1, -1, 0.0));
 
-          REQUIRE(mesh->assign_nodal_friction_constraints(
+          REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == true);
           // When constraints fail
           friction_constraints.emplace_back(std::make_tuple(3, 3, -1, 0.0));
-          REQUIRE(mesh->assign_nodal_friction_constraints(
+          REQUIRE(constraints->assign_nodal_friction_constraints(
                       friction_constraints) == false);
         }
 

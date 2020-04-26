@@ -834,9 +834,10 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
         if (constraints.find("file") != constraints.end()) {
           std::string friction_constraints_file =
               constraints.at("file").template get<std::string>();
-          bool friction_constraints = mesh_->assign_nodal_friction_constraints(
-              mesh_io->read_friction_constraints(
-                  io_->file_name(friction_constraints_file)));
+          bool friction_constraints =
+              constraints_->assign_nodal_friction_constraints(
+                  mesh_io->read_friction_constraints(
+                      io_->file_name(friction_constraints_file)));
           if (!friction_constraints)
             throw std::runtime_error(
                 "Friction constraints are not properly assigned");
@@ -854,8 +855,8 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               nset_id, dir, sign_n, friction);
-          mesh_->assign_nodal_frictional_constraint(nset_id,
-                                                    friction_constraint);
+          constraints_->assign_nodal_frictional_constraint(nset_id,
+                                                           friction_constraint);
         }
       }
     } else

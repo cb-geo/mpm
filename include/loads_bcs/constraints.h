@@ -38,6 +38,20 @@ class Constraints {
       const std::vector<std::tuple<mpm::Index, unsigned, double>>&
           velocity_constraints);
 
+  //! Assign nodal frictional constraints
+  //! \param[in] setid Node set id
+  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
+  bool assign_nodal_frictional_constraint(
+      int nset_id,
+      const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
+
+  //! Assign friction constraints to nodes
+  //! \param[in] friction_constraints Constraint at node, dir, sign, and
+  //! friction
+  bool assign_nodal_friction_constraints(
+      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
+          friction_constraints);
+
  private:
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;

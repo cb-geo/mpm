@@ -1129,42 +1129,6 @@ void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
   }
 }
 
-//! Assign friction constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_frictional_constraint(
-    int nset_id, const std::shared_ptr<mpm::FrictionConstraint>& fconstraint) {
-  bool status = false;
-  try {
-    if (nset_id == -1 || node_sets_.find(nset_id) != node_sets_.end()) {
-      int set_id = fconstraint->setid();
-      // If set id is -1, use all nodes
-      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
-      unsigned dir = fconstraint->dir();
-      int nsign_n = fconstraint->sign_n();
-      double friction = fconstraint->friction();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
-                                  tbb_grain_size_),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status =
-                  nset[i]->assign_friction_constraint(dir, nsign_n, friction);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise velocity constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
-    } else
-      throw std::runtime_error("No node set found to assign velocity con");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Assign node tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
@@ -1714,41 +1678,6 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
                                                             nullptr);
 
       if (!status) throw std::runtime_error("Force is invalid for node");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Assign friction constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_friction_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-        friction_constraints) {
-  bool status = false;
-  try {
-    if (!nodes_.size())
-      throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign friction "
-          "constraints");
-
-    for (const auto& friction_constraint : friction_constraints) {
-      // Node id
-      mpm::Index nid = std::get<0>(friction_constraint);
-      // Direction
-      unsigned dir = std::get<1>(friction_constraint);
-      // Sign
-      int sign = std::get<2>(friction_constraint);
-      // Friction
-      double friction = std::get<3>(friction_constraint);
-
-      // Apply constraint
-      status = map_nodes_[nid]->assign_friction_constraint(dir, sign, friction);
-
-      if (!status)
-        throw std::runtime_error("Node or friction constraint is invalid");
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

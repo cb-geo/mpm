@@ -277,20 +277,6 @@ class Mesh {
   //! Apply particles velocity constraints
   void apply_particle_velocity_constraints();
 
-  //! Assign nodal frictional constraints
-  //! \param[in] setid Node set id
-  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
-  bool assign_nodal_frictional_constraint(
-      int nset_id,
-      const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
-
-  //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, and
-  //! friction
-  bool assign_nodal_friction_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-          friction_constraints);
-
   //! Assign nodal concentrated force
   //! \param[in] nodal_forces Force at dir on nodes
   bool assign_nodal_concentrated_forces(
