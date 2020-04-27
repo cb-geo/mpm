@@ -101,8 +101,7 @@ bool mpm::MohrCoulomb<Tdim>::compute_stress_invariants(
   // Compute the mean pressure
   (*state_vars).at("epsilon") = mpm::materials::p(stress) * std::sqrt(3.);
   // Compute theta value
-  (*state_vars).at("theta") = mpm::materials::lode_angle(
-      stress, std::numeric_limits<double>::epsilon());
+  (*state_vars).at("theta") = mpm::materials::lode_angle(stress);
   // Compute rho
   (*state_vars).at("rho") = std::sqrt(2. * mpm::materials::j2(stress));
 

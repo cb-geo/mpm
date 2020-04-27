@@ -274,8 +274,7 @@ bool mpm::ModifiedCamClay<Tdim>::compute_stress_invariants(
   (*state_vars).at("q") = mpm::materials::q(stress);
   // Compute theta (Lode angle)
   if (three_invariants_)
-    (*state_vars).at("theta") = mpm::materials::lode_angle(
-        stress, std::numeric_limits<double>::epsilon());
+    (*state_vars).at("theta") = mpm::materials::lode_angle(stress);
 
   return true;
 }
