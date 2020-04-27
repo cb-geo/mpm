@@ -3,7 +3,7 @@ template <typename Traits>
 Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
     std::string solver_type) {
-  Eigen::VectorXd x;
+  Eigen::VectorXd x(b.size());
 
   try {
 
@@ -47,13 +47,22 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecSetSizes(petsc_b, PETSC_DECIDE, dim);
     VecSetType(petsc_b, VECMPI);
     VecDuplicate(petsc_b, &petsc_x);
+    VecGetOwnershipRange(petsc_b,&low,&high);
+    std::cout<<low<<std::endl;
+    std::cout<<high<<std::endl;
 
     std::cout << "TEST OUTPUT: 4: " << std::endl;
 
     // Create PETSC_A with global dim = DIM by DIM, PETSC_DECIDE local dim
-    MatCreate(PETSC_COMM_WORLD, &petsc_A);
-    MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
-    MatSetType(petsc_A, MATMPIAIJ);
+    //MatCreate(PETSC_COMM_WORLD, &petsc_A);
+    MatCreateMPIAIJCRL(PETSC_COMM_SELF, dim, dim, dim, PETSC_NULL, (dim-1), PETSC_NULL, &petsc_A);
+    //MatCreateSeqAIJ(comm, dim, dim, dim, 0, &petsc_A);
+    //MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
+    //MatSetType(petsc_A, MATMPIAIJ);
+    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
+    std::cout<<rlow<<std::endl;
+    std::cout<<rhigh<<std::endl;
+
 
     std::cout << "TEST OUTPUT: 5: " << std::endl;
 
@@ -97,15 +106,24 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
+    for (vi = 0; vi < dim; vi++) {
+          VecGetValues(petsc_b, 1, &vi, &v);
+          std::cout << v << std::endl;
 
+    }
     std::cout << "TEST OUTPUT: 7: " << std::endl;
 
     if (solver_type == "cg") {
       KSPCreate(comm, &solver);
+      std::cout << "TEST OUTPUT: 7.1: " << std::endl;
       KSPSetOperators(solver, petsc_A, petsc_A);
+      std::cout << "TEST OUTPUT: 7.2: " << std::endl;
       KSPSetType(solver, KSPCG);
+      std::cout << "TEST OUTPUT: 7.3: " << std::endl;
       KSPSolve(solver, petsc_b, petsc_x);
+      std::cout << "TEST OUTPUT: 7.4: " << std::endl;
       KSPGetConvergedReason(solver, &reason);
+      std::cout << "TEST OUTPUT: 7.5: " << std::endl;
       if (reason < 0) {
         PetscPrintf(PETSC_COMM_WORLD, "\nKSPCG solver Diverged;\n");
       }
