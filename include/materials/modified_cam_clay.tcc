@@ -485,63 +485,20 @@ void mpm::ModifiedCamClay<Tdim>::compute_df_dsigma(
   // Compute dF / dpc
   double df_dpc = -(p + pcc);
   // Compute dp / dSigma
-  Vector6d dp_dsigma = Vector6d::Zero();
-  dp_dsigma(0) = -1. / 3.;
-  dp_dsigma(1) = -1. / 3.;
-  dp_dsigma(2) = -1. / 3.;
+  Vector6d dp_dsigma = -mpm::materials::dp_dsigma(stress);
   // Compute dq / dSigma
-  Vector6d dq_dsigma = Vector6d::Zero();
-  dq_dsigma = 1.5 / q * dev_stress;
+  Vector6d dq_dsigma = mpm::materials::dq_dsigma(stress);
   // Compute dF/dSigma
   (*df_dsigma) = (df_dp * dp_dsigma) + (df_dq * dq_dsigma);
   // Compute dTheta / dSigma
   if (three_invariants_) {
     // Compute dF / dM
-    double df_dm = 0.;
+    double df_dm = -2 * q * q / std::pow(m_theta, 3);
     // Compute dM / dtheta
-    double dm_dtheta = 0.;
-    // Compute r
-    double r_val = 0.;
-    // Compute j2
-    const double j2 = mpm::materials::j2(stress);
-    const double j3 = mpm::materials::j3(stress);
-    if (std::fabs(j2) > std::numeric_limits<double>::epsilon())
-      r_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
-    // Compute dTheta / dr
-    double divider = 1 - (r_val * r_val);
-    if (divider <= 0.) divider = 1.E-3;
-    double dtheta_dr = -1 / (3. * std::sqrt(divider));
-    // Compute dr / dJ2
-    double dr_dj2 = (-9 * std::sqrt(3.) / 4.) * j3;
-    if (std::fabs(j2) > std::numeric_limits<double>::epsilon())
-      dr_dj2 = dr_dj2 / std::pow(j2, 2.5);
-    // Compute dr / dJ3
-    double dr_dj3 = 1.5 * std::sqrt(3.);
-    if (std::fabs(j2) > std::numeric_limits<double>::epsilon())
-      dr_dj3 = dr_dj3 / std::pow(j2, 1.5);
-    // Compute dJ2 / dSigma
-    Vector6d dj2_dsigma = dev_stress;
-    // Compute dJ3 / dSigma
-    Eigen::Matrix<double, 3, 1> dev1;
-    dev1(0) = dev_stress(0);
-    dev1(1) = dev_stress(3);
-    dev1(2) = dev_stress(5);
-    Eigen::Matrix<double, 3, 1> dev2;
-    dev2(0) = dev_stress(3);
-    dev2(1) = dev_stress(1);
-    dev2(2) = dev_stress(4);
-    Eigen::Matrix<double, 3, 1> dev3;
-    dev3(0) = dev_stress(5);
-    dev3(1) = dev_stress(4);
-    dev3(2) = dev_stress(2);
-    Vector6d dj3_dsigma = Vector6d::Zero();
-    dj3_dsigma(0) = dev1.dot(dev1) - (2. / 3.) * j2;
-    dj3_dsigma(1) = dev2.dot(dev2) - (2. / 3.) * j2;
-    dj3_dsigma(2) = dev3.dot(dev3) - (2. / 3.) * j2;
-    dj3_dsigma(3) = dev1.dot(dev2);
+    double dm_dtheta = m_ * m_ / (3 + m_) * sin(1.5 * theta) * 1.5;
     // Compute dtheta / dsigma
-    Vector6d dtheta_dsigma = Vector6d::Zero();
-    dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
+    Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(
+        stress, std::numeric_limits<double>::epsilon());
     (*df_dsigma) += (df_dm * dm_dtheta * dtheta_dsigma);
   }
 }

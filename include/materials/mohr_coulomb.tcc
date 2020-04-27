@@ -180,11 +180,6 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   const double cohesion = (*state_vars).at("cohesion");
   // Get equivalent plastic deviatoric strain
   const double pdstrain = (*state_vars).at("pdstrain");
-  // Compute the mean stress
-  const double mean_p = (stress(0) + stress(1) + stress(2)) / 3.0;
-  // Compute deviatoric stress
-  Vector6d dev_stress = stress;
-  for (unsigned i = 0; i < 3; ++i) dev_stress(i) -= mean_p;
   // Compute dF / dEpsilon,  dF / dRho, dF / dTheta
   double df_depsilon, df_drho, df_dtheta;
   // Values in tension yield
@@ -204,64 +199,12 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
                  (sin(theta + M_PI / 3.) * tan(phi) / 3.));
   }
   // Compute dEpsilon / dSigma
-  Vector6d depsilon_dsigma = Vector6d::Zero();
-  depsilon_dsigma(0) = depsilon_dsigma(1) = depsilon_dsigma(2) =
-      1. / std::sqrt(3.);
+  Vector6d depsilon_dsigma = mpm::materials::dp_dsigma(stress) * std::sqrt(3.);
   // Initialise dRho / dSigma
-  Vector6d drho_dsigma = Vector6d::Zero();
-  // Initialise r value
-  double r_val = 0.;
-  // Compute J3
-  const double j3 = mpm::materials::j3(stress);
-  // Initialise dr / dJ2
-  double dr_dj2 = (-9 * std::sqrt(6.)) * j3;
-  // Initialise dr / dJ3
-  double dr_dj3 = 3. * std::sqrt(6.);
-  if (fabs(rho) > std::numeric_limits<double>::epsilon()) {
-    // Compute dRho / dSigma
-    drho_dsigma = 1. / rho * dev_stress;
-    drho_dsigma(3) *= 2.0;
-    drho_dsigma(4) *= 2.0;
-    drho_dsigma(5) *= 2.0;
-    // Compute r value
-    r_val = (3. * std::sqrt(6.)) * (j3 / std::pow(rho, 3));
-    // Compute dr / dJ2
-    dr_dj2 /= std::pow(rho, 5);
-    // Compute dr / dJ3
-    dr_dj3 /= std::pow(rho, 3);
-  }
-  // Compute dTheta / dr
-  double divider = 1 - (r_val * r_val);
-  if (divider < std::numeric_limits<double>::epsilon()) divider = 1.E-3;
-  const double dtheta_dr = -1 / (3. * std::sqrt(divider));
-  // Compute dJ2 / dSigma
-  Vector6d dj2_dsigma = dev_stress;
-  dj2_dsigma(3) *= 2.0;
-  dj2_dsigma(4) *= 2.0;
-  dj2_dsigma(5) *= 2.0;
-  // Compute dJ3 / dSigma
-  Eigen::Matrix<double, 3, 1> dev1;
-  dev1(0) = dev_stress(0);
-  dev1(1) = dev_stress(3);
-  dev1(2) = dev_stress(5);
-  Eigen::Matrix<double, 3, 1> dev2;
-  dev2(0) = dev_stress(3);
-  dev2(1) = dev_stress(1);
-  dev2(2) = dev_stress(4);
-  Eigen::Matrix<double, 3, 1> dev3;
-  dev3(0) = dev_stress(5);
-  dev3(1) = dev_stress(4);
-  dev3(2) = dev_stress(2);
-  Vector6d dj3_dsigma = Vector6d::Zero();
-  dj3_dsigma(0) = dev1.dot(dev1) - (1. / 3.) * rho * rho;
-  dj3_dsigma(1) = dev2.dot(dev2) - (1. / 3.) * rho * rho;
-  dj3_dsigma(2) = dev3.dot(dev3) - (1. / 3.) * rho * rho;
-  dj3_dsigma(3) = 2.0 * dev1.dot(dev2);
-  dj3_dsigma(4) = 2.0 * dev2.dot(dev3);
-  dj3_dsigma(5) = 2.0 * dev1.dot(dev3);
+  Vector6d drho_dsigma = mpm::materials::dq_dsigma(stress) * std::sqrt(2. / 3.);
   // Compute dtheta / dsigma
-  Vector6d dtheta_dsigma = Vector6d::Zero();
-  dtheta_dsigma = dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma));
+  Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(
+      stress, std::numeric_limits<double>::epsilon());
   // Compute dF/dSigma
   (*df_dsigma) = (df_depsilon * depsilon_dsigma) + (df_drho * drho_dsigma) +
                  (df_dtheta * dtheta_dsigma);
@@ -368,7 +311,7 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
             ((sin(phi) * sin(theta + M_PI / 3.) /
               (std::sqrt(3.) * cos(phi) * cos(phi))) +
              (cos(theta + M_PI / 3.) / (3. * cos(phi) * cos(phi)))) +
-        (mean_p / (cos(phi) * cos(phi)));
+        (mpm::materials::p(stress) / (cos(phi) * cos(phi)));
     double df_dc = -1.;
     (*softening) =
         (-1.) * ((df_dphi * dphi_dpstrain) + (df_dc * dc_dpstrain)) * (*dp_dq);
