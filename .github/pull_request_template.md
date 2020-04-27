@@ -1,9 +1,3 @@
----
-name: Pull request template
-about: Create a documentation to help us merge your code
-
----
-
 **Describe the PR**
 A clear and concise description of the PR.
 
