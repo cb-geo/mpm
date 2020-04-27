@@ -81,8 +81,6 @@ mpm::dense_map mpm::ModifiedCamClay<Tdim>::initialise_state_variables() {
       {"shear_modulus", 3 * youngs_modulus_ * (1 - 2 * poisson_ratio_) /
                             (2 * (1 + poisson_ratio_))},
       // Stress invariants
-      // J3
-      {"j3", 0.},
       // Volumetric stress
       {"p", 0.},
       // Deviatoric stress
@@ -105,6 +103,10 @@ mpm::dense_map mpm::ModifiedCamClay<Tdim>::initialise_state_variables() {
       {"dpvstrain", 0.},
       // Incremental plastic deviatoric strain
       {"dpdstrain", 0.},
+      // Plastic volumetic strain
+      {"pvstrain", 0.},
+      // Plastic deviatoric strain
+      {"pdstrain", 0.},
       // Bonding parameters
       // Chi
       {"chi", 1.},
@@ -267,51 +269,13 @@ template <unsigned Tdim>
 bool mpm::ModifiedCamClay<Tdim>::compute_stress_invariants(
     const Vector6d& stress, mpm::dense_map* state_vars) {
   // Compute volumetic stress
-  (*state_vars).at("p") = -(stress(0) + stress(1) + stress(2)) / 3.;
-  // Compute the deviatoric stress
-  Vector6d dev_stress = Vector6d::Zero();
-  dev_stress(0) = stress(0) + (*state_vars).at("p");
-  dev_stress(1) = stress(1) + (*state_vars).at("p");
-  dev_stress(2) = stress(2) + (*state_vars).at("p");
-  dev_stress(3) = stress(3);
-  if (Tdim == 3) {
-    dev_stress(4) = stress(4);
-    dev_stress(5) = stress(5);
-  }
-  // Compute J2
-  double j2 = (std::pow((stress(0) - stress(1)), 2) +
-               std::pow((stress(1) - stress(2)), 2) +
-               std::pow((stress(0) - stress(2)), 2)) /
-                  6.0 +
-              std::pow(stress(3), 2);
-  if (Tdim == 3) j2 += std::pow(stress(4), 2) + std::pow(stress(5), 2);
-  // Compute q
-  (*state_vars).at("q") = std::sqrt(3. * j2);
-
-  if (three_invariants_) {
-    // Compute J3
-    (*state_vars).at("j3") = (dev_stress(0) * dev_stress(1) * dev_stress(2)) -
-                             (dev_stress(2) * std::pow(dev_stress(3), 2));
-    if (Tdim == 3)
-      (*state_vars).at("j3") +=
-          ((2 * dev_stress(3) * dev_stress(4) * dev_stress(5)) -
-           (dev_stress(0) * std::pow(dev_stress(4), 2)) -
-           (dev_stress(1) * std::pow(dev_stress(5), 2)));
-    // Compute theta value (Lode angle)
-    double theta_val = 0.;
-    if (std::fabs(j2) > 0.0)
-      theta_val = (3. * std::sqrt(3.) / 2.) *
-                  ((*state_vars).at("j3") / std::pow(j2, 1.5));
-    // Check theta value
-    if (theta_val > 1.0) theta_val = 1.0;
-    if (theta_val < -1.0) theta_val = -1.0;
-    // Compute theta
-    (*state_vars).at("theta") = (1. / 3.) * acos(theta_val);
-    // Check theta
-    if ((*state_vars).at("theta") > M_PI / 3.)
-      (*state_vars).at("theta") = M_PI / 3.;
-    if ((*state_vars).at("theta") < 0.0) (*state_vars).at("theta") = 0.;
-  }
+  (*state_vars).at("p") = -mpm::materials::p(stress);
+  // Compute deviatoric q
+  (*state_vars).at("q") = mpm::materials::q(stress);
+  // Compute theta (Lode angle)
+  if (three_invariants_)
+    (*state_vars).at("theta") = mpm::materials::lode_angle(
+        stress, std::numeric_limits<double>::epsilon());
 
   return true;
 }
@@ -503,7 +467,6 @@ void mpm::ModifiedCamClay<Tdim>::compute_df_dsigma(
     const mpm::dense_map* state_vars, const Vector6d& stress,
     Vector6d* df_dsigma) {
   // Get stress invariants
-  const double j3 = (*state_vars).at("j3");
   const double p = (*state_vars).at("p");
   const double q = (*state_vars).at("q");
   const double theta = (*state_vars).at("theta");
@@ -540,7 +503,8 @@ void mpm::ModifiedCamClay<Tdim>::compute_df_dsigma(
     // Compute r
     double r_val = 0.;
     // Compute j2
-    double j2 = 3 * std::pow(q, 2);
+    const double j2 = mpm::materials::j2(stress);
+    const double j3 = mpm::materials::j3(stress);
     if (std::fabs(j2) > std::numeric_limits<double>::epsilon())
       r_val = (3. * std::sqrt(3.) / 2.) * (j3 / std::pow(j2, 1.5));
     // Compute dTheta / dr
@@ -718,11 +682,12 @@ Eigen::Matrix<double, 6, 1> mpm::ModifiedCamClay<Tdim>::compute_stress(
     // Counter iteration step
     ++counter_f;
   }
-
+  // Update plastic strain
+  (*state_vars).at("pvstrain") += (*state_vars).at("dpvstrain");
+  (*state_vars).at("pdstrain") += (*state_vars).at("dpdstrain");
   // Update stress
   updated_stress = (*state_vars).at("q") * n_trial;
   for (int i = 0; i < 3; ++i) updated_stress(i) -= (*state_vars).at("p");
-
   // Update void_ratio
   (*state_vars).at("void_ratio") +=
       ((dstrain(0) + dstrain(1) + dstrain(2)) * (1 + e0_));
