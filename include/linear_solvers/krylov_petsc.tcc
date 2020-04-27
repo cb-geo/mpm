@@ -47,9 +47,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecSetSizes(petsc_b, PETSC_DECIDE, dim);
     VecSetType(petsc_b, VECMPI);
     VecDuplicate(petsc_b, &petsc_x);
-    VecGetOwnershipRange(petsc_b,&low,&high);
-    std::cout<<low<<std::endl;
-    std::cout<<high<<std::endl;
+    
 
     std::cout << "TEST OUTPUT: 4: " << std::endl;
 
@@ -67,20 +65,33 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     std::cout << "TEST OUTPUT: 5: " << std::endl;
 
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-    // TODO: Optimize send from value-to-value to array-to-array
-    if (rank == 0) {
-      // Copy b to petsc_b
-      for (vi = 0; vi < dim; vi++) {
-        v = b(vi);
-        VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
-      }
-      // Copy A to petsc_A. Can be optimized for sparse A
-      for (mi = 0; mi < dim; mi++) {
+    VecGetOwnershipRange(petsc_b,&low,&high);
+    for (vi=low; vi < high; vi++) {
+      v = b(vi);
+      VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
+    }
+    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
+    for (mi = rlow; mi < rhigh; mi++) {
         for (mj = 0; mj < dim; mj++) {
           m = A.coeff(mi, mj);
           MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
         }
-      }
+    }
+
+    // TODO: Optimize send from value-to-value to array-to-array
+    if (rank == 0) {
+      // Copy b to petsc_b
+      /*for (vi = 0; vi < dim; vi++) {
+        v = b(vi);
+        VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
+      }*/
+      // Copy A to petsc_A. Can be optimized for sparse A
+      /*for (mi = 0; mi < dim; mi++) {
+        for (mj = 0; mj < dim; mj++) {
+          m = A.coeff(mi, mj);
+          MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
+        }
+      }*/
     }
 
     std::cout << "TEST OUTPUT: 6: " << rank << std::endl;
@@ -106,10 +117,12 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
-    for (vi = 0; vi < dim; vi++) {
-          VecGetValues(petsc_b, 1, &vi, &v);
-          std::cout << v << std::endl;
+    if (rank==0){
+      for (vi = 0; vi < dim; vi++) {
+           VecGetValues(petsc_b, 1, &vi, &v);
+           std::cout << v << std::endl;
 
+     }
     }
     std::cout << "TEST OUTPUT: 7: " << std::endl;
 
@@ -138,7 +151,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       PetscFinalize();
     }
 
-    std::cout << "TEST OUTPUT: 8: " << std::endl;
+    std::cout << "TEST OUTPUT: 8: solution is: "<< x << std::endl;
 
 #endif
 
