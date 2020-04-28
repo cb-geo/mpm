@@ -203,3 +203,20 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dtheta_dsigma(
   // Compute and return dtheta / dsigma
   return (dtheta_dr * ((dr_dj2 * dj2_dsigma) + (dr_dj3 * dj3_dsigma)));
 }
+
+//! Compute plastic deviatoric strain
+inline double mpm::materials::pdstrain(
+    const Eigen::Matrix<double, 6, 1>& plastic_strain) {
+
+  // Compute pdstrain
+  const double pdstrain = std::sqrt(
+      2. / 9. *
+          (std::pow((plastic_strain(0) - plastic_strain(1)), 2.) +
+           std::pow((plastic_strain(1) - plastic_strain(2)), 2.) +
+           std::pow((plastic_strain(2) - plastic_strain(0)), 2.)) +
+      1. / 3. *
+          (std::pow(plastic_strain(3), 2.) + std::pow(plastic_strain(4), 2.) +
+           std::pow(plastic_strain(5), 2.)));
+
+  return pdstrain;
+}
