@@ -35,19 +35,32 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     p_image_initial_ =
         material_properties.at("p_image_initial").template get<double>();
     // Flag for bonded model
-    bond_model_ = material_properties.at("bond_model").template get<bool>();
-    // Initial p_cohesion
-    p_cohesion_initial_ =
-        material_properties.at("p_cohesion_initial").template get<double>();
-    // Initial p_dilation
-    p_dilation_initial_ =
-        material_properties.at("p_dilation_initial").template get<double>();
-    // Cohesion degradation parameter m upon shearing
-    m_cohesion_ = material_properties.at("m_cohesion").template get<double>();
-    // Dilation degradation parameter m upon shearing
-    m_dilation_ = material_properties.at("m_dilation").template get<double>();
-    // Parameter for shear modulus
-    m_modulus_ = material_properties.at("m_modulus").template get<double>();
+    if (material_properties.find("bond_model") != material_properties.end()) {
+      bond_model_ = material_properties.at("bond_model").template get<bool>();
+      // Initial p_cohesion
+      p_cohesion_initial_ =
+          material_properties.at("p_cohesion_initial").template get<double>();
+      // Initial p_dilation
+      p_dilation_initial_ =
+          material_properties.at("p_dilation_initial").template get<double>();
+      // Cohesion degradation parameter m upon shearing
+      m_cohesion_ = material_properties.at("m_cohesion").template get<double>();
+      // Dilation degradation parameter m upon shearing
+      m_dilation_ = material_properties.at("m_dilation").template get<double>();
+      // Parameter for shear modulus
+      m_modulus_ = material_properties.at("m_modulus").template get<double>();
+    } else {
+      // Initial p_cohesion
+      p_cohesion_initial_ = 0.;
+      // Initial p_dilation
+      p_dilation_initial_ = 0.;
+      // Cohesion degradation parameter m upon shearing
+      m_cohesion_ = 0.;
+      // Dilation degradation parameter m upon shearing
+      m_dilation_ = 0.;
+      // Parameter for shear modulus
+      m_modulus_ = 0.;
+    }
     // Default tolerance
     if (material_properties.find("tolerance") != material_properties.end())
       tolerance_ = material_properties.at("tolerance").template get<double>();
@@ -389,15 +402,6 @@ template <unsigned Tdim>
 Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
-
-  // Zero parameters for non-bond model
-  if (!bond_model_) {
-    (*state_vars).at("p_cohesion") = 0.0;
-    (*state_vars).at("p_dilation") = 0.0;
-    m_cohesion_ = 0.0;
-    m_dilation_ = 0.0;
-    m_modulus_ = 0.0;
-  }
 
   // Note: compression positive in all derivations
   Vector6d stress_neg = -1 * stress;
