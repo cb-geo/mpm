@@ -440,8 +440,8 @@ std::vector<Ttype> mpm::Mesh<Tdim>::aggregate_particle_neighbours_property(
         int rdata_size = 0;
         MPI_Recv(&rdata_size, 1, MPI_INT, neighbour_cell_rank,
                  neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        // Receive data from neighbour cells
-        if (nparticles > 0) {
+        // Receive data from neighbour cells exists
+        if (rdata_size > 0) {
           received_data.resize(nparticles);
           MPI_Recv(received_data.data(), rdata_size,
                    MPI_Type_Traits<Ttype>::mpi_type(rdata_type),
