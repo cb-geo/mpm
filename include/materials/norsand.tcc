@@ -403,6 +403,15 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
+  // Zero parameters for non-bond model
+  if (!bond_model_) {
+    (*state_vars).at("p_cohesion") = 0.0;
+    (*state_vars).at("p_dilation") = 0.0;
+    m_cohesion_ = 0.0;
+    m_dilation_ = 0.0;
+    m_modulus_ = 0.0;
+  }
+
   // Note: compression positive in all derivations
   Vector6d stress_neg = -1 * stress;
   Vector6d dstrain_neg = -1 * dstrain;
