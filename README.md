@@ -9,7 +9,7 @@
 [![](https://img.shields.io/github/issues-raw/cb-geo/mpm.svg)](https://github.com/cb-geo/mpm/issues)
 [![Coverity](https://scan.coverity.com/projects/14389/badge.svg)](https://scan.coverity.com/projects/14389/badge.svg)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/cb-geo/mpm.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cb-geo/mpm/context:cpp)
-[![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/cb-geo/mpm/projects/)
+[![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/orgs/cb-geo/projects/1)
 [![Discourse forum](https://img.shields.io/badge/forum-mpm-blueviolet.svg)](https://cb-geo.discourse.group/c/mpm/)
 
 ## Documentation
