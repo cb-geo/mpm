@@ -471,22 +471,16 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   (*state_vars).at("plastic_strain4") += dpstrain(4);
   (*state_vars).at("plastic_strain5") += dpstrain(5);
 
+  Vector6d plastic_strain;
+  plastic_strain(0) = (*state_vars).at("plastic_strain0");
+  plastic_strain(1) = (*state_vars).at("plastic_strain1");
+  plastic_strain(2) = (*state_vars).at("plastic_strain2");
+  plastic_strain(3) = (*state_vars).at("plastic_strain3");
+  plastic_strain(4) = (*state_vars).at("plastic_strain4");
+  plastic_strain(5) = (*state_vars).at("plastic_strain5");
+
   // Update equivalent plastic deviatoric strain
-  (*state_vars).at("pdstrain") =
-      std::sqrt(2. / 9. *
-                    (std::pow(((*state_vars).at("plastic_strain0") -
-                               (*state_vars).at("plastic_strain1")),
-                              2.) +
-                     std::pow(((*state_vars).at("plastic_strain1") -
-                               (*state_vars).at("plastic_strain2")),
-                              2.) +
-                     std::pow(((*state_vars).at("plastic_strain2") -
-                               (*state_vars).at("plastic_strain0")),
-                              2.)) +
-                1. / 3. *
-                    (std::pow(((*state_vars).at("plastic_strain3")), 2.) +
-                     std::pow(((*state_vars).at("plastic_strain4")), 2.) +
-                     std::pow(((*state_vars).at("plastic_strain5")), 2.)));
+  (*state_vars).at("pdstrain") = mpm::materials::pdstrain(plastic_strain);
 
   // Update p_cohesion
   this->compute_p_bond(state_vars);
