@@ -388,6 +388,77 @@ void mpm::Mesh<Tdim>::find_particle_neighbours(
     map_particles_[particle_id]->assign_neighbours(neighbour_particles);
 }
 
+//! Aggregate particle neighbour properties
+template <unsigned Tdim>
+template <typename Ttype, typename Tmpitype, unsigned Tnparam,
+          typename Tgetfunctor>
+std::vector<Ttype> mpm::Mesh<Tdim>::aggregate_particle_neighbours_property(
+    const std::shared_ptr<mpm::Cell<Tdim>>& cell, Tgetfunctor getter) {
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
+  // Initialize properties data
+  std::vector<Ttype> properties_data;
+  // Get particle data in local cell
+  auto pids = cell->particles();
+  for (auto pid : pids) properties_data.emplace_back(getter(map_cells_[pid]));
+
+  // Loop over all neighboring cells, and append particle ids from each cell
+  for (const auto& neighbour_cell_id : cell->neighbours()) {
+    // Get the MPI rank of the neighbour cell
+    int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
+    if (neighbour_cell_rank != cell->rank()) {
+#ifdef USE_MPI
+      // Send particle ids
+      if (neighbour_cell_rank == mpi_rank) {
+        // Get particles from each cell
+        auto pids = map_cells_[neighbour_cell_id]->particles();
+        // Aggregate property data
+        std::vector<Ttype> send_properties;
+        // Iterate over particles in cell 
+        for (auto pid : pids)
+          send_properties.emplace_back(getter(map_cells_[pid]));
+        // Get data size of the particle properties
+        int sdata_size = send_properties.size();
+        // Send the size of the particle data
+        MPI_Send(&sdata_size, 1, MPI_INT, cell->rank(), neighbour_cell_id,
+                 MPI_COMM_WORLD);
+
+        // Send particle data if it is not empty
+        if (sdata_size > 0)
+          MPI_Send(send_properties.data(), sdata_size, MPI_UNSIGNED_LONG_LONG,
+                   cell->rank(), neighbour_cell_id, MPI_COMM_WORLD);
+      }
+      // Receive particle properties in the current MPI rank
+      if (cell->rank() == mpi_rank) {
+        // Particle ids at local cell MPI rank
+        std::vector<Ttype> received_data;
+        int rdata_size = 0;
+        MPI_Recv(&rdata_size, 1, MPI_INT, neighbour_cell_rank,
+                 neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Receive data from neighbour cells
+        if (nparticles > 0) {
+          received_data.resize(nparticles);
+          MPI_Recv(received_data.data(), rdata_size, MPI_UNSIGNED_LONG_LONG,
+                   neighbour_cell_rank, neighbour_cell_id, MPI_COMM_WORLD,
+                   MPI_STATUS_IGNORE);
+        }
+        // Add received data to properties
+        properties_data.insert(properties_data.end(), received_data.begin(),
+                               received_data.end());
+      }
+#endif
+    } else {
+      const auto& particle_data = getter(map_cells_[neighbour_cell_id]);
+      properties_data.insert(properties_data.end(), particle_data.begin(),
+                             particle_data.end());
+    }
+  }
+  return properties_data;
+}
+
 //! Find ghost cell neighbours
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {

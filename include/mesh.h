@@ -356,6 +356,18 @@ class Mesh {
   //! \param[in] cell of interest
   void find_particle_neighbours(const std::shared_ptr<mpm::Cell<Tdim>>& cell);
 
+  //! Aggregate properties over particle neighbours
+  //! \tparam Ttype Type of property to accumulate
+  //! \tparam Tmpitype MPI communicator type
+  //! \tparam Tnparam Size of individual property
+  //! \tparam Tgetfunctor Functor for getter
+  //! \tparam Tsetfunctor Functor for setter
+  //! \param[in] getter Getter function
+  template <typename Ttype, typename Tmpitype, unsigned Tnparam,
+            typename Tgetfunctor>
+  std::vector<Ttype> aggregate_particle_neighbours_property(
+      const std::shared_ptr<mpm::Cell<Tdim>>& cell, Tgetfunctor getter);
+
   //! Add a neighbour mesh, using the local id for the new mesh and a mesh
   //! pointer
   //! \param[in] local_id local id of the mesh
