@@ -390,8 +390,7 @@ void mpm::Mesh<Tdim>::find_particle_neighbours(
 
 //! Aggregate particle neighbour properties
 template <unsigned Tdim>
-template <typename Ttype, typename Tmpitype, unsigned Tnparam,
-          typename Tgetfunctor>
+template <typename Ttype, unsigned Tnparam, typename Tgetfunctor>
 std::vector<Ttype> mpm::Mesh<Tdim>::aggregate_particle_neighbours_property(
     const std::shared_ptr<mpm::Cell<Tdim>>& cell, Tgetfunctor getter) {
   int mpi_rank = 0;
@@ -428,11 +427,14 @@ std::vector<Ttype> mpm::Mesh<Tdim>::aggregate_particle_neighbours_property(
 
         // Send particle data if it is not empty
         if (sdata_size > 0)
-          MPI_Send(send_properties.data(), sdata_size, MPI_UNSIGNED_LONG_LONG,
+          MPI_Send(send_properties.data(), sdata_size,
+                   MPI_Type_Traits<Ttype>::mpi_type(send_properties[0]),
                    cell->rank(), neighbour_cell_id, MPI_COMM_WORLD);
       }
       // Receive particle properties in the current MPI rank
       if (cell->rank() == mpi_rank) {
+        // Fetch MPI data type
+        Ttype rdata_type;
         // Particle ids at local cell MPI rank
         std::vector<Ttype> received_data;
         int rdata_size = 0;
@@ -441,7 +443,8 @@ std::vector<Ttype> mpm::Mesh<Tdim>::aggregate_particle_neighbours_property(
         // Receive data from neighbour cells
         if (nparticles > 0) {
           received_data.resize(nparticles);
-          MPI_Recv(received_data.data(), rdata_size, MPI_UNSIGNED_LONG_LONG,
+          MPI_Recv(received_data.data(), rdata_size,
+                   MPI_Type_Traits<Ttype>::mpi_type(rdata_type),
                    neighbour_cell_rank, neighbour_cell_id, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
         }

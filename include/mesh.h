@@ -35,6 +35,7 @@ using Json = nlohmann::json;
 #include "logger.h"
 #include "material.h"
 #include "mpi_datatypes.h"
+#include "mpi_type_traits.h"
 #include "node.h"
 #include "particle.h"
 #include "particle_base.h"
@@ -358,13 +359,11 @@ class Mesh {
 
   //! Aggregate properties over particle neighbours
   //! \tparam Ttype Type of property to accumulate
-  //! \tparam Tmpitype MPI communicator type
   //! \tparam Tnparam Size of individual property
   //! \tparam Tgetfunctor Functor for getter
   //! \tparam Tsetfunctor Functor for setter
   //! \param[in] getter Getter function
-  template <typename Ttype, typename Tmpitype, unsigned Tnparam,
-            typename Tgetfunctor>
+  template <typename Ttype, unsigned Tnparam, typename Tgetfunctor>
   std::vector<Ttype> aggregate_particle_neighbours_property(
       const std::shared_ptr<mpm::Cell<Tdim>>& cell, Tgetfunctor getter);
 

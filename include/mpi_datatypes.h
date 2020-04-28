@@ -11,6 +11,7 @@
 #include "hdf5_particle.h"
 
 namespace mpm {
+
 //! Initialize MPI particle data types
 inline MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
   // Number of blocks to create
