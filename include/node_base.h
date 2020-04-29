@@ -230,6 +230,12 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual double density(unsigned phase) = 0;
 
+  //! Update density at the nodes
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] density Density from the particles in a cell
+  virtual void update_density(bool update, unsigned phase, double density) = 0;
+
   //! Compute nodal density
   virtual void compute_density() = 0;
 

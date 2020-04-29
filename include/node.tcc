@@ -522,6 +522,18 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   return status.second;
 }
 
+//! Update density at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_density(bool update, unsigned phase,
+                                                  double density) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign mass
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  density_(phase) = (density_(phase) * factor) + density;
+}
+
 //! Compute mass density (Z. Wiezckowski, 2004)
 //! density = mass / lumped volume
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>

@@ -240,6 +240,12 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   double density(unsigned phase) override { return density_(phase); }
 
+  //! Update density at the nodes
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] density Density from the particles in a cell
+  void update_density(bool update, unsigned phase, double density) noexcept override;
+
   //! Compute nodal density
   void compute_density() override;
 

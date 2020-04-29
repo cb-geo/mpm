@@ -125,9 +125,13 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1));
 
+    std::cout << "TEST 0: R" << mpi_rank << std::endl;
+
     // Compute free surface cells, nodes, and particles
     task_group.run([&] {
       mesh_->compute_free_surface(volume_tolerance_);
+
+      std::cout << "TEST 0.1: R" << mpi_rank << std::endl;
 
       // Assign initial pressure
       mesh_->iterate_over_particles_predicate(
@@ -137,6 +141,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                     std::placeholders::_1));
     });
     task_group.wait();
+
+    std::cout << "TEST 1: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -162,6 +168,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     }
 #endif
 
+    std::cout << "TEST 2: R" << mpi_rank << std::endl;
+
     // Compute nodal velocity at the begining of time step
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
@@ -175,6 +183,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Iterate over each particle to compute shear (deviatoric) stress
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
+
+    std::cout << "TEST 3: R" << mpi_rank << std::endl;
 
     // Spawn a task for external force
     task_group.run([&] {
@@ -194,6 +204,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
+
+    std::cout << "TEST 4: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -215,11 +227,15 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     }
 #endif
 
+    std::cout << "TEST 5: R" << mpi_rank << std::endl;
+
     // Compute intermediate velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
                   std::placeholders::_1, fluid, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    std::cout << "TEST 6: R" << mpi_rank << std::endl;
 
     // Reinitialise system matrix to perform PPE
     bool matrix_reinitialization_status = this->reinitialise_matrix();
