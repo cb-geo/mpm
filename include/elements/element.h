@@ -153,7 +153,7 @@ class Element {
 
   //! Return quadrature of the element
   virtual std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
-      unsigned nquadratures) const = 0;
+      unsigned nquadratures, const std::string& generator_type) const = 0;
 
   //! Compute volume
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

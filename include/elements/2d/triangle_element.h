@@ -177,7 +177,7 @@ class TriangleElement : public Element<Tdim> {
 
   //! Return quadrature of the element
   std::shared_ptr<mpm::Quadrature<Tdim>> quadrature(
-      unsigned nquadratures = 1) const override;
+      unsigned nquadratures = 1, const std::string& generator_type = "gauss") const override;
 
   //! Compute volume
   //! \param[in] nodal_coordinates Coordinates of nodes forming the cell

@@ -62,7 +62,7 @@ class Cell {
   bool is_initialised() const;
 
   //! Assign quadrature
-  void assign_quadrature(unsigned nquadratures);
+  void assign_quadrature(unsigned nquadratures, const std::string& generator_type= "gauss");
 
   //! Generate points
   std::vector<Eigen::Matrix<double, Tdim, 1>> generate_points();

@@ -78,11 +78,11 @@ bool mpm::Cell<Tdim>::is_initialised() const {
 
 //! Assign quadrature
 template <unsigned Tdim>
-void mpm::Cell<Tdim>::assign_quadrature(unsigned nquadratures) {
-  this->quadrature_ = element_->quadrature(nquadratures);
+void mpm::Cell<Tdim>::assign_quadrature(unsigned nquadratures, const std::string& generator_type) { 
+  this->quadrature_ = element_->quadrature(nquadratures, generator_type);
 }
 
-//! Assign quadrature
+//! Generate particles using quadratures
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, Tdim, 1>> mpm::Cell<Tdim>::generate_points() {
   // Assign a default quadrature of 1

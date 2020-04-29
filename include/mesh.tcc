@@ -436,6 +436,7 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
 //! Create cells from node lists
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
+                                               const std::string& generator_type,
                                                const std::string& particle_type,
                                                unsigned material_id,
                                                int cset_id, unsigned pset_id) {
@@ -453,7 +454,7 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
       auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
       // Iterate over each cell to generate points
       for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
-        (*citr)->assign_quadrature(nquadratures);
+        (*citr)->assign_quadrature(nquadratures, generator_type);
         // Genereate particles at the Gauss points
         const auto cpoints = (*citr)->generate_points();
         // Iterate over each coordinate to generate material points
@@ -1581,7 +1582,25 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       int cset_id = generator["cset_id"].template get<int>();
       // Particle set id
       unsigned pset_id = generator["pset_id"].template get<unsigned>();
-      status = this->generate_material_points(nparticles_dir, particle_type,
+      status = this->generate_material_points(nparticles_dir, generator_type, particle_type,
+                                              material_id, cset_id, pset_id);
+    }
+
+    // Generate material points at the Gauss location in all cells
+    else if (generator_type == "random") {
+      // Number of particles per dir
+      unsigned particles_per_cell =
+          generator["particles_per_cell"].template get<unsigned>();
+      // Particle type
+      auto particle_type =
+          generator["particle_type"].template get<std::string>();
+      // Material id
+      unsigned material_id = generator["material_id"].template get<unsigned>();
+      // Cell set id
+      int cset_id = generator["cset_id"].template get<int>();
+      // Particle set id
+      unsigned pset_id = generator["pset_id"].template get<unsigned>();
+      status = this->generate_material_points(particles_per_cell, generator_type, particle_type,
                                               material_id, cset_id, pset_id);
     }
 
@@ -1653,7 +1672,7 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
       for (auto citr = cset.cbegin(); citr != cset.cend(); ++citr) {
         if ((*citr)->rank() == mpi_rank && (*citr)->nparticles() == 0) {
           // Assign quadratures based on number of particles
-          (*citr)->assign_quadrature(injection.nparticles_dir);
+          (*citr)->assign_quadrature(injection.nparticles_dir, "gauss");
 
           // Genereate particles at the Gauss points
           const auto cpoints = (*citr)->generate_points();

@@ -512,24 +512,50 @@ inline Eigen::VectorXi
 template <unsigned Tdim, unsigned Tnfunctions>
 inline std::shared_ptr<mpm::Quadrature<Tdim>>
     mpm::QuadrilateralElement<Tdim, Tnfunctions>::quadrature(
-        unsigned nquadratures) const {
-  switch (nquadratures) {
-    case 1:
-      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
-      break;
-    case 2:
-      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ2");
-      break;
-    case 3:
-      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ3");
-      break;
-    case 4:
-      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ4");
-      break;
-    default:
-      return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
-      break;
+        unsigned nquadratures, const std::string& generator_type) const {
+
+  if (generator_type == "gauss") {
+    switch (nquadratures) {
+      case 1:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
+        break;
+      case 2:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ2");
+        break;
+      case 3:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ3");
+        break;
+      case 4:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ4");
+        break;
+      default:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QQ1");
+        break;
+    }  
+  } else {
+    switch (nquadratures) {
+      case 1:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ1");
+        break;
+      case 4:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ4");
+        break;
+      case 9:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ9");
+        break;
+      case 16:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ16");
+        break;
+      case 25:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ25");
+        break;
+      default:
+        return Factory<mpm::Quadrature<Tdim>>::instance()->create("QRQ1");
+        break;
+    }  
   }
+
+
 }
 
 //! Compute volume
