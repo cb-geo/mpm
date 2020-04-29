@@ -9,7 +9,7 @@ namespace mpm {
 // MPI Type traits
 template <typename Ttype>
 struct MPI_Type_Traits {
-  static inline MPI_Datatype mpi_type(Ttype&& raw);
+  static inline MPI_Datatype mpi_type(Ttype&&);
 };
 
 // Specialization of the MPI_Type_Traits for primitive data types types
