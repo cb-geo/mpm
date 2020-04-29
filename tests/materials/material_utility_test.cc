@@ -115,6 +115,22 @@ TEST_CASE("materials utility is checked", "[materials]") {
     REQUIRE(dtheta_dsigma_tolerance(3) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(4) == Approx(0.).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(5) == Approx(0.).epsilon(Tolerance));
+
+    // Initialise strain
+    Eigen::Matrix<double, 6, 1> strain;
+    strain.setZero();
+
+    // Check strain
+    REQUIRE(strain(0) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(strain(1) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(strain(2) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(strain(3) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(strain(4) == Approx(0.).epsilon(Tolerance));
+    REQUIRE(strain(5) == Approx(0.).epsilon(Tolerance));
+
+    // Check pdstrain
+    double pdstrain = mpm::materials::pdstrain(strain);
+    REQUIRE(pdstrain == Approx(0.).epsilon(Tolerance));
   }
 
   SECTION("Check for non-zero stresses") {
@@ -235,5 +251,18 @@ TEST_CASE("materials utility is checked", "[materials]") {
             Approx(0.0117793023407611).epsilon(Tolerance));
     REQUIRE(dtheta_dsigma_tolerance(5) ==
             Approx(0.00189011673149042).epsilon(Tolerance));
+
+    // Initialise strain
+    Eigen::Matrix<double, 6, 1> strain;
+    strain(0) = 0.001;
+    strain(1) = -0.002;
+    strain(2) = -0.0015;
+    strain(3) = 0.0007;
+    strain(4) = -0.0006;
+    strain(5) = 0.0009;
+
+    // Check pdstrain
+    double pdstrain = mpm::materials::pdstrain(strain);
+    REQUIRE(pdstrain == Approx(0.001999444367263).epsilon(Tolerance));
   }
 }
