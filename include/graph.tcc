@@ -1,9 +1,12 @@
 //! Constructor with cells, size and rank
 template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
-
+mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells) {
   this->cells_ = cells;
+}
 
+//! Constructor with cells, size and rank
+template <unsigned Tdim>
+void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
   // Clear all graph properties
   this->xadj_.clear();
   this->vwgt_.clear();

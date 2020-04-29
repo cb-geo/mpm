@@ -9,14 +9,14 @@
 [![](https://img.shields.io/github/issues-raw/cb-geo/mpm.svg)](https://github.com/cb-geo/mpm/issues)
 [![Coverity](https://scan.coverity.com/projects/14389/badge.svg)](https://scan.coverity.com/projects/14389/badge.svg)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/cb-geo/mpm.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/cb-geo/mpm/context:cpp)
-[![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/cb-geo/mpm/projects/)
+[![Project management](https://img.shields.io/badge/projects-view-ff69b4.svg)](https://github.com/orgs/cb-geo/projects/1)
 [![Discourse forum](https://img.shields.io/badge/forum-mpm-blueviolet.svg)](https://cb-geo.discourse.group/c/mpm/)
 
 ## Documentation
 
-Please refer to [CB-Geo MPM Documentation](https://cb-geo.github.io/mpm-doc) for information on compiling, and running the code. The documentation also include the MPM theory.
+Please refer to [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for information on compiling, and running the code. The documentation also include the MPM theory.
 
-If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://cb-geo.discourse.group/c/mpm/). 
+If you have any issues running or compiling the MPM code please open a issue on the [CB-Geo Discourse forum](https://cb-geo.discourse.group/c/mpm/).
 
 ## Running code on Docker
 
@@ -103,7 +103,7 @@ cd ~/workspace/ && git clone https://github.com/schulzchristian/KaHIP && \
 ```
 
 ## Compile
-> See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
+> See [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for more detailed instructions.
 
 0. Run `mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=g++ ..`.
 
@@ -134,7 +134,7 @@ module load mpi/openmpi-x86_64
 Compile with OpenMPI (with halo exchange):
 
 ```
-mkdir build && cd build 
+mkdir build && cd build
 export CXX_COMPILER=mpicxx
 cmake -DCMAKE_BUILD_TYPE=Release -DKAHIP_ROOT=~/workspace/KaHIP/ -DHALO_EXCHANGE=On ..
 make -jN
@@ -157,7 +157,7 @@ Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical 
 0. Run `./mpmtest -s` (for a verbose output) or `ctest -VV`.
 
 ## Run MPM
-> See https://mpm-doc.cb-geo.com/ for more detailed instructions. 
+> See [CB-Geo MPM Documentation](https://mpm.cb-geo.com/) for more detailed instructions.
 
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
