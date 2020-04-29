@@ -146,6 +146,15 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
               Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
               Approx(0.0).epsilon(Tolerance));
+
+      const std::vector<std::string> state_vars = {
+          "M_theta",         "void_ratio",      "e_image",
+          "p_image",         "p_cohesion",      "p_dilation",
+          "pdstrain",        "plastic_strain0", "plastic_strain1",
+          "plastic_strain2", "plastic_strain3", "plastic_strain4",
+          "plastic_strain5"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 
