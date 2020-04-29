@@ -97,7 +97,6 @@ TEST_CASE("Modified cam clay undrained condition is checked in 3D",
               Approx(3846153.8460000).epsilon(Tolerance));
       REQUIRE(state_variables.at("shear_modulus") ==
               Approx(4615384.61538462).epsilon(Tolerance));
-      REQUIRE(state_variables.at("j3") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("p") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("q") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("theta") == Approx(0.0).epsilon(Tolerance));
