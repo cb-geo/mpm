@@ -67,7 +67,7 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
       //! get the id of neighbours
       for (const auto& neighbour : neighbours) adjncy_.emplace_back(neighbour);
 
-      vwgt_.emplace_back((*citr)->nparticles());
+      vwgt_.emplace_back((*citr)->nglobal_particles());
     }
   }
 

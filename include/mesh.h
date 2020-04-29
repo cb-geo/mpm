@@ -167,6 +167,12 @@ class Mesh {
   template <typename Toper>
   void iterate_over_cells(Toper oper);
 
+  //! Find cell neighbours
+  void find_cell_neighbours();
+
+  //! Find global nparticles across MPI ranks / cell
+  void find_nglobal_particles_cells();
+
   //! Create particles from coordinates
   //! \param[in] particle_type Particle type
   //! \param[in] coordinates Nodal coordinates
@@ -353,9 +359,6 @@ class Mesh {
           materials) {
     materials_ = materials;
   }
-
-  //! Find cell neighbours
-  void find_cell_neighbours();
 
   //! Find particle neighbours
   //! \param[in] cell of interest

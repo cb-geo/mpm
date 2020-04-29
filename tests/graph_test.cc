@@ -491,6 +491,7 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
       if (mpi_rank == 4) {
         // Create graph
         auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        mesh->find_nglobal_particles_cells();
         graph->construct_graph(mpi_size, mpi_rank);
         // Initialize MPI
         MPI_Comm comm;
@@ -744,6 +745,7 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
       if (mpi_rank == 4) {
         // Create graph
         auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        mesh->find_nglobal_particles_cells();
         graph->construct_graph(mpi_size, mpi_rank);
         // Initialize MPI
         MPI_Comm comm;

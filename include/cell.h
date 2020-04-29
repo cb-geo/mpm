@@ -70,6 +70,14 @@ class Cell {
   //! Return the number of particles
   unsigned nparticles() const { return particles_.size(); }
 
+  //! Assign global nparticles
+  void nglobal_particles(unsigned nparticles) {
+    nglobal_particles_ = nparticles;
+  }
+
+  //! nglobal particles
+  unsigned nglobal_particles() const { return nglobal_particles_; }
+
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
@@ -228,6 +236,8 @@ class Cell {
   double mean_length_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
+  //! Number of global nparticles
+  unsigned nglobal_particles_{0};
   //! Container of node pointers (local id, node pointer)
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates

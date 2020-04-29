@@ -8,7 +8,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 
 //! Domain decomposition
 template <unsigned Tdim>
-void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
+void mpm::MPMExplicit<Tdim>::mpi_domain_decompose(bool initial_step) {
 #ifdef USE_MPI
   // Initialise MPI rank and size
   int mpi_rank = 0;
@@ -33,8 +33,13 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
       throw std::runtime_error("Container of cells is empty");
 
 #ifdef USE_GRAPH_PARTITIONING
-    // Create graph
-    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
+    // Create graph object if empty
+    if (initial_step || graph_ == nullptr)
+      graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
+
+    // Find number of particles in each cell across MPI ranks
+    mesh_->find_nglobal_particles_cells();
+    // Construct a weighted DAG
     graph_->construct_graph(mpi_size, mpi_rank);
 
     // Graph partitioning mode
@@ -45,7 +50,10 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose() {
     graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
     // Delete all the particles which is not in local task parititon
-    mesh_->remove_all_nonrank_particles();
+    if (initial_step) mesh_->remove_all_nonrank_particles();
+    // If not initial step, transfer non-rank particles
+    else mesh_->transfer_nonrank_particles();
+    
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
     // Identify ghost boundary cells
@@ -176,7 +184,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
   // Domain decompose
-  this->mpi_domain_decompose();
+  bool initial_step = true;
+  this->mpi_domain_decompose(initial_step);
 
   // Check point resume
   if (resume) this->checkpoint_resume();

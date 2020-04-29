@@ -20,7 +20,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   MPMExplicit(const std::shared_ptr<IO>& io);
 
   //! Domain decomposition
-  void mpi_domain_decompose();
+  //! \param[in] initial_step Start of simulation or later steps
+  void mpi_domain_decompose(bool initial_step = false);
 
   //! Solve
   bool solve() override;
