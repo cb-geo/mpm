@@ -208,9 +208,14 @@ TEST_CASE("Graph is checked for 2D case", "[graph][2D]") {
   int num_threads = 3;
 
   // initialize graph
-  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellvector, num_threads, 0);
-  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellvector, num_threads, 1);
-  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellvector, num_threads, 2);
+  mpm::Graph<Dim> graph1 = mpm::Graph<Dim>(*cellvector);
+  mpm::Graph<Dim> graph2 = mpm::Graph<Dim>(*cellvector);
+  mpm::Graph<Dim> graph3 = mpm::Graph<Dim>(*cellvector);
+
+  // Construct graphs
+  graph1.construct_graph(num_threads, 0);
+  graph2.construct_graph(num_threads, 1);
+  graph3.construct_graph(num_threads, 2);
 
   // Check graph structure
   SECTION("Check graph initialize function") {
@@ -485,8 +490,8 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
     SECTION("Decompose mesh graph") {
       if (mpi_rank == 4) {
         // Create graph
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
-                                                       mpi_rank);
+        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        graph->construct_graph(mpi_size, mpi_rank);
         // Initialize MPI
         MPI_Comm comm;
         MPI_Comm_dup(MPI_COMM_WORLD, &comm);
@@ -738,8 +743,8 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
     SECTION("Decompose mesh graph") {
       if (mpi_rank == 4) {
         // Create graph
-        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells(), mpi_size,
-                                                       mpi_rank);
+        auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+        graph->construct_graph(mpi_size, mpi_rank);
         // Initialize MPI
         MPI_Comm comm;
         MPI_Comm_dup(MPI_COMM_WORLD, &comm);
