@@ -43,44 +43,58 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     // TODO: Now do all rank create matrix and vector? Or only rank 0 should run
     // these lines Create PETSC_B and PETSC_X with global dim = DIM,
     // PETSC_DECIDE local dim
-    VecCreate(comm, &petsc_b);
+    /*VecCreate(comm, &petsc_b);
     VecSetSizes(petsc_b, PETSC_DECIDE, dim);
-    VecSetType(petsc_b, VECMPI);
+    VecSetType(petsc_b, VECMPI);*/
+    VecCreateMPI(comm, PETSC_DECIDE, dim, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
     VecGetOwnershipRange(petsc_b,&low,&high);
-    std::cout<<low<<std::endl;
-    std::cout<<high<<std::endl;
+    std::cout << "vector range: " << low << high <<std::endl;
 
     std::cout << "TEST OUTPUT: 4: " << std::endl;
 
     // Create PETSC_A with global dim = DIM by DIM, PETSC_DECIDE local dim
-    //MatCreate(PETSC_COMM_WORLD, &petsc_A);
-    MatCreateMPIAIJCRL(PETSC_COMM_SELF, dim, dim, dim, PETSC_NULL, (dim-1), PETSC_NULL, &petsc_A);
-    //MatCreateSeqAIJ(comm, dim, dim, dim, 0, &petsc_A);
+    MatCreateAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 
+    dim, dim, 0, NULL, 0, NULL, &petsc_A);
+    MatSetOption(petsc_A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    //MatCreateMPIAIJCRL(PETSC_COMM_WORLD, dim, dim, dim, PETSC_NULL, (dim-1), PETSC_NULL, &petsc_A);
+    
     //MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
-    //MatSetType(petsc_A, MATMPIAIJ);
-    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
-    std::cout<<rlow<<std::endl;
-    std::cout<<rhigh<<std::endl;
-
-
     std::cout << "TEST OUTPUT: 5: " << std::endl;
+    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
+    std::cout << "Matrix range: " << rlow << rhigh <<std::endl;
+
+    
 
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-    // TODO: Optimize send from value-to-value to array-to-array
-    if (rank == 0) {
-      // Copy b to petsc_b
-      for (vi = 0; vi < dim; vi++) {
-        v = b(vi);
-        VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
-      }
-      // Copy A to petsc_A. Can be optimized for sparse A
-      for (mi = 0; mi < dim; mi++) {
+    VecGetOwnershipRange(petsc_b,&low,&high);
+    for (vi=low; vi < high; vi++) {
+      v = b(vi);
+      VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
+    }
+    std::cout << "TEST OUTPUT: 5.1: " << std::endl;
+    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
+    for (mi = rlow; mi < rhigh; mi++) {
         for (mj = 0; mj < dim; mj++) {
           m = A.coeff(mi, mj);
           MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
         }
-      }
+    }
+
+    // TODO: Optimize send from value-to-value to array-to-array
+    if (rank == 0) {
+      // Copy b to petsc_b
+      /*for (vi = 0; vi < dim; vi++) {
+        v = b(vi);
+        VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
+      }*/
+      // Copy A to petsc_A. Can be optimized for sparse A
+      /*for (mi = 0; mi < dim; mi++) {
+        for (mj = 0; mj < dim; mj++) {
+          m = A.coeff(mi, mj);
+          MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
+        }
+      }*/
     }
 
     std::cout << "TEST OUTPUT: 6: " << rank << std::endl;
@@ -106,10 +120,12 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
-    for (vi = 0; vi < dim; vi++) {
-          VecGetValues(petsc_b, 1, &vi, &v);
-          std::cout << v << std::endl;
+    if (rank==0){
+      for (vi = 0; vi < dim; vi++) {
+           VecGetValues(petsc_b, 1, &vi, &v);
+           std::cout << v << std::endl;
 
+     }
     }
     std::cout << "TEST OUTPUT: 7: " << std::endl;
 
@@ -138,7 +154,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       PetscFinalize();
     }
 
-    std::cout << "TEST OUTPUT: 8: " << std::endl;
+    std::cout << "TEST OUTPUT: 8: solution is: "<< x << std::endl;
 
 #endif
 
