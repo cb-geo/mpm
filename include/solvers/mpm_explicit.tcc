@@ -52,8 +52,9 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Delete all the particles which is not in local task parititon
     if (initial_step) mesh_->remove_all_nonrank_particles();
     // If not initial step, transfer non-rank particles
-    else mesh_->transfer_nonrank_particles();
-    
+    else
+      mesh_->transfer_nonrank_particles();
+
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
     // Identify ghost boundary cells

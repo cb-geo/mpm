@@ -325,15 +325,14 @@ void mpm::Mesh<Tdim>::find_nglobal_particles_cells() {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     int nparticles;
-    // Determine the rank of the broadcast emitter process 
-    if((*citr)->rank() == mpi_rank) nparticles = (*citr)->nparticles();
+    // Determine the rank of the broadcast emitter process
+    if ((*citr)->rank() == mpi_rank) nparticles = (*citr)->nparticles();
     MPI_Bcast(&nparticles, 1, MPI_INT, (*citr)->rank(), MPI_COMM_WORLD);
     // Receive broadcast and update on all ranks
     (*citr)->nglobal_particles(nparticles);
   }
 #endif
 }
-
 
 //! Find particle neighbours for all particle
 template <unsigned Tdim>
