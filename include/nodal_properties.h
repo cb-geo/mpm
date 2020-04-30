@@ -36,7 +36,7 @@ struct NodalProperties {
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   // \param[in] property Property name
   void assign_property(const std::string& property, unsigned node_id,
-                       unsigned mat_id, Eigen::MatrixXd property_value,
+                       unsigned mat_id, const Eigen::MatrixXd& property_value,
                        unsigned nprops = 1);
 
   // Update property value according to a pair of node and material
@@ -46,7 +46,7 @@ struct NodalProperties {
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   // \param[in] property Property name
   void update_property(const std::string& property, unsigned node_id,
-                       unsigned mat_id, Eigen::MatrixXd property_value,
+                       unsigned mat_id, const Eigen::MatrixXd& property_value,
                        unsigned nprops = 1);
 
   std::map<std::string, Eigen::MatrixXd> properties_;

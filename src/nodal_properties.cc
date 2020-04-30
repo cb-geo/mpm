@@ -24,10 +24,9 @@ Eigen::MatrixXd mpm::NodalProperties::property(const std::string& property,
 }
 
 // Assign property value to a pair of node and material
-void mpm::NodalProperties::assign_property(const std::string& property,
-                                           unsigned node_id, unsigned mat_id,
-                                           Eigen::MatrixXd property_value,
-                                           unsigned nprops) {
+void mpm::NodalProperties::assign_property(
+    const std::string& property, unsigned node_id, unsigned mat_id,
+    const Eigen::MatrixXd& property_value, unsigned nprops) {
   // Assign a property value matrix with dimensions nprops x 1 to its proper
   // location in the properties_ matrix that stores all nodal properties
   properties_.at(property).block(node_id * nprops, mat_id, nprops, 1) =
@@ -35,10 +34,9 @@ void mpm::NodalProperties::assign_property(const std::string& property,
 }
 
 // Update property value according to a pair of node and material
-void mpm::NodalProperties::update_property(const std::string& property,
-                                           unsigned node_id, unsigned mat_id,
-                                           Eigen::MatrixXd property_value,
-                                           unsigned nprops) {
+void mpm::NodalProperties::update_property(
+    const std::string& property, unsigned node_id, unsigned mat_id,
+    const Eigen::MatrixXd& property_value, unsigned nprops) {
   // Update a property value matrix with dimensions nprops x 1 considering its
   // proper location in the properties_ matrix that stores all nodal properties
   properties_.at(property).block(node_id * nprops, mat_id, nprops, 1) =
