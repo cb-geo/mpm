@@ -127,10 +127,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle2->compute_shapefn();
   particle3->compute_shapefn();
 
-  // Map nodal properties to nodes
-  particle1->map_properties_to_nodes();
-  particle2->map_properties_to_nodes();
-  particle3->map_properties_to_nodes();
+  // Map multimaterial properties from the particles to the nodes
+  particle1->map_multimaterial_properties_to_nodes();
+  particle2->map_multimaterial_properties_to_nodes();
+  particle3->map_multimaterial_properties_to_nodes();
 
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
