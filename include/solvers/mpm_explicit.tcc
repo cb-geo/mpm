@@ -39,6 +39,7 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose(bool initial_step) {
 
     // Find number of particles in each cell across MPI ranks
     mesh_->find_nglobal_particles_cells();
+    
     // Construct a weighted DAG
     graph_->construct_graph(mpi_size, mpi_rank);
 
@@ -51,9 +52,6 @@ void mpm::MPMExplicit<Tdim>::mpi_domain_decompose(bool initial_step) {
 
     // Delete all the particles which is not in local task parititon
     if (initial_step) mesh_->remove_all_nonrank_particles();
-    // If not initial step, transfer non-rank particles
-    else
-      mesh_->transfer_nonrank_particles();
 
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
@@ -343,6 +341,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
+    // Run load balancer
+    if (step_ % 500 == 0 && step_ != 0) this->mpi_domain_decompose(false);
+
     mesh_->transfer_nonrank_particles();
 #endif
 #endif
