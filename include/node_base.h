@@ -62,6 +62,12 @@ class NodeBase {
   //! Return status
   virtual bool status() const = 0;
 
+  //! Assign status
+  virtual void assign_solving_status(bool status) = 0;
+
+  //! Return status
+  virtual bool solving_status() const = 0;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -256,6 +262,12 @@ class NodeBase {
 
   //! Return active id
   virtual mpm::Index active_id() = 0;
+
+  //! Assign global active id
+  virtual void assign_global_active_id(Index id) = 0;
+
+  //! Return global active id
+  virtual mpm::Index global_active_id() = 0;
 
   //! Compute navier-stokes semi-implicit acceleration and velocity
   //! \param[in] phase Index corresponding to the phase

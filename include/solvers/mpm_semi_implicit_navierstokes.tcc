@@ -159,12 +159,12 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
                     std::placeholders::_1, false, fluid,
                     std::placeholders::_2));
-      // TODO: Check if nodal free-surface condition needs all reduce
-      // MPI all reduce nodal momentum
-      mesh_->template nodal_halo_exchange<bool, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::free_surface, std::placeholders::_1),
-          std::bind(&mpm::NodeBase<Tdim>::assign_free_surface,
-                    std::placeholders::_1, std::placeholders::_2));
+      // // TODO: Check if nodal free-surface condition needs all reduce
+      // // MPI all reduce nodal momentum
+      // mesh_->template nodal_halo_exchange<bool, Tdim>(
+      //     std::bind(&mpm::NodeBase<Tdim>::free_surface, std::placeholders::_1),
+      //     std::bind(&mpm::NodeBase<Tdim>::assign_free_surface,
+      //               std::placeholders::_1, std::placeholders::_2));
     }
 #endif
 
@@ -353,8 +353,28 @@ template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
   bool status = true;
   try {
-    // Assigning matrix id
+
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
+
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+    // Assigning matrix id in each MPI rank
     const auto nactive_node = mesh_->assign_active_nodes_id();
+
+    // Assigning matrix id globally
+    unsigned nglobal_active_node = nactive_node;
+#ifdef USE_MPI
+    nglobal_active_node = mesh_->assign_global_active_nodes_id();
+#endif
+
+    std::cout << "reinitialise_matrix: R" << mpi_rank << "GLOBAL NODE NUMBER: " << nglobal_active_node << std::endl;
 
     // Assign global node indice
     matrix_assembler_->assign_global_node_indices(nactive_node);

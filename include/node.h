@@ -57,6 +57,12 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
+  //! Assign status
+  void assign_solving_status(bool status) override { solving_status_ = status; }
+
+  //! Return solving status
+  bool solving_status() const override { return solving_status_; }
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -275,6 +281,12 @@ class Node : public NodeBase<Tdim> {
   //! Return active id
   mpm::Index active_id() override { return active_id_; }
 
+  //! Assign global active id
+  void assign_global_active_id(Index id) override { global_active_id_ = id; }
+
+  //! Return global active id
+  mpm::Index global_active_id() override { return global_active_id_; }
+
   //! Return nodal pressure constraint
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] current_time current time of the analysis
@@ -328,6 +340,8 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Solving tatus
+  bool solving_status_{false};
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume
@@ -368,8 +382,10 @@ class Node : public NodeBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
-  //! Global index for active node
+  //! Global index for active node (in each rank)
   Index active_id_{std::numeric_limits<Index>::max()};
+  //! Global index for active node (globally)
+  Index global_active_id_{std::numeric_limits<Index>::max()};
   //! Interpolated density
   Eigen::Matrix<double, 1, Tnphases> density_;
   //! p^(t+1) - beta * p^(t)

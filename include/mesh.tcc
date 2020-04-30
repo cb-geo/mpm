@@ -109,17 +109,77 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   this->active_nodes_.clear();
   Index active_id = 0;
 
+  bool* send_nodal_solving_status = new bool[nnodes()];
+  memset (send_nodal_solving_status, 0, nnodes()*sizeof(bool));
+  bool* receive_nodal_solving_status = new bool[nnodes()];
+
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if ((*nitr)->status()) {
       this->active_nodes_.add(*nitr);
       (*nitr)->assign_active_id(active_id);
       active_id++;
+
+      // Assign solving status for MPI solver
+      send_nodal_solving_status[(*nitr)->id()] = true;
     } else {
       (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
     }
   }
 
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
+
+#ifdef USE_MPI
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+#endif
+
+// #ifdef USE_MPI
+//     1. all rank send that flag to rank 0
+//     2. in rank 0 count the same way as you count local
+//     3. broadcast that!
+// #endif
+
+#ifdef USE_MPI
+  MPI_Allreduce(&send_nodal_solving_status, &receive_nodal_solving_status, nnodes(),
+              MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
+
+  Index global_active_id = 0;
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if (receive_nodal_solving_status[(*nitr)->id()]) {
+      // Assign solving status for MPI solver
+      (*nitr)->assign_solving_status(true);
+    }
+  }
+#endif
+
+  delete[] send_nodal_solving_status;
+  delete[] receive_nodal_solving_status;
+
   return active_id;
+}
+
+//! Create a list of active nodes in mesh and assign active node id
+template <unsigned Tdim>
+unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
+  // Clear existing list of active nodes
+  Index global_active_id = 0;
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      (*nitr)->assign_global_active_id(global_active_id);
+      global_active_id++;
+    } else {
+      (*nitr)->assign_global_active_id(std::numeric_limits<Index>::max());
+    }
+  }
+
+  return global_active_id;
 }
 
 //! Return global node indices
@@ -2221,113 +2281,123 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         const auto& node_id = (*citr)->nodes_id();
         bool internal = true;
 
-        //! Check internal cell
-        for (const auto neighbour_cell_id : (*citr)->neighbours()) {
-          // Get the MPI rank of the neighbour cell
-          bool neighbour_cell_status;
-          int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
-          if (neighbour_cell_rank != (*citr)->rank()) {
-            std::cout << "COMPUTE_FS: R:" << mpi_rank << " Neighbour Rank" << neighbour_cell_rank <<  std::endl;
-            std::cout << "COMPUTE_FS: R:" << mpi_rank << " Current Rank" << (*citr)->rank() << std::endl;
-#ifdef USE_MPI
-            MPI_Request send_requests;
-
-            // Send cell status
-            if (neighbour_cell_rank == mpi_rank) {
-                // Neighbour active status
-                bool send_status = map_cells_[neighbour_cell_id]->status();
-                // Send the size of the particles in cell
-                MPI_Isend(&send_status, 1, MPI_CXX_BOOL, (*citr)->rank(), neighbour_cell_id,
-                        MPI_COMM_WORLD, &send_requests);
-            }
-            // Receive cell status the current MPI rank
-            if ((*citr)->rank() == mpi_rank) {
-                // Particle ids at local cell MPI rank
-                bool receive_status;
-                MPI_Recv(&receive_status, 1, MPI_CXX_BOOL, neighbour_cell_rank,
-                        neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                neighbour_cell_status = receive_status;
-            }
-#endif
-          }
-          else{
-            neighbour_cell_status = map_cells_[neighbour_cell_id]->status();
-          }
-
-          if (!neighbour_cell_status) {
-            internal = false;
-            break;
+        // FIXME: DELETE THIS!
+        for (auto n_id : node_id){
+          if (n_id == 200 || n_id == 201 || n_id == 202 || n_id == 203){
+            (*citr)->assign_free_surface(true);
+            boundary_cells.insert((*citr)->id());
+            map_nodes_[n_id]->assign_free_surface(true);
+            boundary_nodes.insert(n_id);
           }
         }
+
+        //! Check internal cell
+//         for (const auto neighbour_cell_id : (*citr)->neighbours()) {
+//           // Get the MPI rank of the neighbour cell
+//           bool neighbour_cell_status;
+//           int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
+//           if (neighbour_cell_rank != (*citr)->rank()) {
+//             std::cout << "COMPUTE_FS: R:" << mpi_rank << " Neighbour Rank" << neighbour_cell_rank <<  std::endl;
+//             std::cout << "COMPUTE_FS: R:" << mpi_rank << " Current Rank" << (*citr)->rank() << std::endl;
+// #ifdef USE_MPI
+//             MPI_Request send_requests;
+
+//             // Send cell status
+//             if (neighbour_cell_rank == mpi_rank) {
+//                 // Neighbour active status
+//                 bool send_status = map_cells_[neighbour_cell_id]->status();
+//                 // Send the size of the particles in cell
+//                 MPI_Isend(&send_status, 1, MPI_CXX_BOOL, (*citr)->rank(), neighbour_cell_id,
+//                         MPI_COMM_WORLD, &send_requests);
+//             }
+//             // Receive cell status the current MPI rank
+//             if ((*citr)->rank() == mpi_rank) {
+//                 // Particle ids at local cell MPI rank
+//                 bool receive_status;
+//                 MPI_Recv(&receive_status, 1, MPI_CXX_BOOL, neighbour_cell_rank,
+//                         neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//                 neighbour_cell_status = receive_status;
+//             }
+// #endif
+//           }
+//           else{
+//             neighbour_cell_status = map_cells_[neighbour_cell_id]->status();
+//           }
+
+//           if (!neighbour_cell_status) {
+//             internal = false;
+//             break;
+//           }
+//         }
 
         //! Check volume fraction only for boundary cell
-        if (!internal) {
-          if ((*citr)->volume_fraction() < tolerance) {
-            cell_at_interface = true;
-            for (const auto id : node_id) {
-              map_nodes_[id]->assign_free_surface(cell_at_interface);
-              boundary_nodes.insert(id);
-            }
-          } else {
-            for (const auto neighbour_cell_id : (*citr)->neighbours()) {
-              double neighbour_volume_fraction;
-              int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
-              if (neighbour_cell_rank != (*citr)->rank()) {
-#ifdef USE_MPI
-                MPI_Request send_requests;
+//         if (!internal) {
+//           if ((*citr)->volume_fraction() < tolerance) {
+//             cell_at_interface = true;
+//             for (const auto id : node_id) {
+//               map_nodes_[id]->assign_free_surface(cell_at_interface);
+//               boundary_nodes.insert(id);
+//             }
+//           } else {
+//             for (const auto neighbour_cell_id : (*citr)->neighbours()) {
+//               double neighbour_volume_fraction;
+//               int neighbour_cell_rank = map_cells_[neighbour_cell_id]->rank();
+//               if (neighbour_cell_rank != (*citr)->rank()) {
+// #ifdef USE_MPI
+//                 MPI_Request send_requests;
 
-                // Send cell status
-                if (neighbour_cell_rank == mpi_rank) {
-                    // Neighbour active status
-                    double send_volume_fraction = map_cells_[neighbour_cell_id]->volume_fraction();
-                    // Send the size of the particles in cell
-                    MPI_Isend(&send_volume_fraction, 1, MPI_DOUBLE, (*citr)->rank(), neighbour_cell_id,
-                            MPI_COMM_WORLD, &send_requests);
-                }
-                // Receive cell status the current MPI rank
-                if ((*citr)->rank() == mpi_rank) {
-                    // Particle ids at local cell MPI rank
-                    double receive_volume_fraction;
-                    MPI_Recv(&receive_volume_fraction, 1, MPI_DOUBLE, neighbour_cell_rank,
-                            neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    neighbour_volume_fraction = receive_volume_fraction;
-                }
-#endif
-              }
-              else{
-                neighbour_volume_fraction = map_cells_[neighbour_cell_id]->volume_fraction();
-              }
+//                 // Send cell status
+//                 if (neighbour_cell_rank == mpi_rank) {
+//                     // Neighbour active status
+//                     double send_volume_fraction = map_cells_[neighbour_cell_id]->volume_fraction();
+//                     // Send the size of the particles in cell
+//                     MPI_Isend(&send_volume_fraction, 1, MPI_DOUBLE, (*citr)->rank(), neighbour_cell_id,
+//                             MPI_COMM_WORLD, &send_requests);
+//                 }
+//                 // Receive cell status the current MPI rank
+//                 if ((*citr)->rank() == mpi_rank) {
+//                     // Particle ids at local cell MPI rank
+//                     double receive_volume_fraction;
+//                     MPI_Recv(&receive_volume_fraction, 1, MPI_DOUBLE, neighbour_cell_rank,
+//                             neighbour_cell_id, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//                     neighbour_volume_fraction = receive_volume_fraction;
+//                 }
+// #endif
+//               }
+//               else{
+//                 neighbour_volume_fraction = map_cells_[neighbour_cell_id]->volume_fraction();
+//               }
 
-              if ( neighbour_volume_fraction < tolerance) {
-                cell_at_interface = true;
-                const auto& n_node_id = map_cells_[neighbour_cell_id]->nodes_id();
+//               if ( neighbour_volume_fraction < tolerance) {
+//                 cell_at_interface = true;
+//                 const auto& n_node_id = map_cells_[neighbour_cell_id]->nodes_id();
 
-                // Detect common node id
-                std::set<mpm::Index> common_node_id;
-                std::set_intersection(
-                    node_id.begin(), node_id.end(), n_node_id.begin(),
-                    n_node_id.end(),
-                    std::inserter(common_node_id, common_node_id.begin()));
+//                 // Detect common node id
+//                 std::set<mpm::Index> common_node_id;
+//                 std::set_intersection(
+//                     node_id.begin(), node_id.end(), n_node_id.begin(),
+//                     n_node_id.end(),
+//                     std::inserter(common_node_id, common_node_id.begin()));
 
-                // Assign free surface nodes
-                if (!common_node_id.empty()) {
-                  for (const auto common_id : common_node_id) {
-                    map_nodes_[common_id]->assign_free_surface(
-                        cell_at_interface);
-                    boundary_nodes.insert(common_id);
-                  }
-                }
-              }
-            }
-          }
+//                 // Assign free surface nodes
+//                 if (!common_node_id.empty()) {
+//                   for (const auto common_id : common_node_id) {
+//                     map_nodes_[common_id]->assign_free_surface(
+//                         cell_at_interface);
+//                     boundary_nodes.insert(common_id);
+//                   }
+//                 }
+//               }
+//             }
+//           }
 
 
-          // Assign free surface cell
-          if (cell_at_interface) {
-            (*citr)->assign_free_surface(cell_at_interface);
-            boundary_cells.insert((*citr)->id());
-          }
-        }
+//           // Assign free surface cell
+//           if (cell_at_interface) {
+//             (*citr)->assign_free_surface(cell_at_interface);
+//             boundary_cells.insert((*citr)->id());
+//           }
+//         }
       }
     }
 
@@ -2366,6 +2436,11 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         (*pitr)->assign_free_surface(status);
         boundary_particles.insert((*pitr)->id());
       }
+    }
+
+    std::cout << "COMPUTE_FS: R:" << mpi_rank << " BOUNDARY PARTICLES ARE:" << std::endl;
+    for (auto i : boundary_particles){
+      std::cout << "BOUNDARY PARTICLE: R:" << mpi_rank << " id: " << i << std::endl;
     }
 
   } catch (std::exception& exception) {

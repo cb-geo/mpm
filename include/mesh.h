@@ -464,6 +464,9 @@ class Mesh {
   //! Assign id for active node
   unsigned assign_active_nodes_id();
 
+  //! Assign id for active node
+  unsigned assign_global_active_nodes_id();
+
   //! Return container of active nodes
   mpm::Vector<NodeBase<Tdim>> active_nodes() { return active_nodes_; }
 
