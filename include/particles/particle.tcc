@@ -502,7 +502,7 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
 
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_multimaterial_properties_to_nodes() noexcept {
+void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   // Check if particle mass is set
   assert(mass_ != std::numeric_limits<double>::max());
 
