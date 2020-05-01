@@ -35,6 +35,16 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   material_ids_.clear();
 }
 
+//! Initialise shared pointer to nodal properties pool
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
+    unsigned prop_id,
+    std::shared_ptr<mpm::NodalProperties> property_handle) noexcept {
+  // the property handle and the property id is set in the node
+  this->property_handle_ = property_handle;
+  this->prop_id_ = prop_id;
+}
+
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
@@ -517,4 +527,16 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
   std::lock_guard<std::mutex> guard(node_mutex_);
   auto status = this->mpi_ranks_.insert(rank);
   return status.second;
+}
+
+//! Update nodal property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
+    bool update, const std::string& property,
+    const Eigen::MatrixXd& property_value, unsigned mat_id,
+    unsigned nprops) noexcept {
+  // Update/assign property
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  property_handle_->update_property(property, prop_id_, mat_id, property_value,
+                                    nprops);
 }
