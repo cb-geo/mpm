@@ -35,19 +35,25 @@ mpm::NorSand<Tdim>::NorSand(unsigned id, const Json& material_properties)
     p_image_initial_ =
         material_properties.at("p_image_initial").template get<double>();
     // Flag for bonded model
-    bond_model_ = material_properties.at("bond_model").template get<bool>();
-    // Initial p_cohesion
-    p_cohesion_initial_ =
-        material_properties.at("p_cohesion_initial").template get<double>();
-    // Initial p_dilation
-    p_dilation_initial_ =
-        material_properties.at("p_dilation_initial").template get<double>();
-    // Cohesion degradation parameter m upon shearing
-    m_cohesion_ = material_properties.at("m_cohesion").template get<double>();
-    // Dilation degradation parameter m upon shearing
-    m_dilation_ = material_properties.at("m_dilation").template get<double>();
-    // Parameter for shear modulus
-    m_modulus_ = material_properties.at("m_modulus").template get<double>();
+    if (material_properties.find("bond_model") != material_properties.end())
+      bond_model_ = material_properties.at("bond_model").template get<bool>();
+
+    // Obtain the rest of the bonded parameters
+    if (bond_model_) {
+      // Initial p_cohesion
+      p_cohesion_initial_ =
+          material_properties.at("p_cohesion_initial").template get<double>();
+      // Initial p_dilation
+      p_dilation_initial_ =
+          material_properties.at("p_dilation_initial").template get<double>();
+      // Cohesion degradation parameter m upon shearing
+      m_cohesion_ = material_properties.at("m_cohesion").template get<double>();
+      // Dilation degradation parameter m upon shearing
+      m_dilation_ = material_properties.at("m_dilation").template get<double>();
+      // Parameter for shear modulus
+      m_modulus_ = material_properties.at("m_modulus").template get<double>();
+    }
+
     // Default tolerance
     if (material_properties.find("tolerance") != material_properties.end())
       tolerance_ = material_properties.at("tolerance").template get<double>();
@@ -91,6 +97,18 @@ mpm::dense_map mpm::NorSand<Tdim>::initialise_state_variables() {
       {"plastic_strain4", 0.},
       {"plastic_strain5", 0.}};
 
+  return state_vars;
+}
+
+//! Initialise state variables
+template <unsigned Tdim>
+std::vector<std::string> mpm::NorSand<Tdim>::state_variables() const {
+  const std::vector<std::string> state_vars = {
+      "M_theta",         "void_ratio",      "e_image",
+      "p_image",         "p_cohesion",      "p_dilation",
+      "pdstrain",        "plastic_strain0", "plastic_strain1",
+      "plastic_strain2", "plastic_strain3", "plastic_strain4",
+      "plastic_strain5"};
   return state_vars;
 }
 
@@ -390,15 +408,6 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
     const Vector6d& stress, const Vector6d& dstrain,
     const ParticleBase<Tdim>* ptr, mpm::dense_map* state_vars) {
 
-  // Zero parameters for non-bond model
-  if (!bond_model_) {
-    (*state_vars).at("p_cohesion") = 0.0;
-    (*state_vars).at("p_dilation") = 0.0;
-    m_cohesion_ = 0.0;
-    m_dilation_ = 0.0;
-    m_modulus_ = 0.0;
-  }
-
   // Note: compression positive in all derivations
   Vector6d stress_neg = -1 * stress;
   Vector6d dstrain_neg = -1 * dstrain;
@@ -467,22 +476,16 @@ Eigen::Matrix<double, 6, 1> mpm::NorSand<Tdim>::compute_stress(
   (*state_vars).at("plastic_strain4") += dpstrain(4);
   (*state_vars).at("plastic_strain5") += dpstrain(5);
 
+  Vector6d plastic_strain;
+  plastic_strain(0) = (*state_vars).at("plastic_strain0");
+  plastic_strain(1) = (*state_vars).at("plastic_strain1");
+  plastic_strain(2) = (*state_vars).at("plastic_strain2");
+  plastic_strain(3) = (*state_vars).at("plastic_strain3");
+  plastic_strain(4) = (*state_vars).at("plastic_strain4");
+  plastic_strain(5) = (*state_vars).at("plastic_strain5");
+
   // Update equivalent plastic deviatoric strain
-  (*state_vars).at("pdstrain") =
-      std::sqrt(2. / 9. *
-                    (std::pow(((*state_vars).at("plastic_strain0") -
-                               (*state_vars).at("plastic_strain1")),
-                              2.) +
-                     std::pow(((*state_vars).at("plastic_strain1") -
-                               (*state_vars).at("plastic_strain2")),
-                              2.) +
-                     std::pow(((*state_vars).at("plastic_strain2") -
-                               (*state_vars).at("plastic_strain0")),
-                              2.)) +
-                1. / 3. *
-                    (std::pow(((*state_vars).at("plastic_strain3")), 2.) +
-                     std::pow(((*state_vars).at("plastic_strain4")), 2.) +
-                     std::pow(((*state_vars).at("plastic_strain5")), 2.)));
+  (*state_vars).at("pdstrain") = mpm::materials::pdstrain(plastic_strain);
 
   // Update p_cohesion
   this->compute_p_bond(state_vars);
