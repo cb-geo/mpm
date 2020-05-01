@@ -45,7 +45,7 @@ class AssemblerBase {
   }
 
   //! Create a pair between nodes and index in Matrix / Vector
-  virtual bool assign_global_node_indices(unsigned active_dof) = 0;
+  virtual bool assign_global_node_indices(unsigned nactive_node, unsigned nglobal_active_node) = 0;
 
   //! Assemble laplacian matrix
   virtual Eigen::SparseMatrix<double>& laplacian_matrix() = 0;

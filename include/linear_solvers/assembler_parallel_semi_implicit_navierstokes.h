@@ -19,7 +19,7 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   AssemblerParallelSemiImplicitNavierStokes();
 
   //! Create a pair between nodes and index in Matrix / Vector
-  bool assign_global_node_indices(unsigned active_dof) override;
+  bool assign_global_node_indices(unsigned nactive_node, unsigned nglobal_active_node) override;
 
   //! Return laplacian matrix
   Eigen::SparseMatrix<double>& laplacian_matrix() override {
@@ -73,6 +73,8 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   using AssemblerBase<Tdim>::active_dof_;
   //! Mesh object
   using AssemblerBase<Tdim>::mesh_;
+  //! Number of total active_dof in all rank
+  unsigned global_active_dof_;
   //! Laplacian matrix
   Eigen::SparseMatrix<double> laplacian_matrix_;
   //! Poisson RHS vector
@@ -87,6 +89,8 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::SparseMatrix<double> correction_matrix_;
   //! Global node indices
   std::vector<Eigen::VectorXi> global_node_indices_;
+  //! Global node indices
+  std::vector<Eigen::VectorXi> mpi_global_node_indices_;
 };
 }  // namespace mpm
 

@@ -11,13 +11,15 @@ mpm::AssemblerParallelSemiImplicitNavierStokes<
 //! Assign global node indices
 template <unsigned Tdim>
 bool mpm::AssemblerParallelSemiImplicitNavierStokes<
-    Tdim>::assign_global_node_indices(unsigned nactive_node) {
+    Tdim>::assign_global_node_indices(unsigned nactive_node, unsigned nglobal_active_node) {
   bool status = true;
   try {
     // Total number of active node
     active_dof_ = nactive_node;
+    global_active_dof_ = nglobal_active_node;
 
     global_node_indices_ = mesh_->global_node_indices();
+    mpi_global_node_indices_ = mesh_->mpi_global_node_indices();
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
