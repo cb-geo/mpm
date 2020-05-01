@@ -39,6 +39,9 @@ class Bingham : public Material<Tdim> {
   //! \retval state_vars State variables with history
   mpm::dense_map initialise_state_variables() override;
 
+  //! State variables
+  std::vector<std::string> state_variables() const override;
+
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain

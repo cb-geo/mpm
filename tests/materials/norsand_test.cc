@@ -39,13 +39,6 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
   jmaterial["hardening_modulus"] = 200.0;
   jmaterial["void_ratio_initial"] = 0.85;
   jmaterial["p_image_initial"] = 87014.6;
-  jmaterial["bond_model"] = false;
-  jmaterial["p_cohesion_initial"] = 0.0;
-  jmaterial["p_dilation_initial"] = 0.0;
-  jmaterial["m_cohesion"] = 0.0;
-  jmaterial["m_dilation"] = 0.0;
-  jmaterial["m_modulus"] = 0.0;
-  jmaterial["tolerance"] = 1.0E-15;
 
   //! Check for id = 0
   SECTION("NorSand id is zero") {
@@ -98,20 +91,6 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
             Approx(jmaterial.at("void_ratio_initial")).epsilon(Tolerance));
     REQUIRE(material->template property<double>("p_image_initial") ==
             Approx(jmaterial.at("p_image_initial")).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("p_cohesion_initial") ==
-            Approx(jmaterial.at("p_cohesion_initial")).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("p_dilation_initial") ==
-            Approx(jmaterial.at("p_dilation_initial")).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("m_cohesion") ==
-            Approx(jmaterial.at("m_cohesion")).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("m_dilation") ==
-            Approx(jmaterial.at("m_dilation")).epsilon(Tolerance));
-    REQUIRE(material->template property<double>("m_modulus") ==
-            Approx(jmaterial.at("m_modulus")).epsilon(Tolerance));
-    REQUIRE(material->template property<bool>("bond_model") ==
-            jmaterial.at("bond_model"));
-    REQUIRE(material->template property<double>("tolerance") ==
-            Approx(jmaterial.at("tolerance")).epsilon(Tolerance));
 
     // Check if state variable is initialised
     SECTION("State variable is initialised") {
@@ -130,9 +109,9 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
       REQUIRE(state_variables.at("p_image") ==
               Approx(87014.6).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_cohesion") ==
-              Approx(jmaterial["p_cohesion_initial"]).epsilon(Tolerance));
+              Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("p_dilation") ==
-              Approx(jmaterial["p_dilation_initial"]).epsilon(Tolerance));
+              Approx(0.).epsilon(Tolerance));
       REQUIRE(state_variables.at("pdstrain") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain0") ==
               Approx(0.0).epsilon(Tolerance));
@@ -146,6 +125,15 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
               Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("plastic_strain5") ==
               Approx(0.0).epsilon(Tolerance));
+
+      const std::vector<std::string> state_vars = {
+          "M_theta",         "void_ratio",      "e_image",
+          "p_image",         "p_cohesion",      "p_dilation",
+          "pdstrain",        "plastic_strain0", "plastic_strain1",
+          "plastic_strain2", "plastic_strain3", "plastic_strain4",
+          "plastic_strain5"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 

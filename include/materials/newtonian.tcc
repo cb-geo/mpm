@@ -30,6 +30,13 @@ mpm::dense_map mpm::Newtonian<Tdim>::initialise_state_variables() {
   return state_vars;
 }
 
+//! State variables
+template <unsigned Tdim>
+std::vector<std::string> mpm::Newtonian<Tdim>::state_variables() const {
+  const std::vector<std::string> state_vars = {"pressure"};
+  return state_vars;
+}
+
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Newtonian<Tdim>::thermodynamic_pressure(
