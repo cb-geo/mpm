@@ -141,6 +141,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept override;
 
+  //! Map multimaterial properties to nodes
+  void map_multimaterial_mass_momentum_to_nodes() noexcept override;
+
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status

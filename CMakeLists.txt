@@ -205,6 +205,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
     ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
+    ${mpm_SOURCE_DIR}/tests/interface_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
