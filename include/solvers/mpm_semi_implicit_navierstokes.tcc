@@ -351,7 +351,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
 // Reinitialise and resize matrices at the beginning of every time step
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
-  
+
   bool status = true;
   try {
 
@@ -375,10 +375,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
     nglobal_active_node = mesh_->assign_global_active_nodes_id();
 #endif
 
-    std::cout << "reinitialise_matrix: R" << mpi_rank << "GLOBAL NODE NUMBER: " << nglobal_active_node << std::endl;
-
     // Assign global node indice
-    matrix_assembler_->assign_global_node_indices(nactive_node);
+    matrix_assembler_->assign_global_node_indices(nactive_node, nglobal_active_node);
 
     // Assign pressure constraints
     matrix_assembler_->assign_pressure_constraints(this->beta_,

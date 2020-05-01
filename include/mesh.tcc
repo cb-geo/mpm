@@ -171,18 +171,15 @@ unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
   // Clear existing list of active nodes
   Index global_active_id = 0;
 
-std::cout << "assign_global_active_nodes_id start:" << std::endl;
-
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
-    if ((*nitr)->status()) {
-      this->active_nodes_.add(*nitr);
+    if ((*nitr)->solving_status()) {
       (*nitr)->assign_global_active_id(global_active_id);
       global_active_id++;
     } else {
       (*nitr)->assign_global_active_id(std::numeric_limits<Index>::max());
     }
   }
-std::cout << "assign_global_active_nodes_id end:" << std::endl;
+
   return global_active_id;
 }
 
@@ -196,6 +193,25 @@ std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
       if ((*citr)->status()) {
         node_indices.emplace_back((*citr)->local_node_indices());
+      }
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+  }
+  return node_indices;
+}
+
+//! Return MPI global node indices
+template <unsigned Tdim>
+std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::mpi_global_node_indices() const {
+  // Vector of node_pairs
+  std::vector<Eigen::VectorXi> node_indices;
+  try {
+    // Iterate over cells
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      if ((*citr)->status()) {
+        node_indices.emplace_back((*citr)->mpi_local_node_indices());
       }
     }
 
