@@ -342,7 +342,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
     // Run load balancer
-    if (step_ % 500 == 0 && step_ != 0) this->mpi_domain_decompose(false);
+    if (step_ % 1000 == 0 && step_ != 0) this->mpi_domain_decompose(false);
 
     mesh_->transfer_nonrank_particles();
 #endif
