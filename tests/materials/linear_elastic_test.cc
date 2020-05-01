@@ -78,6 +78,9 @@ TEST_CASE("LinearElastic is checked in 2D", "[material][linear_elastic][2D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == true);
+      const std::vector<std::string> state_vars = {};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 
@@ -215,6 +218,9 @@ TEST_CASE("LinearElastic is checked in 3D", "[material][linear_elastic][3D]") {
     SECTION("State variable is initialised") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.empty() == true);
+      const std::vector<std::string> state_vars = {};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 

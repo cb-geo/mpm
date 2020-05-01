@@ -115,8 +115,9 @@ bool mpm::Particle<Tdim>::initialise_particle(
       auto mat_state_vars = material_->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
         unsigned i = 0;
-        for (const auto& mat_state_var : mat_state_vars) {
-          this->state_variables_[mat_state_var.first] = particle.svars[i];
+        auto state_variables = material_->state_variables();
+        for (const auto& state_var : state_variables) {
+          this->state_variables_.at(state_var) = particle.svars[i];
           ++i;
         }
       }
@@ -209,8 +210,9 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
     if (state_variables_.size() > 20)
       throw std::runtime_error("# of state variables cannot be more than 20");
     unsigned i = 0;
-    for (const auto& state_var : this->state_variables_) {
-      particle_data.svars[i] = state_var.second;
+    auto state_variables = material_->state_variables();
+    for (const auto& state_var : state_variables) {
+      particle_data.svars[i] = state_variables_.at(state_var);
       ++i;
     }
   }
@@ -499,6 +501,24 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
                            mass_ * shapefn_[i]);
     nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
                                mass_ * shapefn_[i] * velocity_);
+  }
+}
+
+//! Map multimaterial properties to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
+  // Check if particle mass is set
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  // Unit 1x1 Eigen matrix to be used with scalar quantities
+  Eigen::Matrix<double, 1, 1> nodal_mass;
+
+  // Map mass and momentum to nodal property taking into account the material id
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    nodal_mass(0, 0) = mass_ * shapefn_[i];
+    nodes_[i]->update_property(true, "masses", nodal_mass, material_id_, 1);
+    nodes_[i]->update_property(true, "momenta", nodal_mass(0, 0) * velocity_,
+                               material_id_, Tdim);
   }
 }
 

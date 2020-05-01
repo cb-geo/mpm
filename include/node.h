@@ -2,6 +2,7 @@
 #define MPM_NODE_H_
 
 #include "logger.h"
+#include "nodal_properties.h"
 #include "node_base.h"
 
 namespace mpm {
@@ -37,6 +38,13 @@ class Node : public NodeBase<Tdim> {
 
   //! Return id of the nodebase
   Index id() const override { return id_; }
+
+  //! Initialise shared pointer to nodal properties pool
+  //! \param[in] prop_id Property id in the nodal property pool
+  //! \param[in] nodal_properties Shared pointer to nodal properties pool
+  void initialise_property_handle(
+      unsigned prop_id,
+      std::shared_ptr<mpm::NodalProperties> property_handle) noexcept override;
 
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase
@@ -308,12 +316,23 @@ class Node : public NodeBase<Tdim> {
   //! \retval status Computation status
   bool compute_acceleration_velocity_navierstokes_semi_implicit(
       unsigned phase, double dt) override;
+  //! Update nodal property at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] property Property name
+  //! \param[in] property_value Property quantity from the particles in the cell
+  //! \param[in] mat_id Id of the material within the property data
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  void update_property(bool update, const std::string& property,
+                       const Eigen::MatrixXd& property_value, unsigned mat_id,
+                       unsigned nprops) noexcept override;
 
  private:
   //! Mutex
   std::mutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
+  //! nodal property id
+  unsigned prop_id_{std::numeric_limits<unsigned>::max()};
   //! shared ghost id
   Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates
@@ -358,6 +377,8 @@ class Node : public NodeBase<Tdim> {
   std::shared_ptr<FunctionBase> force_function_{nullptr};
   //! Mathematical function for pressure
   std::map<unsigned, std::shared_ptr<FunctionBase>> pressure_function_;
+  //! Nodal property pool
+  std::shared_ptr<mpm::NodalProperties> property_handle_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
