@@ -112,7 +112,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   bool* send_nodal_solving_status = new bool[nnodes()];
   memset (send_nodal_solving_status, 0, nnodes()*sizeof(bool));
   bool* receive_nodal_solving_status = new bool[nnodes()];
-
+  std::cout << "assign_active_nodes_id: new arrays" << std::endl;
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if ((*nitr)->status()) {
       this->active_nodes_.add(*nitr);
@@ -136,6 +136,8 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   // Get number of MPI ranks
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
+std::cout << "assign_active_nodes_id TEST1: R"<< mpi_rank << std::endl;
+
 
 // #ifdef USE_MPI
 //     1. all rank send that flag to rank 0
@@ -144,7 +146,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
 // #endif
 
 #ifdef USE_MPI
-  MPI_Allreduce(&send_nodal_solving_status, &receive_nodal_solving_status, nnodes(),
+  MPI_Allreduce(send_nodal_solving_status, receive_nodal_solving_status, nnodes(),
               MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
 
   Index global_active_id = 0;
@@ -156,10 +158,10 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
     }
   }
 #endif
-
+std::cout << "assign_active_nodes_id DELETE0: R"<< mpi_rank << std::endl;
   delete[] send_nodal_solving_status;
   delete[] receive_nodal_solving_status;
-
+std::cout << "assign_active_nodes_id DELETE1: R"<< mpi_rank << std::endl;
   return active_id;
 }
 
@@ -168,6 +170,8 @@ template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
   // Clear existing list of active nodes
   Index global_active_id = 0;
+
+std::cout << "assign_global_active_nodes_id start:" << std::endl;
 
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if ((*nitr)->status()) {
@@ -178,7 +182,7 @@ unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
       (*nitr)->assign_global_active_id(std::numeric_limits<Index>::max());
     }
   }
-
+std::cout << "assign_global_active_nodes_id end:" << std::endl;
   return global_active_id;
 }
 

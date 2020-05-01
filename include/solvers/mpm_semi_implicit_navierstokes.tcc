@@ -351,6 +351,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
 // Reinitialise and resize matrices at the beginning of every time step
 template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
+  
   bool status = true;
   try {
 
