@@ -2,6 +2,8 @@
 #define MPM_SOLVER_BASE_H_
 
 #include "logger.h"
+#include "data_types.h"
+
 namespace mpm {
 template <typename Traits>
 class SolverBase {
@@ -18,6 +20,10 @@ class SolverBase {
   virtual Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
                                 const Eigen::VectorXd& b,
                                 std::string solver_type) = 0;
+
+  virtual void assign_global_active_dof(unsigned global_active_dof){};
+
+  virtual void assign_rank_global_mapper(std::vector<mpm::Index> rank_global_mapper){};
 
  protected:
   //! Maximum number of iterations

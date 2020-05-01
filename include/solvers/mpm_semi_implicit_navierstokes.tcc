@@ -421,6 +421,12 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
     // Apply constraints
     matrix_assembler_->apply_pressure_constraints();
 
+#if USE_MPI
+    matrix_solver_->assign_global_active_dof(matrix_assembler_->global_active_dof());
+
+    matrix_solver_->assign_rank_global_mapper(matrix_assembler_->rank_global_mapper());
+#endif
+
     // Solve matrix equation
     matrix_assembler_->assign_pressure_increment(matrix_solver_->solve(
         matrix_assembler_->laplacian_matrix(),

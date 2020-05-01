@@ -19,7 +19,16 @@ bool mpm::AssemblerParallelSemiImplicitNavierStokes<
     global_active_dof_ = nglobal_active_node;
 
     global_node_indices_ = mesh_->global_node_indices();
-    mpi_global_node_indices_ = mesh_->mpi_global_node_indices();
+
+    // Initialise mapping vector
+    rank_global_mapper_.resize(active_dof_);
+
+    // Nodes container
+    const auto& nodes = mesh_->active_nodes();
+    for (int counter = 0; counter < nodes.size(); counter++) {
+      // Assign get nodal global index
+      rank_global_mapper_[counter] = nodes[counter]->global_active_id();
+    }
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -302,3 +311,4 @@ bool mpm::AssemblerParallelSemiImplicitNavierStokes<
   }
   return status;
 }
+

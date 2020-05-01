@@ -83,6 +83,10 @@ class AssemblerBase {
   //! Assemble corrector RHS
   virtual bool assemble_corrector_right(double dt) = 0;
 
+  virtual unsigned global_active_dof(){};
+
+  virtual std::vector<mpm::Index> rank_global_mapper(){};
+
  protected:
   //! Number of total active_dof
   unsigned active_dof_;

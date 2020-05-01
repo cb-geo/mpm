@@ -64,6 +64,10 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Assemble corrector RHS
   bool assemble_corrector_right(double dt) override;
 
+  unsigned global_active_dof() override {return global_active_dof_;};
+
+  std::vector<mpm::Index> rank_global_mapper() override {return rank_global_mapper_;};
+
  protected:
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
@@ -89,8 +93,8 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::SparseMatrix<double> correction_matrix_;
   //! Global node indices
   std::vector<Eigen::VectorXi> global_node_indices_;
-  //! Global node indices
-  std::vector<Eigen::VectorXi> mpi_global_node_indices_;
+  //! Rank to Global mapper
+  std::vector<mpm::Index> rank_global_mapper_;
 };
 }  // namespace mpm
 

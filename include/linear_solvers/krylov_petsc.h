@@ -38,6 +38,10 @@ class KrylovPETSC : public SolverBase<Traits> {
   //! Return the type of solver
   std::string solver_type() const { return "PETSC"; }
 
+  void assign_global_active_dof(unsigned global_active_dof) override {global_active_dof_ = global_active_dof;};
+
+  void assign_rank_global_mapper(std::vector<mpm::Index> rank_global_mapper) override {rank_global_mapper_ = rank_global_mapper;};
+
  protected:
   //! Maximum number of iterations
   using SolverBase<Traits>::max_iter_;
@@ -47,6 +51,10 @@ class KrylovPETSC : public SolverBase<Traits> {
   using SolverBase<Traits>::console_;
   //! cg_type_ (leastSquaresConjugateGradient or ConjugateGradient)
   std::string cg_type_;
+  //! Global active dof
+  unsigned global_active_dof_;
+  //! Rank global Mapper
+  std::vector<mpm::Index> rank_global_mapper_;
 };
 }  // namespace mpm
 
