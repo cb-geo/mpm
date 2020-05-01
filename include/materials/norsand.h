@@ -158,15 +158,15 @@ class NorSand : public Material<Tdim> {
   //! Flag for bonded model
   bool bond_model_{false};
   //! Initial p_cohesion
-  double p_cohesion_initial_{std::numeric_limits<double>::max()};
+  double p_cohesion_initial_{0.};
   //! Initial p_dilation
-  double p_dilation_initial_{std::numeric_limits<double>::max()};
+  double p_dilation_initial_{0.};
   //! Cohesion degradation parameter m upon shearing
-  double m_cohesion_{std::numeric_limits<double>::max()};
+  double m_cohesion_{0.};
   //! Dilation degradation parameter m upon shearing
-  double m_dilation_{std::numeric_limits<double>::max()};
+  double m_dilation_{0.};
   //! Parameter for modulus
-  double m_modulus_{std::numeric_limits<double>::max()};
+  double m_modulus_{0.};
   //! Default tolerance
   double tolerance_{std::numeric_limits<double>::epsilon()};
 
