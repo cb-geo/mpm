@@ -67,7 +67,7 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
 
   unsigned global_active_dof() override { return global_active_dof_; };
 
-  std::vector<mpm::Index> rank_global_mapper() override {
+  std::vector<int> rank_global_mapper() override {
     return rank_global_mapper_;
   };
 
@@ -97,7 +97,7 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Global node indices
   std::vector<Eigen::VectorXi> global_node_indices_;
   //! Rank to Global mapper
-  std::vector<mpm::Index> rank_global_mapper_;
+  std::vector<int> rank_global_mapper_;
 };
 }  // namespace mpm
 

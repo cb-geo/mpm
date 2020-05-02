@@ -9,93 +9,68 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
 #if USE_PETSC
 
-    std::cout << "TEST OUTPUT: 0: " << std::endl;
+    // Initialise MPI mpi_rank and size
+    int mpi_rank = 0;
+    int mpi_size = 1;
 
-    // Initialize PETSC parameters
+    // Get MPI mpi_rank
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    // Get number of MPI mpi_ranks
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    // Initialize PETSC matrix, vectors, and parameters
     KSP solver;
     Mat petsc_A;
     Vec petsc_b, petsc_x;
-    PetscErrorCode ierr;
-    MPI_Comm comm;
-    PetscInt dim = b.size();
-    PetscInt rank, vi, mi, mj;
-    PetscScalar v, m;
+    PetscInt dim = global_active_dof_;
     KSPConvergedReason reason;
     PetscViewer viewer;
-    PetscInt low, high, rlow, rhigh;
 
-    std::cout << "TEST OUTPUT: 1: " << std::endl;
+    PetscInt vi, mi, mj;
+    PetscScalar v, m;
+    PetscInt low, high, row_low, row_high;
 
+    //! Initialize Petsc
     int petsc_argc = 1;
-    char* petsc_arg = "petsc_argv";
+    char* petsc_arg = "p";
     char** petsc_argv = &petsc_arg;
     PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
 
-    std::cout << "TEST OUTPUT: 2: " << std::endl;
-
-    comm = PETSC_COMM_WORLD;
-    // Broadcast DIM to all ranks
-    MPI_Bcast(&dim, 1, MPI_INT, 0, comm);
-
-    std::cout << "TEST OUTPUT: 3: " << std::endl;
-
-    // TODO: Now do all rank create matrix and vector? Or only rank 0 should run
-    // these lines Create PETSC_B and PETSC_X with global dim = DIM,
-    // PETSC_DECIDE local dim
-    /*VecCreate(comm, &petsc_b);
-    VecSetSizes(petsc_b, PETSC_DECIDE, dim);
-    VecSetType(petsc_b, VECMPI);*/
-    VecCreateMPI(comm, PETSC_DECIDE, dim, &petsc_b);
+    //! Initialize vector b across the ranks
+    VecCreateMPI(MPI_COMM_WORLD, b.size(), global_active_dof_, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
-    VecGetOwnershipRange(petsc_b, &low, &high);
-    std::cout << "vector range: " << low << high << std::endl;
 
-    std::cout << "TEST OUTPUT: 4: " << std::endl;
-
-    // Create PETSC_A with global dim = DIM by DIM, PETSC_DECIDE local dim
-    MatCreateAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, dim, dim, 0,
-                 NULL, 0, NULL, &petsc_A);
+    // Initialize Matrix A across the ranks
+    MatCreateAIJ(MPI_COMM_WORLD, A.rows(), A.cols(), global_active_dof_,
+                 global_active_dof_, 0, NULL, 0, NULL, &petsc_A);
     MatSetOption(petsc_A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    // MatCreateMPIAIJCRL(PETSC_COMM_WORLD, dim, dim, dim, PETSC_NULL, (dim-1),
-    // PETSC_NULL, &petsc_A);
 
-    // MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
-    std::cout << "TEST OUTPUT: 5: " << std::endl;
-    MatGetOwnershipRange(petsc_A, &rlow, &rhigh);
-    std::cout << "Matrix range: " << rlow << rhigh << std::endl;
+    //! Copying Eigen matrix b to petsc b vector
+    VecSetValues(petsc_b, rank_global_mapper_.size(),
+                 rank_global_mapper_.data(), b.data(), INSERT_VALUES);
+    VecAssemblyBegin(petsc_b);
+    VecAssemblyEnd(petsc_b);
 
-    MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-    VecGetOwnershipRange(petsc_b, &low, &high);
-    for (vi = low; vi < high; vi++) {
-      v = b(vi);
-      VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
-    }
+    // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
+    // VecView(petsc_b, viewer);
+    // MPI_Barrier(MPI_COMM_WORLD);
+
+    // for (unsigned i = 0; i < b.size(); i++) {
+    //   auto value = b[i];
+    //   unsigned global_index = rank_global_mapper_[i];
+    //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
+    // }
+
     std::cout << "TEST OUTPUT: 5.1: " << std::endl;
-    MatGetOwnershipRange(petsc_A, &rlow, &rhigh);
-    for (mi = rlow; mi < rhigh; mi++) {
+    MatGetOwnershipRange(petsc_A, &row_low, &row_high);
+    for (mi = row_low; mi < row_high; mi++) {
       for (mj = 0; mj < dim; mj++) {
         m = A.coeff(mi, mj);
         MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
       }
     }
 
-    // TODO: Optimize send from value-to-value to array-to-array
-    if (rank == 0) {
-      // Copy b to petsc_b
-      /*for (vi = 0; vi < dim; vi++) {
-        v = b(vi);
-        VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
-      }*/
-      // Copy A to petsc_A. Can be optimized for sparse A
-      /*for (mi = 0; mi < dim; mi++) {
-        for (mj = 0; mj < dim; mj++) {
-          m = A.coeff(mi, mj);
-          MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
-        }
-      }*/
-    }
-
-    std::cout << "TEST OUTPUT: 6: " << rank << std::endl;
+    std::cout << "TEST OUTPUT: 6: " << mpi_rank << std::endl;
 
     // If b and A are broadcasted, parallel seting value
     /*VecGetOwnershipRange(petsc_b, &low, &high);
@@ -103,22 +78,20 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       v = b(vi);
       VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
     }
-    MatGetOwnershipRange(petsc_A, &rlow, &rhigh);
-    for (mi = rlow; mi < rhigh; mi++){
+    MatGetOwnershipRange(petsc_A, &row_low, &row_high);
+    for (mi = row_low; mi < row_high; mi++){
       for(mj = 0; mj < dim; mj++){
             m = A.coeffRef(mi, mj);
             MatSetValue(petsc_A, 1, &mi, 1, &mj, &m, INSERT_VALUES);
           }
     }*/
 
-    MPI_Barrier(comm);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // Assemble PETSC_A, PETSC_b
     MatAssemblyBegin(petsc_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
-    VecAssemblyBegin(petsc_b);
-    VecAssemblyEnd(petsc_b);
-    if (rank == 0) {
+    if (mpi_rank == 0) {
       for (vi = 0; vi < dim; vi++) {
         VecGetValues(petsc_b, 1, &vi, &v);
         std::cout << v << std::endl;
@@ -127,7 +100,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     std::cout << "TEST OUTPUT: 7: " << std::endl;
 
     if (solver_type == "cg") {
-      KSPCreate(comm, &solver);
+      KSPCreate(MPI_COMM_WORLD, &solver);
       std::cout << "TEST OUTPUT: 7.1: " << std::endl;
       KSPSetOperators(solver, petsc_A, petsc_A);
       std::cout << "TEST OUTPUT: 7.2: " << std::endl;
@@ -138,11 +111,11 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       KSPGetConvergedReason(solver, &reason);
       std::cout << "TEST OUTPUT: 7.5: " << std::endl;
       if (reason < 0) {
-        PetscPrintf(PETSC_COMM_WORLD, "\nKSPCG solver Diverged;\n");
+        PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
       }
 
       // Copy petsc_x to x
-      if (rank == 0) {
+      if (mpi_rank == 0) {
         for (vi = 0; vi < dim; vi++) {
           VecGetValues(petsc_x, 1, &vi, &v);
           x(vi) = v;

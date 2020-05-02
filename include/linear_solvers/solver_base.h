@@ -23,8 +23,7 @@ class SolverBase {
 
   virtual void assign_global_active_dof(unsigned global_active_dof){};
 
-  virtual void assign_rank_global_mapper(
-      std::vector<mpm::Index> rank_global_mapper){};
+  virtual void assign_rank_global_mapper(std::vector<int> rank_global_mapper){};
 
  protected:
   //! Maximum number of iterations

@@ -42,8 +42,7 @@ class KrylovPETSC : public SolverBase<Traits> {
     global_active_dof_ = global_active_dof;
   };
 
-  void assign_rank_global_mapper(
-      std::vector<mpm::Index> rank_global_mapper) override {
+  void assign_rank_global_mapper(std::vector<int> rank_global_mapper) override {
     rank_global_mapper_ = rank_global_mapper;
   };
 
@@ -59,7 +58,7 @@ class KrylovPETSC : public SolverBase<Traits> {
   //! Global active dof
   unsigned global_active_dof_;
   //! Rank global Mapper
-  std::vector<mpm::Index> rank_global_mapper_;
+  std::vector<int> rank_global_mapper_;
 };
 }  // namespace mpm
 
