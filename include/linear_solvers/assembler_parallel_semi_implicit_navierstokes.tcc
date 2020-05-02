@@ -11,7 +11,8 @@ mpm::AssemblerParallelSemiImplicitNavierStokes<
 //! Assign global node indices
 template <unsigned Tdim>
 bool mpm::AssemblerParallelSemiImplicitNavierStokes<
-    Tdim>::assign_global_node_indices(unsigned nactive_node, unsigned nglobal_active_node) {
+    Tdim>::assign_global_node_indices(unsigned nactive_node,
+                                      unsigned nglobal_active_node) {
   bool status = true;
   try {
     // Total number of active node
@@ -311,4 +312,3 @@ bool mpm::AssemblerParallelSemiImplicitNavierStokes<
   }
   return status;
 }
-

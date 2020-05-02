@@ -9,7 +9,6 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
 #if USE_PETSC
 
-
     std::cout << "TEST OUTPUT: 0: " << std::endl;
 
     // Initialize PETSC parameters
@@ -48,37 +47,36 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecSetType(petsc_b, VECMPI);*/
     VecCreateMPI(comm, PETSC_DECIDE, dim, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
-    VecGetOwnershipRange(petsc_b,&low,&high);
-    std::cout << "vector range: " << low << high <<std::endl;
+    VecGetOwnershipRange(petsc_b, &low, &high);
+    std::cout << "vector range: " << low << high << std::endl;
 
     std::cout << "TEST OUTPUT: 4: " << std::endl;
 
     // Create PETSC_A with global dim = DIM by DIM, PETSC_DECIDE local dim
-    MatCreateAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 
-    dim, dim, 0, NULL, 0, NULL, &petsc_A);
+    MatCreateAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, dim, dim, 0,
+                 NULL, 0, NULL, &petsc_A);
     MatSetOption(petsc_A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    //MatCreateMPIAIJCRL(PETSC_COMM_WORLD, dim, dim, dim, PETSC_NULL, (dim-1), PETSC_NULL, &petsc_A);
-    
-    //MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
-    std::cout << "TEST OUTPUT: 5: " << std::endl;
-    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
-    std::cout << "Matrix range: " << rlow << rhigh <<std::endl;
+    // MatCreateMPIAIJCRL(PETSC_COMM_WORLD, dim, dim, dim, PETSC_NULL, (dim-1),
+    // PETSC_NULL, &petsc_A);
 
-    
+    // MatSetSizes(petsc_A, PETSC_DECIDE, PETSC_DECIDE, dim, dim);
+    std::cout << "TEST OUTPUT: 5: " << std::endl;
+    MatGetOwnershipRange(petsc_A, &rlow, &rhigh);
+    std::cout << "Matrix range: " << rlow << rhigh << std::endl;
 
     MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-    VecGetOwnershipRange(petsc_b,&low,&high);
-    for (vi=low; vi < high; vi++) {
+    VecGetOwnershipRange(petsc_b, &low, &high);
+    for (vi = low; vi < high; vi++) {
       v = b(vi);
       VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
     }
     std::cout << "TEST OUTPUT: 5.1: " << std::endl;
-    MatGetOwnershipRange(petsc_A,&rlow,&rhigh);
+    MatGetOwnershipRange(petsc_A, &rlow, &rhigh);
     for (mi = rlow; mi < rhigh; mi++) {
-        for (mj = 0; mj < dim; mj++) {
-          m = A.coeff(mi, mj);
-          MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
-        }
+      for (mj = 0; mj < dim; mj++) {
+        m = A.coeff(mi, mj);
+        MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
+      }
     }
 
     // TODO: Optimize send from value-to-value to array-to-array
@@ -120,12 +118,11 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
-    if (rank==0){
+    if (rank == 0) {
       for (vi = 0; vi < dim; vi++) {
-           VecGetValues(petsc_b, 1, &vi, &v);
-           std::cout << v << std::endl;
-
-     }
+        VecGetValues(petsc_b, 1, &vi, &v);
+        std::cout << v << std::endl;
+      }
     }
     std::cout << "TEST OUTPUT: 7: " << std::endl;
 
@@ -154,7 +151,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       PetscFinalize();
     }
 
-    std::cout << "TEST OUTPUT: 8: solution is: "<< x << std::endl;
+    std::cout << "TEST OUTPUT: 8: solution is: " << x << std::endl;
 
 #endif
 

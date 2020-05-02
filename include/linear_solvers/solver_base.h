@@ -1,8 +1,8 @@
 #ifndef MPM_SOLVER_BASE_H_
 #define MPM_SOLVER_BASE_H_
 
-#include "logger.h"
 #include "data_types.h"
+#include "logger.h"
 
 namespace mpm {
 template <typename Traits>
@@ -23,7 +23,8 @@ class SolverBase {
 
   virtual void assign_global_active_dof(unsigned global_active_dof){};
 
-  virtual void assign_rank_global_mapper(std::vector<mpm::Index> rank_global_mapper){};
+  virtual void assign_rank_global_mapper(
+      std::vector<mpm::Index> rank_global_mapper){};
 
  protected:
   //! Maximum number of iterations

@@ -19,7 +19,8 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   AssemblerParallelSemiImplicitNavierStokes();
 
   //! Create a pair between nodes and index in Matrix / Vector
-  bool assign_global_node_indices(unsigned nactive_node, unsigned nglobal_active_node) override;
+  bool assign_global_node_indices(unsigned nactive_node,
+                                  unsigned nglobal_active_node) override;
 
   //! Return laplacian matrix
   Eigen::SparseMatrix<double>& laplacian_matrix() override {
@@ -64,9 +65,11 @@ class AssemblerParallelSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   //! Assemble corrector RHS
   bool assemble_corrector_right(double dt) override;
 
-  unsigned global_active_dof() override {return global_active_dof_;};
+  unsigned global_active_dof() override { return global_active_dof_; };
 
-  std::vector<mpm::Index> rank_global_mapper() override {return rank_global_mapper_;};
+  std::vector<mpm::Index> rank_global_mapper() override {
+    return rank_global_mapper_;
+  };
 
  protected:
   //! Logger
