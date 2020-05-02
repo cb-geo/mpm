@@ -65,8 +65,10 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
       auto neighbours = (*citr)->neighbours();
 
       //! get the id of neighbours
-      for (const auto& neighbour : neighbours) adjncy_.emplace_back(neighbour);
-
+      for (const auto& neighbour : neighbours) {
+        adjncy_.emplace_back(neighbour);
+        adjwgt_.emplace_back(1.);
+      }
       vwgt_.emplace_back((*citr)->nglobal_particles());
     }
   }
@@ -77,9 +79,6 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
 
   //! allocate space for part
   part_.reserve(cells_.size());
-
-  //! assign edgecut
-  this->edgecut_ = 0;
 }
 
 //! Return xadj
@@ -126,7 +125,7 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
   int seed = 0;
 
   // Suppress output from the partitioning library.
-  bool suppress_output = true;
+  bool suppress_output = false;
 
   ParHIPPartitionKWay(
       this->vtxdist_.data(), this->xadj_.data(), this->adjncy_.data(),

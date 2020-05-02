@@ -1,22 +1,16 @@
-version: 2.0
-jobs:
-  gcc:
-    docker:
-      - image: quay.io/cbgeo/mpm
-    steps:
-      - checkout
-      # GCC-8
-      - run:
-          name: GCC-8 build + MPI
-          command: |
-            mkdir -p build
-            [ "$(ls -A build)" ] && rm -rf build/*
+version : 2.0 jobs : gcc : docker : -image : quay.io / cbgeo /
+                mpm steps : -checkout
+#GCC - 8
+            - run : name : GCC - 8 build +
+                           MPI command : |
+                                         mkdir - p build["$(ls -A build)"] &&
+    rm - rf build/*
             cd build
             source /etc/profile.d/modules.sh
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
-            cmake -GNinja -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             ninja -j2
             ctest -VV
             mpirun -n 4 ./mpmtest [mpi]
@@ -64,7 +58,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DMPM_BUILD_LIB=Off -DENABLE_COVERAGE=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
             mpirun -n 4 ./mpmtest_coverage [mpi]

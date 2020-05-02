@@ -766,14 +766,14 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
 
     auto missing = mesh->locate_particles_mesh();
     REQUIRE(missing.size() == 0);
-    
+
     REQUIRE(mesh->nparticles() == 4);
 
     SECTION("Decompose mesh graph") {
       if (mpi_size == 4) {
         // Initialize MPI
         MPI_Comm comm;
-        MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+        int val = MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
         auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
 
@@ -786,9 +786,9 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         // Graph partitioning mode
         int mode = 4;  // FAST
         // Create graph partition
-        bool graph_partition = graph->create_partitions(&comm, mode);
-        REQUIRE(graph_partition == true);
-        /*
+        graph->create_partitions(&comm, mode);
+        // REQUIRE(graph_partition == true);
+
         // Collect the partitions
         graph->collect_partitions(mpi_size, mpi_rank, &comm);
 
@@ -799,30 +799,21 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         mesh->find_domain_shared_nodes();
         // Identify ghost boundary cells
         mesh->find_ghost_boundary_cells();
-        */
-        // for (unsigned i = 0; i < mpi_size; ++i) {
-        //   if (i == mpi_rank) {
-        //     std::cout << "MPI rank: " << i << " Cell 0 rank" << cell0->rank()
-        //               << "\n";
-        //     std::cout << "MPI rank: " << i << " Cell 1 rank" << cell1->rank()
-        //               << "\n";
-        //     std::cout << "MPI rank: " << i << " Cell 2 rank" << cell2->rank()
-        //               << "\n";
-        //     std::cout << "MPI rank: " << i << " Cell 3 rank" << cell3->rank()
-        //               << "\n";
-        //   }
-        // }
 
-        // Identify ghost boundary cells
-        // mesh->find_ghost_boundary_cells();
-        // for (unsigned i = 0; i < mpi_size; ++i)
-        //   if (mpi_rank == 0)
-        //     std::cout << "MPI: " << mpi_rank << "\t cell" << mesh->ncells_rank()
-        //               << " ghost: " << mesh->nghost_cells() << "local_ghost"
-        //               << mesh->nlocal_ghost_cells() << "\n";
+        std::vector<int> ranks;
+        ranks.emplace_back(cell0->rank());
+        ranks.emplace_back(cell1->rank());
+        ranks.emplace_back(cell2->rank());
+        ranks.emplace_back(cell3->rank());
 
-        // REQUIRE(mesh->nghost_cells() == 3);
-        // REQUIRE(mesh->nlocal_ghost_cells() == 1);
+        for (unsigned i = 0; i < mpi_size; ++i) {
+          if (mpi_rank == i) {
+            int nlocal = std::count(ranks.begin(), ranks.end(), mpi_rank);
+            int nghost = (nlocal != 0) ? ranks.size() - nlocal : 0;
+            REQUIRE(mesh->nghost_cells() == nghost);
+            REQUIRE(mesh->nlocal_ghost_cells() == nlocal);
+          }
+        }
       }
     }
   }
