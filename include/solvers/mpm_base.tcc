@@ -1056,37 +1056,6 @@ bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
   return status;
 }
 
-// Parallelization information
-template <unsigned Tdim>
-void mpm::MPMBase<Tdim>::write_parallel_info(mpm::Index step) {
-  // MPI parallel
-  int mpi_rank = 0;
-  int mpi_size = 1;
-#ifdef USE_MPI
-  // Get MPI rank
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  // Get number of MPI ranks
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
-
-  // file pointer
-  std::fstream fout;
-  std::string fname = io_->working_dir() + "parallel-" +
-                      std::to_string(mpi_rank) + "-" + std::to_string(mpi_size);
-  // opens an existing csv file or creates a new file.
-  fout.open(fname, ios::out | ios::app);
-
-  // At step 0
-  if (step == 0)
-    fout << "#step,#particles,#cells,#active_cells,#nghost_cells,#nlocal_ghost_"
-            "cells,"
-            "#nnodes,#nnodes_rank,#shared_nodes\n";
-  fout << step << "," << mesh_->nparticles() << "," << mesh_->ncells_rank()
-       << "," << mesh_->ncells_rank(true) << "," << mesh_->nghost_cells() << ","
-       << mesh_->nlocal_ghost_cells() << "," << mesh_->nnodes() << ","
-       << mesh_->nnodes_rank() << "," << mesh_->nshared_nodes() << "\n";
-}
-
 //! Domain decomposition
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {

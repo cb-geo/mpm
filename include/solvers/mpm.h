@@ -77,9 +77,6 @@ class MPM {
   virtual void write_partio(mpm::Index step, mpm::Index max_steps) = 0;
 #endif
 
-  //! Write parallel info
-  virtual void write_parallel_info(mpm::Index step) = 0;
-
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
   virtual void mpi_domain_decompose(bool initial_step) = 0;

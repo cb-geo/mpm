@@ -299,8 +299,6 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Partio outputs
       this->write_partio(this->step_, this->nsteps_);
 #endif
-      // Parallel info
-      // this->write_parallel_info(this->step_);
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
