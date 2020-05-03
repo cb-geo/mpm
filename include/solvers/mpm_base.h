@@ -81,6 +81,10 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
+  //! Domain decomposition
+  //! \param[in] initial_step Start of simulation or later steps
+  void mpi_domain_decompose(bool initial_step = false) override;
+
  private:
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
@@ -160,6 +164,8 @@ class MPMBase : public MPM {
   using mpm::MPM::nsteps_;
   //! Output steps
   using mpm::MPM::output_steps_;
+  //! Load balancing steps
+  using mpm::MPM::nload_balance_steps_;
   //! A unique ptr to IO object
   using mpm::MPM::io_;
   //! JSON analysis object

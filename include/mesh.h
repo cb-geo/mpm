@@ -100,6 +100,9 @@ class Mesh {
   //! Return the number of nodes
   mpm::Index nnodes() const { return nodes_.size(); }
 
+  //! Return the number of nodes in rank
+  mpm::Index nnodes_rank();
+
   //! Iterate over nodes
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
@@ -168,10 +171,19 @@ class Mesh {
   //! Number of cells in the mesh
   mpm::Index ncells() const { return cells_.size(); }
 
+  //! Number of cells in mesh rank
+  mpm::Index ncells_rank(bool active_cells = false);
+
   //! Iterate over cells
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
   void iterate_over_cells(Toper oper);
+
+  //! Find cell neighbours
+  void find_cell_neighbours();
+
+  //! Find global nparticles across MPI ranks / cell
+  void find_nglobal_particles_cells();
 
   //! Create particles from coordinates
   //! \param[in] particle_type Particle type
@@ -213,6 +225,9 @@ class Mesh {
 
   //! Find shared nodes across MPI domains in the mesh
   void find_domain_shared_nodes();
+
+  //! Find number of domain shared nodes in local rank
+  mpm::Index nshared_nodes() const { return domain_shared_nodes_.size(); }
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
@@ -330,9 +345,6 @@ class Mesh {
           materials) {
     materials_ = materials;
   }
-
-  //! Find cell neighbours
-  void find_cell_neighbours();
 
   //! Find particle neighbours
   //! \param[in] cell of interest
