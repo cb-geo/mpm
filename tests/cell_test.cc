@@ -568,6 +568,14 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->activate_nodes();
     for (const auto& node : nodes) REQUIRE(node->status() == false);
   }
+
+  SECTION("Test nglobal particles") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    REQUIRE(cell->nglobal_particles() == 0);
+    cell->nglobal_particles(5);
+    REQUIRE(cell->nglobal_particles() == 5);
+  }
 }
 
 //! \brief Check cell class for 3D case
@@ -1496,5 +1504,13 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Check using unit cell with affine transformation / Newton-Raphson
     REQUIRE(cell2->is_point_in_cell(point, &xi) == false);
+  }
+
+  SECTION("Test nglobal particles") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    REQUIRE(cell->nglobal_particles() == 0);
+    cell->nglobal_particles(5);
+    REQUIRE(cell->nglobal_particles() == 5);
   }
 }

@@ -25,6 +25,11 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     // Number of time steps
     nsteps_ = analysis_["nsteps"].template get<mpm::Index>();
 
+    // nload balance
+    if (analysis_.find("nload_balance_steps") != analysis_.end())
+      nload_balance_steps_ =
+          analysis_["nload_balance_steps"].template get<mpm::Index>();
+
     // Locate particles
     if (analysis_.find("locate_particles") != analysis_.end())
       locate_particles_ = analysis_["locate_particles"].template get<bool>();
@@ -1049,4 +1054,65 @@ bool mpm::MPMBase<Tdim>::initialise_damping(const Json& damping_props) {
   }
 
   return status;
+}
+
+//! Domain decomposition
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
+#ifdef USE_MPI
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
+
+  // Get MPI rank
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  if (mpi_size > 1 && mesh_->ncells() > 1) {
+
+    // Initialize MPI
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+    auto mpi_domain_begin = std::chrono::steady_clock::now();
+    console_->info("Rank {}, Domain decomposition started\n", mpi_rank);
+
+    // Check if mesh has cells to partition
+    if (mesh_->ncells() == 0)
+      throw std::runtime_error("Container of cells is empty");
+
+#ifdef USE_GRAPH_PARTITIONING
+    // Create graph object if empty
+    if (initial_step || graph_ == nullptr)
+      graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
+
+    // Find number of particles in each cell across MPI ranks
+    mesh_->find_nglobal_particles_cells();
+
+    // Construct a weighted DAG
+    graph_->construct_graph(mpi_size, mpi_rank);
+
+    // Graph partitioning mode
+    int mode = 4;  // FAST
+    // Create graph partition
+    bool graph_partition = graph_->create_partitions(&comm, mode);
+    // Collect the partitions
+    graph_->collect_partitions(mpi_size, mpi_rank, &comm);
+
+    // Delete all the particles which is not in local task parititon
+    if (initial_step) mesh_->remove_all_nonrank_particles();
+
+    // Identify shared nodes across MPI domains
+    mesh_->find_domain_shared_nodes();
+    // Identify ghost boundary cells
+    mesh_->find_ghost_boundary_cells();
+#endif
+    auto mpi_domain_end = std::chrono::steady_clock::now();
+    console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,
+                   std::chrono::duration_cast<std::chrono::milliseconds>(
+                       mpi_domain_end - mpi_domain_begin)
+                       .count());
+  }
+#endif  // MPI
 }
