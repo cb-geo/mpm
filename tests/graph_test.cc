@@ -1,7 +1,5 @@
 #ifdef USE_GRAPH_PARTITIONING
 
-#include <iostream>
-
 #include <functional>
 #include <limits>
 #include <memory>

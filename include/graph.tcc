@@ -125,7 +125,7 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
   int seed = 0;
 
   // Suppress output from the partitioning library.
-  bool suppress_output = false;
+  bool suppress_output = true;
 
   ParHIPPartitionKWay(
       this->vtxdist_.data(), this->xadj_.data(), this->adjncy_.data(),

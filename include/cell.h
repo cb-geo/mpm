@@ -71,11 +71,13 @@ class Cell {
   unsigned nparticles() const { return particles_.size(); }
 
   //! Assign global nparticles
+  //! \param[in] nparticles Number of global particles of cell
   void nglobal_particles(unsigned nparticles) {
     nglobal_particles_ = nparticles;
   }
 
   //! nglobal particles
+  //! \retval nglobal_particles_ Number of global particles of cell
   unsigned nglobal_particles() const { return nglobal_particles_; }
 
   //! Return the status of a cell: active (if a particle is present)
