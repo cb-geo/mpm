@@ -77,6 +77,10 @@ class MPM {
   virtual void write_partio(mpm::Index step, mpm::Index max_steps) = 0;
 #endif
 
+  //! Domain decomposition
+  //! \param[in] initial_step Start of simulation or later steps
+  virtual void mpi_domain_decompose(bool initial_step) = 0;
+
  protected:
   //! A unique id for the analysis
   std::string uuid_;
@@ -88,6 +92,8 @@ class MPM {
   mpm::Index nsteps_{std::numeric_limits<mpm::Index>::max()};
   //! Output steps
   mpm::Index output_steps_{std::numeric_limits<mpm::Index>::max()};
+  //! Load balancing steps
+  mpm::Index nload_balance_steps_{1000};
   //! A shared ptr to IO object
   std::shared_ptr<mpm::IO> io_;
   //! JSON analysis object

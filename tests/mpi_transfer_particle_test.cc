@@ -289,7 +289,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       // Identify ghost boundary cells
       mesh->find_cell_neighbours();
       mesh->find_ghost_boundary_cells();
-
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
       // Transfer particle to the correct MPI rank
       mesh->transfer_nonrank_particles();
       // Check sender ranks
@@ -624,6 +624,8 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       // Identify ghost boundary cells
       mesh->find_cell_neighbours();
       mesh->find_ghost_boundary_cells();
+      // Test find nglobal particles in each cell
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
 
       // Transfer particle to the correct MPI rank
       mesh->transfer_nonrank_particles();
