@@ -1244,6 +1244,50 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       }
     }
   }
+
+  //! Check if nodal properties is initialised
+  SECTION("Check nodal properties initialisation") {
+    // Create the different meshes
+    std::shared_ptr<mpm::Mesh<Dim>> mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+
+    // Define nodes
+    Eigen::Vector2d coords;
+    coords << 0., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    // Create the node sets
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+    node_sets[0] = std::vector<mpm::Index>{0, 1};
+    node_sets[1] = std::vector<mpm::Index>{2, 3};
+
+    // Add nodes 0 to 3 to the mesh
+    REQUIRE(mesh->add_node(node0) == true);
+    REQUIRE(mesh->add_node(node1) == true);
+    REQUIRE(mesh->add_node(node2) == true);
+    REQUIRE(mesh->add_node(node3) == true);
+
+    // Node set creation
+    REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+    // Check nodal properties initialisation with valid node sets
+    REQUIRE(mesh->initialise_nodal_properties(-1) == true);
+    REQUIRE(mesh->initialise_nodal_properties(0) == true);
+    REQUIRE(mesh->initialise_nodal_properties(1) == true);
+    REQUIRE(mesh->initialise_nodal_properties(2) == false);
+  }
 }
 
 //! \brief Check mesh class for 3D case
@@ -2581,5 +2625,69 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
         }
       }
     }
+  }
+
+  //! Check if nodal properties is initialised
+  SECTION("Check nodal properties initialisation") {
+    // Create the different meshes
+    std::shared_ptr<mpm::Mesh<Dim>> mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+
+    // Define nodes
+    Eigen::Vector3d coords;
+    coords << 0, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2, 0, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0, 2, 0;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    coords << 0, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node4 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(4, coords);
+
+    coords << 2, 0, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node5 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(5, coords);
+
+    coords << 2, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node6 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(6, coords);
+
+    coords << 0, 2, 2;
+    std::shared_ptr<mpm::NodeBase<Dim>> node7 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
+
+    // Create the node sets
+    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
+    node_sets[0] = std::vector<mpm::Index>{0, 1, 3, 4};
+    node_sets[1] = std::vector<mpm::Index>{2, 3, 6};
+
+    // Add nodes 0 to 3 to the mesh
+    REQUIRE(mesh->add_node(node0) == true);
+    REQUIRE(mesh->add_node(node1) == true);
+    REQUIRE(mesh->add_node(node2) == true);
+    REQUIRE(mesh->add_node(node3) == true);
+    REQUIRE(mesh->add_node(node4) == true);
+    REQUIRE(mesh->add_node(node5) == true);
+    REQUIRE(mesh->add_node(node6) == true);
+    REQUIRE(mesh->add_node(node7) == true);
+
+    // Node set creation
+    REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+
+    // Check nodal properties initialisation with valid node sets
+    REQUIRE(mesh->initialise_nodal_properties(-1) == true);
+    REQUIRE(mesh->initialise_nodal_properties(0) == true);
+    REQUIRE(mesh->initialise_nodal_properties(1) == true);
+    REQUIRE(mesh->initialise_nodal_properties(2) == false);
   }
 }
