@@ -300,6 +300,17 @@ class NodeBase {
   virtual bool compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;
 
+  //! Update correction force
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] force Correction force from the particles in a cell
+  virtual void update_correction_force(bool update, unsigned phase,
+                                       const VectorDim& force) noexcept = 0;
+
+  //! Return correction force
+  //! \param[in] phase Index corresponding to the phase
+  virtual VectorDim correction_force(unsigned phase) const = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 

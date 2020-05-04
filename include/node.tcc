@@ -127,6 +127,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
   internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
 }
 
+//! Update correction force
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_correction_force(
+    bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
+  // Assert
+  assert(phase < Tnphases);
+
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign correction force
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  correction_force_.col(phase) = correction_force_.col(phase) * factor + force;
+}
+
 //! Assign nodal momentum
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(

@@ -264,6 +264,19 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Compute correction force
     this->compute_correction_force();
 
+#ifdef USE_MPI
+    // Run if there is more than a single MPI task
+    if (mpi_size > 1) {
+      // MPI all reduce correction force
+      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
+          std::bind(&mpm::NodeBase<Tdim>::correction_force,
+                    std::placeholders::_1, fluid),
+          std::bind(&mpm::NodeBase<Tdim>::update_correction_force,
+                    std::placeholders::_1, false, fluid,
+                    std::placeholders::_2));
+    }
+#endif
+
     // Compute corrected acceleration and velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(

@@ -260,6 +260,19 @@ class Node : public NodeBase<Tdim> {
   bool compute_nodal_correction_force(
       const VectorDim& correction_force) override;
 
+  //! Update correction force
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] force Correction force from the particles in a cell
+  void update_correction_force(bool update, unsigned phase,
+                               const VectorDim& force) noexcept override;
+
+  //! Return correction force at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  VectorDim correction_force(unsigned phase) const override {
+    return correction_force_.col(phase);
+  }
+
   //! Assign free surface
   void assign_free_surface(bool free_surface) override {
     free_surface_ = free_surface;
