@@ -3,10 +3,11 @@ template <typename Traits>
 Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
     std::string solver_type) {
+
+  //! Initialize solution vector x
   Eigen::VectorXd x(b.size());
 
   try {
-
 #if USE_PETSC
 
     // Initialise MPI mpi_rank and size
@@ -24,6 +25,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     Vec petsc_b, petsc_x;
     PetscInt dim = global_active_dof_;
     KSPConvergedReason reason;
+    PC pc;
     PetscViewer viewer;
 
     PetscInt vi, mi, mj;
@@ -51,9 +53,15 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
 
-    // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
-    // VecView(petsc_b, viewer);
-    // MPI_Barrier(MPI_COMM_WORLD);
+    // for (unsigned i = 0; i < b.size(); i++) {
+    //   double value = b[i];
+    //   int global_index = rank_global_mapper_[i];
+    //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
+    // }
+
+    PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
+    VecView(petsc_b, viewer);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // for (unsigned i = 0; i < b.size(); i++) {
     //   auto value = b[i];
@@ -61,75 +69,51 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
     // }
 
-    std::cout << "TEST OUTPUT: 5.1: " << std::endl;
-    MatGetOwnershipRange(petsc_A, &row_low, &row_high);
-    for (mi = row_low; mi < row_high; mi++) {
-      for (mj = 0; mj < dim; mj++) {
-        m = A.coeff(mi, mj);
-        MatSetValue(petsc_A, mi, mj, m, INSERT_VALUES);
+    for (int k = 0; k < A.outerSize(); ++k) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it(A, k); it; ++it) {
+        MatSetValue(petsc_A, rank_global_mapper_[it.row()],
+                    rank_global_mapper_[k], it.value(), ADD_VALUES);
       }
     }
+    MatAssemblyBegin(petsc_A, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
 
-    std::cout << "TEST OUTPUT: 6: " << mpi_rank << std::endl;
-
-    // If b and A are broadcasted, parallel seting value
-    /*VecGetOwnershipRange(petsc_b, &low, &high);
-    for (vi = low; vi < high; vi++){
-      v = b(vi);
-      VecSetValues(petsc_b, 1, &vi, &v, INSERT_VALUES);
-    }
-    MatGetOwnershipRange(petsc_A, &row_low, &row_high);
-    for (mi = row_low; mi < row_high; mi++){
-      for(mj = 0; mj < dim; mj++){
-            m = A.coeffRef(mi, mj);
-            MatSetValue(petsc_A, 1, &mi, 1, &mj, &m, INSERT_VALUES);
-          }
-    }*/
+    PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
+    MatView(petsc_A, viewer);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // Assemble PETSC_A, PETSC_b
-    MatAssemblyBegin(petsc_A, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
-    if (mpi_rank == 0) {
-      for (vi = 0; vi < dim; vi++) {
-        VecGetValues(petsc_b, 1, &vi, &v);
-        std::cout << v << std::endl;
-      }
-    }
-    std::cout << "TEST OUTPUT: 7: " << std::endl;
-
     if (solver_type == "cg") {
       KSPCreate(MPI_COMM_WORLD, &solver);
-      std::cout << "TEST OUTPUT: 7.1: " << std::endl;
       KSPSetOperators(solver, petsc_A, petsc_A);
-      std::cout << "TEST OUTPUT: 7.2: " << std::endl;
       KSPSetType(solver, KSPCG);
-      std::cout << "TEST OUTPUT: 7.3: " << std::endl;
+      // KSPCGSetType(solver, KSP_CG_SYMMETRIC);
+      // KSPSetInitialGuessNonzero(solver, PETSC_TRUE);
+      // KSPGetPC(solver, &pc);
+      // PCFactorSetShiftType(pc, MAT_SHIFT_POSITIVE_DEFINITE);
+      // PCSetType(pc, PCSOR);
       KSPSolve(solver, petsc_b, petsc_x);
-      std::cout << "TEST OUTPUT: 7.4: " << std::endl;
       KSPGetConvergedReason(solver, &reason);
-      std::cout << "TEST OUTPUT: 7.5: " << std::endl;
-      if (reason < 0) {
-        PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
-      }
-
-      // Copy petsc_x to x
-      if (mpi_rank == 0) {
-        for (vi = 0; vi < dim; vi++) {
-          VecGetValues(petsc_x, 1, &vi, &v);
-          x(vi) = v;
-        }
-      }
-      PetscFinalize();
     }
 
-    std::cout << "TEST OUTPUT: 8: solution is: " << x << std::endl;
+    if (reason < 0) {
+      PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
+    }
+
+    // Copy petsc x to Eigen x
+    for (unsigned i = 0; i < x.size(); i++) {
+      const int global_index = rank_global_mapper_[i];
+      VecGetValues(petsc_x, 1, &global_index, &v);
+      x(i) = v;
+    }
+
+    PetscFinalize();
 
 #endif
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
+
   return x;
 }
