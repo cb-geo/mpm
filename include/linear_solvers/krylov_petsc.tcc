@@ -39,11 +39,11 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
 
     //! Initialize vector b across the ranks
-    VecCreateMPI(MPI_COMM_WORLD, b.size(), global_active_dof_, &petsc_b);
+    VecCreateMPI(MPI_COMM_WORLD, PETSC_DECIDE, global_active_dof_, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
 
     // Initialize Matrix A across the ranks
-    MatCreateAIJ(MPI_COMM_WORLD, A.rows(), A.cols(), global_active_dof_,
+    MatCreateAIJ(MPI_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, global_active_dof_,
                  global_active_dof_, 0, NULL, 0, NULL, &petsc_A);
     MatSetOption(petsc_A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
@@ -59,9 +59,9 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
     // }
 
-    PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
-    VecView(petsc_b, viewer);
-    MPI_Barrier(MPI_COMM_WORLD);
+    // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
+    // VecView(petsc_b, viewer);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     // for (unsigned i = 0; i < b.size(); i++) {
     //   auto value = b[i];
@@ -78,8 +78,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyBegin(petsc_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
 
-    PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
-    MatView(petsc_A, viewer);
+    // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
+    // MatView(petsc_A, viewer);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
