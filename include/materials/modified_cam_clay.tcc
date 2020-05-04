@@ -124,7 +124,6 @@ template <unsigned Tdim>
 std::vector<std::string> mpm::ModifiedCamClay<Tdim>::state_variables() const {
   const std::vector<std::string> state_vars = {"bulk_modulus",
                                                "shear_modulus",
-                                               "j3",
                                                "p",
                                                "q",
                                                "theta",
@@ -135,6 +134,8 @@ std::vector<std::string> mpm::ModifiedCamClay<Tdim>::state_variables() const {
                                                "f_function",
                                                "dpvstrain",
                                                "dpdstrain",
+                                               "pvstrain",
+                                               "pdstrain"
                                                "chi",
                                                "pcd",
                                                "pcc",
