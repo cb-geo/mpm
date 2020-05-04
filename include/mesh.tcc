@@ -109,23 +109,6 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   this->active_nodes_.clear();
   Index active_id = 0;
 
-  bool* send_nodal_solving_status = new bool[nnodes()];
-  memset(send_nodal_solving_status, 0, nnodes() * sizeof(bool));
-  bool* receive_nodal_solving_status = new bool[nnodes()];
-  std::cout << "assign_active_nodes_id: new arrays" << std::endl;
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
-    if ((*nitr)->status()) {
-      this->active_nodes_.add(*nitr);
-      (*nitr)->assign_active_id(active_id);
-      active_id++;
-
-      // Assign solving status for MPI solver
-      send_nodal_solving_status[(*nitr)->id()] = true;
-    } else {
-      (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
-    }
-  }
-
   // Initialise MPI rank and size
   int mpi_rank = 0;
   int mpi_size = 1;
@@ -136,19 +119,30 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   // Get number of MPI ranks
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
-  std::cout << "assign_active_nodes_id TEST1: R" << mpi_rank << std::endl;
 
-  // #ifdef USE_MPI
-  //     1. all rank send that flag to rank 0
-  //     2. in rank 0 count the same way as you count local
-  //     3. broadcast that!
-  // #endif
+  bool* send_nodal_solving_status = new bool[nnodes()];
+  memset(send_nodal_solving_status, 0, nnodes() * sizeof(bool));
+  bool* receive_nodal_solving_status = new bool[nnodes()];
+
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      (*nitr)->assign_active_id(active_id);
+      active_id++;
+
+#ifdef USE_MPI
+      // Assign solving status for MPI solver
+      send_nodal_solving_status[(*nitr)->id()] = true;
+#endif
+
+    } else {
+      (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
+    }
+  }
 
 #ifdef USE_MPI
   MPI_Allreduce(send_nodal_solving_status, receive_nodal_solving_status,
                 nnodes(), MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
-
-  Index global_active_id = 0;
 
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if (receive_nodal_solving_status[(*nitr)->id()]) {
@@ -157,10 +151,10 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
     }
   }
 #endif
-  std::cout << "assign_active_nodes_id DELETE0: R" << mpi_rank << std::endl;
+
   delete[] send_nodal_solving_status;
   delete[] receive_nodal_solving_status;
-  std::cout << "assign_active_nodes_id DELETE1: R" << mpi_rank << std::endl;
+
   return active_id;
 }
 
@@ -170,6 +164,7 @@ unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
   // Clear existing list of active nodes
   Index global_active_id = 0;
 
+#ifdef USE_MPI
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if ((*nitr)->solving_status()) {
       (*nitr)->assign_global_active_id(global_active_id);
@@ -178,6 +173,7 @@ unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
       (*nitr)->assign_global_active_id(std::numeric_limits<Index>::max());
     }
   }
+#endif
 
   return global_active_id;
 }
@@ -192,25 +188,6 @@ std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
       if ((*citr)->status()) {
         node_indices.emplace_back((*citr)->local_node_indices());
-      }
-    }
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return node_indices;
-}
-
-//! Return MPI global node indices
-template <unsigned Tdim>
-std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::mpi_global_node_indices() const {
-  // Vector of node_pairs
-  std::vector<Eigen::VectorXi> node_indices;
-  try {
-    // Iterate over cells
-    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      if ((*citr)->status()) {
-        node_indices.emplace_back((*citr)->mpi_local_node_indices());
       }
     }
 
