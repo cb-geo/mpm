@@ -49,7 +49,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
     //! Copying Eigen matrix b to petsc b vector
     VecSetValues(petsc_b, rank_global_mapper_.size(),
-                 rank_global_mapper_.data(), b.data(), INSERT_VALUES);
+                 rank_global_mapper_.data(), b.data(), ADD_VALUES);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
 
@@ -61,7 +61,6 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
 
     // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
     // VecView(petsc_b, viewer);
-    // MPI_Barrier(MPI_COMM_WORLD);
 
     // for (unsigned i = 0; i < b.size(); i++) {
     //   auto value = b[i];
