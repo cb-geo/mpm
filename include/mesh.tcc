@@ -1823,3 +1823,36 @@ bool mpm::Mesh<Tdim>::assign_nodal_friction_constraints(
   }
   return status;
 }
+
+//! Assign nodal velocity constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::initialise_nodal_properties(int set_id) {
+  bool status = true;
+  // Initialise the shared pointer to nodal properties
+  nodal_properties_ = std::make_shared<mpm::NodalProperties>();
+  try {
+    if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end()) {
+      // If set id is -1, use all nodes
+      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+
+      // Create pool data for each property in the nodal properties struct
+      // object. Properties must be named in the plural form
+      nodal_properties_->create_property("masses", nset.size(),
+                                         materials_.size());
+      nodal_properties_->create_property("momenta", nset.size() * Tdim,
+                                         materials_.size());
+
+      // Iterate over all nodes in the selected node set to initialise the
+      // property handle in each node
+      for (unsigned i = 0; i < nset.size(); ++i)
+        nset[i]->initialise_property_handle(i, nodal_properties_);
+    } else
+      throw std::runtime_error(
+          "No node set found to initialise nodal properties");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}

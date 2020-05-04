@@ -438,6 +438,10 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
+  // Initialise the nodal properties` pool
+  //! \param[in] nset Set of nodes where contact law is applied
+  bool initialise_nodal_properties(int set_id);
+
  private:
   // Read particles from file
   //! \param[in] pset_id Set ID of the particles
@@ -499,7 +503,7 @@ class Mesh {
   //! Vector of generators for particle injections
   std::vector<mpm::Injection> particle_injections_;
   //! Nodal property pool
-  std::shared_ptr<mpm::NodalProperties> nodal_properties_;
+  std::shared_ptr<mpm::NodalProperties> nodal_properties_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
