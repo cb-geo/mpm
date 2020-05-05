@@ -78,7 +78,7 @@ mpm::dense_map mpm::MohrCoulomb<Tdim>::initialise_state_variables() {
 template <unsigned Tdim>
 std::vector<std::string> mpm::MohrCoulomb<Tdim>::state_variables() const {
   const std::vector<std::string> state_vars = {
-      "phi", "psi", "cohesion", "j3", "epsilon", "rho", "theta", "pdstrain"};
+      "phi", "psi", "cohesion", "epsilon", "rho", "theta", "pdstrain"};
   return state_vars;
 }
 
