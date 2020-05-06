@@ -99,12 +99,32 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
     }
 
+    VecScatter ctx;
+    Vec x_seq;
+    PetscScalar* x_data;
+    VecScatterCreateToAll(petsc_x, &ctx, &x_seq);
+    VecScatterBegin(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
+    VecScatterEnd(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
+    VecGetArray(x_seq, &x_data);
+
     // Copy petsc x to Eigen x
     for (unsigned i = 0; i < x.size(); i++) {
       const int global_index = rank_global_mapper_[i];
-      VecGetValues(petsc_x, 1, &global_index, &v);
-      x(i) = v;
+      x(i) = x_data[global_index];
     }
+
+    VecRestoreArray(x_seq, &x_data);
+    VecScatterDestroy(&ctx);
+    VecDestroy(&x_seq);
+
+    // if (mpi_rank == 0) {
+    //   std::cout << "EIGEN_X: " << mpi_rank << ": " << x << std::endl;
+    //   std::cout << "Rank_global_map: " << mpi_rank << ": " << std::endl;
+    //   for (const auto i : rank_global_mapper_) {
+    //     std::cout << i << std::endl;
+    //   }
+    // }
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     PetscFinalize();
 
