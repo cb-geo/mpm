@@ -185,11 +185,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
     // Initialise nodal properties if contact interface is given
-    if (mesh_props.contains("contact_interface")) {
-      int nset_id =
-          mesh_props.at("contact_interface")["nset_id"].template get<int>();
-      mesh_->initialise_nodal_properties(nset_id);
-    }
+    mesh_->initialise_nodal_properties();
 
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
