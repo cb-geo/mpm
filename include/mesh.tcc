@@ -1746,28 +1746,23 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
   return status;
 }
 
-//! Assign nodal velocity constraints
+// Initialise the nodal properties' pool
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::initialise_nodal_properties() {
-  bool status = true;
   // Initialise the shared pointer to nodal properties
   nodal_properties_ = std::make_shared<mpm::NodalProperties>();
-  try {
-    // Create pool data for each property in the nodal properties struct
-    // object. Properties must be named in the plural form
-    nodal_properties_->create_property("masses", nodes_.size(),
-                                       materials_.size());
-    nodal_properties_->create_property("momenta", nodes_.size() * Tdim,
-                                       materials_.size());
 
-    // Iterate over all nodes to initialise the property handle in each node
-    // and assign its node id as the prop id in the nodal property data pool
-    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-      (*nitr)->initialise_property_handle((*nitr)->id(), nodal_properties_);
+  // Create pool data for each property in the nodal properties struct
+  // object. Properties must be named in the plural form
+  nodal_properties_->create_property("masses", nodes_.size(),
+                                     materials_.size());
+  nodal_properties_->create_property("momenta", nodes_.size() * Tdim,
+                                     materials_.size());
 
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Iterate over all nodes to initialise the property handle in each node
+  // and assign its node id as the prop id in the nodal property data pool
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    (*nitr)->initialise_property_handle((*nitr)->id(), nodal_properties_);
+
+  return true;
 }
