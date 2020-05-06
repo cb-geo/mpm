@@ -450,9 +450,8 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
-  // Initialise the nodal properties` pool
-  //! \param[in] nset Set of nodes where contact law is applied
-  bool initialise_nodal_properties(int set_id);
+  // Initialise the nodal properties' pool
+  bool initialise_nodal_properties();
 
  private:
   // Read particles from file
