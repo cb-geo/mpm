@@ -1268,25 +1268,17 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node3 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
 
-    // Create the node sets
-    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
-    node_sets[0] = std::vector<mpm::Index>{0, 1};
-    node_sets[1] = std::vector<mpm::Index>{2, 3};
-
     // Add nodes 0 to 3 to the mesh
     REQUIRE(mesh->add_node(node0) == true);
     REQUIRE(mesh->add_node(node1) == true);
     REQUIRE(mesh->add_node(node2) == true);
     REQUIRE(mesh->add_node(node3) == true);
 
-    // Node set creation
-    REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+    // Initialise material models
+    mesh->initialise_material_models(materials);
 
     // Check nodal properties initialisation with valid node sets
-    REQUIRE(mesh->initialise_nodal_properties(-1) == true);
-    REQUIRE(mesh->initialise_nodal_properties(0) == true);
-    REQUIRE(mesh->initialise_nodal_properties(1) == true);
-    REQUIRE(mesh->initialise_nodal_properties(2) == false);
+    REQUIRE(mesh->initialise_nodal_properties() == true);
   }
 }
 
@@ -2666,11 +2658,6 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node7 =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(7, coords);
 
-    // Create the node sets
-    tsl::robin_map<mpm::Index, std::vector<mpm::Index>> node_sets;
-    node_sets[0] = std::vector<mpm::Index>{0, 1, 3, 4};
-    node_sets[1] = std::vector<mpm::Index>{2, 3, 6};
-
     // Add nodes 0 to 3 to the mesh
     REQUIRE(mesh->add_node(node0) == true);
     REQUIRE(mesh->add_node(node1) == true);
@@ -2681,13 +2668,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     REQUIRE(mesh->add_node(node6) == true);
     REQUIRE(mesh->add_node(node7) == true);
 
-    // Node set creation
-    REQUIRE(mesh->create_node_sets(node_sets, true) == true);
+    // Initialise material models
+    mesh->initialise_material_models(materials);
 
     // Check nodal properties initialisation with valid node sets
-    REQUIRE(mesh->initialise_nodal_properties(-1) == true);
-    REQUIRE(mesh->initialise_nodal_properties(0) == true);
-    REQUIRE(mesh->initialise_nodal_properties(1) == true);
-    REQUIRE(mesh->initialise_nodal_properties(2) == false);
+    REQUIRE(mesh->initialise_nodal_properties() == true);
   }
 }
