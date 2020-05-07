@@ -145,9 +145,8 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
-          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
-                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &send_requests[j]);
+          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank, 0,
+                    MPI_COMM_WORLD, &send_requests[j]);
           ++j;
         }
       }
@@ -166,8 +165,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
           Ttype value;
-          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank,
-                   domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank, 0, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
           property += value;
         }
