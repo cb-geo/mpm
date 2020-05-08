@@ -1346,29 +1346,50 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
 
   // Calculate the size and the offsets of our struct members in memory
-  const unsigned nparticles = this->nparticles();
-  const hsize_t NRECORDS = nparticles;
+  hsize_t nrecords = 0;
+  hsize_t nfields = 0;
+  auto err = H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+  if (nfields != mpm::hdf5::particle::NFIELDS)
+    throw std::runtime_error("HDF5 table has incorrect number of fields");
 
   std::vector<HDF5Particle> dst_buf;
-  dst_buf.reserve(nparticles);
+  dst_buf.reserve(nrecords);
   // Read the table
   H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
                  mpm::hdf5::particle::dst_offset,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
+
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    HDF5Particle particle = dst_buf[i];
-    // Get particle's material from list of materials
-    auto material = materials_.at(particle.material_id);
-    // Initialise particle with HDF5 data
-    (*pitr)->initialise_particle(particle, material);
-    ++i;
+    if (i < nrecords) {
+      HDF5Particle particle = dst_buf[i];
+      // Get particle's material from list of materials
+      auto material = materials_.at(particle.material_id);
+      // Initialise particle with HDF5 data
+      (*pitr)->initialise_particle(particle, material);
+      // Add particle to map
+      map_particles_.insert(particle.id, *pitr);
+      particles.add(*pitr);
+      ++i;
+    }
   }
   // close the file
   H5Fclose(file_id);
+
+  // Overwrite particles container
+  this->particles_ = particles;
+
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->clear_particle_ids();
+
   return true;
 }
 

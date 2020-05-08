@@ -121,12 +121,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
-  // Domain decompose
-  bool initial_step = true;
-  this->mpi_domain_decompose(initial_step);
-
   // Check point resume
   if (resume) this->checkpoint_resume();
+
+  // Domain decompose
+  bool initial_step = (resume == true) ? false : true;
+  this->mpi_domain_decompose(initial_step);
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
