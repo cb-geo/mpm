@@ -413,28 +413,21 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
 
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
 
     // Clear all particle ids
     mesh_->iterate_over_cells(
         std::bind(&mpm::Cell<Tdim>::clear_particle_ids, std::placeholders::_1));
 
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
 
     if (!unlocatable_particles.empty())
       throw std::runtime_error("Particle outside the mesh domain");
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
 
     // Increament step
     ++this->step_;
-
-    console_->info("{} {} {}", mpi_rank, __FILE__, __LINE__);
     console_->info("Checkpoint resume at step {} of {}", this->step_,
                    this->nsteps_);
 

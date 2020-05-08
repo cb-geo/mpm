@@ -56,6 +56,10 @@ TEST_CASE("Node map is checked for 2D case", "[nodemap][2D]") {
     REQUIRE(nodemap->remove(node3->id()) == false);
     // Check size of node hanlder
     REQUIRE(nodemap->size() == 2);
+    // Clear node map
+    REQUIRE_NOTHROW(nodemap->clear());
+    // Check size of node hanlder
+    REQUIRE(nodemap->size() == 0);
   }
 
   SECTION("Check operator []") {
@@ -177,6 +181,10 @@ TEST_CASE("Node map is checked for 3D case", "[nodemap][3D]") {
     REQUIRE(nodemap->remove(node3->id()) == false);
     // Check size of node hanlder
     REQUIRE(nodemap->size() == 2);
+    // Clear node map
+    REQUIRE_NOTHROW(nodemap->clear());
+    // Check size of node hanlder
+    REQUIRE(nodemap->size() == 0);
   }
 
   SECTION("Check operator []") {
