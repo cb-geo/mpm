@@ -281,9 +281,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
     // Run load balancer at a specified frequency
-    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
-      this->mpi_domain_decompose(false);
-
+    // if (step_ % nload_balance_steps_ == 0 && step_ != 0)
+    //   this->mpi_domain_decompose(false);
     mesh_->transfer_nonrank_particles();
 #endif
 #endif

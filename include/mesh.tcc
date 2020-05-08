@@ -1440,18 +1440,27 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()
 
 //! Cell node pairs
 template <unsigned Tdim>
-std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs(
+    bool active) const {
   // Vector of node_pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs;
 
   try {
+    int mpi_rank = 0;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
     if (cells_.size() == 0)
       throw std::runtime_error("No cells have been initialised!");
 
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      const auto pairs = (*citr)->side_node_pairs();
-      node_pairs.insert(std::end(node_pairs), std::begin(pairs),
-                        std::end(pairs));
+      // If node pairs are only requested for active nodes
+      bool get_pairs = (active == true) ? ((*citr)->rank() == mpi_rank) : true;
+      if (get_pairs) {
+        const auto pairs = (*citr)->side_node_pairs();
+        node_pairs.insert(std::end(node_pairs), std::begin(pairs),
+                          std::end(pairs));
+      }
     }
 
   } catch (std::exception& exception) {

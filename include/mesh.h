@@ -388,7 +388,7 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
 
   //! Return node pairs
-  std::vector<std::array<mpm::Index, 2>> node_pairs() const;
+  std::vector<std::array<mpm::Index, 2>> node_pairs(bool active = false) const;
 
   //! Create map of vector of particles in sets
   //! \param[in] map of particles ids in sets

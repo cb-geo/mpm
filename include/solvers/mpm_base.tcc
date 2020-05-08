@@ -470,10 +470,11 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   auto vtk_writer = std::make_unique<VtkWriter>(mesh_->particle_coordinates());
 
   // Write mesh on step 0
+  // Get active node pairs use true
   if (step == 0)
     vtk_writer->write_mesh(
         io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
-        mesh_->nodal_coordinates(), mesh_->node_pairs());
+        mesh_->nodal_coordinates(), mesh_->node_pairs(false));
 
   // Write input geometry to vtk file
   const std::string extension = ".vtp";
