@@ -121,12 +121,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
-  // Domain decompose
-  bool initial_step = true;
-  this->mpi_domain_decompose(initial_step);
-
   // Check point resume
   if (resume) this->checkpoint_resume();
+
+  // Domain decompose
+  bool initial_step = (resume == true) ? false : true;
+  this->mpi_domain_decompose(initial_step);
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
@@ -281,9 +281,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
     // Run load balancer at a specified frequency
-    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
-      this->mpi_domain_decompose(false);
-
+    // if (step_ % nload_balance_steps_ == 0 && step_ != 0)
+    //   this->mpi_domain_decompose(false);
     mesh_->transfer_nonrank_particles();
 #endif
 #endif

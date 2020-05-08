@@ -392,6 +392,11 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     // TODO: Set phase
     const unsigned phase = 0;
 
+    int mpi_rank = 0;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
     if (!analysis_["resume"]["resume"].template get<bool>())
       throw std::runtime_error("Resume analysis option is disabled!");
 
@@ -407,6 +412,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     auto particles_file =
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
+
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
 
@@ -422,7 +428,6 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 
     // Increament step
     ++this->step_;
-
     console_->info("Checkpoint resume at step {} of {}", this->step_,
                    this->nsteps_);
 
@@ -458,10 +463,11 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   auto vtk_writer = std::make_unique<VtkWriter>(mesh_->particle_coordinates());
 
   // Write mesh on step 0
+  // Get active node pairs use true
   if (step == 0)
     vtk_writer->write_mesh(
         io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
-        mesh_->nodal_coordinates(), mesh_->node_pairs());
+        mesh_->nodal_coordinates(), mesh_->node_pairs(false));
 
   // Write input geometry to vtk file
   const std::string extension = ".vtp";
