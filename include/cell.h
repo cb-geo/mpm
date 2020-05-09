@@ -214,10 +214,6 @@ class Cell {
   //! Return rank
   unsigned rank() const;
 
-  //! Assign previous mpi rank
-  //! \param[in] Previous MPI Rank of cell
-  void previous_mpirank(unsigned mpi_rank);
-
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
