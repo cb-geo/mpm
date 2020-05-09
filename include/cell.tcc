@@ -813,11 +813,20 @@ inline std::vector<std::vector<mpm::Index>>
 //! Assign MPI rank to cell
 template <unsigned Tdim>
 inline void mpm::Cell<Tdim>::rank(unsigned rank) {
-  this->rank_ = rank;
+  if (rank_ != rank) {
+    this->previous_mpirank_ = this->rank_;
+    this->rank_ = rank;
+  }
 }
 
 //! Return MPI rank of the cell
 template <unsigned Tdim>
 inline unsigned mpm::Cell<Tdim>::rank() const {
   return this->rank_;
+}
+
+//! Return MPI rank of the cell
+template <unsigned Tdim>
+inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
+  return this->previous_mpirank_;
 }

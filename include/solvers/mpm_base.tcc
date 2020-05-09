@@ -464,10 +464,10 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 
   // Write mesh on step 0
   // Get active node pairs use true
-  if (step == 0)
+  if (step % nload_balance_steps_ == 0)
     vtk_writer->write_mesh(
         io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
-        mesh_->nodal_coordinates(), mesh_->node_pairs(false));
+        mesh_->nodal_coordinates(), mesh_->node_pairs(true));
 
   // Write input geometry to vtk file
   const std::string extension = ".vtp";
@@ -1110,15 +1110,19 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Create graph partition
     bool graph_partition = graph_->create_partitions(&comm, mode);
     // Collect the partitions
-    graph_->collect_partitions(mpi_size, mpi_rank, &comm);
-
-    // Delete all the particles which is not in local task parititon
-    if (initial_step) mesh_->remove_all_nonrank_particles();
+    auto exchange_cells = graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
     // Identify ghost boundary cells
     mesh_->find_ghost_boundary_cells();
+
+    // Delete all the particles which is not in local task parititon
+    if (initial_step) mesh_->remove_all_nonrank_particles();
+    // Transfer non-rank particles to appropriate cells
+    else
+      mesh_->transfer_nonrank_particles(exchange_cells);
+
 #endif
     auto mpi_domain_end = std::chrono::steady_clock::now();
     console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,

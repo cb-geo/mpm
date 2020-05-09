@@ -134,6 +134,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
 
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    // Run load balancer at a specified frequency
+    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
+      this->mpi_domain_decompose(false);
+#endif
+#endif
+
     // Inject particles
     mesh_->inject_particles(this->step_ * this->dt_);
 
@@ -280,10 +288,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
-    // Run load balancer at a specified frequency
-    // if (step_ % nload_balance_steps_ == 0 && step_ != 0)
-    //   this->mpi_domain_decompose(false);
-    mesh_->transfer_nonrank_particles();
+    mesh_->transfer_halo_particles();
 #endif
 #endif
 

@@ -114,12 +114,20 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check MPI rank
     SECTION("Assign and check MPI rank on nodes") {
       cell->rank(1);
+      REQUIRE(cell->rank() == 1);
       cell->assign_mpi_rank_to_nodes();
 
       REQUIRE(node0->mpi_ranks().size() == 1);
       REQUIRE(node1->mpi_ranks().size() == 1);
       REQUIRE(node2->mpi_ranks().size() == 1);
       REQUIRE(node3->mpi_ranks().size() == 1);
+
+      // Update MPI rank of cell
+      REQUIRE(cell->previous_mpirank() == 0);
+      REQUIRE(cell->rank() == 1);
+      cell->rank(2);
+      REQUIRE(cell->rank() == 2);
+      REQUIRE(cell->previous_mpirank() == 1);
     }
 
     // Check cell length calculation
@@ -707,6 +715,13 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(node1->mpi_ranks().size() == 1);
       REQUIRE(node2->mpi_ranks().size() == 1);
       REQUIRE(node3->mpi_ranks().size() == 1);
+
+      // Update MPI rank of cell
+      REQUIRE(cell->previous_mpirank() == 0);
+      REQUIRE(cell->rank() == 1);
+      cell->rank(2);
+      REQUIRE(cell->rank() == 2);
+      REQUIRE(cell->previous_mpirank() == 1);
     }
 
     // Check cell length calculation

@@ -534,7 +534,8 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
         // REQUIRE(graph_partition == true);
 
         // Collect the partitions
-        graph->collect_partitions(mpi_size, mpi_rank, &comm);
+        auto exchange_cells =
+            graph->collect_partitions(mpi_size, mpi_rank, &comm);
 
         // Delete all the particles which is not in local task parititon
         mesh->remove_all_nonrank_particles();
@@ -827,7 +828,8 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
         // REQUIRE(graph_partition == true);
 
         // Collect the partitions
-        graph->collect_partitions(mpi_size, mpi_rank, &comm);
+        auto exchange_cells =
+            graph->collect_partitions(mpi_size, mpi_rank, &comm);
 
         // Delete all the particles which is not in local task parititon
         mesh->remove_all_nonrank_particles();
