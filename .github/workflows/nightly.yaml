@@ -18,9 +18,8 @@ jobs:
         with:
           entrypoint: /bin/sh
           args: |
-            mkdir -p build
-	    [ "$(ls -A build)" ] && rm -rf build/*
-            cd build
+            git clone https://github.com/cb-geo/mpm
+            cd mpm && mkdir -p build && cd build
             source /etc/profile.d/modules.sh
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
