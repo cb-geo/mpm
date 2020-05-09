@@ -821,3 +821,15 @@ template <unsigned Tdim>
 inline unsigned mpm::Cell<Tdim>::rank() const {
   return this->rank_;
 }
+
+//! Assign previous MPI rank to cell
+template <unsigned Tdim>
+inline void mpm::Cell<Tdim>::previous_mpirank(unsigned rank) {
+  this->previous_mpirank_ = rank;
+}
+
+//! Return MPI rank of the cell
+template <unsigned Tdim>
+inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
+  return this->previous_mpirank_;
+}

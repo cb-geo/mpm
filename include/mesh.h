@@ -224,7 +224,9 @@ class Mesh {
   void transfer_halo_particles();
 
   //! Transfer particles to different ranks in nonlocal rank cells
-  void transfer_nonrank_particles();
+  //! \param[in] exchange_cells Vector of cell ids that needs exchange
+  void transfer_nonrank_particles(
+      const std::vector<mpm::Index>& exchange_cells);
 
   //! Find shared nodes across MPI domains in the mesh
   void find_domain_shared_nodes();
