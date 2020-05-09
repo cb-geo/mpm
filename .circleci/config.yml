@@ -104,6 +104,8 @@ workflows:
             - cppcheck
             - codecov
     nightly:
+        jobs:
+            - benchmarks
         triggers:
             - schedule:
                 cron: "0 0 * * *"
@@ -111,5 +113,3 @@ workflows:
                     branches:
                         only:
                           - develop
-    jobs:
-      - benchmarks
