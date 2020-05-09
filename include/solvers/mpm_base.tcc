@@ -395,6 +395,11 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     // TODO: Set phase
     const unsigned phase = 0;
 
+    int mpi_rank = 0;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
     if (!analysis_["resume"]["resume"].template get<bool>())
       throw std::runtime_error("Resume analysis option is disabled!");
 
@@ -410,6 +415,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
     auto particles_file =
         io_->output_file(attribute, extension, uuid_, step_, this->nsteps_)
             .string();
+
     // Load particle information from file
     mesh_->read_particles_hdf5(phase, particles_file);
 
@@ -425,7 +431,6 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 
     // Increament step
     ++this->step_;
-
     console_->info("Checkpoint resume at step {} of {}", this->step_,
                    this->nsteps_);
 
@@ -461,10 +466,11 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   auto vtk_writer = std::make_unique<VtkWriter>(mesh_->particle_coordinates());
 
   // Write mesh on step 0
-  if (step == 0)
+  // Get active node pairs use true
+  if (step % nload_balance_steps_ == 0)
     vtk_writer->write_mesh(
         io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
-        mesh_->nodal_coordinates(), mesh_->node_pairs());
+        mesh_->nodal_coordinates(), mesh_->node_pairs(true));
 
   // Write input geometry to vtk file
   const std::string extension = ".vtp";
@@ -1107,15 +1113,19 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Create graph partition
     bool graph_partition = graph_->create_partitions(&comm, mode);
     // Collect the partitions
-    graph_->collect_partitions(mpi_size, mpi_rank, &comm);
-
-    // Delete all the particles which is not in local task parititon
-    if (initial_step) mesh_->remove_all_nonrank_particles();
+    auto exchange_cells = graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
     // Identify shared nodes across MPI domains
     mesh_->find_domain_shared_nodes();
     // Identify ghost boundary cells
     mesh_->find_ghost_boundary_cells();
+
+    // Delete all the particles which is not in local task parititon
+    if (initial_step) mesh_->remove_all_nonrank_particles();
+    // Transfer non-rank particles to appropriate cells
+    else
+      mesh_->transfer_nonrank_particles(exchange_cells);
+
 #endif
     auto mpi_domain_end = std::chrono::steady_clock::now();
     console_->info("Rank {}, Domain decomposition: {} ms", mpi_rank,

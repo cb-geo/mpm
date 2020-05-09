@@ -93,7 +93,7 @@ class MPM {
   //! Output steps
   mpm::Index output_steps_{std::numeric_limits<mpm::Index>::max()};
   //! Load balancing steps
-  mpm::Index nload_balance_steps_{1000};
+  mpm::Index nload_balance_steps_{10000};
   //! A shared ptr to IO object
   std::shared_ptr<mpm::IO> io_;
   //! JSON analysis object

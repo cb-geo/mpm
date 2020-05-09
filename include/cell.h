@@ -214,6 +214,9 @@ class Cell {
   //! Return rank
   unsigned rank() const;
 
+  //! Return previous mpi rank
+  unsigned previous_mpirank() const;
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -226,6 +229,8 @@ class Cell {
   Index id_{std::numeric_limits<Index>::max()};
   //! MPI Rank
   unsigned rank_{0};
+  //! Previous MPI Rank
+  unsigned previous_mpirank_{0};
   //! Isoparametric
   bool isoparametric_{true};
   //! Number of nodes

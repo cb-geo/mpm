@@ -145,9 +145,8 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
-          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
-                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &send_requests[j]);
+          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank, 0,
+                    MPI_COMM_WORLD, &send_requests[j]);
           ++j;
         }
       }
@@ -166,8 +165,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
           Ttype value;
-          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank,
-                   domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank, 0, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
           property += value;
         }
@@ -721,7 +719,7 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
 
 //! Transfer all particles in cells that are not in local rank
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
+void mpm::Mesh<Tdim>::transfer_halo_particles() {
 #ifdef USE_MPI
   // Get number of MPI ranks
   int mpi_size;
@@ -796,6 +794,118 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
               mpm::register_mpi_particle_type(received);
           MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
                    neighbour_ranks[i], 0, MPI_COMM_WORLD, &status_recv);
+          mpm::deregister_mpi_particle_type(particle_type);
+
+          // Iterate through n number of received particles
+          for (const auto& rparticle : recv_particles) {
+            mpm::Index id = 0;
+            // Initial particle coordinates
+            Eigen::Matrix<double, Tdim, 1> pcoordinates;
+            pcoordinates.setZero();
+
+            // Received particle
+            auto received_particle =
+                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+            // Get material
+            auto material = materials_.at(rparticle.material_id);
+            // Reinitialise particle from HDF5 data
+            received_particle->initialise_particle(rparticle, material);
+
+            // Add particle to mesh
+            this->add_particle(received_particle, true);
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+//! Transfer all particles in cells that are not in local rank
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::transfer_nonrank_particles(
+    const std::vector<mpm::Index>& exchange_cells) {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+  if (mpi_size > 1) {
+    std::vector<MPI_Request> send_requests;
+    send_requests.reserve(exchange_cells.size());
+    unsigned nsend_requests = 0;
+
+    std::vector<mpm::Index> remove_pids;
+    // Iterate through the ghost cells and send particles
+    for (auto cid : exchange_cells) {
+      // Get cell pointer
+      auto cell = map_cells_[cid];
+      // If the previous rank of cell is the current MPI rank,
+      // then send all particles
+      if ((cell->rank() != cell->previous_mpirank()) &&
+          (cell->previous_mpirank() == mpi_rank)) {
+        // Create a vector of h5_particles
+        std::vector<mpm::HDF5Particle> h5_particles;
+        auto particle_ids = cell->particles();
+        // Create a vector of HDF5 data of particles to send
+        // delete particle
+        for (auto& id : particle_ids) {
+          // Append to vector of particles
+          h5_particles.emplace_back(map_particles_[id]->hdf5());
+          // Particles to be removed from the current rank
+          remove_pids.emplace_back(id);
+        }
+        cell->clear_particle_ids();
+
+        // Send number of particles to receiver rank
+        unsigned nparticles = particle_ids.size();
+        MPI_Isend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0, MPI_COMM_WORLD,
+                  &send_requests[nsend_requests]);
+        if (nparticles > 0) {
+          mpm::HDF5Particle h5_particle;
+          // Initialize MPI datatypes and send vector of particles
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(h5_particle);
+          MPI_Send(h5_particles.data(), nparticles, particle_type, cell->rank(),
+                   0, MPI_COMM_WORLD);
+          mpm::deregister_mpi_particle_type(particle_type);
+        }
+        h5_particles.clear();
+        ++nsend_requests;
+      }
+    }
+    // Remove all sent particles
+    this->remove_particles(remove_pids);
+    // Send complete iterate only upto valid send requests
+    for (unsigned i = 0; i < nsend_requests; ++i)
+      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    // Iterate through the ghost cells and send particles
+    for (auto cid : exchange_cells) {
+      // Get cell pointer
+      auto cell = map_cells_[cid];
+      // If the current rank is the MPI rank receive particles
+      if ((cell->rank() != cell->previous_mpirank()) &&
+          (cell->rank() == mpi_rank)) {
+        // MPI status
+        MPI_Status recv_status;
+        // Receive number of particles
+        unsigned nrecv_particles;
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, cell->previous_mpirank(), 0,
+                 MPI_COMM_WORLD, &recv_status);
+
+        if (nrecv_particles != 0) {
+          std::vector<mpm::HDF5Particle> recv_particles;
+          recv_particles.resize(nrecv_particles);
+          // Receive the vector of particles
+          mpm::HDF5Particle received;
+          MPI_Status status_recv;
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(received);
+          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
+                   cell->previous_mpirank(), 0, MPI_COMM_WORLD, &status_recv);
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
@@ -1348,29 +1458,50 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
 
   // Calculate the size and the offsets of our struct members in memory
-  const unsigned nparticles = this->nparticles();
-  const hsize_t NRECORDS = nparticles;
+  hsize_t nrecords = 0;
+  hsize_t nfields = 0;
+  auto err = H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+  if (nfields != mpm::hdf5::particle::NFIELDS)
+    throw std::runtime_error("HDF5 table has incorrect number of fields");
 
   std::vector<HDF5Particle> dst_buf;
-  dst_buf.reserve(nparticles);
+  dst_buf.reserve(nrecords);
   // Read the table
   H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
                  mpm::hdf5::particle::dst_offset,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
+
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    HDF5Particle particle = dst_buf[i];
-    // Get particle's material from list of materials
-    auto material = materials_.at(particle.material_id);
-    // Initialise particle with HDF5 data
-    (*pitr)->initialise_particle(particle, material);
-    ++i;
+    if (i < nrecords) {
+      HDF5Particle particle = dst_buf[i];
+      // Get particle's material from list of materials
+      auto material = materials_.at(particle.material_id);
+      // Initialise particle with HDF5 data
+      (*pitr)->initialise_particle(particle, material);
+      // Add particle to map
+      map_particles_.insert(particle.id, *pitr);
+      particles.add(*pitr);
+      ++i;
+    }
   }
   // close the file
   H5Fclose(file_id);
+
+  // Overwrite particles container
+  this->particles_ = particles;
+
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->clear_particle_ids();
+
   return true;
 }
 
@@ -1421,18 +1552,27 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()
 
 //! Cell node pairs
 template <unsigned Tdim>
-std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs(
+    bool active) const {
   // Vector of node_pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs;
 
   try {
+    int mpi_rank = 0;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
     if (cells_.size() == 0)
       throw std::runtime_error("No cells have been initialised!");
 
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      const auto pairs = (*citr)->side_node_pairs();
-      node_pairs.insert(std::end(node_pairs), std::begin(pairs),
-                        std::end(pairs));
+      // If node pairs are only requested for active nodes
+      bool get_pairs = (active == true) ? ((*citr)->rank() == mpi_rank) : true;
+      if (get_pairs) {
+        const auto pairs = (*citr)->side_node_pairs();
+        node_pairs.insert(std::end(node_pairs), std::begin(pairs),
+                          std::end(pairs));
+      }
     }
 
   } catch (std::exception& exception) {
