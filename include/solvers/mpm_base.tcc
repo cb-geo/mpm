@@ -464,10 +464,10 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 
   // Write mesh on step 0
   // Get active node pairs use true
-  // if (step == 0)
-  vtk_writer->write_mesh(
-      io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
-      mesh_->nodal_coordinates(), mesh_->node_pairs(true));
+  if (step % nload_balance_steps_ == 0)
+    vtk_writer->write_mesh(
+        io_->output_file("mesh", ".vtp", uuid_, step, max_steps).string(),
+        mesh_->nodal_coordinates(), mesh_->node_pairs(true));
 
   // Write input geometry to vtk file
   const std::string extension = ".vtp";
@@ -1096,8 +1096,8 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
 
 #ifdef USE_GRAPH_PARTITIONING
     // Create graph object if empty
-    // if (initial_step || graph_ == nullptr)
-    graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
+    if (initial_step || graph_ == nullptr)
+      graph_ = std::make_shared<Graph<Tdim>>(mesh_->cells());
 
     // Find number of particles in each cell across MPI ranks
     mesh_->find_nglobal_particles_cells();
