@@ -185,8 +185,10 @@ std::vector<mpm::Index> mpm::Graph<Tdim>::collect_partitions(int mpi_size,
     if (current_rank != previous_rank) {
       // Assign current MPI rank
       (*citr)->rank(current_rank);
-      // Add cell id to list of cells to transfer particles
-      exchange_cells.emplace_back((*citr)->id());
+      // Add cell id to list of cells to transfer particles if there are
+      // particles
+      if ((*citr)->nglobal_particles() > 0)
+        exchange_cells.emplace_back((*citr)->id());
     }
   }
   return exchange_cells;
