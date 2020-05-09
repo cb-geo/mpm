@@ -220,6 +220,9 @@ class Mesh {
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 
+  //! Transfer halo particles to different ranks
+  void transfer_halo_particles();
+
   //! Transfer particles to different ranks in nonlocal rank cells
   void transfer_nonrank_particles();
 
