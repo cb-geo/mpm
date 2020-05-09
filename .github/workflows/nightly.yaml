@@ -14,7 +14,7 @@ jobs:
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
     - name: Install dependencies, compile, check formatting, test and create docs
-      uses: docker://cbgeo:mpm
+      uses: docker://quay.io/cbgeo/mpm
         with:
           entrypoint: /bin/sh
           args: |
