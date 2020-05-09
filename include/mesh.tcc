@@ -1886,23 +1886,26 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
   return status;
 }
 
-// Initialise the nodal properties' pool
+// Create the nodal properties' pool
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::initialise_nodal_properties() {
+void mpm::Mesh<Tdim>::create_nodal_properties() {
   // Initialise the shared pointer to nodal properties
   nodal_properties_ = std::make_shared<mpm::NodalProperties>();
 
-  // Create pool data for each property in the nodal properties struct
-  // object. Properties must be named in the plural form
-  nodal_properties_->create_property("masses", nodes_.size(),
-                                     materials_.size());
-  nodal_properties_->create_property("momenta", nodes_.size() * Tdim,
-                                     materials_.size());
+  // Check if nodes_ and materials_is empty and throw runtime error if they are
+  if (nodes_.size() != 0 && materials_.size() != 0) {
+    // Create pool data for each property in the nodal properties struct
+    // object. Properties must be named in the plural form
+    nodal_properties_->create_property("masses", nodes_.size(),
+                                       materials_.size());
+    nodal_properties_->create_property("momenta", nodes_.size() * Tdim,
+                                       materials_.size());
 
-  // Iterate over all nodes to initialise the property handle in each node
-  // and assign its node id as the prop id in the nodal property data pool
-  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-    (*nitr)->initialise_property_handle((*nitr)->id(), nodal_properties_);
-
-  return true;
+    // Iterate over all nodes to initialise the property handle in each node
+    // and assign its node id as the prop id in the nodal property data pool
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+      (*nitr)->initialise_property_handle((*nitr)->id(), nodal_properties_);
+  } else {
+    throw std::runtime_error("Number of nodes or number of materials is zero");
+  }
 }

@@ -440,8 +440,8 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
-  // Initialise the nodal properties' pool
-  bool initialise_nodal_properties();
+  // Create the nodal properties' pool
+  void create_nodal_properties();
 
  private:
   // Read particles from file

@@ -1420,7 +1420,7 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
     // Initialise material models
     mesh->initialise_material_models(materials);
 
-    // Check nodal properties initialisation with valid node sets
-    REQUIRE(mesh->initialise_nodal_properties() == true);
+    // Check nodal properties creation
+    REQUIRE_NOTHROW(mesh->create_nodal_properties());
   }
 }
