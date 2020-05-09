@@ -5,9 +5,9 @@ jobs:
       - image: quay.io/cbgeo/mpm
     steps:
       - checkout
-      # GCC-8
+      # GCC
       - run:
-          name: GCC-8 build + MPI
+          name: GCC build + MPI
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
@@ -25,9 +25,9 @@ jobs:
       - image: quay.io/cbgeo/mpm
     steps:
       - checkout
-      # Clang-6.0
+      # Clang
       - run:
-          name: Clang-6.0 + Static analysis
+          name: Clang + Static analysis
           command: |
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
@@ -41,7 +41,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: cppcheck
+          name: cppcheck/clang-format
           command: |
             cppcheck --version
             cppcheck --inline-suppr --enable=warning --inconclusive --force --language=c++ --std=c++11 src/*.cc include/*.h include/*.tcc --error-exitcode=1
@@ -71,6 +71,30 @@ jobs:
             lcov --directory . --capture --output-file coverage.info
             bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
 
+  benchmarks:
+    docker:
+      - image: quay.io/cbgeo/mpm
+    steps:
+      - checkout
+      # GCC
+      - run:
+          name: GCC build + MPI
+          command: |
+            mkdir -p build
+            [ "$(ls -A build)" ] && rm -rf build/*
+            cd build
+            source /etc/profile.d/modules.sh
+            export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+            module load mpi/openmpi-x86_64
+            export CXX_COMPILER=mpicxx
+            cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            ninja -j2
+            ctest -VV
+            mpirun -n 4 ./mpmtest [mpi]
+            git clone https://github.com/cb-geo/mpm-benchmarks/ benchmarks
+            mpirun -n 4 ./mpm -f ./benchmarks/2d/sliding_block_inclined_boundary/
+            mpirun -n 4 ./mpm -f ./benchmarks/2d/uniaxial_stress/
+            mpirun -n 4 ./mpm -f ./benchmarks/2d/uniaxial-traction/
 workflows:
     version: 2
     build:
@@ -79,3 +103,13 @@ workflows:
             - clang
             - cppcheck
             - codecov
+    nightly:
+      triggers:
+        - schedule:
+            cron: "*/5 * * * *"
+            filters:
+              branches:
+                only:
+                  - develop
+    jobs:
+      - benchmarks
