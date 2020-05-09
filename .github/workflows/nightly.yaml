@@ -7,22 +7,22 @@ on:
     
 jobs:
   build:
-    container:
-      image: quay.io/cbgeo/mpm
+    runs-on: ubuntu-latest
+    container: cbgeo:mpm
     steps:
-    - name: Create Build Environment
+    - name: Checkout github
     - uses: actions/checkout@develop
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
       run: |
-            mkdir -p build
-            [ "$(ls -A build)" ] && rm -rf build/*
-            cd build
-            source /etc/profile.d/modules.sh
-            export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
-            module load mpi/openmpi-x86_64
-            export CXX_COMPILER=mpicxx
-            cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
-            ninja -j2
-            ctest -VV
-            mpirun -n 4 ./mpmtest [mpi]
+        mkdir -p build
+        [ "$(ls -A build)" ] && rm -rf build/*
+        cd build
+        source /etc/profile.d/modules.sh
+        export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
+        module load mpi/openmpi-x86_64
+        export CXX_COMPILER=mpicxx
+        cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+        ninja -j2
+        ctest -VV
+        mpirun -n 4 ./mpmtest [mpi]
