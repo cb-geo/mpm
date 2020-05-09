@@ -123,9 +123,9 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
       REQUIRE(node3->mpi_ranks().size() == 1);
 
       // Update MPI rank of cell
-      REQUIRE(cell->previous_mpirank() == 1);
+      REQUIRE(cell->previous_mpirank() == 0);
       REQUIRE(cell->rank() == 1);
-      cell->rank(1);
+      cell->rank(2);
       REQUIRE(cell->rank() == 2);
       REQUIRE(cell->previous_mpirank() == 1);
     }
@@ -717,9 +717,9 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(node3->mpi_ranks().size() == 1);
 
       // Update MPI rank of cell
-      REQUIRE(cell->previous_mpirank() == 1);
+      REQUIRE(cell->previous_mpirank() == 0);
       REQUIRE(cell->rank() == 1);
-      cell->rank(1);
+      cell->rank(2);
       REQUIRE(cell->rank() == 2);
       REQUIRE(cell->previous_mpirank() == 1);
     }
