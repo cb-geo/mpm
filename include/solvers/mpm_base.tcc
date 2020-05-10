@@ -177,6 +177,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign friction constraints
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+    // Read and assign friction constraints
+    this->nodal_pressure_constraints(mesh_props, mesh_io);
+
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
@@ -854,6 +857,66 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
 
   } catch (std::exception& exception) {
     console_->warn("#{}: Friction conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
+// Nodal pressure constraints
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+
+    unsigned phase = 0;
+
+    // Read and assign pressure constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("pressure_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+
+      // Iterate over pressure constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["pressure_constraints"]) {
+
+        // Check if it is pressure increment constraints
+        if (constraints.find("increment_boundary") != constraints.end() &&
+            constraints["increment_boundary"])
+          phase += 1;
+
+        // Pressure constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+
+          std::string pressure_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool ppressure_constraints = mesh_->assign_nodal_pressure_constraints(
+              phase, mesh_io->read_pressure_constraints(
+                         io_->file_name(pressure_constraints_file)));
+          if (!ppressure_constraints)
+            throw std::runtime_error(
+                "Pressure constraints are not properly assigned");
+        } else {
+
+          // Get the math function
+          std::shared_ptr<FunctionBase> pfunction = nullptr;
+          if (constraints.find("math_function_id") != constraints.end())
+            pfunction = math_functions_.at(
+                constraints.at("math_function_id").template get<unsigned>());
+
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Pressure
+          double pressure = constraints.at("pressure").template get<double>();
+
+          // Add pressure constraint to mesh
+          mesh_->assign_nodal_pressure_constraint(pfunction, nset_id, phase,
+                                                  pressure);
+        }
+      }
+    } else
+      throw std::runtime_error("Pressure constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Pressure conditions are undefined {} ", __LINE__,
                    exception.what());
   }
 }

@@ -152,6 +152,12 @@ class MPMBase : public MPM {
       const Json& mesh_prop,
       const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io);
 
+  //! Nodal pressure constraints
+  //! \param[in] mesh_prop Mesh properties
+  //! \param[in] mesh_io Mesh IO handle
+  void nodal_pressure_constraints(
+      const Json& mesh_prop, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io);
+
   //! Particle entity sets
   //! \param[in] mesh_prop Mesh properties
   //! \param[in] check Check duplicates

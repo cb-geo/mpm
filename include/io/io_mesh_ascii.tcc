@@ -486,6 +486,49 @@ std::vector<std::tuple<mpm::Index, unsigned, int, double>>
   return constraints;
 }
 
+//! Read pressure constraints file
+template <unsigned Tdim>
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::IOMeshAscii<Tdim>::read_pressure_constraints(
+        const std::string& pressure_constraints_file) {
+  // Particle pressure constraints
+  std::vector<std::tuple<mpm::Index, double>> constraints;
+  constraints.clear();
+
+  // input file stream
+  std::fstream file;
+  file.open(pressure_constraints_file.c_str(), std::ios::in);
+
+  try {
+    if (file.is_open() && file.good()) {
+      // Line
+      std::string line;
+      while (std::getline(file, line)) {
+        boost::algorithm::trim(line);
+        std::istringstream istream(line);
+        // ignore comment lines (# or !) or blank lines
+        if ((line.find('#') == std::string::npos) &&
+            (line.find('!') == std::string::npos) && (line != "")) {
+          while (istream.good()) {
+            // ID
+            mpm::Index id;
+            // Pressure
+            double pressure;
+            // Read stream
+            istream >> id >> pressure;
+            constraints.emplace_back(std::make_tuple(id, pressure));
+          }
+        }
+      }
+    }
+    file.close();
+  } catch (std::exception& exception) {
+    console_->error("Read pressure constraints: {}", exception.what());
+    file.close();
+  }
+  return constraints;
+}
+
 //! Return particles force
 template <unsigned Tdim>
 std::vector<std::tuple<mpm::Index, unsigned, double>>
