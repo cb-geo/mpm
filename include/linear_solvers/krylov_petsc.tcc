@@ -26,19 +26,18 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     PetscInt dim = global_active_dof_;
     KSPConvergedReason reason;
     PC pc;
-    PetscViewer viewer;
 
     PetscInt vi, mi, mj;
     PetscScalar v, m;
     PetscInt low, high, row_low, row_high;
 
-    //! Initialize Petsc
+    // Initialize PETSc
     int petsc_argc = 1;
     char* petsc_arg = "p";
     char** petsc_argv = &petsc_arg;
     PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
 
-    //! Initialize vector b across the ranks
+    // Initialize vector b across the ranks
     VecCreateMPI(MPI_COMM_WORLD, PETSC_DECIDE, global_active_dof_, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
 
@@ -47,27 +46,17 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
                  global_active_dof_, 0, NULL, 0, NULL, &petsc_A);
     MatSetOption(petsc_A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
-    //! Copying Eigen matrix b to petsc b vector
+    // Copying Eigen vector b to petsc b vector
     VecSetValues(petsc_b, rank_global_mapper_.size(),
                  rank_global_mapper_.data(), b.data(), ADD_VALUES);
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
 
-    // for (unsigned i = 0; i < b.size(); i++) {
-    //   double value = b[i];
-    //   int global_index = rank_global_mapper_[i];
-    //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
-    // }
-
+    // PetscViewer viewer;
     // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
     // VecView(petsc_b, viewer);
 
-    // for (unsigned i = 0; i < b.size(); i++) {
-    //   auto value = b[i];
-    //   unsigned global_index = rank_global_mapper_[i];
-    //   VecSetValues(petsc_b, 1, &global_index, &value, INSERT_VALUES);
-    // }
-
+    // Copying Eigen matrix A to petsc A matrix
     for (int k = 0; k < A.outerSize(); ++k) {
       for (Eigen::SparseMatrix<double>::InnerIterator it(A, k); it; ++it) {
         MatSetValue(petsc_A, rank_global_mapper_[it.row()],
@@ -80,8 +69,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
     // MatView(petsc_A, viewer);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    // Solve linear systems
     if (solver_type == "cg") {
       KSPCreate(MPI_COMM_WORLD, &solver);
       KSPSetOperators(solver, petsc_A, petsc_A);
@@ -95,10 +83,13 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       KSPGetConvergedReason(solver, &reason);
     }
 
+    // Warn if it does not converge
+    // FIXME: Should we throw error instead?
     if (reason < 0) {
       PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
     }
 
+    // Scatter and gather for cloning procedure
     VecScatter ctx;
     Vec x_seq;
     PetscScalar* x_data;
@@ -113,10 +104,12 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       x(i) = x_data[global_index];
     }
 
+    // Destroy scatter array
     VecRestoreArray(x_seq, &x_data);
     VecScatterDestroy(&ctx);
     VecDestroy(&x_seq);
 
+    // End PETSC
     PetscFinalize();
 
 #endif
