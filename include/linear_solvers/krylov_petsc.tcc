@@ -90,24 +90,34 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     }
 
     // Scatter and gather for cloning procedure
-    VecScatter ctx;
-    Vec x_seq;
-    PetscScalar* x_data;
-    VecScatterCreateToAll(petsc_x, &ctx, &x_seq);
-    VecScatterBegin(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
-    VecScatterEnd(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
-    VecGetArray(x_seq, &x_data);
+    if (mpi_size > 1) {
+      VecScatter ctx;
+      Vec x_seq;
+      PetscScalar* x_data;
+      VecScatterCreateToAll(petsc_x, &ctx, &x_seq);
+      VecScatterBegin(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
+      VecScatterEnd(ctx, petsc_x, x_seq, INSERT_VALUES, SCATTER_FORWARD);
+      VecGetArray(x_seq, &x_data);
 
-    // Copy petsc x to Eigen x
-    for (unsigned i = 0; i < x.size(); i++) {
-      const int global_index = rank_global_mapper_[i];
-      x(i) = x_data[global_index];
+      // Copy petsc x to Eigen x
+      for (unsigned i = 0; i < x.size(); i++) {
+        const int global_index = rank_global_mapper_[i];
+        x(i) = x_data[global_index];
+      }
+
+      // Destroy scatter array
+      VecRestoreArray(x_seq, &x_data);
+      VecScatterDestroy(&ctx);
+      VecDestroy(&x_seq);
+    } else {
+      PetscScalar value;
+      // Copy petsc x to Eigen x
+      for (unsigned i = 0; i < x.size(); i++) {
+        const int global_index = rank_global_mapper_[i];
+        VecGetValues(petsc_x, 1, &global_index, &value);
+        x(i) = value;
+      }
     }
-
-    // Destroy scatter array
-    VecRestoreArray(x_seq, &x_data);
-    VecScatterDestroy(&ctx);
-    VecDestroy(&x_seq);
 
     // End PETSC
     PetscFinalize();
