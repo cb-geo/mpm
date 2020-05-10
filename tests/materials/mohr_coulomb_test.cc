@@ -129,7 +129,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -388,7 +388,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (cohesion only, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -595,7 +595,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -850,7 +850,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -1059,7 +1059,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -1314,7 +1314,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, without softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -1522,7 +1522,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -2000,7 +2000,7 @@ TEST_CASE("MohrCoulomb is checked in 2D (c & phi & psi, with softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb2D", std::move(id), jmaterial);
+            "MohrCoulomb2D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -2512,7 +2512,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb3D", std::move(id), jmaterial);
+            "MohrCoulomb3D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 
@@ -3018,7 +3018,7 @@ TEST_CASE("MohrCoulomb is checked in 3D (c & phi & psi, with softening)",
     unsigned id = 0;
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "MohrCoulomb3D", std::move(id), jmaterial);
+            "MohrCoulomb3D", std::move(0), jmaterial);
 
     auto mohr_coulomb = std::make_shared<mpm::MohrCoulomb<Dim>>(id, jmaterial);
 

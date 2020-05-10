@@ -48,7 +48,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic2D", std::move(mid), jmaterial);
+            "LinearElastic2D", std::move(1), jmaterial);
 
     std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
     materials[mid] = material;
@@ -383,7 +383,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic3D", std::move(mid), jmaterial);
+            "LinearElastic3D", std::move(1), jmaterial);
 
     std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
     materials[mid] = material;

@@ -762,10 +762,10 @@ inline Eigen::Matrix<double, 2, 1> mpm::QuadrilateralElement<2, 4>::natural_coor
       const double bb = ((a2 * b3 - a4 * c2) / b2) - b3;
       const double cc = -(a2 * c2 / b2) + c1;
       // There are two possible solutions
-      const double u2 = (-bb + std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
+      const double u2 = (-bb + std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
       const double u1 = (c2 - b3 * u2) / b2;
       // Second solution of a quadratic equation
-      const double v2 = (-bb - std::sqrt((bb * bb - 4 * aa * cc))) / (2 * aa);
+      const double v2 = (-bb - std::sqrt(bb * bb - 4 * aa * cc)) / (2 * aa);
       const double v1 = (c2 - b3 * v2) / b2;
       if (u1 >= -1. && u1 <= 1. && u2 >= -1. && u2 <= 1.) {
         xi(0) = u1;
