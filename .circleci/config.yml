@@ -102,13 +102,14 @@ jobs:
           name: 2D sliding block
           command: |
             cd /home/cbgeo/project/build
+            pip3 install tables --user
             mpirun -n 4 ./mpm -f ./benchmarks/2d/sliding_block_inclined_boundary/
+            python3 ./benchmarks/2d/sliding_block_inclined_boundary/test_benchmark.py
       # Stress
       - run:
           name: Uniaxial stress
           command: |
             cd /home/cbgeo/project/build
-            pip3 install tables --user
             ./mpm -f ./benchmarks/2d/uniaxial_stress/
             python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
       # Traction
