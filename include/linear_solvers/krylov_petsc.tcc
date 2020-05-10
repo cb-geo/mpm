@@ -117,15 +117,6 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecScatterDestroy(&ctx);
     VecDestroy(&x_seq);
 
-    // if (mpi_rank == 0) {
-    //   std::cout << "EIGEN_X: " << mpi_rank << ": " << x << std::endl;
-    //   std::cout << "Rank_global_map: " << mpi_rank << ": " << std::endl;
-    //   for (const auto i : rank_global_mapper_) {
-    //     std::cout << i << std::endl;
-    //   }
-    // }
-    // MPI_Barrier(MPI_COMM_WORLD);
-
     PetscFinalize();
 
 #endif

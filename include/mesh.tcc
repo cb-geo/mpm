@@ -2242,9 +2242,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-    std::cout << "COMPUTE_FS: R:" << mpi_rank
-              << " NUM_PARTICLE: " << particles_.size() << std::endl;
-
     // Reset free surface cell
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_free_surface,
                                        std::placeholders::_1, false));
@@ -2271,9 +2268,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         (*citr)->assign_volume_fraction(cell_volume_fraction);
       }
     }
-
-    std::cout << "COMPUTE_FS: R:" << mpi_rank << " FUNCTION 0 FINISH!"
-              << std::endl;
 
     // Compute boundary cells and nodes based on geometry
     std::set<mpm::Index> boundary_cells;
@@ -2302,10 +2296,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         //           int neighbour_cell_rank =
         //           map_cells_[neighbour_cell_id]->rank(); if
         //           (neighbour_cell_rank != (*citr)->rank()) {
-        //             std::cout << "COMPUTE_FS: R:" << mpi_rank << " Neighbour
-        //             Rank" << neighbour_cell_rank <<  std::endl; std::cout <<
-        //             "COMPUTE_FS: R:" << mpi_rank << " Current Rank" <<
-        //             (*citr)->rank() << std::endl;
         // #ifdef USE_MPI
         //             MPI_Request send_requests;
 
@@ -2445,9 +2435,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
     }
 #endif
 
-    std::cout << "COMPUTE_FS: R:" << mpi_rank << " FUNCTION 3 FINISH!"
-              << std::endl;
-
     // Evaluate free surface particles
     std::set<mpm::Index> boundary_particles;
     for (auto pitr = this->particles_.cbegin(); pitr != this->particles_.cend();
@@ -2458,14 +2445,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface(double tolerance) {
         boundary_particles.insert((*pitr)->id());
       }
     }
-
-    std::cout << "COMPUTE_FS: R:" << mpi_rank
-              << " BOUNDARY PARTICLES ARE:" << std::endl;
-    for (auto i : boundary_particles) {
-      std::cout << "BOUNDARY PARTICLE: R:" << mpi_rank << " id: " << i
-                << std::endl;
-    }
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }

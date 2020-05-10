@@ -125,13 +125,9 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1));
 
-    std::cout << "TEST 0: R" << mpi_rank << std::endl;
-
     // Compute free surface cells, nodes, and particles
     task_group.run([&] {
       mesh_->compute_free_surface(volume_tolerance_);
-
-      std::cout << "TEST 0.1: R" << mpi_rank << std::endl;
 
       // Assign initial pressure
       mesh_->iterate_over_particles_predicate(
@@ -141,8 +137,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                     std::placeholders::_1));
     });
     task_group.wait();
-
-    std::cout << "TEST 1: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -159,7 +153,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
                     std::placeholders::_1, false, fluid,
                     std::placeholders::_2));
-      // // TODO: Check if nodal free-surface condition needs all reduce
+      // // FIXME: Check if nodal free-surface condition needs all reduce
       // // MPI all reduce nodal momentum
       // mesh_->template nodal_halo_exchange<bool, Tdim>(
       //     std::bind(&mpm::NodeBase<Tdim>::free_surface,
@@ -168,8 +162,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       //               std::placeholders::_1, std::placeholders::_2));
     }
 #endif
-
-    std::cout << "TEST 2: R" << mpi_rank << std::endl;
 
     // Compute nodal velocity at the begining of time step
     mesh_->iterate_over_nodes_predicate(
@@ -184,8 +176,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Iterate over each particle to compute shear (deviatoric) stress
     mesh_->iterate_over_particles(std::bind(
         &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
-
-    std::cout << "TEST 3: R" << mpi_rank << std::endl;
 
     // Spawn a task for external force
     task_group.run([&] {
@@ -205,8 +195,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
-
-    std::cout << "TEST 4: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -228,16 +216,11 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     }
 #endif
 
-    std::cout << "TEST 5: R" << mpi_rank << std::endl;
-
     // Compute intermediate velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
                   std::placeholders::_1, fluid, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 6: R" << mpi_rank << std::endl;
 
     // Reinitialise system matrix to perform PPE
     bool matrix_reinitialization_status = this->reinitialise_matrix();
@@ -246,14 +229,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       throw std::runtime_error("Reinitialisation of matrix failed");
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 7: R" << mpi_rank << std::endl;
-
     // Compute poisson equation
     this->compute_poisson_equation();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 8: R" << mpi_rank << std::endl;
 
     // Assign pressure to nodes
     mesh_->iterate_over_nodes_predicate(
@@ -263,22 +240,13 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                   this->step_ * this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 9: R" << mpi_rank << std::endl;
-
     // Use nodal pressure to update particle pressure
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_pressure,
                   std::placeholders::_1));
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 10: R" << mpi_rank << std::endl;
-
     // Compute correction force
     this->compute_correction_force();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 11: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -293,9 +261,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     }
 #endif
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 12: R" << mpi_rank << std::endl;
-
     // Compute corrected acceleration and velocity
     mesh_->iterate_over_nodes_predicate(
         std::bind(
@@ -304,34 +269,19 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
             std::placeholders::_1, fluid, this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 13: R" << mpi_rank << std::endl;
-
     // Update particle position and kinematics
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, this->dt_, velocity_update_));
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 14: R" << mpi_rank << std::endl;
-
     // Apply particle velocity constraints
     mesh_->apply_particle_velocity_constraints();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 15: R" << mpi_rank << std::endl;
 
     // Pressure smoothing
     if (pressure_smoothing_) this->pressure_smoothing(fluid);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 16: R" << mpi_rank << std::endl;
-
     // Locate particle
     this->locate_particle();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    std::cout << "TEST 17: R" << mpi_rank << std::endl;
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
