@@ -95,7 +95,7 @@ jobs:
       - run:
           name: Clone benchmarks
           command: |
-            git clone https://github.com/cb-geo/mpm-benchmarks/ benchmarks
+            git clone https://github.com/cb-geo/mpm-benchmarks.git benchmarks
       # Benchmarks
       - run:
           name: 2D sliding block
@@ -105,20 +105,13 @@ jobs:
       - run:
           name: Uniaxial stress
           command: |
-            mpirun -n 4 ./mpm -f ./benchmarks/2d/uniaxial_stress/
-      # Traction
-      - run:
-          name: Uniaxial traction
-          command: |
-            mpirun -n 4 ./mpm -f ./benchmarks/2d/uniaxial-traction/
+            ./mpm -f ./benchmarks/2d/uniaxial_stress/
+            python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
 workflows:
     version: 2
     build:
         jobs:
-            - gcc
-            - clang
-            - cppcheck
-            - codecov
+            - benchmarks
     nightly:
         jobs:
             - benchmarks
