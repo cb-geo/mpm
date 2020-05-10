@@ -305,11 +305,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
   //! Volumetric mass density (mass / volume)
-  double mass_density_;
+  double mass_density_{0.};
   //! Mass
-  double mass_;
+  double mass_{0.};
   //! Volume
-  double volume_;
+  double volume_{0.};
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
@@ -319,9 +319,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Strains
   Eigen::Matrix<double, 6, 1> strain_;
   //! dvolumetric strain
-  double dvolumetric_strain_;
+  double dvolumetric_strain_{0.};
   //! Volumetric strain at centroid
-  double volumetric_strain_centroid_;
+  double volumetric_strain_centroid_{0.};
   //! Strain rate
   Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains

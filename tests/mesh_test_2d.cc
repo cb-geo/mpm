@@ -59,7 +59,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
   auto le_material =
       Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-          "LinearElastic2D", std::move(mid), jmaterial);
+          "LinearElastic2D", std::move(0), jmaterial);
 
   std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
   materials[mid] = le_material;

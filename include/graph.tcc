@@ -38,7 +38,7 @@ void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
   //! If the number of processors can not be evenly distributed, then the last
   //! processor will handle the rest of cells
   if (rest != 0) {
-    start = start - part;
+    // start = start - part;
     start = sum;
     vtxdist_.emplace_back(start);
   } else {

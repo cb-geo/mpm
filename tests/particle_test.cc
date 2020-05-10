@@ -1099,7 +1099,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     SECTION("Particle assign state variables") {
       SECTION("Assign state variable fail") {
-        unsigned mid = 0;
+        mid = 0;
         Json jmaterial;
         jmaterial["density"] = 1000.;
         jmaterial["youngs_modulus"] = 1.0E+7;
@@ -2351,7 +2351,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     SECTION("Particle assign state variables") {
       SECTION("Assign state variable fail") {
-        unsigned mid = 0;
+        mid = 0;
         Json jmaterial;
         jmaterial["density"] = 1000.;
         jmaterial["youngs_modulus"] = 1.0E+7;

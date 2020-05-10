@@ -759,7 +759,7 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_mass_pressure(
           mpm::ParticlePhase::Solid,
-          shapefn_[i] * mass_ * state_variables_.at("pressure"));
+          shapefn_[i] * mass_ * state_variables_["pressure"]);
 
     status = true;
   }
@@ -782,7 +782,7 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
     for (unsigned i = 0; i < this->nodes_.size(); ++i)
       pressure += shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
 
-    state_variables_.at("pressure") = pressure;
+    state_variables_["pressure"] = pressure;
     status = true;
   }
   return status;
