@@ -102,7 +102,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -191,7 +190,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     mpm::Index mesh_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -286,7 +284,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     mpm::Index mesh_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -390,7 +387,6 @@ TEST_CASE("Bingham is checked in 2D", "[material][bingham][2D]") {
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     mpm::Index mesh_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -652,7 +648,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 3;
     const unsigned Dof = 3;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
@@ -763,7 +758,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 3;
     const unsigned Dof = 3;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
@@ -884,7 +878,6 @@ TEST_CASE("Bingham is checked in 3D", "[material][bingham][3D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 3;
     const unsigned Dof = 3;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
