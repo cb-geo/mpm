@@ -91,10 +91,13 @@ jobs:
             ninja -j2
             ctest -VV
             mpirun -n 4 ./mpmtest [mpi]
+            pwd
       # Benchmarks
       - run:
           name: Clone benchmarks
           command: |
+            pwd
+            cd mpm/build
             git clone https://github.com/cb-geo/mpm-benchmarks.git benchmarks
       # Benchmarks
       - run:
