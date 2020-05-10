@@ -109,16 +109,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   this->active_nodes_.clear();
   Index active_id = 0;
 
-  // Initialise MPI rank and size
-  int mpi_rank = 0;
-  int mpi_size = 1;
-
 #ifdef USE_MPI
-  // Get MPI rank
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  // Get number of MPI ranks
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
 
   bool* send_nodal_solving_status = new bool[nnodes()];
   memset(send_nodal_solving_status, 0, nnodes() * sizeof(bool));
@@ -130,17 +121,14 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
       (*nitr)->assign_active_id(active_id);
       active_id++;
 
-#ifdef USE_MPI
       // Assign solving status for MPI solver
       send_nodal_solving_status[(*nitr)->id()] = true;
-#endif
 
     } else {
       (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
     }
   }
 
-#ifdef USE_MPI
   MPI_Allreduce(send_nodal_solving_status, receive_nodal_solving_status,
                 nnodes(), MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
 
@@ -150,10 +138,22 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
       (*nitr)->assign_solving_status(true);
     }
   }
-#endif
 
   delete[] send_nodal_solving_status;
   delete[] receive_nodal_solving_status;
+
+#else
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if ((*nitr)->status()) {
+      this->active_nodes_.add(*nitr);
+      (*nitr)->assign_active_id(active_id);
+      active_id++;
+
+    } else {
+      (*nitr)->assign_active_id(std::numeric_limits<Index>::max());
+    }
+  }
+#endif
 
   return active_id;
 }

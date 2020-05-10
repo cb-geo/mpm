@@ -364,14 +364,13 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-    // Assigning matrix id in each MPI rank
+    // Assigning matrix id (in each MPI rank)
     const auto nactive_node = mesh_->assign_active_nodes_id();
 
-    // Assigning matrix id globally
+    // Assigning matrix id globally (required for rank-to-global mapping)
     unsigned nglobal_active_node = nactive_node;
-#ifdef USE_MPI
-    nglobal_active_node = mesh_->assign_global_active_nodes_id();
-#endif
+    if (mpi_size > 1)
+      nglobal_active_node = mesh_->assign_global_active_nodes_id();
 
     // Assign global node indice
     matrix_assembler_->assign_global_node_indices(nactive_node,
