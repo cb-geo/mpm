@@ -116,9 +116,8 @@ jobs:
           name: Uniaxial traction
           command: |
             cd /home/cbgeo/project/build
-            pip3 install tables --user
-            ./mpm -f ../../benchmarks/2d/uniaxial_traction/ -i mpm-nodal-forces.json
-            ./mpm -f ../../benchmarks/2d/uniaxial_traction/ -i mpm-particle-traction.json
+            ./mpm -f ./benchmarks/2d/uniaxial_traction/ -i mpm-nodal-forces.json
+            ./mpm -f ./benchmarks/2d/uniaxial_traction/ -i mpm-particle-traction.json
             python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
 
 workflows:
