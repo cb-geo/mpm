@@ -91,29 +91,30 @@ jobs:
             ninja -j2
             ctest -VV
             mpirun -n 4 ./mpmtest [mpi]
-            pwd
       # Benchmarks
       - run:
           name: Clone benchmarks
           command: |
-            pwd
-            cd mpm/build
+            cd /home/cbgeo/project/build
             git clone https://github.com/cb-geo/mpm-benchmarks.git benchmarks
       # Benchmarks
       - run:
           name: 2D sliding block
           command: |
+            cd /home/cbgeo/project/build
             mpirun -n 4 ./mpm -f ./benchmarks/2d/sliding_block_inclined_boundary/
       # Stress
       - run:
           name: Uniaxial stress
           command: |
+            cd /home/cbgeo/project/build
             ./mpm -f ./benchmarks/2d/uniaxial_stress/
             python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
       # Traction
       - run:
           name: Uniaxial traction
           command: |
+            cd /home/cbgeo/project/build
             ./mpm -f ../../benchmarks/2d/uniaxial_traction/ -i mpm-nodal-forces.json
             ./mpm -f ../../benchmarks/2d/uniaxial_traction/ -i mpm-particle-traction.json
             python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
