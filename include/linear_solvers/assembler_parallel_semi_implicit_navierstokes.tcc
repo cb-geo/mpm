@@ -297,7 +297,7 @@ bool mpm::AssemblerParallelSemiImplicitNavierStokes<
     for (auto node = nodes.cbegin(); node != nodes.cend(); ++node) {
       // Assign total pressure constraint
       const double pressure_constraint =
-          (*node)->pressure_constraint(1, current_time);
+          (*node)->pressure_constraint(0, current_time);
 
       // Check if there is a pressure constraint
       if (pressure_constraint != std::numeric_limits<double>::max()) {
