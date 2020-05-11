@@ -9,11 +9,14 @@ template <typename Traits>
 class SolverBase {
  public:
   //! Constructor with min and max iterations and tolerance
+  //! \param[in] max_iter Maximum number of iterations
+  //! \param[in] tolerance Tolerance for solver to achieve convergence
   SolverBase(unsigned max_iter, double tolerance) {
     max_iter_ = max_iter;
     tolerance_ = tolerance;
     //! Logger
-    console_ = std::make_unique<spdlog::logger>("SolverBase", mpm::stdout_sink);
+    std::string logger = "SolverBase::";
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess

@@ -19,13 +19,12 @@ class CGEigen : public SolverBase<Traits> {
  public:
   //! Constructor
   //! \param[in] max_iter Maximum number of iterations
-
   //! \param[in] tolerance Tolerance for solver to achieve convergence
   CGEigen(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
     //! Logger
-    console_ =
-        std::make_unique<spdlog::logger>("EigenCGSolver", mpm::stdout_sink);
+    std::string logger = "EigenCGSolver::";
+    console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   };
 
   //! Matrix solver with default initial guess
