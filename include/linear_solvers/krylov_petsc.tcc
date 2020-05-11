@@ -68,6 +68,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       KSPCreate(MPI_COMM_WORLD, &solver);
       KSPSetOperators(solver, petsc_A, petsc_A);
       KSPSetType(solver, KSPCG);
+      KSPSetTolerances(solver, tolerance_, PETSC_DEFAULT, PETSC_DEFAULT,
+                       max_iter_);
       // KSPCGSetType(solver, KSP_CG_SYMMETRIC);
       // KSPSetInitialGuessNonzero(solver, PETSC_TRUE);
       // KSPGetPC(solver, &pc);
@@ -75,6 +77,18 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       // PCSetType(pc, PCSOR);
       KSPSolve(solver, petsc_b, petsc_x);
       KSPGetConvergedReason(solver, &reason);
+      // Uncomment below to print residual in each iteration
+      // PetscViewerAndFormat* vf;
+      // PetscViewerAndFormatCreate(PETSC_VIEWER_STDOUT_WORLD,
+      //                            PETSC_VIEWER_DEFAULT, &vf);
+      // PetscInt its;
+      // KSPGetIterationNumber(solver, &its);
+      // PetscPrintf(PETSC_COMM_WORLD, "\nConvergence in %d iterations.\n",
+      //             (int)its);
+      // PetscReal rnorm;
+      // for (int i = 0; i < its; i++) {
+      //   KSPMonitorTrueResidualNorm(solver, i, rnorm, vf);
+      // }
     }
 
     // Warn if it does not converge
