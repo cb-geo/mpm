@@ -27,6 +27,9 @@ class CGEigen : public SolverBase<Traits> {
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   };
 
+  //! Destructor
+  ~CGEigen(){};
+
   //! Matrix solver with default initial guess
   Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
                         const Eigen::VectorXd& b,

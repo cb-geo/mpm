@@ -352,18 +352,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
 
   bool status = true;
   try {
-
-    // Initialise MPI rank and size
-    int mpi_rank = 0;
-    int mpi_size = 1;
-
-#ifdef USE_MPI
-    // Get MPI rank
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    // Get number of MPI ranks
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
-
     // Assigning matrix id (in each MPI rank)
     const auto nactive_node = mesh_->assign_active_nodes_id();
 

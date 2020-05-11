@@ -19,6 +19,9 @@ class SolverBase {
     console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
   };
 
+  //! Destructor
+  virtual ~SolverBase(){};
+
   //! Matrix solver with default initial guess
   virtual Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
                                 const Eigen::VectorXd& b,

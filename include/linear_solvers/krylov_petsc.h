@@ -41,6 +41,7 @@ class KrylovPETSC : public SolverBase<Traits> {
 #endif
   };
 
+  //! Destructor
   ~KrylovPETSC() {
 #ifdef USE_PETSC
     // Finalize PETSc
