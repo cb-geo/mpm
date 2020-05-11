@@ -28,7 +28,25 @@ class KrylovPETSC : public SolverBase<Traits> {
     //! Logger
     console_ =
         std::make_unique<spdlog::logger>("PETSCKrylovSolver", mpm::stdout_sink);
+    #ifdef USE_PETSC
+    // Initialize PETSc
+    int petsc_argc = 0;
+    char* petsc_arg0 = NULL;
+    char **petsc_argv = &petsc_arg0;
+    PetscErrorCode    ierr;
+    PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
+    if (ierr) {
+      throw std::runtime_error("Error when initializaing Petsc.");
+    }
+    #endif
   };
+
+  ~KrylovPETSC() {
+    #ifdef USE_PETSC
+    // Finalize PETSc
+    PetscFinalize();
+    #endif
+  }
 
   //! Matrix solver with default initial guess
   Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,

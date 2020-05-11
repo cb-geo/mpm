@@ -30,13 +30,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     PetscInt vi, mi, mj;
     PetscScalar v, m;
     PetscInt low, high, row_low, row_high;
-
-    // Initialize PETSc
-    int petsc_argc = 1;
-    char* petsc_arg = "p";
-    char** petsc_argv = &petsc_arg;
-    PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
-
+  
     // Initialize vector b across the ranks
     VecCreateMPI(MPI_COMM_WORLD, PETSC_DECIDE, global_active_dof_, &petsc_b);
     VecDuplicate(petsc_b, &petsc_x);
@@ -118,9 +112,6 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
         x(i) = value;
       }
     }
-
-    // End PETSC
-    PetscFinalize();
 
 #endif
 
