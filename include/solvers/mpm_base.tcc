@@ -187,9 +187,6 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign friction constraints
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
-    // Create nodal properties
-    mesh_->create_nodal_properties();
-
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name

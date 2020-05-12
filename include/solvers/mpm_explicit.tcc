@@ -117,6 +117,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     throw std::runtime_error("Initialisation of loading failed");
   }
 
+  // Create nodal properties
+  if (interface_) mesh_->create_nodal_properties();
+
   // Compute mass
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
