@@ -1255,4 +1255,40 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
       }
     }
   }
+
+  //! Check if nodal properties is initialised
+  SECTION("Check nodal properties initialisation") {
+    // Create the different meshes
+    std::shared_ptr<mpm::Mesh<Dim>> mesh = std::make_shared<mpm::Mesh<Dim>>(0);
+
+    // Define nodes
+    Eigen::Vector2d coords;
+    coords << 0., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node0 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(0, coords);
+
+    coords << 2., 0.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node1 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(1, coords);
+
+    coords << 2., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node2 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(2, coords);
+
+    coords << 0., 2.;
+    std::shared_ptr<mpm::NodeBase<Dim>> node3 =
+        std::make_shared<mpm::Node<Dim, Dof, Nphases>>(3, coords);
+
+    // Add nodes 0 to 3 to the mesh
+    REQUIRE(mesh->add_node(node0) == true);
+    REQUIRE(mesh->add_node(node1) == true);
+    REQUIRE(mesh->add_node(node2) == true);
+    REQUIRE(mesh->add_node(node3) == true);
+
+    // Initialise material models
+    mesh->initialise_material_models(materials);
+
+    // Check nodal properties creation
+    REQUIRE_NOTHROW(mesh->create_nodal_properties());
+  }
 }

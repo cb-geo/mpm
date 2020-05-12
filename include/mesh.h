@@ -440,6 +440,9 @@ class Mesh {
   //! Inject particles
   void inject_particles(double current_time);
 
+  // Create the nodal properties' pool
+  void create_nodal_properties();
+
  private:
   // Read particles from file
   //! \param[in] pset_id Set ID of the particles
@@ -501,7 +504,7 @@ class Mesh {
   //! Vector of generators for particle injections
   std::vector<mpm::Injection> particle_injections_;
   //! Nodal property pool
-  std::shared_ptr<mpm::NodalProperties> nodal_properties_;
+  std::shared_ptr<mpm::NodalProperties> nodal_properties_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size
