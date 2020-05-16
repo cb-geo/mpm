@@ -16,7 +16,11 @@ outcome?
 
 ## Design Detail
 
-> This is the bulk of the RFC.
+> This is the bulk of the RFC. Include code snippets, class outlines, inheritance schemes,
+feature design outlines, etc. Describe how a new feature / function / class will be implemented
+in detail. Elaborate on the feature on how it will be implemented with examples.
+RFCs should be used as a design and discussion board to have full details of the implementation,
+before a feature is implemented. 
 
 > Explain the design in enough detail for somebody
 familiar with the infrastructure to understand. This should get into specifics and corner-cases,
@@ -56,3 +60,7 @@ This section is intended to encourage you as an author to think about the lesson
 > What parts of the design do you expect to resolve through the implementation of this feature before stabilisation?
 
 > What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+
+## Changelog
+
+> Add edit summaries to the current RFC here.
