@@ -487,10 +487,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
           const double vel_fricion = mu * std::abs(acc_n) * dt;
 
           if (vel_net_t <= vel_fricion) {
-            acc(dir_t0) = -vel(dir_t0);  // To set particle velocity to zero
-            acc(dir_t1) = -vel(dir_t1);
+            acc(dir_t0) = -vel(dir_t0) / dt;
+            acc(dir_t1) = -vel(dir_t1) / dt;
           } else {
-
             acc(dir_t0) -= mu * std::abs(acc_n) * (vel_net(0) / vel_net_t);
             acc(dir_t1) -= mu * std::abs(acc_n) * (vel_net(1) / vel_net_t);
           }

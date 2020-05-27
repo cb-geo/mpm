@@ -18,11 +18,10 @@
 #include "graph.h"
 #endif
 
-#include "friction_constraint.h"
+#include "constraints.h"
 #include "mpm.h"
 #include "particle.h"
 #include "vector.h"
-#include "velocity_constraint.h"
 
 namespace mpm {
 
@@ -89,6 +88,10 @@ class MPMBase : public MPM {
 
   //! Locate particle
   void locate_particle();
+
+  //! Domain decomposition
+  //! \param[in] initial_step Start of simulation or later steps
+  void mpi_domain_decompose(bool initial_step = false) override;
 
  private:
   //! Return if a mesh will be isoparametric or not
@@ -175,6 +178,8 @@ class MPMBase : public MPM {
   using mpm::MPM::nsteps_;
   //! Output steps
   using mpm::MPM::output_steps_;
+  //! Load balancing steps
+  using mpm::MPM::nload_balance_steps_;
   //! A unique ptr to IO object
   using mpm::MPM::io_;
   //! JSON analysis object
@@ -192,6 +197,8 @@ class MPMBase : public MPM {
   Eigen::Matrix<double, Tdim, 1> gravity_;
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
+  //! Constraints object
+  std::shared_ptr<mpm::Constraints<Tdim>> constraints_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions

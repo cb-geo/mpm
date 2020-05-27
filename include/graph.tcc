@@ -1,9 +1,12 @@
 //! Constructor with cells, size and rank
 template <unsigned Tdim>
-mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
-
+mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells) {
   this->cells_ = cells;
+}
 
+//! Constructor with cells, size and rank
+template <unsigned Tdim>
+void mpm::Graph<Tdim>::construct_graph(int mpi_size, int mpi_rank) {
   // Clear all graph properties
   this->xadj_.clear();
   this->vwgt_.clear();
@@ -35,7 +38,7 @@ mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
   //! If the number of processors can not be evenly distributed, then the last
   //! processor will handle the rest of cells
   if (rest != 0) {
-    start = start - part;
+    // start = start - part;
     start = sum;
     vtxdist_.emplace_back(start);
   } else {
@@ -62,9 +65,11 @@ mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
       auto neighbours = (*citr)->neighbours();
 
       //! get the id of neighbours
-      for (const auto& neighbour : neighbours) adjncy_.emplace_back(neighbour);
-
-      vwgt_.emplace_back((*citr)->nparticles());
+      for (const auto& neighbour : neighbours) {
+        adjncy_.emplace_back(neighbour);
+        adjwgt_.emplace_back(1.);
+      }
+      vwgt_.emplace_back((*citr)->nglobal_particles());
     }
   }
 
@@ -74,9 +79,6 @@ mpm::Graph<Tdim>::Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank) {
 
   //! allocate space for part
   part_.reserve(cells_.size());
-
-  //! assign edgecut
-  this->edgecut_ = 0;
 }
 
 //! Return xadj
@@ -134,13 +136,15 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
 
 //! Collect the partitions and store it in the graph
 template <unsigned Tdim>
-void mpm::Graph<Tdim>::collect_partitions(int mpi_size, int mpi_rank,
-                                          MPI_Comm* comm) {
+std::vector<mpm::Index> mpm::Graph<Tdim>::collect_partitions(int mpi_size,
+                                                             int mpi_rank,
+                                                             MPI_Comm* comm) {
   //! allocate space to partition
   MPI_Status status;
   mpm::Index ncells = this->cells_.size();
   std::vector<mpm::Index> partition(ncells, 0);
-
+  // ID of cells, which should transfer particles
+  std::vector<mpm::Index> exchange_cells;
   if (mpi_rank == 0) {
     int par = 0;
     for (int i = 0; i < this->vtxdist_[1]; ++i) {
@@ -174,6 +178,18 @@ void mpm::Graph<Tdim>::collect_partitions(int mpi_size, int mpi_rank,
   }
 
   // Assign partition to cells
-  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
-    (*citr)->rank(partition[(*citr)->id()]);
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr) {
+    auto current_rank = partition[(*citr)->id()];
+    auto previous_rank = (*citr)->rank();
+    // If the current rank is different from cell rank
+    if (current_rank != previous_rank) {
+      // Assign current MPI rank
+      (*citr)->rank(current_rank);
+      // Add cell id to list of cells to transfer particles if there are
+      // particles
+      if ((*citr)->nglobal_particles() > 0)
+        exchange_cells.emplace_back((*citr)->id());
+    }
+  }
+  return exchange_cells;
 }

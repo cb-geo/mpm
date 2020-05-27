@@ -105,6 +105,9 @@ class Mesh {
   //! Return container of nodes
   mpm::Vector<NodeBase<Tdim>> nodes() { return nodes_; }
 
+  //! Return the number of nodes in rank
+  mpm::Index nnodes_rank();
+
   //! Iterate over nodes
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
@@ -115,6 +118,17 @@ class Mesh {
   //! \tparam Tpred Predicate
   template <typename Toper, typename Tpred>
   void iterate_over_nodes_predicate(Toper oper, Tpred pred);
+
+  //! Return a vector of nodes
+  //! \param[in] set_id Set of id of nodes (-1 for all nodes)
+  Vector<NodeBase<Tdim>> nodes(unsigned set_id) const {
+    return (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+  }
+
+  //! Return a nodal shared_ptr
+  std::shared_ptr<NodeBase<Tdim>> node(unsigned node_id) {
+    return map_nodes_[node_id];
+  }
 
   //! Create a list of active nodes in mesh
   void find_active_nodes();
@@ -162,10 +176,19 @@ class Mesh {
   //! Number of cells in the mesh
   mpm::Index ncells() const { return cells_.size(); }
 
+  //! Number of cells in mesh rank
+  mpm::Index ncells_rank(bool active_cells = false);
+
   //! Iterate over cells
   //! \tparam Toper Callable object typically a baseclass functor
   template <typename Toper>
   void iterate_over_cells(Toper oper);
+
+  //! Find cell neighbours
+  void find_cell_neighbours();
+
+  //! Find global nparticles across MPI ranks / cell
+  void find_nglobal_particles_cells();
 
   //! Create particles from coordinates
   //! \param[in] particle_type Particle type
@@ -202,11 +225,19 @@ class Mesh {
   //! Remove all particles in a cell in nonlocal rank
   void remove_all_nonrank_particles();
 
+  //! Transfer halo particles to different ranks
+  void transfer_halo_particles();
+
   //! Transfer particles to different ranks in nonlocal rank cells
-  void transfer_nonrank_particles();
+  //! \param[in] exchange_cells Vector of cell ids that needs exchange
+  void transfer_nonrank_particles(
+      const std::vector<mpm::Index>& exchange_cells);
 
   //! Find shared nodes across MPI domains in the mesh
   void find_domain_shared_nodes();
+
+  //! Find number of domain shared nodes in local rank
+  mpm::Index nshared_nodes() const { return domain_shared_nodes_.size(); }
 
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
@@ -278,32 +309,6 @@ class Mesh {
   //! Apply particles velocity constraints
   void apply_particle_velocity_constraints();
 
-  //! Assign nodal velocity constraints
-  //! \param[in] setid Node set id
-  //! \param[in] velocity_constraints Velocity constraint at node, dir, velocity
-  bool assign_nodal_velocity_constraint(
-      int set_id, const std::shared_ptr<mpm::VelocityConstraint>& constraint);
-
-  //! Assign nodal frictional constraints
-  //! \param[in] setid Node set id
-  //! \param[in] friction_constraints Constraint at node, dir, sign, friction
-  bool assign_nodal_frictional_constraint(
-      int nset_id,
-      const std::shared_ptr<mpm::FrictionConstraint>& fconstraints);
-
-  //! Assign velocity constraints to nodes
-  //! \param[in] velocity_constraints Constraint at node, dir, and velocity
-  bool assign_nodal_velocity_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-          velocity_constraints);
-
-  //! Assign friction constraints to nodes
-  //! \param[in] friction_constraints Constraint at node, dir, sign, and
-  //! friction
-  bool assign_nodal_friction_constraints(
-      const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-          friction_constraints);
-
   //! Assign nodal concentrated force
   //! \param[in] nodal_forces Force at dir on nodes
   bool assign_nodal_concentrated_forces(
@@ -372,9 +377,6 @@ class Mesh {
     materials_ = materials;
   }
 
-  //! Find cell neighbours
-  void find_cell_neighbours();
-
   //! Find particle neighbours
   //! \param[in] cell of interest
   void find_particle_neighbours();
@@ -417,7 +419,7 @@ class Mesh {
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
 
   //! Return node pairs
-  std::vector<std::array<mpm::Index, 2>> node_pairs() const;
+  std::vector<std::array<mpm::Index, 2>> node_pairs(bool active = false) const;
 
   //! Create map of vector of particles in sets
   //! \param[in] map of particles ids in sets
@@ -486,9 +488,13 @@ class Mesh {
   //! Return global node indices
   std::vector<Eigen::VectorXi> global_node_indices() const;
 
+  //! Compute correction force in the node
   bool compute_nodal_correction_force(
       Eigen::SparseMatrix<double>& correction_matrix,
       Eigen::VectorXd& pressure_increment, double dt);
+
+  // Create the nodal properties' pool
+  void create_nodal_properties();
 
  private:
   // Read particles from file
@@ -551,7 +557,7 @@ class Mesh {
   //! Vector of generators for particle injections
   std::vector<mpm::Injection> particle_injections_;
   //! Nodal property pool
-  std::shared_ptr<mpm::NodalProperties> nodal_properties_;
+  std::shared_ptr<mpm::NodalProperties> nodal_properties_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
   //! TBB grain size

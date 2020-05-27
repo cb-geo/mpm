@@ -122,23 +122,11 @@ mpm::dense_map mpm::ModifiedCamClay<Tdim>::initialise_state_variables() {
 //! Initialise state variables
 template <unsigned Tdim>
 std::vector<std::string> mpm::ModifiedCamClay<Tdim>::state_variables() const {
-  const std::vector<std::string> state_vars = {"bulk_modulus",
-                                               "shear_modulus",
-                                               "j3",
-                                               "p",
-                                               "q",
-                                               "theta",
-                                               "pc",
-                                               "void_ratio",
-                                               "delta_phi",
-                                               "m_theta",
-                                               "f_function",
-                                               "dpvstrain",
-                                               "dpdstrain",
-                                               "chi",
-                                               "pcd",
-                                               "pcc",
-                                               "subloading_r"};
+  const std::vector<std::string> state_vars = {
+      "bulk_modulus", "shear_modulus", "p",           "q",        "theta",
+      "pc",           "void_ratio",    "delta_phi",   "m_theta",  "f_function",
+      "dpvstrain",    "dpdstrain",     "pvstrain",    "pdstrain", "chi",
+      "pcd",          "pcc",           "subloading_r"};
   return state_vars;
 }
 

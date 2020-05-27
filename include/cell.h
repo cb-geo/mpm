@@ -70,6 +70,16 @@ class Cell {
   //! Return the number of particles
   unsigned nparticles() const { return particles_.size(); }
 
+  //! Assign global nparticles
+  //! \param[in] nparticles Number of global particles of cell
+  void nglobal_particles(unsigned nparticles) {
+    nglobal_particles_ = nparticles;
+  }
+
+  //! nglobal particles
+  //! \retval nglobal_particles_ Number of global particles of cell
+  unsigned nglobal_particles() const { return nglobal_particles_; }
+
   //! Return the status of a cell: active (if a particle is present)
   bool status() const { return particles_.size(); }
 
@@ -264,6 +274,8 @@ class Cell {
   void compute_local_correction_matrix(const Eigen::VectorXd& shapefn,
                                        const Eigen::MatrixXd& grad_shapefn,
                                        double pvolume) noexcept;
+  //! Return previous mpi rank
+  unsigned previous_mpirank() const;
 
  private:
   //! Approximately check if a point is in a cell
@@ -277,6 +289,8 @@ class Cell {
   Index id_{std::numeric_limits<Index>::max()};
   //! MPI Rank
   unsigned rank_{0};
+  //! Previous MPI Rank
+  unsigned previous_mpirank_{0};
   //! Isoparametric
   bool isoparametric_{true};
   //! Number of nodes
@@ -289,6 +303,8 @@ class Cell {
   double mean_length_{std::numeric_limits<double>::max()};
   //! particles ids in cell
   std::vector<Index> particles_;
+  //! Number of global nparticles
+  unsigned nglobal_particles_{0};
   //! Container of node pointers (local id, node pointer)
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Nodal coordinates

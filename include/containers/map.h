@@ -36,6 +36,9 @@ class Map {
   //! \param[in] id Global/local index of the pointer
   bool remove(Index id);
 
+  //! Clear all entities
+  void clear() { elements_.clear(); }
+
   //! Return number of elements in the container
   std::size_t size() const { return elements_.size(); }
 

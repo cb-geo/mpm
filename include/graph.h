@@ -26,9 +26,12 @@ class Graph {
  public:
   //! Constructor with cells, size and rank
   //! \param[in] cells Vector of cells
+  explicit Graph(Vector<Cell<Tdim>> cells);
+
+  //! Construct graph
   //! \param[in] mpi_size # of MPI tasks
   //! \param[in] mpi_rank MPI rank
-  Graph(Vector<Cell<Tdim>> cells, int mpi_size, int mpi_rank);
+  void construct_graph(int mpi_size, int mpi_rank);
 
   //! Create graph partition
   //! \param[in] comm MPI Communication
@@ -39,7 +42,9 @@ class Graph {
   //! \param[in] mpi_size # of MPI tasks
   //! \param[in] mpi_rank MPI rank
   //! \param[in] comm MPI Communication
-  void collect_partitions(int mpi_size, int mpi_rank, MPI_Comm* comm);
+  //! \retval Return vector of partitions to exchange particles
+  std::vector<mpm::Index> collect_partitions(int mpi_size, int mpi_rank,
+                                             MPI_Comm* comm);
 
   //! Return xadj
   std::vector<idxtype> xadj() const;
