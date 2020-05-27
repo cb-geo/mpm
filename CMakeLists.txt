@@ -44,9 +44,6 @@ option(MPM_BUILD_LIB "enable libmpm" OFF)
 # Halo exchange
 option(HALO_EXCHANGE "Enable halo exchange" OFF)
 
-# PETSC
-option(USE_PETSC "Use PETSC solver library" OFF)
-
 # CMake Modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
@@ -107,15 +104,6 @@ if (MKL_FOUND)
     link_libraries(${MKL_LIBRARIES})
     add_definitions("-DUSE_MKL")
   endif()
-endif()
-
-# PETSc
-if (USE_PETSC)
-  find_package(PETSc COMPONENTS C)
-endif()
-if (PETSC_FOUND)
-  include_directories(${PETSC_INCLUDES})
-  link_libraries(${PETSC_LIBRARIES})
 endif()
 
 # KaHIP
