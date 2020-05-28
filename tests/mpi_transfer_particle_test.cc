@@ -15,6 +15,8 @@
 #include "particle.h"
 #include "quadrilateral_element.h"
 
+#ifdef USE_MPI
+#ifdef USE_KAHIP
 //! Check transfer of particles across MPI tasks
 TEST_CASE("MPI transfer particle is checked in 2D",
           "[particle][mpi][transfer][2D]") {
@@ -721,3 +723,5 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
     }
   }
 }
+#endif
+#endif
