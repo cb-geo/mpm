@@ -21,6 +21,9 @@ struct NodalProperties {
   bool create_property(const std::string& property, unsigned rows,
                        unsigned columns);
 
+  //! Initialise all the nodal values for all properties in the property pool
+  void initialise_properties();
+
   // Return data in the nodal properties map at a specific index
   // \param[in] property Property name
   // \param[in] node_id Id of the node within the property data
@@ -49,6 +52,7 @@ struct NodalProperties {
                        unsigned mat_id, const Eigen::MatrixXd& property_value,
                        unsigned nprops = 1);
 
+  // Map of properties and their nodal values
   std::map<std::string, Eigen::MatrixXd> properties_;
 };  // NodalProperties struct
 }  // namespace mpm

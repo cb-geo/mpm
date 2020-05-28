@@ -3,7 +3,7 @@
 // Function to create new property with given name and size (rows x cols)
 bool mpm::NodalProperties::create_property(const std::string& property,
                                            unsigned rows, unsigned columns) {
-  // Initialize a matrix with size of rows times columns and insert it to the
+  // Create a matrix with size of rows times columns and insert it to the
   // property database map
   Eigen::MatrixXd property_data = Eigen::MatrixXd::Zero(rows, columns);
   std::pair<std::map<std::string, Eigen::MatrixXd>::iterator, bool> status =
@@ -41,4 +41,18 @@ void mpm::NodalProperties::update_property(
   // proper location in the properties_ matrix that stores all nodal properties
   properties_.at(property).block(node_id * nprops, mat_id, nprops, 1) =
       property_value + this->property(property, node_id, mat_id, nprops);
+}
+
+// Initialise all the nodal values for all properties in the property pool
+void mpm::NodalProperties::initialise_properties() {
+  // Iterate over all properties in the property map
+  for (std::map<std::string, Eigen::MatrixXd>::iterator prop_itr =
+           properties_.begin();
+       prop_itr != properties_.end(); ++prop_itr) {
+    // Create Matrix with zero values that has same size of the current property
+    // in the iteration
+    Eigen::MatrixXd zeroed_property =
+        Eigen::MatrixXd::Zero(prop_itr->second.rows(), prop_itr->second.cols());
+    this->assign_property(prop_itr->first, 0, 0, zeroed_property, 1);
+  }
 }
