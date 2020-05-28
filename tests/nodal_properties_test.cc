@@ -5,7 +5,7 @@
 
 #include "nodal_properties.h"
 
-//! \brief Check NodalProperties struct
+//! \brief Check NodalProperties struct and its functions
 TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
   // Number of nodes
   const unsigned nnodes = 3;
@@ -121,6 +121,21 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
                   Approx(data1(i * dim + k, j)).epsilon(tolerance));
           REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(data2(i * dim + k, j)).epsilon(tolerance));
+        }
+      }
+    }
+
+    // initialise all nodal properties (set all values to zero)
+    nodal_properties.initialise_properties();
+
+    // Check if all values for all properties are zero
+    for (int i = 0; i < nnodes; ++i) {
+      for (int j = 0; j < nmaterials; ++j) {
+        for (int k = 0; k < dim; ++k) {
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
+                  Approx(0.0).epsilon(tolerance));
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
+                  Approx(0.0).epsilon(tolerance));
         }
       }
     }
@@ -251,6 +266,21 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
                   Approx(data1(i * dim + k, j)).epsilon(tolerance));
           REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
                   Approx(data2(i * dim + k, j)).epsilon(tolerance));
+        }
+      }
+    }
+
+    // initialise all nodal properties (set all values to zero)
+    nodal_properties.initialise_properties();
+
+    // Check if all values for all properties are zero
+    for (int i = 0; i < nnodes; ++i) {
+      for (int j = 0; j < nmaterials; ++j) {
+        for (int k = 0; k < dim; ++k) {
+          REQUIRE(nodal_properties.property(property1, i, j, dim)(k, 0) ==
+                  Approx(0.0).epsilon(tolerance));
+          REQUIRE(nodal_properties.property(property2, i, j, dim)(k, 0) ==
+                  Approx(0.0).epsilon(tolerance));
         }
       }
     }
