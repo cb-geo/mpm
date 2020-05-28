@@ -54,6 +54,6 @@ void mpm::NodalProperties::initialise_properties() {
     // in the iteration
     Eigen::MatrixXd zeroed_property =
         Eigen::MatrixXd::Zero(prop_itr->second.rows(), prop_itr->second.cols());
-    this->assign_property(prop_itr->first, 0, 0, zeroed_property, 1);
+    this->assign_property(prop_itr->first, 0, 0, zeroed_property);
   }
 }
