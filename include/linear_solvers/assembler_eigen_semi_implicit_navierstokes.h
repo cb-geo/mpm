@@ -8,7 +8,6 @@
 #include "assembler_base.h"
 #include "spdlog/spdlog.h"
 
-#include "cg_eigen.h"
 #include "mesh.h"
 
 namespace mpm {
@@ -66,14 +65,14 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   bool assemble_corrector_right(double dt) override;
 
  protected:
-  //! Logger
-  std::shared_ptr<spdlog::logger> console_;
-
- private:
   //! number of nodes
   using AssemblerBase<Tdim>::active_dof_;
   //! Mesh object
   using AssemblerBase<Tdim>::mesh_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
+  //! Global node indices
+  std::vector<Eigen::VectorXi> global_node_indices_;
   //! Laplacian matrix
   Eigen::SparseMatrix<double> laplacian_matrix_;
   //! Poisson RHS vector
@@ -86,8 +85,6 @@ class AssemblerEigenSemiImplicitNavierStokes : public AssemblerBase<Tdim> {
   Eigen::VectorXd pressure_increment_;
   //! correction_matrix
   Eigen::SparseMatrix<double> correction_matrix_;
-  //! Global node indices
-  std::vector<Eigen::VectorXi> global_node_indices_;
 };
 }  // namespace mpm
 
