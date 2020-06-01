@@ -444,7 +444,7 @@ class Mesh {
   void create_nodal_properties();
 
   // Initialise the nodal properties' map
-  void initialise_properties();
+  void initialise_nodal_properties();
 
  private:
   // Read particles from file

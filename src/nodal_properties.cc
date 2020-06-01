@@ -45,7 +45,7 @@ void mpm::NodalProperties::update_property(
 }
 
 // Initialise all the nodal values for all properties in the property pool
-void mpm::NodalProperties::initialise_properties() {
+void mpm::NodalProperties::initialise_nodal_properties() {
   // Iterate over all properties in the property map
   for (auto prop_itr = properties_.begin(); prop_itr != properties_.end();
        ++prop_itr) {

@@ -1912,7 +1912,7 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
 
 // Initialise the nodal properties' map
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::initialise_properties() {
+void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
-  nodal_properties_->initialise_properties();
+  nodal_properties_->initialise_nodal_properties();
 }
