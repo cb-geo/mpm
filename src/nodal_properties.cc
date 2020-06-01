@@ -47,11 +47,13 @@ void mpm::NodalProperties::update_property(
 // Initialise all the nodal values for all properties in the property pool
 void mpm::NodalProperties::initialise_properties() {
   // Iterate over all properties in the property map
-  for (std::map<std::string, Eigen::MatrixXd>::iterator prop_itr =
-           properties_.begin();
-       prop_itr != properties_.end(); ++prop_itr) {
+  for (auto prop_itr = properties_.begin(); prop_itr != properties_.end();
+       ++prop_itr) {
     // Create Matrix with zero values that has same size of the current property
-    // in the iteration
+    // in the iteration. The referred size is equal to rows * cols, where:
+    // rows = number of nodes * size of property (1 if property is scalar, Tdim
+    // if property is vector)
+    // cols = number of materials
     Eigen::MatrixXd zeroed_property =
         Eigen::MatrixXd::Zero(prop_itr->second.rows(), prop_itr->second.cols());
     this->assign_property(prop_itr->first, 0, 0, zeroed_property);
