@@ -1422,5 +1422,10 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
 
     // Check nodal properties creation
     REQUIRE_NOTHROW(mesh->create_nodal_properties());
+
+    // Check nodal properties initialisation
+    REQUIRE_NOTHROW(mesh->Initialise_nodal_properties());
+
+    
   }
 }
