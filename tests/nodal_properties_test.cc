@@ -126,7 +126,7 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     }
 
     // initialise all nodal properties (set all values to zero)
-    nodal_properties.initialise_properties();
+    nodal_properties.initialise_nodal_properties();
 
     // Check if all values for all properties are zero
     for (int i = 0; i < nnodes; ++i) {
@@ -271,7 +271,7 @@ TEST_CASE("NodalProperties is checked", "[nodal_properties]") {
     }
 
     // initialise all nodal properties (set all values to zero)
-    nodal_properties.initialise_properties();
+    nodal_properties.initialise_nodal_properties();
 
     // Check if all values for all properties are zero
     for (int i = 0; i < nnodes; ++i) {

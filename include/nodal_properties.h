@@ -22,7 +22,7 @@ struct NodalProperties {
                        unsigned columns);
 
   //! Initialise all the nodal values for all properties in the property pool
-  void initialise_properties();
+  void initialise_nodal_properties();
 
   // Return data in the nodal properties map at a specific index
   // \param[in] property Property name
