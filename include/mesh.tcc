@@ -1881,7 +1881,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
   return status;
 }
 
-// Create the nodal properties' pool
+// Create the nodal properties' map
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_nodal_properties() {
   // Initialise the shared pointer to nodal properties
@@ -1903,4 +1903,11 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
   } else {
     throw std::runtime_error("Number of nodes or number of materials is zero");
   }
+}
+
+// Initialise the nodal properties' map
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::initialise_nodal_properties() {
+  // Call initialise_properties function from the nodal properties
+  nodal_properties_->initialise_nodal_properties();
 }
