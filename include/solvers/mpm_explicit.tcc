@@ -170,11 +170,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     task_group.wait();
 
-    // Initialise nodal properties and assign material ids to node
+    // Initialise nodal properties and append material ids to node
     if (interface_) {
       // Initialise nodal properties
       mesh_->initialise_nodal_properties();
 
+      // Append material ids to nodes
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
                     std::placeholders::_1));
@@ -208,6 +209,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
                   std::placeholders::_1),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+
+    if (interface_)
+      mesh_->iterate_over_nodes(std::bind(
+          &mpm::NodeBase<Tdim>::compute_multimaterial_change_in_momentum,
+          std::placeholders::_1));
 
     // Update stress first
     if (this->stress_update_ == mpm::StressUpdate::USF)

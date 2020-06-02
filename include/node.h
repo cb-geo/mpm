@@ -254,6 +254,9 @@ class Node : public NodeBase<Tdim> {
                        const Eigen::MatrixXd& property_value, unsigned mat_id,
                        unsigned nprops) noexcept override;
 
+  //! Compute multimaterial change in momentum
+  void compute_multimaterial_change_in_momentum() override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;
