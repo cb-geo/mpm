@@ -140,7 +140,6 @@ std::vector<mpm::Index> mpm::Graph<Tdim>::collect_partitions(int mpi_size,
                                                              int mpi_rank,
                                                              MPI_Comm* comm) {
   //! allocate space to partition
-  MPI_Status status;
   mpm::Index ncells = this->cells_.size();
   std::vector<mpm::Index> partition(ncells, 0);
   // ID of cells, which should transfer particles
@@ -157,7 +156,7 @@ std::vector<mpm::Index> mpm::Graph<Tdim>::collect_partitions(int mpi_size,
       std::vector<idxtype> rpart(rnvtxs);
       //! penum is the source process
       MPI_Recv(rpart.data(), rnvtxs, MPI_UNSIGNED_LONG_LONG, penum, 1, *comm,
-               &status);
+               MPI_STATUS_IGNORE);
 
       for (int i = 0; i < rnvtxs; ++i) {
         partition[par] = rpart[i];
@@ -174,7 +173,7 @@ std::vector<mpm::Index> mpm::Graph<Tdim>::collect_partitions(int mpi_size,
              this->vtxdist_[mpi_rank + 1] - this->vtxdist_[mpi_rank],
              MPI_UNSIGNED_LONG_LONG, 0, 1, *comm);
     MPI_Recv(partition.data(), ncells, MPI_UNSIGNED_LONG_LONG, 0, 1, *comm,
-             &status);
+             MPI_STATUS_IGNORE);
   }
 
   // Assign partition to cells
