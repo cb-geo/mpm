@@ -777,23 +777,20 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
           ghost_cells_neighbour_ranks_[(*citr)->id()];
 
       for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
-        // MPI status
-        MPI_Status recv_status;
         // Receive number of particles
         unsigned nrecv_particles;
         MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
-                 MPI_COMM_WORLD, &recv_status);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         if (nrecv_particles != 0) {
           std::vector<mpm::HDF5Particle> recv_particles;
           recv_particles.resize(nrecv_particles);
           // Receive the vector of particles
           mpm::HDF5Particle received;
-          MPI_Status status_recv;
           MPI_Datatype particle_type =
               mpm::register_mpi_particle_type(received);
           MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   neighbour_ranks[i], 0, MPI_COMM_WORLD, &status_recv);
+                   neighbour_ranks[i], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
@@ -889,23 +886,21 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
       // If the current rank is the MPI rank receive particles
       if ((cell->rank() != cell->previous_mpirank()) &&
           (cell->rank() == mpi_rank)) {
-        // MPI status
-        MPI_Status recv_status;
         // Receive number of particles
         unsigned nrecv_particles;
         MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, cell->previous_mpirank(), 0,
-                 MPI_COMM_WORLD, &recv_status);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         if (nrecv_particles != 0) {
           std::vector<mpm::HDF5Particle> recv_particles;
           recv_particles.resize(nrecv_particles);
           // Receive the vector of particles
           mpm::HDF5Particle received;
-          MPI_Status status_recv;
           MPI_Datatype particle_type =
               mpm::register_mpi_particle_type(received);
           MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   cell->previous_mpirank(), 0, MPI_COMM_WORLD, &status_recv);
+                   cell->previous_mpirank(), 0, MPI_COMM_WORLD,
+                   MPI_STATUS_IGNORE);
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
@@ -1886,7 +1881,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
   return status;
 }
 
-// Create the nodal properties' pool
+// Create the nodal properties' map
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::create_nodal_properties() {
   // Initialise the shared pointer to nodal properties
@@ -1908,4 +1903,11 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
   } else {
     throw std::runtime_error("Number of nodes or number of materials is zero");
   }
+}
+
+// Initialise the nodal properties' map
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::initialise_nodal_properties() {
+  // Call initialise_properties function from the nodal properties
+  nodal_properties_->initialise_nodal_properties();
 }
