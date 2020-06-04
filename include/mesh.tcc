@@ -1889,14 +1889,15 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
 
   // Check if nodes_ and materials_is empty and throw runtime error if they are
   if (nodes_.size() != 0 && materials_.size() != 0) {
+    // Compute number of rows in nodal properties for vector entities
+    const unsigned nrows = nodes_.size() * Tdim;
     // Create pool data for each property in the nodal properties struct
     // object. Properties must be named in the plural form
     nodal_properties_->create_property("masses", nodes_.size(),
                                        materials_.size());
-    nodal_properties_->create_property("momenta", nodes_.size() * Tdim,
+    nodal_properties_->create_property("momenta", nrows, materials_.size());
+    nodal_properties_->create_property("change_in_momenta", nrows,
                                        materials_.size());
-    nodal_properties_->create_property("change_in_momenta",
-                                       nodes_.size() * Tdim, materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
