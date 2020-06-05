@@ -12,6 +12,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   // Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass, double(0.)));
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
@@ -26,6 +28,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass, double(0.)));
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 

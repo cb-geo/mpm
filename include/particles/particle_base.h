@@ -140,10 +140,10 @@ class ParticleBase {
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] value Property value from the particles in a cell
-  virtual void update_scalar_property(mpm::properties::Scalar property, bool update,
-                              double value) noexcept = 0;
+  virtual void update_scalar_property(mpm::properties::Scalar property,
+                                      bool update, double value) noexcept = 0;
 
-  //! Return property 
+  //! Return property
   //! \param[in] phase Index corresponding to the phase
   virtual double scalar_property(mpm::properties::Scalar property) const = 0;
 
