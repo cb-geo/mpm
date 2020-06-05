@@ -548,11 +548,12 @@ void mpm::Node<Tdim, Tdof,
   // momentum
   std::lock_guard<std::mutex> guard(node_mutex_);
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    Eigen::MatrixXd mass =
+    const Eigen::Matrix<double, 1, 1> mass =
         property_handle_->property("masses", prop_id_, *mitr);
-    Eigen::MatrixXd momentum =
+    const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
-    Eigen::MatrixXd change_in_momenta = velocity_ * mass - momentum;
+    const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
+        velocity_ * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
