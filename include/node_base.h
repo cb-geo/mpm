@@ -244,6 +244,9 @@ class NodeBase {
                                const Eigen::MatrixXd& property_value,
                                unsigned mat_id, unsigned nprops) noexcept = 0;
 
+  //! Compute multimaterial change in momentum
+  virtual void compute_multimaterial_change_in_momentum() = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
