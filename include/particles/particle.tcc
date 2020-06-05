@@ -488,6 +488,23 @@ void mpm::Particle<Tdim>::compute_mass() noexcept {
   this->mass_ = volume_ * mass_density_;
 }
 
+//! Update scalar property at the nodes from particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::update_scalar_property(
+    mpm::properties::Scalar property, bool update, double value) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+  scalar_properties_.at(property) =
+      scalar_properties_.at(property) * factor + value;
+}
+
+//! Update scalar property at the nodes from particle
+template <unsigned Tdim>
+double mpm::Particle<Tdim>::scalar_property(
+    mpm::properties::Scalar property) const {
+  return scalar_properties_.at(property);
+}
+
 //! Map scalar property to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_scalar_property_nodes(

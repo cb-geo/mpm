@@ -139,6 +139,17 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute mass as volume * density
   void compute_mass() noexcept override;
 
+  //! Update scalar property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
+                              double value) noexcept override;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(mpm::properties::Scalar property) const override;
+
   //! Map scalar property to the nodes
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
