@@ -1,6 +1,8 @@
 #ifndef MPM_NODE_H_
 #define MPM_NODE_H_
 
+#include <tsl/ordered_map.h>
+
 #include "logger.h"
 #include "nodal_properties.h"
 #include "node_base.h"
@@ -64,6 +66,19 @@ class Node : public NodeBase<Tdim> {
 
   //! Return status
   bool status() const override { return status_; }
+
+  //! Update scalar property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(const std::string& property, bool update,
+                              unsigned phase, double value) noexcept override;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(const std::string& property,
+                         unsigned phase) const override;
 
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -269,6 +284,12 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Scalar properties
+  tsl::ordered_map<std::string, Eigen::Matrix<double, 1, Tnphases>>
+      scalar_properties_;
+  //! Vector properties
+  tsl::ordered_map<std::string, Eigen::Matrix<double, 1, Tnphases>>
+      vector_properties_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
   //! Volume

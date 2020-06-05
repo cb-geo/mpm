@@ -70,6 +70,20 @@ class NodeBase {
   //! Return status
   virtual bool status() const = 0;
 
+  //! Update scalar property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_scalar_property(const std::string& property, bool update,
+                                      unsigned phase,
+                                      double value) noexcept = 0;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double scalar_property(const std::string& property,
+                                 unsigned phase) const = 0;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

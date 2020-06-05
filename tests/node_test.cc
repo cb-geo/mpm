@@ -121,6 +121,23 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     std::shared_ptr<mpm::NodeBase<Dim>> node =
         std::make_shared<mpm::Node<Dim, Dof, Nphases>>(id, coords);
 
+    SECTION("Nodal scalar properties") {
+      // Check mass
+      REQUIRE(node->scalar_property("mass", Nphase) == Approx(0.0).epsilon(Tolerance));
+      double mass = 100.5;
+      // Update mass to 100.5
+      REQUIRE_NOTHROW(node->update_scalar_property("mass", true, Nphase, mass));
+      REQUIRE(node->scalar_property("mass", Nphase) == Approx(100.5).epsilon(Tolerance));
+      // Update mass to 201
+      REQUIRE_NOTHROW(node->update_scalar_property("mass", true, Nphase, mass));
+      REQUIRE(node->scalar_property("mass", Nphase) == Approx(201.0).epsilon(Tolerance));
+      // Assign mass to 100
+      mass = 100.;
+      REQUIRE_NOTHROW(node->update_scalar_property("mass", false, Nphase, mass));
+      REQUIRE(node->scalar_property("mass", Nphase) ==
+              Approx(100.0).epsilon(Tolerance));
+    }
+    
     // Check mass
     REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
