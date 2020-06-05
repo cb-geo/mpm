@@ -445,9 +445,10 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
       const auto element = cell_->element_ptr();
 
       // Set local particle length based on length of element in natural
-      //coordinates. Length/(npartices^(1/Dimension))
-      this->natural_size_.fill(element->unit_element_length() /
-      	std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
+      // coordinates. Length/(npartices^(1/Dimension))
+      this->natural_size_.fill(
+          element->unit_element_length() /
+          std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

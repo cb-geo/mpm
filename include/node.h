@@ -72,12 +72,12 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] value Property value from the particles in a cell
-  void update_scalar_property(const std::string& property, bool update,
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
                               unsigned phase, double value) noexcept override;
 
   //! Return property at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double scalar_property(const std::string& property,
+  double scalar_property(mpm::properties::Scalar property,
                          unsigned phase) const override;
 
   //! Update mass at the nodes from particle
@@ -285,10 +285,10 @@ class Node : public NodeBase<Tdim> {
   //! Status
   bool status_{false};
   //! Scalar properties
-  tsl::ordered_map<std::string, Eigen::Matrix<double, 1, Tnphases>>
+  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
       scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<std::string, Eigen::Matrix<double, 1, Tnphases>>
+  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
       vector_properties_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;

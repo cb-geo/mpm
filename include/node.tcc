@@ -17,8 +17,9 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   // Clear any velocity constraints
   velocity_constraints_.clear();
   concentrated_force_.setZero();
-  scalar_properties_.emplace(std::make_pair(
-      std::string("mass"), Eigen::Matrix<double, 1, Tnphases>::Zero()));
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass,
+                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
   this->initialise();
 }
 
@@ -35,7 +36,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   acceleration_.setZero();
   status_ = false;
   material_ids_.clear();
-  scalar_properties_.at("mass").setZero();
+  scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -51,7 +52,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
 //! Update scalar property at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
-    const std::string& property, bool update, unsigned phase,
+    mpm::properties::Scalar property, bool update, unsigned phase,
     double value) noexcept {
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
@@ -62,11 +63,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
       (scalar_properties_.at(property)[phase] * factor) + value;
 }
 
-
 //! Update scalar property at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 double mpm::Node<Tdim, Tdof, Tnphases>::scalar_property(
-    const std::string& property, unsigned phase) const {
+    mpm::properties::Scalar property, unsigned phase) const {
   return scalar_properties_.at(property)[phase];
 }
 
