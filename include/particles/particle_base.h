@@ -136,6 +136,19 @@ class ParticleBase {
   //! Compute mass of particle
   virtual void compute_mass() noexcept = 0;
 
+  //! Map scalar property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  virtual void map_scalar_property_nodes(mpm::properties::Scalar property,
+                                         bool update,
+                                         unsigned phase) noexcept = 0;
+
+  //! Interpolate scalar property from nodes for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double interpolate_scalar_property_nodes(
+      mpm::properties::Scalar property, unsigned phase) const = 0;
+
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
 

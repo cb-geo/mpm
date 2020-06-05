@@ -488,6 +488,30 @@ void mpm::Particle<Tdim>::compute_mass() noexcept {
   this->mass_ = volume_ * mass_density_;
 }
 
+//! Map scalar property to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_scalar_property_nodes(
+    mpm::properties::Scalar property, bool update, unsigned phase) noexcept {
+  // Check if particle mass is set
+  assert(scalar_properties_.at(property) != std::numeric_limits<double>::max());
+
+  // Map scalar property to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_scalar_property(
+        property, update, phase, scalar_properties_.at(property) * shapefn_[i]);
+}
+
+//! Interpolate scalar property from nodes
+template <unsigned Tdim>
+double mpm::Particle<Tdim>::interpolate_scalar_property_nodes(
+    mpm::properties::Scalar property, unsigned phase) const {
+  double value = 0.;
+  // Interpolate scalar property from nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    value += nodes_[i]->scalar_property(property, phase) * shapefn_[i];
+  return value;
+}
+
 //! Map particle mass and momentum to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {

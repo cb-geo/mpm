@@ -3,6 +3,7 @@
 
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
+#include <tsl/ordered_map.h>
 
 #include <array>
 #include <limits>
@@ -137,6 +138,18 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute mass as volume * density
   void compute_mass() noexcept override;
+
+  //! Map scalar property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase) noexcept override;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
+                                           unsigned phase) const override;
 
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept override;
@@ -304,6 +317,11 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::state_variables_;
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
+  //! Scalar properties
+  tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
+  //! Vector properties
+  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tdim>>
+      vector_properties_;
   //! Volumetric mass density (mass / volume)
   double mass_density_{0.};
   //! Mass
