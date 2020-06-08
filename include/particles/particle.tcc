@@ -445,9 +445,10 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
       const auto element = cell_->element_ptr();
 
       // Set local particle length based on length of element in natural
-      //coordinates. Length/(npartices^(1/Dimension))
-      this->natural_size_.fill(element->unit_element_length() /
-      	std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
+      // coordinates. Length/(npartices^(1/Dimension))
+      this->natural_size_.fill(
+          element->unit_element_length() /
+          std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -515,7 +516,7 @@ void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     nodal_mass(0, 0) = mass_ * shapefn_[i];
     nodes_[i]->update_property(true, "masses", nodal_mass, material_id_, 1);
-    nodes_[i]->update_property(true, "momenta", nodal_mass(0, 0) * velocity_,
+    nodes_[i]->update_property(true, "momenta", velocity_ * nodal_mass,
                                material_id_, Tdim);
   }
 }
