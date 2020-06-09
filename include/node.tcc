@@ -576,9 +576,9 @@ void mpm::Node<Tdim, Tdof,
 
     // displacement of the center of mass
     displacement_ += material_displacement / mass_(0, 0);
-    // update nodal-multimaterial displacement by dividing it by this material's
+    // assign nodal-multimaterial displacement by dividing it by this material's
     // mass
-    property_handle_->update_property(
+    property_handle_->assign_property(
         "displacements", prop_id_, *mitr,
         material_displacement / material_mass(0, 0), Tdim);
   }
