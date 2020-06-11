@@ -564,3 +564,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
   property_handle_->update_property(property, prop_id_, mat_id, property_value,
                                     nprops);
 }
+
+//! Compute multimaterial change in momentum
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_change_in_momentum() {
+  // iterate over all materials in the material_ids set and update the change in
+  // momentum
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    const Eigen::Matrix<double, 1, 1> mass =
+        property_handle_->property("masses", prop_id_, *mitr);
+    const Eigen::Matrix<double, Tdim, 1> momentum =
+        property_handle_->property("momenta", prop_id_, *mitr, Tdim);
+    const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
+        velocity_ * mass - momentum;
+    property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
+                                      change_in_momenta, Tdim);
+  }
+}
