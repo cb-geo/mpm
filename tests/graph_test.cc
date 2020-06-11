@@ -488,19 +488,19 @@ TEST_CASE("Graph Partitioning in 2D", "[mpi][graph][2D]") {
     mesh->find_cell_neighbours();
 
     coords << 1, 1;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle0 =
+    std::shared_ptr<mpm::Particle<Dim>> particle0 =
         std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     coords << 1, 3;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+    std::shared_ptr<mpm::Particle<Dim>> particle1 =
         std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     coords << 3, 1;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+    std::shared_ptr<mpm::Particle<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim>>(2, coords);
 
     coords << 3, 3;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+    std::shared_ptr<mpm::Particle<Dim>> particle3 =
         std::make_shared<mpm::Particle<Dim>>(3, coords);
 
     mesh->add_particle(particle0);
@@ -782,19 +782,19 @@ TEST_CASE("Graph Partitioning in 3D", "[mpi][graph][3D]") {
     mesh->find_cell_neighbours();
 
     coords << 1, 1, 1;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle0 =
+    std::shared_ptr<mpm::Particle<Dim>> particle0 =
         std::make_shared<mpm::Particle<Dim>>(0, coords);
 
     coords << 1, 1, 3;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+    std::shared_ptr<mpm::Particle<Dim>> particle1 =
         std::make_shared<mpm::Particle<Dim>>(1, coords);
 
     coords << 3, 1, 3;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+    std::shared_ptr<mpm::Particle<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim>>(2, coords);
 
     coords << 3, 1, 1;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+    std::shared_ptr<mpm::Particle<Dim>> particle3 =
         std::make_shared<mpm::Particle<Dim>>(3, coords);
 
     mesh->add_particle(particle0);

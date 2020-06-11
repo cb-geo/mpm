@@ -306,8 +306,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
+    mesh_->iterate_over_particles(
+        std::bind(&mpm::Particle<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     this->particles_volumes(mesh_props, particle_io);

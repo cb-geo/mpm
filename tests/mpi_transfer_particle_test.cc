@@ -209,7 +209,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
     if (mpi_rank == 1) {
       // Particle 1
       coords << 0.5, 0.5;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+      std::shared_ptr<mpm::Particle<Dim>> particle1 =
           std::make_shared<mpm::Particle<Dim>>(0, coords);
       particle1->assign_material(material);
 
@@ -235,7 +235,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
     if (mpi_rank == 2) {
       // Particle 2
       coords << 1.5, 1.5;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+      std::shared_ptr<mpm::Particle<Dim>> particle2 =
           std::make_shared<mpm::Particle<Dim>>(2, coords);
       particle2->assign_material(material);
 
@@ -261,7 +261,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
     if (mpi_rank == 3) {
       // Particle 2
       coords << 0.5, 1.5;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+      std::shared_ptr<mpm::Particle<Dim>> particle3 =
           std::make_shared<mpm::Particle<Dim>>(3, coords);
       particle3->assign_material(material);
 
@@ -570,7 +570,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
     if (mpi_rank == 1) {
       // Particle 1
       coords << 1.0, 1.0, 1.0;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+      std::shared_ptr<mpm::Particle<Dim>> particle1 =
           std::make_shared<mpm::Particle<Dim>>(0, coords);
       particle1->assign_material(material);
 
@@ -596,7 +596,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
     if (mpi_rank == 2) {
       // Particle 2
       coords << 1.5, 1.5, 1.5;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+      std::shared_ptr<mpm::Particle<Dim>> particle2 =
           std::make_shared<mpm::Particle<Dim>>(1, coords);
       particle2->assign_material(material);
 
@@ -622,7 +622,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
     if (mpi_rank == 3) {
       // Particle 3
       coords << 0.5, 0.5, 0.5;
-      std::shared_ptr<mpm::ParticleBase<Dim>> particle3 =
+      std::shared_ptr<mpm::Particle<Dim>> particle3 =
           std::make_shared<mpm::Particle<Dim>>(3, coords);
       particle3->assign_material(material);
 

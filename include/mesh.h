@@ -38,7 +38,6 @@ using Json = nlohmann::json;
 #include "nodal_properties.h"
 #include "node.h"
 #include "particle.h"
-#include "particle_base.h"
 #include "traction.h"
 #include "vector.h"
 #include "velocity_constraint.h"
@@ -201,14 +200,13 @@ class Mesh {
   //! \param[in] particle A shared pointer to particle
   //! \param[in] checks Parameter to check duplicates and addition
   //! \retval insertion_status Return the successful addition of a particle
-  bool add_particle(const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle,
+  bool add_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle,
                     bool checks = true);
 
   //! Remove a particle from the mesh
   //! \param[in] particle A shared pointer to particle
   //! \retval insertion_status Return the successful addition of a particle
-  bool remove_particle(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+  bool remove_particle(const std::shared_ptr<mpm::Particle<Tdim>>& particle);
 
   //! Remove a particle by id
   bool remove_particle_by_id(mpm::Index id);
@@ -241,7 +239,7 @@ class Mesh {
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
   //! \retval particles Particles which cannot be located in the mesh
-  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> locate_particles_mesh();
+  std::vector<std::shared_ptr<mpm::Particle<Tdim>>> locate_particles_mesh();
 
   //! Iterate over particles
   //! \tparam Toper Callable object typically a baseclass functor
@@ -454,7 +452,7 @@ class Mesh {
 
   // Locate a particle in mesh cells
   bool locate_particle_cells(
-      const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle);
+      const std::shared_ptr<mpm::Particle<Tdim>>& particle);
 
  private:
   //! mesh id
@@ -464,13 +462,13 @@ class Mesh {
   //! Vector of mesh neighbours
   Map<Mesh<Tdim>> neighbour_meshes_;
   //! Vector of particles
-  Vector<ParticleBase<Tdim>> particles_;
+  Vector<Particle<Tdim>> particles_;
   //! Vector of particles ids and cell ids
   std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Vector of particle sets
   tsl::robin_map<unsigned, tbb::concurrent_vector<mpm::Index>> particle_sets_;
   //! Map of particles for fast retrieval
-  Map<ParticleBase<Tdim>> map_particles_;
+  Map<Particle<Tdim>> map_particles_;
   //! Vector of nodes
   Vector<NodeBase<Tdim>> nodes_;
   //! Vector of domain shared nodes

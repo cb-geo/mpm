@@ -42,7 +42,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   //! Check for id = 0
   SECTION("Particle id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
@@ -51,7 +51,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   SECTION("Particle id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
     REQUIRE(particle->status() == true);
@@ -61,7 +61,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   SECTION("Particle with id, coordinates, and status") {
     mpm::Index id = 0;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
@@ -74,7 +74,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
 
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check for coordinates being zero
@@ -109,7 +109,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     Eigen::Matrix<double, 6, 1> stress =
         Eigen::Matrix<double, 6, 1>::Constant(5.7);
@@ -129,7 +129,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     // Apply constraints
     particle->apply_particle_velocity_constraints(0, 10.5);
@@ -141,7 +141,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     SECTION("Check scalar properties") {
@@ -218,7 +218,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
   SECTION("Check initialise particle HDF5") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     mpm::HDF5Particle h5_particle;
@@ -596,7 +596,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     Eigen::Matrix<double, 6, 1> stress =
         Eigen::Matrix<double, 6, 1>::Constant(5.7);
@@ -612,7 +612,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
 
     // Apply constraints
@@ -1230,7 +1230,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check mass
@@ -1300,7 +1300,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
   SECTION("Check initialise particle HDF5") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     mpm::HDF5Particle h5_particle;
@@ -1600,7 +1600,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   //! Check for id = 0
   SECTION("Particle id is zero") {
     mpm::Index id = 0;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
@@ -1609,7 +1609,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Particle id is positive") {
     //! Check for id is a positive value
     mpm::Index id = std::numeric_limits<mpm::Index>::max();
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
     REQUIRE(particle->id() == std::numeric_limits<mpm::Index>::max());
     REQUIRE(particle->status() == true);
@@ -1619,7 +1619,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Particle with id, coordinates, and status") {
     mpm::Index id = 0;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     REQUIRE(particle->id() == 0);
     REQUIRE(particle->status() == true);
@@ -1631,7 +1631,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("coordinates function is checked") {
     mpm::Index id = 0;
     // Create particle
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     //! Check for coordinates being zero
@@ -1666,7 +1666,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Add particle
     mpm::Index id = 0;
     coords << 1.5, 1.5, 1.5;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check particle coordinates
@@ -1820,7 +1820,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     Eigen::Matrix<double, 6, 1> stress =
         Eigen::Matrix<double, 6, 1>::Constant(5.7);
@@ -1837,7 +1837,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords, status);
     // Apply constraints
     particle->apply_particle_velocity_constraints(0, 10.5);
@@ -1855,7 +1855,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Add particle
     mpm::Index id = 0;
     coords << 1.5, 1.5, 1.5;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Phase
@@ -2523,7 +2523,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Check particle properties") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check mass
@@ -2593,7 +2593,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
   SECTION("Check initialise particle HDF5") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+    std::shared_ptr<mpm::Particle<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     mpm::HDF5Particle h5_particle;

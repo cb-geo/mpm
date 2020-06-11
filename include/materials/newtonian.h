@@ -49,7 +49,7 @@ class Newtonian : public Material<Tdim> {
   //! \param[in] state_vars History-dependent state variables
   //! \retval updated_stress Updated value of stress
   Vector6d compute_stress(const Vector6d& stress, const Vector6d& dstrain,
-                          const ParticleBase<Tdim>* ptr,
+                          const Particle<Tdim>* ptr,
                           mpm::dense_map* state_vars) override;
 
  protected:

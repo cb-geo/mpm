@@ -157,20 +157,19 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
 
   // Iterate over each particle to initialise
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::initialise, std::placeholders::_1));
+      std::bind(&mpm::Particle<Dim>::initialise, std::placeholders::_1));
 
   // Iterate over each particle to assign material
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                material));
+  mesh->iterate_over_particles(std::bind(&mpm::Particle<Dim>::assign_material,
+                                         std::placeholders::_1, material));
 
   // Compute volume
-  mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::Particle<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
+      std::bind(&mpm::Particle<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -186,13 +185,12 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
   REQUIRE(node3->assign_velocity_constraint(0, 0) == true);
 
   // Iterate over each particle to compute shapefn
-  mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_shapefn, std::placeholders::_1));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::Particle<Dim>::compute_shapefn, std::placeholders::_1));
 
   // Assign mass and momentum to nodes
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1));
+  mesh->iterate_over_particles(std::bind(
+      &mpm::Particle<Dim>::map_mass_momentum_to_nodes, std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
@@ -202,7 +200,7 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
 
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
+      std::bind(&mpm::Particle<Dim>::compute_updated_position,
                 std::placeholders::_1, dt, false));
 
   // Locate particles in a mesh
@@ -413,20 +411,19 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
 
   // Iterate over each particle to initialise
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::initialise, std::placeholders::_1));
+      std::bind(&mpm::Particle<Dim>::initialise, std::placeholders::_1));
 
   // Iterate over each particle to assign material
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::assign_material, std::placeholders::_1,
-                material));
+  mesh->iterate_over_particles(std::bind(&mpm::Particle<Dim>::assign_material,
+                                         std::placeholders::_1, material));
 
   // Compute volume
-  mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::Particle<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
+      std::bind(&mpm::Particle<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -446,13 +443,12 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
   REQUIRE(node7->assign_velocity_constraint(0, 0) == true);
 
   // Iterate over each particle to compute shapefn
-  mesh->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Dim>::compute_shapefn, std::placeholders::_1));
+  mesh->iterate_over_particles(
+      std::bind(&mpm::Particle<Dim>::compute_shapefn, std::placeholders::_1));
 
   // Assign mass and momentum to nodes
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
-                std::placeholders::_1));
+  mesh->iterate_over_particles(std::bind(
+      &mpm::Particle<Dim>::map_mass_momentum_to_nodes, std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
@@ -462,7 +458,7 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
 
   // Iterate over each particle to compute updated position
   mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_updated_position,
+      std::bind(&mpm::Particle<Dim>::compute_updated_position,
                 std::placeholders::_1, dt, false));
 
   // Locate particles in a mesh

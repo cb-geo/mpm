@@ -18,16 +18,16 @@ TEST_CASE("Particle vector is checked for 2D case", "[particlevector][2D]") {
   mpm::Index id1 = 0;
   Eigen::Vector2d coords;
   coords.setZero();
-  std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+  std::shared_ptr<mpm::Particle<Dim>> particle1 =
       std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
-  std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+  std::shared_ptr<mpm::Particle<Dim>> particle2 =
       std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
   // Particle vector
-  auto particlevector = std::make_shared<mpm::Vector<mpm::ParticleBase<Dim>>>();
+  auto particlevector = std::make_shared<mpm::Vector<mpm::Particle<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
@@ -98,7 +98,7 @@ TEST_CASE("Particle vector is checked for 2D case", "[particlevector][2D]") {
 
     // Iterate through particle vector to update coordinaates
     particlevector->for_each(  // function structure
-        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
+        std::bind(&mpm::Particle<Dim>::assign_coordinates,
                   std::placeholders::_1, coords));
 
     // Check if update has gone through
@@ -125,16 +125,16 @@ TEST_CASE("Particle vector is checked for 3D case", "[particlevector][3D]") {
   mpm::Index id1 = 0;
   Eigen::Vector3d coords;
   coords.setZero();
-  std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+  std::shared_ptr<mpm::Particle<Dim>> particle1 =
       std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
   // Particle 2
   mpm::Index id2 = 1;
-  std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+  std::shared_ptr<mpm::Particle<Dim>> particle2 =
       std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
   // Particle vector
-  auto particlevector = std::make_shared<mpm::Vector<mpm::ParticleBase<Dim>>>();
+  auto particlevector = std::make_shared<mpm::Vector<mpm::Particle<Dim>>>();
 
   // Check add particle
   SECTION("Check add particle functionality") {
@@ -203,9 +203,8 @@ TEST_CASE("Particle vector is checked for 3D case", "[particlevector][3D]") {
     coords << 1., 1., 1.;
 
     // Iterate through particle vector to update coordinaates
-    particlevector->for_each(
-        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
-                  std::placeholders::_1, coords));
+    particlevector->for_each(std::bind(&mpm::Particle<Dim>::assign_coordinates,
+                                       std::placeholders::_1, coords));
 
     // Check if update has gone through
     for (auto itr = particlevector->cbegin(); itr != particlevector->cend();

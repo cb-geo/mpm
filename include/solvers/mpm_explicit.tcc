@@ -11,7 +11,7 @@ template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
   mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
+      &mpm::Particle<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
 
 #ifdef USE_MPI
   int mpi_size = 1;
@@ -30,28 +30,27 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
 #endif
 
   // Smooth pressure over particles
-  mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                std::placeholders::_1));
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::Particle<Tdim>::compute_pressure_smoothing, std::placeholders::_1));
 }
 
 //! MPM Explicit compute stress strain
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
   // Iterate over each particle to calculate strain
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
+  mesh_->iterate_over_particles(std::bind(&mpm::Particle<Tdim>::compute_strain,
+                                          std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::Particle<Tdim>::update_volume, std::placeholders::_1));
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
 
   // Iterate over each particle to compute stress
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::Particle<Tdim>::compute_stress, std::placeholders::_1));
 }
 
 //! MPM Explicit solver
@@ -122,7 +121,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Compute mass
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+      std::bind(&mpm::Particle<Tdim>::compute_mass, std::placeholders::_1));
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -165,7 +164,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     task_group.run([&] {
       // Iterate over each particle to compute shapefn
       mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+          &mpm::Particle<Tdim>::compute_shapefn, std::placeholders::_1));
     });
 
     task_group.wait();
@@ -176,13 +175,13 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       mesh_->initialise_nodal_properties();
 
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
+          std::bind(&mpm::Particle<Tdim>::append_material_id_to_nodes,
                     std::placeholders::_1));
     }
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+        std::bind(&mpm::Particle<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1));
 
 #ifdef USE_MPI
@@ -217,8 +216,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     task_group.run([&] {
       // Iterate over each particle to compute nodal body force
       mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, this->gravity_));
+          std::bind(&mpm::Particle<Tdim>::map_body_force, std::placeholders::_1,
+                    this->gravity_));
 
       // Apply particle traction and map to nodes
       mesh_->apply_traction_on_particles(this->step_ * this->dt_);
@@ -234,7 +233,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     task_group.run([&] {
       // Iterate over each particle to compute nodal internal force
       mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
+          &mpm::Particle<Tdim>::map_internal_force, std::placeholders::_1));
     });
     task_group.wait();
 
@@ -273,7 +272,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Iterate over each particle to compute updated position
     mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
+        std::bind(&mpm::Particle<Tdim>::compute_updated_position,
                   std::placeholders::_1, this->dt_, this->velocity_update_));
 
     // Apply particle velocity constraints

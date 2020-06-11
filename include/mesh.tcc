@@ -519,11 +519,8 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
           // Particle id
           mpm::Index pid = particles_.size();
           // Create particle
-          auto particle =
-              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                  ->create(particle_type, static_cast<mpm::Index>(pid),
-                           coordinates);
+          auto particle = std::make_shared<mpm::Particle<Tdim>>(
+              static_cast<mpm::Index>(pid), coordinates);
 
           // Add particle to mesh
           status = this->add_particle(particle, checks);
@@ -578,11 +575,9 @@ bool mpm::Mesh<Tdim>::create_particles(
     for (const auto& particle_coordinates : coordinates) {
       // Particle id
       mpm::Index pid = particles_.size();
-      // Create particle
-      auto particle = Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                              const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                          ->create(particle_type, static_cast<mpm::Index>(pid),
-                                   particle_coordinates);
+      // Create particle // Add particle tpe
+      auto particle = std::make_shared<mpm::Particle<Tdim>>(
+          static_cast<mpm::Index>(pid), particle_coordinates);
 
       // Add particle to mesh and check
       bool insert_status = this->add_particle(particle, check_duplicates);
@@ -611,7 +606,7 @@ bool mpm::Mesh<Tdim>::create_particles(
 //! Add a particle pointer to the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::add_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle, bool checks) {
+    const std::shared_ptr<mpm::Particle<Tdim>>& particle, bool checks) {
   bool status = false;
   try {
     if (checks) {
@@ -641,7 +636,7 @@ bool mpm::Mesh<Tdim>::add_particle(
 //! Remove a particle pointer from the mesh
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::remove_particle(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
   const mpm::Index id = particle->id();
   // Remove associated cell for the particle
   map_particles_[id]->remove_cell();
@@ -983,18 +978,18 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
 
 //! Locate particles in a cell
 template <unsigned Tdim>
-std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
+std::vector<std::shared_ptr<mpm::Particle<Tdim>>>
     mpm::Mesh<Tdim>::locate_particles_mesh() {
 
-  std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>> particles;
+  std::vector<std::shared_ptr<mpm::Particle<Tdim>>> particles;
 
-  std::for_each(particles_.cbegin(), particles_.cend(),
-                [=, &particles](
-                    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
-                  // If particle is not found in mesh add to a list of particles
-                  if (!this->locate_particle_cells(particle))
-                    particles.emplace_back(particle);
-                });
+  std::for_each(
+      particles_.cbegin(), particles_.cend(),
+      [=, &particles](const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
+        // If particle is not found in mesh add to a list of particles
+        if (!this->locate_particle_cells(particle))
+          particles.emplace_back(particle);
+      });
 
   return particles;
 }
@@ -1002,7 +997,7 @@ std::vector<std::shared_ptr<mpm::ParticleBase<Tdim>>>
 //! Locate particles in a cell
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::locate_particle_cells(
-    const std::shared_ptr<mpm::ParticleBase<Tdim>>& particle) {
+    const std::shared_ptr<mpm::Particle<Tdim>>& particle) {
   // Check the current cell if it is not invalid
   if (particle->cell_id() != std::numeric_limits<mpm::Index>::max()) {
     // If a cell id is present, but not a cell locate the cell from map
@@ -1245,12 +1240,12 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
     unsigned dir = ptraction->dir();
     double traction = ptraction->traction(current_time);
     this->iterate_over_particle_set(
-        set_id, std::bind(&mpm::ParticleBase<Tdim>::assign_traction,
+        set_id, std::bind(&mpm::Particle<Tdim>::assign_traction,
                           std::placeholders::_1, dir, traction));
   }
   if (!particle_tractions_.empty()) {
     this->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
+        &mpm::Particle<Tdim>::map_traction_force, std::placeholders::_1));
   }
 }
 
@@ -1289,7 +1284,7 @@ void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
 
     this->iterate_over_particle_set(
         set_id,
-        std::bind(&mpm::ParticleBase<Tdim>::apply_particle_velocity_constraints,
+        std::bind(&mpm::Particle<Tdim>::apply_particle_velocity_constraints,
                   std::placeholders::_1, dir, velocity));
   }
 }
@@ -1468,7 +1463,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
   // Vector of particles
-  Vector<ParticleBase<Tdim>> particles;
+  Vector<Particle<Tdim>> particles;
 
   // Clear map of particles
   map_particles_.clear();
@@ -1760,7 +1755,7 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
   // Container of new injected particles
-  std::vector<std::shared_ptr<ParticleBase<Tdim>>> injected_particles;
+  std::vector<std::shared_ptr<Particle<Tdim>>> injected_particles;
   // Iterate over all injection cells
   for (auto injection : particle_injections_) {
     unsigned pid = this->nparticles();
@@ -1785,11 +1780,8 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
           // Iterate over each coordinate to generate material points
           for (const auto& coordinates : cpoints) {
             // Create particle
-            auto particle =
-                Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                        const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                    ->create(injection.particle_type,
-                             static_cast<mpm::Index>(pid), coordinates);
+            auto particle = std::make_shared<mpm::Particle<Tdim>>(
+                static_cast<mpm::Index>(pid), coordinates);
 
             // particle velocity
             Eigen::Matrix<double, Tdim, 1> pvelocity(injection.velocity.data());

@@ -103,13 +103,13 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     mpm::Index id1 = 0;
     Eigen::Vector2d coords;
     coords.setZero();
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+    std::shared_ptr<mpm::Particle<Dim>> particle1 =
         std::make_shared<mpm::Particle<Dim>>(id1, coords);
 
     // Particle 2
     mpm::Index id2 = 1;
     coords << 2., 2.;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+    std::shared_ptr<mpm::Particle<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim>>(id2, coords);
 
     auto mesh = std::make_shared<mpm::Mesh<Dim>>(0);
@@ -192,7 +192,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     coordinates << 1., 1.;
     // Check iterate over functionality
     mesh->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Dim>::assign_coordinates,
+        std::bind(&mpm::Particle<Dim>::assign_coordinates,
                   std::placeholders::_1, coordinates));
 
     // Particle 1
@@ -621,12 +621,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     // Particle 1
     coords << 1.0, 1.0;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+    std::shared_ptr<mpm::Particle<Dim>> particle1 =
         std::make_shared<mpm::Particle<Dim>>(100, coords);
 
     // Particle 2
     coords << 1.5, 1.5;
-    std::shared_ptr<mpm::ParticleBase<Dim>> particle2 =
+    std::shared_ptr<mpm::Particle<Dim>> particle2 =
         std::make_shared<mpm::Particle<Dim>>(101, coords);
 
     // Add particle 1 and check
@@ -881,7 +881,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               coords << 100., 100.;
 
               mpm::Index pid = 100;
-              std::shared_ptr<mpm::ParticleBase<Dim>> particle100 =
+              std::shared_ptr<mpm::Particle<Dim>> particle100 =
                   std::make_shared<mpm::Particle<Dim>>(pid, coords);
 
               // Add particle100 and check
@@ -960,14 +960,12 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
               // Locate particles in a mesh
               auto particles = mesh->locate_particles_mesh();
               REQUIRE(particles.size() == 0);
-              mesh->iterate_over_particles(
-                  std::bind(&mpm::ParticleBase<Dim>::compute_shapefn,
-                            std::placeholders::_1));
+              mesh->iterate_over_particles(std::bind(
+                  &mpm::Particle<Dim>::compute_shapefn, std::placeholders::_1));
 
               // Compute volume
-              mesh->iterate_over_particles(
-                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
-                            std::placeholders::_1));
+              mesh->iterate_over_particles(std::bind(
+                  &mpm::Particle<Dim>::compute_volume, std::placeholders::_1));
 
               mesh->apply_traction_on_particles(10);
             }

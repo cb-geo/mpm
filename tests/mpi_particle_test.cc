@@ -210,7 +210,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
 
       if (mpi_rank == sender) {
         // Create and initialzie particle with HDF5 data
-        std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::shared_ptr<mpm::Particle<Dim>> particle =
             std::make_shared<mpm::Particle<Dim>>(id, pcoordinates);
 
         // Assign material
@@ -305,7 +305,7 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         mpm::deregister_mpi_particle_type(paritcle_type);
 
         // Received particle
-        std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
+        std::shared_ptr<mpm::Particle<Dim>> rparticle =
             std::make_shared<mpm::Particle<Dim>>(id, pcoordinates);
 
         // Assign material

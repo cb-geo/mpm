@@ -11,16 +11,15 @@
 #include "map.h"
 #include "material_utility.h"
 #include "particle.h"
-#include "particle_base.h"
 
 // JSON
 using Json = nlohmann::json;
 
 namespace mpm {
 
-// Forward declaration of ParticleBase
+// Forward declaration of Particle
 template <unsigned Tdim>
-class ParticleBase;
+class Particle;
 
 //! Material base class
 //! \brief Base class that stores the information about materials
@@ -75,7 +74,7 @@ class Material {
   //! \retval updated_stress Updated value of stress
   virtual Vector6d compute_stress(const Vector6d& stress,
                                   const Vector6d& dstrain,
-                                  const ParticleBase<Tdim>* ptr,
+                                  const Particle<Tdim>* ptr,
                                   mpm::dense_map* state_vars) = 0;
 
  protected:

@@ -297,7 +297,7 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D][mpi]") {
 
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5;
-        std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+        std::shared_ptr<mpm::Particle<Dim>> particle1 =
             std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
@@ -331,10 +331,10 @@ TEST_CASE("Mesh cell neighbours 2D", "[MeshCell][2D][mpi]") {
           cell7->rank(2);
           cell6->rank(3);
 
-          std::shared_ptr<mpm::ParticleBase<Dim>> particle0, particle1,
-              particle2, particle3, particle4, particle5, particle6, particle7,
-              particle8, particle9, particle10, particle11, particle12,
-              particle13, particle14, particle15, particle16, particle17;
+          std::shared_ptr<mpm::Particle<Dim>> particle0, particle1, particle2,
+              particle3, particle4, particle5, particle6, particle7, particle8,
+              particle9, particle10, particle11, particle12, particle13,
+              particle14, particle15, particle16, particle17;
 
           if (mpi_rank == 0) {
             coords << 1.0, 1.0;
@@ -990,7 +990,7 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D][mpi]") {
 
       SECTION("Locate particles in mesh") {
         coords << 3., 1.5, 1.5;
-        std::shared_ptr<mpm::ParticleBase<Dim>> particle1 =
+        std::shared_ptr<mpm::Particle<Dim>> particle1 =
             std::make_shared<mpm::Particle<Dim>>(1, coords);
         // Add particle 1 and check
         REQUIRE(mesh->add_particle(particle1, false) == true);
@@ -1025,10 +1025,10 @@ TEST_CASE("Mesh cell neighbours 3D", "[MeshCell][3D][mpi]") {
           cell8->rank(2);
           cell6->rank(3);
 
-          std::shared_ptr<mpm::ParticleBase<Dim>> particle0, particle1,
-              particle2, particle3, particle4, particle5, particle6, particle7,
-              particle8, particle9, particle10, particle11, particle12,
-              particle13, particle14, particle15, particle16, particle17;
+          std::shared_ptr<mpm::Particle<Dim>> particle0, particle1, particle2,
+              particle3, particle4, particle5, particle6, particle7, particle8,
+              particle9, particle10, particle11, particle12, particle13,
+              particle14, particle15, particle16, particle17;
 
           if (mpi_rank == 0) {
             coords << 1.0, 1.0, 1.5;

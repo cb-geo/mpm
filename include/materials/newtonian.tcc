@@ -48,7 +48,7 @@ double mpm::Newtonian<Tdim>::thermodynamic_pressure(
 //! Compute stress in 2D
 template <>
 Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
-    const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<2>* ptr,
+    const Vector6d& stress, const Vector6d& dstrain, const Particle<2>* ptr,
     mpm::dense_map* state_vars) {
 
   // Get strain rate
@@ -81,7 +81,7 @@ Eigen::Matrix<double, 6, 1> mpm::Newtonian<2>::compute_stress(
 //! Compute stress in 3D
 template <>
 Eigen::Matrix<double, 6, 1> mpm::Newtonian<3>::compute_stress(
-    const Vector6d& stress, const Vector6d& dstrain, const ParticleBase<3>* ptr,
+    const Vector6d& stress, const Vector6d& dstrain, const Particle<3>* ptr,
     mpm::dense_map* state_vars) {
 
   // Get strain rate
