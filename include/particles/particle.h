@@ -124,8 +124,10 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return the approximate particle diameter
   double diameter() const override {
-    if (Tdim == 2) return 2.0 * std::sqrt(volume_ / M_PI);
-    if (Tdim == 3) return 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
+    double diameter = 0;
+    if (Tdim == 2) diameter = 2.0 * std::sqrt(volume_ / M_PI);
+    if (Tdim == 3) diameter = 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
+    return diameter;
   }
 
   //! Return size of particle in natural coordinates

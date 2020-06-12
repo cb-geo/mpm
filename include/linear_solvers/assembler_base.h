@@ -84,9 +84,11 @@ class AssemblerBase {
   //! Assemble corrector RHS
   virtual bool assemble_corrector_right(double dt) = 0;
 
-  virtual unsigned global_active_dof(){};
+  //! Return the total size of global dof in all rank
+  virtual unsigned global_active_dof() = 0;
 
-  virtual std::vector<int> rank_global_mapper(){};
+  //! Return a vector to map local (rank) index to global index
+  virtual std::vector<int> rank_global_mapper() = 0;
 
  protected:
   //! Number of total active_dof
