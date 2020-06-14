@@ -35,6 +35,8 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   // Add masses and momenta to the nodal properties pool
   nodal_properties->create_property("masses", Nnodes, Nmaterials);
   nodal_properties->create_property("momenta", Nnodes * Dim, Nmaterials);
+  nodal_properties->create_property("change_in_momenta", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -115,12 +117,17 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle3->assign_mass(0.5);
 
   // Assign velocity
-  Eigen::VectorXd velocity;
-  velocity.resize(Dim);
-  for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i + 1;
-  particle1->assign_velocity(velocity);
-  particle2->assign_velocity(velocity);
-  particle3->assign_velocity(velocity);
+  Eigen::VectorXd velocity1;
+  Eigen::VectorXd velocity2;
+  velocity1.resize(Dim);
+  velocity2.resize(Dim);
+  for (unsigned i = 0; i < velocity1.size(); ++i) {
+    velocity1(i) = i + 1;
+    velocity2(i) = i - 0.5;
+  }
+  particle1->assign_velocity(velocity1);
+  particle2->assign_velocity(velocity2);
+  particle3->assign_velocity(velocity1);
 
   // Compute shape functions
   particle1->compute_shapefn();
@@ -132,6 +139,31 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle2->map_multimaterial_mass_momentum_to_nodes();
   particle3->map_multimaterial_mass_momentum_to_nodes();
 
+  // Map masses and momenta from particles to nodes
+  particle1->map_mass_momentum_to_nodes();
+  particle2->map_mass_momentum_to_nodes();
+  particle3->map_mass_momentum_to_nodes();
+
+  // Compute velocities at nodes
+  node0->compute_velocity();
+  node1->compute_velocity();
+  node2->compute_velocity();
+  node3->compute_velocity();
+
+  // Append material ids to node
+  for (unsigned i = 0; i < 2; ++i) {
+    node0->append_material_id(i);
+    node1->append_material_id(i);
+    node2->append_material_id(i);
+    node3->append_material_id(i);
+  }
+
+  // Compute multimaterial change in momentum
+  node0->compute_multimaterial_change_in_momentum();
+  node1->compute_multimaterial_change_in_momentum();
+  node2->compute_multimaterial_change_in_momentum();
+  node3->compute_multimaterial_change_in_momentum();
+
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
   masses << 0.96, 1.46,
@@ -141,23 +173,40 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   // clang-format on
   Eigen::Matrix<double, 8, 2> momenta;
   // clang-format off
-  momenta << 0.96,  1.46,
-             1.92,  2.92,
-             0.24,  1.04,
-             0.48,  2.08,
-             0.16,  0.56,
-             0.32,  1.12,
-             0.64,  0.44,
-             1.28,  0.88;
+  momenta << 0.96,  -0.70,
+             1.92,   0.76,
+             0.24,  -0.40,
+             0.48,   0.64,
+             0.16,   0.20,
+             0.32,   0.76,
+             0.64,  -0.10,
+             1.28,   0.34;
   // clang-format on
 
+  Eigen::Matrix<double, 8, 2> delta_momenta;
+  // clang-format off
+  delta_momenta << -0.8568595041322, 0.8568595041322,
+                   -0.8568595041322, 0.8568595041322,
+                   -0.2700000000000, 0.2700000000000,
+                   -0.2700000000000, 0.2700000000000,
+                   -0.0800000000000, 0.0800000000000,
+                   -0.0800000000000, 0.0800000000000,
+                   -0.3200000000000, 0.3200000000000,
+                   -0.3200000000000, 0.3200000000000;
+  // clang-format on
+
+  // Check if masses, momenta and velocities were properly mapped and computed
   for (int i = 0; i < Nnodes; ++i) {
     for (int j = 0; j < Nmaterials; ++j) {
       REQUIRE(nodal_properties->property("masses", i, j, 1)(0, 0) ==
               Approx(masses(i, j)).epsilon(tolerance));
-      for (int k = 0; k < Dim; ++k)
+      for (int k = 0; k < Dim; ++k) {
         REQUIRE(nodal_properties->property("momenta", i, j, Dim)(k, 0) ==
                 Approx(momenta(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("change_in_momenta", i, j, Dim)(k, 0) ==
+            Approx(delta_momenta(i * Dim + k, j)).epsilon(tolerance));
+      }
     }
   }
 }

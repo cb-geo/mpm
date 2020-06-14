@@ -493,8 +493,11 @@ class Mesh {
       Eigen::SparseMatrix<double>& correction_matrix,
       Eigen::VectorXd& pressure_increment, double dt);
 
-  // Create the nodal properties' pool
+  // Create the nodal properties' map
   void create_nodal_properties();
+
+  // Initialise the nodal properties' map
+  void initialise_nodal_properties();
 
  private:
   // Read particles from file
