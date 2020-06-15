@@ -80,6 +80,20 @@ class Node : public NodeBase<Tdim> {
   double scalar_property(mpm::properties::Scalar property,
                          unsigned phase) const override;
 
+  //! Update vector property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_vector_property(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept override;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property, unsigned phase) const override;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -291,7 +305,8 @@ class Node : public NodeBase<Tdim> {
   tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
       scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
+  tsl::ordered_map<mpm::properties::Vector,
+                   Eigen::Matrix<double, Tdim, Tnphases>>
       vector_properties_;
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;

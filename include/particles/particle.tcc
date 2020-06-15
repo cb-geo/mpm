@@ -485,7 +485,7 @@ void mpm::Particle<Tdim>::compute_mass() noexcept {
   mass_ = volume_ * mass_density_;
 }
 
-//! Update scalar property at the nodes from particle
+//! Update scalar property at particle
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::update_scalar_property(
     mpm::properties::Scalar property, bool update, double value) noexcept {
@@ -495,7 +495,7 @@ void mpm::Particle<Tdim>::update_scalar_property(
       scalar_properties_.at(property) * factor + value;
 }
 
-//! Update scalar property at the nodes from particle
+//! Update scalar property at particle
 template <unsigned Tdim>
 double mpm::Particle<Tdim>::scalar_property(
     mpm::properties::Scalar property) const {
@@ -506,7 +506,7 @@ double mpm::Particle<Tdim>::scalar_property(
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_scalar_property_nodes(
     mpm::properties::Scalar property, bool update, unsigned phase) noexcept {
-  // Check if particle mass is set
+  // Check if particle property is set
   assert(scalar_properties_.at(property) != std::numeric_limits<double>::max());
 
   // Map scalar property to nodes
@@ -523,6 +523,46 @@ double mpm::Particle<Tdim>::interpolate_scalar_property_nodes(
   // Interpolate scalar property from nodes
   for (unsigned i = 0; i < nodes_.size(); ++i)
     value += nodes_[i]->scalar_property(property, phase) * shapefn_[i];
+  return value;
+}
+
+//! Update vector property at particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::update_vector_property(
+    mpm::properties::Vector property, bool update,
+    const Eigen::Matrix<double, Tdim, 1>& value) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+  vector_properties_.at(property) =
+      vector_properties_.at(property) * factor + value;
+}
+
+//! Update vector property at particle
+template <unsigned Tdim>
+Eigen::Matrix<double, Tdim, 1> mpm::Particle<Tdim>::vector_property(
+    mpm::properties::Vector property) const {
+  return vector_properties_.at(property);
+}
+
+//! Map vector property to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_vector_property_nodes(
+    mpm::properties::Vector property, bool update, unsigned phase) noexcept {
+  // TODO: Check assert needed?
+  // Map vector property to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_vector_property(
+        property, update, phase, vector_properties_.at(property) * shapefn_[i]);
+}
+
+//! Interpolate vector property from nodes
+template <unsigned Tdim>
+double mpm::Particle<Tdim>::interpolate_vector_property_nodes(
+    mpm::properties::Vector property, unsigned phase) const {
+  Eigen::Matrix<double, Tdim, 1> value = Eigen::Matrix<double, Tdim, 1>::Zero();
+  // Interpolate vector property from nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    value += nodes_[i]->vector_property(property, phase) * shapefn_[i];
   return value;
 }
 

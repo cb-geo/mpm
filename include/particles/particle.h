@@ -183,6 +183,31 @@ class Particle {
   double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
                                            unsigned phase) const;
 
+  //! Update vector property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_vector_property(
+      mpm::properties::Vector property, bool update,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property) const;
+
+  //! Map vector property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_vector_property_nodes(mpm::properties::Vector property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_vector_property_nodes(mpm::properties::Vector property,
+                                           unsigned phase) const;
+
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept;
 
@@ -357,7 +382,7 @@ class Particle {
   //! Scalar properties
   tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tdim>>
+  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, 1, Tdim>>
       vector_properties_;
   //! Volumetric mass density (mass / volume)
   double mass_density_{0.};

@@ -18,8 +18,10 @@
 namespace mpm {
 
 namespace properties {
-//! Sclar Properties
+//! Scalar Properties
 enum Scalar : unsigned int { Mass };
+//! Vector Properties
+enum Vector : unsigned int { Velocity, Displacement, Acceleration };
 }  // namespace properties
 
 //! NodeBase base class for nodes
@@ -88,6 +90,20 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual double scalar_property(mpm::properties::Scalar property,
                                  unsigned phase) const = 0;
+
+  //! Update vector property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_vector_property(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept = 0;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property, unsigned phase) const = 0;
 
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)

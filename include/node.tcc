@@ -70,6 +70,28 @@ double mpm::Node<Tdim, Tdof, Tnphases>::scalar_property(
   return scalar_properties_.at(property)[phase];
 }
 
+//! Update vector property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
+    mpm::properties::Vector property, bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& value) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign mass
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  Eigen::Matrix<double, Tdim, 1> vecvalue =
+      vector_properties_.at(property).col(phase);
+  vector_properties_.at(property).col(phase) = (vecvalue * factor) + value;
+}
+
+//! Update vector property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+Eigen::Matrix<double, Tdim, 1> mpm::Node<Tdim, Tdof, Tnphases>::vector_property(
+    mpm::properties::Vector property, unsigned phase) const {
+  return vector_properties_.at(property).col(phase);
+}
+
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
