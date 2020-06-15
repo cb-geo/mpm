@@ -114,12 +114,20 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     // Check MPI rank
     SECTION("Assign and check MPI rank on nodes") {
       cell->rank(1);
+      REQUIRE(cell->rank() == 1);
       cell->assign_mpi_rank_to_nodes();
 
       REQUIRE(node0->mpi_ranks().size() == 1);
       REQUIRE(node1->mpi_ranks().size() == 1);
       REQUIRE(node2->mpi_ranks().size() == 1);
       REQUIRE(node3->mpi_ranks().size() == 1);
+
+      // Update MPI rank of cell
+      REQUIRE(cell->previous_mpirank() == 0);
+      REQUIRE(cell->rank() == 1);
+      cell->rank(2);
+      REQUIRE(cell->rank() == 2);
+      REQUIRE(cell->previous_mpirank() == 1);
     }
 
     // Check cell length calculation
@@ -568,6 +576,14 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
     cell->activate_nodes();
     for (const auto& node : nodes) REQUIRE(node->status() == false);
   }
+
+  SECTION("Test nglobal particles") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    REQUIRE(cell->nglobal_particles() == 0);
+    cell->nglobal_particles(5);
+    REQUIRE(cell->nglobal_particles() == 5);
+  }
 }
 
 //! \brief Check cell class for 3D case
@@ -699,6 +715,13 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
       REQUIRE(node1->mpi_ranks().size() == 1);
       REQUIRE(node2->mpi_ranks().size() == 1);
       REQUIRE(node3->mpi_ranks().size() == 1);
+
+      // Update MPI rank of cell
+      REQUIRE(cell->previous_mpirank() == 0);
+      REQUIRE(cell->rank() == 1);
+      cell->rank(2);
+      REQUIRE(cell->rank() == 2);
+      REQUIRE(cell->previous_mpirank() == 1);
     }
 
     // Check cell length calculation
@@ -1496,5 +1519,13 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
 
     // Check using unit cell with affine transformation / Newton-Raphson
     REQUIRE(cell2->is_point_in_cell(point, &xi) == false);
+  }
+
+  SECTION("Test nglobal particles") {
+    mpm::Index pid = 0;
+    auto cell = std::make_shared<mpm::Cell<Dim>>(0, Nnodes, element);
+    REQUIRE(cell->nglobal_particles() == 0);
+    cell->nglobal_particles(5);
+    REQUIRE(cell->nglobal_particles() == 5);
   }
 }

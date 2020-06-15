@@ -21,6 +21,9 @@ struct NodalProperties {
   bool create_property(const std::string& property, unsigned rows,
                        unsigned columns);
 
+  //! Initialise all the nodal values for all properties in the property pool
+  void initialise_nodal_properties();
+
   // Return data in the nodal properties map at a specific index
   // \param[in] property Property name
   // \param[in] node_id Id of the node within the property data
@@ -30,15 +33,26 @@ struct NodalProperties {
                            unsigned mat_id, unsigned nprops = 1) const;
 
   // Assign property value to a pair of node and material
+  // \param[in] property Property name
+  // \param[in] node_id Id of the node within the property data
+  // \param[in] mat_id Id of the material within the property data
+  // \param[in] property_value Property value to be assigned
+  // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  void assign_property(const std::string& property, unsigned node_id,
+                       unsigned mat_id, const Eigen::MatrixXd& property_value,
+                       unsigned nprops = 1);
+
+  // Update property value according to a pair of node and material
   // \param[in] property_value Property value to be assigned
   // \param[in] node_id Id of the node within the property data
   // \param[in] mat_id Id of the material within the property data
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   // \param[in] property Property name
-  void assign_property(const std::string& property, unsigned node_id,
-                       unsigned mat_id, Eigen::MatrixXd property_value,
+  void update_property(const std::string& property, unsigned node_id,
+                       unsigned mat_id, const Eigen::MatrixXd& property_value,
                        unsigned nprops = 1);
 
+  // Map of properties and their nodal values
   std::map<std::string, Eigen::MatrixXd> properties_;
 };  // NodalProperties struct
 }  // namespace mpm

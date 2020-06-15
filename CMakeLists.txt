@@ -220,6 +220,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/functions/linear_function_test.cc
     ${mpm_SOURCE_DIR}/tests/functions/sin_function_test.cc
     ${mpm_SOURCE_DIR}/tests/graph_test.cc
+    ${mpm_SOURCE_DIR}/tests/interface_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_mesh_ascii_test.cc
     ${mpm_SOURCE_DIR}/tests/io/io_test.cc
     ${mpm_SOURCE_DIR}/tests/io/vtk_writer_test.cc
@@ -234,7 +235,8 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/materials/norsand_test.cc
     ${mpm_SOURCE_DIR}/tests/materials/material_utility_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
-    ${mpm_SOURCE_DIR}/tests/mesh_test.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
+    ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc

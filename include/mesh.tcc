@@ -240,9 +240,8 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       std::set<unsigned> node_mpi_ranks = domain_shared_nodes_[i]->mpi_ranks();
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
-          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank,
-                    domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
-                    &send_requests[j]);
+          MPI_Isend(&property, Tnparam, MPI_DOUBLE, node_rank, 0,
+                    MPI_COMM_WORLD, &send_requests[j]);
           ++j;
         }
       }
@@ -261,8 +260,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
       for (auto& node_rank : node_mpi_ranks) {
         if (node_rank != mpi_rank) {
           Ttype value;
-          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank,
-                   domain_shared_nodes_[i]->id(), MPI_COMM_WORLD,
+          MPI_Recv(&value, Tnparam, MPI_DOUBLE, node_rank, 0, MPI_COMM_WORLD,
                    MPI_STATUS_IGNORE);
           property += value;
         }
@@ -412,11 +410,28 @@ void mpm::Mesh<Tdim>::find_cell_neighbours() {
       tbb::simple_partitioner());
 }
 
+//! Find global number of particles across MPI ranks / cell
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::find_nglobal_particles_cells() {
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    int nparticles;
+    // Determine the rank of the broadcast emitter process
+    if ((*citr)->rank() == mpi_rank) nparticles = (*citr)->nparticles();
+    MPI_Bcast(&nparticles, 1, MPI_INT, (*citr)->rank(), MPI_COMM_WORLD);
+    // Receive broadcast and update on all ranks
+    (*citr)->nglobal_particles(nparticles);
+  }
+#endif
+}
+
 //! Find particle neighbours for all particle
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_particle_neighbours() {
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
-    find_particle_neighbours(*citr);
+    this->find_particle_neighbours(*citr);
 }
 
 //! Find particle neighbours for specific cell particle
@@ -526,6 +541,49 @@ void mpm::Mesh<Tdim>::find_ghost_boundary_cells() {
     }
   }
 #endif
+}
+
+//! Find ncells in rank
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::ncells_rank(bool active_cells) {
+  unsigned ncells_rank = 0;
+
+  int mpi_rank = 0;
+  int mpi_size = 1;
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+
+  if (active_cells) {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+      if ((*citr)->rank() == mpi_rank && (*citr)->nparticles() > 0)
+        ncells_rank += 1;
+  } else {
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+      if ((*citr)->rank() == mpi_rank) ncells_rank += 1;
+  }
+  return ncells_rank;
+}
+
+//! Find nnodes in rank
+template <unsigned Tdim>
+mpm::Index mpm::Mesh<Tdim>::nnodes_rank() {
+  unsigned nnodes_rank = 0;
+
+  int mpi_rank = 0;
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    // Get MPI ranks for the node
+    auto mpi_ranks = (*nitr)->mpi_ranks();
+    // Check if the local rank is in the list of ranks for the node
+    const bool local_node = mpi_ranks.find(mpi_rank) != mpi_ranks.end();
+    if (local_node) nnodes_rank += 1;
+  }
+  return nnodes_rank;
 }
 
 //! Create cells from node lists
@@ -756,7 +814,7 @@ void mpm::Mesh<Tdim>::remove_all_nonrank_particles() {
 
 //! Transfer all particles in cells that are not in local rank
 template <unsigned Tdim>
-void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
+void mpm::Mesh<Tdim>::transfer_halo_particles() {
 #ifdef USE_MPI
   // Get number of MPI ranks
   int mpi_size;
@@ -814,23 +872,130 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles() {
           ghost_cells_neighbour_ranks_[(*citr)->id()];
 
       for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
-        // MPI status
-        MPI_Status recv_status;
         // Receive number of particles
         unsigned nrecv_particles;
         MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
-                 MPI_COMM_WORLD, &recv_status);
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         if (nrecv_particles != 0) {
           std::vector<mpm::HDF5Particle> recv_particles;
           recv_particles.resize(nrecv_particles);
           // Receive the vector of particles
           mpm::HDF5Particle received;
-          MPI_Status status_recv;
           MPI_Datatype particle_type =
               mpm::register_mpi_particle_type(received);
           MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   neighbour_ranks[i], 0, MPI_COMM_WORLD, &status_recv);
+                   neighbour_ranks[i], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+          mpm::deregister_mpi_particle_type(particle_type);
+
+          // Iterate through n number of received particles
+          for (const auto& rparticle : recv_particles) {
+            mpm::Index id = 0;
+            // Initial particle coordinates
+            Eigen::Matrix<double, Tdim, 1> pcoordinates;
+            pcoordinates.setZero();
+
+            // Received particle
+            auto received_particle =
+                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+            // Get material
+            auto material = materials_.at(rparticle.material_id);
+            // Reinitialise particle from HDF5 data
+            received_particle->initialise_particle(rparticle, material);
+
+            // Add particle to mesh
+            this->add_particle(received_particle, true);
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+//! Transfer all particles in cells that are not in local rank
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::transfer_nonrank_particles(
+    const std::vector<mpm::Index>& exchange_cells) {
+#ifdef USE_MPI
+  // Get number of MPI ranks
+  int mpi_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  int mpi_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+  if (mpi_size > 1) {
+    std::vector<MPI_Request> send_requests;
+    send_requests.reserve(exchange_cells.size());
+    unsigned nsend_requests = 0;
+
+    std::vector<mpm::Index> remove_pids;
+    // Iterate through the ghost cells and send particles
+    for (auto cid : exchange_cells) {
+      // Get cell pointer
+      auto cell = map_cells_[cid];
+      // If the previous rank of cell is the current MPI rank,
+      // then send all particles
+      if ((cell->rank() != cell->previous_mpirank()) &&
+          (cell->previous_mpirank() == mpi_rank)) {
+        // Create a vector of h5_particles
+        std::vector<mpm::HDF5Particle> h5_particles;
+        auto particle_ids = cell->particles();
+        // Create a vector of HDF5 data of particles to send
+        // delete particle
+        for (auto& id : particle_ids) {
+          // Append to vector of particles
+          h5_particles.emplace_back(map_particles_[id]->hdf5());
+          // Particles to be removed from the current rank
+          remove_pids.emplace_back(id);
+        }
+        cell->clear_particle_ids();
+
+        // Send number of particles to receiver rank
+        unsigned nparticles = particle_ids.size();
+        MPI_Isend(&nparticles, 1, MPI_UNSIGNED, cell->rank(), 0, MPI_COMM_WORLD,
+                  &send_requests[nsend_requests]);
+        if (nparticles > 0) {
+          mpm::HDF5Particle h5_particle;
+          // Initialize MPI datatypes and send vector of particles
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(h5_particle);
+          MPI_Send(h5_particles.data(), nparticles, particle_type, cell->rank(),
+                   0, MPI_COMM_WORLD);
+          mpm::deregister_mpi_particle_type(particle_type);
+        }
+        h5_particles.clear();
+        ++nsend_requests;
+      }
+    }
+    // Remove all sent particles
+    this->remove_particles(remove_pids);
+    // Send complete iterate only upto valid send requests
+    for (unsigned i = 0; i < nsend_requests; ++i)
+      MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    // Iterate through the ghost cells and send particles
+    for (auto cid : exchange_cells) {
+      // Get cell pointer
+      auto cell = map_cells_[cid];
+      // If the current rank is the MPI rank receive particles
+      if ((cell->rank() != cell->previous_mpirank()) &&
+          (cell->rank() == mpi_rank)) {
+        // Receive number of particles
+        unsigned nrecv_particles;
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, cell->previous_mpirank(), 0,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        if (nrecv_particles != 0) {
+          std::vector<mpm::HDF5Particle> recv_particles;
+          recv_particles.resize(nrecv_particles);
+          // Receive the vector of particles
+          mpm::HDF5Particle received;
+          MPI_Datatype particle_type =
+              mpm::register_mpi_particle_type(received);
+          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
+                   cell->previous_mpirank(), 0, MPI_COMM_WORLD,
+                   MPI_STATUS_IGNORE);
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
@@ -1237,76 +1402,6 @@ void mpm::Mesh<Tdim>::apply_particle_velocity_constraints() {
   }
 }
 
-//! Assign nodal velocity constraints
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_velocity_constraint(
-    int set_id, const std::shared_ptr<mpm::VelocityConstraint>& vconstraint) {
-  bool status = true;
-  try {
-    if (set_id == -1 || node_sets_.find(set_id) != node_sets_.end()) {
-      int set_id = vconstraint->setid();
-      // If set id is -1, use all nodes
-      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
-      unsigned dir = vconstraint->dir();
-      double velocity = vconstraint->velocity();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
-                                  tbb_grain_size_),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status = nset[i]->assign_velocity_constraint(dir, velocity);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise velocity constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
-    } else
-      throw std::runtime_error("No node set found to assign velocity con");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
-//! Assign friction constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_frictional_constraint(
-    int nset_id, const std::shared_ptr<mpm::FrictionConstraint>& fconstraint) {
-  bool status = false;
-  try {
-    if (nset_id == -1 || node_sets_.find(nset_id) != node_sets_.end()) {
-      int set_id = fconstraint->setid();
-      // If set id is -1, use all nodes
-      auto nset = (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
-      unsigned dir = fconstraint->dir();
-      int nsign_n = fconstraint->sign_n();
-      double friction = fconstraint->friction();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size()),
-                                  tbb_grain_size_),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status =
-                  nset[i]->assign_friction_constraint(dir, nsign_n, friction);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise velocity constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
-    } else
-      throw std::runtime_error("No node set found to assign velocity con");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Assign node tractions
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
@@ -1531,29 +1626,50 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
 
   // Calculate the size and the offsets of our struct members in memory
-  const unsigned nparticles = this->nparticles();
-  const hsize_t NRECORDS = nparticles;
+  hsize_t nrecords = 0;
+  hsize_t nfields = 0;
+  auto err = H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+  if (nfields != mpm::hdf5::particle::NFIELDS)
+    throw std::runtime_error("HDF5 table has incorrect number of fields");
 
   std::vector<HDF5Particle> dst_buf;
-  dst_buf.reserve(nparticles);
+  dst_buf.reserve(nrecords);
   // Read the table
   H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
                  mpm::hdf5::particle::dst_offset,
                  mpm::hdf5::particle::dst_sizes, dst_buf.data());
 
+  // Vector of particles
+  Vector<ParticleBase<Tdim>> particles;
+
+  // Clear map of particles
+  map_particles_.clear();
+
   unsigned i = 0;
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    HDF5Particle particle = dst_buf[i];
-    // Get particle's material from list of materials
-    auto material = materials_.at(particle.material_id);
-    // Initialise particle with HDF5 data
-    (*pitr)->initialise_particle(particle, material);
-    ++i;
+    if (i < nrecords) {
+      HDF5Particle particle = dst_buf[i];
+      // Get particle's material from list of materials
+      auto material = materials_.at(particle.material_id);
+      // Initialise particle with HDF5 data
+      (*pitr)->initialise_particle(particle, material);
+      // Add particle to map
+      map_particles_.insert(particle.id, *pitr);
+      particles.add(*pitr);
+      ++i;
+    }
   }
   // close the file
   H5Fclose(file_id);
+
+  // Overwrite particles container
+  this->particles_ = particles;
+
+  // Remove associated cell for the particle
+  for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend(); ++citr)
+    (*citr)->clear_particle_ids();
+
   return true;
 }
 
@@ -1604,18 +1720,27 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::nodal_coordinates()
 
 //! Cell node pairs
 template <unsigned Tdim>
-std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs() const {
+std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::node_pairs(
+    bool active) const {
   // Vector of node_pairs
   std::vector<std::array<mpm::Index, 2>> node_pairs;
 
   try {
+    int mpi_rank = 0;
+#ifdef USE_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+#endif
     if (cells_.size() == 0)
       throw std::runtime_error("No cells have been initialised!");
 
     for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
-      const auto pairs = (*citr)->side_node_pairs();
-      node_pairs.insert(std::end(node_pairs), std::begin(pairs),
-                        std::end(pairs));
+      // If node pairs are only requested for active nodes
+      bool get_pairs = (active == true) ? ((*citr)->rank() == mpi_rank) : true;
+      if (get_pairs) {
+        const auto pairs = (*citr)->side_node_pairs();
+        node_pairs.insert(std::end(node_pairs), std::begin(pairs),
+                          std::end(pairs));
+      }
     }
 
   } catch (std::exception& exception) {
@@ -1929,72 +2054,31 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
   return status;
 }
 
-//! Assign velocity constraints to nodes
+// Create the nodal properties' map
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_velocity_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, double>>&
-        velocity_constraints) {
-  bool status = false;
-  try {
-    if (!nodes_.size())
-      throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign velocity "
-          "constraints");
+void mpm::Mesh<Tdim>::create_nodal_properties() {
+  // Initialise the shared pointer to nodal properties
+  nodal_properties_ = std::make_shared<mpm::NodalProperties>();
 
-    for (const auto& velocity_constraint : velocity_constraints) {
-      // Node id
-      mpm::Index nid = std::get<0>(velocity_constraint);
-      // Direction
-      unsigned dir = std::get<1>(velocity_constraint);
-      // Velocity
-      double velocity = std::get<2>(velocity_constraint);
+  // Check if nodes_ and materials_is empty and throw runtime error if they are
+  if (nodes_.size() != 0 && materials_.size() != 0) {
+    // Compute number of rows in nodal properties for vector entities
+    const unsigned nrows = nodes_.size() * Tdim;
+    // Create pool data for each property in the nodal properties struct
+    // object. Properties must be named in the plural form
+    nodal_properties_->create_property("masses", nodes_.size(),
+                                       materials_.size());
+    nodal_properties_->create_property("momenta", nrows, materials_.size());
+    nodal_properties_->create_property("change_in_momenta", nrows,
+                                       materials_.size());
 
-      // Apply constraint
-      status = map_nodes_[nid]->assign_velocity_constraint(dir, velocity);
-
-      if (!status)
-        throw std::runtime_error("Node or velocity constraint is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
+    // Iterate over all nodes to initialise the property handle in each node
+    // and assign its node id as the prop id in the nodal property data pool
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+      (*nitr)->initialise_property_handle((*nitr)->id(), nodal_properties_);
+  } else {
+    throw std::runtime_error("Number of nodes or number of materials is zero");
   }
-  return status;
-}
-
-//! Assign friction constraints to nodes
-template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::assign_nodal_friction_constraints(
-    const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
-        friction_constraints) {
-  bool status = false;
-  try {
-    if (!nodes_.size())
-      throw std::runtime_error(
-          "No nodes have been assigned in mesh, cannot assign friction "
-          "constraints");
-
-    for (const auto& friction_constraint : friction_constraints) {
-      // Node id
-      mpm::Index nid = std::get<0>(friction_constraint);
-      // Direction
-      unsigned dir = std::get<1>(friction_constraint);
-      // Sign
-      int sign = std::get<2>(friction_constraint);
-      // Friction
-      double friction = std::get<3>(friction_constraint);
-
-      // Apply constraint
-      status = map_nodes_[nid]->assign_friction_constraint(dir, sign, friction);
-
-      if (!status)
-        throw std::runtime_error("Node or friction constraint is invalid");
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
 }
 
 //! Compute nodal correction force
@@ -2537,4 +2621,11 @@ std::set<mpm::Index> mpm::Mesh<Tdim>::free_surface_particles() {
        ++pitr)
     if ((*pitr)->free_surface()) id_set.insert((*pitr)->id());
   return id_set;
+}
+
+// Initialise the nodal properties' map
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::initialise_nodal_properties() {
+  // Call initialise_properties function from the nodal properties
+  nodal_properties_->initialise_nodal_properties();
 }

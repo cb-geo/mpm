@@ -38,6 +38,16 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   material_ids_.clear();
 }
 
+//! Initialise shared pointer to nodal properties pool
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
+    unsigned prop_id,
+    std::shared_ptr<mpm::NodalProperties> property_handle) noexcept {
+  // the property handle and the property id is set in the node
+  this->property_handle_ = property_handle;
+  this->prop_id_ = prop_id;
+}
+
 //! Update mass at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
@@ -493,10 +503,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
           const double vel_fricion = mu * std::abs(acc_n) * dt;
 
           if (vel_net_t <= vel_fricion) {
-            acc(dir_t0) = -vel(dir_t0);  // To set particle velocity to zero
-            acc(dir_t1) = -vel(dir_t1);
+            acc(dir_t0) = -vel(dir_t0) / dt;
+            acc(dir_t1) = -vel(dir_t1) / dt;
           } else {
-
             acc(dir_t0) -= mu * std::abs(acc_n) * (vel_net(0) / vel_net_t);
             acc(dir_t1) -= mu * std::abs(acc_n) * (vel_net(1) / vel_net_t);
           }
@@ -664,4 +673,34 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
     status = false;
   }
   return status;
+}
+//! Update nodal property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
+    bool update, const std::string& property,
+    const Eigen::MatrixXd& property_value, unsigned mat_id,
+    unsigned nprops) noexcept {
+  // Update/assign property
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  property_handle_->update_property(property, prop_id_, mat_id, property_value,
+                                    nprops);
+}
+
+//! Compute multimaterial change in momentum
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_change_in_momentum() {
+  // iterate over all materials in the material_ids set and update the change in
+  // momentum
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    const Eigen::Matrix<double, 1, 1> mass =
+        property_handle_->property("masses", prop_id_, *mitr);
+    const Eigen::Matrix<double, Tdim, 1> momentum =
+        property_handle_->property("momenta", prop_id_, *mitr, Tdim);
+    const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
+        velocity_ * mass - momentum;
+    property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
+                                      change_in_momenta, Tdim);
+  }
 }

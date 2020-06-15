@@ -1,9 +1,11 @@
 #include <limits>
+#include <memory>
 
 #include "catch.hpp"
 
 #include "data_types.h"
 #include "element.h"
+#include "graph.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "material.h"
@@ -13,6 +15,8 @@
 #include "particle.h"
 #include "quadrilateral_element.h"
 
+#ifdef USE_MPI
+#ifdef USE_KAHIP
 //! Check transfer of particles across MPI tasks
 TEST_CASE("MPI transfer particle is checked in 2D",
           "[particle][mpi][transfer][2D]") {
@@ -27,7 +31,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
   // Tolerance
   const double Tolerance = 1.E-7;
 
-  SECTION("Transfer particles in mesh in nonrank MPI cells") {
+  SECTION("Transfer particles in mesh domain decomposition of MPI cells") {
 
     // Get number of MPI ranks
     int mpi_size;
@@ -46,7 +50,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic2D", std::move(mid), jmaterial);
+            "LinearElastic2D", std::move(1), jmaterial);
 
     std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
     materials[mid] = material;
@@ -289,9 +293,9 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       // Identify ghost boundary cells
       mesh->find_cell_neighbours();
       mesh->find_ghost_boundary_cells();
-
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
       // Transfer particle to the correct MPI rank
-      mesh->transfer_nonrank_particles();
+      mesh->transfer_halo_particles();
       // Check sender ranks
       if (mpi_rank != 0) {
         REQUIRE(cell0->nparticles() == 0);
@@ -318,6 +322,32 @@ TEST_CASE("MPI transfer particle is checked in 2D",
         REQUIRE(node7->mpi_ranks().size() == 2);
         REQUIRE(node8->mpi_ranks().size() == 1);
       }
+    }
+
+    // Transfer non-rank particles
+    if (mpi_size == 4) {
+      // Initialize MPI
+      MPI_Comm comm;
+      MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+      // Create graph object if empty
+      auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+
+      // Find global nparticles
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
+
+      // Construct a weighted DAG
+      REQUIRE_NOTHROW(graph->construct_graph(mpi_size, mpi_rank));
+
+      // Graph partitioning mode
+      int mode = 4;  // FAST
+      // Create graph partition
+      bool graphpartition = graph->create_partitions(&comm, mode);
+      // Collect the partitions
+      auto exchange_cells =
+          graph->collect_partitions(mpi_size, mpi_rank, &comm);
+      // Transfer particle to the correct MPI rank
+      REQUIRE_NOTHROW(mesh->transfer_nonrank_particles(exchange_cells));
     }
   }
 }
@@ -355,7 +385,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
 
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
-            "LinearElastic3D", std::move(mid), jmaterial);
+            "LinearElastic3D", std::move(1), jmaterial);
 
     std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
     materials[mid] = material;
@@ -624,9 +654,11 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       // Identify ghost boundary cells
       mesh->find_cell_neighbours();
       mesh->find_ghost_boundary_cells();
+      // Test find nglobal particles in each cell
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
 
       // Transfer particle to the correct MPI rank
-      mesh->transfer_nonrank_particles();
+      mesh->transfer_halo_particles();
       // Check all non receiver ranks
       if (mpi_rank != 0) {
         REQUIRE(cell0->nparticles() == 0);
@@ -663,5 +695,33 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
         REQUIRE(node17->mpi_ranks().size() == 1);
       }
     }
+
+    // Transfer non-rank particles
+    if (mpi_size == 4) {
+      // Initialize MPI
+      MPI_Comm comm;
+      MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+      // Create graph object if empty
+      auto graph = std::make_shared<mpm::Graph<Dim>>(mesh->cells());
+
+      // Find global nparticles
+      REQUIRE_NOTHROW(mesh->find_nglobal_particles_cells());
+
+      // Construct a weighted DAG
+      REQUIRE_NOTHROW(graph->construct_graph(mpi_size, mpi_rank));
+
+      // Graph partitioning mode
+      int mode = 4;  // FAST
+      // Create graph partition
+      bool graphpartition = graph->create_partitions(&comm, mode);
+      // Collect the partitions
+      auto exchange_cells =
+          graph->collect_partitions(mpi_size, mpi_rank, &comm);
+      // Transfer particle to the correct MPI rank
+      REQUIRE_NOTHROW(mesh->transfer_nonrank_particles(exchange_cells));
+    }
   }
 }
+#endif
+#endif

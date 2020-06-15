@@ -36,6 +36,13 @@ mpm::dense_map mpm::Bingham<Tdim>::initialise_state_variables() {
   return state_vars;
 }
 
+//! State variables
+template <unsigned Tdim>
+std::vector<std::string> mpm::Bingham<Tdim>::state_variables() const {
+  const std::vector<std::string> state_vars = {"pressure"};
+  return state_vars;
+}
+
 //! Compute pressure
 template <unsigned Tdim>
 double mpm::Bingham<Tdim>::thermodynamic_pressure(

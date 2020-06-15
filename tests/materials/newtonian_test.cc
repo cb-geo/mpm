@@ -72,6 +72,9 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
       REQUIRE(state_variables.at("pressure") == 0.0);
+      const std::vector<std::string> state_vars = {"pressure"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 
@@ -91,7 +94,6 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     mpm::Index mesh_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -187,7 +189,6 @@ TEST_CASE("Newtonian is checked in 2D", "[material][newtonian][2D]") {
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
     mpm::Index mesh_id = 0;
-    const unsigned Dim = 2;
     const unsigned Dof = 2;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 4;
@@ -320,6 +321,9 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
       mpm::dense_map state_variables = material->initialise_state_variables();
       REQUIRE(state_variables.size() == 1);
       REQUIRE(state_variables.at("pressure") == 0.0);
+      const std::vector<std::string> state_vars = {"pressure"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 
@@ -339,7 +343,6 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 3;
     const unsigned Dof = 3;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;
@@ -452,7 +455,6 @@ TEST_CASE("Newtonian is checked in 3D", "[material][newtonian][3D]") {
 
     // Coordinates of nodes for the cell
     mpm::Index cell_id = 0;
-    const unsigned Dim = 3;
     const unsigned Dof = 3;
     const unsigned Nphases = 1;
     const unsigned Nnodes = 8;

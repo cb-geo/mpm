@@ -13,6 +13,7 @@
 
 #include "data_types.h"
 #include "function_base.h"
+#include "nodal_properties.h"
 
 namespace mpm {
 
@@ -42,6 +43,13 @@ class NodeBase {
 
   //! Return id of the nodebase
   virtual Index id() const = 0;
+
+  //! Initialise shared pointer to nodal properties pool
+  //! \param[in] prop_id Property id in the nodal property pool
+  //! \param[in] nodal_properties Shared pointer to nodal properties pool
+  virtual void initialise_property_handle(
+      unsigned prop_id,
+      std::shared_ptr<mpm::NodalProperties> property_handle) noexcept = 0;
 
   //! Assign coordinates
   virtual void assign_coordinates(const VectorDim& coord) = 0;
@@ -299,6 +307,18 @@ class NodeBase {
   //! Compute nodal correction force term
   virtual bool compute_nodal_correction_force(
       const VectorDim& correction_force) = 0;
+  //! Update nodal property at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] property Property name
+  //! \param[in] property_value Property quantity from the particles in the cell
+  //! \param[in] mat_id Id of the material within the property data
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  virtual void update_property(bool update, const std::string& property,
+                               const Eigen::MatrixXd& property_value,
+                               unsigned mat_id, unsigned nprops) noexcept = 0;
+
+  //! Compute multimaterial change in momentum
+  virtual void compute_multimaterial_change_in_momentum() = 0;
 
   //! Update correction force
   //! \param[in] update A boolean to update (true) or assign (false)

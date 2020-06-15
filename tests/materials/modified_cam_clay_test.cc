@@ -97,7 +97,6 @@ TEST_CASE("Modified cam clay undrained condition is checked in 3D",
               Approx(3846153.8460000).epsilon(Tolerance));
       REQUIRE(state_variables.at("shear_modulus") ==
               Approx(4615384.61538462).epsilon(Tolerance));
-      REQUIRE(state_variables.at("j3") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("p") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("q") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("theta") == Approx(0.0).epsilon(Tolerance));
@@ -118,6 +117,27 @@ TEST_CASE("Modified cam clay undrained condition is checked in 3D",
       REQUIRE(state_variables.at("pcc") == Approx(0.0).epsilon(Tolerance));
       REQUIRE(state_variables.at("subloading_r") ==
               Approx(1.0).epsilon(Tolerance));
+
+      const std::vector<std::string> state_vars = {"bulk_modulus",
+                                                   "shear_modulus",
+                                                   "p",
+                                                   "q",
+                                                   "theta",
+                                                   "pc",
+                                                   "void_ratio",
+                                                   "delta_phi",
+                                                   "m_theta",
+                                                   "f_function",
+                                                   "dpvstrain",
+                                                   "dpdstrain",
+                                                   "pvstrain",
+                                                   "pdstrain",
+                                                   "chi",
+                                                   "pcd",
+                                                   "pcc",
+                                                   "subloading_r"};
+      auto state_vars_test = material->state_variables();
+      REQUIRE(state_vars == state_vars_test);
     }
   }
 

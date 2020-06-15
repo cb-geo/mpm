@@ -67,6 +67,9 @@ class IO {
   //! Return the output folder for the analysis
   std::string output_folder() const;
 
+  //! Working directory
+  std::string working_dir() const { return working_dir_; }
+
   //! Create output VTK file names (eg. velocity0000*.vtk)
   //! Generates a file based on attribute, current step and maxsteps
   //! \param[in] attribute Attribute being written (eg., velocity / stress)

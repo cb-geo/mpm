@@ -43,6 +43,9 @@ class NorSand : public Material<Tdim> {
   //! \retval state_vars State variables with history
   mpm::dense_map initialise_state_variables() override;
 
+  //! State variables
+  std::vector<std::string> state_variables() const override;
+
   //! Compute stress
   //! \param[in] stress Stress
   //! \param[in] dstrain Strain
@@ -69,13 +72,14 @@ class NorSand : public Material<Tdim> {
   void compute_plastic_tensor(const Vector6d& stress,
                               mpm::dense_map* state_vars);
 
-  //! Compute stress invariants (p, q, j2, j3, lode_angle and M_theta)
+  //! Compute stress invariants (p, q, lode_angle and M_theta)
   //! \param[in] stress Stress
-  //! \param[in] state_vars History-dependent state variables
-  //! \retval vector of size six, containing p, q, j2, j3, lode_angle and
-  //! M_theta
-  Eigen::Matrix<double, 6, 1> compute_stress_invariants(
-      const Vector6d& stress, mpm::dense_map* state_vars);
+  //! \param[in|out] p Mean stress
+  //! \param[in|out] q Deviatoric stress
+  //! \param[in|out] lode_angle Lode angle
+  //! \param[in|out] M_theta Critical state M lode angle
+  void compute_stress_invariants(const Vector6d& stress, double* p, double* q,
+                                 double* lode_angle, double* M_theta);
 
   //! Compute state variables (void ratio, p_image, e_image, etc)
   //! \param[in] stress Stress
@@ -154,15 +158,17 @@ class NorSand : public Material<Tdim> {
   //! Flag for bonded model
   bool bond_model_{false};
   //! Initial p_cohesion
-  double p_cohesion_initial_{std::numeric_limits<double>::max()};
+  double p_cohesion_initial_{0.};
   //! Initial p_dilation
-  double p_dilation_initial_{std::numeric_limits<double>::max()};
+  double p_dilation_initial_{0.};
   //! Cohesion degradation parameter m upon shearing
-  double m_cohesion_{std::numeric_limits<double>::max()};
+  double m_cohesion_{0.};
   //! Dilation degradation parameter m upon shearing
-  double m_dilation_{std::numeric_limits<double>::max()};
+  double m_dilation_{0.};
   //! Parameter for modulus
-  double m_modulus_{std::numeric_limits<double>::max()};
+  double m_modulus_{0.};
+  //! Default tolerance
+  double tolerance_{std::numeric_limits<double>::epsilon()};
 
 };  // NorSand class
 }  // namespace mpm
