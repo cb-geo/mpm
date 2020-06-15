@@ -86,16 +86,25 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       std::bind(&mpm::ParticleBase<Tdim>::assign_projection_parameter,
                 std::placeholders::_1, beta_));
 
-  // Domain decompose
-  this->mpi_domain_decompose();
-
   // Check point resume
   if (resume) this->checkpoint_resume();
+
+  // Domain decompose
+  bool initial_step = (resume == true) ? false : true;
+  this->mpi_domain_decompose(initial_step);
 
   auto solver_begin = std::chrono::steady_clock::now();
   // Main loop
   for (; step_ < nsteps_; ++step_) {
     if (mpi_rank == 0) console_->info("Step: {} of {}.\n", step_, nsteps_);
+
+#ifdef USE_MPI
+#ifdef USE_GRAPH_PARTITIONING
+    // Run load balancer at a specified frequency
+    if (step_ % nload_balance_steps_ == 0 && step_ != 0)
+      this->mpi_domain_decompose(false);
+#endif
+#endif
 
     // Create a TBB task group
     tbb::task_group task_group;
@@ -285,7 +294,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
-    mesh_->transfer_nonrank_particles();
+    mesh_->transfer_halo_particles();
 #endif
 #endif
 
