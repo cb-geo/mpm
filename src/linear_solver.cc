@@ -20,4 +20,4 @@ static Register<mpm::AssemblerBase<3>,
 // Eigen Conjugate Gradient
 static Register<mpm::SolverBase<Eigen::SparseMatrix<double>>,
                 mpm::CGEigen<Eigen::SparseMatrix<double>>, unsigned, double>
-    solver_eigen_cg("EigenCG");
+    solver_eigen_cg("CGEigen");
