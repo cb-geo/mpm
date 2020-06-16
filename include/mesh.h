@@ -479,7 +479,8 @@ class Mesh {
   //! Get free surface particle set
   std::set<mpm::Index> free_surface_particles();
 
-  //! Assign id for active node
+  //! Create a list of active nodes in mesh and assign active node id
+  //! (rank-wise)
   unsigned assign_active_nodes_id();
 
   //! Assign id for active node
@@ -493,8 +494,8 @@ class Mesh {
 
   //! Compute correction force in the node
   bool compute_nodal_correction_force(
-      Eigen::SparseMatrix<double>& correction_matrix,
-      Eigen::VectorXd& pressure_increment, double dt);
+      const Eigen::SparseMatrix<double>& correction_matrix,
+      const Eigen::VectorXd& pressure_increment, double dt);
 
   // Create the nodal properties' map
   void create_nodal_properties();

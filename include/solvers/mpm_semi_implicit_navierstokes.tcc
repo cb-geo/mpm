@@ -135,10 +135,10 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                   std::placeholders::_1));
 
     // Compute free surface cells, nodes, and particles
-    task_group.run([&] {
       mesh_->compute_free_surface(volume_tolerance_);
 
-      // Assign initial pressure
+    task_group.run([&] {
+      // Assign initial pressure for all free-surface particle
       mesh_->iterate_over_particles_predicate(
           std::bind(&mpm::ParticleBase<Tdim>::initial_pressure,
                     std::placeholders::_1, 0.0),
@@ -425,7 +425,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
         matrix_assembler_->rank_global_mapper());
 #endif
 
-    // Solve matrix equation
+    // Solve matrix equation and assign solution to assembler
     matrix_assembler_->assign_pressure_increment(matrix_solver_->solve(
         matrix_assembler_->laplacian_matrix(),
         matrix_assembler_->poisson_rhs_vector(), solver_type));
@@ -442,6 +442,7 @@ template <unsigned Tdim>
 bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
   bool status = true;
   try {
+    // Map correction matrix from particles to cell
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_correction_matrix_to_cell,
                   std::placeholders::_1));

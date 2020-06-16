@@ -157,7 +157,6 @@ bool mpm::FluidParticle<Tdim>::map_poisson_right_to_cell() {
 template <unsigned Tdim>
 bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
   bool status = true;
-
   try {
     double pressure_increment = 0;
     for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -168,7 +167,8 @@ bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
     state_variables_.at("pressure") =
         state_variables_.at("pressure") * projection_param_ +
         pressure_increment;
-    // Apply free surface
+
+    // Overwrite pressure if free surface
     if (this->free_surface()) state_variables_.at("pressure") = 0.0;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

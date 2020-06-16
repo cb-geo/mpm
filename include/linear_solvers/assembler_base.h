@@ -40,7 +40,7 @@ class AssemblerBase {
 
   //! Assign mesh pointer
   //! \param[in] mesh mesh pointer
-  void assign_mesh_pointer(std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
+  void assign_mesh_pointer(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
     mesh_ = mesh;
   }
 
@@ -66,7 +66,7 @@ class AssemblerBase {
 
   //! Assign pressure constraints
   virtual bool assign_pressure_constraints(double beta,
-                                           const double current_time) = 0;
+                                           double current_time) = 0;
 
   //! Apply pressure constraints to poisson equation
   virtual void apply_pressure_constraints() = 0;
@@ -76,7 +76,7 @@ class AssemblerBase {
 
   //! Assign pressure increment
   virtual void assign_pressure_increment(
-      Eigen::VectorXd pressure_increment) = 0;
+      const Eigen::VectorXd& pressure_increment) = 0;
 
   //! Return correction matrix
   virtual Eigen::SparseMatrix<double>& correction_matrix() = 0;

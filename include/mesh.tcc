@@ -102,7 +102,7 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
     if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
-//! Create a list of active nodes in mesh and assign active node id
+//! Create a list of active nodes in mesh and assign active node id (rank-wise)
 template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   // Clear existing list of active nodes
