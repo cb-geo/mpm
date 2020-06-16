@@ -905,9 +905,10 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
 
           std::string pressure_constraints_file =
               constraints.at("file").template get<std::string>();
-          bool ppressure_constraints = mesh_->assign_nodal_pressure_constraints(
-              phase, mesh_io->read_pressure_constraints(
-                         io_->file_name(pressure_constraints_file)));
+          bool ppressure_constraints =
+              constraints_->assign_nodal_pressure_constraints(
+                  phase, mesh_io->read_pressure_constraints(
+                             io_->file_name(pressure_constraints_file)));
           if (!ppressure_constraints)
             throw std::runtime_error(
                 "Pressure constraints are not properly assigned");
@@ -923,10 +924,15 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
           int nset_id = constraints.at("nset_id").template get<int>();
           // Pressure
           double pressure = constraints.at("pressure").template get<double>();
-
+          // Phase if available
+          if (constraints.contains("phase"))
+            phase = constraints.at("phase").template get<unsigned int>();
+          // Add friction constraint to mesh
+          auto pressure_constraint = std::make_shared<mpm::PressureConstraint>(
+              nset_id, phase, pressure);
           // Add pressure constraint to mesh
-          mesh_->assign_nodal_pressure_constraint(pfunction, nset_id, phase,
-                                                  pressure);
+          constraints_->assign_nodal_pressure_constraint(pfunction,
+                                                         pressure_constraint);
         }
       }
     } else

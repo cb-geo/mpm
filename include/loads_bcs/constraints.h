@@ -10,6 +10,7 @@
 #include "friction_constraint.h"
 #include "logger.h"
 #include "mesh.h"
+#include "pressure_constraint.h"
 #include "velocity_constraint.h"
 
 namespace mpm {
@@ -51,6 +52,21 @@ class Constraints {
   bool assign_nodal_friction_constraints(
       const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
           friction_constraints);
+
+  //! Assign nodal pressure constraints
+  //! \param[in] mfunction Math function if defined
+  //! \param[in] setid Node set id
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pconstraint Pressure constraint at node
+  bool assign_nodal_pressure_constraint(
+      const std::shared_ptr<FunctionBase>& mfunction,
+      const std::shared_ptr<mpm::PressureConstraint>& pconstraint);
+
+  //! Assign nodal pressure constraints to nodes
+  //! \param[in] pressure_constraints Constraint at node, pressure
+  bool assign_nodal_pressure_constraints(
+      const unsigned phase,
+      const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints);
 
  private:
   //! Mesh object
