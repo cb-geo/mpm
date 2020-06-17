@@ -530,8 +530,7 @@ void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   // Map displacements to nodal property and divide it by the respective
   // nodal-material mass
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    Eigen::Matrix<double, Tdim, 1> displacement =
-        mass_ * shapefn_[i] * displacement_;
+    const auto& displacement = mass_ * shapefn_[i] * displacement_;
     nodes_[i]->update_property(true, "displacements", displacement,
                                material_id_, Tdim);
   }

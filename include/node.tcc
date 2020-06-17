@@ -569,9 +569,9 @@ void mpm::Node<Tdim, Tdof,
   // node
   std::lock_guard<std::mutex> guard(node_mutex_);
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
-    const Eigen::Matrix<double, Tdim, 1> material_displacement =
+    const auto& material_displacement =
         property_handle_->property("displacements", prop_id_, *mitr, Tdim);
-    const Eigen::Matrix<double, 1, 1> material_mass =
+    const auto& material_mass =
         property_handle_->property("masses", prop_id_, *mitr);
 
     // displacement of the center of mass
@@ -592,9 +592,9 @@ void mpm::Node<Tdim, Tdof,
         property_handle_->property("masses", prop_id_, *mitr);
 
     // Update the separation vector property
-    Eigen::Matrix<double, Tdim, 1> separation_vector =
-        (displacement_ - material_displacement) * mass_(0, 0) /
-        (mass_(0, 0) - material_mass(0, 0));
+    const auto& separation_vector = (displacement_ - material_displacement) *
+                                    mass_(0, 0) /
+                                    (mass_(0, 0) - material_mass(0, 0));
     property_handle_->update_property("separation_vectors", prop_id_, *mitr,
                                       separation_vector, Tdim);
   }
