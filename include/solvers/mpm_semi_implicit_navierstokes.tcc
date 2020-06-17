@@ -308,7 +308,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info("Rank {}, SemiImplicit_NavierStokes {} solver duration: {} ms",
+  console_->info("Rank {}, SemiImplicit_NavierStokes solver duration: {} ms",
                  mpi_rank,
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
