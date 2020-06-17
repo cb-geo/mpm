@@ -286,7 +286,7 @@ class Node : public NodeBase<Tdim> {
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
-  Eigen::Matrix<double, Tdim, 1> displacement_;
+  Eigen::Matrix<double, Tdim, 1> contact_displacement_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum

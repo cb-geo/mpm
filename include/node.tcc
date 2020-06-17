@@ -28,7 +28,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   external_force_.setZero();
   internal_force_.setZero();
   pressure_.setZero();
-  displacement_.setZero();
+  contact_displacement_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -575,7 +575,7 @@ void mpm::Node<Tdim, Tdof,
         property_handle_->property("masses", prop_id_, *mitr);
 
     // displacement of the center of mass
-    displacement_ += material_displacement / mass_(0, 0);
+    contact_displacement_ += material_displacement / mass_(0, 0);
     // assign nodal-multimaterial displacement by dividing it by this material's
     // mass
     property_handle_->assign_property(
@@ -592,9 +592,9 @@ void mpm::Node<Tdim, Tdof,
         property_handle_->property("masses", prop_id_, *mitr);
 
     // Update the separation vector property
-    const auto& separation_vector = (displacement_ - material_displacement) *
-                                    mass_(0, 0) /
-                                    (mass_(0, 0) - material_mass(0, 0));
+    const auto& separation_vector =
+        (contact_displacement_ - material_displacement) * mass_(0, 0) /
+        (mass_(0, 0) - material_mass(0, 0));
     property_handle_->update_property("separation_vectors", prop_id_, *mitr,
                                       separation_vector, Tdim);
   }
