@@ -870,25 +870,6 @@ Eigen::VectorXi mpm::Cell<Tdim>::local_node_indices() {
   return indices;
 }
 
-//! Return local node indices
-template <unsigned Tdim>
-Eigen::VectorXi mpm::Cell<Tdim>::mpi_local_node_indices() {
-  Eigen::VectorXi indices;
-  try {
-    indices.resize(nodes_.size());
-    indices.setZero();
-    unsigned node_idx = 0;
-    for (auto node_itr = nodes_.cbegin(); node_itr != nodes_.cend();
-         ++node_itr) {
-      indices(node_idx) = (*node_itr)->global_active_id();
-      node_idx++;
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return indices;
-}
-
 //! Initialise element matrix
 template <unsigned Tdim>
 bool mpm::Cell<Tdim>::initialise_element_matrix() {

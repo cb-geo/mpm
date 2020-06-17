@@ -40,7 +40,7 @@ TEST_CASE("Linear solver conjugate gradient", "[linear_solver]") {
         eigen_matrix_solver =
             Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
                     double>::instance()
-                ->create("EigenCG", std::move(max_iter),
+                ->create("CGEigen", std::move(max_iter),
                          std::move(solve_tolerance));
 
     SECTION("Eigen 3x3 solver") {
@@ -72,8 +72,11 @@ TEST_CASE("Linear solver conjugate gradient", "[linear_solver]") {
                          std::move(solve_tolerance));
 
     SECTION("PETSC 3x3 solver") {
-      // Initiate solver_type
+      // Initiate solver_type and necessary mapping arrays
       std::string solver_type = "cg";
+      std::vector<int> mapper{0, 1, 2};
+      petsc_matrix_solver->assign_global_active_dof(3);
+      petsc_matrix_solver->assign_rank_global_mapper(mapper);
 
       // Construct matrix and vector
       const auto& A = CreateSymmetricTestMatrix3x3();

@@ -242,9 +242,6 @@ class Cell {
   //! Return local node indices
   Eigen::VectorXi local_node_indices();
 
-  //! Return local node indices
-  Eigen::VectorXi mpi_local_node_indices();
-
   //! Return local laplacian
   const Eigen::MatrixXd& laplacian_matrix() { return laplacian_matrix_; };
 
