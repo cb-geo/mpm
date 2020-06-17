@@ -271,7 +271,7 @@ void mpm::AssemblerEigenSemiImplicitNavierStokes<
 //! Assign pressure constraints
 template <unsigned Tdim>
 bool mpm::AssemblerEigenSemiImplicitNavierStokes<
-    Tdim>::assign_pressure_constraints(double beta, const double current_time) {
+    Tdim>::assign_pressure_constraints(double beta, double current_time) {
   bool status = false;
   try {
     // Resize pressure constraints vector

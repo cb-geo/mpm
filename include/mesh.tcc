@@ -102,7 +102,7 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
     if ((*nitr)->status()) this->active_nodes_.add(*nitr);
 }
 
-//! Create a list of active nodes in mesh and assign active node id
+//! Create a list of active nodes in mesh and assign active node id (rank-wise)
 template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   // Clear existing list of active nodes
@@ -1961,8 +1961,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
 //! Compute nodal correction force
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
-    Eigen::SparseMatrix<double>& correction_matrix,
-    Eigen::VectorXd& pressure_increment, double dt) {
+    const Eigen::SparseMatrix<double>& correction_matrix,
+    const Eigen::VectorXd& pressure_increment, double dt) {
   bool status = true;
   try {
     //! Active node size

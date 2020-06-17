@@ -645,6 +645,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   }
   return status;
 }
+
 //! Update nodal property at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
