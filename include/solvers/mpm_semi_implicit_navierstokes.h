@@ -78,7 +78,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::materials_;
   //! Pressure smoothing
   bool pressure_smoothing_{false};
-  // Projection method paramter (beta)
+  // Projection method parameter (beta)
   double beta_{1};
   //! Matrix assembler object
   std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler_;

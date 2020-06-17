@@ -36,7 +36,7 @@ class KrylovPETSC : public SolverBase<Traits> {
     PetscErrorCode ierr;
     PetscInitialize(&petsc_argc, &petsc_argv, 0, 0);
     if (ierr) {
-      throw std::runtime_error("Error when initializaing Petsc.");
+      throw std::runtime_error("Error when initialiazing Petsc.");
     }
 #endif
   };
@@ -57,10 +57,12 @@ class KrylovPETSC : public SolverBase<Traits> {
   //! Return the type of solver
   std::string solver_type() const { return "PETSC"; }
 
+  //! Assign global active dof
   void assign_global_active_dof(unsigned global_active_dof) override {
     global_active_dof_ = global_active_dof;
   };
 
+  //! Assign rank to global mapper
   void assign_rank_global_mapper(std::vector<int> rank_global_mapper) override {
     rank_global_mapper_ = rank_global_mapper;
   };

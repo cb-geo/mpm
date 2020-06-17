@@ -65,7 +65,7 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
-  //! Assign status
+  //! Assign solving status
   void assign_solving_status(bool status) override { solving_status_ = status; }
 
   //! Return solving status
@@ -348,6 +348,7 @@ class Node : public NodeBase<Tdim> {
   //! \retval status Computation status
   bool compute_acceleration_velocity_navierstokes_semi_implicit(
       unsigned phase, double dt) override;
+
   //! Update nodal property at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name

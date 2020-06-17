@@ -3,10 +3,8 @@ template <typename Traits>
 Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     const Eigen::SparseMatrix<double>& A, const Eigen::VectorXd& b,
     std::string solver_type) {
-
   //! Initialize solution vector x
   Eigen::VectorXd x(b.size());
-
   try {
 #if USE_PETSC
 
@@ -46,6 +44,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     VecAssemblyBegin(petsc_b);
     VecAssemblyEnd(petsc_b);
 
+    // NOTE: Comment out to output assembled right-hand-side vector in each rank
     // PetscViewer viewer;
     // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
     // VecView(petsc_b, viewer);
@@ -60,6 +59,8 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     MatAssemblyBegin(petsc_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(petsc_A, MAT_FINAL_ASSEMBLY);
 
+    // NOTE: Comment out to output assembled coefficient matrix A
+    // PetscViewer viewer;
     // PetscViewerASCIIGetStdout(MPI_COMM_WORLD, &viewer);
     // MatView(petsc_A, viewer);
 
@@ -70,14 +71,18 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       KSPSetType(solver, KSPCG);
       KSPSetTolerances(solver, tolerance_, PETSC_DEFAULT, PETSC_DEFAULT,
                        max_iter_);
+
+      // NOTE: Comment out to add preconditioner settings
       // KSPCGSetType(solver, KSP_CG_SYMMETRIC);
       // KSPSetInitialGuessNonzero(solver, PETSC_TRUE);
       // KSPGetPC(solver, &pc);
       // PCFactorSetShiftType(pc, MAT_SHIFT_POSITIVE_DEFINITE);
       // PCSetType(pc, PCSOR);
+
       KSPSolve(solver, petsc_b, petsc_x);
       KSPGetConvergedReason(solver, &reason);
-      // Uncomment below to print residual in each iteration
+
+      // NOTE: Uncomment below to print residual in each iteration
       // PetscViewerAndFormat* vf;
       // PetscViewerAndFormatCreate(PETSC_VIEWER_STDOUT_WORLD,
       //                            PETSC_VIEWER_DEFAULT, &vf);
@@ -91,14 +96,16 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
       // }
     }
 
-    // Warn if it does not converge
-    // FIXME: Should we throw error instead?
+    // Warn if solver does not converge
     if (reason < 0) {
-      PetscPrintf(MPI_COMM_WORLD, "\nKSPCG solver Diverged;\n");
+      PetscPrintf(MPI_COMM_WORLD,
+                  "\nKSPCG solver Diverged, try to modify the set tolerance "
+                  "and maximum iteration.\n");
     }
 
     // Scatter and gather for cloning procedure
     if (mpi_size > 1) {
+      // Initiate scatter arrays
       VecScatter ctx;
       Vec x_seq;
       PetscScalar* x_data;
@@ -113,7 +120,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
         x(i) = x_data[global_index];
       }
 
-      // Destroy scatter array
+      // Destroy scatter arrays
       VecRestoreArray(x_seq, &x_data);
       VecScatterDestroy(&ctx);
       VecDestroy(&x_seq);

@@ -110,7 +110,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   Index active_id = 0;
 
 #ifdef USE_MPI
-
+  // Initialize pointer of booleans for send and receive
   bool* send_nodal_solving_status = new bool[nnodes()];
   memset(send_nodal_solving_status, 0, nnodes() * sizeof(bool));
   bool* receive_nodal_solving_status = new bool[nnodes()];
@@ -158,7 +158,7 @@ unsigned mpm::Mesh<Tdim>::assign_active_nodes_id() {
   return active_id;
 }
 
-//! Create a list of active nodes in mesh and assign active node id
+//! Assign active node id (globally in All MPI ranks)
 template <unsigned Tdim>
 unsigned mpm::Mesh<Tdim>::assign_global_active_nodes_id() {
   // Clear existing list of active nodes
@@ -2084,8 +2084,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
 //! Compute nodal correction force
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::compute_nodal_correction_force(
-    Eigen::SparseMatrix<double>& correction_matrix,
-    Eigen::VectorXd& pressure_increment, double dt) {
+    const Eigen::SparseMatrix<double>& correction_matrix,
+    const Eigen::VectorXd& pressure_increment, double dt) {
   bool status = true;
   try {
     //! Active node size

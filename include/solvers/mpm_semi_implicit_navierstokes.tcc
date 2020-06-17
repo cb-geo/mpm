@@ -135,7 +135,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                   std::placeholders::_1));
 
     // Compute free surface cells, nodes, and particles
-      mesh_->compute_free_surface(volume_tolerance_);
+    mesh_->compute_free_surface(volume_tolerance_);
 
     task_group.run([&] {
       // Assign initial pressure for all free-surface particle
@@ -418,9 +418,11 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
     matrix_assembler_->apply_pressure_constraints();
 
 #ifdef USE_MPI
+    // Assign global active dof to solver
     matrix_solver_->assign_global_active_dof(
         matrix_assembler_->global_active_dof());
 
+    // Assign rank global mapper to solver
     matrix_solver_->assign_rank_global_mapper(
         matrix_assembler_->rank_global_mapper());
 #endif

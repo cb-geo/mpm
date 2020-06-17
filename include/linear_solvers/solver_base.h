@@ -27,8 +27,10 @@ class SolverBase {
                                 const Eigen::VectorXd& b,
                                 std::string solver_type) = 0;
 
+  //! Assign global active dof
   virtual void assign_global_active_dof(unsigned global_active_dof){};
 
+  //! Assign rank to global mapper
   virtual void assign_rank_global_mapper(std::vector<int> rank_global_mapper){};
 
  protected:

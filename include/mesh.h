@@ -483,7 +483,7 @@ class Mesh {
   //! (rank-wise)
   unsigned assign_active_nodes_id();
 
-  //! Assign id for active node
+  //! Assign active node id (globally in All MPI ranks)
   unsigned assign_global_active_nodes_id();
 
   //! Return container of active nodes
