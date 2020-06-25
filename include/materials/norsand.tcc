@@ -150,8 +150,9 @@ void mpm::NorSand<Tdim>::compute_stress_invariants(const Vector6d& stress,
   *lode_angle = mpm::materials::lode_angle(-stress, tolerance_);
 
   // Compute M_theta (Jefferies and Shuttle, 2011)
-  *M_theta =
-      Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * *lode_angle);
+  // *M_theta =
+  //     Mtc_ - std::pow(Mtc_, 2) / (3. + Mtc_) * cos(3. / 2. * *lode_angle);
+  *M_theta = Mtc_;
 }
 
 //! Compute state parameters
@@ -340,8 +341,9 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
   const Vector6d dtheta_dsigma = mpm::materials::dtheta_dsigma(-stress);
 
   // dF_dsigma is in compression negative
-  const Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
-                             (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
+  // const Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma) +
+  //                            (-1. * dF_dM * dM_dtheta * dtheta_dsigma);
+  const Vector6d dF_dsigma = (dF_dp * dp_dsigma) + (-1. * dF_dq * dq_dsigma);
 
   // Derivatives in respect to p_image
   const double dF_dpi =
