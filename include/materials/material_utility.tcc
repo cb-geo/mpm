@@ -196,7 +196,7 @@ inline const Eigen::Matrix<double, 6, 1> mpm::materials::dtheta_dsigma(
     dr_dj3 *= std::pow(j2, -1.5);
     // Update derivative of theta in terms of R, check for sqrt of zero
     const double factor =
-        (std::abs(1 - r * r) < tolerance) ? tolerance : (1 - r * r);
+        (std::abs(1 - r * r) < tolerance) ? tolerance : std::abs(1 - r * r);
     dtheta_dr = -1.0 / (3.0 * sqrt(factor));
   }
 
