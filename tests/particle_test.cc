@@ -144,6 +144,18 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
+    // Check scalar properties
+    SECTION("Check scalar properties") {
+      // Check mass
+      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+              Approx(0.0).epsilon(Tolerance));
+      double mass = 100.5;
+      particle->update_scalar_property(mpm::properties::Scalar::Mass, true,
+                                       mass);
+      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+              Approx(100.5).epsilon(Tolerance));
+    }
+
     // Check mass
     REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
     double mass = 100.5;
@@ -1221,6 +1233,18 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
+
+    // Check scalar properties
+    SECTION("Check scalar properties") {
+      // Check mass
+      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+              Approx(0.0).epsilon(Tolerance));
+      double mass = 100.5;
+      particle->update_scalar_property(mpm::properties::Scalar::Mass, true,
+                                       mass);
+      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+              Approx(100.5).epsilon(Tolerance));
+    }
 
     // Check mass
     REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
