@@ -247,8 +247,11 @@ class NodeBase {
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_change_in_momentum() = 0;
 
-  //! Compute multimaterial change in momentum
+  //! Compute multimaterial separation vector
   virtual void compute_multimaterial_separation_vector() = 0;
+
+  //! Compute multimaterial normal unit vector
+  virtual void compute_multimaterial_normal_unit_vector() = 0;
 
 };  // NodeBase class
 }  // namespace mpm

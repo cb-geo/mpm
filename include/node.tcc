@@ -599,3 +599,22 @@ void mpm::Node<Tdim, Tdof,
                                       separation_vector, Tdim);
   }
 }
+
+//! Compute multimaterial normal unit vector
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_normal_unit_vector() {
+  // Iterate over all materials in the material_ids set
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // calculte the normal unit vector
+    const auto& domain_gradient =
+        property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+    const auto& normal_unit_vector =
+        (1 / domain_gradient.norm()) * domain_gradient;
+
+    // assign nodal-multimaterial normal unit vector to property pool
+    property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
+                                      normal_unit_vector, Tdim);
+  }
+}
