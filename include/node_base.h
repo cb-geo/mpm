@@ -133,6 +133,13 @@ class NodeBase {
   virtual void update_mass_pressure(unsigned phase,
                                     double mass_pressure) noexcept = 0;
 
+  //! Update drag force coefficient
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual bool update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

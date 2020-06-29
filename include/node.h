@@ -133,6 +133,13 @@ class Node : public NodeBase<Tdim> {
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
 
+  //! Update drag force coefficient
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  bool update_drag_force_coefficient(
+      bool update, const VectorDim& drag_force_coefficient) override;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -280,6 +287,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
+  //! Drag force coefficient
+  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Velocity

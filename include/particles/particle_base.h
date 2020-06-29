@@ -19,7 +19,12 @@ template <unsigned Tdim>
 class Material;
 
 //! Particle phases
-enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
+enum ParticlePhase : unsigned int {
+  Mixture = 0,
+  Solid = 0,
+  Liquid = 1,
+  Gas = 2
+};
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -252,6 +257,225 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  // Twophase particle functions------------------------------------------------
+
+  //! Assign porosity
+  virtual bool assign_porosity() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Assign particle free surface
+  virtual bool free_surface() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(free_surface) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Assign particle pressure constraints
+  virtual bool assign_particle_pore_pressure_constraint(double pressure) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_particle_pore_pressure_constraint) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise liquid phase
+  virtual void initialise_liquid_phase() {
+    throw std::runtime_error(
+        "Calling the base class function (initialise_liquid_phase) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assign material
+  //! \param[in] material Pointer to a material
+  virtual bool assign_liquid_material(
+      const std::shared_ptr<Material<Tdim>>& material) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_material) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Assign pore pressure
+  //! \param[in] pressure Pore liquid pressure
+  virtual void assign_pore_pressure(double pressure) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assign liquid traction
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  virtual bool assign_liquid_traction(unsigned direction, double traction) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_traction) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Return liquid phase traction
+  virtual VectorDim liquid_traction() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_traction) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
+  virtual double liquid_mass() const {
+    throw std::runtime_error(
+        "Calling the base class function (liquid_mass) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  virtual bool assign_liquid_velocity(const VectorDim& velocity) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return strain of the particle liquid phase
+  //! \retval liquid strain Liquid phase strain
+  virtual Eigen::Matrix<double, 6, 1> liquid_strain() const {
+    auto error = Eigen::Matrix<double, 6, 1>::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_strain) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Assign pore pressure to nodes
+  virtual void map_pore_pressure_to_nodes() {
+    throw std::runtime_error(
+        "Calling the base class function (map_pore_pressure_to_nodes) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Compute pore pressure somoothening by interpolating nodal pressure
+  virtual bool compute_pore_pressure_smoothing() {
+    throw std::runtime_error(
+        "Calling the base class function (compute_pore_pressure_smoothing) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Compute pore pressure
+  //! \param[in] dt Time step size
+  virtual void compute_pore_pressure(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (compute_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Return pore pressure
+  //! \retval pore pressure Pore liquid pressure
+  virtual double pore_pressure() const {
+    throw std::runtime_error(
+        "Calling the base class function (pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return free surface status
+  //! \retval free surface Free surface status
+  virtual bool free_surface() const {
+    throw std::runtime_error(
+        "Calling the base class function (free_surface) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return excessive pore pressure
+  //! \retval excessive pore pressure Excessive pore pressure
+  virtual double excessive_pore_pressure() const {
+    throw std::runtime_error(
+        "Calling the base class function (excessive_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Update particle permeability
+  virtual VectorDim update_permeability() {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (update_permeability) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Update porosity
+  virtual bool update_porosity(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (update_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Map drag force coefficient
+  virtual bool map_drag_force_coefficient() {
+    throw std::runtime_error(
+        "Calling the base class function (map_drag_force_coefficient) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Assign particle liquid phase velocity constraints
+  virtual bool assign_particle_liquid_velocity_constraint(unsigned dir,
+                                                          double velocity) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_particle_liquid_velocity_constraint) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Apply particle liquid phase velocity constraints
+  virtual void apply_particle_liquid_velocity_constraints() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(apply_particle_liquid_velocity_constraints) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool initialise_pore_pressure_watertable(
+      const unsigned dir_v, const unsigned dir_h,
+      std::map<double, double>& refernece_points) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initialise_pore_pressure_watertable) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  // ---------------------------------------------------------------------------
 
  protected:
   //! particleBase id

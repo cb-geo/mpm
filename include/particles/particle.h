@@ -276,12 +276,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Return neighbour ids
   std::vector<mpm::Index> neighbours() const override { return neighbours_; };
 
- private:
+ protected:
   //! Compute strain rate
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates

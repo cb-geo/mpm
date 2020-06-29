@@ -27,6 +27,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   volume_.setZero();
   external_force_.setZero();
   internal_force_.setZero();
+  drag_force_coefficient_.setZero();
   pressure_.setZero();
   velocity_.setZero();
   momentum_.setZero();
@@ -163,6 +164,28 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
     std::lock_guard<std::mutex> guard(node_mutex_);
     pressure_(phase) += mass_pressure / mass_(phase);
   }
+}
+
+//! Update drag force coefficient
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::update_drag_force_coefficient(
+    bool update, const Eigen::Matrix<double, Tdim, 1>& drag_force_coefficient) {
+  bool status = false;
+  try {
+    // Decide to update or assign
+    double factor = 1.0;
+    if (!update) factor = 0.;
+
+    // Update/assign drag force coefficient
+    std::lock_guard<std::mutex> guard(node_mutex_);
+    drag_force_coefficient_ =
+        drag_force_coefficient_ * factor + drag_force_coefficient;
+    status = true;
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }
 
 //! Assign pressure at the nodes from particle
@@ -553,7 +576,7 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_ * mass - momentum;
+        velocity_.col(0) * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
