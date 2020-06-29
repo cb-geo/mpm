@@ -221,6 +221,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,
           std::placeholders::_1));
 
+      // Map multimaterial domain gradients from particles to nodes
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_multimaterial_domain_gradients_to_nodes,
+          std::placeholders::_1));
+
       // Compute multimaterial change in momentum
       mesh_->iterate_over_nodes(std::bind(
           &mpm::NodeBase<Tdim>::compute_multimaterial_change_in_momentum,
@@ -229,6 +234,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Compute multimaterial separation vector
       mesh_->iterate_over_nodes(std::bind(
           &mpm::NodeBase<Tdim>::compute_multimaterial_separation_vector,
+          std::placeholders::_1));
+
+      // Compute multimaterial normal unit vector
+      mesh_->iterate_over_nodes(std::bind(
+          &mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
           std::placeholders::_1));
     }
 
