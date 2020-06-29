@@ -445,9 +445,10 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
       const auto element = cell_->element_ptr();
 
       // Set local particle length based on length of element in natural
-      //coordinates. Length/(npartices^(1/Dimension))
-      this->natural_size_.fill(element->unit_element_length() /
-      	std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
+      // coordinates. Length/(npartices^(1/Dimension))
+      this->natural_size_.fill(
+          element->unit_element_length() /
+          std::pow(cell_->nparticles(), static_cast<double>(1. / Tdim)));
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -515,7 +516,22 @@ void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     nodal_mass(0, 0) = mass_ * shapefn_[i];
     nodes_[i]->update_property(true, "masses", nodal_mass, material_id_, 1);
-    nodes_[i]->update_property(true, "momenta", nodal_mass(0, 0) * velocity_,
+    nodes_[i]->update_property(true, "momenta", velocity_ * nodal_mass,
+                               material_id_, Tdim);
+  }
+}
+
+//! Map multimaterial displacements to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
+  // Check if particle mass is set
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  // Map displacements to nodal property and divide it by the respective
+  // nodal-material mass
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    const auto& displacement = mass_ * shapefn_[i] * displacement_;
+    nodes_[i]->update_property(true, "displacements", displacement,
                                material_id_, Tdim);
   }
 }

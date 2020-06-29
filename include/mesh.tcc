@@ -1898,6 +1898,10 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
     nodal_properties_->create_property("momenta", nrows, materials_.size());
     nodal_properties_->create_property("change_in_momenta", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("displacements", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("separation_vectors", nrows,
+                                       materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
