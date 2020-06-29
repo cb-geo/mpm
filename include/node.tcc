@@ -17,6 +17,10 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   // Clear any velocity constraints
   velocity_constraints_.clear();
   concentrated_force_.setZero();
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass,
+                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
+
   this->initialise();
 }
 
@@ -34,6 +38,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   acceleration_.setZero();
   status_ = false;
   material_ids_.clear();
+  scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -44,6 +49,49 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
   // the property handle and the property id is set in the node
   this->property_handle_ = property_handle;
   this->prop_id_ = prop_id;
+}
+
+//! Update scalar property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
+    mpm::properties::Scalar property, bool update, unsigned phase,
+    double value) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign mass
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  scalar_properties_.at(property)[phase] =
+      (scalar_properties_.at(property)[phase] * factor) + value;
+}
+
+//! Update scalar property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+double mpm::Node<Tdim, Tdof, Tnphases>::scalar_property(
+    mpm::properties::Scalar property, unsigned phase) const {
+  return scalar_properties_.at(property)[phase];
+}
+
+//! Update vector property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
+    mpm::properties::Vector property, bool update, unsigned phase,
+    const Eigen::Matrix<double, Tdim, 1>& value) noexcept {
+  // Decide to update or assign
+  const double factor = (update == true) ? 1. : 0.;
+
+  // Update/assign mass
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  Eigen::Matrix<double, Tdim, 1> vecvalue =
+      vector_properties_.at(property).col(phase);
+  vector_properties_.at(property).col(phase) = (vecvalue * factor) + value;
+}
+
+//! Update vector property at the nodes from particle
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+Eigen::Matrix<double, Tdim, 1> mpm::Node<Tdim, Tdof, Tnphases>::vector_property(
+    mpm::properties::Vector property, unsigned phase) const {
+  return vector_properties_.at(property).col(phase);
 }
 
 //! Update mass at the nodes from particle

@@ -9,6 +9,9 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   nodes_.clear();
   // Set material pointer to null
   material_ = nullptr;
+  // Scalar properties
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass, double(0.)));
   // Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);

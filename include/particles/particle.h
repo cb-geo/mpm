@@ -131,7 +131,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Update volume based on centre volumetric strain rate
   void update_volume() noexcept override;
 
-  //! Return mass density
   //! \param[in] phase Index corresponding to the phase
   double mass_density() const override { return mass_density_; }
 
@@ -307,6 +306,12 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::state_variables_;
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
+  //! Scalar properties
+  using ParticleBase<Tdim>::scalar_properties_;
+  //! Vector properties
+  using ParticleBase<Tdim>::vector_properties_;
+  //! Shape functions
+  using ParticleBase<Tdim>::shapefn_;
   //! Volumetric mass density (mass / volume)
   double mass_density_{0.};
   //! Mass
@@ -339,8 +344,6 @@ class Particle : public ParticleBase<Tdim> {
   bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
-  //! Shape functions
-  Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
   //! dN/dX at cell centroid

@@ -130,6 +130,54 @@ class ParticleBase {
   //! Update volume based on centre volumetric strain rate
   virtual void update_volume() noexcept = 0;
 
+  //! Update scalar property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
+                              double value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(mpm::properties::Scalar property) const;
+
+  //! Map scalar property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
+                                           unsigned phase) const;
+
+  //! Update vector property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_vector_property(
+      mpm::properties::Vector property, bool update,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property) const;
+
+  //! Map vector property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_vector_property_nodes(mpm::properties::Vector property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_vector_property_nodes(mpm::properties::Vector property,
+                                           unsigned phase) const;
+
   //! Return mass density
   virtual double mass_density() const = 0;
 
@@ -279,6 +327,13 @@ class ParticleBase {
   mpm::dense_map state_variables_;
   //! Vector of particle neighbour ids
   std::vector<mpm::Index> neighbours_;
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Scalar properties
+  tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
+  //! Vector properties
+  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, 1, Tdim>>
+      vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
 
