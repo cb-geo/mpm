@@ -145,6 +145,9 @@ class ParticleBase {
   //! Map multimaterial displacements to nodes
   virtual void map_multimaterial_displacements_to_nodes() noexcept = 0;
 
+  //! Map multimaterial domain gradients to nodes
+  virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
+
   //! Assign material
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
