@@ -661,9 +661,9 @@ inline Eigen::Matrix<double, Tdim, 1>
   // Check if the first trial xi is just outside the box
   for (unsigned i = 0; i < nr_xi.size(); ++i) {
     if (nr_xi(i) < -1. && nr_xi(i) > -1.001)
-      nr_xi(i) = -0.999999999999;
+      nr_xi(i) = -1. + std::numeric_limits<double>::epsilon();
     else if (nr_xi(i) > 1. && nr_xi(i) < 1.001)
-      nr_xi(i) = 0.999999999999;
+      nr_xi(i) = 1. - std::numeric_limits<double>::epsilon();
   }
 
   // Maximum iterations of newton raphson
