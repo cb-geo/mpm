@@ -608,10 +608,11 @@ void mpm::Node<Tdim, Tdof,
   std::lock_guard<std::mutex> guard(node_mutex_);
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // calculte the normal unit vector
-    const auto& domain_gradient =
+    VectorDim domain_gradient =
         property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
-    const auto& normal_unit_vector =
-        (1 / domain_gradient.norm()) * domain_gradient;
+    VectorDim normal_unit_vector = VectorDim::Zero();
+    if (domain_gradient.norm() > std::numeric_limits<double>::epsilon())
+      normal_unit_vector = domain_gradient.normalized();
 
     // assign nodal-multimaterial normal unit vector to property pool
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
