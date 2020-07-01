@@ -127,6 +127,11 @@ class Node : public NodeBase<Tdim> {
     return internal_force_.col(phase);
   }
 
+  //! Return drag force coefficient
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
@@ -266,6 +271,17 @@ class Node : public NodeBase<Tdim> {
 
   //! Compute multimaterial separation vector
   void compute_multimaterial_separation_vector() override;
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept override;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! factor \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! Damping factor
+  bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept override;
 
  private:
   //! Mutex

@@ -1,5 +1,5 @@
-#ifndef MPM_MPM_EXPLICIT_H_
-#define MPM_MPM_EXPLICIT_H_
+#ifndef MPM_MPM_EXPLICIT_TWOPHASE_H_
+#define MPM_MPM_EXPLICIT_TWOPHASE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -9,15 +9,15 @@
 
 namespace mpm {
 
-//! MPMExplicit class
-//! \brief A class that implements the fully explicit one phase mpm
-//! \details A single-phase explicit MPM
+//! MPMExplicitTwoPhase class
+//! \brief A class that implements the fully explicit two phase mpm
+//! \details A two-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class MPMExplicit : public MPMBase<Tdim> {
+class MPMExplicitTwoPhase : public MPMBase<Tdim> {
  public:
   //! Default constructor
-  MPMExplicit(const std::shared_ptr<IO>& io);
+  MPMExplicitTwoPhase(const std::shared_ptr<IO>& io);
 
   //! Solve
   bool solve() override;
@@ -27,8 +27,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   void pressure_smoothing(unsigned phase);
 
   //! Compute stress strain
-  //! \param[in] phase Phase to smooth pressure
-  void compute_stress_strain(unsigned phase);
+  void compute_stress_strain();
 
  protected:
   // Generate a unique id for the analysis
@@ -57,6 +56,8 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::graph_;
 #endif
 
+  //! Stress update
+  using mpm::MPMBase<Tdim>::stress_update_;
   //! velocity update
   using mpm::MPMBase<Tdim>::velocity_update_;
   //! Gravity
@@ -77,12 +78,12 @@ class MPMExplicit : public MPMBase<Tdim> {
  private:
   //! Pressure smoothing
   bool pressure_smoothing_{false};
-  //! Interface
-  bool interface_{false};
+  //! Pore pressure smoothing
+  bool pore_pressure_smoothing_{true};
 
-};  // MPMExplicit class
+};  // MPMExplicitTwoPhase class
 }  // namespace mpm
 
-#include "mpm_explicit.tcc"
+#include "mpm_explicit_twophase.tcc"
 
-#endif  // MPM_MPM_EXPLICIT_H_
+#endif  // MPM_MPM_EXPLICIT_TWOPHASE_H_

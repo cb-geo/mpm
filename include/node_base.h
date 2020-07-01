@@ -17,6 +17,14 @@
 
 namespace mpm {
 
+//! Nodal phases
+enum NodePhase : unsigned int {
+  nMixture = 0,
+  nSolid = 0,
+  nLiquid = 1,
+  nGas = 2
+};
+
 //! NodeBase base class for nodes
 //! \brief Base class that stores the information about node_bases
 //! \details NodeBase class: id_ and coordinates.
@@ -126,6 +134,9 @@ class NodeBase {
   //! Return internal force
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
+
+  //! Return drag force coefficient
+  virtual VectorDim drag_force_coefficient() const = 0;
 
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
@@ -256,6 +267,16 @@ class NodeBase {
 
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_separation_vector() = 0;
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept = 0;
 
 };  // NodeBase class
 }  // namespace mpm
