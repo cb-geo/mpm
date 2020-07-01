@@ -223,11 +223,15 @@ TEST_CASE("Cell is checked for 2D case", "[cell][2D]") {
         point << 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+        REQUIRE(xi(0) == -1. + std::numeric_limits<double>::epsilon());
+        REQUIRE(xi(1) == -1. + std::numeric_limits<double>::epsilon());
 
         // Check point on edge
         point << 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+        REQUIRE(xi(0) == -0.5);
+        REQUIRE(xi(1) == -1. + std::numeric_limits<double>::epsilon());
 
         // Check point outside
         point << -2, 2.;
@@ -817,16 +821,25 @@ TEST_CASE("Cell is checked for 3D case", "[cell][3D]") {
         point << 0., 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+        REQUIRE(xi(0) == -1. + std::numeric_limits<double>::epsilon());
+        REQUIRE(xi(1) == -1. + std::numeric_limits<double>::epsilon());
+        REQUIRE(xi(2) == -1. + std::numeric_limits<double>::epsilon());
 
         // Check point on edge
         point << 0.5, 0., 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+        REQUIRE(xi(0) == -0.5);
+        REQUIRE(xi(1) == -1. + std::numeric_limits<double>::epsilon());
+        REQUIRE(xi(2) == -1. + std::numeric_limits<double>::epsilon());
 
         // Check point on surface
         point << 0.5, 0.5, 0.;
         REQUIRE(cell->point_in_cartesian_cell(point) == true);
         REQUIRE(cell->is_point_in_cell(point, &xi) == true);
+        REQUIRE(xi(0) == -0.5);
+        REQUIRE(xi(1) == -0.5);
+        REQUIRE(xi(2) == -1. + std::numeric_limits<double>::epsilon());
 
         // Check point outside
         point << 2.5, 2.5, 2.5;
