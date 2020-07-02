@@ -359,8 +359,8 @@ void mpm::NorSand<Tdim>::compute_plastic_tensor(const Vector6d& stress,
       std::sqrt(std::pow(dF_dsigma(0) - dF_dsigma_v, 2) +
                 std::pow(dF_dsigma(1) - dF_dsigma_v, 2) +
                 std::pow(dF_dsigma(2) - dF_dsigma_v, 2) +
-                2 * std::pow(dF_dsigma(3), 2) + 2 * std::pow(dF_dsigma(4), 2) +
-                2 * std::pow(dF_dsigma(5), 2));
+                std::pow(dF_dsigma(3), 2) / 2. + std::pow(dF_dsigma(4), 2) / 2. +
+                std::pow(dF_dsigma(5), 2)) / 2.;
 
   // Compute hardering term
   double hardening_term;
