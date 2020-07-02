@@ -1026,9 +1026,12 @@ void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
       std::string entity_sets =
           mesh_props["entity_sets"].template get<std::string>();
       if (!io_->file_name(entity_sets).empty()) {
-        mesh_->create_particle_sets(
+        bool particle_sets = mesh_->create_particle_sets(
             (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
             check_duplicates);
+
+        if (!particle_sets)
+          throw std::runtime_error("Particle set creation failed");
       }
     } else
       throw std::runtime_error("Particle entity set JSON not found");
