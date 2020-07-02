@@ -37,6 +37,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   nodal_properties->create_property("momenta", Nnodes * Dim, Nmaterials);
   nodal_properties->create_property("change_in_momenta", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("displacements", Nnodes * Dim, Nmaterials);
+  nodal_properties->create_property("separation_vectors", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -164,6 +167,23 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   node2->compute_multimaterial_change_in_momentum();
   node3->compute_multimaterial_change_in_momentum();
 
+  // Compute displacements of next time step with dt = 0.05
+  const double dt = 0.05;
+  particle1->compute_updated_position(dt, true);
+  particle2->compute_updated_position(dt, true);
+  particle3->compute_updated_position(dt, true);
+
+  // Map multimaterial displacements to nodes
+  particle1->map_multimaterial_displacements_to_nodes();
+  particle2->map_multimaterial_displacements_to_nodes();
+  particle3->map_multimaterial_displacements_to_nodes();
+
+  // Determine separation vectors
+  node0->compute_multimaterial_separation_vector();
+  node1->compute_multimaterial_separation_vector();
+  node2->compute_multimaterial_separation_vector();
+  node3->compute_multimaterial_separation_vector();
+
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
   masses << 0.96, 1.46,
@@ -195,6 +215,30 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                    -0.3200000000000, 0.3200000000000;
   // clang-format on
 
+  Eigen::Matrix<double, 8, 2> displacements;
+  // clang-format off
+  displacements << 0.01182851239670, 0.00576531189856,
+                   0.06182851239669, 0.05576531189856,
+                   0.01182851239670, 0.00662746344565,
+                   0.06182851239669, 0.05662746344565,
+                   0.01182851239670, 0.01337072018890,
+                   0.06182851239669, 0.06337072018890,
+                   0.01182851239670, 0.00805785123967,
+                   0.06182851239669, 0.05805785123967;
+  // clang-format on
+
+  Eigen::Matrix<double, 8, 2> separation;
+  // clang-format off
+  separation << -0.00606320049813,  0.00606320049813,
+                -0.00606320049813,  0.00606320049813,
+                -0.00520104895105,  0.00520104895105,
+                -0.00520104895105,  0.00520104895105,
+                 0.00154220779221, -0.00154220779221,
+                 0.00154220779221, -0.00154220779221,
+                -0.00377066115702,  0.00377066115702,
+                -0.00377066115702,  0.00377066115702;
+  // clang-format on
+
   // Check if masses, momenta and velocities were properly mapped and computed
   for (int i = 0; i < Nnodes; ++i) {
     for (int j = 0; j < Nmaterials; ++j) {
@@ -206,6 +250,11 @@ TEST_CASE("Interface functions are checked", "[interface]") {
         REQUIRE(
             nodal_properties->property("change_in_momenta", i, j, Dim)(k, 0) ==
             Approx(delta_momenta(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(nodal_properties->property("displacements", i, j, Dim)(k, 0) ==
+                Approx(displacements(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("separation_vectors", i, j, Dim)(k, 0) ==
+            Approx(separation(i * Dim + k, j)).epsilon(tolerance));
       }
     }
   }

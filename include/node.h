@@ -257,6 +257,9 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial change in momentum
   void compute_multimaterial_change_in_momentum() override;
 
+  //! Compute multimaterial separation vector
+  void compute_multimaterial_separation_vector() override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -282,6 +285,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, 1> contact_displacement_;
   //! Velocity
   Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
