@@ -1159,7 +1159,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
     const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
   bool status = true;
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -1336,8 +1335,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_stresses(
     const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -1421,7 +1418,6 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
   const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
 
-  hid_t string_type;
   hid_t file_id;
   hsize_t chunk_size = 10000;
   int* fill_data = NULL;
@@ -1455,7 +1451,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   hsize_t nrecords = 0;
   hsize_t nfields = 0;
-  auto err = H5TBget_table_info(file_id, "table", &nfields, &nrecords);
+  H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
   if (nfields != mpm::hdf5::particle::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
@@ -1619,7 +1615,7 @@ bool mpm::Mesh<Tdim>::create_node_sets(
       nodes.reserve((sitr->second).size());
       // Add nodes to the container
       for (auto pid : sitr->second) {
-        bool insertion_status = nodes.add(map_nodes_[pid], check_duplicates);
+        nodes.add(map_nodes_[pid], check_duplicates);
       }
 
       // Create the map of the vector
@@ -1655,7 +1651,7 @@ bool mpm::Mesh<Tdim>::create_cell_sets(
       cells.reserve((sitr->second).size());
       // Add cells to the container
       for (auto pid : sitr->second) {
-        bool insertion_status = cells.add(map_cells_[pid], check_duplicates);
+        cells.add(map_cells_[pid], check_duplicates);
       }
 
       // Create the map of the container

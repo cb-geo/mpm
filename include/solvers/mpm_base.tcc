@@ -113,10 +113,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
-
   try {
     // Initialise MPI rank and size
     int mpi_rank = 0;
@@ -230,10 +227,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
-
   try {
     // Initialise MPI rank and size
     int mpi_rank = 0;
@@ -1032,7 +1026,7 @@ void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
       std::string entity_sets =
           mesh_props["entity_sets"].template get<std::string>();
       if (!io_->file_name(entity_sets).empty()) {
-        bool particle_sets = mesh_->create_particle_sets(
+        mesh_->create_particle_sets(
             (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
             check_duplicates);
       }
