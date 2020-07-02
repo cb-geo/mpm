@@ -254,9 +254,9 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stresses
-    REQUIRE(stress(0) == Approx(-3.08226131566112E+05).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(-0.83375562848983E+05).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(-0.833755628489834E+05).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(-3.278053861775474E+05).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-0.838308943743781E+05).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-0.838308943743781E+05).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
@@ -267,19 +267,19 @@ TEST_CASE("NorSand is checked in 3D non-bonded model",
     REQUIRE(state_vars.at("void_ratio") ==
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") ==
-            Approx(0.7744248704).epsilon(Tolerance));
+            Approx(0.7649824982).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
-            Approx(191665.4292857932).epsilon(Tolerance));
+            Approx(210645.1613137632).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") == Approx(0.000).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") == Approx(0.000).epsilon(Tolerance));
     REQUIRE(state_vars.at("pdstrain") ==
-            Approx(0.0068330748).epsilon(Tolerance));
+            Approx(0.0057132054).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
-            Approx(0.0079594058).epsilon(Tolerance));
+            Approx(0.0066549426).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain1") ==
-            Approx(-0.0022902064).epsilon(Tolerance));
+            Approx(-0.0019148656).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain2") ==
-            Approx(-0.0022902064).epsilon(Tolerance));
+            Approx(-0.0019148656).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain3") == Approx(0.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain4") == Approx(0.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain5") == Approx(0.0).epsilon(Tolerance));
@@ -534,9 +534,9 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
         material->compute_stress(stress, dstrain, particle.get(), &state_vars);
 
     // Check stresses
-    REQUIRE(stress(0) == Approx(-3.329510471220748E+05).epsilon(Tolerance));
-    REQUIRE(stress(1) == Approx(-0.639032567127776E+05).epsilon(Tolerance));
-    REQUIRE(stress(2) == Approx(-0.639032567127776E+05).epsilon(Tolerance));
+    REQUIRE(stress(0) == Approx(-3.576645617093067E+05).epsilon(Tolerance));
+    REQUIRE(stress(1) == Approx(-0.687043553954575E+05).epsilon(Tolerance));
+    REQUIRE(stress(2) == Approx(-0.687043553954575E+05).epsilon(Tolerance));
     REQUIRE(stress(3) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(4) == Approx(0.000000).epsilon(Tolerance));
     REQUIRE(stress(5) == Approx(0.000000).epsilon(Tolerance));
@@ -547,21 +547,21 @@ TEST_CASE("NorSand is checked in 3D bonded model", "[material][NorSand][3D]") {
     REQUIRE(state_vars.at("void_ratio") ==
             Approx(jmaterial["void_ratio_initial"]).epsilon(Tolerance));
     REQUIRE(state_vars.at("e_image") ==
-            Approx(0.7629793282).epsilon(Tolerance));
+            Approx(0.7546089207).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_image") ==
-            Approx(214907.2883463451).epsilon(Tolerance));
+            Approx(233670.2171169946).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_cohesion") ==
-            Approx(9.1175716201974E+03).epsilon(Tolerance));
+            Approx(9.3275328985816E+03).epsilon(Tolerance));
     REQUIRE(state_vars.at("p_dilation") ==
-            Approx(1.95433851765146E+04).epsilon(Tolerance));
+            Approx(1.96549386710219E+04).epsilon(Tolerance));
     REQUIRE(state_vars.at("pdstrain") ==
-            Approx(0.0046190797).epsilon(Tolerance));
+            Approx(0.003480727).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain0") ==
-            Approx(0.0058437274).epsilon(Tolerance));
+            Approx(0.0044035654).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain1") ==
-            Approx(-0.0010848922).epsilon(Tolerance));
+            Approx(-0.0008175251).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain2") ==
-            Approx(-0.0010848922).epsilon(Tolerance));
+            Approx(-0.0008175251).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain3") == Approx(0.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain4") == Approx(0.0).epsilon(Tolerance));
     REQUIRE(state_vars.at("plastic_strain5") == Approx(0.0).epsilon(Tolerance));
