@@ -659,11 +659,12 @@ inline Eigen::Matrix<double, Tdim, 1>
   // Trial guess for NR
   Eigen::Matrix<double, Tdim, 1> nr_xi = geometry_xi;
   // Check if the first trial xi is just outside the box
+  const double nudge_tolerance = 1.E-12;
   for (unsigned i = 0; i < nr_xi.size(); ++i) {
     if (nr_xi(i) < -1. && nr_xi(i) > -1.001)
-      nr_xi(i) = -1. + std::numeric_limits<double>::epsilon();
+      nr_xi(i) = -1. + nudge_tolerance;
     else if (nr_xi(i) > 1. && nr_xi(i) < 1.001)
-      nr_xi(i) = 1. - std::numeric_limits<double>::epsilon();
+      nr_xi(i) = 1. - nudge_tolerance;
   }
 
   // Maximum iterations of newton raphson
