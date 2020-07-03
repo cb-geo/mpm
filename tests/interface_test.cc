@@ -40,6 +40,10 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   nodal_properties->create_property("displacements", Nnodes * Dim, Nmaterials);
   nodal_properties->create_property("separation_vectors", Nnodes * Dim,
                                     Nmaterials);
+  nodal_properties->create_property("domain_gradients", Nnodes * Dim,
+                                    Nmaterials);
+  nodal_properties->create_property("normal_unit_vectors", Nnodes * Dim,
+                                    Nmaterials);
 
   // Element
   std::shared_ptr<mpm::Element<Dim>> element =
@@ -119,6 +123,11 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle2->assign_mass(3.0);
   particle3->assign_mass(0.5);
 
+  // Assign volume
+  particle1->assign_volume(4.0);
+  particle2->assign_volume(3.0);
+  particle3->assign_volume(0.5);
+
   // Assign velocity
   Eigen::VectorXd velocity1;
   Eigen::VectorXd velocity2;
@@ -184,6 +193,17 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   node2->compute_multimaterial_separation_vector();
   node3->compute_multimaterial_separation_vector();
 
+  // Map multimaterial domain gradients to nodes
+  particle1->map_multimaterial_domain_gradients_to_nodes();
+  particle2->map_multimaterial_domain_gradients_to_nodes();
+  particle3->map_multimaterial_domain_gradients_to_nodes();
+
+  // Compute normal unit vectors at nodes
+  node0->compute_multimaterial_normal_unit_vector();
+  node1->compute_multimaterial_normal_unit_vector();
+  node2->compute_multimaterial_normal_unit_vector();
+  node3->compute_multimaterial_normal_unit_vector();
+
   Eigen::Matrix<double, 4, 2> masses;
   // clang-format off
   masses << 0.96, 1.46,
@@ -239,7 +259,31 @@ TEST_CASE("Interface functions are checked", "[interface]") {
                 -0.00377066115702,  0.00377066115702;
   // clang-format on
 
-  // Check if masses, momenta and velocities were properly mapped and computed
+  Eigen::Matrix<double, 8, 2> gradients;
+  // clang-format off
+  gradients << -4.8, -5.0,
+               -6.4, -3.8,
+                4.8,  5.0,
+               -1.6, -3.2,
+                3.2,  2.0,
+                1.6,  3.2,
+               -3.2, -2.0,
+                6.4,  3.8;
+  // clang-format on
+
+  Eigen::Matrix<double, 8, 2> normal;
+  // clang-format off
+  normal << -0.60000000000000, -0.79616219412310,
+            -0.80000000000000, -0.60508326753356,
+             0.94868329805051,  0.84227140066151,
+            -0.31622776601684, -0.53905369642337,
+             0.89442719099992,  0.52999894000318,
+             0.44721359549996,  0.84799830400509,
+            -0.44721359549996, -0.46574643283262,
+             0.89442719099992,  0.88491822238198;
+  // clang-format on
+
+  // Check if nodal properties were properly mapped and computed
   for (int i = 0; i < Nnodes; ++i) {
     for (int j = 0; j < Nmaterials; ++j) {
       REQUIRE(nodal_properties->property("masses", i, j, 1)(0, 0) ==
@@ -255,7 +299,16 @@ TEST_CASE("Interface functions are checked", "[interface]") {
         REQUIRE(
             nodal_properties->property("separation_vectors", i, j, Dim)(k, 0) ==
             Approx(separation(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(
+            nodal_properties->property("domain_gradients", i, j, Dim)(k, 0) ==
+            Approx(gradients(i * Dim + k, j)).epsilon(tolerance));
+        REQUIRE(nodal_properties->property("normal_unit_vectors", i, j, Dim)(
+                    k, 0) == Approx(normal(i * Dim + k, j)).epsilon(tolerance));
       }
+      // Check if normal vector are also unit vectors
+      REQUIRE(
+          nodal_properties->property("normal_unit_vectors", i, j, Dim).norm() ==
+          Approx(1.0).epsilon(tolerance));
     }
   }
 }

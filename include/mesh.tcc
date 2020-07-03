@@ -1898,6 +1898,10 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
                                        materials_.size());
     nodal_properties_->create_property("separation_vectors", nrows,
                                        materials_.size());
+    nodal_properties_->create_property("domain_gradients", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("normal_unit_vectors", nrows,
+                                       materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
