@@ -546,7 +546,9 @@ void mpm::Particle<
   // Map domain gradients to nodal property. The domain gradients is defined as
   // the gradient of the particle volume
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    const auto& gradient = volume_ * dn_dx_.row(i);
+    Eigen::Matrix<double, Tdim, 1> gradient;
+    gradient.setZero();
+    for (unsigned j = 0; j < Tdim; ++j) gradient(j, 0) = volume_ * dn_dx_(i, j);
     nodes_[i]->update_property(true, "domain_gradients", gradient, material_id_,
                                Tdim);
   }
