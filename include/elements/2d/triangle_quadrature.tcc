@@ -21,8 +21,6 @@ inline Eigen::VectorXd mpm::TriangleQuadrature<2, 1>::weights() const {
 template <>
 inline Eigen::MatrixXd mpm::TriangleQuadrature<2, 3>::quadratures() const {
   Eigen::Matrix<double, 2, 3> quadratures;
-  const double val_1_by_sqrt3 = 1. / std::sqrt(3.);
-
   quadratures(0, 0) = 1. / 6.;
   quadratures(1, 0) = 1. / 6.;
   quadratures(0, 1) = 2. / 3.;
