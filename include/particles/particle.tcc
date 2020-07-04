@@ -547,8 +547,7 @@ void mpm::Particle<
   // the gradient of the particle volume
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     Eigen::Matrix<double, Tdim, 1> gradient;
-    gradient.setZero();
-    for (unsigned j = 0; j < Tdim; ++j) gradient(j, 0) = volume_ * dn_dx_(i, j);
+    for (unsigned j = 0; j < Tdim; ++j) gradient[j] = volume_ * dn_dx_(i, j);
     nodes_[i]->update_property(true, "domain_gradients", gradient, material_id_,
                                Tdim);
   }
