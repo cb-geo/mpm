@@ -6,17 +6,17 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraint(
   try {
     int set_id = vconstraint->setid();
     auto nset = mesh_->nodes(set_id);
-    if (nset.size() != 0) {
-      unsigned dir = vconstraint->dir();
-      double velocity = vconstraint->velocity();
-      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-        if (!(*nitr)->assign_velocity_constraint(dir, velocity))
-          throw std::runtime_error(
-              "Failed to initialise velocity constraint at node");
-      }
-    } else
+    if (nset.size() == 0)
       throw std::runtime_error(
-          "Nodal assignment of velocity constraint failed");
+          "Node set is empty for assignment of velocity constraints");
+
+    unsigned dir = vconstraint->dir();
+    double velocity = vconstraint->velocity();
+    for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+      if (!(*nitr)->assign_velocity_constraint(dir, velocity))
+        throw std::runtime_error(
+            "Failed to initialise velocity constraint at node");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -29,7 +29,7 @@ template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, double>>&
         velocity_constraints) {
-  bool status = false;
+  bool status = true;
   try {
     for (const auto& velocity_constraint : velocity_constraints) {
       // Node id
@@ -40,9 +40,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraints(
       double velocity = std::get<2>(velocity_constraint);
 
       // Apply constraint
-      status = mesh_->node(nid)->assign_velocity_constraint(dir, velocity);
-
-      if (!status)
+      if (!mesh_->node(nid)->assign_velocity_constraint(dir, velocity))
         throw std::runtime_error(
             "Nodal velocity constraints assignment failed");
     }
@@ -57,21 +55,21 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraints(
 template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_frictional_constraint(
     int nset_id, const std::shared_ptr<mpm::FrictionConstraint>& fconstraint) {
-  bool status = false;
+  bool status = true;
   try {
     int set_id = fconstraint->setid();
     auto nset = mesh_->nodes(set_id);
-    if (nset.size() != 0) {
-      unsigned dir = fconstraint->dir();
-      int nsign_n = fconstraint->sign_n();
-      double friction = fconstraint->friction();
-      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
-        if (!(*nitr)->assign_friction_constraint(dir, nsign_n, friction))
-          throw std::runtime_error(
-              "Failed to initialise velocity constraint at node");
-      }
-    } else
-      throw std::runtime_error("Nodal frictional constraint assignment failed");
+    if (nset.size() == 0)
+      throw std::runtime_error(
+          "Node set is empty for assignment of velocity constraints");
+    unsigned dir = fconstraint->dir();
+    int nsign_n = fconstraint->sign_n();
+    double friction = fconstraint->friction();
+    for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+      if (!(*nitr)->assign_friction_constraint(dir, nsign_n, friction))
+        throw std::runtime_error(
+            "Failed to initialise velocity constraint at node");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -84,7 +82,7 @@ template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
     const std::vector<std::tuple<mpm::Index, unsigned, int, double>>&
         friction_constraints) {
-  bool status = false;
+  bool status = true;
   try {
     for (const auto& friction_constraint : friction_constraints) {
       // Node id
@@ -97,10 +95,7 @@ bool mpm::Constraints<Tdim>::assign_nodal_friction_constraints(
       double friction = std::get<3>(friction_constraint);
 
       // Apply constraint
-      status =
-          mesh_->node(nid)->assign_friction_constraint(dir, sign, friction);
-
-      if (!status)
+      if (!mesh_->node(nid)->assign_friction_constraint(dir, sign, friction))
         throw std::runtime_error(
             "Nodal friction constraints assignment failed");
     }
