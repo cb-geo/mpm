@@ -184,7 +184,6 @@ void mpm::MohrCoulomb<Tdim>::compute_df_dp(
   // Get MC parameters
   const double phi = (*state_vars).at("phi");
   const double psi = (*state_vars).at("psi");
-  const double cohesion = (*state_vars).at("cohesion");
   // Get equivalent plastic deviatoric strain
   const double pdstrain = (*state_vars).at("pdstrain");
   // Compute dF / dEpsilon,  dF / dRho, dF / dTheta

@@ -170,8 +170,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
-  const double tolerance = 1.E-16;
-
   // Compute pressure from mass*pressure
   std::lock_guard<std::mutex> guard(node_mutex_);
   pressure_(phase) = pressure;

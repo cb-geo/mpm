@@ -568,8 +568,6 @@ Eigen::Matrix<double, 6, 1> mpm::ModifiedCamClay<Tdim>::compute_stress(
   const double p_trial = (*state_vars).at("p");
   // Deviatoric trial stress
   const double q_trial = (*state_vars).at("q");
-  // Lode angle of trial stress
-  const double theta_trial = (*state_vars).at("theta");
   // M_theta of trial stress
   const double m_theta_trial = (*state_vars).at("m_theta");
   // Preconsolidation pressure of last step
