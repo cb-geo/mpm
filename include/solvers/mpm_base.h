@@ -12,7 +12,6 @@
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
-#include "tbb/task_group.h"
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"

@@ -85,12 +85,6 @@ if (OPENMP_FOUND)
   endif()
 endif()
 
-# TBB
-find_package(TBB REQUIRED)
-add_definitions(${TBB_DEFINITIONS})
-include_directories(${TBB_INCLUDE_DIRS})
-link_libraries(${TBB_LIBRARIES})
-
 # pthreads
 find_package (Threads)
 link_libraries (${CMAKE_THREAD_LIBS_INIT})

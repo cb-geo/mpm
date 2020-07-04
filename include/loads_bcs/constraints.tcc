@@ -9,21 +9,14 @@ bool mpm::Constraints<Tdim>::assign_nodal_velocity_constraint(
     if (nset.size() != 0) {
       unsigned dir = vconstraint->dir();
       double velocity = vconstraint->velocity();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size())),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status = nset[i]->assign_velocity_constraint(dir, velocity);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise velocity constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
+      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+        if (!(*nitr)->assign_velocity_constraint(dir, velocity))
+          throw std::runtime_error(
+              "Failed to initialise velocity constraint at node");
+      }
     } else
       throw std::runtime_error(
           "Nodal assignment of velocity constraint failed");
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -72,21 +65,13 @@ bool mpm::Constraints<Tdim>::assign_nodal_frictional_constraint(
       unsigned dir = fconstraint->dir();
       int nsign_n = fconstraint->sign_n();
       double friction = fconstraint->friction();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size())),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status =
-                  nset[i]->assign_friction_constraint(dir, nsign_n, friction);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise velocity constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
+      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+        if (!(*nitr)->assign_friction_constraint(dir, nsign_n, friction))
+          throw std::runtime_error(
+              "Failed to initialise velocity constraint at node");
+      }
     } else
       throw std::runtime_error("Nodal frictional constraint assignment failed");
-
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
