@@ -159,6 +159,10 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) override;
 
+  //! Return material
+  //! \retval material Pointer to a material
+  std::shared_ptr<Material<Tdim>> material() const override;
+
   //! Compute strain
   //! \param[in] dt Analysis time step
   void compute_strain(double dt) noexcept override;
@@ -357,5 +361,6 @@ class Particle : public ParticleBase<Tdim> {
 }  // namespace mpm
 
 #include "particle.tcc"
+#include "particle_functions.tcc"
 
 #endif  // MPM_PARTICLE_H__

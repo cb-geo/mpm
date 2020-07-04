@@ -393,6 +393,12 @@ bool mpm::Particle<Tdim>::assign_material(
   return status;
 }
 
+// Return material of particle
+template <unsigned Tdim>
+std::shared_ptr<mpm::Material<Tdim>> mpm::Particle<Tdim>::material() const {
+  return material_;
+}
+
 // Compute reference location cell to particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::compute_reference_location() noexcept {

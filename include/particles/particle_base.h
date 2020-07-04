@@ -197,6 +197,10 @@ class ParticleBase {
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
+  //! Return material
+  //! \retval material Pointer to a material
+  virtual std::shared_ptr<Material<Tdim>> material() const = 0;
+
   //! Return material id
   unsigned material_id() const { return material_id_; }
 

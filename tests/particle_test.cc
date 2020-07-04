@@ -630,7 +630,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Add particle
     mpm::Index id = 0;
     coords << 0.75, 0.75;
-    auto particle = std::make_shared<mpm::Particle<Dim>>(id, coords);
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Time-step
     const double dt = 0.1;
@@ -752,6 +753,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE_NOTHROW(particle->compute_mass());
     // Mass
     REQUIRE(particle->mass() == Approx(1000.).epsilon(Tolerance));
+    // Compute mass function
+    REQUIRE_NOTHROW(mpm::particle::compute_mass(particle));
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(1000.).epsilon(Tolerance));
 
     // Map particle mass to nodes
     particle->assign_mass(std::numeric_limits<double>::max());
