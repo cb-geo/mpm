@@ -19,7 +19,6 @@ class CGEigen : public SolverBase<Traits> {
  public:
   //! Constructor
   //! \param[in] max_iter Maximum number of iterations
-
   //! \param[in] tolerance Tolerance for solver to achieve convergence
   CGEigen(unsigned max_iter, double tolerance)
       : mpm::SolverBase<Traits>(max_iter, tolerance) {
@@ -47,8 +46,6 @@ class CGEigen : public SolverBase<Traits> {
   using SolverBase<Traits>::tolerance_;
   //! Logger
   using SolverBase<Traits>::console_;
-  //! cg_type_ (leastSquaresConjugateGradient or ConjugateGradient)
-  std::string cg_type_;
 };
 }  // namespace mpm
 
