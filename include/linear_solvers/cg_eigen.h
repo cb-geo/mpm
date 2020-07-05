@@ -45,8 +45,6 @@ class CGEigen : public SolverBase<Traits> {
   using SolverBase<Traits>::tolerance_;
   //! Logger
   using SolverBase<Traits>::console_;
-  //! cg_type_ (leastSquaresConjugateGradient or ConjugateGradient)
-  std::string cg_type_;
 };
 }  // namespace mpm
 

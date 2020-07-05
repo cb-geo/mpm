@@ -28,6 +28,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   external_force_.setZero();
   internal_force_.setZero();
   pressure_.setZero();
+  contact_displacement_.setZero();
   velocity_.setZero();
   momentum_.setZero();
   acceleration_.setZero();
@@ -188,8 +189,6 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
-  const double tolerance = 1.E-16;
-
   // Compute pressure from mass*pressure
   std::lock_guard<std::mutex> guard(node_mutex_);
   pressure_(phase) = pressure;
@@ -703,5 +702,65 @@ void mpm::Node<Tdim, Tdof,
         velocity_ * mass - momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
+  }
+}
+
+//! Compute multimaterial separation vector
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_separation_vector() {
+  // iterate over all materials in the material_ids set, update the
+  // displacements and calculate the displacement of the center of mass for this
+  // node
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    const auto& material_displacement =
+        property_handle_->property("displacements", prop_id_, *mitr, Tdim);
+    const auto& material_mass =
+        property_handle_->property("masses", prop_id_, *mitr);
+
+    // displacement of the center of mass
+    contact_displacement_ += material_displacement / mass_(0, 0);
+    // assign nodal-multimaterial displacement by dividing it by this material's
+    // mass
+    property_handle_->assign_property(
+        "displacements", prop_id_, *mitr,
+        material_displacement / material_mass(0, 0), Tdim);
+  }
+
+  // iterate over all materials in the material_ids to compute the separation
+  // vector
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    const Eigen::Matrix<double, Tdim, 1> material_displacement =
+        property_handle_->property("displacements", prop_id_, *mitr, Tdim);
+    const Eigen::Matrix<double, 1, 1> material_mass =
+        property_handle_->property("masses", prop_id_, *mitr);
+
+    // Update the separation vector property
+    const auto& separation_vector =
+        (contact_displacement_ - material_displacement) * mass_(0, 0) /
+        (mass_(0, 0) - material_mass(0, 0));
+    property_handle_->update_property("separation_vectors", prop_id_, *mitr,
+                                      separation_vector, Tdim);
+  }
+}
+
+//! Compute multimaterial normal unit vector
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof,
+               Tnphases>::compute_multimaterial_normal_unit_vector() {
+  // Iterate over all materials in the material_ids set
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
+    // calculte the normal unit vector
+    VectorDim domain_gradient =
+        property_handle_->property("domain_gradients", prop_id_, *mitr, Tdim);
+    VectorDim normal_unit_vector = VectorDim::Zero();
+    if (domain_gradient.norm() > std::numeric_limits<double>::epsilon())
+      normal_unit_vector = domain_gradient.normalized();
+
+    // assign nodal-multimaterial normal unit vector to property pool
+    property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
+                                      normal_unit_vector, Tdim);
   }
 }

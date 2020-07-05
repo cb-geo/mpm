@@ -331,6 +331,12 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim correction_force(unsigned phase) const = 0;
 
+  //! Compute multimaterial separation vector
+  virtual void compute_multimaterial_separation_vector() = 0;
+
+  //! Compute multimaterial normal unit vector
+  virtual void compute_multimaterial_normal_unit_vector() = 0;
+
 };  // NodeBase class
 }  // namespace mpm
 
