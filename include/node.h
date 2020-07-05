@@ -332,6 +332,9 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial separation vector
   void compute_multimaterial_separation_vector() override;
 
+  //! Compute multimaterial normal unit vector
+  void compute_multimaterial_normal_unit_vector() override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;

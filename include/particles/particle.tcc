@@ -538,6 +538,24 @@ void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   }
 }
 
+//! Map multimaterial domain gradients to nodes
+template <unsigned Tdim>
+void mpm::Particle<
+    Tdim>::map_multimaterial_domain_gradients_to_nodes() noexcept {
+  // Check if particle volume is set
+  assert(volume_ != std::numeric_limits<double>::max());
+
+  // Map domain gradients to nodal property. The domain gradients is defined as
+  // the gradient of the particle volume
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    Eigen::Matrix<double, Tdim, 1> gradient;
+    gradient.setZero();
+    for (unsigned j = 0; j < Tdim; ++j) gradient(j, 0) = volume_ * dn_dx_(i, j);
+    nodes_[i]->update_property(true, "domain_gradients", gradient, material_id_,
+                               Tdim);
+  }
+}
+
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::Particle<1>::compute_strain_rate(

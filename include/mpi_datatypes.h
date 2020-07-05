@@ -21,8 +21,6 @@ inline MPI_Datatype register_mpi_particle_type(const HDF5Particle& particle) {
   // Array containing the displacement for each block, expressed in bytes. The
   // displacement is the distance between the start of the MPI datatype created
   // and the start of the block
-  const std::size_t size_ull = sizeof(unsigned long long);
-
   const MPI_Aint displacements[nblocks] = {
       offsetof(HDF5Particle, id),              // id
       offsetof(HDF5Particle, mass),            // mass
