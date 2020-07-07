@@ -1105,7 +1105,7 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Graph partitioning mode
     int mode = 4;  // FAST
     // Create graph partition
-    bool graph_partition = graph_->create_partitions(&comm, mode);
+    graph_->create_partitions(&comm, mode);
     // Collect the partitions
     auto exchange_cells = graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 
