@@ -79,17 +79,11 @@ endif()
 # OpenMP
 find_package(OpenMP)
 if (OPENMP_FOUND)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   endif()
 endif()
-
-# TBB
-find_package(TBB REQUIRED)
-add_definitions(${TBB_DEFINITIONS})
-include_directories(${TBB_INCLUDE_DIRS})
-link_libraries(${TBB_LIBRARIES})
 
 # pthreads
 find_package (Threads)

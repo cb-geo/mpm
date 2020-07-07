@@ -5,7 +5,6 @@
 #include "mpi.h"
 #endif
 #include "spdlog/spdlog.h"
-#include "tbb/task_scheduler_init.h"
 
 #include "io.h"
 #include "mpm.h"
@@ -32,11 +31,11 @@ int main(int argc, char** argv) {
     // Create an IO object
     auto io = std::make_shared<mpm::IO>(argc, argv);
 
-    // Set TBB threads
-    unsigned nthreads = tbb::task_scheduler_init::default_num_threads();
-    // If number of TBB threads are positive set to nthreads
-    if (io->nthreads() > 0) nthreads = io->nthreads();
-    tbb::task_scheduler_init init(nthreads);
+    // If number of threads are positive set to nthreads
+    unsigned nthreads = io->nthreads();
+#ifdef _OPENMP
+    omp_set_num_threads(nthreads > 0 ? nthreads : omp_get_max_threads());
+#endif
 
     // Get analysis type
     const std::string analysis = io->analysis_type();
