@@ -36,7 +36,7 @@ class Graph {
   //! Create graph partition
   //! \param[in] comm MPI Communication
   //! \param[in] mode KaHIP graph partitioning mode
-  bool create_partitions(MPI_Comm* comm, int mode);
+  void create_partitions(MPI_Comm* comm, int mode);
 
   //! Collect partitions
   //! \param[in] mpi_size # of MPI tasks
