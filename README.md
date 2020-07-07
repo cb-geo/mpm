@@ -31,7 +31,6 @@ If you have any issues running or compiling the MPM code please open a issue on 
 
 * [Boost](http://www.boost.org/)
 * [Eigen](http://eigen.tuxfamily.org/)
-* [Intel TBB](https://www.threadingbuildingblocks.org/)
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
@@ -48,7 +47,7 @@ Please run the following command:
 ```shell
 dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cppcheck dnf-plugins-core \
                    eigen3-devel findutils freeglut freeglut-devel gcc gcc-c++ git hdf5 hdf5-devel \
-                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar tbb tbb-devel \
+                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar \
                    valgrind vim vtk vtk-devel wget
 ```
 
@@ -57,8 +56,7 @@ dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cp
 Please run the following commands to install dependencies:
 
 ```
-sudo apt-get install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
-                        libtbb-dev
+sudo apt-get install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev
 
 ```
 
@@ -162,7 +160,7 @@ Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical 
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
 ```
-   ./mpm  [-p <tbb_parallel>] [-i <input_file>] -f <working_dir> [--]
+   ./mpm  [-p <parallel>] [-i <input_file>] -f <working_dir> [--]
           [--version] [-h]
 ```
 
@@ -175,8 +173,8 @@ For example:
 Where:
 
 ```
-   -p <tbb_parallel>,  --tbb_parallel <tbb_parallel>
-     Number of parallel TBB threads
+   -p <parallel>,  --parallel <parallel>
+     Number of parallel threads
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]
