@@ -69,27 +69,18 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) oper(nodes_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) oper(*nitr);
 }
 
 //! Iterate over nodes
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(nodes_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i)
-          if (pred(nodes_[i])) oper(nodes_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+    if (pred(*nitr)) oper(*nitr);
+  }
 }
 
 //! Create a list of active nodes in mesh
@@ -106,14 +97,9 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(active_nodes_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i)
-          oper(active_nodes_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend(); ++nitr)
+    oper(*nitr);
 }
 
 #ifdef USE_MPI
@@ -186,20 +172,18 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
   std::vector<Ttype> prop_get(nhalo_nodes_, mpm::zero<Ttype>());
   std::vector<Ttype> prop_set(nhalo_nodes_, mpm::zero<Ttype>());
 
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_get](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        prop_get.at(node->ghost_id()) = getter(node);
-      });
+#pragma omp parallel for shared(prop_get)
+  for (auto nitr = domain_shared_nodes_.cbegin();
+       nitr != domain_shared_nodes_.cend(); ++nitr)
+    prop_get.at((*nitr)->ghost_id()) = getter((*nitr));
 
   MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tnparam,
                 MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-  tbb::parallel_for_each(
-      domain_shared_nodes_.cbegin(), domain_shared_nodes_.cend(),
-      [=, &prop_set](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-        setter(node, prop_set.at(node->ghost_id()));
-      });
+#pragma omp parallel for
+  for (auto nitr = domain_shared_nodes_.cbegin();
+       nitr != domain_shared_nodes_.cend(); ++nitr)
+    setter((*nitr), prop_set.at((*nitr)->ghost_id()));
 }
 #endif
 #endif
@@ -276,13 +260,8 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) oper(cells_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) oper(*citr);
 }
 
 //! Create cells from node lists
@@ -296,23 +275,16 @@ void mpm::Mesh<Tdim>::find_cell_neighbours() {
     for (auto id : (*citr)->nodes_id()) node_cell_map[id].insert(cell_id);
   }
 
-  // Assign neighbour to cells
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(cells_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) {
-          // Iterate over each node in current cell
-          for (auto id : cells_[i]->nodes_id()) {
-            auto cell_id = cells_[i]->id();
-            // Get the cells associated with each node
-            for (auto neighbour_id : node_cell_map[id])
-              if (neighbour_id != cell_id)
-                cells_[i]->add_neighbour(neighbour_id);
-          }
-        }
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Iterate over each node in current cell
+    for (auto id : (*citr)->nodes_id()) {
+      auto cell_id = (*citr)->id();
+      // Get the cells associated with each node
+      for (auto neighbour_id : node_cell_map[id])
+        if (neighbour_id != cell_id) (*citr)->add_neighbour(neighbour_id);
+    }
+  }
 }
 
 //! Find global number of particles across MPI ranks / cell
@@ -501,7 +473,7 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
   try {
     if (cells_.size() > 0) {
       // Particle ids
-      tbb::concurrent_vector<mpm::Index> pids;
+      std::vector<mpm::Index> pids;
       unsigned before_generation = this->nparticles();
       bool checks = false;
       // Get material
@@ -539,11 +511,10 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
         throw std::runtime_error("No particles were generated!");
 
       // Add particles to set
-      status =
-          this->particle_sets_
-              .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
-                  pset_id, pids))
-              .second;
+      status = this->particle_sets_
+                   .insert(std::pair<mpm::Index, std::vector<mpm::Index>>(
+                       pset_id, pids))
+                   .second;
       if (!status) throw std::runtime_error("Particle set creation failed");
 
       console_->info(
@@ -568,7 +539,7 @@ bool mpm::Mesh<Tdim>::create_particles(
   bool status = true;
   try {
     // Particle ids
-    tbb::concurrent_vector<mpm::Index> pids;
+    std::vector<mpm::Index> pids;
     // Get material
     auto material = materials_.at(material_id);
     // Check if particle coordinates is empty
@@ -595,11 +566,10 @@ bool mpm::Mesh<Tdim>::create_particles(
         throw std::runtime_error("Addition of particle to mesh failed!");
     }
     // Add particles to set
-    status =
-        this->particle_sets_
-            .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
-                pset_id, pids))
-            .second;
+    status = this->particle_sets_
+                 .insert(std::pair<mpm::Index, std::vector<mpm::Index>>(pset_id,
+                                                                        pids))
+                 .second;
     if (!status) throw std::runtime_error("Particle set creation failed");
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -932,20 +902,20 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   // Clear MPI rank at the nodes
-  tbb::parallel_for_each(nodes_.cbegin(), nodes_.cend(),
-                         [=](std::shared_ptr<mpm::NodeBase<Tdim>> node) {
-                           node->clear_mpi_ranks();
-                         });
+#pragma omp parallel for
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+    (*nitr)->clear_mpi_ranks();
+
   // Get MPI rank
   int mpi_rank = 0;
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
-  // Iterate through all the cells
-  tbb::parallel_for_each(cells_.cbegin(), cells_.cend(),
-                         [=](std::shared_ptr<mpm::Cell<Tdim>> cell) {
-                           cell->assign_mpi_rank_to_nodes();
-                         });
+
+#pragma omp parallel for
+  // Assign MPI rank to nodes of cell
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+    (*citr)->assign_mpi_rank_to_nodes();
 
   this->domain_shared_nodes_.clear();
 
@@ -1023,18 +993,17 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   }
 
   bool status = false;
-  tbb::parallel_for_each(
-      cells_.cbegin(), cells_.cend(),
-      [=, &status](const std::shared_ptr<mpm::Cell<Tdim>>& cell) {
-        // Check if particle is already found, if so don't run for other cells
-        // Check if co-ordinates is within the cell, if true
-        // add particle to cell
-        Eigen::Matrix<double, Tdim, 1> xi;
-        if (!status && cell->is_point_in_cell(particle->coordinates(), &xi)) {
-          particle->assign_cell_xi(cell, xi);
-          status = true;
-        }
-      });
+#pragma omp parallel for
+  for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+    // Check if particle is already found, if so don't run for other cells
+    // Check if co-ordinates is within the cell, if true
+    // add particle to cell
+    Eigen::Matrix<double, Tdim, 1> xi;
+    if (!status && (*citr)->is_point_in_cell(particle->coordinates(), &xi)) {
+      particle->assign_cell_xi(*citr, xi);
+      status = true;
+    }
+  }
 
   return status;
 }
@@ -1043,13 +1012,9 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i) oper(particles_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    oper(*pitr);
 }
 
 //! Iterate over particle set
@@ -1058,27 +1023,16 @@ template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
   // If set id is -1, use all particles
   if (set_id == -1) {
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i)
-            oper(particles_[i]);
-        },
-        tbb::simple_partitioner());
+    this->iterate_over_particles(oper);
   } else {
     // Iterate over the particle set
     auto set = particle_sets_.at(set_id);
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(set.size()), tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i) {
-            unsigned id = set[i];
-            if (map_particles_.find(id) != map_particles_.end())
-              oper(map_particles_[id]);
-          }
-        },
-        tbb::simple_partitioner());
+#pragma omp parallel for
+    for (auto sitr = set.begin(); sitr != set.cend(); ++sitr) {
+      unsigned pid = (*sitr);
+      if (map_particles_.find(pid) != map_particles_.end())
+        oper(map_particles_[pid]);
+    }
   }
 }
 
@@ -1159,7 +1113,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_volumes(
     const std::vector<std::tuple<mpm::Index, double>>& particle_volumes) {
   bool status = true;
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -1312,18 +1265,12 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
     Vector<NodeBase<Tdim>> nodes =
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-    tbb::parallel_for(
-        tbb::blocked_range<int>(size_t(0), size_t(nodes.size()),
-                                tbb_grain_size_),
-        [&](const tbb::blocked_range<int>& range) {
-          for (int i = range.begin(); i != range.end(); ++i) {
-            if (!nodes[i]->assign_concentrated_force(
-                    phase, dir, concentrated_force, mfunction))
-              throw std::runtime_error("Setting concentrated force failed");
-          }
-        },
-        tbb::simple_partitioner());
-
+#pragma omp parallel for
+    for (auto nitr = nodes.cbegin(); nitr != nodes.cend(); ++nitr) {
+      if (!(*nitr)->assign_concentrated_force(phase, dir, concentrated_force,
+                                              mfunction))
+        throw std::runtime_error("Setting concentrated force failed");
+    }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -1336,8 +1283,6 @@ template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_stresses(
     const std::vector<Eigen::Matrix<double, 6, 1>>& particle_stresses) {
   bool status = true;
-  // TODO: Remove phase
-  const unsigned phase = 0;
   try {
     if (!particles_.size())
       throw std::runtime_error(
@@ -1421,7 +1366,6 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
 
   const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
 
-  hid_t string_type;
   hid_t file_id;
   hsize_t chunk_size = 10000;
   int* fill_data = NULL;
@@ -1455,7 +1399,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
   // Calculate the size and the offsets of our struct members in memory
   hsize_t nrecords = 0;
   hsize_t nfields = 0;
-  auto err = H5TBget_table_info(file_id, "table", &nfields, &nrecords);
+  H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
   if (nfields != mpm::hdf5::particle::NFIELDS)
     throw std::runtime_error("HDF5 table has incorrect number of fields");
@@ -1588,15 +1532,14 @@ bool mpm::Mesh<Tdim>::create_particle_sets(
     for (auto sitr = particle_sets.begin(); sitr != particle_sets.end();
          ++sitr) {
       // Create a container for the set
-      tbb::concurrent_vector<mpm::Index> particles((sitr->second).begin(),
-                                                   (sitr->second).end());
+      std::vector<mpm::Index> particles((sitr->second).begin(),
+                                        (sitr->second).end());
 
       // Create the map of the container
-      status =
-          this->particle_sets_
-              .insert(std::pair<mpm::Index, tbb::concurrent_vector<mpm::Index>>(
-                  sitr->first, particles))
-              .second;
+      status = this->particle_sets_
+                   .insert(std::pair<mpm::Index, std::vector<mpm::Index>>(
+                       sitr->first, particles))
+                   .second;
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -1619,7 +1562,7 @@ bool mpm::Mesh<Tdim>::create_node_sets(
       nodes.reserve((sitr->second).size());
       // Add nodes to the container
       for (auto pid : sitr->second) {
-        bool insertion_status = nodes.add(map_nodes_[pid], check_duplicates);
+        nodes.add(map_nodes_[pid], check_duplicates);
       }
 
       // Create the map of the vector
@@ -1655,7 +1598,7 @@ bool mpm::Mesh<Tdim>::create_cell_sets(
       cells.reserve((sitr->second).size());
       // Add cells to the container
       for (auto pid : sitr->second) {
-        bool insertion_status = cells.add(map_cells_[pid], check_duplicates);
+        cells.add(map_cells_[pid], check_duplicates);
       }
 
       // Create the map of the container
@@ -1901,6 +1844,10 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
     nodal_properties_->create_property("displacements", nrows,
                                        materials_.size());
     nodal_properties_->create_property("separation_vectors", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("domain_gradients", nrows,
+                                       materials_.size());
+    nodal_properties_->create_property("normal_unit_vectors", nrows,
                                        materials_.size());
 
     // Iterate over all nodes to initialise the property handle in each node

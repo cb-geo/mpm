@@ -188,15 +188,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->external_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
 
-      // Check if exception is handled
-      unsigned bad_phase = 4;
-      // Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE_NOTHROW(node->update_external_force(true, bad_phase, force));
-      // Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE_NOTHROW(node->update_external_force(false, bad_phase, force));
-
       SECTION("Check concentrated force") {
         // Set external force to zero
         force.setZero();
@@ -270,16 +261,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
-
-      // Check if exception is handled
-      unsigned bad_phase = 4;
-      // Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE(node->update_internal_force(true, bad_phase,
-      // force) == false); Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE(node->update_internal_force(false, bad_phase,
-      // force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -418,14 +399,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < Dim; ++i)
         REQUIRE(node->velocity(Nphase)(i) == Approx(0.1).epsilon(Tolerance));
 
-      // Check if exception is handled
-      unsigned bad_phase = 1;
-      // Exception handling invalid momentum dimension
-      // TODO Assert: REQUIRE_NOTHROW(node->update_momentum(true, bad_phase,
-      // momentum)); Exception handling invalid momentum dimension
-      // TODO Assert: REQUIRE_NOTHROW(node->update_momentum(false, bad_phase,
-      // momentum));
-
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
       // Check out of bounds condition
@@ -459,16 +432,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE_NOTHROW(node->update_acceleration(true, Nphase, acceleration));
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
-
-      // Check if exception is handled
-      unsigned bad_phase = 1;
-      // Exception handling invalid acceleration dimension
-      // TODO Assert: REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase,
-      // acceleration));
-
-      // Exception handling invalid acceleration dimension
-      // TODO Assert: REQUIRE_NOTHROW(node->update_acceleration(false,
-      // bad_phase, acceleration));
 
       // Apply velocity constraints
       REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
@@ -793,15 +756,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
-
-      // Check if exception is handled
-      unsigned bad_phase = 1;
-      // Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE(node->update_internal_force(true, bad_phase, force) == false);
-      // Exception handling invalid force dimension
-      // TODO Assert:
-      // REQUIRE(node->update_internal_force(false, bad_phase, force) == false);
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -946,21 +900,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       Eigen::Matrix<double, Dim, 1> acceleration_bad;
       for (unsigned i = 0; i < acceleration_bad.size(); ++i)
         acceleration_bad(i) = 10.;
-
-      unsigned bad_phase = 3;
-      // Exception handling invalid acceleration dimension
-      // TODO Assert:  REQUIRE_NOTHROW(node->update_acceleration(true,
-      // bad_phase, acceleration_bad));
-
-      // Check if exception is handled
-      bad_phase = 1;
-      // Exception handling invalid momentum dimension
-      // TODO Assert:
-      // REQUIRE_NOTHROW(node->update_momentum(true, bad_phase, momentum) ==
-      // false); Exception handling invalid momentum dimension
-      // TODO Assert:
-      // REQUIRE_NOTHROW(node->update_momentum(false, bad_phase, momentum) ==
-      // false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
@@ -1535,17 +1474,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE_NOTHROW(node->update_acceleration(true, Nphase, acceleration));
       for (unsigned i = 0; i < acceleration.size(); ++i)
         REQUIRE(node->acceleration(Nphase)(i) == Approx(5.).epsilon(Tolerance));
-
-      // Check if exception is handled
-      unsigned bad_phase = 1;
-      // Exception handling invalid acceleration dimension
-      // TODO assert:
-      // REQUIRE_NOTHROW(node->update_acceleration(true, bad_phase,
-      // acceleration) == false); Exception handling invalid acceleration
-      // dimension
-      // TODO Assert:
-      // REQUIRE(node->update_acceleration(false, bad_phase, acceleration) ==
-      //       false);
 
       // Check velocity before constraints
       Eigen::Matrix<double, Dim, 1> velocity;
