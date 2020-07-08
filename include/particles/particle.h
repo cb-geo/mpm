@@ -117,7 +117,9 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_volume(double volume) override;
 
   //! Return volume
-  double volume() const override { return volume_; }
+  double volume() const override {
+    return this->scalar_property(mpm::properties::Scalar::Volume);
+  }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
@@ -129,7 +131,9 @@ class Particle : public ParticleBase<Tdim> {
   void update_volume() noexcept override;
 
   //! \param[in] phase Index corresponding to the phase
-  double mass_density() const override { return mass_density_; }
+  double mass_density() const override {
+    return this->scalar_property(mpm::properties::Scalar::MassDensity);
+  }
 
   //! Compute mass as volume * density
   void compute_mass() noexcept override;
@@ -149,10 +153,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
   //! \retval status Assignment status
-  void assign_mass(double mass) override { mass_ = mass; }
+  void assign_mass(double mass) override {
+    scalar_properties_.at(mpm::properties::Scalar::Mass) = mass;
+  }
 
   //! Return mass of the particles
-  double mass() const override { return mass_; }
+  double mass() const override {
+    return this->scalar_property(mpm::properties::Scalar::Mass);
+  }
 
   //! Assign material
   //! \param[in] material Pointer to a material
@@ -316,12 +324,6 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::vector_properties_;
   //! Shape functions
   using ParticleBase<Tdim>::shapefn_;
-  //! Volumetric mass density (mass / volume)
-  double mass_density_{0.};
-  //! Mass
-  double mass_{0.};
-  //! Volume
-  double volume_{0.};
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates

@@ -157,10 +157,10 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     }
 
     // Check mass
-    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
-    double mass = 100.5;
-    particle->assign_mass(mass);
     REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    double mass = 201.0;
+    particle->assign_mass(mass);
+    REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
@@ -1252,10 +1252,10 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     }
 
     // Check mass
-    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
-    double mass = 100.5;
-    particle->assign_mass(mass);
     REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    double mass = 201.0;
+    particle->assign_mass(mass);
+    REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
