@@ -181,9 +181,6 @@ class ParticleBase {
   //! Return mass density
   virtual double mass_density() const = 0;
 
-  //! Compute mass of particle
-  virtual void compute_mass() noexcept = 0;
-
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
 

@@ -734,9 +734,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic2D", std::move(mid), jmaterial);
 
-    // Check compute mass before material and volume
-    // TODO Assert: REQUIRE(particle->compute_mass() == false);
-
     // Test compute stress before material assignment
     // TODO Assert: REQUIRE(particle->compute_stress() == false);
 
@@ -750,7 +747,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE_NOTHROW(particle->compute_volume());
 
     // Compute mass
-    REQUIRE_NOTHROW(particle->compute_mass());
+    REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     // Mass
     REQUIRE(particle->mass() == Approx(1000.).epsilon(Tolerance));
     // Compute mass function
@@ -777,7 +774,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
-    REQUIRE_NOTHROW(particle->compute_mass());
+    REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
 
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -1073,7 +1070,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE_NOTHROW(particle->compute_volume());
 
       // Compute mass
-      REQUIRE_NOTHROW(particle->compute_mass());
+      REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
       // Mass
       REQUIRE(particle->mass() == Approx(1000.).epsilon(Tolerance));
 
@@ -1095,7 +1092,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->compute_mass());
+      REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
       REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
 
       // Check volumetric strain at centroid
@@ -2008,9 +2005,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic3D", std::move(mid), jmaterial);
 
-    // Check compute mass before material and volume
-    // TODO Assert: REQUIRE(particle->compute_mass() == false);
-
     // Test compute stress before material assignment
     // TODO Assert: REQUIRE(particle->compute_stress() == false);
 
@@ -2024,7 +2018,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE_NOTHROW(particle->compute_volume());
 
     // Compute mass
-    REQUIRE_NOTHROW(particle->compute_mass());
+    REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     // Mass
     REQUIRE(particle->mass() == Approx(8000.).epsilon(Tolerance));
 
@@ -2047,7 +2041,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
-    REQUIRE_NOTHROW(particle->compute_mass());
+    REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
 
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -2337,7 +2331,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE_NOTHROW(particle->compute_volume());
 
       // Compute mass
-      REQUIRE_NOTHROW(particle->compute_mass());
+      REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
       // Mass
       REQUIRE(particle->mass() == Approx(8000.).epsilon(Tolerance));
 
@@ -2359,7 +2353,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->compute_mass());
+      REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
       REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
 
       // Check volumetric strain at centroid

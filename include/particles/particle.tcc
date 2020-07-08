@@ -494,19 +494,6 @@ void mpm::Particle<Tdim>::update_volume() noexcept {
       (1. + dvolumetric_strain_);
 }
 
-// Compute mass of particle
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_mass() noexcept {
-  // Check if particle volume is set and material ptr is valid
-  assert(this->volume() != std::numeric_limits<double>::max() &&
-         material_ != nullptr);
-  // Mass = volume of particle * mass_density
-  scalar_properties_.at(mpm::properties::Scalar::MassDensity) =
-      material_->template property<double>(std::string("density"));
-  scalar_properties_.at(mpm::properties::Scalar::Mass) =
-      this->volume() * this->mass_density();
-}
-
 //! Map particle mass and momentum to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {

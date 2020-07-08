@@ -169,8 +169,9 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
       &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
+  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
+    return mpm::particle::compute_mass<Dim>(ptr);
+  });
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -425,8 +426,9 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
       &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
+  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
+    return mpm::particle::compute_mass<Dim>(ptr);
+  });
 
   // Initialise nodes
   mesh->iterate_over_nodes(

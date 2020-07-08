@@ -122,7 +122,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Compute mass
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::compute_mass<Tdim>(ptr);
+      });
 
   // Check point resume
   if (resume) this->checkpoint_resume();

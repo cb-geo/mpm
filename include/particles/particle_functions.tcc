@@ -7,11 +7,13 @@ void compute_mass(std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
   assert(particle->volume() != std::numeric_limits<double>::max() &&
          particle->material() != nullptr);
   // Mass = volume of particle * mass_density
-  auto density =
-      (particle->material())->template property<double>(std::string("density"));
+  particle->update_scalar_property(
+      mpm::properties::Scalar::MassDensity, false,
+      particle->material()->template property<double>(std::string("density")));
   // Update particle mass
-  particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
-                                   particle->volume() * density);
+  particle->update_scalar_property(
+      mpm::properties::Scalar::Mass, false,
+      particle->volume() * particle->mass_density());
 }
 }  // namespace particle
 }  // namespace mpm

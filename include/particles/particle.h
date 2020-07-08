@@ -135,9 +135,6 @@ class Particle : public ParticleBase<Tdim> {
     return this->scalar_property(mpm::properties::Scalar::MassDensity);
   }
 
-  //! Compute mass as volume * density
-  void compute_mass() noexcept override;
-
   //! Map particle mass and momentum to nodes
   void map_mass_momentum_to_nodes() noexcept override;
 
