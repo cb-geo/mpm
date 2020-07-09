@@ -103,6 +103,7 @@ jobs:
           command: |
             cd /home/cbgeo/project/build
             pip3 install tables --user
+            export OMP_NUM_THREADS=2
             mpirun -n 4 ./mpm -f ./benchmarks/2d/sliding_block_inclined_boundary/
             python3 ./benchmarks/2d/sliding_block_inclined_boundary/test_benchmark.py
       # Stress
@@ -129,6 +130,7 @@ workflows:
             - clang
             - cppcheck
             - codecov
+            - benchmarks
     nightly:
         jobs:
             - benchmarks
