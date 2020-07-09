@@ -815,7 +815,7 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
               nset_id, velocity_constraint);
           if (!velocity_constraints)
             throw std::runtime_error(
-                "Assign nodal velocity constraint is not properly assigned");
+                "Nodal velocity constraint is not properly assigned");
         }
       }
     } else
@@ -868,7 +868,7 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
                   nset_id, friction_constraint);
           if (!friction_constraints)
             throw std::runtime_error(
-                "Assign nodal friction constraint is not properly assigned");
+                "Nodal friction constraint is not properly assigned");
         }
       }
     } else
