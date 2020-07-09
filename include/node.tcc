@@ -25,6 +25,9 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   scalar_properties_.emplace(
       std::make_pair(mpm::properties::Scalar::Volume,
                      Eigen::Matrix<double, 1, Tnphases>::Zero()));
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Pressure,
+                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
 
   // Initialize vector properties
   vector_properties_.emplace(
@@ -49,12 +52,16 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 //! Initialise nodal properties
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
-  pressure_.setZero();
   contact_displacement_.setZero();
   status_ = false;
   material_ids_.clear();
+
+  // Initialise nodal scalar properties
   scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
   scalar_properties_.at(mpm::properties::Scalar::Volume).setZero();
+  scalar_properties_.at(mpm::properties::Scalar::Pressure).setZero();
+
+  // Initialise nodal vector properties
   vector_properties_.at(mpm::properties::Vector::Velocity).setZero();
   vector_properties_.at(mpm::properties::Vector::Acceleration).setZero();
   vector_properties_.at(mpm::properties::Vector::Momentum).setZero();
@@ -202,7 +209,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
   // Compute pressure from mass*pressure
   if (this->mass(phase) > tolerance) {
     std::lock_guard<std::mutex> guard(node_mutex_);
-    pressure_(phase) += mass_pressure / this->mass(phase);
+    scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) +=
+        mass_pressure / this->mass(phase);
   }
 }
 
@@ -212,7 +220,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
   // Compute pressure from mass*pressure
   std::lock_guard<std::mutex> guard(node_mutex_);
-  pressure_(phase) = pressure;
+  scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) = pressure;
 }
 
 //! Compute velocity from momentum

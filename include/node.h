@@ -172,7 +172,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double pressure(unsigned phase) const override { return pressure_(phase); }
+  double pressure(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Pressure, phase);
+  }
 
   //! Update momentum at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -316,8 +318,6 @@ class Node : public NodeBase<Tdim> {
   tsl::ordered_map<mpm::properties::Vector,
                    Eigen::Matrix<double, Tdim, Tnphases>>
       vector_properties_;
-  //! Pressure
-  Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
   //! Velocity constraints
