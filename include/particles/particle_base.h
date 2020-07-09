@@ -148,6 +148,14 @@ class ParticleBase {
   void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
                                  unsigned phase) noexcept;
 
+  //! Map an arbitrary scalar value to nodal scalar property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Scalar value to be mapped from particle to node
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase, double value) noexcept;
+
   //! Return property at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
@@ -172,6 +180,15 @@ class ParticleBase {
   //! \param[in] phase Index corresponding to the phase
   void map_vector_property_nodes(mpm::properties::Vector property, bool update,
                                  unsigned phase) noexcept;
+
+  //! Map an arbitrary vector value to nodal vector property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Vector value to be mapped from particle to node
+  void map_vector_property_nodes(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
 
   //! Return property at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
