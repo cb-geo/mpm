@@ -336,7 +336,7 @@ class ParticleBase {
   //! Scalar properties
   tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, 1, Tdim>>
+  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
       vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
