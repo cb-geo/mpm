@@ -1027,18 +1027,11 @@ void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
   } else {
     // Iterate over the particle set
     auto set = particle_sets_.at(set_id);
-#pragma omp parallel
-#pragma omp single
-    {
-      for (auto sitr = set.begin(); sitr != set.cend(); ++sitr) {
-#pragma omp task firstprivate(sitr)
-        {
-          unsigned pid = (*sitr);
-          if (map_particles_.find(pid) != map_particles_.end())
-            oper(map_particles_[pid]);
-        }
-      }
-#pragma omp taskwait
+#pragma omp parallel for
+    for (auto sitr = set.begin(); sitr != set.cend(); ++sitr) {
+      unsigned pid = (*sitr);
+      if (map_particles_.find(pid) != map_particles_.end())
+        oper(map_particles_[pid]);
     }
   }
 }

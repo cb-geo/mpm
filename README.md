@@ -36,11 +36,12 @@ If you have any issues running or compiling the MPM code please open a issue on 
 #### Optional
 * [MKL](https://software.intel.com/en-us/mkl)
 * [MPI](https://www.open-mpi.org/)
+* [OpenMP 4](
 * [KaHIP](https://github.com/schulzchristian/KaHIP)
 * [Partio](https://github.com/wdas/partio)
 * [VTK](https://www.vtk.org/)
 
-### Fedora installation
+### Fedora installation (recommended)
 
 Please run the following command:
 
@@ -56,14 +57,19 @@ dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cp
 Please run the following commands to install dependencies:
 
 ```
-sudo apt-get install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev
+sudo apt update
+sudo apt upgrade
+sudo apt install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev libomp-dev
+sudo apt install software-properties-common
+sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+sudo apt install gcc-9 g++-9
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 
 ```
 
 To install other dependencies:
 > CMake 3.15
 ```
-sudo apt-get install software-properties-common
 sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 sudo apt update
 sudo apt upgrade
