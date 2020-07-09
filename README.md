@@ -98,7 +98,6 @@ sudo make install
 ### Partio for Houdini SFX Visualization
 
 ```shell
-sudo dnf install -y libnsl freeglut freeglut-devel
 mkdir -p ~/workspace && cd ~/workspace/ && git clone https://github.com/wdas/partio.git && \
     cd partio && cmake . && make
 ```
