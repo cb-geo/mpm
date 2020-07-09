@@ -60,6 +60,12 @@ Please run the following commands to install dependencies:
 sudo apt update
 sudo apt upgrade
 sudo apt install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev libomp-dev
+```
+
+If you are running Ubuntu 18.04 or below, you may want to update the GCC version to 9 to have OpenMP 5 specifications
+support.
+
+```
 sudo apt install software-properties-common
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt install gcc-9 g++-9
