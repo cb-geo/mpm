@@ -144,23 +144,24 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    // Check scalar properties
-    SECTION("Check scalar properties") {
-      // Check mass
-      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-              Approx(0.0).epsilon(Tolerance));
-      double mass = 100.5;
-      particle->update_scalar_property(mpm::properties::Scalar::Mass, true,
-                                       mass);
-      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-              Approx(100.5).epsilon(Tolerance));
-    }
-
     // Check mass
-    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    REQUIRE(particle->mass() == Approx(0.).epsilon(Tolerance));
     double mass = 201.0;
     particle->assign_mass(mass);
     REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
+
+    // Check mass using scalar properties
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(201.0).epsilon(Tolerance));
+    mass = 100.5;
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
+                                     mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(100.5).epsilon(Tolerance));
+
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, true, mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(201.).epsilon(Tolerance));
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
@@ -180,6 +181,25 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+
+    // Check velocity using vector properties
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 13.88;
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, false,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(13.88).epsilon(Tolerance));
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, true,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(27.76).epsilon(Tolerance));
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
@@ -1236,23 +1256,24 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    // Check scalar properties
-    SECTION("Check scalar properties") {
-      // Check mass
-      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-              Approx(0.0).epsilon(Tolerance));
-      double mass = 100.5;
-      particle->update_scalar_property(mpm::properties::Scalar::Mass, true,
-                                       mass);
-      REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-              Approx(100.5).epsilon(Tolerance));
-    }
-
     // Check mass
-    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
+    REQUIRE(particle->mass() == Approx(0.).epsilon(Tolerance));
     double mass = 201.0;
     particle->assign_mass(mass);
     REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
+
+    // Check mass using scalar properties
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(201.).epsilon(Tolerance));
+    mass = 111.11;
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
+                                     mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(111.11).epsilon(Tolerance));
+
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, true, mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(222.22).epsilon(Tolerance));
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
@@ -1272,6 +1293,25 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(19.745).epsilon(Tolerance));
+
+    // Check velocity using vector properties
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(19.745).epsilon(Tolerance));
+
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 11.22;
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, false,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(11.22).epsilon(Tolerance));
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, true,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(22.44).epsilon(Tolerance));
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
@@ -2544,6 +2584,19 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     particle->assign_mass(mass);
     REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
 
+    // Check mass using scalar properties
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(100.5).epsilon(Tolerance));
+    mass = 111.11;
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
+                                     mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(111.11).epsilon(Tolerance));
+
+    particle->update_scalar_property(mpm::properties::Scalar::Mass, true, mass);
+    REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
+            Approx(222.22).epsilon(Tolerance));
+
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
     for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 1.;
@@ -2562,6 +2615,25 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->assign_velocity(velocity) == true);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
+
+    // Check velocity using vector properties
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 11.22;
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, false,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(11.22).epsilon(Tolerance));
+
+    particle->update_vector_property(mpm::properties::Vector::Velocity, true,
+                                     velocity);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_property(mpm::properties::Vector::Velocity)(i) ==
+              Approx(22.44).epsilon(Tolerance));
 
     // Assign volume
     REQUIRE(particle->assign_volume(0.0) == false);
