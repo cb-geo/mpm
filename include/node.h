@@ -100,7 +100,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Return mass at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const override { return mass_(phase); }
+  double mass(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Mass, phase);
+  }
 
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -111,7 +113,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Return volume at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return volume_(phase); }
+  double volume(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Volume, phase);
+  }
 
   //! Assign concentrated force to the node
   //! \param[in] phase Index corresponding to the phase
@@ -312,10 +316,6 @@ class Node : public NodeBase<Tdim> {
   tsl::ordered_map<mpm::properties::Vector,
                    Eigen::Matrix<double, Tdim, Tnphases>>
       vector_properties_;
-  //! Mass
-  Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Volume
-  Eigen::Matrix<double, 1, Tnphases> volume_;
   //! External force
   Eigen::Matrix<double, Tdim, Tnphases> external_force_;
   //! Internal force
