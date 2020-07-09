@@ -36,7 +36,7 @@ If you have any issues running or compiling the MPM code please open a issue on 
 #### Optional
 * [MKL](https://software.intel.com/en-us/mkl)
 * [MPI](https://www.open-mpi.org/)
-* [OpenMP 4](
+* [OpenMP 5.0](https://www.openmp.org/specifications/)
 * [KaHIP](https://github.com/schulzchristian/KaHIP)
 * [Partio](https://github.com/wdas/partio)
 * [VTK](https://www.vtk.org/)
