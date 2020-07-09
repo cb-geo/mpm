@@ -127,7 +127,7 @@ workflows:
     version: 2
     build:
         jobs:
-            - gcc
+            - benchmarks
             - clang
             - cppcheck
             - codecov
