@@ -215,10 +215,14 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_velocity(const VectorDim& velocity) override;
 
   //! Return velocity of the particle
-  VectorDim velocity() const override { return velocity_; }
+  VectorDim velocity() const override {
+    return this->vector_property(mpm::properties::Vector::Velocity);
+  }
 
   //! Return displacement of the particle
-  VectorDim displacement() const override { return displacement_; }
+  VectorDim displacement() const override {
+    return this->vector_property(mpm::properties::Vector::Displacement);
+  }
 
   //! Assign traction to the particle
   //! \param[in] direction Index corresponding to the direction of traction
@@ -337,10 +341,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, 1> dstrain_;
-  //! Velocity
-  Eigen::Matrix<double, Tdim, 1> velocity_;
-  //! Displacement
-  Eigen::Matrix<double, Tdim, 1> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
   //! Set traction
