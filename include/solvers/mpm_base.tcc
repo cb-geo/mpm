@@ -811,7 +811,7 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          velocity_constraints = constraints_->assign_nodal_velocity_constraint(
+          bool velocity_constraints = constraints_->assign_nodal_velocity_constraint(
               nset_id, velocity_constraint);
           if (!velocity_constraints)
             throw std::runtime_error(
@@ -863,7 +863,7 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               nset_id, dir, sign_n, friction);
-          friction_constraints =
+          bool friction_constraints =
               constraints_->assign_nodal_frictional_constraint(
                   nset_id, friction_constraint);
           if (!friction_constraints)
