@@ -142,7 +142,7 @@ class Node : public NodeBase<Tdim> {
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim external_force(unsigned phase) const override {
-    return external_force_.col(phase);
+    return this->vector_property(mpm::properties::Vector::ExternalForce, phase);
   }
 
   //! Update internal force (body force / traction force)
@@ -155,7 +155,7 @@ class Node : public NodeBase<Tdim> {
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
-    return internal_force_.col(phase);
+    return this->vector_property(mpm::properties::Vector::InternalForce, phase);
   }
 
   //! Update pressure at the nodes from particle
@@ -184,7 +184,7 @@ class Node : public NodeBase<Tdim> {
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim momentum(unsigned phase) const override {
-    return momentum_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Momentum, phase);
   }
 
   //! Compute velocity from the momentum
@@ -316,16 +316,10 @@ class Node : public NodeBase<Tdim> {
   tsl::ordered_map<mpm::properties::Vector,
                    Eigen::Matrix<double, Tdim, Tnphases>>
       vector_properties_;
-  //! External force
-  Eigen::Matrix<double, Tdim, Tnphases> external_force_;
-  //! Internal force
-  Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
   //! Pressure
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
-  //! Momentum
-  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints

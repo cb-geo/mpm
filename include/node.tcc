@@ -33,6 +33,15 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   vector_properties_.emplace(
       std::make_pair(mpm::properties::Vector::Acceleration,
                      Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Momentum,
+                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::ExternalForce,
+                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::InternalForce,
+                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
 
   this->initialise();
 }
@@ -40,17 +49,17 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 //! Initialise nodal properties
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
-  external_force_.setZero();
-  internal_force_.setZero();
   pressure_.setZero();
   contact_displacement_.setZero();
-  momentum_.setZero();
   status_ = false;
   material_ids_.clear();
   scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
   scalar_properties_.at(mpm::properties::Scalar::Volume).setZero();
   vector_properties_.at(mpm::properties::Vector::Velocity).setZero();
   vector_properties_.at(mpm::properties::Vector::Acceleration).setZero();
+  vector_properties_.at(mpm::properties::Vector::Momentum).setZero();
+  vector_properties_.at(mpm::properties::Vector::ExternalForce).setZero();
+  vector_properties_.at(mpm::properties::Vector::InternalForce).setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -160,15 +169,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
     bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
-  // Assert
-  assert(phase < Tnphases);
-
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign external force
-  std::lock_guard<std::mutex> guard(node_mutex_);
-  external_force_.col(phase) = external_force_.col(phase) * factor + force;
+  this->update_vector_property(mpm::properties::Vector::ExternalForce, update,
+                               phase, force);
 }
 
 //! Update internal force (body force / traction force)
@@ -176,15 +178,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
     bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& force) noexcept {
-  // Assert
-  assert(phase < Tnphases);
-
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign internal force
-  std::lock_guard<std::mutex> guard(node_mutex_);
-  internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
+  this->update_vector_property(mpm::properties::Vector::InternalForce, update,
+                               phase, force);
 }
 
 //! Assign nodal momentum
@@ -192,15 +187,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
     bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& momentum) noexcept {
-  // Assert
-  assert(phase < Tnphases);
-
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  // Update/assign momentum
-  std::lock_guard<std::mutex> guard(node_mutex_);
-  momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
+  this->update_vector_property(mpm::properties::Vector::Momentum, update, phase,
+                               momentum);
 }
 
 //! Update pressure at the nodes from particle
@@ -235,7 +223,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   for (unsigned phase = 0; phase < Tnphases; ++phase) {
     if (this->mass(phase) > tolerance) {
       vector_properties_.at(mpm::properties::Vector::Velocity).col(phase) =
-          momentum_.col(phase) / this->mass(phase);
+          this->momentum(phase) / this->mass(phase);
 
       // Check to see if value is below threshold
       for (unsigned i = 0; i < Tdim; ++i)
@@ -268,7 +256,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
   if (this->mass(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
     vector_properties_.at(mpm::properties::Vector::Acceleration).col(phase) =
-        (this->external_force_.col(phase) + this->internal_force_.col(phase)) /
+        (this->external_force(phase) + this->internal_force(phase)) /
         this->mass(phase);
 
     // Apply friction constraints
@@ -304,7 +292,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
   if (this->mass(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
     auto unbalanced_force =
-        this->external_force_.col(phase) + this->internal_force_.col(phase);
+        this->external_force(phase) + this->internal_force(phase);
     vector_properties_.at(mpm::properties::Vector::Acceleration).col(phase) =
         (unbalanced_force - damping_factor * unbalanced_force.norm() *
                                 this->velocity(phase).cwiseSign()) /
