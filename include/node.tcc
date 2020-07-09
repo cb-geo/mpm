@@ -52,9 +52,7 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
 //! Initialise nodal properties
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
-  contact_displacement_.setZero();
   status_ = false;
-  material_ids_.clear();
 
   // Initialise nodal scalar properties
   scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
@@ -67,6 +65,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   vector_properties_.at(mpm::properties::Vector::Momentum).setZero();
   vector_properties_.at(mpm::properties::Vector::ExternalForce).setZero();
   vector_properties_.at(mpm::properties::Vector::InternalForce).setZero();
+
+  // Initialise variables for contact
+  material_ids_.clear();
+  contact_displacement_.setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
