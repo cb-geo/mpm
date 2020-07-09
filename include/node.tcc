@@ -26,6 +26,14 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
       std::make_pair(mpm::properties::Scalar::Volume,
                      Eigen::Matrix<double, 1, Tnphases>::Zero()));
 
+  // Initialize vector properties
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Velocity,
+                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Acceleration,
+                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+
   this->initialise();
 }
 
@@ -36,13 +44,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   internal_force_.setZero();
   pressure_.setZero();
   contact_displacement_.setZero();
-  velocity_.setZero();
   momentum_.setZero();
-  acceleration_.setZero();
   status_ = false;
   material_ids_.clear();
   scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
   scalar_properties_.at(mpm::properties::Scalar::Volume).setZero();
+  vector_properties_.at(mpm::properties::Vector::Velocity).setZero();
+  vector_properties_.at(mpm::properties::Vector::Acceleration).setZero();
 }
 
 //! Initialise shared pointer to nodal properties pool
@@ -226,12 +234,14 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_velocity() {
   const double tolerance = 1.E-16;
   for (unsigned phase = 0; phase < Tnphases; ++phase) {
     if (this->mass(phase) > tolerance) {
-      velocity_.col(phase) = momentum_.col(phase) / this->mass(phase);
+      vector_properties_.at(mpm::properties::Vector::Velocity).col(phase) =
+          momentum_.col(phase) / this->mass(phase);
 
       // Check to see if value is below threshold
-      for (unsigned i = 0; i < velocity_.rows(); ++i)
-        if (std::abs(velocity_.col(phase)(i)) < 1.E-15)
-          velocity_.col(phase)(i) = 0.;
+      for (unsigned i = 0; i < Tdim; ++i)
+        if (std::abs(this->velocity(phase)(i)) < 1.E-15)
+          vector_properties_.at(mpm::properties::Vector::Velocity)
+              .col(phase)(i) = 0.;
     }
   }
 
@@ -245,14 +255,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
     bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& acceleration) noexcept {
-  assert(phase < Tnphases);
-
-  // Decide to update or assign
-  const double factor = (update == true) ? 1. : 0.;
-
-  //! Update/assign acceleration
-  std::lock_guard<std::mutex> guard(node_mutex_);
-  acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
+  this->update_vector_property(mpm::properties::Vector::Acceleration, update,
+                               phase, acceleration);
 }
 
 //! Compute acceleration and velocity
@@ -263,7 +267,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
   const double tolerance = 1.0E-15;
   if (this->mass(phase) > tolerance) {
     // acceleration = (unbalaced force / mass)
-    this->acceleration_.col(phase) =
+    vector_properties_.at(mpm::properties::Vector::Acceleration).col(phase) =
         (this->external_force_.col(phase) + this->internal_force_.col(phase)) /
         this->mass(phase);
 
@@ -271,18 +275,21 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity(
     this->apply_friction_constraints(dt);
 
     // Velocity += acceleration * dt
-    this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
+    vector_properties_.at(mpm::properties::Vector::Velocity).col(phase) +=
+        this->acceleration(phase) * dt;
     // Apply velocity constraints, which also sets acceleration to 0,
     // when velocity is set.
     this->apply_velocity_constraints();
 
     // Set a threshold
     for (unsigned i = 0; i < Tdim; ++i)
-      if (std::abs(velocity_.col(phase)(i)) < tolerance)
-        velocity_.col(phase)(i) = 0.;
+      if (std::abs(this->velocity(phase)(i)) < tolerance)
+        vector_properties_.at(mpm::properties::Vector::Velocity).col(phase)(i) =
+            0.;
     for (unsigned i = 0; i < Tdim; ++i)
-      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-        acceleration_.col(phase)(i) = 0.;
+      if (std::abs(this->acceleration(phase)(i)) < tolerance)
+        vector_properties_.at(mpm::properties::Vector::Acceleration)
+            .col(phase)(i) = 0.;
     status = true;
   }
   return status;
@@ -298,27 +305,30 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::compute_acceleration_velocity_cundall(
     // acceleration = (unbalaced force / mass)
     auto unbalanced_force =
         this->external_force_.col(phase) + this->internal_force_.col(phase);
-    this->acceleration_.col(phase) =
+    vector_properties_.at(mpm::properties::Vector::Acceleration).col(phase) =
         (unbalanced_force - damping_factor * unbalanced_force.norm() *
-                                this->velocity_.col(phase).cwiseSign()) /
+                                this->velocity(phase).cwiseSign()) /
         this->mass(phase);
 
     // Apply friction constraints
     this->apply_friction_constraints(dt);
 
     // Velocity += acceleration * dt
-    this->velocity_.col(phase) += this->acceleration_.col(phase) * dt;
+    vector_properties_.at(mpm::properties::Vector::Velocity).col(phase) +=
+        this->acceleration(phase) * dt;
     // Apply velocity constraints, which also sets acceleration to 0,
     // when velocity is set.
     this->apply_velocity_constraints();
 
     // Set a threshold
     for (unsigned i = 0; i < Tdim; ++i)
-      if (std::abs(velocity_.col(phase)(i)) < tolerance)
-        velocity_.col(phase)(i) = 0.;
+      if (std::abs(this->velocity(phase)(i)) < tolerance)
+        vector_properties_.at(mpm::properties::Vector::Velocity).col(phase)(i) =
+            0.;
     for (unsigned i = 0; i < Tdim; ++i)
-      if (std::abs(acceleration_.col(phase)(i)) < tolerance)
-        acceleration_.col(phase)(i) = 0.;
+      if (std::abs(this->acceleration(phase)(i)) < tolerance)
+        vector_properties_.at(mpm::properties::Vector::Acceleration)
+            .col(phase)(i) = 0.;
     status = true;
   }
   return status;
@@ -359,9 +369,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
 
     if (!generic_boundary_constraints_) {
       // Velocity constraints are applied on Cartesian boundaries
-      this->velocity_(direction, phase) = constraint.second;
+      vector_properties_.at(mpm::properties::Vector::Velocity)(
+          direction, phase) = constraint.second;
       // Set acceleration to 0 in direction of velocity constraint
-      this->acceleration_(direction, phase) = 0.;
+      vector_properties_.at(mpm::properties::Vector::Acceleration)(direction,
+                                                                   phase) = 0.;
     } else {
       // Velocity constraints on general boundaries
       // Compute inverse rotation matrix
@@ -369,15 +381,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
           rotation_matrix_.inverse();
       // Transform to local coordinate
       Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
-          inverse_rotation_matrix * this->velocity_;
+          inverse_rotation_matrix *
+          vector_properties_.at(mpm::properties::Vector::Velocity);
       Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
-          inverse_rotation_matrix * this->acceleration_;
+          inverse_rotation_matrix *
+          vector_properties_.at(mpm::properties::Vector::Acceleration);
       // Apply boundary condition in local coordinate
       local_velocity(direction, phase) = constraint.second;
       local_acceleration(direction, phase) = 0.;
       // Transform back to global coordinate
-      this->velocity_ = rotation_matrix_ * local_velocity;
-      this->acceleration_ = rotation_matrix_ * local_acceleration;
+      vector_properties_.at(mpm::properties::Vector::Velocity) =
+          rotation_matrix_ * local_velocity;
+      vector_properties_.at(mpm::properties::Vector::Acceleration) =
+          rotation_matrix_ * local_acceleration;
     }
   }
 }
@@ -433,10 +449,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       if (!generic_boundary_constraints_) {
         // Cartesian case
         // Normal and tangential acceleration
-        acc_n = this->acceleration_(dir_n, phase);
-        acc_t = this->acceleration_(dir_t, phase);
+        acc_n = vector_properties_.at(mpm::properties::Vector::Acceleration)(
+            dir_n, phase);
+        acc_t = vector_properties_.at(mpm::properties::Vector::Acceleration)(
+            dir_t, phase);
         // Velocity tangential
-        vel_t = this->velocity_(dir_t, phase);
+        vel_t = vector_properties_.at(mpm::properties::Vector::Velocity)(dir_t,
+                                                                         phase);
       } else {
         // General case, transform to local coordinate
         // Compute inverse rotation matrix
@@ -444,9 +463,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
             rotation_matrix_.inverse();
         // Transform to local coordinate
         Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
-            inverse_rotation_matrix * this->acceleration_;
+            inverse_rotation_matrix *
+            vector_properties_.at(mpm::properties::Vector::Acceleration);
         Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
-            inverse_rotation_matrix * this->velocity_;
+            inverse_rotation_matrix *
+            vector_properties_.at(mpm::properties::Vector::Velocity);
         // Normal and tangential acceleration
         acc_n = local_acceleration(dir_n, phase);
         acc_t = local_acceleration(dir_t, phase);
@@ -471,7 +492,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
 
         if (!generic_boundary_constraints_) {
           // Cartesian case
-          this->acceleration_(dir_t, phase) = acc_t;
+          vector_properties_.at(mpm::properties::Vector::Acceleration)(
+              dir_t, phase) = acc_t;
         } else {
           // Local acceleration in terms of tangential and normal
           Eigen::Matrix<double, Tdim, Tnphases> acc;
@@ -479,7 +501,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
           acc(dir_n, phase) = acc_n;
 
           // General case, transform to global coordinate
-          this->acceleration_.col(phase) = rotation_matrix_ * acc.col(phase);
+          vector_properties_.at(mpm::properties::Vector::Acceleration)
+              .col(phase) = rotation_matrix_ * acc.col(phase);
         }
       }
     } else if (Tdim == 3) {
@@ -497,16 +520,16 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       Eigen::Matrix<double, Tdim, 1> acc, vel;
       if (!generic_boundary_constraints_) {
         // Cartesian case
-        acc = this->acceleration_.col(phase);
-        vel = this->velocity_.col(phase);
+        acc = this->acceleration(phase);
+        vel = this->velocity(phase);
       } else {
         // General case, transform to local coordinate
         // Compute inverse rotation matrix
         const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
             rotation_matrix_.inverse();
         // Transform to local coordinate
-        acc = inverse_rotation_matrix * this->acceleration_.col(phase);
-        vel = inverse_rotation_matrix * this->velocity_.col(phase);
+        acc = inverse_rotation_matrix * this->acceleration(phase);
+        vel = inverse_rotation_matrix * this->velocity(phase);
       }
 
       const auto acc_n = acc(dir_n);
@@ -546,10 +569,12 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
 
         if (!generic_boundary_constraints_) {
           // Cartesian case
-          this->acceleration_.col(phase) = acc;
+          vector_properties_.at(mpm::properties::Vector::Acceleration)
+              .col(phase) = acc;
         } else {
           // General case, transform to global coordinate
-          this->acceleration_.col(phase) = rotation_matrix_ * acc;
+          vector_properties_.at(mpm::properties::Vector::Acceleration)
+              .col(phase) = rotation_matrix_ * acc;
         }
       }
     }
@@ -596,7 +621,8 @@ void mpm::Node<Tdim, Tdof,
     const Eigen::Matrix<double, Tdim, 1> momentum =
         property_handle_->property("momenta", prop_id_, *mitr, Tdim);
     const Eigen::Matrix<double, Tdim, 1> change_in_momenta =
-        velocity_ * mass - momentum;
+        vector_properties_.at(mpm::properties::Vector::Velocity) * mass -
+        momentum;
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }

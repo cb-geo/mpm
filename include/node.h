@@ -193,7 +193,7 @@ class Node : public NodeBase<Tdim> {
   //! Return velocity at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim velocity(unsigned phase) const override {
-    return velocity_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Velocity, phase);
   }
 
   //! Update nodal acceleration
@@ -206,7 +206,7 @@ class Node : public NodeBase<Tdim> {
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim acceleration(unsigned phase) const override {
-    return acceleration_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Acceleration, phase);
   }
 
   //! Compute acceleration and velocity
@@ -324,12 +324,8 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, 1, Tnphases> pressure_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
-  //! Velocity
-  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
   //! Momentum
   Eigen::Matrix<double, Tdim, Tnphases> momentum_;
-  //! Acceleration
-  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints
