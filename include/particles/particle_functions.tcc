@@ -74,5 +74,17 @@ void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
                                       pgravity * particle->mass());
 }
 
+//! Map traction force
+template <unsigned Tdim>
+void map_traction_force(
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+  if (particle->set_traction()) {
+    // Map particle traction forces to nodes
+    particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
+                                        true, mpm::ParticlePhase::Solid,
+                                        particle->traction());
+  }
+}
+
 }  // namespace particle
 }  // namespace mpm

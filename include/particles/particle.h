@@ -226,8 +226,8 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
-  //! Map traction force
-  void map_traction_force() noexcept override;
+  //! Return set traction bool
+  bool set_traction() const override { return set_traction_; }
 
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step

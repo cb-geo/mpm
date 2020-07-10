@@ -1202,8 +1202,10 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
                           std::placeholders::_1, dir, traction));
   }
   if (!particle_tractions_.empty()) {
-    this->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
+    this->iterate_over_particles(
+        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+          return mpm::particle::map_traction_force<Tdim>(ptr);
+        });
   }
 }
 

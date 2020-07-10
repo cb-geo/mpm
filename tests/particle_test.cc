@@ -936,7 +936,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Assign traction to particle
     particle->assign_traction(direction,
                               mfunction->value(current_time) * traction);
-    particle->map_traction_force();
+    mpm::particle::map_traction_force<Dim>(particle);
 
     // Traction force
     Eigen::Matrix<double, 4, 2> traction_force;
@@ -959,7 +959,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     particle->assign_traction(direction,
                               -traction * mfunction->value(current_time));
     // Map traction force
-    particle->map_traction_force();
+    mpm::particle::map_traction_force<Dim>(particle);
     // Check nodal external force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
@@ -2237,7 +2237,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     particle->assign_traction(direction,
                               mfunction->value(current_time) * traction);
     // Map traction force
-    particle->map_traction_force();
+    mpm::particle::map_traction_force<Dim>(particle);
 
     // Traction force
     Eigen::Matrix<double, 8, 3> traction_force;
@@ -2264,7 +2264,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     particle->assign_traction(direction,
                               mfunction->value(current_time) * -traction);
     // Map traction force
-    particle->map_traction_force();
+    mpm::particle::map_traction_force<Dim>(particle);
     // Check nodal external force
     for (unsigned i = 0; i < traction_force.rows(); ++i)
       for (unsigned j = 0; j < traction_force.cols(); ++j)
