@@ -46,7 +46,8 @@ typedef struct HDF5Particle {
   double svars[20] = {0};
 } HDF5Particle;
 
-namespace hdf5::particle {
+namespace hdf5 {
+namespace particle {
 const hsize_t NFIELDS = 53;
 
 const size_t dst_size = sizeof(HDF5Particle);
@@ -63,7 +64,8 @@ extern const char* field_names[NFIELDS];
 // Initialize field types
 extern const hid_t field_type[NFIELDS];
 
-}  // namespace hdf5::particle
+}  // namespace particle
+}  // namespace hdf5
 
 }  // namespace mpm
 
