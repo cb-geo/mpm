@@ -86,6 +86,9 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
     mpm::properties::Scalar property, bool update, unsigned phase,
     double value) noexcept {
+  // Assert phase
+  assert(phase < Tnphases);
+
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
@@ -99,6 +102,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 double mpm::Node<Tdim, Tdof, Tnphases>::scalar_property(
     mpm::properties::Scalar property, unsigned phase) const {
+  // Assert phase
+  assert(phase < Tnphases);
   return scalar_properties_.at(property)[phase];
 }
 
@@ -107,6 +112,9 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
     mpm::properties::Vector property, bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& value) noexcept {
+  // Assert phase
+  assert(phase < Tnphases);
+
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
@@ -121,6 +129,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 Eigen::Matrix<double, Tdim, 1> mpm::Node<Tdim, Tdof, Tnphases>::vector_property(
     mpm::properties::Vector property, unsigned phase) const {
+  // Assert phase
+  assert(phase < Tnphases);
   return vector_properties_.at(property).col(phase);
 }
 
