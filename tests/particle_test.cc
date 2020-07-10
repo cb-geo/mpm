@@ -145,23 +145,23 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check mass
-    REQUIRE(particle->mass() == Approx(0.).epsilon(Tolerance));
-    double mass = 201.0;
+    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
     particle->assign_mass(mass);
-    REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
+    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
 
     // Check mass using scalar properties
     REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-            Approx(201.0).epsilon(Tolerance));
-    mass = 100.5;
+            Approx(100.5).epsilon(Tolerance));
+    mass = 200.5;
     particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
                                      mass);
     REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-            Approx(100.5).epsilon(Tolerance));
+            Approx(200.5).epsilon(Tolerance));
 
     particle->update_scalar_property(mpm::properties::Scalar::Mass, true, mass);
     REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-            Approx(201.).epsilon(Tolerance));
+            Approx(401.).epsilon(Tolerance));
 
     // Check stress
     Eigen::Matrix<double, 6, 1> stress;
@@ -1253,14 +1253,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
     // Check mass
-    REQUIRE(particle->mass() == Approx(0.).epsilon(Tolerance));
-    double mass = 201.0;
+    REQUIRE(particle->mass() == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
     particle->assign_mass(mass);
-    REQUIRE(particle->mass() == Approx(201.0).epsilon(Tolerance));
+    REQUIRE(particle->mass() == Approx(100.5).epsilon(Tolerance));
 
     // Check mass using scalar properties
     REQUIRE(particle->scalar_property(mpm::properties::Scalar::Mass) ==
-            Approx(201.).epsilon(Tolerance));
+            Approx(100.5).epsilon(Tolerance));
     mass = 111.11;
     particle->update_scalar_property(mpm::properties::Scalar::Mass, false,
                                      mass);
