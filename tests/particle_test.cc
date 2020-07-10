@@ -777,7 +777,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Map particle mass to nodes
     particle->assign_mass(std::numeric_limits<double>::max());
-    // TODO Assert: REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
 
     // Map particle pressure to nodes
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -795,7 +794,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
-    REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
     REQUIRE(particle->compute_pressure_smoothing() == false);
@@ -1096,7 +1095,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
       // Map particle mass to nodes
       particle->assign_mass(std::numeric_limits<double>::max());
-      // TODO Assert: REQUIRE(particle->map_mass_momentum_to_nodes() == false);
 
       // Map particle pressure to nodes
       // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -1113,7 +1111,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
       REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
-      REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
+      REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
       // Check volumetric strain at centroid
       volumetric_strain = 0.2;
@@ -2064,7 +2062,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Map particle mass to nodes
     particle->assign_mass(std::numeric_limits<double>::max());
-    // TODO Assert: REQUIRE(particle->map_mass_momentum_to_nodes() == false);
 
     // Map particle pressure to nodes
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -2082,7 +2079,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
-    REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
+    REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
     // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
     REQUIRE(particle->compute_pressure_smoothing() == false);
@@ -2377,7 +2374,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
       // Map particle mass to nodes
       particle->assign_mass(std::numeric_limits<double>::max());
-      // TODO Assert: REQUIRE(particle->map_mass_momentum_to_nodes() == false);
 
       // Map particle pressure to nodes
       // TODO Assert: REQUIRE(particle->map_pressure_to_nodes() == false);
@@ -2394,7 +2390,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
       REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
-      REQUIRE_NOTHROW(particle->map_mass_momentum_to_nodes());
+      REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
       // Check volumetric strain at centroid
       volumetric_strain = 0.5;

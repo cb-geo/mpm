@@ -198,9 +198,6 @@ class ParticleBase {
   //! Return mass density
   virtual double mass_density() const = 0;
 
-  //! Map particle mass and momentum to nodes
-  virtual void map_mass_momentum_to_nodes() noexcept = 0;
-
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
 

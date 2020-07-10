@@ -184,8 +184,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                  std::placeholders::_1));
+        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+          return mpm::particle::map_mass_momentum_to_nodes<Tdim>(ptr);
+        });
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
