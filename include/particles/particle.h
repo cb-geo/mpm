@@ -127,9 +127,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Compute volume as cell volume / nparticles
   void compute_volume() noexcept override;
 
-  //! Update volume based on centre volumetric strain rate
-  void update_volume() noexcept override;
-
   //! \param[in] phase Index corresponding to the phase
   double mass_density() const override {
     return this->scalar_property(mpm::properties::Scalar::MassDensity);
@@ -198,10 +195,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return stress of the particle
   Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
-
-  //! Map body force
-  //! \param[in] pgravity Gravity of a particle
-  void map_body_force(const VectorDim& pgravity) noexcept override;
 
   //! Map internal force
   inline void map_internal_force() noexcept override;

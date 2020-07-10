@@ -127,9 +127,6 @@ class ParticleBase {
   //! Compute volume of particle
   virtual void compute_volume() noexcept = 0;
 
-  //! Update volume based on centre volumetric strain rate
-  virtual void update_volume() noexcept = 0;
-
   //! Update scalar property at the particle
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -259,9 +256,6 @@ class ParticleBase {
 
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
-
-  //! Map body force
-  virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
 
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;

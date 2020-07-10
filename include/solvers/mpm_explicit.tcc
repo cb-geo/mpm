@@ -43,8 +43,10 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::update_volume<Tdim>(ptr);
+      });
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
@@ -255,8 +257,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       {
         // Iterate over each particle to compute nodal body force
         mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                      std::placeholders::_1, this->gravity_));
+            [&value = gravity_](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+              return mpm::particle::map_body_force<Tdim>(ptr, value);
+            });
 
         // Apply particle traction and map to nodes
         mesh_->apply_traction_on_particles(this->step_ * this->dt_);

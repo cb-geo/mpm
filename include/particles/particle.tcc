@@ -486,21 +486,6 @@ void mpm::Particle<Tdim>::compute_volume() noexcept {
   this->assign_volume(cell_->volume() / cell_->nparticles());
 }
 
-// Update volume based on the central strain rate
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::update_volume() noexcept {
-  // Check if particle has a valid cell ptr and a valid volume
-  assert(cell_ != nullptr &&
-         this->volume() != std::numeric_limits<double>::max());
-  // Compute at centroid
-  // Strain rate for reduced integration
-  scalar_properties_.at(mpm::properties::Scalar::Volume) *=
-      (1. + dvolumetric_strain_);
-  scalar_properties_.at(mpm::properties::Scalar::MassDensity) =
-      scalar_properties_.at(mpm::properties::Scalar::MassDensity) /
-      (1. + dvolumetric_strain_);
-}
-
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
@@ -639,15 +624,6 @@ void mpm::Particle<Tdim>::compute_stress() noexcept {
   // Calculate stress
   this->stress_ =
       material_->compute_stress(stress_, dstrain_, this, &state_variables_);
-}
-
-//! Map body force
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) noexcept {
-  // Compute nodal body forces
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
-                                     (pgravity * this->mass() * shapefn_(i)));
 }
 
 //! Map internal force

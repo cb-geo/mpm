@@ -711,8 +711,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // TODO Assert: REQUIRE_NOTHROW(particle->compute_updated_position(dt,
     // true)); Compute volume
     // TODO Assert: REQUIRE(particle->compute_volume() == false);
-    // Update volume should fail
-    // TODO Assert: REQUIRE(particle->update_volume() == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -887,7 +885,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
     particle->compute_strain(dt);
-    REQUIRE_NOTHROW(particle->update_volume());
+    REQUIRE_NOTHROW(mpm::particle::update_volume<Dim>(particle));
     REQUIRE(particle->volume() == Approx(1.2).epsilon(Tolerance));
 
     // Compute stress
@@ -910,7 +908,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     Eigen::Matrix<double, 2, 1> gravity;
     gravity << 0., -9.81;
 
-    particle->map_body_force(gravity);
+    mpm::particle::map_body_force<Dim>(particle, gravity);
 
     // Body force
     Eigen::Matrix<double, 4, 2> body_force;
@@ -2000,8 +1998,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Compute volume
     // TODO Assert: REQUIRE(particle->compute_volume() == false);
-    // Update volume should fail
-    // TODO Assert: REQUIRE(particle->update_volume() == false);
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -2190,7 +2186,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Update volume strain rate
     REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
     particle->compute_strain(dt);
-    REQUIRE_NOTHROW(particle->update_volume());
+    REQUIRE_NOTHROW(mpm::particle::update_volume<Dim>(particle));
     REQUIRE(particle->volume() == Approx(12.0).epsilon(Tolerance));
 
     // Compute stress
@@ -2213,7 +2209,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     Eigen::Matrix<double, 3, 1> gravity;
     gravity << 0., 0., -9.81;
 
-    particle->map_body_force(gravity);
+    mpm::particle::map_body_force<Dim>(particle, gravity);
 
     // Body force
     Eigen::Matrix<double, 8, 3> body_force;

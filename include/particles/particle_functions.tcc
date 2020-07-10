@@ -20,6 +20,23 @@ void compute_mass(std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
       particle->volume() * particle->mass_density());
 }
 
+// Update volume based on the central strain rate
+template <unsigned Tdim>
+void update_volume(std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+  // Check if particle has a valid cell ptr and a valid volume
+  assert(particle->cell_ptr() &&
+         particle->volume() != std::numeric_limits<double>::max());
+
+  // Compute at centroid
+  // Strain rate for reduced integration
+  particle->update_scalar_property(
+      mpm::properties::Scalar::Volume, false,
+      (particle->volume() * (1. + particle->dvolumetric_strain())));
+  particle->update_scalar_property(
+      mpm::properties::Scalar::MassDensity, false,
+      (particle->mass_density() / (1. + particle->dvolumetric_strain())));
+}
+
 //! Map particle mass and momentum to nodes
 template <unsigned Tdim>
 void map_mass_momentum_to_nodes(
@@ -33,6 +50,16 @@ void map_mass_momentum_to_nodes(
   particle->map_vector_property_nodes(mpm::properties::Vector::Momentum, true,
                                       mpm::ParticlePhase::Solid,
                                       particle->mass() * particle->velocity());
+}
+
+//! Map body force to nodes
+template <unsigned Tdim>
+void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
+                    const Eigen::Matrix<double, Tdim, 1>& pgravity) noexcept {
+  // Compute nodal body forces
+  particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
+                                      true, mpm::ParticlePhase::Solid,
+                                      pgravity * particle->mass());
 }
 
 }  // namespace particle
