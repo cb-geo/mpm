@@ -709,8 +709,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // REQUIRE_NOTHROW(particle->compute_updated_position(dt) == false);
     // Compute updated particle location from nodal velocity should fail
     // TODO Assert: REQUIRE_NOTHROW(particle->compute_updated_position(dt,
-    // true)); Compute volume
-    // TODO Assert: REQUIRE(particle->compute_volume() == false);
+    // true));
 
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
@@ -729,7 +728,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check volume
     REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE_NOTHROW(particle->compute_volume());
+    REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
     // Check volume
     REQUIRE(particle->volume() == Approx(1.0).epsilon(Tolerance));
 
@@ -762,7 +761,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->material_id() == 1);
 
     // Compute volume
-    REQUIRE_NOTHROW(particle->compute_volume());
+    REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
 
     // Compute mass
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
@@ -1084,7 +1083,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       REQUIRE(particle->assign_material(material1) == true);
 
       // Compute volume
-      REQUIRE_NOTHROW(particle->compute_volume());
+      REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
 
       // Compute mass
       REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
@@ -1996,9 +1995,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // TODO Assert: REQUIRE_NOTHROW(particle->compute_updated_position(dt,
     // true));
 
-    // Compute volume
-    // TODO Assert: REQUIRE(particle->compute_volume() == false);
-
     REQUIRE(particle->assign_cell(cell) == true);
     REQUIRE(cell->status() == true);
     REQUIRE(particle->cell_id() == 10);
@@ -2016,7 +2012,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check volume
     REQUIRE(particle->volume() == Approx(2.0).epsilon(Tolerance));
     // Compute volume
-    REQUIRE_NOTHROW(particle->compute_volume());
+    REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
     // Check volume
     REQUIRE(particle->volume() == Approx(8.0).epsilon(Tolerance));
 
@@ -2049,7 +2045,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->material_id() == 0);
 
     // Compute volume
-    REQUIRE_NOTHROW(particle->compute_volume());
+    REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
 
     // Compute mass
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
@@ -2361,7 +2357,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       REQUIRE(particle->assign_material(material1) == true);
 
       // Compute volume
-      REQUIRE_NOTHROW(particle->compute_volume());
+      REQUIRE_NOTHROW(mpm::particle::compute_volume<Dim>(particle));
 
       // Compute mass
       REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));

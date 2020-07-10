@@ -20,6 +20,18 @@ void compute_mass(std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
       particle->volume() * particle->mass_density());
 }
 
+// Compute volume of the particle
+template <unsigned Tdim>
+void compute_volume(
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+  // Check if particle has a valid cell ptr
+  assert(particle->cell_ptr());
+
+  // Volume of the cell / # of particles
+  particle->assign_volume(particle->cell()->volume() /
+                          particle->cell()->nparticles());
+}
+
 // Update volume based on the central strain rate
 template <unsigned Tdim>
 void update_volume(std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {

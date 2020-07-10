@@ -1751,7 +1751,7 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
       }
     }
     for (auto particle : injected_particles) {
-      particle->compute_volume();
+      mpm::particle::compute_volume<Tdim>(particle);
       mpm::particle::compute_mass<Tdim>(particle);
     }
   }

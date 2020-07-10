@@ -477,15 +477,6 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
   return status;
 }
 
-// Compute volume of the particle
-template <unsigned Tdim>
-void mpm::Particle<Tdim>::compute_volume() noexcept {
-  // Check if particle has a valid cell ptr
-  assert(cell_ != nullptr);
-  // Volume of the cell / # of particles
-  this->assign_volume(cell_->volume() / cell_->nparticles());
-}
-
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {

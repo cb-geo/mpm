@@ -103,6 +103,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Return cell id
   Index cell_id() const override { return cell_id_; }
 
+  //! Return cell ptr
+  std::shared_ptr<Cell<Tdim>> cell() const override { return cell_; }
+
   //! Return cell ptr status
   bool cell_ptr() const override { return cell_ != nullptr; }
 
@@ -123,9 +126,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
-
-  //! Compute volume as cell volume / nparticles
-  void compute_volume() noexcept override;
 
   //! \param[in] phase Index corresponding to the phase
   double mass_density() const override {

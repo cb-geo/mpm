@@ -106,6 +106,9 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
+  //! Return cell ptr
+  virtual std::shared_ptr<Cell<Tdim>> cell() const = 0;
+
   //! Return cell ptr status
   virtual bool cell_ptr() const = 0;
 
@@ -123,9 +126,6 @@ class ParticleBase {
 
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
-
-  //! Compute volume of particle
-  virtual void compute_volume() noexcept = 0;
 
   //! Update scalar property at the particle
   //! \param[in] property Name of the property to update
