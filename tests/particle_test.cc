@@ -178,7 +178,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(particle->assign_velocity(velocity) == true);
+    particle->assign_velocity(velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
 
@@ -787,7 +787,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
-    REQUIRE(particle->assign_velocity(velocity) == true);
+    particle->assign_velocity(velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
@@ -1104,7 +1104,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       // Check velocity
       velocity.resize(Dim);
       for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
-      REQUIRE(particle->assign_velocity(velocity) == true);
+      particle->assign_velocity(velocity);
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
@@ -1286,7 +1286,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(particle->assign_velocity(velocity) == true);
+    particle->assign_velocity(velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(19.745).epsilon(Tolerance));
 
@@ -2070,7 +2070,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     Eigen::VectorXd velocity;
     velocity.resize(Dim);
     for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
-    REQUIRE(particle->assign_velocity(velocity) == true);
+    particle->assign_velocity(velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
@@ -2381,7 +2381,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       // Check velocity
       velocity.resize(Dim);
       for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = i;
-      REQUIRE(particle->assign_velocity(velocity) == true);
+      particle->assign_velocity(velocity);
       for (unsigned i = 0; i < velocity.size(); ++i)
         REQUIRE(particle->velocity()(i) == Approx(i).epsilon(Tolerance));
 
@@ -2604,7 +2604,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(0.).epsilon(Tolerance));
 
-    REQUIRE(particle->assign_velocity(velocity) == true);
+    particle->assign_velocity(velocity);
     for (unsigned i = 0; i < velocity.size(); ++i)
       REQUIRE(particle->velocity()(i) == Approx(17.51).epsilon(Tolerance));
 

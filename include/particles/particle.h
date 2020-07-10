@@ -202,7 +202,9 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
   //! \retval status Assignment status
-  bool assign_velocity(const VectorDim& velocity) override;
+  void assign_velocity(const VectorDim& velocity) override {
+    vector_properties_.at(mpm::properties::Vector::Velocity) = velocity;
+  };
 
   //! Return velocity of the particle
   VectorDim velocity() const override {

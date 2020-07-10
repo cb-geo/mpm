@@ -267,7 +267,7 @@ class ParticleBase {
   virtual bool compute_pressure_smoothing() noexcept = 0;
 
   //! Assign velocity
-  virtual bool assign_velocity(const VectorDim& velocity) = 0;
+  virtual void assign_velocity(const VectorDim& velocity) = 0;
 
   //! Return velocity
   virtual VectorDim velocity() const = 0;

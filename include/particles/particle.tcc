@@ -677,15 +677,6 @@ inline void mpm::Particle<3>::map_internal_force() noexcept {
   }
 }
 
-// Assign velocity to the particle
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::assign_velocity(
-    const Eigen::Matrix<double, Tdim, 1>& velocity) {
-  // Assign velocity
-  vector_properties_.at(mpm::properties::Vector::Velocity) = velocity;
-  return true;
-}
-
 // Assign traction to the particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {

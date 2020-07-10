@@ -89,7 +89,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
-  // Update/assign mass
+  // Update/assign value
   std::lock_guard<std::mutex> guard(node_mutex_);
   scalar_properties_.at(property)[phase] =
       (scalar_properties_.at(property)[phase] * factor) + value;
@@ -110,7 +110,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
   // Decide to update or assign
   const double factor = (update == true) ? 1. : 0.;
 
-  // Update/assign mass
+  // Update/assign value
   std::lock_guard<std::mutex> guard(node_mutex_);
   Eigen::Matrix<double, Tdim, 1> vecvalue =
       vector_properties_.at(property).col(phase);
