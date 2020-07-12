@@ -217,17 +217,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
-    unsigned phase, double mass_pressure) noexcept {
-  // Assert
-  assert(phase < Tnphases);
-
-  const double tolerance = 1.E-16;
-  // Compute pressure from mass*pressure
-  if (this->mass(phase) > tolerance) {
-    std::lock_guard<std::mutex> guard(node_mutex_);
-    scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) +=
-        mass_pressure / this->mass(phase);
-  }
+    bool update, unsigned phase, double mass_pressure) noexcept {
+  this->update_scalar_property(mpm::properties::Scalar::MassPressure, update,
+                               phase, mass_pressure);
 }
 
 //! Compute pressure from mass pressure
