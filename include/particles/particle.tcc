@@ -696,21 +696,14 @@ void mpm::Particle<Tdim>::compute_updated_position(
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   // Get interpolated nodal velocity
-  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
-      Eigen::Matrix<double, Tdim, 1>::Zero();
-
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
+  const auto& nodal_velocity = this->interpolate_vector_property_nodes(
+      mpm::properties::Vector::Velocity, mpm::ParticlePhase::Solid);
 
   // Acceleration update
   if (!velocity_update) {
     // Get interpolated nodal acceleration
-    Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
-        Eigen::Matrix<double, Tdim, 1>::Zero();
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodal_acceleration +=
-          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+    const auto& nodal_acceleration = this->interpolate_vector_property_nodes(
+        mpm::properties::Vector::Acceleration, mpm::ParticlePhase::Solid);
 
     // Update particle velocity from interpolated nodal acceleration
     vector_properties_.at(mpm::properties::Vector::Velocity) +=
@@ -722,6 +715,7 @@ void mpm::Particle<Tdim>::compute_updated_position(
 
   // New position  current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
+
   // Update displacement (displacement is initialized from zero)
   vector_properties_.at(mpm::properties::Vector::Displacement) +=
       nodal_velocity * dt;
@@ -737,13 +731,8 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
   // Check if particle has a valid cell ptr
   if (cell_ != nullptr &&
       (state_variables_.find("pressure") != state_variables_.end())) {
-
-    double pressure = 0.;
-    // Update particle pressure to interpolated nodal pressure
-    for (unsigned i = 0; i < this->nodes_.size(); ++i)
-      pressure += shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
-
-    state_variables_["pressure"] = pressure;
+    state_variables_["pressure"] = this->interpolate_scalar_property_nodes(
+        mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
     status = true;
   }
   return status;
