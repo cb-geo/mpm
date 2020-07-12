@@ -164,6 +164,9 @@ class Node : public NodeBase<Tdim> {
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
 
+  //! Compute pressure from the mass pressure
+  virtual void compute_pressure() override;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

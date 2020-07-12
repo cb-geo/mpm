@@ -163,6 +163,9 @@ class NodeBase {
   virtual void update_mass_pressure(unsigned phase,
                                     double mass_pressure) noexcept = 0;
 
+  //! Compute pressure from the mass pressure
+  virtual void compute_pressure() = 0;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase

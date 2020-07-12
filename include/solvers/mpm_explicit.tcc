@@ -9,9 +9,16 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 //! MPM Explicit pressure smoothing
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
-  // Assign pressure to nodes
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
+  // Assign mass pressure to nodes
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::map_mass_pressure_to_nodes<Tdim>(ptr);
+      });
+
+  // Compute nodal pressure
+  mesh_->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::compute_pressure, std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
 #ifdef USE_MPI
   int mpi_size = 1;

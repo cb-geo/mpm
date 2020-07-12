@@ -727,27 +727,6 @@ void mpm::Particle<Tdim>::compute_updated_position(
       nodal_velocity * dt;
 }
 
-//! Map particle pressure to nodes
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
-  // Mass is initialized
-  assert(this->mass() != std::numeric_limits<double>::max());
-
-  bool status = false;
-  // Check if particle mass is set and state variable pressure is found
-  if (this->mass() != std::numeric_limits<double>::max() &&
-      (state_variables_.find("pressure") != state_variables_.end())) {
-    // Map particle pressure to nodes
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_[i]->update_mass_pressure(
-          mpm::ParticlePhase::Solid,
-          shapefn_[i] * this->mass() * state_variables_["pressure"]);
-
-    status = true;
-  }
-  return status;
-}
-
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {

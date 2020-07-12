@@ -244,9 +244,6 @@ class Particle : public ParticleBase<Tdim> {
                : std::numeric_limits<double>::quiet_NaN();
   }
 
-  //! Map particle pressure to nodes
-  bool map_pressure_to_nodes() noexcept override;
-
   //! Compute pressure smoothing of the particle based on nodal pressure
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
   bool compute_pressure_smoothing() noexcept override;

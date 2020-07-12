@@ -4,7 +4,13 @@
 namespace mpm {
 namespace properties {
 //! Scalar Properties
-enum Scalar : unsigned int { Mass, Volume, MassDensity, Pressure };
+enum Scalar : unsigned int {
+  Mass,
+  Volume,
+  MassDensity,
+  MassPressure,
+  Pressure
+};
 //! Vector Properties
 enum Vector : unsigned int {
   Displacement,

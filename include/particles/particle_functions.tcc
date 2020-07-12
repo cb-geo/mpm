@@ -64,6 +64,22 @@ void map_mass_momentum_to_nodes(
                                       particle->mass() * particle->velocity());
 }
 
+//! Map particle pressure to nodes
+template <unsigned Tdim>
+void map_mass_pressure_to_nodes(
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+  // Mass is initialized
+  assert(particle->mass() != std::numeric_limits<double>::max());
+
+  // Check if state variable pressure is found
+  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
+    // Map particle pressure to nodes
+    particle->map_scalar_property_nodes(
+        mpm::properties::Scalar::MassPressure, true, mpm::ParticlePhase::Solid,
+        particle->mass() * particle->pressure());
+  }
+}
+
 //! Map body force to nodes
 template <unsigned Tdim>
 void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,

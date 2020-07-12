@@ -26,6 +26,9 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
       std::make_pair(mpm::properties::Scalar::Volume,
                      Eigen::Matrix<double, 1, Tnphases>::Zero()));
   scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::MassPressure,
+                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
+  scalar_properties_.emplace(
       std::make_pair(mpm::properties::Scalar::Pressure,
                      Eigen::Matrix<double, 1, Tnphases>::Zero()));
 
@@ -57,6 +60,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   // Initialise nodal scalar properties
   scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
   scalar_properties_.at(mpm::properties::Scalar::Volume).setZero();
+  scalar_properties_.at(mpm::properties::Scalar::MassPressure).setZero();
   scalar_properties_.at(mpm::properties::Scalar::Pressure).setZero();
 
   // Initialise nodal vector properties
@@ -223,6 +227,24 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
     std::lock_guard<std::mutex> guard(node_mutex_);
     scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) +=
         mass_pressure / this->mass(phase);
+  }
+}
+
+//! Compute pressure from mass pressure
+//! pressure = mass pressure / mass
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_pressure() {
+  const double tolerance = 1.E-16;
+  for (unsigned phase = 0; phase < Tnphases; ++phase) {
+    if (this->mass(phase) > tolerance) {
+      scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) =
+          scalar_properties_.at(mpm::properties::Scalar::MassPressure)(phase) /
+          this->mass(phase);
+
+      // Check to see if value is below threshold
+      if (std::abs(this->pressure(phase)) < 1.E-15)
+        scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) = 0.;
+    }
   }
 }
 
