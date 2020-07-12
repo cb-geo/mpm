@@ -31,8 +31,8 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
     // MPI all reduce nodal pressure
     mesh_->template nodal_halo_exchange<double, 1>(
         std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
-        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
-                  phase, std::placeholders::_2));
+        std::bind(&mpm::NodeBase<Tdim>::update_pressure, std::placeholders::_1,
+                  false, phase, std::placeholders::_2));
   }
 #endif
 

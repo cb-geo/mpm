@@ -250,11 +250,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::compute_pressure() {
 
 //! Assign pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
+void mpm::Node<Tdim, Tdof, Tnphases>::update_pressure(bool update,
+                                                      unsigned phase,
                                                       double pressure) {
-  // Compute pressure from mass*pressure
-  std::lock_guard<std::mutex> guard(node_mutex_);
-  scalar_properties_.at(mpm::properties::Scalar::Pressure)(phase) = pressure;
+  this->update_scalar_property(mpm::properties::Scalar::Pressure, update, phase,
+                               pressure);
 }
 
 //! Compute velocity from momentum
