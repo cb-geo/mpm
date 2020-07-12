@@ -153,7 +153,8 @@ class ParticleBase {
   void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
                                  unsigned phase, double value) noexcept;
 
-  //! Return property at a given node for a given phase
+  //! Return an interpolation of scalar property in particle from nodes
+  //! \param[in] property Name of the property to update
   //! \param[in] phase Index corresponding to the phase
   double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
                                            unsigned phase) const;
@@ -187,10 +188,11 @@ class ParticleBase {
       mpm::properties::Vector property, bool update, unsigned phase,
       const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
 
-  //! Return property at a given node for a given phase
+  //! Return an interpolation of vector property in particle from nodes
+  //! \param[in] property Name of the property to update
   //! \param[in] phase Index corresponding to the phase
-  double interpolate_vector_property_nodes(mpm::properties::Vector property,
-                                           unsigned phase) const;
+  Eigen::Matrix<double, Tdim, 1> interpolate_vector_property_nodes(
+      mpm::properties::Vector property, unsigned phase) const;
 
   //! Return mass density
   virtual double mass_density() const = 0;
