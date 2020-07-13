@@ -35,3 +35,8 @@ const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usf_logger =
 // Create a logger for MPM Explicit USL
 const std::shared_ptr<spdlog::logger> mpm::Logger::mpm_explicit_usl_logger =
     spdlog::stdout_color_st("MPMExplicitUSL");
+
+// Create a logger for MPM Explicit TwoPhase
+const std::shared_ptr<spdlog::logger>
+    mpm::Logger::mpm_explicit_twophase_logger =
+        spdlog::stdout_color_st("MPMExplicitTwoPhase");
