@@ -38,8 +38,9 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
 
   // Smooth pressure over particles
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                std::placeholders::_1));
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::compute_pressure_smoothing<Tdim>(ptr);
+      });
 }
 
 //! MPM Explicit compute stress strain

@@ -262,9 +262,6 @@ class ParticleBase {
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 
-  //! Compute pressure smoothing of the particle based on nodal pressure
-  virtual bool compute_pressure_smoothing() noexcept = 0;
-
   //! Assign velocity
   virtual void assign_velocity(const VectorDim& velocity) = 0;
 
@@ -286,6 +283,9 @@ class ParticleBase {
   //! Compute updated position
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Return a state variable
+  virtual void assign_state_variable(const std::string& var, double value) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;

@@ -102,5 +102,20 @@ void map_traction_force(
   }
 }
 
+// Compute pressure smoothing of the particle based on nodal pressure
+template <unsigned Tdim>
+void compute_pressure_smoothing(
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+  // Assert
+  assert(particle->cell_ptr());
+
+  // Check if particle has pressure
+  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
+    double pressure = particle->interpolate_scalar_property_nodes(
+        mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
+    particle->assign_state_variable("pressure", pressure);
+  }
+}
+
 }  // namespace particle
 }  // namespace mpm

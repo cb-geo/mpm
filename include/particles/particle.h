@@ -235,6 +235,14 @@ class Particle : public ParticleBase<Tdim> {
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
 
+  //! Assign a state variable
+  //! \param[in] var State variable
+  //! \param[in] value State variable to be assigned
+  void assign_state_variable(const std::string& var, double value) override {
+    if (state_variables_.find(var) != state_variables_.end())
+      state_variables_.at(var) = value;
+  }
+
   //! Return a state variable
   //! \param[in] var State variable
   //! \retval Quantity of the state history variable
@@ -243,10 +251,6 @@ class Particle : public ParticleBase<Tdim> {
                ? state_variables_.at(var)
                : std::numeric_limits<double>::quiet_NaN();
   }
-
-  //! Compute pressure smoothing of the particle based on nodal pressure
-  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  bool compute_pressure_smoothing() noexcept override;
 
   //! Return pressure of the particles
   double pressure() const override {

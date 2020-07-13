@@ -721,23 +721,6 @@ void mpm::Particle<Tdim>::compute_updated_position(
       nodal_velocity * dt;
 }
 
-// Compute pressure smoothing of the particle based on nodal pressure
-template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
-  // Assert
-  assert(cell_ != nullptr);
-
-  bool status = false;
-  // Check if particle has a valid cell ptr
-  if (cell_ != nullptr &&
-      (state_variables_.find("pressure") != state_variables_.end())) {
-    state_variables_["pressure"] = this->interpolate_scalar_property_nodes(
-        mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
-    status = true;
-  }
-  return status;
-}
-
 //! Apply particle velocity constraints
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
