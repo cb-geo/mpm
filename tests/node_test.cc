@@ -134,6 +134,16 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     mass = 100.;
     REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
+    // Assign mass to 200 using scalar property update true
+    REQUIRE_NOTHROW(node->update_scalar_property(mpm::properties::Scalar::Mass,
+                                                 true, Nphase, mass));
+    REQUIRE(node->scalar_property(mpm::properties::Scalar::Mass, Nphase) ==
+            Approx(200.0).epsilon(Tolerance));
+    // Assign mass to 100 using scalar property update false
+    REQUIRE_NOTHROW(node->update_scalar_property(mpm::properties::Scalar::Mass,
+                                                 false, Nphase, mass));
+    REQUIRE(node->scalar_property(mpm::properties::Scalar::Mass, Nphase) ==
+            Approx(100.0).epsilon(Tolerance));
 
     SECTION("Check nodal pressure") {
       // Check pressure
@@ -267,6 +277,22 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       REQUIRE_NOTHROW(node->update_internal_force(false, Nphase, force));
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
+                Approx(10.).epsilon(Tolerance));
+
+      // Assign force to 20 using vector property update true
+      REQUIRE_NOTHROW(node->update_vector_property(
+          mpm::properties::Vector::InternalForce, true, Nphase, force));
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->vector_property(mpm::properties::Vector::InternalForce,
+                                      Nphase)(i) ==
+                Approx(20.).epsilon(Tolerance));
+
+      // Assign force to 10 using vector property update false
+      REQUIRE_NOTHROW(node->update_vector_property(
+          mpm::properties::Vector::InternalForce, false, Nphase, force));
+      for (unsigned i = 0; i < force.size(); ++i)
+        REQUIRE(node->vector_property(mpm::properties::Vector::InternalForce,
+                                      Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
     }
 
