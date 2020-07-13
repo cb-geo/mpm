@@ -113,10 +113,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 // Initialise mesh
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
-
   try {
     // Initialise MPI rank and size
     int mpi_rank = 0;
@@ -230,10 +227,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
 // Initialise particles
 template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::initialise_particles() {
-  // TODO: Fix phase
-  const unsigned phase = 0;
   bool status = true;
-
   try {
     // Initialise MPI rank and size
     int mpi_rank = 0;
@@ -306,8 +300,10 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(std::bind(
-        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
+    mesh_->iterate_over_particles(
+        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+          return mpm::particle::compute_volume<Tdim>(ptr);
+        });
 
     // Read and assign particles volumes
     this->particles_volumes(mesh_props, particle_io);
@@ -817,8 +813,12 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          constraints_->assign_nodal_velocity_constraint(nset_id,
-                                                         velocity_constraint);
+          bool velocity_constraints =
+              constraints_->assign_nodal_velocity_constraint(
+                  nset_id, velocity_constraint);
+          if (!velocity_constraints)
+            throw std::runtime_error(
+                "Nodal velocity constraint is not properly assigned");
         }
       }
     } else
@@ -866,8 +866,12 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               nset_id, dir, sign_n, friction);
-          constraints_->assign_nodal_frictional_constraint(nset_id,
-                                                           friction_constraint);
+          bool friction_constraints =
+              constraints_->assign_nodal_frictional_constraint(
+                  nset_id, friction_constraint);
+          if (!friction_constraints)
+            throw std::runtime_error(
+                "Nodal friction constraint is not properly assigned");
         }
       }
     } else
@@ -1035,6 +1039,9 @@ void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
         bool particle_sets = mesh_->create_particle_sets(
             (io_->entity_sets(io_->file_name(entity_sets), "particle_sets")),
             check_duplicates);
+
+        if (!particle_sets)
+          throw std::runtime_error("Particle set creation failed");
       }
     } else
       throw std::runtime_error("Particle entity set JSON not found");
@@ -1108,7 +1115,7 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Graph partitioning mode
     int mode = 4;  // FAST
     // Create graph partition
-    bool graph_partition = graph_->create_partitions(&comm, mode);
+    graph_->create_partitions(&comm, mode);
     // Collect the partitions
     auto exchange_cells = graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 

@@ -9,9 +9,16 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 //! MPM Explicit pressure smoothing
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
-  // Assign pressure to nodes
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
+  // Assign mass pressure to nodes
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::map_mass_pressure_to_nodes<Tdim>(ptr);
+      });
+
+  // Compute nodal pressure
+  mesh_->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::compute_pressure, std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
 #ifdef USE_MPI
   int mpi_size = 1;
@@ -24,15 +31,16 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
     // MPI all reduce nodal pressure
     mesh_->template nodal_halo_exchange<double, 1>(
         std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
-        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
-                  phase, std::placeholders::_2));
+        std::bind(&mpm::NodeBase<Tdim>::update_pressure, std::placeholders::_1,
+                  false, phase, std::placeholders::_2));
   }
 #endif
 
   // Smooth pressure over particles
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                std::placeholders::_1));
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::compute_pressure_smoothing<Tdim>(ptr);
+      });
 }
 
 //! MPM Explicit compute stress strain
@@ -43,8 +51,10 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::update_volume<Tdim>(ptr);
+      });
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
@@ -122,7 +132,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Compute mass
   mesh_->iterate_over_particles(
-      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::particle::compute_mass<Tdim>(ptr);
+      });
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -148,27 +160,26 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Inject particles
     mesh_->inject_particles(this->step_ * this->dt_);
 
-    // Create a TBB task group
-    tbb::task_group task_group;
+#pragma omp parallel sections
+    {
+      // Spawn a task for initialising nodes and cells
+#pragma omp section
+      {
+        // Initialise nodes
+        mesh_->iterate_over_nodes(
+            std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
-    // Spawn a task for initialising nodes and cells
-    task_group.run([&] {
-      // Initialise nodes
-      mesh_->iterate_over_nodes(
-          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
-
-      mesh_->iterate_over_cells(
-          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-    });
-
-    // Spawn a task for particles
-    task_group.run([&] {
-      // Iterate over each particle to compute shapefn
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
-    });
-
-    task_group.wait();
+        mesh_->iterate_over_cells(
+            std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+      }
+      // Spawn a task for particles
+#pragma omp section
+      {
+        // Iterate over each particle to compute shapefn
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+      }
+    }  // Wait to complete
 
     // Initialise nodal properties and append material ids to node
     if (interface_) {
@@ -183,8 +194,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                  std::placeholders::_1));
+        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+          return mpm::particle::map_mass_momentum_to_nodes<Tdim>(ptr);
+        });
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -221,6 +233,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
           &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,
           std::placeholders::_1));
 
+      // Map multimaterial domain gradients from particles to nodes
+      mesh_->iterate_over_particles(std::bind(
+          &mpm::ParticleBase<Tdim>::map_multimaterial_domain_gradients_to_nodes,
+          std::placeholders::_1));
+
       // Compute multimaterial change in momentum
       mesh_->iterate_over_nodes(std::bind(
           &mpm::NodeBase<Tdim>::compute_multimaterial_change_in_momentum,
@@ -230,36 +247,48 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       mesh_->iterate_over_nodes(std::bind(
           &mpm::NodeBase<Tdim>::compute_multimaterial_separation_vector,
           std::placeholders::_1));
+
+      // Compute multimaterial normal unit vector
+      mesh_->iterate_over_nodes(std::bind(
+          &mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
+          std::placeholders::_1));
     }
 
     // Update stress first
     if (this->stress_update_ == mpm::StressUpdate::USF)
       this->compute_stress_strain(phase);
 
-    // Spawn a task for external force
-    task_group.run([&] {
-      // Iterate over each particle to compute nodal body force
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, this->gravity_));
+      // Spawn a task for external force
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+        // Iterate over each particle to compute nodal body force
+        mesh_->iterate_over_particles(
+            [&value = gravity_](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+              return mpm::particle::map_body_force<Tdim>(ptr, value);
+            });
 
-      // Apply particle traction and map to nodes
-      mesh_->apply_traction_on_particles(this->step_ * this->dt_);
+        // Apply particle traction and map to nodes
+        mesh_->apply_traction_on_particles(this->step_ * this->dt_);
 
-      // Iterate over each node to add concentrated node force to external force
-      if (set_node_concentrated_force_)
-        mesh_->iterate_over_nodes(
-            std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
-                      std::placeholders::_1, phase, (this->step_ * this->dt_)));
-    });
+        // Iterate over each node to add concentrated node force to external
+        // force
+        if (set_node_concentrated_force_)
+          mesh_->iterate_over_nodes(std::bind(
+              &mpm::NodeBase<Tdim>::apply_concentrated_force,
+              std::placeholders::_1, phase, (this->step_ * this->dt_)));
+      }
 
-    // Spawn a task for internal force
-    task_group.run([&] {
-      // Iterate over each particle to compute nodal internal force
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
-    });
-    task_group.wait();
+#pragma omp section
+      {
+        // Spawn a task for internal force
+        // Iterate over each particle to compute nodal internal force
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                      std::placeholders::_1));
+      }
+    }  // Wait for tasks to finish
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task

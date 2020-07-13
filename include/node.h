@@ -65,6 +65,33 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
+  //! Update scalar property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
+                              unsigned phase, double value) noexcept override;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(mpm::properties::Scalar property,
+                         unsigned phase) const override;
+
+  //! Update vector property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_vector_property(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept override;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property, unsigned phase) const override;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -73,7 +100,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Return mass at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double mass(unsigned phase) const override { return mass_(phase); }
+  double mass(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Mass, phase);
+  }
 
   //! Update volume at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -84,7 +113,9 @@ class Node : public NodeBase<Tdim> {
 
   //! Return volume at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double volume(unsigned phase) const override { return volume_(phase); }
+  double volume(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Volume, phase);
+  }
 
   //! Assign concentrated force to the node
   //! \param[in] phase Index corresponding to the phase
@@ -111,7 +142,7 @@ class Node : public NodeBase<Tdim> {
   //! Return external force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim external_force(unsigned phase) const override {
-    return external_force_.col(phase);
+    return this->vector_property(mpm::properties::Vector::ExternalForce, phase);
   }
 
   //! Update internal force (body force / traction force)
@@ -124,7 +155,7 @@ class Node : public NodeBase<Tdim> {
   //! Return internal force at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim internal_force(unsigned phase) const override {
-    return internal_force_.col(phase);
+    return this->vector_property(mpm::properties::Vector::InternalForce, phase);
   }
 
   //! Return drag force coefficient
@@ -133,9 +164,10 @@ class Node : public NodeBase<Tdim> {
   }
 
   //! Update pressure at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  void update_mass_pressure(unsigned phase,
+  void update_mass_pressure(bool update, unsigned phase,
                             double mass_pressure) noexcept override;
 
   //! Update drag force coefficient
@@ -145,15 +177,21 @@ class Node : public NodeBase<Tdim> {
   bool update_drag_force_coefficient(
       bool update, const VectorDim& drag_force_coefficient) override;
 
+  //! Compute pressure from the mass pressure
+  virtual void compute_pressure() override;
+
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] mass_pressure Product of mass x pressure of a particle
-  void assign_pressure(unsigned phase, double mass_pressure) override;
+  //! \param[in] pressure Pressure of a particle
+  virtual void update_pressure(bool update, unsigned phase,
+                               double pressure) override;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
-  double pressure(unsigned phase) const override { return pressure_(phase); }
+  double pressure(unsigned phase) const override {
+    return this->scalar_property(mpm::properties::Scalar::Pressure, phase);
+  }
 
   //! Update momentum at the nodes
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -165,7 +203,7 @@ class Node : public NodeBase<Tdim> {
   //! Return momentum at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim momentum(unsigned phase) const override {
-    return momentum_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Momentum, phase);
   }
 
   //! Compute velocity from the momentum
@@ -174,7 +212,7 @@ class Node : public NodeBase<Tdim> {
   //! Return velocity at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim velocity(unsigned phase) const override {
-    return velocity_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Velocity, phase);
   }
 
   //! Update nodal acceleration
@@ -187,7 +225,7 @@ class Node : public NodeBase<Tdim> {
   //! Return acceleration at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
   VectorDim acceleration(unsigned phase) const override {
-    return acceleration_.col(phase);
+    return this->vector_property(mpm::properties::Vector::Acceleration, phase);
   }
 
   //! Compute acceleration and velocity
@@ -283,6 +321,9 @@ class Node : public NodeBase<Tdim> {
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
 
+  //! Compute multimaterial normal unit vector
+  void compute_multimaterial_normal_unit_vector() override;
+
  private:
   //! Mutex
   std::mutex node_mutex_;
@@ -298,26 +339,15 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
-  //! Mass
-  Eigen::Matrix<double, 1, Tnphases> mass_;
-  //! Volume
-  Eigen::Matrix<double, 1, Tnphases> volume_;
-  //! External force
-  Eigen::Matrix<double, Tdim, Tnphases> external_force_;
-  //! Internal force
-  Eigen::Matrix<double, Tdim, Tnphases> internal_force_;
-  //! Drag force coefficient
-  Eigen::Matrix<double, Tdim, 1> drag_force_coefficient_;
-  //! Pressure
-  Eigen::Matrix<double, 1, Tnphases> pressure_;
+  //! Scalar properties
+  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases> >
+      scalar_properties_;
+  //! Vector properties
+  tsl::ordered_map<mpm::properties::Vector,
+                   Eigen::Matrix<double, Tdim, Tnphases> >
+      vector_properties_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
-  //! Velocity
-  Eigen::Matrix<double, Tdim, Tnphases> velocity_;
-  //! Momentum
-  Eigen::Matrix<double, Tdim, Tnphases> momentum_;
-  //! Acceleration
-  Eigen::Matrix<double, Tdim, Tnphases> acceleration_;
   //! Velocity constraints
   std::map<unsigned, double> velocity_constraints_;
   //! Rotation matrix for general velocity constraints

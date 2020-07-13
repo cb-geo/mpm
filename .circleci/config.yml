@@ -16,7 +16,7 @@ jobs:
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
-            cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            cmake -GNinja -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             ninja -j2
             ctest -VV
             mpirun -n 4 ./mpmtest [mpi]
@@ -32,7 +32,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DMPM_BUILD_LIB=On -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            scan-build cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             scan-build -k -V ninja -j2
             ctest -VV
   cppcheck:
@@ -64,7 +64,7 @@ jobs:
             mkdir -p build
             [ "$(ls -A build)" ] && rm -rf build/*
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DMPM_BUILD_LIB=Off -DENABLE_COVERAGE=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DENABLE_COVERAGE=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             make mpmtest_coverage -j2
             ./mpmtest_coverage
             mpirun -n 4 ./mpmtest_coverage [mpi]
@@ -87,7 +87,7 @@ jobs:
             export MODULEPATH=$MODULEPATH:/usr/share/modulefiles
             module load mpi/openmpi-x86_64
             export CXX_COMPILER=mpicxx
-            cmake -GNinja -DMPM_BUILD_LIB=Off -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
+            cmake -GNinja -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_EXPORT_COMPILE_COMMANDS=On -DKAHIP_ROOT=/home/cbgeo/KaHIP/ -DPARTIO_ROOT=/home/cbgeo/partio/ ..
             ninja -j2
             ctest -VV
             mpirun -n 4 ./mpmtest [mpi]
@@ -103,6 +103,7 @@ jobs:
           command: |
             cd /home/cbgeo/project/build
             pip3 install tables --user
+            export OMP_NUM_THREADS=2
             mpirun -n 4 ./mpm -f ./benchmarks/2d/sliding_block_inclined_boundary/
             python3 ./benchmarks/2d/sliding_block_inclined_boundary/test_benchmark.py
       # Stress
@@ -117,6 +118,7 @@ jobs:
           name: Uniaxial traction
           command: |
             cd /home/cbgeo/project/build
+            export OMP_NUM_THREADS=2
             ./mpm -f ./benchmarks/2d/uniaxial_traction/ -i mpm-nodal-forces.json
             ./mpm -f ./benchmarks/2d/uniaxial_traction/ -i mpm-particle-traction.json
             python3 ./benchmarks/2d/uniaxial_stress/test_benchmark.py
@@ -125,7 +127,7 @@ workflows:
     version: 2
     build:
         jobs:
-            - gcc
+            - benchmarks
             - clang
             - cppcheck
             - codecov

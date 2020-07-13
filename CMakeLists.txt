@@ -38,9 +38,6 @@ endif()
 # so we provide an option similar to BUILD_TESTING, but just for MPM.
 option(MPM_BUILD_TESTING "enable testing for mpm" ON)
 
-# CMake option for building mpm as a shared library for CI
-option(MPM_BUILD_LIB "enable libmpm" OFF)
-
 # Halo exchange
 option(HALO_EXCHANGE "Enable halo exchange" OFF)
 
@@ -79,17 +76,11 @@ endif()
 # OpenMP
 find_package(OpenMP)
 if (OPENMP_FOUND)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   endif()
 endif()
-
-# TBB
-find_package(TBB REQUIRED)
-add_definitions(${TBB_DEFINITIONS})
-include_directories(${TBB_INCLUDE_DIRS})
-link_libraries(${TBB_LIBRARIES})
 
 # pthreads
 find_package (Threads)
@@ -177,14 +168,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
 )
-
-if(MPM_BUILD_LIB)
-add_library(lmpm SHARED ${mpm_src} ${mpm_vtk})
-add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc)
-target_link_libraries(mpm lmpm)
-else()
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
-endif()
 
 # Unit test
 if(MPM_BUILD_TESTING)
@@ -237,16 +221,10 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
   )
-  if(MPM_BUILD_LIB)
-    add_executable(mpmtest ${test_src})
-    target_link_libraries(mpmtest lmpm)
-    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-    enable_testing()
-  else()
-    add_executable(mpmtest ${mpm_src} ${test_src})
-    add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
-    enable_testing()
-  endif()
+  add_executable(mpmtest ${mpm_src} ${test_src})
+  add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
+  enable_testing()
+
 endif()
 
 # Coverage

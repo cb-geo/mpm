@@ -241,8 +241,6 @@ bool write_mesh_3d_unitcell() {
 
   // Dimension
   const unsigned dim = 3;
-  // Tolerance
-  const double Tolerance = 1.E-7;
 
   // Vector of nodal coordinates
   std::vector<Eigen::Matrix<double, dim, 1>> coordinates;

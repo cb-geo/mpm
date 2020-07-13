@@ -4,9 +4,6 @@
 #include <algorithm>
 #include <vector>
 
-// TBB
-#include <tbb/concurrent_vector.h>
-
 #include "data_types.h"
 
 namespace mpm {
@@ -39,14 +36,12 @@ class Vector {
   void clear() { elements_.clear(); }
 
   //! Return begin iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator cbegin()
-      const {
+  typename std::vector<std::shared_ptr<T>>::const_iterator cbegin() const {
     return elements_.cbegin();
   }
 
   //! Return end iterator of nodes
-  typename tbb::concurrent_vector<std::shared_ptr<T>>::const_iterator cend()
-      const {
+  typename std::vector<std::shared_ptr<T>>::const_iterator cend() const {
     return elements_.cend();
   }
 
@@ -62,7 +57,7 @@ class Vector {
 
  private:
   // Unordered map of index and pointer
-  tbb::concurrent_vector<std::shared_ptr<T>> elements_;
+  std::vector<std::shared_ptr<T>> elements_;
 };  // Vector class
 
 #include "vector.tcc"

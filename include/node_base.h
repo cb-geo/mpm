@@ -10,9 +10,11 @@
 #include <vector>
 
 #include <Eigen/Dense>
+#include <tsl/ordered_map.h>
 
 #include "data_types.h"
 #include "function_base.h"
+#include "mpm_properties.h"
 #include "nodal_properties.h"
 
 namespace mpm {
@@ -78,6 +80,34 @@ class NodeBase {
   //! Return status
   virtual bool status() const = 0;
 
+  //! Update scalar property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_scalar_property(mpm::properties::Scalar property,
+                                      bool update, unsigned phase,
+                                      double value) noexcept = 0;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual double scalar_property(mpm::properties::Scalar property,
+                                 unsigned phase) const = 0;
+
+  //! Update vector property at the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Property value from the particles in a cell
+  virtual void update_vector_property(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept = 0;
+
+  //! Return property at a given node for a given phase
+  //! \param[in] phase Index corresponding to the phase
+  virtual Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property, unsigned phase) const = 0;
+
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
@@ -139,9 +169,10 @@ class NodeBase {
   virtual VectorDim drag_force_coefficient() const = 0;
 
   //! Update pressure at the nodes from particle
+  //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(unsigned phase,
+  virtual void update_mass_pressure(bool update, unsigned phase,
                                     double mass_pressure) noexcept = 0;
 
   //! Update drag force coefficient
@@ -150,12 +181,15 @@ class NodeBase {
   //! \retval status Update status
   virtual bool update_drag_force_coefficient(bool update,
                                              const VectorDim& drag_force) = 0;
+  //! Compute pressure from the mass pressure
+  virtual void compute_pressure() = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void assign_pressure(unsigned phase, double mass_pressure) = 0;
+  //! \param[in] pressure Pressure of a particle
+  virtual void update_pressure(bool update, unsigned phase,
+                               double pressure) = 0;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -265,7 +299,7 @@ class NodeBase {
   //! Compute multimaterial change in momentum
   virtual void compute_multimaterial_change_in_momentum() = 0;
 
-  //! Compute multimaterial change in momentum
+  //! Compute multimaterial separation vector
   virtual void compute_multimaterial_separation_vector() = 0;
 
   //! Compute acceleration and velocity for two phase
@@ -277,6 +311,9 @@ class NodeBase {
   //! \param[in] dt Timestep in analysis
   virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept = 0;
+
+  //! Compute multimaterial normal unit vector
+  virtual void compute_multimaterial_normal_unit_vector() = 0;
 
 };  // NodeBase class
 }  // namespace mpm

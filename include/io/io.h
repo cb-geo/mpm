@@ -32,7 +32,7 @@ class IO {
   //! \param[in] argv Input arguments
   IO(int argc, char** argv);
 
-  //! Return number of tbb threads
+  //! Return number of threads
   unsigned nthreads() const;
 
   //! Return input file name of mesh/submesh/soil particles

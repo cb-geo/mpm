@@ -117,7 +117,7 @@ int mpm::Graph<Tdim>::nparts() {
 
 //! Create partition
 template <unsigned Tdim>
-bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
+void mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
 
   // The amount of imbalance that is allowed. (3%)
   double imbalance = 0.03;
@@ -131,7 +131,6 @@ bool mpm::Graph<Tdim>::create_partitions(MPI_Comm* comm, int mode) {
       this->vtxdist_.data(), this->xadj_.data(), this->adjncy_.data(),
       this->vwgt_.data(), this->adjwgt_.data(), &this->nparts_, &imbalance,
       suppress_output, seed, mode, &this->edgecut_, this->part_.data(), comm);
-  return true;
 }
 
 //! Collect the partitions and store it in the graph

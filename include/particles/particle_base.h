@@ -111,6 +111,9 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
+  //! Return cell ptr
+  virtual std::shared_ptr<Cell<Tdim>> cell() const = 0;
+
   //! Return cell ptr status
   virtual bool cell_ptr() const = 0;
 
@@ -129,20 +132,75 @@ class ParticleBase {
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
-  //! Compute volume of particle
-  virtual void compute_volume() noexcept = 0;
+  //! Update scalar property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
+                              double value) noexcept;
 
-  //! Update volume based on centre volumetric strain rate
-  virtual void update_volume() noexcept = 0;
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(mpm::properties::Scalar property) const;
+
+  //! Map scalar property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Map an arbitrary scalar value to nodal scalar property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Scalar value to be mapped from particle to node
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase, double value) noexcept;
+
+  //! Return an interpolation of scalar property in particle from nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
+                                           unsigned phase) const;
+
+  //! Update vector property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_vector_property(
+      mpm::properties::Vector property, bool update,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property) const;
+
+  //! Map vector property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_vector_property_nodes(mpm::properties::Vector property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Map an arbitrary vector value to nodal vector property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Vector value to be mapped from particle to node
+  void map_vector_property_nodes(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return an interpolation of vector property in particle from nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> interpolate_vector_property_nodes(
+      mpm::properties::Vector property, unsigned phase) const;
 
   //! Return mass density
   virtual double mass_density() const = 0;
-
-  //! Compute mass of particle
-  virtual void compute_mass() noexcept = 0;
-
-  //! Map particle mass and momentum to nodes
-  virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
@@ -150,9 +208,16 @@ class ParticleBase {
   //! Map multimaterial displacements to nodes
   virtual void map_multimaterial_displacements_to_nodes() noexcept = 0;
 
+  //! Map multimaterial domain gradients to nodes
+  virtual void map_multimaterial_domain_gradients_to_nodes() noexcept = 0;
+
   //! Assign material
   virtual bool assign_material(
       const std::shared_ptr<Material<Tdim>>& material) = 0;
+
+  //! Return material
+  //! \retval material Pointer to a material
+  virtual std::shared_ptr<Material<Tdim>> material() const = 0;
 
   //! Return material id
   unsigned material_id() const { return material_id_; }
@@ -199,20 +264,11 @@ class ParticleBase {
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
 
-  //! Map body force
-  virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
-
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 
-  //! Map particle pressure to nodes
-  virtual bool map_pressure_to_nodes() noexcept = 0;
-
-  //! Compute pressure smoothing of the particle based on nodal pressure
-  virtual bool compute_pressure_smoothing() noexcept = 0;
-
   //! Assign velocity
-  virtual bool assign_velocity(const VectorDim& velocity) = 0;
+  virtual void assign_velocity(const VectorDim& velocity) = 0;
 
   //! Return velocity
   virtual VectorDim velocity() const = 0;
@@ -226,12 +282,15 @@ class ParticleBase {
   //! Return traction
   virtual VectorDim traction() const = 0;
 
-  //! Map traction force
-  virtual void map_traction_force() noexcept = 0;
+  //! Return set traction bool
+  virtual bool set_traction() const = 0;
 
   //! Compute updated position
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Return a state variable
+  virtual void assign_state_variable(const std::string& var, double value) = 0;
 
   //! Return a state variable
   virtual double state_variable(const std::string& var) const = 0;
@@ -503,6 +562,13 @@ class ParticleBase {
   mpm::dense_map state_variables_;
   //! Vector of particle neighbour ids
   std::vector<mpm::Index> neighbours_;
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Scalar properties
+  tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
+  //! Vector properties
+  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
+      vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
 
