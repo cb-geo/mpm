@@ -790,8 +790,6 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
-    REQUIRE(particle->compute_pressure_smoothing() == false);
-
     // Values of nodal mass
     std::array<double, 4> nodal_mass{562.5, 187.5, 62.5, 187.5};
     // Check nodal mass
@@ -1075,6 +1073,9 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
               ->create("Newtonian2D", std::move(mid1), jmaterial1);
 
+      // Reset nodal properties
+      for (const auto& node : nodes) node->initialise();
+
       // Assign material properties
       REQUIRE(particle->assign_material(material1) == true);
 
@@ -1115,8 +1116,38 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           particle->pressure() ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
+      // Check return and assign state variable
+      REQUIRE(
+          particle->state_variable("pressure") ==
+          Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
+
+      REQUIRE_NOTHROW(particle->assign_state_variable(
+          "pressure", -8333333.333333333 * volumetric_strain));
+
+      // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
-      REQUIRE(particle->compute_pressure_smoothing() == true);
+      for (const auto& node : nodes) node->compute_pressure();
+      REQUIRE_NOTHROW(mpm::particle::compute_pressure_smoothing<Dim>(particle));
+      REQUIRE(
+          particle->pressure() ==
+          Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
+
+      // Assign pressure equal to 1.0, we expect its smoothed value is also 1.0
+      REQUIRE_NOTHROW(particle->assign_state_variable("pressure", 1.0));
+      REQUIRE(particle->pressure() == Approx(1.0).epsilon(Tolerance));
+
+      for (const auto& node : nodes)
+        node->update_scalar_property(mpm::properties::Scalar::MassPressure,
+                                     false, 0, 0.0);
+      REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
+      for (const auto& node : nodes) {
+        REQUIRE(
+            node->scalar_property(mpm::properties::Scalar::MassPressure, 0) ==
+            node->scalar_property(mpm::properties::Scalar::Mass, 0));
+        node->compute_pressure();
+      }
+      REQUIRE_NOTHROW(mpm::particle::compute_pressure_smoothing<Dim>(particle));
+      REQUIRE(particle->pressure() == Approx(1.0).epsilon(Tolerance));
     }
 
     SECTION("Particle assign state variables") {
@@ -2063,8 +2094,6 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE_NOTHROW(mpm::particle::compute_mass<Dim>(particle));
     REQUIRE_NOTHROW(mpm::particle::map_mass_momentum_to_nodes<Dim>(particle));
 
-    REQUIRE(particle->compute_pressure_smoothing() == false);
-
     // Values of nodal mass
     std::array<double, 8> nodal_mass{125., 375.,  1125., 375.,
                                      375., 1125., 3375., 1125.};
@@ -2382,8 +2411,33 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           particle->pressure() ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
+      // Check return and assign state variable
+      REQUIRE(
+          particle->state_variable("pressure") ==
+          Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
+
+      REQUIRE_NOTHROW(particle->assign_state_variable(
+          "pressure", -8333333.333333333 * volumetric_strain));
+
+      // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
-      REQUIRE(particle->compute_pressure_smoothing() == true);
+      for (const auto& node : nodes) node->compute_pressure();
+      REQUIRE_NOTHROW(mpm::particle::compute_pressure_smoothing<Dim>(particle));
+      REQUIRE(particle->pressure() ==
+              Approx(-2083333.3333333333).epsilon(Tolerance));
+
+      // Assign pressure equal to 1.0, we expect its smoothed value is 0.5 as
+      // the nodal mass is mapped twice in this case
+      REQUIRE_NOTHROW(particle->assign_state_variable("pressure", 1.0));
+      REQUIRE(particle->pressure() == Approx(1.0).epsilon(Tolerance));
+
+      for (const auto& node : nodes)
+        node->update_scalar_property(mpm::properties::Scalar::MassPressure,
+                                     false, 0, 0.0);
+      REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
+      for (const auto& node : nodes) node->compute_pressure();
+      REQUIRE_NOTHROW(mpm::particle::compute_pressure_smoothing<Dim>(particle));
+      REQUIRE(particle->pressure() == Approx(0.5).epsilon(Tolerance));
     }
 
     SECTION("Particle assign state variables") {
