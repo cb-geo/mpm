@@ -114,7 +114,8 @@ bool mpm::Particle<Tdim>::initialise_particle(
   if (material != nullptr) {
     if (this->material_id_ == material->id() ||
         this->material_id_ == std::numeric_limits<unsigned>::max()) {
-      material_ = material;
+      bool assign_mat = this->assign_material(material);
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
       auto mat_state_vars = material_->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
