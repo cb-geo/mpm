@@ -478,6 +478,7 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
 }
 
 //! Map multimaterial properties to nodes
+// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   // Check if particle mass is set
@@ -496,6 +497,7 @@ void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
 }
 
 //! Map multimaterial displacements to nodes
+// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   // Check if particle mass is set
@@ -512,6 +514,7 @@ void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
 }
 
 //! Map multimaterial domain gradients to nodes
+// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<
     Tdim>::map_multimaterial_domain_gradients_to_nodes() noexcept {
@@ -722,6 +725,8 @@ void mpm::Particle<Tdim>::compute_updated_position(
 }
 
 //! Apply particle velocity constraints
+// TODO: revisit constraint application in vector properties, should assign
+// direction
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
                                                               double velocity) {
@@ -736,6 +741,7 @@ Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
 }
 
 //! Assign material id of this particle to nodes
+// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
