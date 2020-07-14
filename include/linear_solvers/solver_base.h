@@ -28,10 +28,11 @@ class SolverBase {
                                 std::string solver_type) = 0;
 
   //! Assign global active dof
-  virtual void assign_global_active_dof(unsigned global_active_dof){};
+  virtual void assign_global_active_dof(unsigned global_active_dof) = 0;
 
   //! Assign rank to global mapper
-  virtual void assign_rank_global_mapper(std::vector<int> rank_global_mapper){};
+  virtual void assign_rank_global_mapper(
+      std::vector<int> rank_global_mapper) = 0;
 
  protected:
   //! Maximum number of iterations
