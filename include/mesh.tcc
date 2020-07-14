@@ -1060,14 +1060,10 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_particles_predicate(Toper oper, Tpred pred) {
-  tbb::parallel_for(
-      tbb::blocked_range<int>(size_t(0), size_t(particles_.size()),
-                              tbb_grain_size_),
-      [&](const tbb::blocked_range<int>& range) {
-        for (int i = range.begin(); i != range.end(); ++i)
-          if (pred(particles_[i])) oper(particles_[i]);
-      },
-      tbb::simple_partitioner());
+#pragma omp parallel for
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    if (pred(*pitr)) oper(*pitr);
+  }
 }
 
 //! Iterate over particle set

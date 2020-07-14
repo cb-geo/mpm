@@ -118,18 +118,12 @@ bool mpm::Constraints<Tdim>::assign_nodal_pressure_constraint(
     if (nset.size() != 0) {
       unsigned phase = pconstraint->phase();
       double pressure = pconstraint->pressure();
-      tbb::parallel_for(
-          tbb::blocked_range<int>(size_t(0), size_t(nset.size())),
-          [&](const tbb::blocked_range<int>& range) {
-            for (int i = range.begin(); i != range.end(); ++i) {
-              status = nset[i]->assign_pressure_constraint(phase, pressure,
-                                                           mfunction);
-              if (!status)
-                throw std::runtime_error(
-                    "Failed to initialise pressure constraint at node");
-            }
-          },
-          tbb::simple_partitioner());
+
+      for (auto nitr = nset.cbegin(); nitr != nset.cend(); ++nitr) {
+        if (!(*nitr)->assign_pressure_constraint(phase, pressure, mfunction))
+          throw std::runtime_error(
+              "Failed to initialise pressure constraint at node");
+      }
     } else
       throw std::runtime_error(
           "Nodal assignment of pressure constraint failed");
