@@ -31,24 +31,24 @@ If you have any issues running or compiling the MPM code please open a issue on 
 
 * [Boost](http://www.boost.org/)
 * [Eigen](http://eigen.tuxfamily.org/)
-* [Intel TBB](https://www.threadingbuildingblocks.org/)
 * [HDF5](https://support.hdfgroup.org/HDF5/)
 
 #### Optional
 * [MKL](https://software.intel.com/en-us/mkl)
 * [MPI](https://www.open-mpi.org/)
+* [OpenMP 5.0](https://www.openmp.org/specifications/)
 * [KaHIP](https://github.com/schulzchristian/KaHIP)
 * [Partio](https://github.com/wdas/partio)
 * [VTK](https://www.vtk.org/)
 
-### Fedora installation
+### Fedora installation (recommended)
 
 Please run the following command:
 
 ```shell
 dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cppcheck dnf-plugins-core \
                    eigen3-devel findutils freeglut freeglut-devel gcc gcc-c++ git hdf5 hdf5-devel \
-                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar tbb tbb-devel \
+                   kernel-devel lcov libnsl make ninja-build openmpi openmpi-devel tar \
                    valgrind vim vtk vtk-devel wget
 ```
 
@@ -57,15 +57,25 @@ dnf install -y boost boost-devel clang clang-analyzer clang-tools-extra cmake cp
 Please run the following commands to install dependencies:
 
 ```
-sudo apt-get install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev \
-                        libtbb-dev
+sudo apt update
+sudo apt upgrade
+sudo apt install -y gcc git libboost-all-dev libeigen3-dev libhdf5-serial-dev libopenmpi-dev libomp-dev
+```
+
+If you are running Ubuntu 18.04 or below, you may want to update the GCC version to 9 to have OpenMP 5 specifications
+support.
+
+```
+sudo apt install software-properties-common
+sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+sudo apt install gcc-9 g++-9
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 
 ```
 
 To install other dependencies:
 > CMake 3.15
 ```
-sudo apt-get install software-properties-common
 sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 sudo apt update
 sudo apt upgrade
@@ -88,7 +98,6 @@ sudo make install
 ### Partio for Houdini SFX Visualization
 
 ```shell
-sudo dnf install -y libnsl freeglut freeglut-devel
 mkdir -p ~/workspace && cd ~/workspace/ && git clone https://github.com/wdas/partio.git && \
     cd partio && cmake . && make
 ```
@@ -162,7 +171,7 @@ Please include `-DPARTIO_ROOT=/path/to/partio/` in the cmake command. A typical 
 The CB-Geo MPM code uses a `JSON` file for input configuration. To run the mpm code:
 
 ```
-   ./mpm  [-p <tbb_parallel>] [-i <input_file>] -f <working_dir> [--]
+   ./mpm  [-p <parallel>] [-i <input_file>] -f <working_dir> [--]
           [--version] [-h]
 ```
 
@@ -175,8 +184,8 @@ For example:
 Where:
 
 ```
-   -p <tbb_parallel>,  --tbb_parallel <tbb_parallel>
-     Number of parallel TBB threads
+   -p <parallel>,  --parallel <parallel>
+     Number of parallel threads
 
    -i <input_file>,  --input_file <input_file>
      Input JSON file [mpm.json]

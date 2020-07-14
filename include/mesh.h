@@ -15,10 +15,11 @@
 #ifdef USE_MPI
 #include "mpi.h"
 #endif
-// TBB
-#include <tbb/parallel_for.h>
-#include <tbb/parallel_for_each.h>
-
+// OpenMP
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+// TSL Maps
 #include <tsl/robin_map.h>
 // JSON
 #include "json.hpp"
@@ -510,7 +511,7 @@ class Mesh {
   //! Vector of particles ids and cell ids
   std::map<mpm::Index, mpm::Index> particles_cell_ids_;
   //! Vector of particle sets
-  tsl::robin_map<unsigned, tbb::concurrent_vector<mpm::Index>> particle_sets_;
+  tsl::robin_map<unsigned, std::vector<mpm::Index>> particle_sets_;
   //! Map of particles for fast retrieval
   Map<ParticleBase<Tdim>> map_particles_;
   //! Vector of nodes
@@ -552,8 +553,6 @@ class Mesh {
   std::shared_ptr<mpm::NodalProperties> nodal_properties_{nullptr};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  //! TBB grain size
-  int tbb_grain_size_{100};
   //! Maximum number of halo nodes
   unsigned nhalo_nodes_{0};
   //! Maximum number of halo nodes

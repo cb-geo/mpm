@@ -110,7 +110,8 @@ bool mpm::Particle<Tdim>::initialise_particle(
   if (material != nullptr) {
     if (this->material_id_ == material->id() ||
         this->material_id_ == std::numeric_limits<unsigned>::max()) {
-      material_ = material;
+      bool assign_mat = this->assign_material(material);
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
       auto mat_state_vars = material_->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
@@ -549,8 +550,7 @@ void mpm::Particle<
   // the gradient of the particle volume
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     Eigen::Matrix<double, Tdim, 1> gradient;
-    gradient.setZero();
-    for (unsigned j = 0; j < Tdim; ++j) gradient(j, 0) = volume_ * dn_dx_(i, j);
+    for (unsigned j = 0; j < Tdim; ++j) gradient[j] = volume_ * dn_dx_(i, j);
     nodes_[i]->update_property(true, "domain_gradients", gradient, material_id_,
                                Tdim);
   }
