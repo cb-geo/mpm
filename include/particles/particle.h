@@ -55,7 +55,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] particle HDF5 data of particle
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(
+  bool initialise_particle(
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) override;
 
