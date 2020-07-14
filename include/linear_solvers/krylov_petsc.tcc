@@ -21,13 +21,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
     KSP solver;
     Mat petsc_A;
     Vec petsc_b, petsc_x;
-    PetscInt dim = global_active_dof_;
     KSPConvergedReason reason;
-    PC pc;
-
-    PetscInt vi, mi, mj;
-    PetscScalar v, m;
-    PetscInt low, high, row_low, row_high;
 
     // Initialize vector b across the ranks
     VecCreateMPI(MPI_COMM_WORLD, PETSC_DECIDE, global_active_dof_, &petsc_b);
@@ -73,6 +67,7 @@ Eigen::VectorXd mpm::KrylovPETSC<Traits>::solve(
                        max_iter_);
 
       // NOTE: Comment out to add preconditioner settings
+      // PC pc;
       // KSPCGSetType(solver, KSP_CG_SYMMETRIC);
       // KSPSetInitialGuessNonzero(solver, PETSC_TRUE);
       // KSPGetPC(solver, &pc);
