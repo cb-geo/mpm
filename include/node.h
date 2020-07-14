@@ -74,6 +74,7 @@ class Node : public NodeBase<Tdim> {
                               unsigned phase, double value) noexcept override;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
   double scalar_property(mpm::properties::Scalar property,
                          unsigned phase) const override;
@@ -88,6 +89,7 @@ class Node : public NodeBase<Tdim> {
       const Eigen::Matrix<double, Tdim, 1>& value) noexcept override;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
   virtual Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property, unsigned phase) const override;
