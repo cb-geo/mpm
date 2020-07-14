@@ -19,11 +19,10 @@ mpm::IO::IO(int argc, char** argv) {
                                            "mpm.json", "input_file");
     cmd.add(input_arg);
 
-    // Define # TBB parallel threads
-    TCLAP::ValueArg<unsigned int> tbb_arg("p", "tbb_parallel",
-                                          "Number of parallel TBB threads",
-                                          false, 0, "tbb_parallel");
-    cmd.add(tbb_arg);
+    // Define # parallel threads
+    TCLAP::ValueArg<unsigned int> parallel_arg(
+        "p", "parallel", "Number of parallel threads", false, 0, "parallel");
+    cmd.add(parallel_arg);
 
     // Parse arguments
     cmd.parse(argc, argv);
@@ -35,7 +34,7 @@ mpm::IO::IO(int argc, char** argv) {
     input_file_ = input_arg.getValue();
 
     // Set number of threads
-    nthreads_ = tbb_arg.getValue();
+    nthreads_ = parallel_arg.getValue();
 
   } catch (TCLAP::ArgException& except) {  // catch any exceptions
     console_->error("error: {}  for arg {}", except.error(), except.argId());
@@ -217,5 +216,5 @@ Json mpm::IO::json_object(const std::string& key) const {
 //! Return post processing object
 Json mpm::IO::post_processing() const { return json_["post_processing"]; }
 
-//! Return number of tbb threads
+//! Return number of threads
 unsigned mpm::IO::nthreads() const { return nthreads_; }

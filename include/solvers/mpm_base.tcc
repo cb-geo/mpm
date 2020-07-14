@@ -814,8 +814,11 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          constraints_->assign_nodal_velocity_constraint(nset_id,
-                                                         velocity_constraint);
+          bool velocity_constraints = constraints_->assign_nodal_velocity_constraint(
+              nset_id, velocity_constraint);
+          if (!velocity_constraints)
+            throw std::runtime_error(
+                "Nodal velocity constraint is not properly assigned");
         }
       }
     } else
@@ -863,8 +866,12 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
           // Add friction constraint to mesh
           auto friction_constraint = std::make_shared<mpm::FrictionConstraint>(
               nset_id, dir, sign_n, friction);
-          constraints_->assign_nodal_frictional_constraint(nset_id,
-                                                           friction_constraint);
+          bool friction_constraints =
+              constraints_->assign_nodal_frictional_constraint(
+                  nset_id, friction_constraint);
+          if (!friction_constraints)
+            throw std::runtime_error(
+                "Nodal friction constraint is not properly assigned");
         }
       }
     } else
@@ -1217,7 +1224,7 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
     // Graph partitioning mode
     int mode = 4;  // FAST
     // Create graph partition
-    bool graph_partition = graph_->create_partitions(&comm, mode);
+    graph_->create_partitions(&comm, mode);
     // Collect the partitions
     auto exchange_cells = graph_->collect_partitions(mpi_size, mpi_rank, &comm);
 

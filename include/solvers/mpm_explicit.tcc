@@ -119,27 +119,26 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Inject particles
     mesh_->inject_particles(this->step_ * this->dt_);
 
-    // Create a TBB task group
-    tbb::task_group task_group;
+#pragma omp parallel sections
+    {
+      // Spawn a task for initialising nodes and cells
+#pragma omp section
+      {
+        // Initialise nodes
+        mesh_->iterate_over_nodes(
+            std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
 
-    // Spawn a task for initialising nodes and cells
-    task_group.run([&] {
-      // Initialise nodes
-      mesh_->iterate_over_nodes(
-          std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
-
-      mesh_->iterate_over_cells(
-          std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-    });
-
-    // Spawn a task for particles
-    task_group.run([&] {
-      // Iterate over each particle to compute shapefn
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
-    });
-
-    task_group.wait();
+        mesh_->iterate_over_cells(
+            std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
+      }
+      // Spawn a task for particles
+#pragma omp section
+      {
+        // Iterate over each particle to compute shapefn
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
+      }
+    }  // Wait to complete
 
     // Initialise nodal properties and append material ids to node
     if (interface_) {
@@ -217,30 +216,36 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     if (this->stress_update_ == mpm::StressUpdate::USF)
       this->compute_stress_strain(phase);
 
-    // Spawn a task for external force
-    task_group.run([&] {
-      // Iterate over each particle to compute nodal body force
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                    std::placeholders::_1, this->gravity_));
+      // Spawn a task for external force
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+        // Iterate over each particle to compute nodal body force
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                      std::placeholders::_1, this->gravity_));
 
-      // Apply particle traction and map to nodes
-      mesh_->apply_traction_on_particles(this->step_ * this->dt_);
+        // Apply particle traction and map to nodes
+        mesh_->apply_traction_on_particles(this->step_ * this->dt_);
 
-      // Iterate over each node to add concentrated node force to external force
-      if (set_node_concentrated_force_)
-        mesh_->iterate_over_nodes(
-            std::bind(&mpm::NodeBase<Tdim>::apply_concentrated_force,
-                      std::placeholders::_1, phase, (this->step_ * this->dt_)));
-    });
+        // Iterate over each node to add concentrated node force to external
+        // force
+        if (set_node_concentrated_force_)
+          mesh_->iterate_over_nodes(std::bind(
+              &mpm::NodeBase<Tdim>::apply_concentrated_force,
+              std::placeholders::_1, phase, (this->step_ * this->dt_)));
+      }
 
-    // Spawn a task for internal force
-    task_group.run([&] {
-      // Iterate over each particle to compute nodal internal force
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_internal_force, std::placeholders::_1));
-    });
-    task_group.wait();
+#pragma omp section
+      {
+        // Spawn a task for internal force
+        // Iterate over each particle to compute nodal internal force
+        mesh_->iterate_over_particles(
+            std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
+                      std::placeholders::_1));
+      }
+    }  // Wait for tasks to finish
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task

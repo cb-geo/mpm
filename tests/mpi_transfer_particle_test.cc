@@ -342,7 +342,7 @@ TEST_CASE("MPI transfer particle is checked in 2D",
       // Graph partitioning mode
       int mode = 4;  // FAST
       // Create graph partition
-      bool graphpartition = graph->create_partitions(&comm, mode);
+      graph->create_partitions(&comm, mode);
       // Collect the partitions
       auto exchange_cells =
           graph->collect_partitions(mpi_size, mpi_rank, &comm);
@@ -714,7 +714,7 @@ TEST_CASE("MPI Transfer Particle is checked in 3D",
       // Graph partitioning mode
       int mode = 4;  // FAST
       // Create graph partition
-      bool graphpartition = graph->create_partitions(&comm, mode);
+      graph->create_partitions(&comm, mode);
       // Collect the partitions
       auto exchange_cells =
           graph->collect_partitions(mpi_size, mpi_rank, &comm);

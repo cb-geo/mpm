@@ -1,9 +1,6 @@
 #ifndef MPM_PARTICLE_H_
 #define MPM_PARTICLE_H_
 
-#include <tbb/blocked_range.h>
-#include <tbb/parallel_for.h>
-
 #include <array>
 #include <limits>
 #include <memory>
