@@ -127,7 +127,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
-  //! \param[in] phase Index corresponding to the phase
+  //! Return mass density
   double mass_density() const override {
     return this->scalar_property(mpm::properties::Scalar::MassDensity);
   }
@@ -143,7 +143,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
-  //! \retval status Assignment status
   void assign_mass(double mass) override {
     scalar_properties_.at(mpm::properties::Scalar::Mass) = mass;
   }
@@ -201,7 +200,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
-  //! \retval status Assignment status
   void assign_velocity(const VectorDim& velocity) override {
     vector_properties_.at(mpm::properties::Vector::Velocity) = velocity;
   };
@@ -250,6 +248,12 @@ class Particle : public ParticleBase<Tdim> {
     return (state_variables_.find(var) != state_variables_.end())
                ? state_variables_.at(var)
                : std::numeric_limits<double>::quiet_NaN();
+  }
+
+  //! Assign a state variable
+  //! \param[in] value Particle pressure to be assigned
+  void assign_pressure(double pressure) override {
+    this->assign_state_variable("pressure", pressure);
   }
 
   //! Return pressure of the particles

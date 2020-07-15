@@ -211,7 +211,6 @@ class ParticleBase {
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
   //! Return material
-  //! \retval material Pointer to a material
   virtual std::shared_ptr<Material<Tdim>> material() const = 0;
 
   //! Return material id
@@ -231,6 +230,9 @@ class ParticleBase {
 
   //! Return mass
   virtual double mass() const = 0;
+
+  //! Assign pressure
+  virtual void assign_pressure(double pressure) = 0;
 
   //! Return pressure
   virtual double pressure() const = 0;

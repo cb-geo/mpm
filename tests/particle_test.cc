@@ -1121,8 +1121,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           particle->state_variable("pressure") ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->assign_state_variable(
-          "pressure", -8333333.333333333 * volumetric_strain));
+      REQUIRE_NOTHROW(
+          particle->assign_pressure(-8333333.333333333 * volumetric_strain));
 
       // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
@@ -2416,8 +2416,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           particle->state_variable("pressure") ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->assign_state_variable(
-          "pressure", -8333333.333333333 * volumetric_strain));
+      REQUIRE_NOTHROW(
+          particle->assign_pressure(-8333333.333333333 * volumetric_strain));
 
       // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
