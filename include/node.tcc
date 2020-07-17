@@ -19,35 +19,38 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   concentrated_force_.setZero();
 
   // Initialize scalar properties
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::Mass,
-                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::Volume,
-                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::MassPressure,
-                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::Pressure,
-                     Eigen::Matrix<double, 1, Tnphases>::Zero()));
+  scalar_properties_.reserve(5);
+  // Mass
+  scalar_properties_.emplace_back(Eigen::Matrix<double, 1, Tnphases>::Zero());
+  // Volume
+  scalar_properties_.emplace_back(Eigen::Matrix<double, 1, Tnphases>::Zero());
+  // MassDensity
+  scalar_properties_.emplace_back(Eigen::Matrix<double, 1, Tnphases>::Zero());
+  // MassPressure
+  scalar_properties_.emplace_back(Eigen::Matrix<double, 1, Tnphases>::Zero());
+  // Pressure
+  scalar_properties_.emplace_back(Eigen::Matrix<double, 1, Tnphases>::Zero());
 
   // Initialize vector properties
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Velocity,
-                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Acceleration,
-                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Momentum,
-                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::ExternalForce,
-                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::InternalForce,
-                     Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  vector_properties_.resize(6);
+  // Displacement
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
+  // Velocity
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
+  // Acceleration
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
+  // Momentum
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
+  // ExternalForce
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
+  // InternalForce
+  vector_properties_.emplace_back(
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero());
 
   this->initialise();
 }
@@ -58,17 +61,32 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   status_ = false;
 
   // Initialise nodal scalar properties
-  scalar_properties_.at(mpm::properties::Scalar::Mass).setZero();
-  scalar_properties_.at(mpm::properties::Scalar::Volume).setZero();
-  scalar_properties_.at(mpm::properties::Scalar::MassPressure).setZero();
-  scalar_properties_.at(mpm::properties::Scalar::Pressure).setZero();
+  scalar_properties_.resize(5);
+  scalar_properties_.at(mpm::properties::Scalar::Mass) =
+      Eigen::Matrix<double, 1, Tnphases>::Zero();
+  scalar_properties_.at(mpm::properties::Scalar::Volume) =
+      Eigen::Matrix<double, 1, Tnphases>::Zero();
+  scalar_properties_.at(mpm::properties::Scalar::MassDensity) =
+      Eigen::Matrix<double, 1, Tnphases>::Zero();
+  scalar_properties_.at(mpm::properties::Scalar::MassPressure) =
+      Eigen::Matrix<double, 1, Tnphases>::Zero();
+  scalar_properties_.at(mpm::properties::Scalar::Pressure) =
+      Eigen::Matrix<double, 1, Tnphases>::Zero();
 
   // Initialise nodal vector properties
-  vector_properties_.at(mpm::properties::Vector::Velocity).setZero();
-  vector_properties_.at(mpm::properties::Vector::Acceleration).setZero();
-  vector_properties_.at(mpm::properties::Vector::Momentum).setZero();
-  vector_properties_.at(mpm::properties::Vector::ExternalForce).setZero();
-  vector_properties_.at(mpm::properties::Vector::InternalForce).setZero();
+  vector_properties_.resize(6);
+  vector_properties_.at(mpm::properties::Vector::Displacement) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
+  vector_properties_.at(mpm::properties::Vector::Velocity) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
+  vector_properties_.at(mpm::properties::Vector::Acceleration) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
+  vector_properties_.at(mpm::properties::Vector::Momentum) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
+  vector_properties_.at(mpm::properties::Vector::ExternalForce) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
+  vector_properties_.at(mpm::properties::Vector::InternalForce) =
+      Eigen::Matrix<double, Tdim, Tnphases>::Zero();
 
   // Initialise variables for contact
   material_ids_.clear();
