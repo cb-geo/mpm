@@ -343,9 +343,9 @@ class ParticleBase {
   //! Shape functions
   Eigen::VectorXd shapefn_;
   //! Scalar properties
-  tsl::ordered_map<mpm::properties::Scalar, double> scalar_properties_;
+  fc::vector_map<mpm::properties::Scalar, double> scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
+  fc::vector_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
       vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
