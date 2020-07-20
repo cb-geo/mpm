@@ -267,6 +267,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       if (!gen_status) status = false;
     }
 
+    // Get material sets
+    auto material_sets = io_->json_object("material_sets");
+
     auto particles_gen_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Generate particles: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
