@@ -1,22 +1,16 @@
 #ifndef MPM_NODE_BASE_H_
 #define MPM_NODE_BASE_H_
 
-#include <ctime>
-
 #include <array>
-#include <iostream>
 #include <limits>
 #include <map>
 #include <mutex>
 #include <set>
-#include <sstream>
-#include <string>
 #include <tuple>
 #include <vector>
 
 #include <Eigen/Dense>
 #include <flat/flat_map.hpp>
-#include <tsl/ordered_map.h>
 
 #include "data_types.h"
 #include "function_base.h"
