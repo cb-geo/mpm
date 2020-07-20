@@ -45,9 +45,9 @@ option(HALO_EXCHANGE "Enable halo exchange" OFF)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # Boost Archive
-find_package(Boost REQUIRED COMPONENTS container filesystem system)
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 include_directories(${BOOST_INCLUDE_DIRS})
-link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_CONTAINER_LIBRARY})
+link_libraries(${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 # Eigen
 find_package(Eigen3 REQUIRED)
