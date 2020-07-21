@@ -272,10 +272,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     
     if(!material_sets.empty() && mesh_props["update_materials"] == true) 
       for(const auto& material_set : material_sets){
+        unsigned material_id = material_set["material_id"].template get<unsigned>();
+        unsigned pset_id = material_set["pset_id"].template get<unsigned>();
         // Update material_id for particles in each pset
-        mesh_->iterate_over_particle_set(material_set["pset_id"], 
+        mesh_->iterate_over_particle_set(pset_id,
           std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-          std::placeholders::_1, materials_.at(material_set["material_id"])));
+          std::placeholders::_1, materials_.at(material_id)));
       }
 
     auto particles_gen_end = std::chrono::steady_clock::now();
