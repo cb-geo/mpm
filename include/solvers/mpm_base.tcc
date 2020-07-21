@@ -270,7 +270,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     // Get material sets
     auto material_sets = io_->json_object("material_sets");
     
-    if(!material_sets.empty())
+    if(!material_sets.empty() && mesh_props["update_materials"] == true) 
       for(const auto& material_set : material_sets){
         // Update material_id for particles in each pset
         mesh_->iterate_over_particle_set(material_set["pset_id"], 
