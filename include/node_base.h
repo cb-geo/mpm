@@ -84,6 +84,7 @@ class NodeBase {
   //! Return property at a given node for a given phase
   //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval scalar property at the designated phase
   virtual double scalar_property(mpm::properties::Scalar property,
                                  unsigned phase) const = 0;
 
@@ -99,6 +100,7 @@ class NodeBase {
   //! Return property at a given node for a given phase
   //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval vector property at the designated phase
   virtual Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property, unsigned phase) const = 0;
 

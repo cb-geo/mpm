@@ -35,7 +35,7 @@ double mpm::ParticleBase<Tdim>::scalar_property(
 
 //! Map scalar property to nodes
 template <unsigned Tdim>
-void mpm::ParticleBase<Tdim>::map_scalar_property_nodes(
+void mpm::ParticleBase<Tdim>::map_scalar_property_to_nodes(
     mpm::properties::Scalar property, bool update, unsigned phase) noexcept {
   // Check if particle property is set
   assert(scalar_properties_.at(property) != std::numeric_limits<double>::max());
@@ -48,7 +48,7 @@ void mpm::ParticleBase<Tdim>::map_scalar_property_nodes(
 
 //! Map an arbitrary scalar value to nodal scalar property
 template <unsigned Tdim>
-void mpm::ParticleBase<Tdim>::map_scalar_property_nodes(
+void mpm::ParticleBase<Tdim>::map_scalar_property_to_nodes(
     mpm::properties::Scalar property, bool update, unsigned phase,
     double value) noexcept {
   // Map scalar value to nodes
@@ -59,7 +59,7 @@ void mpm::ParticleBase<Tdim>::map_scalar_property_nodes(
 
 //! Interpolate scalar property from nodes
 template <unsigned Tdim>
-double mpm::ParticleBase<Tdim>::interpolate_scalar_property_nodes(
+double mpm::ParticleBase<Tdim>::interpolate_scalar_property_from_nodes(
     mpm::properties::Scalar property, unsigned phase) const {
   double value = 0.;
   // Interpolate scalar property from nodes
@@ -88,7 +88,7 @@ Eigen::Matrix<double, Tdim, 1> mpm::ParticleBase<Tdim>::vector_property(
 
 //! Map vector property to nodes
 template <unsigned Tdim>
-void mpm::ParticleBase<Tdim>::map_vector_property_nodes(
+void mpm::ParticleBase<Tdim>::map_vector_property_to_nodes(
     mpm::properties::Vector property, bool update, unsigned phase) noexcept {
   // Map vector property to nodes
   for (unsigned i = 0; i < nodes_.size(); ++i)
@@ -98,7 +98,7 @@ void mpm::ParticleBase<Tdim>::map_vector_property_nodes(
 
 //! Map an arbitrary vector value to nodal vector property
 template <unsigned Tdim>
-void mpm::ParticleBase<Tdim>::map_vector_property_nodes(
+void mpm::ParticleBase<Tdim>::map_vector_property_to_nodes(
     mpm::properties::Vector property, bool update, unsigned phase,
     const Eigen::Matrix<double, Tdim, 1>& value) noexcept {
   // Map vector property to nodes
@@ -110,7 +110,7 @@ void mpm::ParticleBase<Tdim>::map_vector_property_nodes(
 //! Interpolate vector property from nodes
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1>
-    mpm::ParticleBase<Tdim>::interpolate_vector_property_nodes(
+    mpm::ParticleBase<Tdim>::interpolate_vector_property_from_nodes(
         mpm::properties::Vector property, unsigned phase) const {
   Eigen::Matrix<double, Tdim, 1> value = Eigen::Matrix<double, Tdim, 1>::Zero();
   // Interpolate vector property from nodes
