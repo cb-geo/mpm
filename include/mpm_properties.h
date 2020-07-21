@@ -5,20 +5,20 @@ namespace mpm {
 namespace properties {
 //! Scalar Properties
 enum Scalar : unsigned int {
-  Mass = 0,
-  Volume = 1,
-  MassDensity = 2,
-  MassPressure = 3,
-  Pressure = 4
+  Mass,
+  Volume,
+  MassDensity,
+  MassPressure,
+  Pressure
 };
 //! Vector Properties
 enum Vector : unsigned int {
-  Displacement = 0,
-  Velocity = 1,
-  Acceleration = 2,
-  Momentum = 3,
-  ExternalForce = 4,
-  InternalForce = 5
+  Displacement,
+  Velocity,
+  Acceleration,
+  Momentum,
+  ExternalForce,
+  InternalForce
 };
 }  // namespace properties
 }  // namespace mpm

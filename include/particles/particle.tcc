@@ -9,8 +9,6 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   nodes_.clear();
   // Set material pointer to null
   material_ = nullptr;
-  scalar_properties_.resize(3);
-  vector_properties_.resize(3);
   // Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -241,17 +239,18 @@ void mpm::Particle<Tdim>::initialise() {
   volumetric_strain_centroid_ = 0.;
 
   // Initialize scalar properties
-  scalar_properties_.resize(3);
-  scalar_properties_.at(mpm::properties::Scalar::Mass) = 0.;
-  scalar_properties_.at(mpm::properties::Scalar::MassDensity) = 0.;
-  scalar_properties_.at(mpm::properties::Scalar::Volume) =
-      std::numeric_limits<double>::max();
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::Mass, double(0.)));
+  scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::MassDensity, double(0.)));
+  scalar_properties_.emplace(std::make_pair(
+      mpm::properties::Scalar::Volume, std::numeric_limits<double>::max()));
 
   // Initialize vector properties
-  vector_properties_.resize(2);
-  vector_properties_.at(mpm::properties::Vector::Displacement) =
-      VectorDim::Zero();
-  vector_properties_.at(mpm::properties::Vector::Velocity) = VectorDim::Zero();
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Displacement, VectorDim::Zero()));
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Velocity, VectorDim::Zero()));
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
