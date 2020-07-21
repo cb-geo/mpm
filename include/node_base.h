@@ -10,7 +10,7 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <tsl/ordered_map.h>
+#include <flat/flat_map.hpp>
 
 #include "data_types.h"
 #include "function_base.h"

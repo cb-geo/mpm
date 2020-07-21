@@ -319,9 +319,11 @@ class Node : public NodeBase<Tdim> {
   //! Status
   bool status_{false};
   //! Scalar properties
-  std::vector<Eigen::Matrix<double, 1, Tnphases>> scalar_properties_;
+  fc::vector_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
+      scalar_properties_;
   //! Vector properties
-  std::vector<Eigen::Matrix<double, Tdim, Tnphases>> vector_properties_;
+  fc::vector_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, Tnphases>>
+      vector_properties_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
   //! Velocity constraints
