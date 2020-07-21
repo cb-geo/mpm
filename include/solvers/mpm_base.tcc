@@ -269,6 +269,11 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     // Get material sets
     auto material_sets = io_->json_object("material_sets");
+    
+    if(!material_sets.empty())
+      for(const auto& material_set : material_sets){
+
+      }
 
     auto particles_gen_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Generate particles: {} ms", mpi_rank,
