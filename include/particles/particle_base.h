@@ -124,6 +124,73 @@ class ParticleBase {
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
+  //! Update scalar property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_scalar_property(mpm::properties::Scalar property, bool update,
+                              double value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  double scalar_property(mpm::properties::Scalar property) const;
+
+  //! Map scalar property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Map an arbitrary scalar value to nodal scalar property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Scalar value to be mapped from particle to node
+  void map_scalar_property_nodes(mpm::properties::Scalar property, bool update,
+                                 unsigned phase, double value) noexcept;
+
+  //! Return an interpolation of scalar property in particle from nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] phase Index corresponding to the phase
+  double interpolate_scalar_property_nodes(mpm::properties::Scalar property,
+                                           unsigned phase) const;
+
+  //! Update vector property at the particle
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] value Property value from the particles in a cell
+  void update_vector_property(
+      mpm::properties::Vector property, bool update,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return property
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> vector_property(
+      mpm::properties::Vector property) const;
+
+  //! Map vector property to the nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  void map_vector_property_nodes(mpm::properties::Vector property, bool update,
+                                 unsigned phase) noexcept;
+
+  //! Map an arbitrary vector value to nodal vector property
+  //! \param[in] property Name of the property to update
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] value Vector value to be mapped from particle to node
+  void map_vector_property_nodes(
+      mpm::properties::Vector property, bool update, unsigned phase,
+      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
+
+  //! Return an interpolation of vector property in particle from nodes
+  //! \param[in] property Name of the property to update
+  //! \param[in] phase Index corresponding to the phase
+  Eigen::Matrix<double, Tdim, 1> interpolate_vector_property_nodes(
+      mpm::properties::Vector property, unsigned phase) const;
+
   //! Compute volume of particle
   virtual void compute_volume() noexcept = 0;
 
@@ -282,6 +349,13 @@ class ParticleBase {
   mpm::dense_map state_variables_;
   //! Vector of particle neighbour ids
   std::vector<mpm::Index> neighbours_;
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Scalar properties
+  fc::vector_map<mpm::properties::Scalar, double> scalar_properties_;
+  //! Vector properties
+  fc::vector_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
+      vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
 

@@ -307,6 +307,8 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::state_variables_;
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
+  //! Shape functions
+  using ParticleBase<Tdim>::shapefn_;
   //! Volumetric mass density (mass / volume)
   double mass_density_{0.};
   //! Mass
@@ -339,8 +341,6 @@ class Particle : public ParticleBase<Tdim> {
   bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
-  //! Shape functions
-  Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
   //! dN/dX at cell centroid
