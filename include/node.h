@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "nodal_properties.h"
 #include "node_base.h"
+#include "mutex.h"
 
 namespace mpm {
 
@@ -265,7 +266,7 @@ class Node : public NodeBase<Tdim> {
 
  private:
   //! Mutex
-  std::mutex node_mutex_;
+  SpinMutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal property id
