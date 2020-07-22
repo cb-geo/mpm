@@ -700,14 +700,15 @@ void mpm::Particle<Tdim>::compute_updated_position(
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   // Get interpolated nodal velocity
-  const auto& nodal_velocity = this->interpolate_vector_property_nodes(
+  const auto& nodal_velocity = this->interpolate_vector_property_from_nodes(
       mpm::properties::Vector::Velocity, mpm::ParticlePhase::Solid);
 
   // Acceleration update
   if (!velocity_update) {
     // Get interpolated nodal acceleration
-    const auto& nodal_acceleration = this->interpolate_vector_property_nodes(
-        mpm::properties::Vector::Acceleration, mpm::ParticlePhase::Solid);
+    const auto& nodal_acceleration =
+        this->interpolate_vector_property_from_nodes(
+            mpm::properties::Vector::Acceleration, mpm::ParticlePhase::Solid);
 
     // Update particle velocity from interpolated nodal acceleration
     vector_properties_.at(mpm::properties::Vector::Velocity) +=

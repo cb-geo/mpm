@@ -57,11 +57,11 @@ void map_mass_momentum_to_nodes(
   assert(particle->mass() != std::numeric_limits<double>::max());
 
   // Map mass and momentum to nodes
-  particle->map_scalar_property_nodes(mpm::properties::Scalar::Mass, true,
-                                      mpm::ParticlePhase::Solid);
-  particle->map_vector_property_nodes(mpm::properties::Vector::Momentum, true,
-                                      mpm::ParticlePhase::Solid,
-                                      particle->mass() * particle->velocity());
+  particle->map_scalar_property_to_nodes(mpm::properties::Scalar::Mass, true,
+                                         mpm::ParticlePhase::Solid);
+  particle->map_vector_property_to_nodes(
+      mpm::properties::Vector::Momentum, true, mpm::ParticlePhase::Solid,
+      particle->mass() * particle->velocity());
 }
 
 //! Map particle pressure to nodes
@@ -74,7 +74,7 @@ void map_mass_pressure_to_nodes(
   // Check if state variable pressure is found
   if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
     // Map particle pressure to nodes
-    particle->map_scalar_property_nodes(
+    particle->map_scalar_property_to_nodes(
         mpm::properties::Scalar::MassPressure, true, mpm::ParticlePhase::Solid,
         particle->mass() * particle->pressure());
   }
@@ -85,9 +85,9 @@ template <unsigned Tdim>
 void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
                     const Eigen::Matrix<double, Tdim, 1>& pgravity) noexcept {
   // Compute nodal body forces
-  particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
-                                      true, mpm::ParticlePhase::Solid,
-                                      pgravity * particle->mass());
+  particle->map_vector_property_to_nodes(mpm::properties::Vector::ExternalForce,
+                                         true, mpm::ParticlePhase::Solid,
+                                         pgravity * particle->mass());
 }
 
 //! Map traction force
@@ -96,9 +96,9 @@ void map_traction_force(
     std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
   if (particle->set_traction()) {
     // Map particle traction forces to nodes
-    particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
-                                        true, mpm::ParticlePhase::Solid,
-                                        particle->traction());
+    particle->map_vector_property_to_nodes(
+        mpm::properties::Vector::ExternalForce, true, mpm::ParticlePhase::Solid,
+        particle->traction());
   }
 }
 
@@ -111,7 +111,7 @@ void compute_pressure_smoothing(
 
   // Check if particle has pressure
   if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
-    double pressure = particle->interpolate_scalar_property_nodes(
+    double pressure = particle->interpolate_scalar_property_from_nodes(
         mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
     particle->assign_state_variable("pressure", pressure);
   }
