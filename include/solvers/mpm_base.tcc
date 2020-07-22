@@ -267,19 +267,6 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
       if (!gen_status) status = false;
     }
 
-    // Get material sets
-    auto material_sets = io_->json_object("material_sets");
-    
-    if(!material_sets.empty() && mesh_props["update_materials"] == true) 
-      for(const auto& material_set : material_sets){
-        unsigned material_id = material_set["material_id"].template get<unsigned>();
-        unsigned pset_id = material_set["pset_id"].template get<unsigned>();
-        // Update material_id for particles in each pset
-        mesh_->iterate_over_particle_set(pset_id,
-          std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-          std::placeholders::_1, materials_.at(material_id)));
-      }
-
     auto particles_gen_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Generate particles: {} ms", mpi_rank,
                    std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -341,6 +328,36 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                    std::chrono::duration_cast<std::chrono::milliseconds>(
                        particles_volume_end - particles_volume_begin)
                        .count());
+
+    // Get material sets
+    bool update_materials = false;
+    try {
+      update_materials = mesh_props["update_materials"].template get<bool>();
+    } catch (std::exception& exception) {
+      console_->warn(
+          "{} #{}: Update materials, not specified setting default as false",
+          __FILE__, __LINE__, exception.what());
+      update_materials = false;
+    }
+
+    try {
+      auto material_sets = io_->json_object("material_sets");
+      if (!material_sets.empty() && update_materials) {
+        for (const auto& material_set : material_sets) {
+          unsigned material_id =
+              material_set["material_id"].template get<unsigned>();
+          unsigned pset_id = material_set["pset_id"].template get<unsigned>();
+          // Update material_id for particles in each pset
+          mesh_->iterate_over_particle_set(
+              pset_id,
+              std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                        std::placeholders::_1, materials_.at(material_id)));
+        }
+      }
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: Material sets, not specified", __FILE__, __LINE__,
+                     exception.what());
+    }
 
   } catch (std::exception& exception) {
     console_->error("#{}: MPM Base generating particles: {}", __LINE__,
@@ -824,8 +841,9 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          bool velocity_constraints = constraints_->assign_nodal_velocity_constraint(
-              nset_id, velocity_constraint);
+          bool velocity_constraints =
+              constraints_->assign_nodal_velocity_constraint(
+                  nset_id, velocity_constraint);
           if (!velocity_constraints)
             throw std::runtime_error(
                 "Nodal velocity constraint is not properly assigned");
