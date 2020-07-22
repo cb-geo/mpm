@@ -62,10 +62,12 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material history variables
   //! \param[in] state_vars State variables
   //! \param[in] material Material associated with the particle
+  //! \param[in] phase Index to indicate material phase
   //! \retval status Status of cloning HDF5 particle
   bool assign_material_state_vars(
       const mpm::dense_map& state_vars,
-      const std::shared_ptr<mpm::Material<Tdim>>& material) override;
+      const std::shared_ptr<mpm::Material<Tdim>>& material,
+      unsigned phase = mpm::ParticlePhase::Solid) override;
 
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
@@ -157,8 +159,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign material
   //! \param[in] material Pointer to a material
-  bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
+  //! \param[in] phase Index to indicate phase
+  bool assign_material(const std::shared_ptr<Material<Tdim>>& material,
+                       unsigned phase = mpm::ParticlePhase::Solid) override;
 
   //! Compute strain
   //! \param[in] dt Analysis time step
@@ -233,10 +236,13 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return a state variable
   //! \param[in] var State variable
+  //! \param[in] phase Index to indicate phase
   //! \retval Quantity of the state history variable
-  double state_variable(const std::string& var) const override {
-    return (state_variables_.find(var) != state_variables_.end())
-               ? state_variables_.at(var)
+  double state_variable(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) const override {
+    return (state_variables_[phase].find(var) != state_variables_[phase].end())
+               ? state_variables_[phase].at(var)
                : std::numeric_limits<double>::quiet_NaN();
   }
 
@@ -248,9 +254,11 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_pressure_smoothing() noexcept override;
 
   //! Return pressure of the particles
-  double pressure() const override {
-    return (state_variables_.find("pressure") != state_variables_.end())
-               ? state_variables_.at("pressure")
+  //! \param[in] phase Index to indicate phase
+  double pressure(unsigned phase = mpm::ParticlePhase::Solid) const override {
+    return (state_variables_[phase].find("pressure") !=
+            state_variables_[phase].end())
+               ? state_variables_[phase].at("pressure")
                : std::numeric_limits<double>::quiet_NaN();
   }
 
