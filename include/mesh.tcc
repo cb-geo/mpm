@@ -69,7 +69,7 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) oper(*nitr);
 }
 
@@ -77,7 +77,7 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if (pred(*nitr)) oper(*nitr);
   }
@@ -97,7 +97,7 @@ void mpm::Mesh<Tdim>::find_active_nodes() {
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend(); ++nitr)
     oper(*nitr);
 }
@@ -172,7 +172,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
   std::vector<Ttype> prop_get(nhalo_nodes_, mpm::zero<Ttype>());
   std::vector<Ttype> prop_set(nhalo_nodes_, mpm::zero<Ttype>());
 
-#pragma omp parallel for shared(prop_get)
+#pragma omp parallel for schedule(runtime) shared(prop_get)
   for (auto nitr = domain_shared_nodes_.cbegin();
        nitr != domain_shared_nodes_.cend(); ++nitr)
     prop_get.at((*nitr)->ghost_id()) = getter((*nitr));
@@ -180,7 +180,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
   MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tnparam,
                 MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = domain_shared_nodes_.cbegin();
        nitr != domain_shared_nodes_.cend(); ++nitr)
     setter((*nitr), prop_set.at((*nitr)->ghost_id()));
@@ -260,7 +260,7 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) oper(*citr);
 }
 
@@ -275,7 +275,7 @@ void mpm::Mesh<Tdim>::find_cell_neighbours() {
     for (auto id : (*citr)->nodes_id()) node_cell_map[id].insert(cell_id);
   }
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Iterate over each node in current cell
     for (auto id : (*citr)->nodes_id()) {
@@ -902,7 +902,7 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   // Clear MPI rank at the nodes
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
     (*nitr)->clear_mpi_ranks();
 
@@ -912,7 +912,7 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   // Assign MPI rank to nodes of cell
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
     (*citr)->assign_mpi_rank_to_nodes();
@@ -993,7 +993,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   }
 
   bool status = false;
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Check if particle is already found, if so don't run for other cells
     // Check if co-ordinates is within the cell, if true
@@ -1012,7 +1012,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
     oper(*pitr);
 }
@@ -1027,7 +1027,7 @@ void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
   } else {
     // Iterate over the particle set
     auto set = particle_sets_.at(set_id);
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
     for (auto sitr = set.begin(); sitr != set.cend(); ++sitr) {
       unsigned pid = (*sitr);
       if (map_particles_.find(pid) != map_particles_.end())
@@ -1265,7 +1265,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
     Vector<NodeBase<Tdim>> nodes =
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
     for (auto nitr = nodes.cbegin(); nitr != nodes.cend(); ++nitr) {
       if (!(*nitr)->assign_concentrated_force(phase, dir, concentrated_force,
                                               mfunction))
