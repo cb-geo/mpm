@@ -7,7 +7,7 @@ struct Injection {
   // Particle type
   std::string particle_type;
   // Material id
-  unsigned material_id;
+  std::vector<unsigned> material_id;
   // Cell id
   int cell_set_id;
   // Start
