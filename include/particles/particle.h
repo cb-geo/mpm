@@ -317,6 +317,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
   //! Scalar properties
+  using ParticleBase<Tdim>::boolean_properties_;
+  //! Scalar properties
   using ParticleBase<Tdim>::scalar_properties_;
   //! Vector properties
   using ParticleBase<Tdim>::vector_properties_;

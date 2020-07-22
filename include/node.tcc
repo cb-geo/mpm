@@ -94,6 +94,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise_property_handle(
   this->prop_id_ = prop_id;
 }
 
+//! Assign boolean property at the nodes
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::assign_boolean_property(
+    mpm::properties::Boolean property, bool boolean) noexcept {
+  // Update/assign value
+  std::lock_guard<std::mutex> guard(node_mutex_);
+  boolean_properties_.at(property) = boolean;
+}
+
+//! Return boolean property
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::boolean_property(
+    mpm::properties::Boolean property) const {
+  return boolean_properties_.at(property);
+}
+
 //! Update scalar property at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(

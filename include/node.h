@@ -65,6 +65,17 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
+  //! Assign boolean property at the nodes
+  //! \param[in] property Name of the property to assign
+  //! \param[in] boolean Property boolean (true/false) of the node
+  void assign_boolean_property(mpm::properties::Boolean property,
+                               bool boolean) noexcept override;
+
+  //! Return boolean property
+  //! \param[in] property Name of the property to update
+  //! \retval boolean property at node
+  bool boolean_property(mpm::properties::Boolean property) const override;
+
   //! Update scalar property at the nodes
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -76,6 +87,7 @@ class Node : public NodeBase<Tdim> {
   //! Return property at a given node for a given phase
   //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval scalar property at the designated phase
   double scalar_property(mpm::properties::Scalar property,
                          unsigned phase) const override;
 
@@ -91,6 +103,7 @@ class Node : public NodeBase<Tdim> {
   //! Return property at a given node for a given phase
   //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval vector property at the designated phase
   virtual Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property, unsigned phase) const override;
 
@@ -318,6 +331,8 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Boolean properties
+  fc::vector_map<mpm::properties::Boolean, bool> boolean_properties_;
   //! Scalar properties
   fc::vector_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
       scalar_properties_;
