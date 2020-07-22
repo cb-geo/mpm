@@ -11,7 +11,7 @@ class SpinMutex {
   //! Attempt locking
   bool try_lock() { return !lock_.test_and_set(std::memory_order_acquire); }
 
-  //! Call lock 
+  //! Call lock
   void lock() {
     std::size_t spin_count{0};
     while (!try_lock()) {

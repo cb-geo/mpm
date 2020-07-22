@@ -2,9 +2,9 @@
 #define MPM_NODE_H_
 
 #include "logger.h"
+#include "mutex.h"
 #include "nodal_properties.h"
 #include "node_base.h"
-#include "mutex.h"
 
 namespace mpm {
 

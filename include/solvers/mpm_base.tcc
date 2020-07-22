@@ -811,8 +811,9 @@ void mpm::MPMBase<Tdim>::nodal_velocity_constraints(
           // Add velocity constraint to mesh
           auto velocity_constraint =
               std::make_shared<mpm::VelocityConstraint>(nset_id, dir, velocity);
-          bool velocity_constraints = constraints_->assign_nodal_velocity_constraint(
-              nset_id, velocity_constraint);
+          bool velocity_constraints =
+              constraints_->assign_nodal_velocity_constraint(
+                  nset_id, velocity_constraint);
           if (!velocity_constraints)
             throw std::runtime_error(
                 "Nodal velocity constraint is not properly assigned");
