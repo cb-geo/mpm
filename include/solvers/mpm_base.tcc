@@ -329,7 +329,7 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_volume_end - particles_volume_begin)
                        .count());
 
-    // Get material sets
+    // Material id update using particle sets
     bool update_materials = false;
     try {
       update_materials = mesh_props["update_materials"].template get<bool>();
