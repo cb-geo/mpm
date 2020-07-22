@@ -124,6 +124,18 @@ class ParticleBase {
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
+  //! Assign boolean property at the particle
+  //! \param[in] property Name of the property to assign
+  //! \param[in] boolean Property boolean (true/false) of the particles in a
+  //! cell
+  void assign_boolean_property(mpm::properties::Boolean property,
+                               bool boolean) noexcept;
+
+  //! Return boolean property
+  //! \param[in] property Name of the property to update
+  //! \retval boolean property at particle
+  bool boolean_property(mpm::properties::Boolean property) const;
+
   //! Update scalar property at the particle
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -132,7 +144,7 @@ class ParticleBase {
                               double value) noexcept;
 
   //! Return scalar property
-  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Name of the property to return
   //! \retval scalar property at particle
   double scalar_property(mpm::properties::Scalar property) const;
 
@@ -168,7 +180,7 @@ class ParticleBase {
       const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
 
   //! Return vector property
-  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] property Name of the property to return
   //! \retval vector property at particle
   Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property) const;
@@ -356,6 +368,8 @@ class ParticleBase {
   std::vector<mpm::Index> neighbours_;
   //! Shape functions
   Eigen::VectorXd shapefn_;
+  //! Boolean properties
+  fc::vector_map<mpm::properties::Boolean, bool> boolean_properties_;
   //! Scalar properties
   fc::vector_map<mpm::properties::Scalar, double> scalar_properties_;
   //! Vector properties

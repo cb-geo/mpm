@@ -16,6 +16,20 @@ mpm::ParticleBase<Tdim>::ParticleBase(Index id, const VectorDim& coord,
   status_ = status;
 }
 
+//! Assign boolean property at the particle
+template <unsigned Tdim>
+void mpm::ParticleBase<Tdim>::assign_boolean_property(
+    mpm::properties::Boolean property, bool boolean) noexcept {
+  boolean_properties_.at(property) = boolean;
+}
+
+//! Return boolean property
+template <unsigned Tdim>
+bool mpm::ParticleBase<Tdim>::boolean_property(
+    mpm::properties::Boolean property) const {
+  return boolean_properties_.at(property);
+}
+
 //! Update scalar property at particle
 template <unsigned Tdim>
 void mpm::ParticleBase<Tdim>::update_scalar_property(
