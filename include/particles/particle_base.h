@@ -223,10 +223,12 @@ class ParticleBase {
   virtual void map_internal_force() noexcept = 0;
 
   //! Map particle pressure to nodes
-  virtual bool map_pressure_to_nodes() noexcept = 0;
+  virtual bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
-  virtual bool compute_pressure_smoothing() noexcept = 0;
+  virtual bool compute_pressure_smoothing(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
 
   //! Assign velocity
   virtual bool assign_velocity(const VectorDim& velocity) = 0;

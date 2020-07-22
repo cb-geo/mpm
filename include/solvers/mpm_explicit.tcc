@@ -10,8 +10,9 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 template <unsigned Tdim>
 void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::map_pressure_to_nodes, std::placeholders::_1));
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                std::placeholders::_1, phase));
 
 #ifdef USE_MPI
   int mpi_size = 1;
@@ -32,7 +33,7 @@ void mpm::MPMExplicit<Tdim>::pressure_smoothing(unsigned phase) {
   // Smooth pressure over particles
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
-                std::placeholders::_1));
+                std::placeholders::_1, phase));
 }
 
 //! MPM Explicit compute stress strain

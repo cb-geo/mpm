@@ -793,21 +793,19 @@ void mpm::Particle<Tdim>::compute_updated_position(
 
 //! Map particle pressure to nodes
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
+bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
   // Mass is initialized
   assert(mass_ != std::numeric_limits<double>::max());
 
   bool status = false;
   // Check if particle mass is set and state variable pressure is found
   if (mass_ != std::numeric_limits<double>::max() &&
-      (state_variables_[mpm::ParticlePhase::Solid].find("pressure") !=
-       state_variables_[mpm::ParticlePhase::Solid].end())) {
+      (state_variables_[phase].find("pressure") !=
+       state_variables_[phase].end())) {
     // Map particle pressure to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_mass_pressure(
-          mpm::ParticlePhase::Solid,
-          shapefn_[i] * mass_ *
-              state_variables_[mpm::ParticlePhase::Solid]["pressure"]);
+          phase, shapefn_[i] * mass_ * state_variables_[phase]["pressure"]);
 
     status = true;
   }
@@ -816,22 +814,21 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes() noexcept {
 
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_pressure_smoothing() noexcept {
+bool mpm::Particle<Tdim>::compute_pressure_smoothing(unsigned phase) noexcept {
   // Assert
   assert(cell_ != nullptr);
 
   bool status = false;
   // Check if particle has a valid cell ptr
-  if (cell_ != nullptr &&
-      (state_variables_[mpm::ParticlePhase::Solid].find("pressure") !=
-       state_variables_[mpm::ParticlePhase::Solid].end())) {
+  if (cell_ != nullptr && (state_variables_[phase].find("pressure") !=
+                           state_variables_[phase].end())) {
 
     double pressure = 0.;
     // Update particle pressure to interpolated nodal pressure
     for (unsigned i = 0; i < this->nodes_.size(); ++i)
-      pressure += shapefn_[i] * nodes_[i]->pressure(mpm::ParticlePhase::Solid);
+      pressure += shapefn_[i] * nodes_[i]->pressure(phase);
 
-    state_variables_[mpm::ParticlePhase::Solid]["pressure"] = pressure;
+    state_variables_[phase]["pressure"] = pressure;
     status = true;
   }
   return status;

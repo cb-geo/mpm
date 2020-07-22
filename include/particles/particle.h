@@ -247,11 +247,13 @@ class Particle : public ParticleBase<Tdim> {
   }
 
   //! Map particle pressure to nodes
-  bool map_pressure_to_nodes() noexcept override;
+  bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  bool compute_pressure_smoothing() noexcept override;
+  bool compute_pressure_smoothing(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
   //! Return pressure of the particles
   //! \param[in] phase Index to indicate phase
