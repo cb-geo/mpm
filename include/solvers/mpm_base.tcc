@@ -330,19 +330,9 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        .count());
 
     // Material id update using particle sets
-    bool update_materials = false;
-    try {
-      update_materials = mesh_props["update_materials"].template get<bool>();
-    } catch (std::exception& exception) {
-      console_->warn(
-          "{} #{}: Update materials, not specified setting default as false",
-          __FILE__, __LINE__, exception.what());
-      update_materials = false;
-    }
-
     try {
       auto material_sets = io_->json_object("material_sets");
-      if (!material_sets.empty() && update_materials) {
+      if (!material_sets.empty()) {
         for (const auto& material_set : material_sets) {
           unsigned material_id =
               material_set["material_id"].template get<unsigned>();
