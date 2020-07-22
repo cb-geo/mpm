@@ -1137,3 +1137,33 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
   }
 #endif  // MPI
 }
+
+//! MPM pressure smoothing
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
+  // Assign pressure to nodes
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+  int mpi_size = 1;
+
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  // Run if there is more than a single MPI task
+  if (mpi_size > 1) {
+    // MPI all reduce nodal pressure
+    mesh_->template nodal_halo_exchange<double, 1>(
+        std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
+        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
+                  phase, std::placeholders::_2));
+  }
+#endif
+
+  // Smooth pressure over particles
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                std::placeholders::_1, phase));
+}
