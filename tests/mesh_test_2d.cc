@@ -578,7 +578,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         // Gauss point generation
         Json jgen;
         jgen["type"] = "gauss";
-        jgen["material_id"] = [0];
+        jgen["material_id"] = {0};
         jgen["cset_id"] = 1;
         jgen["particle_type"] = "P2D";
         jgen["check_duplicates"] = false;
@@ -595,7 +595,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         // Gauss point generation
         Json jgen;
         jgen["type"] = "inject";
-        jgen["material_id"] = [0];
+        jgen["material_id"] = {0};
         jgen["cset_id"] = 1;
         jgen["particle_type"] = "P2D";
         jgen["check_duplicates"] = false;
