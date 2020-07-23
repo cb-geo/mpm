@@ -1,8 +1,9 @@
-#ifndef _MUTEX_
-#define _MUTEX_
+#ifndef MPM_MUTEX_H_
+#define MPM_MUTEX_H_
 
 #include <atomic>
 
+namespace mpm {
 //! Hybrid SpinMutex class
 //! \brief SpinMutex class that offers a fast locking and unlocking mechanism
 class SpinMutex {
@@ -34,4 +35,5 @@ class SpinMutex {
   //! Spin prediction
   std::atomic<std::size_t> spin_pred_{0};
 };
-#endif  // _MUTEX_
+}  // namespace mpm
+#endif  // MPM_MUTEX_H_
