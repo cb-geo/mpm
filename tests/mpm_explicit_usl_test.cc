@@ -21,6 +21,9 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
   REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
           true);
 
+  // Write JSON Entity Sets file
+  REQUIRE(mpm_test::write_entity_set() == true);
+
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_2d() == true);
 
