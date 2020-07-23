@@ -467,7 +467,7 @@ mpm::Index mpm::Mesh<Tdim>::nnodes_rank() {
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::generate_material_points(
     unsigned nquadratures, const std::string& particle_type,
-    const std::vector<unsigned>& material_id, int cset_id, unsigned pset_id) {
+    const std::vector<unsigned>& material_ids, int cset_id, unsigned pset_id) {
   bool status = true;
   try {
     if (cells_.size() > 0) {
@@ -477,8 +477,7 @@ bool mpm::Mesh<Tdim>::generate_material_points(
       bool checks = false;
       // Get material
       std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
-      for (const auto m_id : material_id)
-        material.emplace_back(materials_.at(m_id));
+      for (auto m_id : material_ids) material.emplace_back(materials_.at(m_id));
 
       // If set id is -1, use all cells
       auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
@@ -537,7 +536,7 @@ bool mpm::Mesh<Tdim>::generate_material_points(
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
     const std::string& particle_type, const std::vector<VectorDim>& coordinates,
-    const std::vector<unsigned>& material_id, unsigned pset_id,
+    const std::vector<unsigned>& material_ids, unsigned pset_id,
     bool check_duplicates) {
   bool status = true;
   try {
@@ -545,8 +544,7 @@ bool mpm::Mesh<Tdim>::create_particles(
     std::vector<mpm::Index> pids;
     // Get material
     std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
-    for (const auto m_id : material_id)
-      material.emplace_back(materials_.at(m_id));
+    for (auto m_id : material_ids) material.emplace_back(materials_.at(m_id));
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
@@ -1650,19 +1648,19 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       auto particle_type =
           generator["particle_type"].template get<std::string>();
       // Material id
-      std::vector<unsigned> material_id;
+      std::vector<unsigned> material_ids;
       if (generator.at("material_id").is_array())
-        material_id =
+        material_ids =
             generator["material_id"].template get<std::vector<unsigned>>();
       else
-        material_id.emplace_back(
+        material_ids.emplace_back(
             generator["material_id"].template get<unsigned>());
       // Cell set id
       int cset_id = generator["cset_id"].template get<int>();
       // Particle set id
       unsigned pset_id = generator["pset_id"].template get<unsigned>();
       status = this->generate_material_points(nparticles_dir, particle_type,
-                                              material_id, cset_id, pset_id);
+                                              material_ids, cset_id, pset_id);
     }
 
     // Generate material points at the Gauss location in all cells
@@ -1676,10 +1674,10 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
           generator["particle_type"].template get<std::string>();
       // Material id
       if (generator.at("material_id").is_array())
-        inject.material_id =
+        inject.material_ids =
             generator["material_id"].template get<std::vector<unsigned>>();
       else
-        inject.material_id.emplace_back(
+        inject.material_ids.emplace_back(
             generator["material_id"].template get<unsigned>());
       // Cell set id
       inject.cell_set_id = generator["cset_id"].template get<int>();
@@ -1727,7 +1725,7 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
     bool checks = false;
     // Get material
     std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
-    for (const auto m_id : injection.material_id)
+    for (auto m_id : injection.material_ids)
       material.emplace_back(materials_.at(m_id));
 
     // Check if duration is within the current time
@@ -1794,12 +1792,13 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   bool check_duplicates = generator["check_duplicates"].template get<bool>();
 
   // Material id
-  std::vector<unsigned> material_id;
+  std::vector<unsigned> material_ids;
   if (generator.at("material_id").is_array())
-    material_id =
+    material_ids =
         generator["material_id"].template get<std::vector<unsigned>>();
   else
-    material_id.emplace_back(generator["material_id"].template get<unsigned>());
+    material_ids.emplace_back(
+        generator["material_id"].template get<unsigned>());
 
   const std::string reader = generator["io_type"].template get<std::string>();
 
@@ -1810,7 +1809,7 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   auto coords = particle_io->read_particles(file_loc);
 
   // Create particles from coordinates
-  bool status = this->create_particles(particle_type, coords, material_id,
+  bool status = this->create_particles(particle_type, coords, material_ids,
                                        pset_id, check_duplicates);
 
   if (!status) throw std::runtime_error("Addition of particles to mesh failed");

@@ -195,7 +195,7 @@ class Mesh {
   //! \retval status Create particle status
   bool create_particles(const std::string& particle_type,
                         const std::vector<VectorDim>& coordinates,
-                        const std::vector<unsigned>& material_id,
+                        const std::vector<unsigned>& material_ids,
                         unsigned pset_id, bool check_duplicates = true);
 
   //! Add a particle to the mesh
@@ -341,7 +341,7 @@ class Mesh {
   //! \retval point Material point coordinates
   bool generate_material_points(unsigned nquadratures,
                                 const std::string& particle_type,
-                                const std::vector<unsigned>& material_id,
+                                const std::vector<unsigned>& material_ids,
                                 int cset_id, unsigned pset_id);
 
   //! Initialise material models
