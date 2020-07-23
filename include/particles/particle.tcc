@@ -7,10 +7,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   cell_ = nullptr;
   // Nodes
   nodes_.clear();
-  // Set material pointer to null
-  material_.emplace_back(nullptr);
-  material_id_.emplace_back(std::numeric_limits<unsigned>::max());
-  state_variables_.emplace_back(mpm::dense_map());
+  // Set material containers
+  this->initialise_material(1);
   // Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -24,9 +22,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   this->initialise();
   cell_ = nullptr;
   nodes_.clear();
-  material_.emplace_back(nullptr);
-  material_id_.emplace_back(std::numeric_limits<unsigned>::max());
-  state_variables_.emplace_back(mpm::dense_map());
+  // Set material containers
+  this->initialise_material(1);
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -253,6 +250,18 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
+//! Initialise particle material container
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::initialise_material(unsigned phase_size) {
+  material_.resize(phase_size);
+  material_id_.resize(phase_size);
+  state_variables_.resize(phase_size);
+  std::fill(material_.begin(), material_.end(), nullptr);
+  std::fill(material_id_.begin(), material_id_.end(),
+            std::numeric_limits<unsigned>::max());
+  std::fill(state_variables_.begin(), state_variables_.end(), mpm::dense_map());
+}
+
 //! Assign material state variables from neighbour particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material_state_vars(
@@ -386,9 +395,10 @@ bool mpm::Particle<Tdim>::assign_material(
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      material_[phase] = material;
-      material_id_[phase] = material_[phase]->id();
-      state_variables_[phase] = material_[phase]->initialise_state_variables();
+      material_.at(phase) = material;
+      material_id_.at(phase) = material_[phase]->id();
+      state_variables_.at(phase) =
+          material_[phase]->initialise_state_variables();
       status = true;
     } else {
       throw std::runtime_error("Material is undefined!");

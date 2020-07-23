@@ -289,8 +289,20 @@ class Particle : public ParticleBase<Tdim> {
   //! Return neighbour ids
   std::vector<mpm::Index> neighbours() const override { return neighbours_; };
 
+ protected:
+  //! Initialise particle material container
+  //! \details This function allocate memory and initialise the material related
+  //! containers according to the particle phase, i.e. solid or fluid particle
+  //! has phase_size = 1, whereas two-phase (solid-fluid) or three-phase
+  //! (solid-water-air) particle have phase_size = 2 and 3, respectively.
+  //! \param[in] phase_size The material phase size
+  void initialise_material(unsigned phase_size = 1);
+
  private:
   //! Compute strain rate
+  //! \param[in] dn_dx The spatial gradient of shape function
+  //! \param[in] phase Index to indicate phase
+  //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
