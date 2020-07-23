@@ -476,8 +476,9 @@ bool mpm::Mesh<Tdim>::generate_material_points(
       unsigned before_generation = this->nparticles();
       bool checks = false;
       // Get material
-      std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
-      for (auto m_id : material_ids) material.emplace_back(materials_.at(m_id));
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      for (auto m_id : material_ids)
+        materials.emplace_back(materials_.at(m_id));
 
       // If set id is -1, use all cells
       auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
@@ -501,8 +502,8 @@ bool mpm::Mesh<Tdim>::generate_material_points(
           status = this->add_particle(particle, checks);
           if (status) {
             map_particles_[pid]->assign_cell(*citr);
-            for (unsigned phase = 0; phase < material.size(); phase++)
-              map_particles_[pid]->assign_material(material[phase], phase);
+            for (unsigned phase = 0; phase < materials.size(); phase++)
+              map_particles_[pid]->assign_material(materials[phase], phase);
             pids.emplace_back(pid);
           } else
             throw std::runtime_error("Generate particles in mesh failed");
@@ -543,8 +544,8 @@ bool mpm::Mesh<Tdim>::create_particles(
     // Particle ids
     std::vector<mpm::Index> pids;
     // Get material
-    std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
-    for (auto m_id : material_ids) material.emplace_back(materials_.at(m_id));
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+    for (auto m_id : material_ids) materials.emplace_back(materials_.at(m_id));
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
@@ -563,8 +564,8 @@ bool mpm::Mesh<Tdim>::create_particles(
 
       // If insertion is successful
       if (insert_status) {
-        for (unsigned phase = 0; phase < material.size(); phase++)
-          map_particles_[pid]->assign_material(material[phase], phase);
+        for (unsigned phase = 0; phase < materials.size(); phase++)
+          map_particles_[pid]->assign_material(materials[phase], phase);
         pids.emplace_back(pid);
       } else
         throw std::runtime_error("Addition of particle to mesh failed!");
@@ -1724,9 +1725,9 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
     unsigned pid = this->nparticles();
     bool checks = false;
     // Get material
-    std::vector<std::shared_ptr<mpm::Material<Tdim>>> material;
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
     for (auto m_id : injection.material_ids)
-      material.emplace_back(materials_.at(m_id));
+      materials.emplace_back(materials_.at(m_id));
 
     // Check if duration is within the current time
     if (injection.start_time <= current_time &&
@@ -1760,8 +1761,8 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
             unsigned status = this->add_particle(particle, checks);
             if (status) {
               map_particles_[pid]->assign_cell(*citr);
-              for (unsigned phase = 0; phase < material.size(); phase++)
-                map_particles_[pid]->assign_material(material[phase], phase);
+              for (unsigned phase = 0; phase < materials.size(); phase++)
+                map_particles_[pid]->assign_material(materials[phase], phase);
               ++pid;
               injected_particles.emplace_back(particle);
             }
