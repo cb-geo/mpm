@@ -336,17 +336,20 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         for (const auto& material_set : material_sets) {
           unsigned material_id =
               material_set["material_id"].template get<unsigned>();
+          unsigned phase_id = mpm::ParticlePhase::Solid;
+          if (material_set.contains("phase_id"))
+            phase_id = material_set["phase_id"].template get<unsigned>();
           unsigned pset_id = material_set["pset_id"].template get<unsigned>();
           // Update material_id for particles in each pset
           mesh_->iterate_over_particle_set(
-              pset_id,
-              std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                        std::placeholders::_1, materials_.at(material_id)));
+              pset_id, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                                 std::placeholders::_1,
+                                 materials_.at(material_id), phase_id));
         }
       }
     } catch (std::exception& exception) {
-      console_->warn("{} #{}: Material sets are not specified", __FILE__, __LINE__,
-                     exception.what());
+      console_->warn("{} #{}: Material sets are not specified", __FILE__,
+                     __LINE__, exception.what());
     }
 
   } catch (std::exception& exception) {
