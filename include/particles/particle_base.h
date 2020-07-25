@@ -296,9 +296,6 @@ class ParticleBase {
   //! Return traction
   virtual VectorDim traction() const = 0;
 
-  //! Return set traction bool
-  virtual bool set_traction() const = 0;
-
   //! Compute updated position
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;

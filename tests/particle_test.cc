@@ -234,6 +234,14 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
     }
+
+    // Check for boolean property assignment and return
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            true);
+    particle->assign_boolean_property(mpm::properties::Boolean::SetTraction,
+                                      false);
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            false);
   }
 
   SECTION("Check initialise particle HDF5") {
@@ -1368,6 +1376,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
     }
+
+    // Check for boolean property assignment and return
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            true);
+    particle->assign_boolean_property(mpm::properties::Boolean::SetTraction,
+                                      false);
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            false);
   }
 
   // Check initialise particle from HDF5 file

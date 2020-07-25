@@ -94,7 +94,7 @@ void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
 template <unsigned Tdim>
 void map_traction_force(
     std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
-  if (particle->set_traction()) {
+  if (particle->boolean_property(mpm::properties::Boolean::SetTraction)) {
     // Map particle traction forces to nodes
     particle->map_vector_property_to_nodes(
         mpm::properties::Vector::ExternalForce, true, mpm::ParticlePhase::Solid,

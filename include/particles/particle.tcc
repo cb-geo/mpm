@@ -230,13 +230,16 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::initialise() {
   dstrain_.setZero();
   natural_size_.setZero();
-  set_traction_ = false;
   size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
   traction_.setZero();
   volumetric_strain_centroid_ = 0.;
+
+  // Initialize boolean properties
+  boolean_properties_.emplace(
+      std::make_pair(mpm::properties::Boolean::SetTraction, false));
 
   // Initialize scalar properties
   scalar_properties_.emplace(
@@ -685,7 +688,7 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
     // Assign traction
     traction_(direction) = traction * this->volume() / this->size_(direction);
     status = true;
-    this->set_traction_ = true;
+    this->assign_boolean_property(mpm::properties::Boolean::SetTraction, true);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

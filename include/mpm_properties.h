@@ -4,7 +4,7 @@
 namespace mpm {
 namespace properties {
 //! Boolean Properties
-enum Boolean : unsigned int { FreeSurface };
+enum Boolean : unsigned int { SetTraction };
 //! Scalar Properties
 enum Scalar : unsigned int {
   Mass,

@@ -224,9 +224,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
-  //! Return set traction bool
-  bool set_traction() const override { return set_traction_; }
-
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
   //! \param[in] velocity_update Update particle velocity from nodal vel
@@ -342,8 +339,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> dstrain_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
-  //! Set traction
-  bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
   //! dN/dX
