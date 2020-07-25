@@ -51,8 +51,9 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_boolean_property(
     mpm::properties::Boolean property, bool boolean) noexcept {
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   boolean_properties_.at(property) = boolean;
+  node_mutex_.unlock();
 }
 
 //! Return boolean property
@@ -74,9 +75,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   scalar_properties_.at(property)[phase] =
       (scalar_properties_.at(property)[phase] * factor) + value;
+  node_mutex_.unlock();
 }
 
 //! Update scalar property at the nodes from particle
@@ -100,10 +102,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   Eigen::Matrix<double, Tdim, 1> vecvalue =
       vector_properties_.at(property).col(phase);
   vector_properties_.at(property).col(phase) = (vecvalue * factor) + value;
+  node_mutex_.unlock();
 }
 
 //! Update vector property at the nodes from particle
