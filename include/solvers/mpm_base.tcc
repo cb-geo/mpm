@@ -339,12 +339,15 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         for (const auto& material_set : material_sets) {
           unsigned material_id =
               material_set["material_id"].template get<unsigned>();
+          unsigned phase_id = mpm::ParticlePhase::Solid;
+          if (material_set.contains("phase_id"))
+            phase_id = material_set["phase_id"].template get<unsigned>();
           unsigned pset_id = material_set["pset_id"].template get<unsigned>();
           // Update material_id for particles in each pset
           mesh_->iterate_over_particle_set(
-              pset_id,
-              std::bind(&mpm::ParticleBase<Tdim>::assign_material,
-                        std::placeholders::_1, materials_.at(material_id)));
+              pset_id, std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                                 std::placeholders::_1,
+                                 materials_.at(material_id), phase_id));
         }
       }
     } catch (std::exception& exception) {
@@ -1268,4 +1271,34 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
                        .count());
   }
 #endif  // MPI
+}
+
+//! MPM pressure smoothing
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
+  // Assign pressure to nodes
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                std::placeholders::_1, phase));
+
+#ifdef USE_MPI
+  int mpi_size = 1;
+
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+  // Run if there is more than a single MPI task
+  if (mpi_size > 1) {
+    // MPI all reduce nodal pressure
+    mesh_->template nodal_halo_exchange<double, 1>(
+        std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
+        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
+                  phase, std::placeholders::_2));
+  }
+#endif
+
+  // Smooth pressure over particles
+  mesh_->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                std::placeholders::_1, phase));
 }

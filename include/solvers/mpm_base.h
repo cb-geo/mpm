@@ -92,6 +92,10 @@ class MPMBase : public MPM {
   //! \param[in] initial_step Start of simulation or later steps
   void mpi_domain_decompose(bool initial_step = false) override;
 
+  //! Pressure smoothing
+  //! \param[in] phase Phase to smooth pressure
+  void pressure_smoothing(unsigned phase);
+
  private:
   //! Return if a mesh will be isoparametric or not
   //! \retval isoparametric Status of mesh type
