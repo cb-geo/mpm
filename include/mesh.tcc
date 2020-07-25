@@ -1060,7 +1060,7 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_particles_predicate(Toper oper, Tpred pred) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if (pred(*pitr)) oper(*pitr);
   }
