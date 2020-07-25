@@ -80,21 +80,17 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
- protected:
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
+ protected:
   //! Locate particle
   void locate_particle();
 
   //! Domain decomposition
   //! \param[in] initial_step Start of simulation or later steps
   void mpi_domain_decompose(bool initial_step = false) override;
-
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase);
 
  private:
   //! Return if a mesh will be isoparametric or not

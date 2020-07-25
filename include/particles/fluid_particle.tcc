@@ -59,7 +59,9 @@ template <>
 inline void mpm::FluidParticle<1>::map_internal_force() noexcept {
   // initialise a vector of total stress (deviatoric + turbulent - pressure)
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->projection_param_ * state_variables_.at("pressure");
+  total_stress(0) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
@@ -77,8 +79,12 @@ template <>
 inline void mpm::FluidParticle<2>::map_internal_force() noexcept {
   // initialise a vector of total stress (deviatoric + turbulent - pressure)
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->projection_param_ * state_variables_.at("pressure");
-  total_stress(1) -= this->projection_param_ * state_variables_.at("pressure");
+  total_stress(0) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
+  total_stress(1) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -99,9 +105,15 @@ template <>
 inline void mpm::FluidParticle<3>::map_internal_force() noexcept {
   // initialise a vector of total stress (deviatoric + turbulent - pressure)
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->projection_param_ * state_variables_.at("pressure");
-  total_stress(1) -= this->projection_param_ * state_variables_.at("pressure");
-  total_stress(2) -= this->projection_param_ * state_variables_.at("pressure");
+  total_stress(0) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
+  total_stress(1) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
+  total_stress(2) -=
+      this->projection_param_ *
+      this->state_variables(mpm::ParticlePhase::SinglePhase)["pressure"];
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -145,7 +157,8 @@ bool mpm::FluidParticle<Tdim>::map_poisson_right_to_cell() {
     // Compute local poisson rhs matrix
     cell_->compute_local_poisson_right(
         shapefn_, dn_dx_, volume_,
-        material_->template property<double>(std::string("density")));
+        this->material(mpm::ParticlePhase::SinglePhase)
+            ->template property<double>(std::string("density")));
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
@@ -164,12 +177,14 @@ bool mpm::FluidParticle<Tdim>::compute_updated_pressure() {
     }
 
     // Get interpolated nodal pressure
-    state_variables_.at("pressure") =
-        state_variables_.at("pressure") * projection_param_ +
+    state_variables_[mpm::ParticlePhase::SinglePhase].at("pressure") =
+        state_variables_[mpm::ParticlePhase::SinglePhase].at("pressure") *
+            projection_param_ +
         pressure_increment;
 
     // Overwrite pressure if free surface
-    if (this->free_surface()) state_variables_.at("pressure") = 0.0;
+    if (this->free_surface())
+      state_variables_[mpm::ParticlePhase::SinglePhase].at("pressure") = 0.0;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
