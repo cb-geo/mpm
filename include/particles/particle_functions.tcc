@@ -67,16 +67,17 @@ void map_mass_momentum_to_nodes(
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 void map_mass_pressure_to_nodes(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
+    unsigned phase = mpm::ParticlePhase::Solid) noexcept {
   // Mass is initialized
   assert(particle->mass() != std::numeric_limits<double>::max());
 
   // Check if state variable pressure is found
-  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
+  if (particle->pressure(phase) != std::numeric_limits<double>::quiet_NaN()) {
     // Map particle pressure to nodes
     particle->map_scalar_property_to_nodes(
-        mpm::properties::Scalar::MassPressure, true, mpm::ParticlePhase::Solid,
-        particle->mass() * particle->pressure());
+        mpm::properties::Scalar::MassPressure, true, phase,
+        particle->mass() * particle->pressure(phase));
   }
 }
 
@@ -105,15 +106,16 @@ void map_traction_force(
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
 void compute_pressure_smoothing(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
+    unsigned phase = mpm::ParticlePhase::Solid) noexcept {
   // Assert
   assert(particle->cell_ptr());
 
   // Check if particle has pressure
-  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
+  if (particle->pressure(phase) != std::numeric_limits<double>::quiet_NaN()) {
     double pressure = particle->interpolate_scalar_property_from_nodes(
-        mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
-    particle->assign_state_variable("pressure", pressure);
+        mpm::properties::Scalar::Pressure, phase);
+    particle->assign_state_variable("pressure", pressure, phase);
   }
 }
 
