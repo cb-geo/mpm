@@ -39,17 +39,10 @@ class CGEigen : public SolverBase<Traits> {
   std::string solver_type() const { return "Eigen"; }
 
   //! Assign global active dof
-  void assign_global_active_dof(unsigned global_active_dof) override {
-    throw std::runtime_error(
-        "Calling the function (assign_global_active_dof) in CGEigen:: "
-        "illegal operation!");
-  }
+  void assign_global_active_dof(unsigned global_active_dof) override {}
 
   //! Assign rank to global mapper
   void assign_rank_global_mapper(std::vector<int> rank_global_mapper) override {
-    throw std::runtime_error(
-        "Calling the function (assign_rank_global_mapper) in CGEigen:: "
-        "illegal operation!");
   }
 
  protected:
