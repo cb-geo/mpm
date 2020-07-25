@@ -347,8 +347,8 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
         }
       }
     } catch (std::exception& exception) {
-      console_->warn("{} #{}: Material sets are not specified", __FILE__, __LINE__,
-                     exception.what());
+      console_->warn("{} #{}: Material sets are not specified", __FILE__,
+                     __LINE__, exception.what());
     }
 
   } catch (std::exception& exception) {

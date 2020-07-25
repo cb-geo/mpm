@@ -99,8 +99,9 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_boolean_property(
     mpm::properties::Boolean property, bool boolean) noexcept {
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   boolean_properties_.at(property) = boolean;
+  node_mutex_.unlock();
 }
 
 //! Return boolean property
@@ -122,9 +123,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_scalar_property(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   scalar_properties_.at(property)[phase] =
       (scalar_properties_.at(property)[phase] * factor) + value;
+  node_mutex_.unlock();
 }
 
 //! Update scalar property at the nodes from particle
@@ -148,10 +150,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_vector_property(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign value
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   Eigen::Matrix<double, Tdim, 1> vecvalue =
       vector_properties_.at(property).col(phase);
   vector_properties_.at(property).col(phase) = (vecvalue * factor) + value;
+  node_mutex_.unlock();
 }
 
 //! Update vector property at the nodes from particle
@@ -631,15 +634,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
 //! Add material id from material points to material_ids_
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::append_material_id(unsigned id) {
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   material_ids_.emplace(id);
+  node_mutex_.unlock();
 }
 
 // Assign MPI rank to node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   auto status = this->mpi_ranks_.insert(rank);
+  node_mutex_.unlock();
   return status.second;
 }
 
@@ -650,9 +655,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     const Eigen::MatrixXd& property_value, unsigned mat_id,
     unsigned nprops) noexcept {
   // Update/assign property
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   property_handle_->update_property(property, prop_id_, mat_id, property_value,
                                     nprops);
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial change in momentum
@@ -661,7 +667,7 @@ void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_change_in_momentum() {
   // iterate over all materials in the material_ids set and update the change in
   // momentum
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const Eigen::Matrix<double, 1, 1> mass =
         property_handle_->property("masses", prop_id_, *mitr);
@@ -673,6 +679,7 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial separation vector
@@ -682,7 +689,7 @@ void mpm::Node<Tdim, Tdof,
   // iterate over all materials in the material_ids set, update the
   // displacements and calculate the displacement of the center of mass for this
   // node
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const auto& material_displacement =
         property_handle_->property("displacements", prop_id_, *mitr, Tdim);
@@ -717,6 +724,7 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->update_property("separation_vectors", prop_id_, *mitr,
                                       separation_vector, Tdim);
   }
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial normal unit vector
@@ -724,7 +732,7 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_normal_unit_vector() {
   // Iterate over all materials in the material_ids set
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // calculte the normal unit vector
     VectorDim domain_gradient =
@@ -737,4 +745,5 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
                                       normal_unit_vector, Tdim);
   }
+  node_mutex_.unlock();
 }
