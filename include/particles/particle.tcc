@@ -7,8 +7,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord)
   cell_ = nullptr;
   // Nodes
   nodes_.clear();
-  // Set material pointer to null
-  material_ = nullptr;
+  // Set material containers
+  this->initialise_material(1);
   // Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -22,7 +22,8 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   this->initialise();
   cell_ = nullptr;
   nodes_.clear();
-  material_ = nullptr;
+  // Set material containers
+  this->initialise_material(1);
   //! Logger
   std::string logger =
       "particle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -100,7 +101,7 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   this->nodes_.clear();
 
   // Material id
-  this->material_id_ = particle.material_id;
+  this->material_id_[mpm::ParticlePhase::Solid] = particle.material_id;
 
   return true;
 }
@@ -112,17 +113,18 @@ bool mpm::Particle<Tdim>::initialise_particle(
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
   bool status = this->initialise_particle(particle);
   if (material != nullptr) {
-    if (this->material_id_ == material->id() ||
-        this->material_id_ == std::numeric_limits<unsigned>::max()) {
+    if (this->material_id() == material->id() ||
+        this->material_id() == std::numeric_limits<unsigned>::max()) {
       bool assign_mat = this->assign_material(material);
       if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
-      auto mat_state_vars = material_->initialise_state_variables();
+      auto mat_state_vars = (this->material())->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
         unsigned i = 0;
-        auto state_variables = material_->state_variables();
+        auto state_variables = (this->material())->state_variables();
         for (const auto& state_var : state_variables) {
-          this->state_variables_.at(state_var) = particle.svars[i];
+          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+              particle.svars[i];
           ++i;
         }
       }
@@ -167,8 +169,9 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   particle_data.mass = this->mass();
   particle_data.volume = this->volume();
   particle_data.pressure =
-      (state_variables_.find("pressure") != state_variables_.end())
-          ? state_variables_.at("pressure")
+      (state_variables_[mpm::ParticlePhase::Solid].find("pressure") !=
+       state_variables_[mpm::ParticlePhase::Solid].end())
+          ? state_variables_[mpm::ParticlePhase::Solid].at("pressure")
           : 0.;
 
   particle_data.coord_x = coordinates[0];
@@ -210,14 +213,16 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
   particle_data.material_id = this->material_id();
 
   // Write state variables
-  if (material_ != nullptr) {
-    particle_data.nstate_vars = state_variables_.size();
-    if (state_variables_.size() > 20)
+  if (this->material() != nullptr) {
+    particle_data.nstate_vars =
+        state_variables_[mpm::ParticlePhase::Solid].size();
+    if (state_variables_[mpm::ParticlePhase::Solid].size() > 20)
       throw std::runtime_error("# of state variables cannot be more than 20");
     unsigned i = 0;
-    auto state_variables = material_->state_variables();
+    auto state_variables = (this->material())->state_variables();
     for (const auto& state_var : state_variables) {
-      particle_data.svars[i] = state_variables_.at(state_var);
+      particle_data.svars[i] =
+          state_variables_[mpm::ParticlePhase::Solid].at(state_var);
       ++i;
     }
   }
@@ -262,19 +267,31 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["displacements"] = [&]() { return displacement(); };
 }
 
+//! Initialise particle material container
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::initialise_material(unsigned phase_size) {
+  material_.resize(phase_size);
+  material_id_.resize(phase_size);
+  state_variables_.resize(phase_size);
+  std::fill(material_.begin(), material_.end(), nullptr);
+  std::fill(material_id_.begin(), material_id_.end(),
+            std::numeric_limits<unsigned>::max());
+  std::fill(state_variables_.begin(), state_variables_.end(), mpm::dense_map());
+}
+
 //! Assign material state variables from neighbour particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
-    const std::shared_ptr<mpm::Material<Tdim>>& material) {
+    const std::shared_ptr<mpm::Material<Tdim>>& material, unsigned phase) {
   bool status = false;
-  if (material != nullptr && this->material_ != nullptr &&
-      this->material_id_ == material->id()) {
+  if (material != nullptr && this->material() != nullptr &&
+      this->material_id() == material->id()) {
     // Clone state variables
-    auto mat_state_vars = material_->initialise_state_variables();
-    if (this->state_variables_.size() == state_vars.size() &&
+    auto mat_state_vars = (this->material())->initialise_state_variables();
+    if (state_variables_[phase].size() == state_vars.size() &&
         mat_state_vars.size() == state_vars.size()) {
-      this->state_variables_ = state_vars;
+      this->state_variables_[phase] = state_vars;
       status = true;
     }
   }
@@ -390,14 +407,15 @@ void mpm::Particle<Tdim>::remove_cell() {
 // Assign a material to particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material(
-    const std::shared_ptr<Material<Tdim>>& material) {
+    const std::shared_ptr<Material<Tdim>>& material, unsigned phase) {
   bool status = false;
   try {
     // Check if material is valid and properties are set
     if (material != nullptr) {
-      material_ = material;
-      material_id_ = material_->id();
-      state_variables_ = material_->initialise_state_variables();
+      material_.at(phase) = material;
+      material_id_.at(phase) = material_[phase]->id();
+      state_variables_.at(phase) =
+          material_[phase]->initialise_state_variables();
       status = true;
     } else {
       throw std::runtime_error("Material is undefined!");
@@ -406,12 +424,6 @@ bool mpm::Particle<Tdim>::assign_material(
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
   }
   return status;
-}
-
-// Return material of particle
-template <unsigned Tdim>
-std::shared_ptr<mpm::Material<Tdim>> mpm::Particle<Tdim>::material() const {
-  return material_;
 }
 
 // Compute reference location cell to particle
@@ -494,9 +506,10 @@ void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   // Map mass and momentum to nodal property taking into account the material id
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     nodal_mass(0, 0) = this->mass() * shapefn_[i];
-    nodes_[i]->update_property(true, "masses", nodal_mass, material_id_, 1);
+    nodes_[i]->update_property(true, "masses", nodal_mass, this->material_id(),
+                               1);
     nodes_[i]->update_property(true, "momenta", this->velocity() * nodal_mass,
-                               material_id_, Tdim);
+                               this->material_id(), Tdim);
   }
 }
 
@@ -513,7 +526,7 @@ void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
     const auto& displacement =
         this->mass() * shapefn_[i] * this->displacement();
     nodes_[i]->update_property(true, "displacements", displacement,
-                               material_id_, Tdim);
+                               this->material_id(), Tdim);
   }
 }
 
@@ -531,8 +544,8 @@ void mpm::Particle<
     Eigen::Matrix<double, Tdim, 1> gradient;
     for (unsigned j = 0; j < Tdim; ++j)
       gradient[j] = this->volume() * dn_dx_(i, j);
-    nodes_[i]->update_property(true, "domain_gradients", gradient, material_id_,
-                               Tdim);
+    nodes_[i]->update_property(true, "domain_gradients", gradient,
+                               this->material_id(), Tdim);
   }
 }
 
@@ -618,10 +631,12 @@ void mpm::Particle<Tdim>::compute_strain(double dt) noexcept {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::compute_stress() noexcept {
   // Check if material ptr is valid
-  assert(material_ != nullptr);
+  assert(this->material() != nullptr);
   // Calculate stress
   this->stress_ =
-      material_->compute_stress(stress_, dstrain_, this, &state_variables_);
+      (this->material())
+          ->compute_stress(stress_, dstrain_, this,
+                           &state_variables_[mpm::ParticlePhase::Solid]);
 }
 
 //! Map internal force
@@ -750,7 +765,7 @@ Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodes_[i]->append_material_id(material_id_);
+    nodes_[i]->append_material_id(this->material_id());
 }
 
 //! Assign neighbour particles
