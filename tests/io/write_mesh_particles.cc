@@ -15,7 +15,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   auto io_type = "Ascii2D";
   std::string material = "LinearElastic2D";
   std::vector<double> gravity{{0., -9.81}};
-  unsigned material_id = 1;
+  unsigned material_id = 0;
   std::vector<double> xvalues{{0.0, 0.5, 1.0}};
   std::vector<double> fxvalues{{0.0, 1.0, 1.0}};
 
@@ -35,6 +35,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
       {"title", "Example JSON Input for MPM"},
       {"mesh",
        {{"mesh", "mesh-" + dimension + ".txt"},
+        {"entity_sets", "entity_sets_0.json"},
         {"io_type", io_type},
         {"check_duplicates", true},
         {"isoparametric", false},
@@ -64,6 +65,8 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
          {"density", 2300.},
          {"youngs_modulus", 1.5E+6},
          {"poisson_ratio", 0.25}}}},
+      {"material_sets",
+       {{{"material_id", 1}, {"phase_id", 0}, {"pset_id", 2}}}},
       {"external_loading_conditions",
        {{"gravity", gravity},
         {"particle_surface_traction",
@@ -104,6 +107,23 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
   // Dump JSON as an input file to be read
   std::ofstream file;
   file.open((file_name + "-" + dimension + ".json").c_str());
+  file << json_file.dump(2);
+  file.close();
+
+  return true;
+}
+
+// Write JSON Entity Set
+bool write_entity_set() {
+  // JSON Entity Sets
+  Json json_file = {
+      {"particle_sets",
+       {{{"id", 2},
+         {"set", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}}}}}};
+
+  // Dump JSON as an input file to be read
+  std::ofstream file;
+  file.open("entity_sets_0.json");
   file << json_file.dump(2);
   file.close();
 
