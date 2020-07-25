@@ -154,8 +154,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_correction_force(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign correction force
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   correction_force_.col(phase) = correction_force_.col(phase) * factor + force;
+  node_mutex_.unlock();
 }
 
 //! Assign nodal momentum
@@ -565,8 +566,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_density(bool update,
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign mass
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   density_(phase) = (density_(phase) * factor) + density;
+  node_mutex_.unlock();
 }
 
 //! Compute mass density (Z. Wiezckowski, 2004)
