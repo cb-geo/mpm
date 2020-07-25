@@ -21,6 +21,9 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
   REQUIRE(mpm_test::write_json(2, resume, analysis, stress_update, fname) ==
           true);
 
+  // Write JSON Entity Sets file
+  REQUIRE(mpm_test::write_entity_set() == true);
+
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_2d() == true);
 
@@ -85,6 +88,15 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     // Solve
     REQUIRE(mpm->solve() == true);
   }
+
+  SECTION("Check pressure smoothing") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    // Pressure smoothing
+    REQUIRE_NOTHROW(mpm->pressure_smoothing(0));
+  }
 }
 
 // Check MPM Explicit
@@ -100,6 +112,9 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
   const bool resume = false;
   REQUIRE(mpm_test::write_json(3, resume, analysis, stress_update, fname) ==
           true);
+
+  // Write JSON Entity Sets file
+  REQUIRE(mpm_test::write_entity_set() == true);
 
   // Write Mesh
   REQUIRE(mpm_test::write_mesh_3d() == true);
@@ -161,5 +176,14 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
     REQUIRE(mpm->checkpoint_resume() == true);
     // Solve
     REQUIRE(mpm->solve() == true);
+  }
+
+  SECTION("Check pressure smoothing") {
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
+    // Pressure smoothing
+    REQUIRE_NOTHROW(mpm->pressure_smoothing(0));
   }
 }

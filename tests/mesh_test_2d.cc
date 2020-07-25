@@ -51,6 +51,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
   // Assign material
   unsigned mid = 0;
+  std::vector<unsigned> mids(1, mid);
   // Initialise material
   Json jmaterial;
   jmaterial["density"] = 1000.;
@@ -530,7 +531,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
     // Generate material points in cell
     REQUIRE(mesh->nparticles() == 0);
 
-    REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1, 0) ==
+    REQUIRE(mesh->generate_material_points(1, particle_type, mids, -1, 0) ==
             false);
     REQUIRE(mesh->nparticles() == 0);
 
@@ -539,19 +540,19 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
     SECTION("Check generating 1 particle / cell") {
       // Generate material points in cell
-      REQUIRE(mesh->generate_material_points(1, particle_type, mid, -1, 0) ==
+      REQUIRE(mesh->generate_material_points(1, particle_type, mids, -1, 0) ==
               true);
       REQUIRE(mesh->nparticles() == 1);
     }
 
     SECTION("Check generating 2 particle / cell") {
-      REQUIRE(mesh->generate_material_points(2, particle_type, mid, -1, 0) ==
+      REQUIRE(mesh->generate_material_points(2, particle_type, mids, -1, 0) ==
               true);
       REQUIRE(mesh->nparticles() == 4);
     }
 
     SECTION("Check generating 3 particle / cell") {
-      REQUIRE(mesh->generate_material_points(3, particle_type, mid, -1, 0) ==
+      REQUIRE(mesh->generate_material_points(3, particle_type, mids, -1, 0) ==
               true);
       REQUIRE(mesh->nparticles() == 9);
     }
@@ -577,7 +578,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         // Gauss point generation
         Json jgen;
         jgen["type"] = "gauss";
-        jgen["material_id"] = mid;
+        jgen["material_id"] = {0};
         jgen["cset_id"] = 1;
         jgen["particle_type"] = "P2D";
         jgen["check_duplicates"] = false;
@@ -594,7 +595,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
         // Gauss point generation
         Json jgen;
         jgen["type"] = "inject";
-        jgen["material_id"] = mid;
+        jgen["material_id"] = {0};
         jgen["cset_id"] = 1;
         jgen["particle_type"] = "P2D";
         jgen["check_duplicates"] = false;
@@ -781,7 +782,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             // Particle type 2D
             const std::string particle_type = "P2D";
             // Create particles from file
-            mesh->create_particles(particle_type, coordinates, mid, 0, false);
+            mesh->create_particles(particle_type, coordinates, mids, 0, false);
             // Check if mesh has added particles
             REQUIRE(mesh->nparticles() == coordinates.size());
 
@@ -840,7 +841,7 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
             unsigned nparticles = coordinates.size();
             coordinates.clear();
             // This fails with empty list error in particle creation
-            mesh->create_particles(particle_type, coordinates, mid, 0, false);
+            mesh->create_particles(particle_type, coordinates, mids, 0, false);
             REQUIRE(mesh->nparticles() == nparticles);
 
             const unsigned phase = 0;

@@ -44,7 +44,7 @@ class FluidParticle : public mpm::Particle<Tdim> {
   //! Initial pressure
   //! \param[in] pressure Initial pressure
   void initial_pressure(double pressure) override {
-    state_variables_.at("pressure") = pressure;
+    state_variables_[mpm::ParticlePhase::SinglePhase].at("pressure") = pressure;
   }
 
   //! ----------------------------------------------------------------
@@ -78,6 +78,8 @@ class FluidParticle : public mpm::Particle<Tdim> {
   using ParticleBase<Tdim>::cell_;
   //! Nodes
   using ParticleBase<Tdim>::nodes_;
+  //! Fluid material
+  using ParticleBase<Tdim>::material_;
   //! State variables
   using ParticleBase<Tdim>::state_variables_;
   //! Shape functions
@@ -86,8 +88,6 @@ class FluidParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::dn_dx_;
   //! Fluid strain rate
   using Particle<Tdim>::strain_rate_;
-  //! Fluid material
-  using Particle<Tdim>::material_;
   //! Effective stress of soil skeleton
   using Particle<Tdim>::stress_;
   //! Particle mass density

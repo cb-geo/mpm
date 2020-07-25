@@ -80,11 +80,11 @@ class MPMBase : public MPM {
   //! Write HDF5 files
   void write_hdf5(mpm::Index step, mpm::Index max_steps) override;
 
- protected:
   //! Pressure smoothing
   //! \param[in] phase Phase to smooth pressure
   void pressure_smoothing(unsigned phase);
 
+ protected:
   //! Locate particle
   void locate_particle();
 

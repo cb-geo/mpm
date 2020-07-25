@@ -69,7 +69,7 @@ bool mpm::Mesh<Tdim>::remove_node(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) oper(*nitr);
 }
 
@@ -77,7 +77,7 @@ void mpm::Mesh<Tdim>::iterate_over_nodes(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_nodes_predicate(Toper oper, Tpred pred) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
     if (pred(*nitr)) oper(*nitr);
   }
@@ -192,7 +192,7 @@ std::vector<Eigen::VectorXi> mpm::Mesh<Tdim>::global_node_indices() const {
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_active_nodes(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = active_nodes_.cbegin(); nitr != active_nodes_.cend(); ++nitr)
     oper(*nitr);
 }
@@ -267,7 +267,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
   std::vector<Ttype> prop_get(nhalo_nodes_, mpm::zero<Ttype>());
   std::vector<Ttype> prop_set(nhalo_nodes_, mpm::zero<Ttype>());
 
-#pragma omp parallel for shared(prop_get)
+#pragma omp parallel for schedule(runtime) shared(prop_get)
   for (auto nitr = domain_shared_nodes_.cbegin();
        nitr != domain_shared_nodes_.cend(); ++nitr)
     prop_get.at((*nitr)->ghost_id()) = getter((*nitr));
@@ -275,7 +275,7 @@ void mpm::Mesh<Tdim>::nodal_halo_exchange(Tgetfunctor getter,
   MPI_Allreduce(prop_get.data(), prop_set.data(), nhalo_nodes_ * Tnparam,
                 MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = domain_shared_nodes_.cbegin();
        nitr != domain_shared_nodes_.cend(); ++nitr)
     setter((*nitr), prop_set.at((*nitr)->ghost_id()));
@@ -355,7 +355,7 @@ bool mpm::Mesh<Tdim>::remove_cell(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_cells(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) oper(*citr);
 }
 
@@ -370,7 +370,7 @@ void mpm::Mesh<Tdim>::find_cell_neighbours() {
     for (auto id : (*citr)->nodes_id()) node_cell_map[id].insert(cell_id);
   }
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Iterate over each node in current cell
     for (auto id : (*citr)->nodes_id()) {
@@ -560,10 +560,9 @@ mpm::Index mpm::Mesh<Tdim>::nnodes_rank() {
 
 //! Create cells from node lists
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
-                                               const std::string& particle_type,
-                                               unsigned material_id,
-                                               int cset_id, unsigned pset_id) {
+bool mpm::Mesh<Tdim>::generate_material_points(
+    unsigned nquadratures, const std::string& particle_type,
+    const std::vector<unsigned>& material_ids, int cset_id, unsigned pset_id) {
   bool status = true;
   try {
     if (cells_.size() > 0) {
@@ -572,7 +571,9 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
       unsigned before_generation = this->nparticles();
       bool checks = false;
       // Get material
-      auto material = materials_.at(material_id);
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      for (auto m_id : material_ids)
+        materials.emplace_back(materials_.at(m_id));
 
       // If set id is -1, use all cells
       auto cset = (cset_id == -1) ? this->cells_ : cell_sets_.at(cset_id);
@@ -596,7 +597,8 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
           status = this->add_particle(particle, checks);
           if (status) {
             map_particles_[pid]->assign_cell(*citr);
-            map_particles_[pid]->assign_material(material);
+            for (unsigned phase = 0; phase < materials.size(); phase++)
+              map_particles_[pid]->assign_material(materials[phase], phase);
             pids.emplace_back(pid);
           } else
             throw std::runtime_error("Generate particles in mesh failed");
@@ -630,13 +632,15 @@ bool mpm::Mesh<Tdim>::generate_material_points(unsigned nquadratures,
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::create_particles(
     const std::string& particle_type, const std::vector<VectorDim>& coordinates,
-    unsigned material_id, unsigned pset_id, bool check_duplicates) {
+    const std::vector<unsigned>& material_ids, unsigned pset_id,
+    bool check_duplicates) {
   bool status = true;
   try {
     // Particle ids
     std::vector<mpm::Index> pids;
     // Get material
-    auto material = materials_.at(material_id);
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+    for (auto m_id : material_ids) materials.emplace_back(materials_.at(m_id));
     // Check if particle coordinates is empty
     if (coordinates.empty())
       throw std::runtime_error("List of coordinates is empty");
@@ -655,7 +659,8 @@ bool mpm::Mesh<Tdim>::create_particles(
 
       // If insertion is successful
       if (insert_status) {
-        map_particles_[pid]->assign_material(material);
+        for (unsigned phase = 0; phase < materials.size(); phase++)
+          map_particles_[pid]->assign_material(materials[phase], phase);
         pids.emplace_back(pid);
       } else
         throw std::runtime_error("Addition of particle to mesh failed!");
@@ -997,7 +1002,7 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   // Clear MPI rank at the nodes
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
     (*nitr)->clear_mpi_ranks();
 
@@ -1007,7 +1012,7 @@ void mpm::Mesh<Tdim>::find_domain_shared_nodes() {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   // Assign MPI rank to nodes of cell
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
     (*citr)->assign_mpi_rank_to_nodes();
@@ -1088,7 +1093,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
   }
 
   bool status = false;
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
     // Check if particle is already found, if so don't run for other cells
     // Check if co-ordinates is within the cell, if true
@@ -1107,7 +1112,7 @@ bool mpm::Mesh<Tdim>::locate_particle_cells(
 template <unsigned Tdim>
 template <typename Toper>
 void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
     oper(*pitr);
 }
@@ -1116,7 +1121,7 @@ void mpm::Mesh<Tdim>::iterate_over_particles(Toper oper) {
 template <unsigned Tdim>
 template <typename Toper, typename Tpred>
 void mpm::Mesh<Tdim>::iterate_over_particles_predicate(Toper oper, Tpred pred) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if (pred(*pitr)) oper(*pitr);
   }
@@ -1132,7 +1137,7 @@ void mpm::Mesh<Tdim>::iterate_over_particle_set(int set_id, Toper oper) {
   } else {
     // Iterate over the particle set
     auto set = particle_sets_.at(set_id);
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
     for (auto sitr = set.begin(); sitr != set.cend(); ++sitr) {
       unsigned pid = (*sitr);
       if (map_particles_.find(pid) != map_particles_.end())
@@ -1370,7 +1375,7 @@ bool mpm::Mesh<Tdim>::assign_nodal_concentrated_forces(
     Vector<NodeBase<Tdim>> nodes =
         (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(runtime)
     for (auto nitr = nodes.cbegin(); nitr != nodes.cend(); ++nitr) {
       if (!(*nitr)->assign_concentrated_force(phase, dir, concentrated_force,
                                               mfunction))
@@ -1749,13 +1754,19 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       auto particle_type =
           generator["particle_type"].template get<std::string>();
       // Material id
-      unsigned material_id = generator["material_id"].template get<unsigned>();
+      std::vector<unsigned> material_ids;
+      if (generator.at("material_id").is_array())
+        material_ids =
+            generator["material_id"].template get<std::vector<unsigned>>();
+      else
+        material_ids.emplace_back(
+            generator["material_id"].template get<unsigned>());
       // Cell set id
       int cset_id = generator["cset_id"].template get<int>();
       // Particle set id
       unsigned pset_id = generator["pset_id"].template get<unsigned>();
       status = this->generate_material_points(nparticles_dir, particle_type,
-                                              material_id, cset_id, pset_id);
+                                              material_ids, cset_id, pset_id);
     }
 
     // Generate material points at the Gauss location in all cells
@@ -1768,7 +1779,12 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       inject.particle_type =
           generator["particle_type"].template get<std::string>();
       // Material id
-      inject.material_id = generator["material_id"].template get<unsigned>();
+      if (generator.at("material_id").is_array())
+        inject.material_ids =
+            generator["material_id"].template get<std::vector<unsigned>>();
+      else
+        inject.material_ids.emplace_back(
+            generator["material_id"].template get<unsigned>());
       // Cell set id
       inject.cell_set_id = generator["cset_id"].template get<int>();
       // Duration of injection
@@ -1814,7 +1830,10 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
     unsigned pid = this->nparticles();
     bool checks = false;
     // Get material
-    auto material = materials_.at(injection.material_id);
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+    for (auto m_id : injection.material_ids)
+      materials.emplace_back(materials_.at(m_id));
+
     // Check if duration is within the current time
     if (injection.start_time <= current_time &&
         injection.end_time > current_time) {
@@ -1847,7 +1866,8 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
             unsigned status = this->add_particle(particle, checks);
             if (status) {
               map_particles_[pid]->assign_cell(*citr);
-              map_particles_[pid]->assign_material(material);
+              for (unsigned phase = 0; phase < materials.size(); phase++)
+                map_particles_[pid]->assign_material(materials[phase], phase);
               ++pid;
               injected_particles.emplace_back(particle);
             }
@@ -1878,7 +1898,13 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   bool check_duplicates = generator["check_duplicates"].template get<bool>();
 
   // Material id
-  unsigned material_id = generator["material_id"].template get<unsigned>();
+  std::vector<unsigned> material_ids;
+  if (generator.at("material_id").is_array())
+    material_ids =
+        generator["material_id"].template get<std::vector<unsigned>>();
+  else
+    material_ids.emplace_back(
+        generator["material_id"].template get<unsigned>());
 
   const std::string reader = generator["io_type"].template get<std::string>();
 
@@ -1889,7 +1915,7 @@ bool mpm::Mesh<Tdim>::read_particles_file(const std::shared_ptr<mpm::IO>& io,
   auto coords = particle_io->read_particles(file_loc);
 
   // Create particles from coordinates
-  bool status = this->create_particles(particle_type, coords, material_id,
+  bool status = this->create_particles(particle_type, coords, material_ids,
                                        pset_id, check_duplicates);
 
   if (!status) throw std::runtime_error("Addition of particles to mesh failed");
