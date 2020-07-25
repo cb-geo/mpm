@@ -57,8 +57,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass(bool update, unsigned phase,
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign mass
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   mass_(phase) = (mass_(phase) * factor) + mass;
+  node_mutex_.unlock();
 }
 
 //! Update volume at the nodes from particle
@@ -69,8 +70,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_volume(bool update, unsigned phase,
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign volume
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   volume_(phase) = volume_(phase) * factor + volume;
+  node_mutex_.unlock();
 }
 
 // Assign concentrated force to the node
@@ -118,8 +120,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_external_force(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign external force
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   external_force_.col(phase) = external_force_.col(phase) * factor + force;
+  node_mutex_.unlock();
 }
 
 //! Update internal force (body force / traction force)
@@ -134,8 +137,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_internal_force(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign internal force
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   internal_force_.col(phase) = internal_force_.col(phase) * factor + force;
+  node_mutex_.unlock();
 }
 
 //! Assign nodal momentum
@@ -150,8 +154,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
   const double factor = (update == true) ? 1. : 0.;
 
   // Update/assign momentum
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   momentum_.col(phase) = momentum_.col(phase) * factor + momentum;
+  node_mutex_.unlock();
 }
 
 //! Update pressure at the nodes from particle
@@ -164,8 +169,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
   const double tolerance = 1.E-16;
   // Compute pressure from mass*pressure
   if (mass_(phase) > tolerance) {
-    std::lock_guard<std::mutex> guard(node_mutex_);
+    node_mutex_.lock();
     pressure_(phase) += mass_pressure / mass_(phase);
+    node_mutex_.unlock();
   }
 }
 
@@ -174,8 +180,9 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure(unsigned phase,
                                                       double pressure) {
   // Compute pressure from mass*pressure
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   pressure_(phase) = pressure;
+  node_mutex_.unlock();
 }
 
 //! Compute velocity from momentum
@@ -210,8 +217,9 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_acceleration(
   const double factor = (update == true) ? 1. : 0.;
 
   //! Update/assign acceleration
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   acceleration_.col(phase) = acceleration_.col(phase) * factor + acceleration;
+  node_mutex_.unlock();
 }
 
 //! Compute acceleration and velocity
@@ -518,15 +526,17 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
 //! Add material id from material points to material_ids_
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::append_material_id(unsigned id) {
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   material_ids_.emplace(id);
+  node_mutex_.unlock();
 }
 
 // Assign MPI rank to node
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::mpi_rank(unsigned rank) {
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   auto status = this->mpi_ranks_.insert(rank);
+  node_mutex_.unlock();
   return status.second;
 }
 
@@ -652,9 +662,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
     const Eigen::MatrixXd& property_value, unsigned mat_id,
     unsigned nprops) noexcept {
   // Update/assign property
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   property_handle_->update_property(property, prop_id_, mat_id, property_value,
                                     nprops);
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial change in momentum
@@ -663,7 +674,7 @@ void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_change_in_momentum() {
   // iterate over all materials in the material_ids set and update the change in
   // momentum
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const Eigen::Matrix<double, 1, 1> mass =
         property_handle_->property("masses", prop_id_, *mitr);
@@ -674,6 +685,7 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->update_property("change_in_momenta", prop_id_, *mitr,
                                       change_in_momenta, Tdim);
   }
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial separation vector
@@ -683,7 +695,7 @@ void mpm::Node<Tdim, Tdof,
   // iterate over all materials in the material_ids set, update the
   // displacements and calculate the displacement of the center of mass for this
   // node
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const auto& material_displacement =
         property_handle_->property("displacements", prop_id_, *mitr, Tdim);
@@ -714,6 +726,7 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->update_property("separation_vectors", prop_id_, *mitr,
                                       separation_vector, Tdim);
   }
+  node_mutex_.unlock();
 }
 
 //! Compute multimaterial normal unit vector
@@ -721,7 +734,7 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_normal_unit_vector() {
   // Iterate over all materials in the material_ids set
-  std::lock_guard<std::mutex> guard(node_mutex_);
+  node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     // calculte the normal unit vector
     VectorDim domain_gradient =
@@ -734,4 +747,5 @@ void mpm::Node<Tdim, Tdof,
     property_handle_->assign_property("normal_unit_vectors", prop_id_, *mitr,
                                       normal_unit_vector, Tdim);
   }
+  node_mutex_.unlock();
 }

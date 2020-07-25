@@ -332,6 +332,26 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
                        particles_volume_end - particles_volume_begin)
                        .count());
 
+    // Material id update using particle sets
+    try {
+      auto material_sets = io_->json_object("material_sets");
+      if (!material_sets.empty()) {
+        for (const auto& material_set : material_sets) {
+          unsigned material_id =
+              material_set["material_id"].template get<unsigned>();
+          unsigned pset_id = material_set["pset_id"].template get<unsigned>();
+          // Update material_id for particles in each pset
+          mesh_->iterate_over_particle_set(
+              pset_id,
+              std::bind(&mpm::ParticleBase<Tdim>::assign_material,
+                        std::placeholders::_1, materials_.at(material_id)));
+        }
+      }
+    } catch (std::exception& exception) {
+      console_->warn("{} #{}: Material sets are not specified", __FILE__, __LINE__,
+                     exception.what());
+    }
+
   } catch (std::exception& exception) {
     console_->error("#{}: MPM Base generating particles: {}", __LINE__,
                     exception.what());
