@@ -271,7 +271,7 @@ class Node : public NodeBase<Tdim> {
   void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
     rotation_matrix_ = rotation_matrix;
-    generic_boundary_constraints_ = true;
+    this->assign_boolean_property(mpm::properties::Boolean::GenericBC, true);
   }
 
   //! Add material id from material points to list of materials in materials_
@@ -348,11 +348,7 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
   std::set<unsigned> material_ids_;
-  //! A general velocity (non-Cartesian/inclined) constraint is specified at the
-  //! node
-  bool generic_boundary_constraints_{false};
   //! Frictional constraints
-  bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
   //! Concentrated force
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;

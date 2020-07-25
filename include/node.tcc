@@ -18,6 +18,14 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
   velocity_constraints_.clear();
   concentrated_force_.setZero();
 
+  // Initialize boolean properties
+  // Friction
+  boolean_properties_.emplace(
+      std::make_pair(mpm::properties::Boolean::Friction, false));
+  // GenericBC
+  boolean_properties_.emplace(
+      std::make_pair(mpm::properties::Boolean::GenericBC, false));
+
   // Initialize scalar properties
   // Mass
   scalar_properties_.emplace(
@@ -417,7 +425,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints() {
     // Phase: Integer value of division (dir / Tdim)
     const auto phase = static_cast<unsigned>(dir / Tdim);
 
-    if (!generic_boundary_constraints_) {
+    if (!this->boolean_property(mpm::properties::Boolean::GenericBC)) {
       // Velocity constraints are applied on Cartesian boundaries
       vector_properties_.at(mpm::properties::Vector::Velocity)(
           direction, phase) = constraint.second;
@@ -460,7 +468,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_friction_constraint(
       this->friction_constraint_ =
           std::make_tuple(static_cast<unsigned>(dir), static_cast<int>(sign_n),
                           static_cast<double>(friction));
-      this->friction_ = true;
+      this->assign_boolean_property(mpm::properties::Boolean::Friction, true);
     } else
       throw std::runtime_error("Constraint direction is out of bounds");
 
@@ -474,7 +482,7 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::assign_friction_constraint(
 //! Apply friction constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
-  if (friction_) {
+  if (this->boolean_property(mpm::properties::Boolean::Friction)) {
     auto sign = [](double value) { return (value > 0.) ? 1. : -1.; };
 
     // Set friction constraint
@@ -496,7 +504,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       // tangential direction to boundary
       const unsigned dir_t = (Tdim - 1) - dir_n;
 
-      if (!generic_boundary_constraints_) {
+      if (!this->boolean_property(mpm::properties::Boolean::GenericBC)) {
         // Cartesian case
         // Normal and tangential acceleration
         acc_n = vector_properties_.at(mpm::properties::Vector::Acceleration)(
@@ -540,7 +548,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
             acc_t -= sign(acc_t) * mu * std::abs(acc_n);
         }
 
-        if (!generic_boundary_constraints_) {
+        if (!this->boolean_property(mpm::properties::Boolean::GenericBC)) {
           // Cartesian case
           vector_properties_.at(mpm::properties::Vector::Acceleration)(
               dir_t, phase) = acc_t;
@@ -568,7 +576,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
       const unsigned dir_t1 = dir(dir_n, 1);
 
       Eigen::Matrix<double, Tdim, 1> acc, vel;
-      if (!generic_boundary_constraints_) {
+      if (!this->boolean_property(mpm::properties::Boolean::GenericBC)) {
         // Cartesian case
         acc = this->acceleration(phase);
         vel = this->velocity(phase);
@@ -617,7 +625,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::apply_friction_constraints(double dt) {
           }
         }
 
-        if (!generic_boundary_constraints_) {
+        if (!this->boolean_property(mpm::properties::Boolean::GenericBC)) {
           // Cartesian case
           vector_properties_.at(mpm::properties::Vector::Acceleration)
               .col(phase) = acc;
