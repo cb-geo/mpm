@@ -8,9 +8,8 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord)
   cell_ = nullptr;
   // Nodes
   nodes_.clear();
-  // Set material pointer to null
-  material_ = nullptr;
-  liquid_material_ = nullptr;
+  // Set material containers
+  this->initialise_material(2);
   // Logger
   std::string logger =
       "twophaseparticle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -28,9 +27,8 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
   cell_ = nullptr;
   // Nodes
   nodes_.clear();
-  // Set material pointer to null
-  material_ = nullptr;
-  liquid_material_ = nullptr;
+  // Set material containers
+  this->initialise_material(2);
   // Logger
   std::string logger =
       "twophaseparticle" + std::to_string(Tdim) + "d::" + std::to_string(id);
@@ -81,16 +79,18 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
     const std::shared_ptr<mpm::Material<Tdim>>& material) {
   bool status = this->initialise_particle(particle);
   if (material != nullptr) {
-    if (this->material_id_ == material->id() ||
-        this->material_id_ == std::numeric_limits<unsigned>::max()) {
-      material_ = material;
+    if (this->material_id() == material->id() ||
+        this->material_id() == std::numeric_limits<unsigned>::max()) {
+      bool assign_mat = mpm::Particle<Tdim>::assign_material(material);
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
-      auto mat_state_vars = material_->initialise_state_variables();
+      auto mat_state_vars = (this->material())->initialise_state_variables();
       if (mat_state_vars.size() == particle.nstate_vars) {
         unsigned i = 0;
-        auto state_variables = material_->state_variables();
+        auto state_variables = (this->material())->state_variables();
         for (const auto& state_var : state_variables) {
-          this->state_variables_.at(state_var) = particle.svars[i];
+          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+              particle.svars[i];
           ++i;
         }
       }
@@ -404,45 +404,20 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_traction(unsigned direction,
   return status;
 }
 
-//! Assign a liquid material to particle
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_material(
-    const std::shared_ptr<Material<Tdim>>& material) {
-  bool status = false;
-  try {
-    // Check if material is valid and properties are set
-    if (material != nullptr) {
-      liquid_material_ = material;
-      liquid_material_id_ = liquid_material_->id();
-      status = true;
-    } else {
-      throw std::runtime_error("Liquid material is undefined!");
-    }
-    // TODO
-    // Assign porosity
-    // mpm::twophaseparticle::assign_porosity();
-    // Assign permeability
-    // mpm::twophaseparticle::assign_permeability();
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-  }
-  return status;
-}
-
 //! Compute pore pressure (compressible fluid)
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) noexcept {
   // Check if liquid material and cell pointer are set and positive
-  assert(liquid_material_ != nullptr && cell_ != nullptr);
+  assert(material_.at(mpm::ParticlePhase::Liquid) != nullptr &&
+         cell_ != nullptr);
   // Apply free surface
   if (this->free_surface())
     scalar_properties_.at(mpm::properties::Scalar::PorePressure) = 0.0;
   // Compute pore pressure
   else {
     // get the bulk modulus of liquid
-    double K = liquid_material_->template property<double>(
-        std::string("bulk_modulus"));
+    double K = material_.at(mpm::ParticlePhase::Liquid)
+                   ->template property<double>(std::string("bulk_modulus"));
     // Compute strain rate of liquid phase at centroid
     auto liquid_strain_rate_centroid = mpm::Particle<Tdim>::compute_strain_rate(
         dn_dx_centroid_, mpm::ParticlePhase::Liquid);

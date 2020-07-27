@@ -370,16 +370,6 @@ class ParticleBase {
     return false;
   };
 
-  //! Assign material
-  //! \param[in] material Pointer to a material
-  virtual bool assign_liquid_material(
-      const std::shared_ptr<Material<Tdim>>& material) {
-    throw std::runtime_error(
-        "Calling the base class function (assign_liquid_material) in "
-        "ParticleBase:: illegal operation!");
-    return false;
-  };
-
   //! Compute pore pressure
   //! \param[in] dt Time step size
   virtual void compute_pore_pressure(double dt) {

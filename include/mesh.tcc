@@ -1640,15 +1640,6 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       // Particle set id
       unsigned pset_id = generator["pset_id"].template get<unsigned>();
       status = this->read_particles_file(io, generator, pset_id);
-      // Assign liquid material for twophase particle
-      if (generator["particle_type"] == "P2D2PHASE") {
-        // Liquid material
-        auto liquid_material = materials_.at(generator["liquid_material_id"]);
-        // Assign liquid material
-        iterate_over_particle_set(
-            pset_id, std::bind(&mpm::ParticleBase<Tdim>::assign_liquid_material,
-                               std::placeholders::_1, liquid_material));
-      }
     }
 
     // Generate material points at the Gauss location in all cells
@@ -1672,16 +1663,7 @@ bool mpm::Mesh<Tdim>::generate_particles(const std::shared_ptr<mpm::IO>& io,
       // Particle set id
       unsigned pset_id = generator["pset_id"].template get<unsigned>();
       status = this->generate_material_points(nparticles_dir, particle_type,
-                                              material_id, cset_id, pset_id);
-      // Assign liquid material for twophase particle
-      if (particle_type == "P2D2PHASE") {
-        // Liquid material
-        auto liquid_material = materials_.at(generator["liquid_material_id"]);
-        // Assign liquid material
-        iterate_over_particle_set(
-            pset_id, std::bind(&mpm::ParticleBase<Tdim>::assign_liquid_material,
-                               std::placeholders::_1, liquid_material));
-      }
+                                              material_ids, cset_id, pset_id);
     }
 
     // Generate material points at the Gauss location in all cells

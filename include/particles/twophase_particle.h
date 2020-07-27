@@ -78,11 +78,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \retval status Assignment status
   bool assign_liquid_traction(unsigned direction, double traction) override;
 
-  //! Assign material
-  //! \param[in] material Pointer to a material
-  bool assign_liquid_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
-
   //! Compute pore pressure
   //! \param[in] dt Time step size
   void compute_pore_pressure(double dt) noexcept override;
@@ -161,16 +156,10 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::dn_dx_;
   //! dN/dX at cell centroid
   using Particle<Tdim>::dn_dx_centroid_;
-  //! Set traction
-  using Particle<Tdim>::set_traction_;
   //! Scalar properties
   using ParticleBase<Tdim>::scalar_properties_;
   //! Vector properties
   using ParticleBase<Tdim>::vector_properties_;
-  //! Material
-  std::shared_ptr<Material<Tdim>> liquid_material_;
-  //! Liquid material id
-  unsigned liquid_material_id_{std::numeric_limits<unsigned>::max()};
   //! Particle liquid phase velocity constraints
   std::map<unsigned, double> liquid_velocity_constraints_;
   //! Free surface

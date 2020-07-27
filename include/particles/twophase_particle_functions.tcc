@@ -109,21 +109,21 @@ void map_mass_momentum_to_nodes(
   assert(particle->mass() != std::numeric_limits<double>::max());
 
   // Map solid mass and momentum to nodes
-  particle->map_scalar_property_nodes(mpm::properties::Scalar::Mass, true,
-                                      mpm::ParticlePhase::Solid);
-  particle->map_vector_property_nodes(mpm::properties::Vector::Momentum, true,
-                                      mpm::ParticlePhase::Solid,
-                                      particle->mass() * particle->velocity());
+  particle->map_scalar_property_to_nodes(mpm::properties::Scalar::Mass, true,
+                                         mpm::ParticlePhase::Solid);
+  particle->map_vector_property_to_nodes(
+      mpm::properties::Vector::Momentum, true, mpm::ParticlePhase::Solid,
+      particle->mass() * particle->velocity());
 
   // Check if particle mass is set
   assert(particle->scalar_property(mpm::properties::Scalar::LiquidMass) !=
          std::numeric_limits<double>::max());
 
   // Map liquid mass and momentum to nodes
-  particle->map_scalar_property_nodes(
+  particle->map_scalar_property_to_nodes(
       mpm::properties::Scalar::LiquidMass, true, mpm::ParticlePhase::Liquid,
       particle->scalar_property(mpm::properties::Scalar::LiquidMass));
-  particle->map_vector_property_nodes(
+  particle->map_vector_property_to_nodes(
       mpm::properties::Vector::Momentum, true, mpm::ParticlePhase::Liquid,
       particle->scalar_property(mpm::properties::Scalar::LiquidMass) *
           particle->vector_property(mpm::properties::Vector::LiquidVelocity));
@@ -138,7 +138,7 @@ void map_pore_pressure_to_nodes(
          std::numeric_limits<double>::max());
 
   // Map particle liquid mass and pore pressure to nodes
-  map_scalar_property_nodes(
+  map_scalar_property_to_nodes(
       mpm::properties::Scalar::MassPressure, true, mpm::ParticlePhase::Liquid,
       particle->scalar_property(mpm::properties::Scalar::LiquidMass) *
           particle->scalar_property(mpm::properties::Scalar::PorePressure));
@@ -149,12 +149,12 @@ template <unsigned Tdim>
 void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
                     const Eigen::Matrix<double, Tdim, 1>& pgravity) noexcept {
   //! Map body force for mixture
-  particle->map_vector_property_nodes(
+  particle->map_vector_property_to_nodes(
       mpm::properties::Vector::ExternalForce, true, mpm::ParticlePhase::Mixture,
       pgravity * (particle->mass() + particle->scalar_property(
                                          mpm::properties::Scalar::LiquidMass)));
   //! Map body force for liquid
-  particle->map_vector_property_nodes(
+  particle->map_vector_property_to_nodes(
       mpm::properties::Vector::ExternalForce, true, mpm::ParticlePhase::Liquid,
       pgravity *
           particle->scalar_property(mpm::properties::Scalar::LiquidMass));
@@ -186,7 +186,7 @@ void map_drag_force_coefficient(
         permeability(i);
   }
 
-  particle->map_vector_property_nodes(
+  particle->map_vector_property_to_nodes(
       mpm::properties::Vector::DragForce, true, mpm::ParticlePhase::Solid,
       drag_force_coefficient * particle->volume());
 }
