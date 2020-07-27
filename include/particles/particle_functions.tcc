@@ -1,4 +1,3 @@
-// Compute mass of particle
 namespace mpm {
 namespace particle {
 

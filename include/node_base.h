@@ -175,12 +175,6 @@ class NodeBase {
   virtual void update_mass_pressure(bool update, unsigned phase,
                                     double mass_pressure) noexcept = 0;
 
-  //! Update drag force coefficient
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
-  virtual bool update_drag_force_coefficient(bool update,
-                                             const VectorDim& drag_force) = 0;
   //! Compute pressure from the mass pressure
   virtual void compute_pressure() = 0;
 

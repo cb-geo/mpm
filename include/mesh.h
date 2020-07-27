@@ -41,6 +41,7 @@ using Json = nlohmann::json;
 #include "particle.h"
 #include "particle_base.h"
 #include "traction.h"
+#include "twophase_particle.h"
 #include "vector.h"
 #include "velocity_constraint.h"
 

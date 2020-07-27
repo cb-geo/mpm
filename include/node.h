@@ -160,7 +160,8 @@ class Node : public NodeBase<Tdim> {
 
   //! Return drag force coefficient
   VectorDim drag_force_coefficient() const override {
-    return drag_force_coefficient_;
+    return this->vector_property(mpm::properties::Vector::DragForce,
+                                 mpm::NodePhase::nSolid);
   }
 
   //! Update pressure at the nodes from particle
@@ -169,13 +170,6 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] mass_pressure Product of mass x pressure of a particle
   void update_mass_pressure(bool update, unsigned phase,
                             double mass_pressure) noexcept override;
-
-  //! Update drag force coefficient
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
-  bool update_drag_force_coefficient(
-      bool update, const VectorDim& drag_force_coefficient) override;
 
   //! Compute pressure from the mass pressure
   virtual void compute_pressure() override;

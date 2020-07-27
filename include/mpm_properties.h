@@ -9,7 +9,12 @@ enum Scalar : unsigned int {
   Volume,
   MassDensity,
   MassPressure,
-  Pressure
+  Pressure,
+  //! TwoPhase properties
+  LiquidMass,
+  Porosity,
+  PorePressure,
+  LiquidMassDensity
 };
 //! Vector Properties
 enum Vector : unsigned int {
@@ -18,7 +23,11 @@ enum Vector : unsigned int {
   Acceleration,
   Momentum,
   ExternalForce,
-  InternalForce
+  InternalForce,
+  //! TwoPhase properties
+  Permeability,
+  LiquidVelocity,
+  DragForce
 };
 }  // namespace properties
 }  // namespace mpm
