@@ -22,10 +22,6 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Solve
   bool solve() override;
 
-  //! Pressure smoothing
-  //! \param[in] phase Phase to smooth pressure
-  void pressure_smoothing(unsigned phase);
-
   //! Compute stress strain
   //! \param[in] phase Phase to smooth pressure
   void compute_stress_strain(unsigned phase);

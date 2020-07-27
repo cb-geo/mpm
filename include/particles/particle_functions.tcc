@@ -56,26 +56,27 @@ void map_mass_momentum_to_nodes(
   assert(particle->mass() != std::numeric_limits<double>::max());
 
   // Map mass and momentum to nodes
-  particle->map_scalar_property_nodes(mpm::properties::Scalar::Mass, true,
-                                      mpm::ParticlePhase::Solid);
-  particle->map_vector_property_nodes(mpm::properties::Vector::Momentum, true,
-                                      mpm::ParticlePhase::Solid,
-                                      particle->mass() * particle->velocity());
+  particle->map_scalar_property_to_nodes(mpm::properties::Scalar::Mass, true,
+                                         mpm::ParticlePhase::Solid);
+  particle->map_vector_property_to_nodes(
+      mpm::properties::Vector::Momentum, true, mpm::ParticlePhase::Solid,
+      particle->mass() * particle->velocity());
 }
 
 //! Map particle pressure to nodes
 template <unsigned Tdim>
 void map_mass_pressure_to_nodes(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
+    unsigned phase = mpm::ParticlePhase::Solid) noexcept {
   // Mass is initialized
   assert(particle->mass() != std::numeric_limits<double>::max());
 
   // Check if state variable pressure is found
-  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
+  if (particle->pressure(phase) != std::numeric_limits<double>::quiet_NaN()) {
     // Map particle pressure to nodes
-    particle->map_scalar_property_nodes(
-        mpm::properties::Scalar::MassPressure, true, mpm::ParticlePhase::Solid,
-        particle->mass() * particle->pressure());
+    particle->map_scalar_property_to_nodes(
+        mpm::properties::Scalar::MassPressure, true, phase,
+        particle->mass() * particle->pressure(phase));
   }
 }
 
@@ -84,35 +85,36 @@ template <unsigned Tdim>
 void map_body_force(std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
                     const Eigen::Matrix<double, Tdim, 1>& pgravity) noexcept {
   // Compute nodal body forces
-  particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
-                                      true, mpm::ParticlePhase::Solid,
-                                      pgravity * particle->mass());
+  particle->map_vector_property_to_nodes(mpm::properties::Vector::ExternalForce,
+                                         true, mpm::ParticlePhase::Solid,
+                                         pgravity * particle->mass());
 }
 
 //! Map traction force
 template <unsigned Tdim>
 void map_traction_force(
     std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
-  if (particle->set_traction()) {
+  if (particle->boolean_property(mpm::properties::Boolean::SetTraction)) {
     // Map particle traction forces to nodes
-    particle->map_vector_property_nodes(mpm::properties::Vector::ExternalForce,
-                                        true, mpm::ParticlePhase::Solid,
-                                        particle->traction());
+    particle->map_vector_property_to_nodes(
+        mpm::properties::Vector::ExternalForce, true, mpm::ParticlePhase::Solid,
+        particle->traction());
   }
 }
 
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
 void compute_pressure_smoothing(
-    std::shared_ptr<mpm::ParticleBase<Tdim>> particle) noexcept {
+    std::shared_ptr<mpm::ParticleBase<Tdim>> particle,
+    unsigned phase = mpm::ParticlePhase::Solid) noexcept {
   // Assert
   assert(particle->cell_ptr());
 
   // Check if particle has pressure
-  if (particle->pressure() != std::numeric_limits<double>::quiet_NaN()) {
-    double pressure = particle->interpolate_scalar_property_nodes(
-        mpm::properties::Scalar::Pressure, mpm::ParticlePhase::Solid);
-    particle->assign_state_variable("pressure", pressure);
+  if (particle->pressure(phase) != std::numeric_limits<double>::quiet_NaN()) {
+    double pressure = particle->interpolate_scalar_property_from_nodes(
+        mpm::properties::Scalar::Pressure, phase);
+    particle->assign_state_variable("pressure", pressure, phase);
   }
 }
 

@@ -234,6 +234,14 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
     }
+
+    // Check for boolean property assignment and return
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            true);
+    particle->assign_boolean_property(mpm::properties::Boolean::SetTraction,
+                                      false);
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            false);
   }
 
   SECTION("Check initialise particle HDF5") {
@@ -1121,8 +1129,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           particle->state_variable("pressure") ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->assign_state_variable(
-          "pressure", -8333333.333333333 * volumetric_strain));
+      REQUIRE_NOTHROW(
+          particle->assign_pressure(-8333333.333333333 * volumetric_strain));
 
       // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));
@@ -1368,6 +1376,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
       else
         REQUIRE(particle->traction()(i) == Approx(0.).epsilon(Tolerance));
     }
+
+    // Check for boolean property assignment and return
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            true);
+    particle->assign_boolean_property(mpm::properties::Boolean::SetTraction,
+                                      false);
+    REQUIRE(particle->boolean_property(mpm::properties::Boolean::SetTraction) ==
+            false);
   }
 
   // Check initialise particle from HDF5 file
@@ -2416,8 +2432,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           particle->state_variable("pressure") ==
           Approx(-8333333.333333333 * volumetric_strain).epsilon(Tolerance));
 
-      REQUIRE_NOTHROW(particle->assign_state_variable(
-          "pressure", -8333333.333333333 * volumetric_strain));
+      REQUIRE_NOTHROW(
+          particle->assign_pressure(-8333333.333333333 * volumetric_strain));
 
       // Check pressure smoothing
       REQUIRE_NOTHROW(mpm::particle::map_mass_pressure_to_nodes<Dim>(particle));

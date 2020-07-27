@@ -55,17 +55,19 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] particle HDF5 data of particle
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(
+  bool initialise_particle(
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) override;
 
   //! Assign material history variables
   //! \param[in] state_vars State variables
   //! \param[in] material Material associated with the particle
+  //! \param[in] phase Index to indicate material phase
   //! \retval status Status of cloning HDF5 particle
   bool assign_material_state_vars(
       const mpm::dense_map& state_vars,
-      const std::shared_ptr<mpm::Material<Tdim>>& material) override;
+      const std::shared_ptr<mpm::Material<Tdim>>& material,
+      unsigned phase = mpm::ParticlePhase::Solid) override;
 
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
@@ -127,7 +129,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
-  //! \param[in] phase Index corresponding to the phase
+  //! Return mass density
   double mass_density() const override {
     return this->scalar_property(mpm::properties::Scalar::MassDensity);
   }
@@ -143,7 +145,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
-  //! \retval status Assignment status
   void assign_mass(double mass) override {
     scalar_properties_.at(mpm::properties::Scalar::Mass) = mass;
   }
@@ -155,12 +156,9 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign material
   //! \param[in] material Pointer to a material
-  bool assign_material(
-      const std::shared_ptr<Material<Tdim>>& material) override;
-
-  //! Return material
-  //! \retval material Pointer to a material
-  std::shared_ptr<Material<Tdim>> material() const override;
+  //! \param[in] phase Index to indicate phase
+  bool assign_material(const std::shared_ptr<Material<Tdim>>& material,
+                       unsigned phase = mpm::ParticlePhase::Solid) override;
 
   //! Compute strain
   //! \param[in] dt Analysis time step
@@ -201,7 +199,6 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
-  //! \retval status Assignment status
   void assign_velocity(const VectorDim& velocity) override {
     vector_properties_.at(mpm::properties::Vector::Velocity) = velocity;
   };
@@ -226,9 +223,6 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
-  //! Return set traction bool
-  bool set_traction() const override { return set_traction_; }
-
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
   //! \param[in] velocity_update Update particle velocity from nodal vel
@@ -238,24 +232,40 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign a state variable
   //! \param[in] var State variable
   //! \param[in] value State variable to be assigned
-  void assign_state_variable(const std::string& var, double value) override {
-    if (state_variables_.find(var) != state_variables_.end())
-      state_variables_.at(var) = value;
+  //! \param[in] phase Index to indicate phase
+  void assign_state_variable(
+      const std::string& var, double value,
+      unsigned phase = mpm::ParticlePhase::Solid) override {
+    if (state_variables_[phase].find(var) != state_variables_[phase].end())
+      state_variables_[phase].at(var) = value;
   }
 
   //! Return a state variable
   //! \param[in] var State variable
+  //! \param[in] phase Index to indicate phase
   //! \retval Quantity of the state history variable
-  double state_variable(const std::string& var) const override {
-    return (state_variables_.find(var) != state_variables_.end())
-               ? state_variables_.at(var)
+  double state_variable(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) const override {
+    return (state_variables_[phase].find(var) != state_variables_[phase].end())
+               ? state_variables_[phase].at(var)
                : std::numeric_limits<double>::quiet_NaN();
   }
 
+  //! Assign a state variable
+  //! \param[in] value Particle pressure to be assigned
+  //! \param[in] phase Index to indicate phase
+  void assign_pressure(double pressure,
+                       unsigned phase = mpm::ParticlePhase::Solid) override {
+    this->assign_state_variable("pressure", pressure, phase);
+  }
+
   //! Return pressure of the particles
-  double pressure() const override {
-    return (state_variables_.find("pressure") != state_variables_.end())
-               ? state_variables_.at("pressure")
+  //! \param[in] phase Index to indicate phase
+  double pressure(unsigned phase = mpm::ParticlePhase::Solid) const override {
+    return (state_variables_[phase].find("pressure") !=
+            state_variables_[phase].end())
+               ? state_variables_[phase].at("pressure")
                : std::numeric_limits<double>::quiet_NaN();
   }
 
@@ -285,7 +295,19 @@ class Particle : public ParticleBase<Tdim> {
   std::vector<mpm::Index> neighbours() const override { return neighbours_; };
 
  protected:
+  //! Initialise particle material container
+  //! \details This function allocate memory and initialise the material related
+  //! containers according to the particle phase, i.e. solid or fluid particle
+  //! has phase_size = 1, whereas two-phase (solid-fluid) or three-phase
+  //! (solid-water-air) particle have phase_size = 2 and 3, respectively.
+  //! \param[in] phase_size The material phase size
+  void initialise_material(unsigned phase_size = 1);
+
+ private:
   //! Compute strain rate
+  //! \param[in] dn_dx The spatial gradient of shape function
+  //! \param[in] phase Index to indicate phase
+  //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
@@ -313,6 +335,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
   //! Scalar properties
+  using ParticleBase<Tdim>::boolean_properties_;
+  //! Scalar properties
   using ParticleBase<Tdim>::scalar_properties_;
   //! Vector properties
   using ParticleBase<Tdim>::vector_properties_;
@@ -336,8 +360,6 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> dstrain_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
-  //! Set traction
-  bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
   //! dN/dX

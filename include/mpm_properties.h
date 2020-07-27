@@ -3,6 +3,8 @@
 
 namespace mpm {
 namespace properties {
+//! Boolean Properties
+enum Boolean : unsigned int { SetTraction, Friction, GenericBC };
 //! Scalar Properties
 enum Scalar : unsigned int {
   Mass,

@@ -2,6 +2,7 @@
 #define MPM_NODE_H_
 
 #include "logger.h"
+#include "mutex.h"
 #include "nodal_properties.h"
 #include "node_base.h"
 
@@ -65,6 +66,17 @@ class Node : public NodeBase<Tdim> {
   //! Return status
   bool status() const override { return status_; }
 
+  //! Assign boolean property at the nodes
+  //! \param[in] property Name of the property to assign
+  //! \param[in] boolean Property boolean (true/false) of the node
+  void assign_boolean_property(mpm::properties::Boolean property,
+                               bool boolean) noexcept override;
+
+  //! Return boolean property
+  //! \param[in] property Name of the property to update
+  //! \retval boolean property at node
+  bool boolean_property(mpm::properties::Boolean property) const override;
+
   //! Update scalar property at the nodes
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -74,7 +86,9 @@ class Node : public NodeBase<Tdim> {
                               unsigned phase, double value) noexcept override;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval scalar property at the designated phase
   double scalar_property(mpm::properties::Scalar property,
                          unsigned phase) const override;
 
@@ -88,7 +102,9 @@ class Node : public NodeBase<Tdim> {
       const Eigen::Matrix<double, Tdim, 1>& value) noexcept override;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval vector property at the designated phase
   virtual Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property, unsigned phase) const override;
 
@@ -261,7 +277,7 @@ class Node : public NodeBase<Tdim> {
   void assign_rotation_matrix(
       const Eigen::Matrix<double, Tdim, Tdim>& rotation_matrix) override {
     rotation_matrix_ = rotation_matrix;
-    generic_boundary_constraints_ = true;
+    this->assign_boolean_property(mpm::properties::Boolean::GenericBC, true);
   }
 
   //! Add material id from material points to list of materials in materials_
@@ -320,7 +336,7 @@ class Node : public NodeBase<Tdim> {
 
  private:
   //! Mutex
-  std::mutex node_mutex_;
+  SpinMutex node_mutex_;
   //! nodebase id
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal property id
@@ -333,12 +349,13 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
+  //! Boolean properties
+  fc::vector_map<mpm::properties::Boolean, bool> boolean_properties_;
   //! Scalar properties
-  tsl::ordered_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases> >
+  fc::vector_map<mpm::properties::Scalar, Eigen::Matrix<double, 1, Tnphases>>
       scalar_properties_;
   //! Vector properties
-  tsl::ordered_map<mpm::properties::Vector,
-                   Eigen::Matrix<double, Tdim, Tnphases> >
+  fc::vector_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, Tnphases>>
       vector_properties_;
   //! Displacement
   Eigen::Matrix<double, Tdim, 1> contact_displacement_;
@@ -348,11 +365,7 @@ class Node : public NodeBase<Tdim> {
   Eigen::Matrix<double, Tdim, Tdim> rotation_matrix_;
   //! Material ids whose information was passed to this node
   std::set<unsigned> material_ids_;
-  //! A general velocity (non-Cartesian/inclined) constraint is specified at the
-  //! node
-  bool generic_boundary_constraints_{false};
   //! Frictional constraints
-  bool friction_{false};
   std::tuple<unsigned, int, double> friction_constraint_;
   //! Concentrated force
   Eigen::Matrix<double, Tdim, Tnphases> concentrated_force_;

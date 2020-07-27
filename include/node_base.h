@@ -10,7 +10,7 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <tsl/ordered_map.h>
+#include <flat/flat_map.hpp>
 
 #include "data_types.h"
 #include "function_base.h"
@@ -80,6 +80,17 @@ class NodeBase {
   //! Return status
   virtual bool status() const = 0;
 
+  //! Assign boolean property at the nodes
+  //! \param[in] property Name of the property to assign
+  //! \param[in] boolean Property boolean (true/false) of the node
+  virtual void assign_boolean_property(mpm::properties::Boolean property,
+                                       bool boolean) noexcept = 0;
+
+  //! Return boolean property
+  //! \param[in] property Name of the property to update
+  //! \retval boolean property at node
+  virtual bool boolean_property(mpm::properties::Boolean property) const = 0;
+
   //! Update scalar property at the nodes
   //! \param[in] property Name of the property to update
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -90,7 +101,9 @@ class NodeBase {
                                       double value) noexcept = 0;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval scalar property at the designated phase
   virtual double scalar_property(mpm::properties::Scalar property,
                                  unsigned phase) const = 0;
 
@@ -104,7 +117,9 @@ class NodeBase {
       const Eigen::Matrix<double, Tdim, 1>& value) noexcept = 0;
 
   //! Return property at a given node for a given phase
+  //! \param[in] property Name of the property to return
   //! \param[in] phase Index corresponding to the phase
+  //! \retval vector property at the designated phase
   virtual Eigen::Matrix<double, Tdim, 1> vector_property(
       mpm::properties::Vector property, unsigned phase) const = 0;
 
