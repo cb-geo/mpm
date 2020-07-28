@@ -66,6 +66,13 @@ mpm::Node<Tdim, Tdof, Tnphases>::Node(
       std::make_pair(mpm::properties::Vector::InternalForce,
                      Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
 
+  // Twophase properties
+  if (Tnphases > 1) {
+    // DragForce
+    vector_properties_.emplace(
+        std::make_pair(mpm::properties::Vector::DragForce,
+                       Eigen::Matrix<double, Tdim, Tnphases>::Zero()));
+  }
   this->initialise();
 }
 
@@ -86,6 +93,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   vector_properties_.at(mpm::properties::Vector::Momentum).setZero();
   vector_properties_.at(mpm::properties::Vector::ExternalForce).setZero();
   vector_properties_.at(mpm::properties::Vector::InternalForce).setZero();
+
+  // Initialise nodal scalar and vector properties for two phase
+  if (Tnphases > 1) {
+    // Initialise nodal scalar properties for two phase
+    // Initialise nodal vector properties for two phase
+    vector_properties_.at(mpm::properties::Vector::DragForce).setZero();
+  }
 
   // Initialise variables for contact
   material_ids_.clear();
