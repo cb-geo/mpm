@@ -279,16 +279,16 @@ void mpm::Particle<Tdim>::initialise_material(unsigned phase_size) {
   std::fill(state_variables_.begin(), state_variables_.end(), mpm::dense_map());
 }
 
-//! Assign material state variables from neighbour particle
+//! Assign material history variables
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material, unsigned phase) {
   bool status = false;
-  if (material != nullptr && this->material() != nullptr &&
-      this->material_id() == material->id()) {
+  if (material != nullptr && this->material(phase) != nullptr &&
+      this->material_id(phase) == material->id()) {
     // Clone state variables
-    auto mat_state_vars = (this->material())->initialise_state_variables();
+    auto mat_state_vars = (this->material(phase))->initialise_state_variables();
     if (state_variables_[phase].size() == state_vars.size() &&
         mat_state_vars.size() == state_vars.size()) {
       this->state_variables_[phase] = state_vars;
