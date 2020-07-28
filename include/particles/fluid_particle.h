@@ -41,12 +41,6 @@ class FluidParticle : public mpm::Particle<Tdim> {
   //! Map internal force
   inline void map_internal_force() noexcept override;
 
-  //! Initial pressure
-  //! \param[in] pressure Initial pressure
-  void initial_pressure(double pressure) override {
-    state_variables_[mpm::ParticlePhase::SinglePhase].at("pressure") = pressure;
-  }
-
   //! ----------------------------------------------------------------
   //! Semi-Implicit integration functions based on Chorin's Projection
   //! ----------------------------------------------------------------

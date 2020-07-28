@@ -69,16 +69,6 @@ class ParticleBase {
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
-  //! Assign material history variables
-  //! \param[in] state_vars State variables
-  //! \param[in] material Material associated with the particle
-  //! \param[in] phase Index to indicate material phase
-  //! \retval status Status of cloning HDF5 particle
-  virtual bool assign_material_state_vars(
-      const mpm::dense_map& state_vars,
-      const std::shared_ptr<mpm::Material<Tdim>>& material,
-      unsigned phase = mpm::ParticlePhase::Solid) = 0;
-
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
   virtual HDF5Particle hdf5() const = 0;
@@ -175,12 +165,28 @@ class ParticleBase {
     return material_id_[phase];
   }
 
+  //! Assign material state variables
+  virtual bool assign_material_state_vars(
+      const mpm::dense_map& state_vars,
+      const std::shared_ptr<mpm::Material<Tdim>>& material,
+      unsigned phase = mpm::ParticlePhase::Solid) = 0;
+
   //! Return state variables
   //! \param[in] phase Index to indicate material phase
   mpm::dense_map state_variables(
       unsigned phase = mpm::ParticlePhase::Solid) const {
     return state_variables_[phase];
   }
+
+  //! Assign a state variable
+  virtual void assign_state_variable(
+      const std::string& var, double value,
+      unsigned phase = mpm::ParticlePhase::Solid) = 0;
+
+  //! Return a state variable
+  virtual double state_variable(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Assign status
   void assign_status(bool status) { status_ = status; }
@@ -196,6 +202,10 @@ class ParticleBase {
 
   //! Return mass
   virtual double mass() const = 0;
+
+  //! Assign pressure
+  virtual void assign_pressure(double pressure,
+                               unsigned phase = mpm::ParticlePhase::Solid) = 0;
 
   //! Return pressure
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
@@ -260,11 +270,6 @@ class ParticleBase {
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
 
-  //! Return a state variable
-  virtual double state_variable(
-      const std::string& var,
-      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
-
   //! Return tensor data of particles
   //! \param[in] property Property string
   //! \retval vecdata Tensor data of particle property
@@ -304,15 +309,6 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
-
-  //! Initial pressure
-  //! \param[in] pressure Initial pressure
-  virtual void initial_pressure(double pressure) {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(initial_pressure) in "
-        "ParticleBase:: illegal operation!");
-  };
 
   //! Assigning beta parameter to particle
   //! \param[in] pressure parameter determining type of projection

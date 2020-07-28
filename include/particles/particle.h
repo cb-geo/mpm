@@ -59,16 +59,6 @@ class Particle : public ParticleBase<Tdim> {
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) override;
 
-  //! Assign material history variables
-  //! \param[in] state_vars State variables
-  //! \param[in] material Material associated with the particle
-  //! \param[in] phase Index to indicate material phase
-  //! \retval status Status of cloning HDF5 particle
-  bool assign_material_state_vars(
-      const mpm::dense_map& state_vars,
-      const std::shared_ptr<mpm::Material<Tdim>>& material,
-      unsigned phase = mpm::ParticlePhase::Solid) override;
-
   //! Retrun particle data as HDF5
   //! \retval particle HDF5 data of the particle
   HDF5Particle hdf5() const override;
@@ -240,6 +230,27 @@ class Particle : public ParticleBase<Tdim> {
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
 
+  //! Assign material history variables
+  //! \param[in] state_vars State variables
+  //! \param[in] material Material associated with the particle
+  //! \param[in] phase Index to indicate material phase
+  //! \retval status Status of cloning HDF5 particle
+  bool assign_material_state_vars(
+      const mpm::dense_map& state_vars,
+      const std::shared_ptr<mpm::Material<Tdim>>& material,
+      unsigned phase = mpm::ParticlePhase::Solid) override;
+
+  //! Assign a state variable
+  //! \param[in] var State variable
+  //! \param[in] value State variable to be assigned
+  //! \param[in] phase Index to indicate phase
+  void assign_state_variable(
+      const std::string& var, double value,
+      unsigned phase = mpm::ParticlePhase::Solid) override {
+    if (state_variables_[phase].find(var) != state_variables_[phase].end())
+      state_variables_[phase].at(var) = value;
+  }
+
   //! Return a state variable
   //! \param[in] var State variable
   //! \param[in] phase Index to indicate phase
@@ -261,13 +272,18 @@ class Particle : public ParticleBase<Tdim> {
   bool compute_pressure_smoothing(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
+  //! Assign a state variable
+  //! \param[in] value Particle pressure to be assigned
+  //! \param[in] phase Index to indicate phase
+  void assign_pressure(double pressure,
+                       unsigned phase = mpm::ParticlePhase::Solid) override {
+    this->assign_state_variable("pressure", pressure, phase);
+  }
+
   //! Return pressure of the particles
   //! \param[in] phase Index to indicate phase
   double pressure(unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (state_variables_[phase].find("pressure") !=
-            state_variables_[phase].end())
-               ? state_variables_[phase].at("pressure")
-               : std::numeric_limits<double>::quiet_NaN();
+    return this->state_variable("pressure", phase);
   }
 
   //! Return tensor data of particles
