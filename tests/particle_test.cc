@@ -1137,9 +1137,15 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         SECTION("Assign state variables") {
           // Assign material properties
           REQUIRE(particle->assign_material(mc_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == true);
+          // Assign and read a state variable
+          REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
+          REQUIRE(particle->state_variable("phi") == 30.);
+          // Assign and read pressure though MC does not contain pressure
+          REQUIRE_NOTHROW(particle->assign_pressure(1000));
+          REQUIRE(std::isnan(particle->pressure()) == true);
         }
 
         SECTION("Assign state variables fail on state variables size") {
@@ -1157,7 +1163,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
           // Assign material properties
           REQUIRE(particle->assign_material(newtonian_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == false);
         }
@@ -1177,7 +1183,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
           // Assign material properties
           REQUIRE(particle->assign_material(newtonian_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == false);
         }
@@ -2389,9 +2395,15 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
         SECTION("Assign state variables") {
           // Assign material properties
           REQUIRE(particle->assign_material(mc_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == true);
+          // Assign and read a state variable
+          REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
+          REQUIRE(particle->state_variable("phi") == 30.);
+          // Assign and read pressure though MC does not contain pressure
+          REQUIRE_NOTHROW(particle->assign_pressure(1000));
+          REQUIRE(std::isnan(particle->pressure()) == true);
         }
 
         SECTION("Assign state variables fail on state variables size") {
@@ -2409,7 +2421,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
           // Assign material properties
           REQUIRE(particle->assign_material(newtonian_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == false);
         }
@@ -2429,7 +2441,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
           // Assign material properties
           REQUIRE(particle->assign_material(newtonian_material) == true);
-          // Assing state variables
+          // Assign state variables
           REQUIRE(particle->assign_material_state_vars(state_variables,
                                                        mc_material) == false);
         }
