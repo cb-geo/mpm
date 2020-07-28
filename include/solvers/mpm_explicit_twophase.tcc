@@ -7,43 +7,6 @@ mpm::MPMExplicitTwoPhase<Tdim>::MPMExplicitTwoPhase(
   console_ = spdlog::get("MPMExplicitTwoPhase");
 }
 
-//! MPM Explicit pressure smoothing
-template <unsigned Tdim>
-void mpm::MPMExplicitTwoPhase<Tdim>::pressure_smoothing(unsigned phase) {
-  // Assign mass pressure to nodes
-  mesh_->iterate_over_particles(
-      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::map_mass_pressure_to_nodes<Tdim>(ptr);
-      });
-
-  // Compute nodal pressure
-  mesh_->iterate_over_nodes_predicate(
-      std::bind(&mpm::NodeBase<Tdim>::compute_pressure, std::placeholders::_1),
-      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-#ifdef USE_MPI
-  int mpi_size = 1;
-
-  // Get number of MPI ranks
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-  // Run if there is more than a single MPI task
-  if (mpi_size > 1) {
-    // MPI all reduce nodal pressure
-    mesh_->template nodal_halo_exchange<double, 1>(
-        std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
-        std::bind(&mpm::NodeBase<Tdim>::update_pressure, std::placeholders::_1,
-                  false, phase, std::placeholders::_2));
-  }
-#endif
-
-  // Smooth pressure over particles
-  mesh_->iterate_over_particles(
-      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::compute_pressure_smoothing<Tdim>(ptr);
-      });
-}
-
 //! MPM Explicit two-phase compute stress strain
 template <unsigned Tdim>
 void mpm::MPMExplicitTwoPhase<Tdim>::compute_stress_strain() {
@@ -139,6 +102,18 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     status = false;
     throw std::runtime_error("Initialisation of loads failed");
   }
+
+  // Assign porosity
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::twophaseparticle::assign_porosity<Tdim>(ptr);
+      });
+
+  // Assign permeability
+  mesh_->iterate_over_particles(
+      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
+        return mpm::twophaseparticle::assign_permeability<Tdim>(ptr);
+      });
 
   // Compute mass for each phase
   mesh_->iterate_over_particles(

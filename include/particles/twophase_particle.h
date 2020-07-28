@@ -152,6 +152,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::strain_rate_;
   //! Soil skeleton material
   using Particle<Tdim>::material_;
+  //! State variables
+  using ParticleBase<Tdim>::state_variables_;
   //! dN/dX
   using Particle<Tdim>::dn_dx_;
   //! dN/dX at cell centroid

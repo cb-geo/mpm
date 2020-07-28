@@ -149,19 +149,21 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
 
   // Initialize scalar properties
   scalar_properties_.emplace(
+      std::make_pair(mpm::properties::Scalar::LiquidMass, double(0.)));
+  scalar_properties_.emplace(
       std::make_pair(mpm::properties::Scalar::Porosity, double(0.)));
   scalar_properties_.emplace(
       std::make_pair(mpm::properties::Scalar::PorePressure, double(0.)));
   scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::LiquidMass, double(0.)));
-  scalar_properties_.emplace(
       std::make_pair(mpm::properties::Scalar::LiquidMassDensity, double(0.)));
 
   // Initialize vector properties
+  vector_properties_.emplace(
+      std::make_pair(mpm::properties::Vector::Permeability, VectorDim::Zero()));
   vector_properties_.emplace(std::make_pair(
       mpm::properties::Vector::LiquidVelocity, VectorDim::Zero()));
   vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Permeability, VectorDim::Zero()));
+      std::make_pair(mpm::properties::Vector::DragForce, VectorDim::Zero()));
 
   // Initialize vector data properties
   this->properties_["liquid_strains"] = [&]() { return liquid_strain(); };
