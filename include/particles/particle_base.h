@@ -310,15 +310,6 @@ class ParticleBase {
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
-  //! Initial pressure
-  //! \param[in] pressure Initial pressure
-  virtual void initial_pressure(double pressure) {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(initial_pressure) in "
-        "ParticleBase:: illegal operation!");
-  };
-
   //! Assigning beta parameter to particle
   //! \param[in] pressure parameter determining type of projection
   virtual void assign_projection_parameter(double parameter) {

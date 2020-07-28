@@ -130,8 +130,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
       {
         // Assign initial pressure for all free-surface particle
         mesh_->iterate_over_particles_predicate(
-            std::bind(&mpm::ParticleBase<Tdim>::initial_pressure,
-                      std::placeholders::_1, 0.0),
+            std::bind(&mpm::ParticleBase<Tdim>::assign_pressure,
+                      std::placeholders::_1, 0.0, fluid),
             std::bind(&mpm::ParticleBase<Tdim>::free_surface,
                       std::placeholders::_1));
       }
