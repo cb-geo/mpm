@@ -1207,10 +1207,8 @@ void mpm::Mesh<Tdim>::apply_traction_on_particles(double current_time) {
                           std::placeholders::_1, dir, traction));
   }
   if (!particle_tractions_.empty()) {
-    this->iterate_over_particles(
-        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-          return mpm::particle::map_traction_force<Tdim>(ptr);
-        });
+    this->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::map_traction_force, std::placeholders::_1));
   }
 }
 
@@ -1773,8 +1771,8 @@ void mpm::Mesh<Tdim>::inject_particles(double current_time) {
       }
     }
     for (auto particle : injected_particles) {
-      mpm::particle::compute_volume<Tdim>(particle);
-      mpm::particle::compute_mass<Tdim>(particle);
+      particle->compute_volume();
+      particle->compute_mass();
     }
   }
 }
@@ -1892,4 +1890,93 @@ template <unsigned Tdim>
 void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
   nodal_properties_->initialise_nodal_properties();
+}
+
+//! Assign nodal pressure constraints
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_pressure_constraint(
+    const std::shared_ptr<FunctionBase>& mfunction, int set_id,
+    const unsigned phase, const unsigned pconstraint) {
+  bool status = true;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign pressure "
+          "constraint");
+
+    // Set id of -1, is all nodes
+    Vector<NodeBase<Tdim>> nodes =
+        (set_id == -1) ? this->nodes_ : node_sets_.at(set_id);
+
+#pragma omp parallel for schedule(runtime)
+    for (auto nitr = nodes.cbegin(); nitr != nodes.cend(); ++nitr) {
+      if (!(*nitr)->assign_pressure_constraint(phase, pconstraint, mfunction))
+        throw std::runtime_error("Setting pressure constraint failed");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign particle pore pressures
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
+    const std::vector<double>& particle_pore_pressure) {
+  bool status = true;
+
+  try {
+    if (!particles_.size())
+      throw std::runtime_error(
+          "No particles have been assigned in mesh, cannot assign pore "
+          "pressures");
+
+    if (particles_.size() != particle_pore_pressure.size())
+      throw std::runtime_error(
+          "Number of particles in mesh and initial pore pressures don't "
+          "match");
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      (*pitr)->initial_pore_pressure(particle_pore_pressure.at(i));
+      ++i;
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+//! Assign nodal pressure constraints to nodes
+template <unsigned Tdim>
+bool mpm::Mesh<Tdim>::assign_nodal_pressure_constraints(
+    const unsigned phase,
+    const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints) {
+  bool status = false;
+  try {
+    if (!nodes_.size())
+      throw std::runtime_error(
+          "No nodes have been assigned in mesh, cannot assign pressure "
+          "constraints");
+
+    for (const auto& pressure_constraint : pressure_constraints) {
+      // Node id
+      mpm::Index nid = std::get<0>(pressure_constraint);
+      // Pressure
+      double pressure = std::get<1>(pressure_constraint);
+
+      // Apply constraint
+      status =
+          map_nodes_[nid]->assign_pressure_constraint(phase, pressure, nullptr);
+
+      if (!status)
+        throw std::runtime_error("Node or pressure constraint is invalid");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }

@@ -63,6 +63,17 @@ class IOMesh {
   virtual std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
       const std::string& particles_stresses) = 0;
 
+  //! Read particle pressure
+  //! \param[in] particles_pressures file name with particle pressure
+  //! \retval Vector of particles pressures
+  virtual std::vector<double> read_particles_pressures(
+      const std::string& particles_pressures) = 0;
+
+  //! Read pressure constraints file
+  //! \param[in] pressure_constraints_files file name with pressure constraints
+  virtual std::vector<std::tuple<mpm::Index, double>> read_pressure_constraints(
+      const std::string& _pressure_constraints_file) = 0;
+
   //! Read nodal euler angles file
   //! \param[in] nodal_euler_angles_file file name with nodal id and respective
   //! euler angles

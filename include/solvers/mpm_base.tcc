@@ -184,6 +184,9 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     // Read and assign friction constraints
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
+    // Read and assign pore pressure constraints
+    this->nodal_pore_pressure_constraints(mesh_props, mesh_io);
+
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
     // Shape function name
@@ -300,16 +303,17 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
     auto particles_volume_begin = std::chrono::steady_clock::now();
     // Compute volume
-    mesh_->iterate_over_particles(
-        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-          return mpm::particle::compute_volume<Tdim>(ptr);
-        });
+    mesh_->iterate_over_particles(std::bind(
+        &mpm::ParticleBase<Tdim>::compute_volume, std::placeholders::_1));
 
     // Read and assign particles volumes
     this->particles_volumes(mesh_props, particle_io);
 
     // Read and assign particles stresses
     this->particles_stresses(mesh_props, particle_io);
+
+    // Read and assign particles initial pore pressure
+    this->particles_pore_pressures(mesh_props, particle_io);
 
     auto particles_volume_end = std::chrono::steady_clock::now();
     console_->info("Rank {} Read volume, velocity and stresses: {} ms",
@@ -508,7 +512,8 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 #endif
 
   //! VTK vector variables
-  std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
+  std::vector<std::string> vtk_vector_data = {"displacements", "velocities",
+                                              "pore_pressure"};
 
   // Write VTK attributes
   for (const auto& attribute : vtk_vector_data) {
@@ -906,6 +911,77 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   }
 }
 
+// Nodal pore pressure constraints (Coupled solid-fluid formulation)
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
+    const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
+  try {
+    // Water phase indice
+    const unsigned phase = mpm::ParticlePhase::Liquid;
+    // Total phase
+    const unsigned Tnphases = 2;
+
+    // Read and assign pore pressure constraints
+    if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
+        mesh_props["boundary_conditions"].find("pore_pressure_constraints") !=
+            mesh_props["boundary_conditions"].end()) {
+
+      // Iterate over pore pressure constraints
+      for (const auto& constraints :
+           mesh_props["boundary_conditions"]["pore_pressure_constraints"]) {
+        // Pore pressure constraint phase indice
+        unsigned constraint_phase = phase;
+
+        // Check if it is pressure increment constraints
+        if (constraints.find("increment_boundary") != constraints.end() &&
+            constraints["increment_boundary"])
+          constraint_phase += Tnphases;
+
+        // Pore pressure constraints are specified in a file
+        if (constraints.find("file") != constraints.end()) {
+          std::string pore_pressure_constraints_file =
+              constraints.at("file").template get<std::string>();
+          bool ppressure_constraints = mesh_->assign_nodal_pressure_constraints(
+              constraint_phase,
+              mesh_io->read_pressure_constraints(
+                  io_->file_name(pore_pressure_constraints_file)));
+          if (!ppressure_constraints)
+            throw std::runtime_error(
+                "Pore pressure constraints are not properly assigned");
+        } else {
+          // Get the math function
+          std::shared_ptr<FunctionBase> pfunction = nullptr;
+          if (constraints.find("math_function_id") != constraints.end())
+            pfunction = math_functions_.at(
+                constraints.at("math_function_id").template get<unsigned>());
+          // Set id
+          int nset_id = constraints.at("nset_id").template get<int>();
+          // Pore Pressure
+          double pore_pressure =
+              constraints.at("pore_pressure").template get<double>();
+          // Add pore pressure constraint to mesh
+          mesh_->assign_nodal_pressure_constraint(
+              pfunction, nset_id, constraint_phase, pore_pressure);
+          // if (constraint_phase >= Tnphases) {
+          //   // Reference step
+          //   const Index ref_step =
+          //       constraints.at("ref_step").template get<Index>();
+          //   // Add reference step to nodes
+          //   mesh_->assign_nodal_pressure_reference_step(nset_id, ref_step);
+          //   // Insert the ref_step to the vector
+          //   pore_pressure_ref_step_.emplace_back(ref_step);
+          // }
+        }
+      }
+    } else
+      throw std::runtime_error("Pore pressure constraints JSON not found");
+
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Pore pressure conditions are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
 //! Cell entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::cell_entity_sets(const Json& mesh_props,
@@ -1049,6 +1125,66 @@ void mpm::MPMBase<Tdim>::particles_stresses(
   }
 }
 
+// Particles pore pressures
+template <unsigned Tdim>
+void mpm::MPMBase<Tdim>::particles_pore_pressures(
+    const Json& mesh_props,
+    const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
+  try {
+    if (mesh_props.find("particles_pore_pressures") != mesh_props.end()) {
+      // Assign initial pore pressure by file
+      if (mesh_props["particles_pore_pressures"].find("file") !=
+          mesh_props["particles_pore_pressures"].end()) {
+        std::string fparticles_pore_pressures =
+            mesh_props["particles_pore_pressures"]["file"]
+                .template get<std::string>();
+        if (!io_->file_name(fparticles_pore_pressures).empty()) {
+
+          // Get pore pressures of all particles
+          const auto all_particles_pore_pressures =
+              particle_io->read_particles_pressures(
+                  io_->file_name(fparticles_pore_pressures));
+
+          // Read and assign particles pore pressures
+          if (!mesh_->assign_particles_pore_pressures(
+                  all_particles_pore_pressures))
+            throw std::runtime_error(
+                "Particles pore pressures are not properly assigned");
+        } else
+          throw std::runtime_error("Particle pore pressures JSON not found");
+
+      } else {
+        // Initialise water tables
+        std::map<double, double> refernece_points;
+        // Vertical direction
+        const unsigned dir_v = mesh_props["particles_pore_pressures"]["dir_v"]
+                                   .template get<unsigned>();
+        // Horizontal direction
+        const unsigned dir_h = mesh_props["particles_pore_pressures"]["dir_h"]
+                                   .template get<unsigned>();
+        // Iterate over water tables
+        for (const auto& water_table :
+             mesh_props["particles_pore_pressures"]["water_tables"]) {
+          // Position coordinate
+          double position = water_table.at("position").template get<double>();
+          // Direction
+          double h0 = water_table.at("h0").template get<double>();
+          // Add refernece points to mesh
+          refernece_points.insert(std::make_pair<double, double>(
+              static_cast<double>(position), static_cast<double>(h0)));
+        }
+        // Initialise particles pore pressures by watertable
+        mesh_->iterate_over_particles(std::bind(
+            &mpm::ParticleBase<Tdim>::initialise_pore_pressure_watertable,
+            std::placeholders::_1, dir_v, dir_h, refernece_points));
+      }
+    }
+  } catch (std::exception& exception) {
+    console_->warn("#{}: Particle pore pressures are undefined {} ", __LINE__,
+                   exception.what());
+  }
+}
+
 //! Particle entity sets
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::particle_entity_sets(const Json& mesh_props,
@@ -1166,16 +1302,10 @@ void mpm::MPMBase<Tdim>::mpi_domain_decompose(bool initial_step) {
 //! MPM pressure smoothing
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
-  // Assign mass pressure to nodes
+  // Assign pressure to nodes
   mesh_->iterate_over_particles(
-      [&phase = phase](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::map_mass_pressure_to_nodes<Tdim>(ptr, phase);
-      });
-
-  // Compute nodal pressure
-  mesh_->iterate_over_nodes_predicate(
-      std::bind(&mpm::NodeBase<Tdim>::compute_pressure, std::placeholders::_1),
-      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+      std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
+                std::placeholders::_1, phase));
 
 #ifdef USE_MPI
   int mpi_size = 1;
@@ -1188,14 +1318,13 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
     // MPI all reduce nodal pressure
     mesh_->template nodal_halo_exchange<double, 1>(
         std::bind(&mpm::NodeBase<Tdim>::pressure, std::placeholders::_1, phase),
-        std::bind(&mpm::NodeBase<Tdim>::update_pressure, std::placeholders::_1,
-                  false, phase, std::placeholders::_2));
+        std::bind(&mpm::NodeBase<Tdim>::assign_pressure, std::placeholders::_1,
+                  phase, std::placeholders::_2));
   }
 #endif
 
   // Smooth pressure over particles
   mesh_->iterate_over_particles(
-      [&phase = phase](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::compute_pressure_smoothing<Tdim>(ptr, phase);
-      });
+      std::bind(&mpm::ParticleBase<Tdim>::compute_pressure_smoothing,
+                std::placeholders::_1, phase));
 }

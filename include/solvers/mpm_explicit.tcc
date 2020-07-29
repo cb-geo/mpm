@@ -14,10 +14,8 @@ void mpm::MPMExplicit<Tdim>::compute_stress_strain(unsigned phase) {
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));
 
   // Iterate over each particle to update particle volume
-  mesh_->iterate_over_particles(
-      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::update_volume<Tdim>(ptr);
-      });
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
 
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(phase);
@@ -95,9 +93,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Compute mass
   mesh_->iterate_over_particles(
-      [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-        return mpm::particle::compute_mass<Tdim>(ptr);
-      });
+      std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
 
   // Check point resume
   if (resume) this->checkpoint_resume();
@@ -157,9 +153,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
-        [](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-          return mpm::particle::map_mass_momentum_to_nodes<Tdim>(ptr);
-        });
+        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
+                  std::placeholders::_1));
 
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
@@ -228,9 +223,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       {
         // Iterate over each particle to compute nodal body force
         mesh_->iterate_over_particles(
-            [&value = gravity_](std::shared_ptr<mpm::ParticleBase<Tdim>> ptr) {
-              return mpm::particle::map_body_force<Tdim>(ptr, value);
-            });
+            std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
+                      std::placeholders::_1, this->gravity_));
 
         // Apply particle traction and map to nodes
         mesh_->apply_traction_on_particles(this->step_ * this->dt_);

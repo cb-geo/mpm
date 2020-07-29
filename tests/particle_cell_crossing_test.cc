@@ -165,14 +165,12 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
                 material, mpm::ParticlePhase::Solid));
 
   // Compute volume
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::compute_volume<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::compute_mass<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -192,9 +190,9 @@ TEST_CASE("Particle cell crossing is checked for 2D case",
       &mpm::ParticleBase<Dim>::compute_shapefn, std::placeholders::_1));
 
   // Assign mass and momentum to nodes
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::map_mass_momentum_to_nodes<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(
@@ -423,14 +421,12 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
                 material, mpm::ParticlePhase::Solid));
 
   // Compute volume
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::compute_volume<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Dim>::compute_volume, std::placeholders::_1));
 
   // Compute mass
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::compute_mass<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::compute_mass, std::placeholders::_1));
 
   // Initialise nodes
   mesh->iterate_over_nodes(
@@ -454,9 +450,9 @@ TEST_CASE("Particle cell crossing is checked for 3D case",
       &mpm::ParticleBase<Dim>::compute_shapefn, std::placeholders::_1));
 
   // Assign mass and momentum to nodes
-  mesh->iterate_over_particles([](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-    return mpm::particle::map_mass_momentum_to_nodes<Dim>(ptr);
-  });
+  mesh->iterate_over_particles(
+      std::bind(&mpm::ParticleBase<Dim>::map_mass_momentum_to_nodes,
+                std::placeholders::_1));
 
   // Iterate over active nodes to compute acceleratation and velocity
   mesh->iterate_over_nodes_predicate(

@@ -10,21 +10,19 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <flat/flat_map.hpp>
 
 #include "data_types.h"
 #include "function_base.h"
-#include "mpm_properties.h"
 #include "nodal_properties.h"
 
 namespace mpm {
 
-//! Nodal phases
+//! Particle phases
 enum NodePhase : unsigned int {
-  nMixture = 0,
   nSolid = 0,
   nLiquid = 1,
-  nGas = 2
+  nGas = 2,
+  nMixture = 0
 };
 
 //! NodeBase base class for nodes
@@ -79,49 +77,6 @@ class NodeBase {
 
   //! Return status
   virtual bool status() const = 0;
-
-  //! Assign boolean property at the nodes
-  //! \param[in] property Name of the property to assign
-  //! \param[in] boolean Property boolean (true/false) of the node
-  virtual void assign_boolean_property(mpm::properties::Boolean property,
-                                       bool boolean) noexcept = 0;
-
-  //! Return boolean property
-  //! \param[in] property Name of the property to update
-  //! \retval boolean property at node
-  virtual bool boolean_property(mpm::properties::Boolean property) const = 0;
-
-  //! Update scalar property at the nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] value Property value from the particles in a cell
-  virtual void update_scalar_property(mpm::properties::Scalar property,
-                                      bool update, unsigned phase,
-                                      double value) noexcept = 0;
-
-  //! Return property at a given node for a given phase
-  //! \param[in] property Name of the property to return
-  //! \param[in] phase Index corresponding to the phase
-  //! \retval scalar property at the designated phase
-  virtual double scalar_property(mpm::properties::Scalar property,
-                                 unsigned phase) const = 0;
-
-  //! Update vector property at the nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] value Property value from the particles in a cell
-  virtual void update_vector_property(
-      mpm::properties::Vector property, bool update, unsigned phase,
-      const Eigen::Matrix<double, Tdim, 1>& value) noexcept = 0;
-
-  //! Return property at a given node for a given phase
-  //! \param[in] property Name of the property to return
-  //! \param[in] phase Index corresponding to the phase
-  //! \retval vector property at the designated phase
-  virtual Eigen::Matrix<double, Tdim, 1> vector_property(
-      mpm::properties::Vector property, unsigned phase) const = 0;
 
   //! Update mass at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -180,25 +135,27 @@ class NodeBase {
   //! \param[in] phase Index corresponding to the phase
   virtual VectorDim internal_force(unsigned phase) const = 0;
 
-  //! Return drag force coefficient
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  virtual void update_drag_force_coefficient(bool update,
+                                             const VectorDim& drag_force) = 0;
+
+  //! Return drag force at a given node
   virtual VectorDim drag_force_coefficient() const = 0;
 
   //! Update pressure at the nodes from particle
-  //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(bool update, unsigned phase,
+  virtual void update_mass_pressure(unsigned phase,
                                     double mass_pressure) noexcept = 0;
-
-  //! Compute pressure from the mass pressure
-  virtual void compute_pressure() = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Pressure of a particle
-  virtual void update_pressure(bool update, unsigned phase,
-                               double pressure) = 0;
+  //! \param[in] mass_pressure Product of mass x pressure of a particle
+  virtual void assign_pressure(unsigned phase, double mass_pressure) = 0;
 
   //! Return pressure at a given node for a given phase
   //! \param[in] phase Index corresponding to the phase
@@ -244,6 +201,24 @@ class NodeBase {
   //! \param[in] damping_factor Damping factor
   virtual bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept = 0;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! \param[in] dt Timestep in analysis
+  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept = 0;
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  virtual bool assign_pressure_constraint(
+      const unsigned phase, double pressure,
+      const std::shared_ptr<FunctionBase>& function) = 0;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -310,16 +285,6 @@ class NodeBase {
 
   //! Compute multimaterial separation vector
   virtual void compute_multimaterial_separation_vector() = 0;
-
-  //! Compute acceleration and velocity for two phase
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit(
-      double dt) noexcept = 0;
-
-  //! Compute acceleration and velocity for two phase with cundall damping
-  //! \param[in] dt Timestep in analysis
-  virtual bool compute_acceleration_velocity_twophase_explicit_cundall(
-      double dt, double damping_factor) noexcept = 0;
 
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
