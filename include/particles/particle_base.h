@@ -23,7 +23,7 @@ enum ParticlePhase : unsigned int {
   Solid = 0,
   Liquid = 1,
   Gas = 2,
-  Mixture = 1
+  Mixture = 0
 };
 
 //! ParticleBase class
@@ -113,9 +113,6 @@ class ParticleBase {
   //! Return cell id
   virtual Index cell_id() const = 0;
 
-  //! Return cell ptr
-  virtual std::shared_ptr<Cell<Tdim>> cell() const = 0;
-
   //! Return cell ptr status
   virtual bool cell_ptr() const = 0;
 
@@ -134,92 +131,20 @@ class ParticleBase {
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
-  //! Assign boolean property at the particle
-  //! \param[in] property Name of the property to assign
-  //! \param[in] boolean Property boolean (true/false) of the particles in a
-  //! cell
-  void assign_boolean_property(mpm::properties::Boolean property,
-                               bool boolean) noexcept;
+  //! Compute volume of particle
+  virtual void compute_volume() noexcept = 0;
 
-  //! Return boolean property
-  //! \param[in] property Name of the property to update
-  //! \retval boolean property at particle
-  bool boolean_property(mpm::properties::Boolean property) const;
-
-  //! Update scalar property at the particle
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] value Property value from the particles in a cell
-  void update_scalar_property(mpm::properties::Scalar property, bool update,
-                              double value) noexcept;
-
-  //! Return scalar property
-  //! \param[in] property Name of the property to return
-  //! \retval scalar property at particle
-  double scalar_property(mpm::properties::Scalar property) const;
-
-  //! Map scalar property to the nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  void map_scalar_property_to_nodes(mpm::properties::Scalar property,
-                                    bool update, unsigned phase) noexcept;
-
-  //! Map an arbitrary scalar value to nodal scalar property
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] value Scalar value to be mapped from particle to node
-  void map_scalar_property_to_nodes(mpm::properties::Scalar property,
-                                    bool update, unsigned phase,
-                                    double value) noexcept;
-
-  //! Return an interpolation of scalar property in particle from nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] phase Index corresponding to the phase
-  //! \retval interpolated scalar property at particle
-  double interpolate_scalar_property_from_nodes(
-      mpm::properties::Scalar property, unsigned phase) const;
-
-  //! Update vector property at the particle
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] value Property value from the particles in a cell
-  void update_vector_property(
-      mpm::properties::Vector property, bool update,
-      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
-
-  //! Return vector property
-  //! \param[in] property Name of the property to return
-  //! \retval vector property at particle
-  Eigen::Matrix<double, Tdim, 1> vector_property(
-      mpm::properties::Vector property) const;
-
-  //! Map vector property to the nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  void map_vector_property_to_nodes(mpm::properties::Vector property,
-                                    bool update, unsigned phase) noexcept;
-
-  //! Map an arbitrary vector value to nodal vector property
-  //! \param[in] property Name of the property to update
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] value Vector value to be mapped from particle to node
-  void map_vector_property_to_nodes(
-      mpm::properties::Vector property, bool update, unsigned phase,
-      const Eigen::Matrix<double, Tdim, 1>& value) noexcept;
-
-  //! Return an interpolation of vector property in particle from nodes
-  //! \param[in] property Name of the property to update
-  //! \param[in] phase Index corresponding to the phase
-  //! \retval interpolated vector property at particle
-  Eigen::Matrix<double, Tdim, 1> interpolate_vector_property_from_nodes(
-      mpm::properties::Vector property, unsigned phase) const;
+  //! Update volume based on centre volumetric strain rate
+  virtual void update_volume() noexcept = 0;
 
   //! Return mass density
   virtual double mass_density() const = 0;
+
+  //! Compute mass of particle
+  virtual void compute_mass() noexcept = 0;
+
+  //! Map particle mass and momentum to nodes
+  virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
@@ -254,16 +179,6 @@ class ParticleBase {
     return state_variables_[phase];
   }
 
-  //! Assign a state variable
-  virtual void assign_state_variable(
-      const std::string& var, double value,
-      unsigned phase = mpm::ParticlePhase::Solid) = 0;
-
-  //! Return a state variable
-  virtual double state_variable(
-      const std::string& var,
-      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
-
   //! Assign status
   void assign_status(bool status) { status_ = status; }
 
@@ -278,10 +193,6 @@ class ParticleBase {
 
   //! Return mass
   virtual double mass() const = 0;
-
-  //! Assign pressure
-  virtual void assign_pressure(double pressure,
-                               unsigned phase = mpm::ParticlePhase::Solid) = 0;
 
   //! Return pressure
   virtual double pressure(unsigned phase = mpm::ParticlePhase::Solid) const = 0;
@@ -310,11 +221,22 @@ class ParticleBase {
   //! Return stress
   virtual Eigen::Matrix<double, 6, 1> stress() const = 0;
 
+  //! Map body force
+  virtual void map_body_force(const VectorDim& pgravity) noexcept = 0;
+
   //! Map internal force
   virtual void map_internal_force() noexcept = 0;
 
+  //! Map particle pressure to nodes
+  virtual bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  virtual bool compute_pressure_smoothing(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept = 0;
+
   //! Assign velocity
-  virtual void assign_velocity(const VectorDim& velocity) = 0;
+  virtual bool assign_velocity(const VectorDim& velocity) = 0;
 
   //! Return velocity
   virtual VectorDim velocity() const = 0;
@@ -328,9 +250,17 @@ class ParticleBase {
   //! Return traction
   virtual VectorDim traction() const = 0;
 
+  //! Map traction force
+  virtual void map_traction_force() noexcept = 0;
+
   //! Compute updated position
   virtual void compute_updated_position(
       double dt, bool velocity_update = false) noexcept = 0;
+
+  //! Return a state variable
+  virtual double state_variable(
+      const std::string& var,
+      unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
   //! Return tensor data of particles
   //! \param[in] property Property string
@@ -357,8 +287,48 @@ class ParticleBase {
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
-  //----------------------------------------------------------------------------
-  //! TODO
+  //! Update porosity
+  //! \param[in] dt Analysis time step
+  virtual bool update_porosity(double dt) {
+    throw std::runtime_error(
+        "Calling the base class function (update_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initial pore pressure
+  virtual void initial_pore_pressure(double pore_pressure) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initial_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Assign particle pressure constraints
+  virtual bool assign_particle_pore_pressure_constraint(double pressure) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_particle_pore_pressure_constraint) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign saturation degree
+  virtual bool assign_saturation_degree() {
+    throw std::runtime_error(
+        "Calling the base class function (assign_saturation_degree) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign pore pressure
+  //! \param[in] pressure Pore liquid pressure
+  virtual void assign_pore_pressure(double pressure) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+  };
+
   //! Assign liquid traction
   //! \param[in] direction Index corresponding to the direction of traction
   //! \param[in] traction Particle traction in specified direction
@@ -367,7 +337,72 @@ class ParticleBase {
     throw std::runtime_error(
         "Calling the base class function (assign_liquid_traction) in "
         "ParticleBase:: illegal operation!");
-    return false;
+    return 0;
+  };
+
+  //! Return liquid phase traction
+  virtual VectorDim liquid_traction() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_traction) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return mixture traction
+  virtual VectorDim mixture_traction() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (mixture_traction) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
+  virtual double liquid_mass() const {
+    throw std::runtime_error(
+        "Calling the base class function (liquid_mass) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Assign velocity to the particle liquid phase
+  //! \param[in] velocity A vector of particle liquid phase velocity
+  //! \retval status Assignment status
+  virtual bool assign_liquid_velocity(const VectorDim& velocity) {
+    throw std::runtime_error(
+        "Calling the base class function (assign_liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return strain of the particle liquid phase
+  //! \retval liquid strain Liquid phase strain
+  virtual Eigen::Matrix<double, 6, 1> liquid_strain() const {
+    auto error = Eigen::Matrix<double, 6, 1>::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_strain) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Compute pore pressure somoothening by interpolating nodal pressure
+  virtual bool compute_pore_pressure_smoothing() {
+    throw std::runtime_error(
+        "Calling the base class function (compute_pore_pressure_smoothing) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
   };
 
   //! Compute pore pressure
@@ -378,33 +413,81 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
   };
 
-  //! Compute pore pressure somoothening by interpolating nodal pressure
-  virtual bool compute_pore_pressure_smoothing() {
+  //! Return liquid pore pressure
+  //! \retval pore pressure Pore liquid pressure
+  virtual double pore_pressure() const {
     throw std::runtime_error(
-        "Calling the base class function (compute_pore_pressure_smoothing) in "
+        "Calling the base class function (pore_pressure) in "
         "ParticleBase:: illegal operation!");
-    return false;
+    return 0;
+  };
+
+  //! Update particle permeability
+  virtual bool update_permeability() {
+    throw std::runtime_error(
+        "Calling the base class function (update_permeability) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Map drag force coefficient
+  virtual bool map_drag_force_coefficient() {
+    throw std::runtime_error(
+        "Calling the base class function (map_drag_force_coefficient) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
   };
 
   //! Assign particle liquid phase velocity constraints
+  //! Directions can take values between 0 and Dim
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle liquid phase velocity constraint
+  //! \retval status Assignment status
   virtual bool assign_particle_liquid_velocity_constraint(unsigned dir,
                                                           double velocity) {
     throw std::runtime_error(
         "Calling the base class function "
         "(assign_particle_liquid_velocity_constraint) in "
         "ParticleBase:: illegal operation!");
-    return false;
+    return 0;
   };
 
-  //! Assign particle pressure constraints
-  virtual bool assign_particle_pore_pressure_constraint(double pressure) {
+  //! Apply particle liquid phase velocity constraints
+  virtual void apply_particle_liquid_velocity_constraints() {
     throw std::runtime_error(
         "Calling the base class function "
-        "(assign_particle_pore_pressure_constraint) in "
+        "(apply_particle_liquid_velocity_constraints) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool initialise_pore_pressure_watertable(
+      const unsigned dir_v, const unsigned dir_h,
+      std::map<double, double>& refernece_points) {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(initial_pore_pressure_watertable) in "
         "ParticleBase:: illegal operation!");
     return false;
   };
-  //----------------------------------------------------------------------------
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_porosity() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_porosity) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
+
+  //! Initialise particle pore pressure by watertable
+  virtual bool assign_permeability() {
+    throw std::runtime_error(
+        "Calling the base class function "
+        "(assign_permeability) in "
+        "ParticleBase:: illegal operation!");
+    return false;
+  };
 
  protected:
   //! particleBase id
@@ -429,15 +512,6 @@ class ParticleBase {
   std::vector<mpm::dense_map> state_variables_;
   //! Vector of particle neighbour ids
   std::vector<mpm::Index> neighbours_;
-  //! Shape functions
-  Eigen::VectorXd shapefn_;
-  //! Boolean properties
-  fc::vector_map<mpm::properties::Boolean, bool> boolean_properties_;
-  //! Scalar properties
-  fc::vector_map<mpm::properties::Scalar, double> scalar_properties_;
-  //! Vector properties
-  fc::vector_map<mpm::properties::Vector, Eigen::Matrix<double, Tdim, 1>>
-      vector_properties_;
 };  // ParticleBase class
 }  // namespace mpm
 

@@ -55,7 +55,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] particle HDF5 data of particle
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
-  bool initialise_particle(
+  virtual bool initialise_particle(
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) override;
 
@@ -105,9 +105,6 @@ class Particle : public ParticleBase<Tdim> {
   //! Return cell id
   Index cell_id() const override { return cell_id_; }
 
-  //! Return cell ptr
-  std::shared_ptr<Cell<Tdim>> cell() const override { return cell_; }
-
   //! Return cell ptr status
   bool cell_ptr() const override { return cell_ != nullptr; }
 
@@ -122,17 +119,26 @@ class Particle : public ParticleBase<Tdim> {
   bool assign_volume(double volume) override;
 
   //! Return volume
-  double volume() const override {
-    return this->scalar_property(mpm::properties::Scalar::Volume);
-  }
+  double volume() const override { return volume_; }
 
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
+  //! Compute volume as cell volume / nparticles
+  void compute_volume() noexcept override;
+
+  //! Update volume based on centre volumetric strain rate
+  void update_volume() noexcept override;
+
   //! Return mass density
-  double mass_density() const override {
-    return this->scalar_property(mpm::properties::Scalar::MassDensity);
-  }
+  //! \param[in] phase Index corresponding to the phase
+  double mass_density() const override { return mass_density_; }
+
+  //! Compute mass as volume * density
+  void compute_mass() noexcept override;
+
+  //! Map particle mass and momentum to nodes
+  void map_mass_momentum_to_nodes() noexcept override;
 
   //! Map multimaterial properties to nodes
   void map_multimaterial_mass_momentum_to_nodes() noexcept override;
@@ -145,14 +151,11 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Assign nodal mass to particles
   //! \param[in] mass Mass from the particles in a cell
-  void assign_mass(double mass) override {
-    scalar_properties_.at(mpm::properties::Scalar::Mass) = mass;
-  }
+  //! \retval status Assignment status
+  void assign_mass(double mass) override { mass_ = mass; }
 
   //! Return mass of the particles
-  double mass() const override {
-    return this->scalar_property(mpm::properties::Scalar::Mass);
-  }
+  double mass() const override { return mass_; }
 
   //! Assign material
   //! \param[in] material Pointer to a material
@@ -194,24 +197,23 @@ class Particle : public ParticleBase<Tdim> {
   //! Return stress of the particle
   Eigen::Matrix<double, 6, 1> stress() const override { return stress_; }
 
+  //! Map body force
+  //! \param[in] pgravity Gravity of a particle
+  void map_body_force(const VectorDim& pgravity) noexcept override;
+
   //! Map internal force
   inline void map_internal_force() noexcept override;
 
   //! Assign velocity to the particle
   //! \param[in] velocity A vector of particle velocity
-  void assign_velocity(const VectorDim& velocity) override {
-    vector_properties_.at(mpm::properties::Vector::Velocity) = velocity;
-  };
+  //! \retval status Assignment status
+  bool assign_velocity(const VectorDim& velocity) override;
 
   //! Return velocity of the particle
-  VectorDim velocity() const override {
-    return this->vector_property(mpm::properties::Vector::Velocity);
-  }
+  VectorDim velocity() const override { return velocity_; }
 
   //! Return displacement of the particle
-  VectorDim displacement() const override {
-    return this->vector_property(mpm::properties::Vector::Displacement);
-  }
+  VectorDim displacement() const override { return displacement_; }
 
   //! Assign traction to the particle
   //! \param[in] direction Index corresponding to the direction of traction
@@ -223,22 +225,14 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] phase Index corresponding to the phase
   VectorDim traction() const override { return traction_; }
 
+  //! Map traction force
+  void map_traction_force() noexcept override;
+
   //! Compute updated position of the particle
   //! \param[in] dt Analysis time step
   //! \param[in] velocity_update Update particle velocity from nodal vel
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
-
-  //! Assign a state variable
-  //! \param[in] var State variable
-  //! \param[in] value State variable to be assigned
-  //! \param[in] phase Index to indicate phase
-  void assign_state_variable(
-      const std::string& var, double value,
-      unsigned phase = mpm::ParticlePhase::Solid) override {
-    if (state_variables_[phase].find(var) != state_variables_[phase].end())
-      state_variables_[phase].at(var) = value;
-  }
 
   //! Return a state variable
   //! \param[in] var State variable
@@ -252,13 +246,14 @@ class Particle : public ParticleBase<Tdim> {
                : std::numeric_limits<double>::quiet_NaN();
   }
 
-  //! Assign a state variable
-  //! \param[in] value Particle pressure to be assigned
-  //! \param[in] phase Index to indicate phase
-  void assign_pressure(double pressure,
-                       unsigned phase = mpm::ParticlePhase::Solid) override {
-    this->assign_state_variable("pressure", pressure, phase);
-  }
+  //! Map particle pressure to nodes
+  bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
+
+  //! Compute pressure smoothing of the particle based on nodal pressure
+  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
+  bool compute_pressure_smoothing(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
   //! Return pressure of the particles
   //! \param[in] phase Index to indicate phase
@@ -333,14 +328,12 @@ class Particle : public ParticleBase<Tdim> {
   using ParticleBase<Tdim>::state_variables_;
   //! Neighbour particles
   using ParticleBase<Tdim>::neighbours_;
-  //! Scalar properties
-  using ParticleBase<Tdim>::boolean_properties_;
-  //! Scalar properties
-  using ParticleBase<Tdim>::scalar_properties_;
-  //! Vector properties
-  using ParticleBase<Tdim>::vector_properties_;
-  //! Shape functions
-  using ParticleBase<Tdim>::shapefn_;
+  //! Volumetric mass density (mass / volume)
+  double mass_density_{0.};
+  //! Mass
+  double mass_{0.};
+  //! Volume
+  double volume_{0.};
   //! Size of particle
   Eigen::Matrix<double, 1, Tdim> size_;
   //! Size of particle in natural coordinates
@@ -357,10 +350,18 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, 6, 1> strain_rate_;
   //! dstrains
   Eigen::Matrix<double, 6, 1> dstrain_;
+  //! Velocity
+  Eigen::Matrix<double, Tdim, 1> velocity_;
+  //! Displacement
+  Eigen::Matrix<double, Tdim, 1> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
+  //! Set traction
+  bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)
   Eigen::Matrix<double, Tdim, 1> traction_;
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
   //! dN/dX
   Eigen::MatrixXd dn_dx_;
   //! dN/dX at cell centroid
@@ -374,6 +375,5 @@ class Particle : public ParticleBase<Tdim> {
 }  // namespace mpm
 
 #include "particle.tcc"
-#include "particle_functions.tcc"
 
 #endif  // MPM_PARTICLE_H__

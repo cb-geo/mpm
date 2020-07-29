@@ -51,6 +51,18 @@ class IOMeshAscii : public IOMesh<Tdim> {
   std::vector<Eigen::Matrix<double, 6, 1>> read_particles_stresses(
       const std::string& particles_stresses) override;
 
+  //! Read particle pressure
+  //! \param[in] particles_pressures file name with particle pressure
+  //! \retval Vector of particles pressures
+  std::vector<double> read_particles_pressures(
+      const std::string& particles_pressures) override;
+
+  //! Read pressure constraints file
+  //! \param[in] pressure_constraints_files file name with pressure
+  //! constraints
+  std::vector<std::tuple<mpm::Index, double>> read_pressure_constraints(
+      const std::string& pressure_constraints_file) override;
+
   //! Read nodal euler angles file
   //! \param[in] nodal_euler_angles_file file name with nodal id and respective
   //! euler angles

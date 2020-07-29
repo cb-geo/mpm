@@ -35,7 +35,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::step_;
   //! Number of steps
   using mpm::MPMBase<Tdim>::nsteps_;
-  //! Load balance step
+  //! Number of steps
   using mpm::MPMBase<Tdim>::nload_balance_steps_;
   //! Output steps
   using mpm::MPMBase<Tdim>::output_steps_;

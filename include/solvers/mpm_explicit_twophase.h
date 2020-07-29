@@ -5,13 +5,13 @@
 #include "graph.h"
 #endif
 
-#include "mpm_base.h"
+#include "solvers/mpm_base.h"
 
 namespace mpm {
 
-//! MPMExplicitTwoPhase class
-//! \brief A class that implements the fully explicit two phase mpm
-//! \details A two-phase explicit MPM
+//! MPMExplicit class
+//! \brief A class that implements the fully explicit one phase mpm
+//! \details A single-phase explicit MPM
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class MPMExplicitTwoPhase : public MPMBase<Tdim> {
@@ -34,7 +34,7 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::step_;
   //! Number of steps
   using mpm::MPMBase<Tdim>::nsteps_;
-  //! Load balance step
+  //! Number of steps
   using mpm::MPMBase<Tdim>::nload_balance_steps_;
   //! Output steps
   using mpm::MPMBase<Tdim>::output_steps_;
@@ -52,8 +52,6 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::graph_;
 #endif
 
-  //! Stress update
-  using mpm::MPMBase<Tdim>::stress_update_;
   //! velocity update
   using mpm::MPMBase<Tdim>::velocity_update_;
   //! Gravity
@@ -75,11 +73,13 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   //! Pressure smoothing
   bool pressure_smoothing_{false};
   //! Pore pressure smoothing
-  bool pore_pressure_smoothing_{true};
+  bool pore_pressure_smoothing_{false};
+  //! Volume tolerance for free surface
+  double volume_tolerance_{0};
 
-};  // MPMExplicitTwoPhase class
+};  // MPMExplicit class
 }  // namespace mpm
 
 #include "mpm_explicit_twophase.tcc"
 
-#endif  // MPM_MPM_EXPLICIT_TWOPHASE_H_
+#endif  // MPM_MPM_EXPLICIT_H_

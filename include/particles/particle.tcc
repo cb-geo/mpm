@@ -37,12 +37,11 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   // Assign id
   this->id_ = particle.id;
   // Mass
-  scalar_properties_.at(mpm::properties::Scalar::Mass) = particle.mass;
+  this->mass_ = particle.mass;
   // Volume
-  scalar_properties_.at(mpm::properties::Scalar::Volume) = particle.volume;
+  this->volume_ = particle.volume;
   // Mass Density
-  scalar_properties_.at(mpm::properties::Scalar::MassDensity) =
-      particle.mass / particle.volume;
+  this->mass_density_ = particle.mass / particle.volume;
   // Set local size of particle
   Eigen::Vector3d psize;
   psize << particle.nsize_x, particle.nsize_y, particle.nsize_z;
@@ -60,16 +59,13 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
   displacement << particle.displacement_x, particle.displacement_y,
       particle.displacement_z;
   // Initialise displacement
-  for (unsigned i = 0; i < Tdim; ++i)
-    vector_properties_.at(mpm::properties::Vector::Displacement)(i) =
-        displacement(i);
+  for (unsigned i = 0; i < Tdim; ++i) this->displacement_(i) = displacement(i);
 
   // Velocity
   Eigen::Vector3d velocity;
   velocity << particle.velocity_x, particle.velocity_y, particle.velocity_z;
   // Initialise velocity
-  for (unsigned i = 0; i < Tdim; ++i)
-    vector_properties_.at(mpm::properties::Vector::Velocity)(i) = velocity(i);
+  for (unsigned i = 0; i < Tdim; ++i) this->velocity_(i) = velocity(i);
 
   // Stress
   this->stress_[0] = particle.stress_xx;
@@ -149,11 +145,11 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 
   Eigen::Vector3d displacement;
   displacement.setZero();
-  for (unsigned j = 0; j < Tdim; ++j) displacement[j] = this->displacement()[j];
+  for (unsigned j = 0; j < Tdim; ++j) displacement[j] = this->displacement_[j];
 
   Eigen::Vector3d velocity;
   velocity.setZero();
-  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity()[j];
+  for (unsigned j = 0; j < Tdim; ++j) velocity[j] = this->velocity_[j];
 
   // Particle local size
   Eigen::Vector3d nsize;
@@ -233,32 +229,19 @@ mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 // Initialise particle properties
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::initialise() {
+  displacement_.setZero();
   dstrain_.setZero();
+  mass_ = 0.;
   natural_size_.setZero();
+  set_traction_ = false;
   size_.setZero();
   strain_rate_.setZero();
   strain_.setZero();
   stress_.setZero();
   traction_.setZero();
+  velocity_.setZero();
+  volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
-
-  // Initialize boolean properties
-  boolean_properties_.emplace(
-      std::make_pair(mpm::properties::Boolean::SetTraction, false));
-
-  // Initialize scalar properties
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::Mass, double(0.)));
-  scalar_properties_.emplace(
-      std::make_pair(mpm::properties::Scalar::MassDensity, double(0.)));
-  scalar_properties_.emplace(std::make_pair(
-      mpm::properties::Scalar::Volume, std::numeric_limits<double>::max()));
-
-  // Initialize vector properties
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Displacement, VectorDim::Zero()));
-  vector_properties_.emplace(
-      std::make_pair(mpm::properties::Vector::Velocity, VectorDim::Zero()));
 
   // Initialize vector data properties
   this->properties_["stresses"] = [&]() { return stress(); };
@@ -279,16 +262,16 @@ void mpm::Particle<Tdim>::initialise_material(unsigned phase_size) {
   std::fill(state_variables_.begin(), state_variables_.end(), mpm::dense_map());
 }
 
-//! Assign material state variables from neighbour particle
+//! Assign material history variables
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_material_state_vars(
     const mpm::dense_map& state_vars,
     const std::shared_ptr<mpm::Material<Tdim>>& material, unsigned phase) {
   bool status = false;
-  if (material != nullptr && this->material() != nullptr &&
-      this->material_id() == material->id()) {
+  if (material != nullptr && this->material(phase) != nullptr &&
+      this->material_id(phase) == material->id()) {
     // Clone state variables
-    auto mat_state_vars = (this->material())->initialise_state_variables();
+    auto mat_state_vars = (this->material(phase))->initialise_state_variables();
     if (state_variables_[phase].size() == state_vars.size() &&
         mat_state_vars.size() == state_vars.size()) {
       this->state_variables_[phase] = state_vars;
@@ -469,10 +452,10 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
     if (volume <= 0.)
       throw std::runtime_error("Particle volume cannot be negative");
 
-    scalar_properties_.at(mpm::properties::Scalar::Volume) = volume;
+    this->volume_ = volume;
     // Compute size of particle in each direction
     const double length =
-        std::pow(this->volume(), static_cast<double>(1. / Tdim));
+        std::pow(this->volume_, static_cast<double>(1. / Tdim));
     // Set particle size as length on each side
     this->size_.fill(length);
 
@@ -493,57 +476,99 @@ bool mpm::Particle<Tdim>::assign_volume(double volume) {
   return status;
 }
 
+// Compute volume of the particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_volume() noexcept {
+  // Check if particle has a valid cell ptr
+  assert(cell_ != nullptr);
+  // Volume of the cell / # of particles
+  this->assign_volume(cell_->volume() / cell_->nparticles());
+}
+
+// Update volume based on the central strain rate
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::update_volume() noexcept {
+  // Check if particle has a valid cell ptr and a valid volume
+  assert(cell_ != nullptr && volume_ != std::numeric_limits<double>::max());
+  // Compute at centroid
+  // Strain rate for reduced integration
+  this->volume_ *= (1. + dvolumetric_strain_);
+  this->mass_density_ = this->mass_density_ / (1. + dvolumetric_strain_);
+}
+
+// Compute mass of particle
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::compute_mass() noexcept {
+  // Check if particle volume is set and material ptr is valid
+  assert(volume_ != std::numeric_limits<double>::max() &&
+         this->material() != nullptr);
+  // Mass = volume of particle * mass_density
+  this->mass_density_ =
+      (this->material())->template property<double>(std::string("density"));
+  this->mass_ = volume_ * mass_density_;
+}
+
+//! Map particle mass and momentum to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
+  // Check if particle mass is set
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  // Map mass and momentum to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    nodes_[i]->update_mass(true, mpm::ParticlePhase::Solid,
+                           mass_ * shapefn_[i]);
+    nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
+                               mass_ * shapefn_[i] * velocity_);
+  }
+}
+
 //! Map multimaterial properties to nodes
-// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   // Check if particle mass is set
-  assert(this->mass() != std::numeric_limits<double>::max());
+  assert(mass_ != std::numeric_limits<double>::max());
 
   // Unit 1x1 Eigen matrix to be used with scalar quantities
   Eigen::Matrix<double, 1, 1> nodal_mass;
 
   // Map mass and momentum to nodal property taking into account the material id
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    nodal_mass(0, 0) = this->mass() * shapefn_[i];
+    nodal_mass(0, 0) = mass_ * shapefn_[i];
     nodes_[i]->update_property(true, "masses", nodal_mass, this->material_id(),
                                1);
-    nodes_[i]->update_property(true, "momenta", this->velocity() * nodal_mass,
+    nodes_[i]->update_property(true, "momenta", velocity_ * nodal_mass,
                                this->material_id(), Tdim);
   }
 }
 
 //! Map multimaterial displacements to nodes
-// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   // Check if particle mass is set
-  assert(this->mass() != std::numeric_limits<double>::max());
+  assert(mass_ != std::numeric_limits<double>::max());
 
   // Map displacements to nodal property and divide it by the respective
   // nodal-material mass
   for (unsigned i = 0; i < nodes_.size(); ++i) {
-    const auto& displacement =
-        this->mass() * shapefn_[i] * this->displacement();
+    const auto& displacement = mass_ * shapefn_[i] * displacement_;
     nodes_[i]->update_property(true, "displacements", displacement,
                                this->material_id(), Tdim);
   }
 }
 
 //! Map multimaterial domain gradients to nodes
-// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<
     Tdim>::map_multimaterial_domain_gradients_to_nodes() noexcept {
   // Check if particle volume is set
-  assert(this->volume() != std::numeric_limits<double>::max());
+  assert(volume_ != std::numeric_limits<double>::max());
 
   // Map domain gradients to nodal property. The domain gradients is defined as
   // the gradient of the particle volume
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     Eigen::Matrix<double, Tdim, 1> gradient;
-    for (unsigned j = 0; j < Tdim; ++j)
-      gradient[j] = this->volume() * dn_dx_(i, j);
+    for (unsigned j = 0; j < Tdim; ++j) gradient[j] = volume_ * dn_dx_(i, j);
     nodes_[i]->update_property(true, "domain_gradients", gradient,
                                this->material_id(), Tdim);
   }
@@ -639,6 +664,15 @@ void mpm::Particle<Tdim>::compute_stress() noexcept {
                            &state_variables_[mpm::ParticlePhase::Solid]);
 }
 
+//! Map body force
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_body_force(const VectorDim& pgravity) noexcept {
+  // Compute nodal body forces
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                     (pgravity * mass_ * shapefn_(i)));
+}
+
 //! Map internal force
 template <>
 inline void mpm::Particle<1>::map_internal_force() noexcept {
@@ -646,7 +680,7 @@ inline void mpm::Particle<1>::map_internal_force() noexcept {
   for (unsigned i = 0; i < nodes_.size(); ++i) {
     // Compute force: -pstress * volume
     Eigen::Matrix<double, 1, 1> force;
-    force[0] = -1. * dn_dx_(i, 0) * this->volume() * stress_[0];
+    force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
   }
@@ -662,7 +696,7 @@ inline void mpm::Particle<2>::map_internal_force() noexcept {
     force[0] = dn_dx_(i, 0) * stress_[0] + dn_dx_(i, 1) * stress_[3];
     force[1] = dn_dx_(i, 1) * stress_[1] + dn_dx_(i, 0) * stress_[3];
 
-    force *= -1. * this->volume();
+    force *= -1. * this->volume_;
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
   }
@@ -684,10 +718,19 @@ inline void mpm::Particle<3>::map_internal_force() noexcept {
     force[2] = dn_dx_(i, 2) * stress_[2] + dn_dx_(i, 1) * stress_[4] +
                dn_dx_(i, 0) * stress_[5];
 
-    force *= -1. * this->volume();
+    force *= -1. * this->volume_;
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
   }
+}
+
+// Assign velocity to the particle
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_velocity(
+    const Eigen::Matrix<double, Tdim, 1>& velocity) {
+  // Assign velocity
+  velocity_ = velocity;
+  return true;
 }
 
 // Assign traction to the particle
@@ -696,19 +739,30 @@ bool mpm::Particle<Tdim>::assign_traction(unsigned direction, double traction) {
   bool status = false;
   try {
     if (direction >= Tdim ||
-        this->volume() == std::numeric_limits<double>::max()) {
+        this->volume_ == std::numeric_limits<double>::max()) {
       throw std::runtime_error(
           "Particle traction property: volume / direction is invalid");
     }
     // Assign traction
-    traction_(direction) = traction * this->volume() / this->size_(direction);
+    traction_(direction) = traction * this->volume_ / this->size_(direction);
     status = true;
-    this->assign_boolean_property(mpm::properties::Boolean::SetTraction, true);
+    this->set_traction_ = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
   }
   return status;
+}
+
+//! Map traction force
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_traction_force() noexcept {
+  if (this->set_traction_) {
+    // Map particle traction forces to nodes
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
+                                       (shapefn_[i] * traction_));
+  }
 }
 
 // Compute updated position of the particle
@@ -718,40 +772,84 @@ void mpm::Particle<Tdim>::compute_updated_position(
   // Check if particle has a valid cell ptr
   assert(cell_ != nullptr);
   // Get interpolated nodal velocity
-  const auto& nodal_velocity = this->interpolate_vector_property_from_nodes(
-      mpm::properties::Vector::Velocity, mpm::ParticlePhase::Solid);
+  Eigen::Matrix<double, Tdim, 1> nodal_velocity =
+      Eigen::Matrix<double, Tdim, 1>::Zero();
+
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodal_velocity +=
+        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
 
   // Acceleration update
   if (!velocity_update) {
     // Get interpolated nodal acceleration
-    const auto& nodal_acceleration =
-        this->interpolate_vector_property_from_nodes(
-            mpm::properties::Vector::Acceleration, mpm::ParticlePhase::Solid);
+    Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodal_acceleration +=
+          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
 
     // Update particle velocity from interpolated nodal acceleration
-    vector_properties_.at(mpm::properties::Vector::Velocity) +=
-        nodal_acceleration * dt;
+    this->velocity_ += nodal_acceleration * dt;
   }
   // Update particle velocity using interpolated nodal velocity
   else
-    vector_properties_.at(mpm::properties::Vector::Velocity) = nodal_velocity;
+    this->velocity_ = nodal_velocity;
 
   // New position  current position + velocity * dt
   this->coordinates_ += nodal_velocity * dt;
-
   // Update displacement (displacement is initialized from zero)
-  vector_properties_.at(mpm::properties::Vector::Displacement) +=
-      nodal_velocity * dt;
+  this->displacement_ += nodal_velocity * dt;
+}
+
+//! Map particle pressure to nodes
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
+  // Mass is initialized
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  bool status = false;
+  // Check if particle mass is set and state variable pressure is found
+  if (mass_ != std::numeric_limits<double>::max() &&
+      (state_variables_[phase].find("pressure") !=
+       state_variables_[phase].end())) {
+    // Map particle pressure to nodes
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodes_[i]->update_mass_pressure(
+          phase, shapefn_[i] * mass_ * state_variables_[phase]["pressure"]);
+
+    status = true;
+  }
+  return status;
+}
+
+// Compute pressure smoothing of the particle based on nodal pressure
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::compute_pressure_smoothing(unsigned phase) noexcept {
+  // Assert
+  assert(cell_ != nullptr);
+
+  bool status = false;
+  // Check if particle has a valid cell ptr
+  if (cell_ != nullptr && (state_variables_[phase].find("pressure") !=
+                           state_variables_[phase].end())) {
+
+    double pressure = 0.;
+    // Update particle pressure to interpolated nodal pressure
+    for (unsigned i = 0; i < this->nodes_.size(); ++i)
+      pressure += shapefn_[i] * nodes_[i]->pressure(phase);
+
+    state_variables_[phase]["pressure"] = pressure;
+    status = true;
+  }
+  return status;
 }
 
 //! Apply particle velocity constraints
-// TODO: revisit constraint application in vector properties, should assign
-// direction
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
                                                               double velocity) {
   // Set particle velocity constraint
-  vector_properties_.at(mpm::properties::Vector::Velocity)(dir) = velocity;
+  this->velocity_(dir) = velocity;
 }
 
 //! Return particle tensor data
@@ -761,7 +859,6 @@ Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
 }
 
 //! Assign material id of this particle to nodes
-// TODO: Contact function to be refactored
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
