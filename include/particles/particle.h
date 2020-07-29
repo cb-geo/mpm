@@ -308,8 +308,11 @@ class Particle : public ParticleBase<Tdim> {
   //! Return free surface bool
   bool free_surface() override { return free_surface_; };
 
-  //! Compute free surface
-  bool compute_free_surface() override;
+  //! Compute free surface in particle level by density ratio comparison
+  //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_density(
+      double density_ratio_tolerance = 0.70) override;
 
   //! Assign normal vector
   void assign_normal(const VectorDim& normal) override { normal_ = normal; };

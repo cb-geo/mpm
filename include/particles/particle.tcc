@@ -871,9 +871,10 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
     nodes_[i]->append_material_id(this->material_id());
 }
 
-//! Compute free surface
+//! Compute free surface in particle level by density ratio comparison
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::compute_free_surface() {
+bool mpm::Particle<Tdim>::compute_free_surface_by_density(
+    double density_ratio_tolerance) {
   bool status = false;
   // Check if particle has a valid cell ptr
   if (cell_ != nullptr) {
@@ -885,7 +886,8 @@ bool mpm::Particle<Tdim>::compute_free_surface() {
           shapefn_[i] * nodes_[i]->density(mpm::ParticlePhase::Solid);
 
     // Compare smoothen density to actual particle mass density
-    if ((nodal_mass_density / mass_density_) <= 0.70) status = true;
+    if ((nodal_mass_density / mass_density_) <= density_ratio_tolerance)
+      status = true;
   }
   return status;
 };

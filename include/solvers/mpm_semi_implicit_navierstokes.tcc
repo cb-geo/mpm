@@ -121,7 +121,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
                   std::placeholders::_1));
 
     // Compute free surface cells, nodes, and particles
-    mesh_->compute_free_surface(volume_tolerance_);
+    mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
 
     // Spawn a task for initializing pressure at free surface
 #pragma omp parallel sections
@@ -265,6 +265,12 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
     // Get matrix solver type
     std::string solver_type =
         analysis_["matrix"]["solver_type"].template get<std::string>();
+    // Get method to detect free surface detection
+    free_surface_detection_ = "density";
+    if (analysis_["matrix"].contains("free_surface_detection_type"))
+      free_surface_detection_ =
+          analysis_["matrix"]["free_surface_detection_type"]
+              .template get<std::string>();
     // Get volume tolerance for free surface
     volume_tolerance_ =
         analysis_["matrix"]["volume_tolerance"].template get<double>();
