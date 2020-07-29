@@ -967,9 +967,8 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
 
               // Compute volume
               mesh->iterate_over_particles(
-                  [](std::shared_ptr<mpm::ParticleBase<Dim>> ptr) {
-                    return mpm::particle::compute_volume<Dim>(ptr);
-                  });
+                  std::bind(&mpm::ParticleBase<Dim>::compute_volume,
+                            std::placeholders::_1));
 
               mesh->apply_traction_on_particles(10);
             }

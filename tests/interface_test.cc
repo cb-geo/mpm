@@ -152,9 +152,9 @@ TEST_CASE("Interface functions are checked", "[interface]") {
   particle3->map_multimaterial_mass_momentum_to_nodes();
 
   // Map masses and momenta from particles to nodes
-  mpm::particle::map_mass_momentum_to_nodes<Dim>(particle1);
-  mpm::particle::map_mass_momentum_to_nodes<Dim>(particle2);
-  mpm::particle::map_mass_momentum_to_nodes<Dim>(particle3);
+  particle1->map_mass_momentum_to_nodes();
+  particle2->map_mass_momentum_to_nodes();
+  particle3->map_mass_momentum_to_nodes();
 
   // Compute velocities at nodes
   node0->compute_velocity();

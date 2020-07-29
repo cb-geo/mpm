@@ -134,47 +134,30 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
     mass = 100.;
     REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
     REQUIRE(node->mass(Nphase) == Approx(100.0).epsilon(Tolerance));
-    // Assign mass to 200 using scalar property update true
-    REQUIRE_NOTHROW(node->update_scalar_property(mpm::properties::Scalar::Mass,
-                                                 true, Nphase, mass));
-    REQUIRE(node->scalar_property(mpm::properties::Scalar::Mass, Nphase) ==
-            Approx(200.0).epsilon(Tolerance));
-    // Assign mass to 100 using scalar property update false
-    REQUIRE_NOTHROW(node->update_scalar_property(mpm::properties::Scalar::Mass,
-                                                 false, Nphase, mass));
-    REQUIRE(node->scalar_property(mpm::properties::Scalar::Mass, Nphase) ==
-            Approx(100.0).epsilon(Tolerance));
 
     SECTION("Check nodal pressure") {
       // Check pressure
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(false, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(true, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
-      REQUIRE_NOTHROW(node->update_pressure(false, Nphase, pressure));
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
-      // Try to update pressure, should throw and keep to 1000.
+      // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
-      node->update_mass_pressure(false, Nphase, pressure);
-      node->compute_pressure();
+      const double pmass = 1.5;
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
-      // Update pressure to 2000.
-      REQUIRE_NOTHROW(node->update_pressure(true, Nphase, pressure));
-      REQUIRE(node->pressure(Nphase) == Approx(2000.0).epsilon(Tolerance));
     }
 
     SECTION("Check external force") {
@@ -278,22 +261,6 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
       for (unsigned i = 0; i < force.size(); ++i)
         REQUIRE(node->internal_force(Nphase)(i) ==
                 Approx(10.).epsilon(Tolerance));
-
-      // Assign force to 20 using vector property update true
-      REQUIRE_NOTHROW(node->update_vector_property(
-          mpm::properties::Vector::InternalForce, true, Nphase, force));
-      for (unsigned i = 0; i < force.size(); ++i)
-        REQUIRE(node->vector_property(mpm::properties::Vector::InternalForce,
-                                      Nphase)(i) ==
-                Approx(20.).epsilon(Tolerance));
-
-      // Assign force to 10 using vector property update false
-      REQUIRE_NOTHROW(node->update_vector_property(
-          mpm::properties::Vector::InternalForce, false, Nphase, force));
-      for (unsigned i = 0; i < force.size(); ++i)
-        REQUIRE(node->vector_property(mpm::properties::Vector::InternalForce,
-                                      Nphase)(i) ==
-                Approx(10.).epsilon(Tolerance));
     }
 
     SECTION("Check compute acceleration and velocity") {
@@ -341,19 +308,11 @@ TEST_CASE("Node is checked for 1D case", "[node][1D]") {
         REQUIRE(node->velocity(Nphase)(i) ==
                 Approx(velocity(i)).epsilon(Tolerance));
 
-      // Check boolean properties Friction, should be false
-      REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-              false);
-
       // Apply friction constraints
       REQUIRE(node->assign_friction_constraint(0, 1., 0.5) == true);
       // Apply friction constraints
       REQUIRE(node->assign_friction_constraint(-1, 1., 0.5) == false);
       REQUIRE(node->assign_friction_constraint(3, 1., 0.5) == false);
-
-      // Check boolean properties Friction, should be true
-      REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-              true);
 
       // Test acceleration with constraints
       acceleration[0] = 0.5 * acceleration[0];
@@ -648,31 +607,24 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(false, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(true, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
-      REQUIRE_NOTHROW(node->update_pressure(false, Nphase, pressure));
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
-      // Try to update pressure, should throw and keep to 1000.
+      // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
-      node->update_mass_pressure(false, Nphase, pressure);
-      node->compute_pressure();
+      const double pmass = 1.5;
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
-      // Update pressure to 2000.
-      REQUIRE_NOTHROW(node->update_pressure(true, Nphase, pressure));
-      REQUIRE(node->pressure(Nphase) == Approx(2000.0).epsilon(Tolerance));
     }
 
     SECTION("Check volume") {
@@ -987,10 +939,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         // Apply velocity constraints
         REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
 
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
-
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
         euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
@@ -998,10 +946,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
             mpm::geometry::rotation_matrix(euler_angles);
         node->assign_rotation_matrix(rotation_matrix);
         const auto inverse_rotation_matrix = rotation_matrix.inverse();
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Apply inclined velocity constraints
         node->apply_velocity_constraints();
@@ -1032,10 +976,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
         REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
         REQUIRE(node->assign_velocity_constraint(1, 7.5) == true);
 
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
-
         // Apply rotation matrix with Euler angles alpha = -10 deg, beta = 30
         // deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
@@ -1044,10 +984,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
             mpm::geometry::rotation_matrix(euler_angles);
         node->assign_rotation_matrix(rotation_matrix);
         const auto inverse_rotation_matrix = rotation_matrix.inverse();
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Apply inclined velocity constraints
         node->apply_velocity_constraints();
@@ -1078,18 +1014,10 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       }
 
       SECTION("Check Cartesian friction constraints") {
-        // Check boolean properties Friction, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                false);
-
         // Apply friction constraints
         REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
         // Check out of bounds condition
         REQUIRE(node->assign_friction_constraint(2, 1, 0.2) == false);
-
-        // Check boolean properties Friction, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                true);
 
         // Apply friction constraints
         node->apply_friction_constraints(dt);
@@ -1102,20 +1030,8 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
       }
 
       SECTION("Check general friction constraints in 1 direction") {
-        // Check boolean properties Friction, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                false);
-
         // Apply friction constraints
         REQUIRE(node->assign_friction_constraint(1, 1, 0.2) == true);
-
-        // Check boolean properties Friction, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                true);
-
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
 
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 30 deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
@@ -1127,10 +1043,6 @@ TEST_CASE("Node is checked for 2D case", "[node][2D]") {
 
         // Apply general friction constraints
         node->apply_friction_constraints(dt);
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Check applied constraints on acceleration in the global coordinates
         acceleration << 4.905579787672637, 4.920772034660430;
@@ -1299,31 +1211,24 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       REQUIRE(node->pressure(Nphase) == Approx(0.0).epsilon(Tolerance));
       double pressure = 1000.7;
       // Update pressure to 1000.7
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(false, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(1000.7).epsilon(Tolerance));
       // Update pressure to 2001.4
-      REQUIRE_NOTHROW(
-          node->update_mass_pressure(true, Nphase, mass * pressure));
-      node->compute_pressure();
+      REQUIRE_NOTHROW(node->update_mass_pressure(Nphase, mass * pressure));
       REQUIRE(node->pressure(Nphase) == Approx(2001.4).epsilon(Tolerance));
       // Assign pressure to 1000
       pressure = 1000.;
-      REQUIRE_NOTHROW(node->update_pressure(false, Nphase, pressure));
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
       // Assign mass to 0
       mass = 0.;
       REQUIRE_NOTHROW(node->update_mass(false, Nphase, mass));
       REQUIRE(node->mass(Nphase) == Approx(0.0).epsilon(Tolerance));
-      // Try to update pressure, should throw and keep to 1000.
+      // Try to update pressure to 2000, should throw and keep to 1000.
       pressure = 1000.;
-      node->update_mass_pressure(false, Nphase, pressure);
-      node->compute_pressure();
+      const double pmass = 1.5;
+      node->assign_pressure(Nphase, pressure);
       REQUIRE(node->pressure(Nphase) == Approx(1000.0).epsilon(Tolerance));
-      // Update pressure to 2000.
-      REQUIRE_NOTHROW(node->update_pressure(true, Nphase, pressure));
-      REQUIRE(node->pressure(Nphase) == Approx(2000.0).epsilon(Tolerance));
     }
 
     SECTION("Check external force") {
@@ -1611,10 +1516,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->assign_velocity_constraint(0, 10.5) == true);
         REQUIRE(node->assign_velocity_constraint(2, -12.5) == true);
 
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
-
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
         // and gamma = 30 deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
@@ -1623,10 +1524,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
             mpm::geometry::rotation_matrix(euler_angles);
         node->assign_rotation_matrix(rotation_matrix);
         const auto inverse_rotation_matrix = rotation_matrix.inverse();
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Apply constraints
         node->apply_velocity_constraints();
@@ -1663,10 +1560,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
         REQUIRE(node->assign_velocity_constraint(1, -12.5) == true);
         REQUIRE(node->assign_velocity_constraint(2, 7.5) == true);
 
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
-
         // Apply rotation matrix with Euler angles alpha = -10 deg, beta = 20
         // deg and gamma = -30 deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
@@ -1675,10 +1568,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
             mpm::geometry::rotation_matrix(euler_angles);
         node->assign_rotation_matrix(rotation_matrix);
         const auto inverse_rotation_matrix = rotation_matrix.inverse();
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Apply constraints
         node->apply_velocity_constraints();
@@ -1713,18 +1602,10 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       }
 
       SECTION("Check Cartesian friction constraints") {
-        // Check boolean properties Friction, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                false);
-
         // Apply friction constraints
         REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
         // Check out of bounds condition
         REQUIRE(node->assign_friction_constraint(4, 1, 0.2) == false);
-
-        // Check boolean properties Friction, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                true);
 
         // Apply constraints
         node->apply_friction_constraints(dt);
@@ -1737,20 +1618,8 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
       }
 
       SECTION("Check general friction constraints in 1 direction") {
-        // Check boolean properties Friction, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                false);
-
         // Apply friction constraints
         REQUIRE(node->assign_friction_constraint(2, 2, 0.3) == true);
-
-        // Check boolean properties Friction, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::Friction) ==
-                true);
-
-        // Check boolean properties GenericBC, should be false
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                false);
 
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta = 20 deg
         // and gamma = 30 deg
@@ -1763,10 +1632,6 @@ TEST_CASE("Node is checked for 3D case", "[node][3D]") {
 
         // Apply inclined velocity constraints
         node->apply_friction_constraints(dt);
-
-        // Check boolean properties GenericBC, should be true
-        REQUIRE(node->boolean_property(mpm::properties::Boolean::GenericBC) ==
-                true);
 
         // Check applied constraints on acceleration in the global coordinates
         acceleration << 4.602895052828914, 4.492575657560740, 4.751301246937935;
