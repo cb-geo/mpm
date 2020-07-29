@@ -326,34 +326,6 @@ class ParticleBase {
     return 0;
   };
 
-  //! Assign pore pressure
-  //! \param[in] pressure Pore liquid pressure
-  virtual void assign_pore_pressure(double pressure) {
-    throw std::runtime_error(
-        "Calling the base class function (assign_pore_pressure) in "
-        "ParticleBase:: illegal operation!");
-  };
-
-  //! Assign liquid traction
-  //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Particle traction in specified direction
-  //! \retval status Assignment status
-  virtual bool assign_liquid_traction(unsigned direction, double traction) {
-    throw std::runtime_error(
-        "Calling the base class function (assign_liquid_traction) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
-  //! Return liquid phase traction
-  virtual VectorDim liquid_traction() const {
-    auto error = VectorDim::Zero();
-    throw std::runtime_error(
-        "Calling the base class function (liquid_traction) in "
-        "ParticleBase:: illegal operation!");
-    return error;
-  };
-
   //! Return mixture traction
   virtual VectorDim mixture_traction() const {
     auto error = VectorDim::Zero();

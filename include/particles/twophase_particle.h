@@ -65,21 +65,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Assign saturation degree
   bool assign_saturation_degree() override;
 
-  //! Assign pore pressure
-  //! \param[in] pressure Pore liquid pressure
-  void assign_pore_pressure(double pressure) override {
-    this->pore_pressure_ = pressure;
-  }
-
-  //! Assign liquid traction
-  //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Particle traction in specified direction
-  //! \retval status Assignment status
-  bool assign_liquid_traction(unsigned direction, double traction) override;
-
-  //! Return liquid phase traction
-  VectorDim liquid_traction() const { return liquid_traction_; };
-
   //! Return mixture traction
   VectorDim mixture_traction() const { return mixture_traction_; };
 
@@ -194,9 +179,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
       unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
  private:
-  //! Compute liquid mass
-  virtual void compute_liquid_mass() noexcept;
-
   //! Assign liquid mass and momentum to nodes
   virtual void map_liquid_mass_momentum_to_nodes() noexcept;
 
@@ -215,9 +197,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] traction Particle traction in specified direction
   //! \retval status Assignment status
   virtual bool assign_mixture_traction(unsigned direction, double traction);
-
-  //! Map liquid phase traction force
-  virtual void map_liquid_traction_force() noexcept;
 
   //! Map two phase mixture traction force
   //! \param[in] mixture Identification for Mixture
@@ -282,12 +261,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   double pore_pressure_constraint_{std::numeric_limits<unsigned>::max()};
   //! Pore pressure
   double pore_pressure_;
-  //! Set liquid phase traction
-  bool set_liquid_traction_;
   //! Set mixture traction
   bool set_mixture_traction_;
-  //! Traction for liquid phase
-  Eigen::Matrix<double, Tdim, 1> liquid_traction_;
   //! Traction for mixture (soil skeleton + pore liquid)
   Eigen::Matrix<double, Tdim, 1> mixture_traction_;
   //! Liquid strain rate
