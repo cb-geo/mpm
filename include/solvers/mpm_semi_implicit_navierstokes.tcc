@@ -194,9 +194,8 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
     // Assign pressure to nodes
     mesh_->iterate_over_nodes_predicate(
         std::bind(&mpm::NodeBase<Tdim>::update_pressure_increment,
-                  std::placeholders::_1,
-                  matrix_assembler_->pressure_increment(), fluid,
-                  this->step_ * this->dt_),
+                  std::placeholders::_1, assembler_->pressure_increment(),
+                  fluid, this->step_ * this->dt_),
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Use nodal pressure to update particle pressure
@@ -256,34 +255,35 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::initialise_matrix() {
   try {
     // Max iteration steps
     unsigned max_iter =
-        analysis_["matrix"]["max_iter"].template get<unsigned>();
+        analysis_["linear_solver"]["max_iter"].template get<unsigned>();
     // Tolerance
-    double tolerance = analysis_["matrix"]["tolerance"].template get<double>();
+    double tolerance =
+        analysis_["linear_solver"]["tolerance"].template get<double>();
     // Get matrix assembler type
-    std::string assembler_type =
-        analysis_["matrix"]["assembler_type"].template get<std::string>();
+    std::string assembler_type = analysis_["linear_solver"]["assembler_type"]
+                                     .template get<std::string>();
     // Get matrix solver type
     std::string solver_type =
-        analysis_["matrix"]["solver_type"].template get<std::string>();
-    // Get method to detect free surface detection
-    free_surface_detection_ = "density";
-    if (analysis_["matrix"].contains("free_surface_detection_type"))
-      free_surface_detection_ =
-          analysis_["matrix"]["free_surface_detection_type"]
-              .template get<std::string>();
-    // Get volume tolerance for free surface
-    volume_tolerance_ =
-        analysis_["matrix"]["volume_tolerance"].template get<double>();
+        analysis_["linear_solver"]["solver_type"].template get<std::string>();
     // Create matrix assembler
-    matrix_assembler_ =
+    assembler_ =
         Factory<mpm::AssemblerBase<Tdim>>::instance()->create(assembler_type);
     // Create matrix solver
-    matrix_solver_ =
+    linear_solver_ =
         Factory<mpm::SolverBase<Eigen::SparseMatrix<double>>, unsigned,
                 double>::instance()
             ->create(solver_type, std::move(max_iter), std::move(tolerance));
     // Assign mesh pointer to assembler
-    matrix_assembler_->assign_mesh_pointer(mesh_);
+    assembler_->assign_mesh_pointer(mesh_);
+
+    // Get method to detect free surface detection
+    free_surface_detection_ = "density";
+    if (analysis_["free_surface_detection"].contains("type"))
+      free_surface_detection_ = analysis_["free_surface_detection"]["type"]
+                                    .template get<std::string>();
+    // Get volume tolerance for free surface
+    volume_tolerance_ = analysis_["free_surface_detection"]["volume_tolerance"]
+                            .template get<double>();
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -301,11 +301,11 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::reinitialise_matrix() {
     const auto nactive_node = mesh_->assign_active_nodes_id();
 
     // Assign global node indice
-    matrix_assembler_->assign_global_node_indices(nactive_node);
+    assembler_->assign_global_node_indices(nactive_node);
 
     // Assign pressure constraints
-    matrix_assembler_->assign_pressure_constraints(this->beta_,
-                                                   this->step_ * this->dt_);
+    assembler_->assign_pressure_constraints(this->beta_,
+                                            this->step_ * this->dt_);
 
     // Initialise element matrix
     mesh_->iterate_over_cells(std::bind(
@@ -330,7 +330,7 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
                   std::placeholders::_1));
 
     // Assemble global laplacian matrix
-    matrix_assembler_->assemble_laplacian_matrix(dt_);
+    assembler_->assemble_laplacian_matrix(dt_);
 
     // Map Poisson RHS matrix
     mesh_->iterate_over_particles(
@@ -338,18 +338,18 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_poisson_equation(
                   std::placeholders::_1));
 
     // Assemble poisson RHS vector
-    matrix_assembler_->assemble_poisson_right(dt_);
+    assembler_->assemble_poisson_right(dt_);
 
     // Assign free surface to assembler
-    matrix_assembler_->assign_free_surface(mesh_->free_surface_nodes());
+    assembler_->assign_free_surface(mesh_->free_surface_nodes());
 
     // Apply constraints
-    matrix_assembler_->apply_pressure_constraints();
+    assembler_->apply_pressure_constraints();
 
     // Solve matrix equation and assign solution to assembler
-    matrix_assembler_->assign_pressure_increment(matrix_solver_->solve(
-        matrix_assembler_->laplacian_matrix(),
-        matrix_assembler_->poisson_rhs_vector(), solver_type));
+    assembler_->assign_pressure_increment(
+        linear_solver_->solve(assembler_->laplacian_matrix(),
+                              assembler_->poisson_rhs_vector(), solver_type));
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -369,12 +369,11 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::compute_correction_force() {
                   std::placeholders::_1));
 
     // Assemble correction matrix
-    matrix_assembler_->assemble_corrector_right(dt_);
+    assembler_->assemble_corrector_right(dt_);
 
     // Assign correction force
     mesh_->compute_nodal_correction_force(
-        matrix_assembler_->correction_matrix(),
-        matrix_assembler_->pressure_increment(), dt_);
+        assembler_->correction_matrix(), assembler_->pressure_increment(), dt_);
 
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
