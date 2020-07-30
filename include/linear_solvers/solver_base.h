@@ -19,12 +19,6 @@ class SolverBase {
                                 const Eigen::VectorXd& b,
                                 std::string solver_type) = 0;
 
-  //! Matrix solver with defined initial guess
-  virtual Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
-                                const Eigen::VectorXd& b,
-                                std::string solver_type,
-                                const Eigen::VectorXd& initial_guess) = 0;
-
  protected:
   //! Maximum number of iterations
   unsigned max_iter_;

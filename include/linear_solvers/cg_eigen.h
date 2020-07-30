@@ -8,7 +8,6 @@
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
-#include <iostream>
 
 namespace mpm {
 
@@ -30,11 +29,6 @@ class CGEigen : public SolverBase<Traits> {
   Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
                         const Eigen::VectorXd& b,
                         std::string solver_type) override;
-
-  //! Matrix solver with defined initial guess
-  Eigen::VectorXd solve(const Eigen::SparseMatrix<double>& A,
-                        const Eigen::VectorXd& b, std::string solver_type,
-                        const Eigen::VectorXd& initial_guess) override;
 
   //! Return the type of solver
   std::string solver_type() const { return "Eigen"; }
