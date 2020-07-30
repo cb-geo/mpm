@@ -447,25 +447,10 @@ class Mesh {
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
 
-  //! Assign nodal pressure constraints to nodes
-  //! \param[in] pressure_constraints Constraint at node, pressure
-  bool assign_nodal_pressure_constraints(
-      const unsigned phase,
-      const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints);
-
   //! Assign particles pore pressures
   //! \param[in] particle_pore_pressure Initial pore pressure of particle
   bool assign_particles_pore_pressures(
       const std::vector<double>& particle_pore_pressures);
-
-  //! Assign nodal velocity constraints
-  //! \param[in] mfunction Math function if defined
-  //! \param[in] setid Node set id
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pconstraint Pressure constraint at node
-  bool assign_nodal_pressure_constraint(
-      const std::shared_ptr<FunctionBase>& mfunction, int set_id,
-      const unsigned phase, const unsigned pconstraint);
 
  private:
   // Read particles from file

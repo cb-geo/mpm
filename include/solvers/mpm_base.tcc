@@ -941,10 +941,11 @@ void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
         if (constraints.find("file") != constraints.end()) {
           std::string pore_pressure_constraints_file =
               constraints.at("file").template get<std::string>();
-          bool ppressure_constraints = mesh_->assign_nodal_pressure_constraints(
-              constraint_phase,
-              mesh_io->read_pressure_constraints(
-                  io_->file_name(pore_pressure_constraints_file)));
+          bool ppressure_constraints =
+              constraints_->assign_nodal_pressure_constraints(
+                  constraint_phase,
+                  mesh_io->read_pressure_constraints(
+                      io_->file_name(pore_pressure_constraints_file)));
           if (!ppressure_constraints)
             throw std::runtime_error(
                 "Pore pressure constraints are not properly assigned");
@@ -960,7 +961,7 @@ void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
           double pore_pressure =
               constraints.at("pore_pressure").template get<double>();
           // Add pore pressure constraint to mesh
-          mesh_->assign_nodal_pressure_constraint(
+          constraints_->assign_nodal_pressure_constraint(
               pfunction, nset_id, constraint_phase, pore_pressure);
           // if (constraint_phase >= Tnphases) {
           //   // Reference step
