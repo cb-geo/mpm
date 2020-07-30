@@ -42,8 +42,6 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   // liquid_velocity.setZero();
   // for (unsigned j = 0; j < Tdim; ++j)
   //   liquid_velocity[j] = this->liquid_velocity_[j];
-  // // Particle liquid strain
-  // Eigen::Matrix<double, 6, 1> liquid_strain = this->liquid_strain_;
   // // Particle liquid mass
   // particle_data.liquid_mass = this->liquid_mass_;
   // Particle pore pressure
@@ -52,13 +50,6 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   // particle_data.liquid_velocity_x = liquid_velocity[0];
   // particle_data.liquid_velocity_y = liquid_velocity[1];
   // particle_data.liquid_velocity_z = liquid_velocity[2];
-  // // Particle liquid strain
-  // particle_data.liquid_strain_xx = liquid_strain[0];
-  // particle_data.liquid_strain_yy = liquid_strain[1];
-  // particle_data.liquid_strain_zz = liquid_strain[2];
-  // particle_data.liquid_gamma_xy = liquid_strain[3];
-  // particle_data.liquid_gamma_yz = liquid_strain[4];
-  // particle_data.liquid_gamma_xz = liquid_strain[5];
   // // Particle liquid material id
   // particle_data.liquid_material_id = this->liquid_material_id_;
 
@@ -88,14 +79,6 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
   // for (unsigned i = 0; i < Tdim; ++i)
   //   this->liquid_velocity_(i) = liquid_velocity(i);
 
-  // // Liquid strain
-  // this->liquid_strain_[0] = particle.liquid_strain_xx;
-  // this->liquid_strain_[1] = particle.liquid_strain_yy;
-  // this->liquid_strain_[2] = particle.liquid_strain_zz;
-  // this->liquid_strain_[3] = particle.liquid_gamma_xy;
-  // this->liquid_strain_[4] = particle.liquid_gamma_yz;
-  // this->liquid_strain_[5] = particle.liquid_gamma_xz;
-
   // // Liquid material id
   // this->liquid_material_id_ = particle.liquid_material_id;
 
@@ -118,14 +101,11 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   mpm::Particle<Tdim>::initialise();
   liquid_mass_ = 0.;
   liquid_velocity_.setZero();
-  liquid_strain_rate_.setZero();
-  liquid_strain_.setZero();
   set_mixture_traction_ = false;
   pore_pressure_ = 0.;
   liquid_saturation_ = 1.;
 
   // Initialize vector data properties
-  this->properties_["liquid_strains"] = [&]() { return liquid_strain(); };
   this->properties_["liquid_velocities"] = [&]() { return liquid_velocity(); };
   this->properties_["pore_pressure"] = [&]() {
     Eigen::VectorXd vec_pressure = Eigen::VectorXd::Zero(3);
@@ -274,24 +254,6 @@ void mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) noexcept {
 
   // Apply free surface
   // if (this->free_surface()) this->pore_pressure_ = 0.0;
-}
-
-// Compute pore liquid pressure smoothing based on nodal pressure
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure_smoothing() noexcept {
-  // Check if particle has a valid cell ptr
-  assert(cell_ != nullptr);
-
-  bool status = true;
-  double pressure = 0;
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-    pressure += shapefn_(i) * nodes_[i]->pressure(mpm::ParticlePhase::Liquid);
-
-  // Update pore liquid pressure to interpolated nodal pressure
-  this->pore_pressure_ = pressure;
-  // Apply free surface
-  // if (this->free_surface()) this->pore_pressure_ = 0.0;
-  return status;
 }
 
 //! Map body force for both mixture and liquid
@@ -636,24 +598,39 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_permeability() {
           std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
       switch (Tdim) {
         case (1): {
-          permeability_(0) = this->material()->template property<double>("k_x");
-          c1_(0) = permeability_(0) / k_p;
+          // Check if the permeability is valid
+          if (this->material()->template property<double>("k_x") < 0)
+            throw std::runtime_error("Material's permeability is invalid");
+          // Assign permeability
+          permeability_(0) =
+              this->material()->template property<double>("k_x") / k_p;
           break;
         }
         case (2): {
-          permeability_(0) = this->material()->template property<double>("k_x");
-          permeability_(1) = this->material()->template property<double>("k_y");
-          c1_(0) = permeability_(0) / k_p;
-          c1_(1) = permeability_(1) / k_p;
+          // Check if the permeability is valid
+          if (this->material()->template property<double>("k_x") < 0 ||
+              this->material()->template property<double>("k_y") < 0)
+            throw std::runtime_error("Material's permeability is invalid");
+          // Assign permeability
+          permeability_(0) =
+              this->material()->template property<double>("k_x") / k_p;
+          permeability_(1) =
+              this->material()->template property<double>("k_y") / k_p;
           break;
         }
         default: {
-          permeability_(0) = this->material()->template property<double>("k_x");
-          permeability_(1) = this->material()->template property<double>("k_y");
-          permeability_(2) = this->material()->template property<double>("k_z");
-          c1_(0) = permeability_(0) / k_p;
-          c1_(1) = permeability_(1) / k_p;
-          c1_(2) = permeability_(2) / k_p;
+          // Check if the permeability is valid
+          if (this->material()->template property<double>("k_x") < 0 ||
+              this->material()->template property<double>("k_y") < 0 ||
+              this->material()->template property<double>("k_z") < 0)
+            throw std::runtime_error("Material's permeability is invalid");
+          // Assign permeability
+          permeability_(0) =
+              this->material()->template property<double>("k_x") / k_p;
+          permeability_(1) =
+              this->material()->template property<double>("k_y") / k_p;
+          permeability_(2) =
+              this->material()->template property<double>("k_z") / k_p;
           break;
         }
       }
@@ -667,46 +644,28 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_permeability() {
   return status;
 }
 
-//! Update particle permeability
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::update_permeability() {
-  bool status = true;
-  try {
-    // Porosity parameter
-    const double k_p =
-        std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
-
-    // Update permeability by KC equation
-    permeability_ = k_p * c1_;
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 //! Map drag force
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
   bool status = true;
   try {
-    // Update permeability
-    this->update_permeability();
+    // Porosity parameter
+    const double k_p =
+        std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
     // Initialise drag force coefficient
     VectorDim drag_force_coefficient;
     drag_force_coefficient.setZero();
 
     // Check if permeability coefficient is valid
     for (unsigned i = 0; i < Tdim; ++i) {
-      if (permeability_(i) > 0.)
+      if (k_p > 0.)
         drag_force_coefficient(i) =
             porosity_ * porosity_ * 9.81 *
             this->material(mpm::ParticlePhase::Liquid)
                 ->template property<double>(std::string("density")) /
-            permeability_(i);
+            (k_p * permeability_(i));
       else
-        throw std::runtime_error("Permeability coefficient is invalid");
+        throw std::runtime_error("Porosity coefficient is invalid");
     }
 
     // Map drag forces from particle to nodes

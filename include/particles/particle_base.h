@@ -292,6 +292,7 @@ class ParticleBase {
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
+  //! TwoPhase functions--------------------------------------------------------
   //! Update porosity
   //! \param[in] dt Analysis time step
   virtual bool update_porosity(double dt) {
@@ -326,24 +327,6 @@ class ParticleBase {
     return 0;
   };
 
-  //! Return mixture traction
-  virtual VectorDim mixture_traction() const {
-    auto error = VectorDim::Zero();
-    throw std::runtime_error(
-        "Calling the base class function (mixture_traction) in "
-        "ParticleBase:: illegal operation!");
-    return error;
-  };
-
-  //! Return liquid mass
-  //! \retval liquid mass Liquid phase mass
-  virtual double liquid_mass() const {
-    throw std::runtime_error(
-        "Calling the base class function (liquid_mass) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
   //! Assign velocity to the particle liquid phase
   //! \param[in] velocity A vector of particle liquid phase velocity
   //! \retval status Assignment status
@@ -354,57 +337,12 @@ class ParticleBase {
     return 0;
   };
 
-  //! Return velocity of the particle liquid phase
-  //! \retval liquid velocity Liquid phase velocity
-  virtual VectorDim liquid_velocity() const {
-    auto error = VectorDim::Zero();
-    throw std::runtime_error(
-        "Calling the base class function (liquid_velocity) in "
-        "ParticleBase:: illegal operation!");
-    return error;
-  };
-
-  //! Return strain of the particle liquid phase
-  //! \retval liquid strain Liquid phase strain
-  virtual Eigen::Matrix<double, 6, 1> liquid_strain() const {
-    auto error = Eigen::Matrix<double, 6, 1>::Zero();
-    throw std::runtime_error(
-        "Calling the base class function (liquid_strain) in "
-        "ParticleBase:: illegal operation!");
-    return error;
-  };
-
-  //! Compute pore pressure somoothening by interpolating nodal pressure
-  virtual bool compute_pore_pressure_smoothing() {
-    throw std::runtime_error(
-        "Calling the base class function (compute_pore_pressure_smoothing) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
   //! Compute pore pressure
   //! \param[in] dt Time step size
   virtual void compute_pore_pressure(double dt) {
     throw std::runtime_error(
         "Calling the base class function (compute_pore_pressure) in "
         "ParticleBase:: illegal operation!");
-  };
-
-  //! Return liquid pore pressure
-  //! \retval pore pressure Pore liquid pressure
-  virtual double pore_pressure() const {
-    throw std::runtime_error(
-        "Calling the base class function (pore_pressure) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
-  //! Update particle permeability
-  virtual bool update_permeability() {
-    throw std::runtime_error(
-        "Calling the base class function (update_permeability) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
   };
 
   //! Map drag force coefficient
@@ -465,6 +403,35 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
     return false;
   };
+
+  //! Return liquid mass
+  //! \retval liquid mass Liquid phase mass
+  virtual double liquid_mass() const {
+    throw std::runtime_error(
+        "Calling the base class function (liquid_mass) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return velocity of the particle liquid phase
+  //! \retval liquid velocity Liquid phase velocity
+  virtual VectorDim liquid_velocity() const {
+    auto error = VectorDim::Zero();
+    throw std::runtime_error(
+        "Calling the base class function (liquid_velocity) in "
+        "ParticleBase:: illegal operation!");
+    return error;
+  };
+
+  //! Return liquid pore pressure
+  //! \retval pore pressure Pore liquid pressure
+  virtual double pore_pressure() const {
+    throw std::runtime_error(
+        "Calling the base class function (pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+  //----------------------------------------------------------------------------
 
  protected:
   //! particleBase id

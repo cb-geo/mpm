@@ -128,18 +128,6 @@ class Node : public NodeBase<Tdim> {
     return internal_force_.col(phase);
   }
 
-  //! Update internal force (body force / traction force)
-  //! \param[in] update A boolean to update (true) or assign (false)
-  //! \param[in] drag_force Drag force from the particles in a cell
-  //! \retval status Update status
-  void update_drag_force_coefficient(bool update,
-                                     const VectorDim& drag_force) override;
-
-  //! Return drag force at a given node
-  VectorDim drag_force_coefficient() const override {
-    return drag_force_coefficient_;
-  }
-
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
@@ -203,25 +191,6 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] damping_factor Damping factor
   bool compute_acceleration_velocity_cundall(
       unsigned phase, double dt, double damping_factor) noexcept override;
-
-  //! Compute acceleration and velocity for two phase
-  //! \param[in] dt Timestep in analysis
-  bool compute_acceleration_velocity_twophase_explicit(
-      double dt) noexcept override;
-
-  //! Compute acceleration and velocity for two phase with cundall damping
-  //! factor \param[in] dt Timestep in analysis \param[in] damping_factor
-  //! Damping factor
-  bool compute_acceleration_velocity_twophase_explicit_cundall(
-      double dt, double damping_factor) noexcept override;
-
-  //! Assign pressure constraint
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Applied pressure constraint
-  //! \param[in] function math function
-  bool assign_pressure_constraint(
-      const unsigned phase, const double pressure,
-      const std::shared_ptr<FunctionBase>& function) override;
 
   //! Assign velocity constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -294,6 +263,39 @@ class Node : public NodeBase<Tdim> {
 
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
+
+  //! TwoPhase functions--------------------------------------------------------
+  //! Update internal force (body force / traction force)
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] drag_force Drag force from the particles in a cell
+  //! \retval status Update status
+  void update_drag_force_coefficient(bool update,
+                                     const VectorDim& drag_force) override;
+
+  //! Return drag force at a given node
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
+
+  //! Compute acceleration and velocity for two phase
+  //! \param[in] dt Timestep in analysis
+  bool compute_acceleration_velocity_twophase_explicit(
+      double dt) noexcept override;
+
+  //! Compute acceleration and velocity for two phase with cundall damping
+  //! factor \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! Damping factor
+  bool compute_acceleration_velocity_twophase_explicit_cundall(
+      double dt, double damping_factor) noexcept override;
+
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      const unsigned phase, const double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+  //----------------------------------------------------------------------------
 
  private:
   //! Mutex
