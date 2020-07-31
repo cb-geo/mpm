@@ -316,11 +316,12 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
     this->particles_pore_pressures(mesh_props, particle_io);
 
     auto particles_volume_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read volume, velocity and stresses: {} ms",
-                   mpi_rank,
-                   std::chrono::duration_cast<std::chrono::milliseconds>(
-                       particles_volume_end - particles_volume_begin)
-                       .count());
+    console_->info(
+        "Rank {} Read volume, velocity stresses and pore pressure: {} ms",
+        mpi_rank,
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            particles_volume_end - particles_volume_begin)
+            .count());
 
     // Particle entity sets
     auto particles_sets_begin = std::chrono::steady_clock::now();
@@ -1132,28 +1133,24 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
     const std::shared_ptr<mpm::IOMesh<Tdim>>& particle_io) {
   try {
     if (mesh_props.find("particles_pore_pressures") != mesh_props.end()) {
+      // Get generator type
+      const std::string type = mesh_props["particles_pore_pressures"]["type"]
+                                   .template get<std::string>();
       // Assign initial pore pressure by file
-      if (mesh_props["particles_pore_pressures"].find("file") !=
-          mesh_props["particles_pore_pressures"].end()) {
+      if (type == "file") {
         std::string fparticles_pore_pressures =
-            mesh_props["particles_pore_pressures"]["file"]
+            mesh_props["particles_pore_pressures"]["location"]
                 .template get<std::string>();
         if (!io_->file_name(fparticles_pore_pressures).empty()) {
-
-          // Get pore pressures of all particles
-          const auto all_particles_pore_pressures =
-              particle_io->read_particles_pressures(
-                  io_->file_name(fparticles_pore_pressures));
-
           // Read and assign particles pore pressures
           if (!mesh_->assign_particles_pore_pressures(
-                  all_particles_pore_pressures))
+                  particle_io->read_particles_scalar_properties(
+                      io_->file_name(fparticles_pore_pressures))))
             throw std::runtime_error(
                 "Particles pore pressures are not properly assigned");
         } else
           throw std::runtime_error("Particle pore pressures JSON not found");
-
-      } else {
+      } else if (type == "water_table") {
         // Initialise water tables
         std::map<double, double> refernece_points;
         // Vertical direction
@@ -1177,7 +1174,10 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
         mesh_->iterate_over_particles(std::bind(
             &mpm::ParticleBase<Tdim>::initialise_pore_pressure_watertable,
             std::placeholders::_1, dir_v, dir_h, refernece_points));
-      }
+      } else
+        throw std::runtime_error(
+            "Particle pore pressures generator type is not properly "
+            "specified");
     }
   } catch (std::exception& exception) {
     console_->warn("#{}: Particle pore pressures are undefined {} ", __LINE__,

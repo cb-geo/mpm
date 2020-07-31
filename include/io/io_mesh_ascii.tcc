@@ -246,24 +246,19 @@ std::vector<Eigen::Matrix<double, 6, 1>>
   return stresses;
 }
 
-//! Return pressures of particles
+//! Return particles scalar properties
 template <unsigned Tdim>
-std::vector<double> mpm::IOMeshAscii<Tdim>::read_particles_pressures(
-    const std::string& particles_pressures) {
+std::vector<std::tuple<mpm::Index, double>>
+    mpm::IOMeshAscii<Tdim>::read_particles_scalar_properties(
+        const std::string& scalar_file) {
 
-  // Particles pressures
-  std::vector<double> pressures;
-  pressures.clear();
-
-  // Expected number of particles
-  mpm::Index nparticles;
-
-  // bool to check firstline
-  bool read_first_line = false;
+  // Particles scalar properties
+  std::vector<std::tuple<mpm::Index, double>> scalar_properties;
+  scalar_properties.clear();
 
   // input file stream
   std::fstream file;
-  file.open(particles_pressures.c_str(), std::ios::in);
+  file.open(scalar_file.c_str(), std::ios::in);
 
   try {
     if (file.is_open() && file.good()) {
@@ -276,29 +271,24 @@ std::vector<double> mpm::IOMeshAscii<Tdim>::read_particles_pressures(
         if ((line.find('#') == std::string::npos) &&
             (line.find('!') == std::string::npos) && (line != "")) {
           while (istream.good()) {
-            if (!read_first_line) {
-              // Read number of nodes and cells
-              istream >> nparticles;
-              pressures.reserve(nparticles);
-              read_first_line = true;
-              break;
-            }
-            // Pressure
-            double pressure;
-            // Read to pressure
-            istream >> pressure;
-            pressures.emplace_back(pressure);
-            break;
+            // ID
+            mpm::Index id;
+            // Scalar
+            double scalar;
+            // Read stream
+            istream >> id >> scalar;
+            scalar_properties.emplace_back(std::make_tuple(id, scalar));
           }
         }
       }
+      file.close();
     }
-    file.close();
   } catch (std::exception& exception) {
-    console_->error("Read particle pressure: {}", exception.what());
+    console_->error("Read particle {} #{}: {}\n", __FILE__, __LINE__,
+                    exception.what());
     file.close();
   }
-  return pressures;
+  return scalar_properties;
 }
 
 //! Read pressure constraints file

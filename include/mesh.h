@@ -450,7 +450,8 @@ class Mesh {
   //! Assign particles pore pressures
   //! \param[in] particle_pore_pressure Initial pore pressure of particle
   bool assign_particles_pore_pressures(
-      const std::vector<double>& particle_pore_pressures);
+      const std::vector<std::tuple<mpm::Index, double>>&
+          particle_pore_pressures);
 
  private:
   // Read particles from file

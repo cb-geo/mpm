@@ -302,11 +302,11 @@ class ParticleBase {
     return false;
   };
 
-  //! Initial pore pressure
-  virtual void initial_pore_pressure(double pore_pressure) {
+  //! Assign pore pressure
+  virtual void assign_pore_pressure(double pore_pressure) {
     throw std::runtime_error(
         "Calling the base class function "
-        "(initial_pore_pressure) in "
+        "(assign_pore_pressure) in "
         "ParticleBase:: illegal operation!");
   };
 

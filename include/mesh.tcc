@@ -1895,7 +1895,8 @@ void mpm::Mesh<Tdim>::initialise_nodal_properties() {
 //! Assign particle pore pressures
 template <unsigned Tdim>
 bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
-    const std::vector<double>& particle_pore_pressure) {
+    const std::vector<std::tuple<mpm::Index, double>>&
+        particle_pore_pressures) {
   bool status = true;
 
   try {
@@ -1904,15 +1905,14 @@ bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
           "No particles have been assigned in mesh, cannot assign pore "
           "pressures");
 
-    if (particles_.size() != particle_pore_pressure.size())
-      throw std::runtime_error(
-          "Number of particles in mesh and initial pore pressures don't "
-          "match");
+    for (const auto& particle_pore_pressure : particle_pore_pressures) {
+      // Particle id
+      mpm::Index pid = std::get<0>(particle_pore_pressure);
+      // Pore pressure
+      double pore_pressure = std::get<1>(particle_pore_pressure);
 
-    unsigned i = 0;
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      (*pitr)->initial_pore_pressure(particle_pore_pressure.at(i));
-      ++i;
+      if (map_particles_.find(pid) != map_particles_.end())
+        map_particles_[pid]->assign_pore_pressure(pore_pressure);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

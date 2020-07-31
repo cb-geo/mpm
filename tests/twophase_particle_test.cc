@@ -125,7 +125,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
       REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
     //! Test initialise particle pore pressure
     double pore_pressure = 100000;
-    particle->initial_pore_pressure(pore_pressure);
+    particle->assign_pore_pressure(pore_pressure);
     REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 
@@ -603,7 +603,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
     //! Test initialise particle pore pressure
     double pore_pressure = 100000;
-    particle->initial_pore_pressure(pore_pressure);
+    particle->assign_pore_pressure(pore_pressure);
     REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 
@@ -1888,7 +1888,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
     //! Test initialise particle pore pressure
     double pore_pressure = 100000;
-    particle->initial_pore_pressure(pore_pressure);
+    particle->assign_pore_pressure(pore_pressure);
     REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 

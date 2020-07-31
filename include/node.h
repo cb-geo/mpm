@@ -272,18 +272,13 @@ class Node : public NodeBase<Tdim> {
   void update_drag_force_coefficient(bool update,
                                      const VectorDim& drag_force) override;
 
-  //! Return drag force at a given node
-  VectorDim drag_force_coefficient() const override {
-    return drag_force_coefficient_;
-  }
-
   //! Compute acceleration and velocity for two phase
   //! \param[in] dt Timestep in analysis
   bool compute_acceleration_velocity_twophase_explicit(
       double dt) noexcept override;
 
   //! Compute acceleration and velocity for two phase with cundall damping
-  //! factor \param[in] dt Timestep in analysis \param[in] damping_factor
+  //! \param[in] dt Timestep in analysis \param[in] damping_factor
   //! Damping factor
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
@@ -295,6 +290,11 @@ class Node : public NodeBase<Tdim> {
   bool assign_pressure_constraint(
       const unsigned phase, const double pressure,
       const std::shared_ptr<FunctionBase>& function) override;
+
+  //! Return drag force at a given node
+  VectorDim drag_force_coefficient() const override {
+    return drag_force_coefficient_;
+  }
   //----------------------------------------------------------------------------
 
  private:
@@ -362,5 +362,6 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
+#include "twophase_node.tcc"
 
 #endif  // MPM_NODE_H_
