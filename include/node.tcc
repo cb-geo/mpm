@@ -653,6 +653,7 @@ void mpm::Node<Tdim, Tdof,
   node_mutex_.unlock();
 }
 
+//! TwoPhase functions--------------------------------------------------------
 //! Update drag force coefficient
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_drag_force_coefficient(
@@ -721,7 +722,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
   return status;
 }
 
-//! TwoPhase functions--------------------------------------------------------
 //! Compute acceleration and velocity for two phase with damping
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 bool mpm::Node<Tdim, Tdof, Tnphases>::
