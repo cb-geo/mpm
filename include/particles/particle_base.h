@@ -310,15 +310,6 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
   };
 
-  //! Assign particle pressure constraints
-  virtual bool assign_particle_pore_pressure_constraint(double pressure) {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(assign_particle_pore_pressure_constraint) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
   //! Assign saturation degree
   virtual bool assign_saturation_degree() {
     throw std::runtime_error(
@@ -351,28 +342,6 @@ class ParticleBase {
         "Calling the base class function (map_drag_force_coefficient) in "
         "ParticleBase:: illegal operation!");
     return 0;
-  };
-
-  //! Assign particle liquid phase velocity constraints
-  //! Directions can take values between 0 and Dim
-  //! \param[in] dir Direction of particle velocity constraint
-  //! \param[in] velocity Applied particle liquid phase velocity constraint
-  //! \retval status Assignment status
-  virtual bool assign_particle_liquid_velocity_constraint(unsigned dir,
-                                                          double velocity) {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(assign_particle_liquid_velocity_constraint) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
-  };
-
-  //! Apply particle liquid phase velocity constraints
-  virtual void apply_particle_liquid_velocity_constraints() {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(apply_particle_liquid_velocity_constraints) in "
-        "ParticleBase:: illegal operation!");
   };
 
   //! Initialise particle pore pressure by watertable
@@ -428,6 +397,15 @@ class ParticleBase {
   virtual double pore_pressure() const {
     throw std::runtime_error(
         "Calling the base class function (pore_pressure) in "
+        "ParticleBase:: illegal operation!");
+    return 0;
+  };
+
+  //! Return porosity
+  //! \retval porosity Porosity
+  virtual double porosity() const {
+    throw std::runtime_error(
+        "Calling the base class function (porosity) in "
         "ParticleBase:: illegal operation!");
     return 0;
   };

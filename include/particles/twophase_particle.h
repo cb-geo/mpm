@@ -75,12 +75,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   void map_body_force(const VectorDim& pgravity) noexcept override;
 
-  //! Assign traction to the particle
-  //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Particle traction in specified direction
-  //! \retval status Assignment status
-  bool assign_traction(unsigned direction, double traction) override;
-
   //! Map traction force
   void map_traction_force() noexcept override;
 
@@ -104,21 +98,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Map drag force coefficient
   bool map_drag_force_coefficient() override;
-
-  //! Assign particle liquid phase velocity constraints
-  //! Directions can take values between 0 and Dim
-  //! \param[in] dir Direction of particle velocity constraint
-  //! \param[in] velocity Applied particle liquid phase velocity constraint
-  //! \retval status Assignment status
-  bool assign_particle_liquid_velocity_constraint(unsigned dir,
-                                                  double velocity) override;
-
-  //! Apply particle liquid phase velocity constraints
-  void apply_particle_liquid_velocity_constraints() override;
-
-  //! Assign particle pressure constraints
-  //! \retval status Assignment status
-  bool assign_particle_pore_pressure_constraint(double pressure) override;
 
   //! Initial pore pressure
   //! \param[in] pore pressure Initial pore pressure
@@ -151,6 +130,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool compute_pressure_smoothing(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
+  //! Apply particle velocity constraints
+  //! \param[in] dir Direction of particle velocity constraint
+  //! \param[in] velocity Applied particle velocity constraint
+  void apply_particle_velocity_constraints(unsigned dir,
+                                           double velocity) override;
+
   //! Return velocity of the particle liquid phase
   //! \retval liquid velocity Liquid phase velocity
   VectorDim liquid_velocity() const override { return liquid_velocity_; }
@@ -162,6 +147,10 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Return liquid pore pressure
   //! \retval pore pressure Pore liquid pressure
   double pore_pressure() const override { return pore_pressure_; }
+
+  //! Reture porosity
+  //! \retval porosity Porosity
+  double porosity() const override { return porosity_; }
 
  private:
   //! Assign liquid mass and momentum to nodes
@@ -177,15 +166,11 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] pgravity Gravity of a particle
   virtual void map_liquid_body_force(const VectorDim& pgravity) noexcept;
 
-  //! Assign mixture traction
-  //! \param[in] direction Index corresponding to the direction of traction
-  //! \param[in] traction Particle traction in specified direction
-  //! \retval status Assignment status
-  virtual bool assign_mixture_traction(unsigned direction, double traction);
-
   //! Map two phase mixture traction force
-  //! \param[in] mixture Identification for Mixture
-  virtual void map_mixture_traction_force(unsigned mixture) noexcept;
+  virtual void map_mixture_traction_force() noexcept;
+
+  //! Map two phase liquid traction force
+  virtual void map_liquid_traction_force() noexcept;
 
   //! Map liquid internal force
   virtual void map_liquid_internal_force() noexcept;
@@ -229,6 +214,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::dn_dx_;
   //! dN/dX at cell centroid
   using Particle<Tdim>::dn_dx_centroid_;
+  //! Set traction
+  using Particle<Tdim>::set_traction_;
+  //! Surface Traction (given as a stress; force/area)
+  using Particle<Tdim>::traction_;
+  //! Particle velocity constraints
+  using Particle<Tdim>::particle_velocity_constraints_;
 
   //! Liquid mass
   double liquid_mass_;
@@ -240,18 +231,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   double porosity_{0.0};
   //! Liquid velocity
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
-  //! Particle liquid phase velocity constraints
-  std::map<unsigned, double> liquid_velocity_constraints_;
   //! Pore pressure constraint
   double pore_pressure_constraint_{std::numeric_limits<unsigned>::max()};
   //! Pore pressure
   double pore_pressure_;
   //! Permeability parameter c1 (k = k_p * c1)
   VectorDim permeability_;
-  //! Set mixture traction
-  bool set_mixture_traction_;
-  //! Traction for mixture (soil skeleton + pore liquid)
-  Eigen::Matrix<double, Tdim, 1> mixture_traction_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 

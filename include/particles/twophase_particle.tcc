@@ -19,7 +19,7 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord)
 template <unsigned Tdim>
 mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
                                               bool status)
-    : mpm::ParticleBase<Tdim>(id, coord, status) {
+    : mpm::Particle<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
   nodes_.clear();
@@ -101,7 +101,6 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   mpm::Particle<Tdim>::initialise();
   liquid_mass_ = 0.;
   liquid_velocity_.setZero();
-  set_mixture_traction_ = false;
   pore_pressure_ = 0.;
   liquid_saturation_ = 1.;
 
@@ -155,44 +154,13 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_liquid_velocity(
   return status;
 }
 
-// Assign traction
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_traction(unsigned direction,
-                                                  double traction) {
-  bool status = true;
-  this->assign_mixture_traction(direction, traction);
-  return status;
-}
-
-// Assign traction to the mixture
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_mixture_traction(unsigned direction,
-                                                          double traction) {
-  bool status = false;
-  try {
-    if (direction >= Tdim ||
-        this->volume_ == std::numeric_limits<double>::max()) {
-      throw std::runtime_error(
-          "Particle mixture traction property: volume / direction is invalid");
-    }
-    // Assign mixture traction
-    mixture_traction_(direction) =
-        traction * this->volume_ / this->size_(direction);
-    status = true;
-    this->set_mixture_traction_ = true;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
-
 // Compute mass of particle (both solid and fluid)
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::compute_mass() noexcept {
   // Check if particle volume is set and material ptr is valid
   assert(volume_ != std::numeric_limits<double>::max() &&
-         this->material() != nullptr && this->material(1) != nullptr);
+         this->material() != nullptr &&
+         this->material(mpm::ParticlePhase::Liquid) != nullptr);
   // Mass = volume of particle * mass_density
   // Solid mass
   this->mass_density_ =
@@ -203,7 +171,7 @@ void mpm::TwoPhaseParticle<Tdim>::compute_mass() noexcept {
   // Liquid mass
   this->liquid_mass_density_ =
       liquid_saturation_ * porosity_ *
-      this->material(mpm::ParticlePhase::Liquid)
+      (this->material(mpm::ParticlePhase::Liquid))
           ->template property<double>(std::string("density"));
   this->liquid_mass_ = volume_ * liquid_mass_density_;
 }
@@ -289,19 +257,30 @@ void mpm::TwoPhaseParticle<Tdim>::map_mixture_body_force(
 //! Map traction force
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_traction_force() noexcept {
-  this->map_mixture_traction_force(mpm::ParticlePhase::Mixture);
+  this->map_mixture_traction_force();
+  this->map_liquid_traction_force();
 }
 
 //! Map mixture traction force
 template <unsigned Tdim>
-void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force(
-    unsigned mixture) noexcept {
-  if (this->set_mixture_traction_) {
-    // Map particle mixture traction forces to nodes
+void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force() noexcept {
+  if (this->set_traction_) {
+    // Map particle traction forces to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_[i]->update_external_force(true, mixture,
-                                       (shapefn_[i] * this->mixture_traction_));
+      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Mixture,
+                                       (shapefn_[i] * traction_));
   }
+}
+
+//! Map liquid traction force
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() noexcept {
+  // if (this->set_traction_) {
+  //   // Map particle traction forces to nodes
+  //   for (unsigned i = 0; i < nodes_.size(); ++i)
+  //     nodes_[i]->update_external_force(true, mpm::ParticlePhase::Mixture,
+  //                                      (shapefn_[i] * traction_));
+  // }
 }
 
 //! Map both mixture and liquid internal force
@@ -314,7 +293,27 @@ inline void mpm::TwoPhaseParticle<Tdim>::map_internal_force() noexcept {
 
 //! Map liquid phase internal force
 template <>
-void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
+inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
+  // initialise a vector of pore pressure
+  Eigen::Matrix<double, 6, 1> pressure;
+  pressure.setZero();
+  pressure(0) = -this->pore_pressure_;
+
+  // Compute nodal internal forces
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = dn_dx_(i, 0) * pressure[0] * this->porosity_;
+
+    force *= -1. * this->volume_;
+
+    nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Liquid, force);
+  }
+}
+
+//! Map liquid phase internal force
+template <>
+inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> pressure;
   pressure.setZero();
@@ -335,7 +334,7 @@ void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
 }
 
 template <>
-void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
+inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> pressure;
   pressure.setZero();
@@ -359,7 +358,27 @@ void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
 
 //! Map mixture internal force
 template <>
-void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
+inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force(
+    unsigned mixture) noexcept {
+  // initialise a vector of pore pressure
+  Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
+  total_stress(0) -= this->pore_pressure_;
+
+  // Compute nodal internal forces
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    // Compute force: -pstress * volume
+    Eigen::Matrix<double, 1, 1> force;
+    force[0] = dn_dx_(i, 0) * total_stress[0] + dn_dx_(i, 1) * total_stress[3];
+
+    force *= -1. * this->volume_;
+
+    nodes_[i]->update_internal_force(true, mixture, force);
+  }
+}
+
+//! Map mixture internal force
+template <>
+inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
     unsigned mixture) noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
@@ -380,7 +399,7 @@ void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
 }
 
 template <>
-void mpm::TwoPhaseParticle<3>::map_mixture_internal_force(
+inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force(
     unsigned mixture) noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
@@ -510,59 +529,19 @@ void mpm::TwoPhaseParticle<Tdim>::compute_updated_liquid_velocity(
     // Update particle velocity to interpolated nodal velocity
     this->liquid_velocity_ = velocity;
   }
-
-  // Apply particle velocity constraints
-  this->apply_particle_liquid_velocity_constraints();
-}
-
-//! Assign particle liquid phase velocity constraint
-//! Constrain directions can take values between 0 and Dim
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_particle_liquid_velocity_constraint(
-    unsigned dir, double velocity) {
-  bool status = true;
-  try {
-    //! Constrain directions can take values between 0 and Dim
-    if (dir < Tdim)
-      this->liquid_velocity_constraints_.insert(
-          std::make_pair<unsigned, double>(static_cast<unsigned>(dir),
-                                           static_cast<double>(velocity)));
-    else
-      throw std::runtime_error(
-          "Particle liquid velocity constraint direction is out of bounds");
-
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
 }
 
 //! Apply particle velocity constraints
 template <unsigned Tdim>
-void mpm::TwoPhaseParticle<Tdim>::apply_particle_liquid_velocity_constraints() {
-  // Set particle velocity constraint
-  for (const auto& constraint : this->liquid_velocity_constraints_) {
-    // Direction value in the constraint (0, Dim)
-    const unsigned dir = constraint.first;
-    // Direction: dir % Tdim (modulus)
-    const auto direction = static_cast<unsigned>(dir % Tdim);
-    this->liquid_velocity_(direction) = constraint.second;
-  }
-}
+void mpm::TwoPhaseParticle<Tdim>::apply_particle_velocity_constraints(
+    unsigned dir, double velocity) {
+  // Set particle velocity constraint for solid phase
+  if (dir < Tdim)
+    mpm::Particle<Tdim>::apply_particle_velocity_constraints(dir, velocity);
 
-//! Assign particle pressure constraints
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::assign_particle_pore_pressure_constraint(
-    double pressure) {
-  bool status = true;
-  try {
-    this->pore_pressure_constraint_ = pressure;
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
+  // Set particle velocity constraint for liquid phase
+  else
+    this->liquid_velocity_(static_cast<unsigned>(dir % Tdim)) = velocity;
 }
 
 // Assign porosity to the particle

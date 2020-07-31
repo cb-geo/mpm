@@ -304,6 +304,9 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
                   std::placeholders::_1, this->dt_, velocity_update_));
 
+    // Apply particle velocity constraints
+    mesh_->apply_particle_velocity_constraints();
+
     // Update Stress Last
     if (this->stress_update_ == mpm::StressUpdate::USL)
       this->compute_stress_strain();
