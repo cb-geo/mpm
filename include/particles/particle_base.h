@@ -179,7 +179,7 @@ class ParticleBase {
   }
 
   //! Assign a state variable
-  virtual bool assign_state_variable(
+  virtual void assign_state_variable(
       const std::string& var, double value,
       unsigned phase = mpm::ParticlePhase::Solid) = 0;
 

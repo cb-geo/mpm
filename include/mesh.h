@@ -477,12 +477,16 @@ class Mesh {
       double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Get free surface node set
+  //! \retval id_set Set of free surface node ids
   std::set<mpm::Index> free_surface_nodes();
 
   //! Get free surface cell set
+  //! \retval id_set Set of free surface cell ids
   std::set<mpm::Index> free_surface_cells();
 
   //! Get free surface particle set
+  //! \retval status Status of compute_free_surface
+  //! \retval id_set Set of free surface particle ids
   std::set<mpm::Index> free_surface_particles();
 
   // Create the nodal properties' map
