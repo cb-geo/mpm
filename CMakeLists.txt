@@ -144,6 +144,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/solvers/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
+  ${mpm_SOURCE_DIR}/include/xmpm/
 )
 
 # mpm executable
@@ -167,6 +168,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/node.cc
   ${mpm_SOURCE_DIR}/src/particle.cc
   ${mpm_SOURCE_DIR}/src/quadrature.cc
+  ${mpm_SOURCE_DIR}/src/discontinuity.cc
 )
 add_executable(mpm ${mpm_SOURCE_DIR}/src/main.cc ${mpm_src} ${mpm_vtk})
 
