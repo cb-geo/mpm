@@ -460,17 +460,22 @@ bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(
   assert(liquid_mass_ != std::numeric_limits<double>::max());
 
   bool status = false;
-  // Check if particle liquid mass is set and state variable pressure is found
-  if (liquid_mass_ != std::numeric_limits<double>::max() &&
-      (state_variables_[phase].find("pressure") !=
-       state_variables_[phase].end())) {
-    // Map particle pressure to nodes
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_[i]->update_mass_pressure(
-          phase,
-          shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"]);
+  // If phase is Solid, use the default map_pressure_to_nodes
+  if (phase == mpm::ParticlePhase::Solid)
+    status = mpm::Particle<Tdim>::map_pressure_to_nodes(phase);
+  else {
+    // Check if particle liquid mass is set and state variable pressure is found
+    if (liquid_mass_ != std::numeric_limits<double>::max() &&
+        (state_variables_[phase].find("pressure") !=
+         state_variables_[phase].end())) {
+      // Map particle pressure to nodes
+      for (unsigned i = 0; i < nodes_.size(); ++i)
+        nodes_[i]->update_mass_pressure(
+            phase,
+            shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"]);
 
-    status = true;
+      status = true;
+    }
   }
   return status;
 }
