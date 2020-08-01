@@ -135,7 +135,7 @@ template <unsigned Tdim>
 bool mpm::Constraints<Tdim>::assign_nodal_pressure_constraints(
     const unsigned phase,
     const std::vector<std::tuple<mpm::Index, double>>& pressure_constraints) {
-  bool status = false;
+  bool status = true;
   try {
     for (const auto& pressure_constraint : pressure_constraints) {
       // Node id

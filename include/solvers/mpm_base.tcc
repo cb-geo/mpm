@@ -978,7 +978,7 @@ void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
       throw std::runtime_error("Pore pressure constraints JSON not found");
 
   } catch (std::exception& exception) {
-    console_->warn("#{}: Pore pressure conditions are undefined {} ", __LINE__,
+    console_->warn("#{}: Pore pressure constraints are undefined {} ", __LINE__,
                    exception.what());
   }
 }
