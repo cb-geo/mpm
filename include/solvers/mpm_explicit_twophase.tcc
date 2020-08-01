@@ -68,6 +68,12 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     pore_pressure_smoothing_ =
         analysis_.at("pore_pressure_smoothing").template get<bool>();
 
+  // Get method to detect free surface detection
+  free_surface_detection_ = "density";
+  if (analysis_["free_surface_detection"].contains("type"))
+    free_surface_detection_ =
+        analysis_["free_surface_detection"]["type"].template get<std::string>();
+
   // Initialise material
   bool mat_status = this->initialise_materials();
   if (!mat_status) {
@@ -190,6 +196,24 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
                     std::placeholders::_2));
     }
 #endif
+
+    // TODO: Parallel free-surface computation is not yet implemented
+    // Compute free surface cells, nodes, and particles
+    mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
+
+    // Spawn a task for initializing pressure at free surface
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+        // Assign initial pressure for all free-surface particle
+        mesh_->iterate_over_particles_predicate(
+            std::bind(&mpm::ParticleBase<Tdim>::assign_pressure,
+                      std::placeholders::_1, 0.0, mpm::ParticlePhase::Liquid),
+            std::bind(&mpm::ParticleBase<Tdim>::free_surface,
+                      std::placeholders::_1));
+      }
+    }  // Wait to complete
 
     // Compute nodal velocity at the begining of time step
     mesh_->iterate_over_nodes_predicate(

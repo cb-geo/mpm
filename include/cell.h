@@ -217,6 +217,28 @@ class Cell {
   //! Return previous mpi rank
   unsigned previous_mpirank() const;
 
+  //! Assign free surface
+  //! \param[in] free_surface boolean indicating free surface cell
+  void assign_free_surface(bool free_surface) { free_surface_ = free_surface; };
+
+  //! Return free surface bool
+  //! \retval free_surface_ indicating free surface cell
+  bool free_surface() { return free_surface_; };
+
+  //! Assign volume traction to node
+  //! \param[in] volume_fraction cell volume fraction
+  void assign_volume_fraction(double volume_fraction) {
+    volume_fraction_ = volume_fraction;
+  };
+
+  //! Return cell volume fraction
+  //! \retval volume_fraction_ cell volume fraction
+  double volume_fraction() { return volume_fraction_; };
+
+  //! Map cell volume to the nodes
+  //! \param[in] phase to map volume
+  bool map_cell_volume_to_nodes(unsigned phase);
+
  private:
   //! Approximately check if a point is in a cell
   //! \param[in] point Coordinates of point
@@ -264,6 +286,10 @@ class Cell {
   //! Normal of face
   //! first-> face_id, second->vector of the normal
   std::map<unsigned, Eigen::VectorXd> face_normals_;
+  //! Free surface bool
+  bool free_surface_{false};
+  //! Volume fraction
+  double volume_fraction_{0.0};
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
 };  // Cell class

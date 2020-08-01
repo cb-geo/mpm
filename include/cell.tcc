@@ -412,7 +412,7 @@ inline Eigen::Matrix<double, 2, 1> mpm::Cell<2>::local_coordinates_point(
     if (indices.size() == 3) {
       //   2 0
       //     |\
-      //     | \  
+      //     | \
       //   c |  \ b
       //     |   \
       //     |    \
@@ -843,4 +843,24 @@ inline unsigned mpm::Cell<Tdim>::rank() const {
 template <unsigned Tdim>
 inline unsigned mpm::Cell<Tdim>::previous_mpirank() const {
   return this->previous_mpirank_;
+}
+
+//! Map cell volume to nodes
+template <unsigned Tdim>
+bool mpm::Cell<Tdim>::map_cell_volume_to_nodes(unsigned phase) {
+  bool status = true;
+  try {
+    // Check if cell volume is set
+    if (volume_ == std::numeric_limits<double>::lowest())
+      this->compute_volume();
+
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      nodes_[i]->update_volume(true, phase, volume_ / nnodes_);
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
 }

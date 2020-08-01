@@ -111,6 +111,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Return volume
   double volume() const override { return volume_; }
 
+  //! Return the approximate particle diameter
+  double diameter() const override {
+    double diameter = 0.;
+    if (Tdim == 2) diameter = 2.0 * std::sqrt(volume_ / M_PI);
+    if (Tdim == 3) diameter = 2.0 * std::pow(volume_ * 0.75 / M_PI, (1 / 3));
+    return diameter;
+  }
+
   //! Return size of particle in natural coordinates
   VectorDim natural_size() const override { return natural_size_; }
 
@@ -294,6 +302,26 @@ class Particle : public ParticleBase<Tdim> {
   //! Assign material id of this particle to nodes
   void append_material_id_to_nodes() const override;
 
+  //! Assign free surface
+  void assign_free_surface(bool free_surface) override {
+    free_surface_ = free_surface;
+  };
+
+  //! Return free surface bool
+  bool free_surface() override { return free_surface_; };
+
+  //! Compute free surface in particle level by density ratio comparison
+  //! \param[in] density_ratio_tolerance Tolerance of density ratio comparison
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_density(
+      double density_ratio_tolerance = 0.70) override;
+
+  //! Assign normal vector
+  void assign_normal(const VectorDim& normal) override { normal_ = normal; };
+
+  //! Return normal vector
+  VectorDim normal() override { return normal_; };
+
   //! Return the number of neighbour particles
   unsigned nneighbours() const override { return neighbours_.size(); };
 
@@ -372,6 +400,10 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::Matrix<double, Tdim, 1> displacement_;
   //! Particle velocity constraints
   std::map<unsigned, double> particle_velocity_constraints_;
+  //! Free surface
+  bool free_surface_{false};
+  //! Free surface
+  Eigen::Matrix<double, Tdim, 1> normal_;
   //! Set traction
   bool set_traction_{false};
   //! Surface Traction (given as a stress; force/area)

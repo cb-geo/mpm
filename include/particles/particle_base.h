@@ -118,6 +118,9 @@ class ParticleBase {
   //! Return volume
   virtual double volume() const = 0;
 
+  //! Return the approximate particle diameter
+  virtual double diameter() const = 0;
+
   //! Return size of particle in natural coordinates
   virtual VectorDim natural_size() const = 0;
 
@@ -280,6 +283,22 @@ class ParticleBase {
 
   //! Assign material id of this particle to nodes
   virtual void append_material_id_to_nodes() const = 0;
+
+  //! Assign particle free surface
+  virtual void assign_free_surface(bool free_surface) = 0;
+
+  //! Assign particle free surface
+  virtual bool free_surface() = 0;
+
+  //! Compute free surface in particle level by density ratio comparison
+  virtual bool compute_free_surface_by_density(
+      double density_ratio_tolerance = 0.70) = 0;
+
+  //! Assign normal vector
+  virtual void assign_normal(const VectorDim& normal) = 0;
+
+  //! Return normal vector
+  virtual VectorDim normal() = 0;
 
   //! Return the number of neighbour particles
   virtual unsigned nneighbours() const = 0;

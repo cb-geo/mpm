@@ -240,6 +240,7 @@ void mpm::Particle<Tdim>::initialise() {
   stress_.setZero();
   traction_.setZero();
   velocity_.setZero();
+  normal_.setZero();
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
 
@@ -248,6 +249,7 @@ void mpm::Particle<Tdim>::initialise() {
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
+  this->properties_["normals"] = [&]() { return normal(); };
 }
 
 //! Initialise particle material container
@@ -839,6 +841,10 @@ bool mpm::Particle<Tdim>::compute_pressure_smoothing(unsigned phase) noexcept {
       pressure += shapefn_[i] * nodes_[i]->pressure(phase);
 
     state_variables_[phase]["pressure"] = pressure;
+
+    // If free_surface particle, overwrite pressure to zero
+    if (free_surface_) state_variables_[phase]["pressure"] = 0.0;
+
     status = true;
   }
   return status;
@@ -864,6 +870,27 @@ void mpm::Particle<Tdim>::append_material_id_to_nodes() const {
   for (unsigned i = 0; i < nodes_.size(); ++i)
     nodes_[i]->append_material_id(this->material_id());
 }
+
+//! Compute free surface in particle level by density ratio comparison
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::compute_free_surface_by_density(
+    double density_ratio_tolerance) {
+  bool status = false;
+  // Check if particle has a valid cell ptr
+  if (cell_ != nullptr) {
+    // Simple approach of density comparison (Hamad, 2015)
+    // Get interpolated nodal density
+    double nodal_mass_density = 0;
+    for (unsigned i = 0; i < nodes_.size(); ++i)
+      nodal_mass_density +=
+          shapefn_[i] * nodes_[i]->density(mpm::ParticlePhase::Solid);
+
+    // Compare smoothen density to actual particle mass density
+    if ((nodal_mass_density / mass_density_) <= density_ratio_tolerance)
+      status = true;
+  }
+  return status;
+};
 
 //! Assign neighbour particles
 template <unsigned Tdim>

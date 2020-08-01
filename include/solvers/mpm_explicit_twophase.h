@@ -76,6 +76,8 @@ class MPMExplicitTwoPhase : public MPMBase<Tdim> {
   bool pore_pressure_smoothing_{false};
   //! Volume tolerance for free surface
   double volume_tolerance_{0};
+  //! Free surface detection type
+  std::string free_surface_detection_;
 
 };  // MPMExplicit class
 }  // namespace mpm

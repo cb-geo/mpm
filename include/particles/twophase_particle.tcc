@@ -109,9 +109,6 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   this->properties_["pore_pressure"] = [&]() {
     Eigen::VectorXd vec_pressure = Eigen::VectorXd::Zero(3);
     vec_pressure[0] = this->pore_pressure();
-    // FIXME: This is to check free surface particles
-    // TODO: To be removed somewhere
-    // vec_pressure[1] = this->free_surface();
     return vec_pressure;
   };
 }
@@ -221,7 +218,7 @@ void mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) noexcept {
        porosity_ * liquid_strain_rate_centroid.head(Tdim).sum());
 
   // Apply free surface
-  // if (this->free_surface()) this->pore_pressure_ = 0.0;
+  if (this->free_surface()) this->pore_pressure_ = 0.0;
 }
 
 //! Map body force for both mixture and liquid
@@ -495,6 +492,10 @@ bool mpm::TwoPhaseParticle<Tdim>::compute_pressure_smoothing(
       pressure += shapefn_[i] * nodes_[i]->pressure(phase);
 
     this->pore_pressure_ = pressure;
+
+    // Apply free surface
+    if (this->free_surface()) this->pore_pressure_ = 0.0;
+
     status = true;
   }
   return status;
