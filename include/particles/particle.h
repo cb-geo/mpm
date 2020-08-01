@@ -246,12 +246,9 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] var State variable
   //! \param[in] value State variable to be assigned
   //! \param[in] phase Index to indicate phase
-  void assign_state_variable(
+  bool assign_state_variable(
       const std::string& var, double value,
-      unsigned phase = mpm::ParticlePhase::Solid) override {
-    if (state_variables_[phase].find(var) != state_variables_[phase].end())
-      state_variables_[phase].at(var) = value;
-  }
+      unsigned phase = mpm::ParticlePhase::Solid) override;
 
   //! Return a state variable
   //! \param[in] var State variable

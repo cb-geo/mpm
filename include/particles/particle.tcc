@@ -283,6 +283,24 @@ bool mpm::Particle<Tdim>::assign_material_state_vars(
   return status;
 }
 
+//! Assign a state variable
+template <unsigned Tdim>
+bool mpm::Particle<Tdim>::assign_state_variable(const std::string& var,
+                                                double value, unsigned phase) {
+  bool status = true;
+  try {
+    if (state_variables_[phase].find(var) != state_variables_[phase].end())
+      state_variables_[phase].at(var) = value;
+    else {
+      throw std::runtime_error(var + "cannot be found in state variables!");
+    }
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 // Assign a cell to particle
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::assign_cell(

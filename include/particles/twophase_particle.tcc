@@ -45,13 +45,27 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   // // Particle liquid mass
   // particle_data.liquid_mass = this->liquid_mass_;
   // Particle pore pressure
-  particle_data.pressure = this->pore_pressure_;
+  // particle_data.pressure = this->pore_pressure_;
   // // Particle liquid velocity
   // particle_data.liquid_velocity_x = liquid_velocity[0];
   // particle_data.liquid_velocity_y = liquid_velocity[1];
   // particle_data.liquid_velocity_z = liquid_velocity[2];
   // // Particle liquid material id
   // particle_data.liquid_material_id = this->liquid_material_id_;
+  if (this->material(mpm::ParticlePhase::Liquid) != nullptr) {
+    particle_data.nstate_vars =
+        state_variables_[mpm::ParticlePhase::Liquid].size();
+    if (state_variables_[mpm::ParticlePhase::Liquid].size() > 20)
+      throw std::runtime_error("# of state variables cannot be more than 20");
+    unsigned i = 0;
+    auto state_variables =
+        (this->material(mpm::ParticlePhase::Liquid))->state_variables();
+    for (const auto& state_var : state_variables) {
+      particle_data.svars[i] =
+          state_variables_[mpm::ParticlePhase::Liquid].at(state_var);
+      ++i;
+    }
+  }
 
   return particle_data;
 }
@@ -101,7 +115,6 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   mpm::Particle<Tdim>::initialise();
   liquid_mass_ = 0.;
   liquid_velocity_.setZero();
-  pore_pressure_ = 0.;
   liquid_saturation_ = 1.;
 
   // Initialize vector data properties
@@ -212,13 +225,14 @@ void mpm::TwoPhaseParticle<Tdim>::compute_pore_pressure(double dt) noexcept {
       this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Liquid);
 
   // update pressure
-  this->pore_pressure_ +=
+  this->state_variables_[mpm::ParticlePhase::Liquid].at("pressure") +=
       -dt * (K / porosity_) *
       ((1 - porosity_) * strain_rate_.head(Tdim).sum() +
        porosity_ * liquid_strain_rate_centroid.head(Tdim).sum());
 
   // Apply free surface
-  if (this->free_surface()) this->pore_pressure_ = 0.0;
+  if (this->free_surface())
+    this->assign_state_variable("pressure", 0., mpm::ParticlePhase::Liquid);
 }
 
 //! Map body force for both mixture and liquid
@@ -294,7 +308,7 @@ inline void mpm::TwoPhaseParticle<1>::map_liquid_internal_force() noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> pressure;
   pressure.setZero();
-  pressure(0) = -this->pore_pressure_;
+  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -314,8 +328,8 @@ inline void mpm::TwoPhaseParticle<2>::map_liquid_internal_force() noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> pressure;
   pressure.setZero();
-  pressure(0) = -this->pore_pressure_;
-  pressure(1) = -this->pore_pressure_;
+  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  pressure(1) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -335,9 +349,9 @@ inline void mpm::TwoPhaseParticle<3>::map_liquid_internal_force() noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> pressure;
   pressure.setZero();
-  pressure(0) = -this->pore_pressure_;
-  pressure(1) = -this->pore_pressure_;
-  pressure(2) = -this->pore_pressure_;
+  pressure(0) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  pressure(1) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  pressure(2) = -this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -359,7 +373,8 @@ inline void mpm::TwoPhaseParticle<1>::map_mixture_internal_force(
     unsigned mixture) noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->pore_pressure_;
+  total_stress(0) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -379,8 +394,10 @@ inline void mpm::TwoPhaseParticle<2>::map_mixture_internal_force(
     unsigned mixture) noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->pore_pressure_;
-  total_stress(1) -= this->pore_pressure_;
+  total_stress(0) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(1) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -400,9 +417,12 @@ inline void mpm::TwoPhaseParticle<3>::map_mixture_internal_force(
     unsigned mixture) noexcept {
   // initialise a vector of pore pressure
   Eigen::Matrix<double, 6, 1> total_stress = this->stress_;
-  total_stress(0) -= this->pore_pressure_;
-  total_stress(1) -= this->pore_pressure_;
-  total_stress(2) -= this->pore_pressure_;
+  total_stress(0) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(1) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
+  total_stress(2) -=
+      this->state_variable("pressure", mpm::ParticlePhase::Liquid);
 
   // Compute nodal internal forces
   for (unsigned i = 0; i < nodes_.size(); ++i) {
@@ -437,64 +457,18 @@ template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(
     unsigned phase) noexcept {
   // Mass is initialized
-  assert(mass_ != std::numeric_limits<double>::max() &&
-         liquid_mass_ != std::numeric_limits<double>::max());
+  assert(liquid_mass_ != std::numeric_limits<double>::max());
 
   bool status = false;
-  if (phase == mpm::ParticlePhase::Solid) {
-    // Check if particle mass is set and state variable pressure is found
-    if (mass_ != std::numeric_limits<double>::max() &&
-        (state_variables_[phase].find("pressure") !=
-         state_variables_[phase].end())) {
-      // Map particle pressure to nodes
-      for (unsigned i = 0; i < nodes_.size(); ++i)
-        nodes_[i]->update_mass_pressure(
-            phase, shapefn_[i] * mass_ * state_variables_[phase]["pressure"]);
-
-      status = true;
-    }
-  } else {
-    // Map particle pore pressure to nodes
+  // Check if particle liquid mass is set and state variable pressure is found
+  if (liquid_mass_ != std::numeric_limits<double>::max() &&
+      (state_variables_[phase].find("pressure") !=
+       state_variables_[phase].end())) {
+    // Map particle pressure to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_mass_pressure(
-          phase, shapefn_[i] * liquid_mass_ * this->pore_pressure_);
-
-    status = true;
-  }
-  return status;
-}
-
-// Compute pressure smoothing of the particle based on nodal pressure
-template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::compute_pressure_smoothing(
-    unsigned phase) noexcept {
-  // Assert
-  assert(cell_ != nullptr);
-
-  bool status = false;
-  if (phase == mpm::ParticlePhase::Solid) {
-    // Check if particle has a valid cell ptr
-    if (cell_ != nullptr && (state_variables_[phase].find("pressure") !=
-                             state_variables_[phase].end())) {
-
-      double pressure = 0.;
-      // Update particle pressure to interpolated nodal pressure
-      for (unsigned i = 0; i < this->nodes_.size(); ++i)
-        pressure += shapefn_[i] * nodes_[i]->pressure(phase);
-
-      state_variables_[phase]["pressure"] = pressure;
-      status = true;
-    }
-  } else {
-    double pressure = 0.;
-    // Update particle pressure to interpolated nodal pressure
-    for (unsigned i = 0; i < this->nodes_.size(); ++i)
-      pressure += shapefn_[i] * nodes_[i]->pressure(phase);
-
-    this->pore_pressure_ = pressure;
-
-    // Apply free surface
-    if (this->free_surface()) this->pore_pressure_ = 0.0;
+          phase,
+          shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"]);
 
     status = true;
   }
@@ -691,27 +665,32 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
       }
     }
 
+    // Initialise pore pressure
+    double pore_pressure = 0;
+
     if (left_boundary != std::numeric_limits<double>::lowest()) {
       // Particle with left and right boundary
       if (right_boundary != std::numeric_limits<double>::max()) {
-        this->pore_pressure_ =
+        pore_pressure =
             ((h0_right - h0_left) / (right_boundary - left_boundary) *
                  (position - left_boundary) +
              h0_left - this->coordinates_(dir_v)) *
             1000 * 9.81;
       } else
         // Particle with only left boundary
-        this->pore_pressure_ =
-            (h0_left - this->coordinates_(dir_v)) * 1000 * 9.81;
+        pore_pressure = (h0_left - this->coordinates_(dir_v)) * 1000 * 9.81;
+
     }
     // Particle with only right boundary
     else if (right_boundary != std::numeric_limits<double>::max())
-      this->pore_pressure_ =
-          (h0_right - this->coordinates_(dir_v)) * 1000 * 9.81;
-
+      pore_pressure = (h0_right - this->coordinates_(dir_v)) * 1000 * 9.81;
     else
       throw std::runtime_error(
           "Particle pore pressure can not be initialised by water table");
+
+    // Assign pore pressure
+    this->assign_state_variable("pressure", pore_pressure,
+                                mpm::ParticlePhase::Liquid);
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;

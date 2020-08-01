@@ -102,7 +102,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Assign pore pressure
   //! \param[in] pore pressure Initial pore pressure
   void assign_pore_pressure(double pore_pressure) override {
-    this->pore_pressure_ = pore_pressure;
+    this->assign_state_variable("pressure", pore_pressure,
+                                mpm::ParticlePhase::Liquid);
   }
 
   //! Assign particles initial pore pressure by watertable
@@ -125,11 +126,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool map_pressure_to_nodes(
       unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
-  //! Compute pressure smoothing of the particle based on nodal pressure
-  //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$
-  bool compute_pressure_smoothing(
-      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
-
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
   //! \param[in] velocity Applied particle velocity constraint
@@ -146,7 +142,9 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Return liquid pore pressure
   //! \retval pore pressure Pore liquid pressure
-  double pore_pressure() const override { return pore_pressure_; }
+  double pore_pressure() const override {
+    return this->state_variables_[mpm::ParticlePhase::Liquid].at("pressure");
+  }
 
   //! Reture porosity
   //! \retval porosity Porosity
@@ -233,8 +231,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
   //! Pore pressure constraint
   double pore_pressure_constraint_{std::numeric_limits<unsigned>::max()};
-  //! Pore pressure
-  double pore_pressure_;
   //! Permeability parameter c1 (k = k_p * c1)
   VectorDim permeability_;
   //! Logger
