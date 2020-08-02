@@ -68,22 +68,17 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     pore_pressure_smoothing_ =
         analysis_.at("pore_pressure_smoothing").template get<bool>();
 
-  free_surface_detection_ = false;
+  // Free surface detection
+  free_surface_detection_ = "none";
   if (analysis_.find("free_surface_detection") != analysis_.end()) {
-    free_surface_detection_ =
-        analysis_["free_surface_detection"]["free_surface_detection"]
-            .template get<bool>();
-    if (free_surface_detection_) {
-      // Get method to detect free surface detection
-      fs_detection_type = "density";
-      if (analysis_["free_surface_detection"].contains("type"))
-        fs_detection_type = analysis_["free_surface_detection"]["type"]
-                                .template get<std::string>();
-      // Get volume tolerance for free surface
-      volume_tolerance_ =
-          analysis_["free_surface_detection"]["volume_tolerance"]
-              .template get<double>();
-    }
+    // Get method to detect free surface detection
+    free_surface_detection_ = "density";
+    if (analysis_["free_surface_detection"].contains("type"))
+      free_surface_detection_ = analysis_["free_surface_detection"]["type"]
+                                    .template get<std::string>();
+    // Get volume tolerance for free surface
+    volume_tolerance_ = analysis_["free_surface_detection"]["volume_tolerance"]
+                            .template get<double>();
   }
 
   // Initialise material
@@ -210,9 +205,9 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
 #endif
 
     // Compute free surface cells, nodes, and particles
-    if (free_surface_detection_) {
+    if (free_surface_detection_ != "none") {
       // TODO: Parallel free-surface computation is not yet implemented
-      mesh_->compute_free_surface(fs_detection_type, volume_tolerance_);
+      mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
 
       // Spawn a task for initializing pressure at free surface
 #pragma omp parallel sections
