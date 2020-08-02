@@ -249,6 +249,7 @@ void mpm::ParticleXMPM<Tdim>::initialise() {
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
+  this->properties_["levelset"] = [&]() { Eigen::Matrix<double, Tdim, 1> levelset; levelset[0] = levelset_phi_ ; return levelset; };
 }
 
 //! Initialise particle material container

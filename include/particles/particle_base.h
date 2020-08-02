@@ -282,6 +282,9 @@ class ParticleBase {
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
+  //! set the level set function values
+  virtual void assign_levelsetphi(const double phivalue) {};
+
  protected:
   //! particleBase id
   Index id_{std::numeric_limits<Index>::max()};
