@@ -665,3 +665,130 @@ Eigen::MatrixXd mpm::Node<Tdim, Tdof,
   //mpm::MapProperty property_handle(position, nprops);
   return property_value;
 }
+
+//! Compute acceleration and velocity with cundall damping factor
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
+    unsigned phase, double dt) noexcept {
+  momentum_.col(phase) = momentum_.col(phase) 
+    + (internal_force_.col(phase)  + external_force_.col(phase)) * dt;
+  if(discontinuity_enrich_){
+     property_handle_->update_property("momenta_enrich", discontinuity_prop_id_, 0,
+                                      (property_handle_->property("internal_force_enrich",discontinuity_prop_id_,0,Tdim) 
+                                      + property_handle_->property("external_force_enrich",discontinuity_prop_id_,0,Tdim) ) * dt, Tdim);
+  }
+  // Apply velocity constraints, which also sets acceleration to 0,
+  // when velocity is set.
+  this->apply_velocity_constraints();
+
+  //this->self_contact_discontinuity(dt);
+
+  this->apply_velocity_constraints();
+
+ 
+  return true;
+}
+ //! Apply velocity constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_velocity_constraints_discontinuity() {
+  // Set velocity constraint
+  for (const auto& constraint : this->velocity_constraints_) {
+    // Direction value in the constraint (0, Dim * Nphases)
+    const unsigned dir = constraint.first;
+    // Direction: dir % Tdim (modulus)
+    const auto direction = static_cast<unsigned>(dir % Tdim);
+    // Phase: Integer value of division (dir / Tdim)
+    const auto phase = static_cast<unsigned>(dir / Tdim);
+
+    if (!generic_boundary_constraints_) {
+      // Velocity constraints are applied on Cartesian boundaries
+      //this->velocity_(direction, phase) = constraint.second;
+      //need to do for one direction
+
+      this->momentum_(direction, phase) = this->mass(phase) * constraint.second;
+      property_handle_->assign_property("momenta_enrich",discontinuity_prop_id_,0,
+                    property_handle_->property("mass_enrich",discontinuity_prop_id_,0,1) * constraint.second,Tdim);
+      // Set acceleration to 0 in direction of velocity constraint
+      //this->acceleration_(direction, phase) = 0.;
+      this->internal_force_(direction, phase) = 0;
+      this->external_force_(direction, phase) = 0;
+
+      Eigen::Matrix<double, Tdim, 1> momentum;
+      momentum.setZero(); 
+      property_handle_->assign_property("internal_force_enrich",discontinuity_prop_id_,0,
+                    momentum,Tdim);
+      property_handle_->assign_property("external_force_enrich",discontinuity_prop_id_,0,
+                    momentum,Tdim);
+    } else { //need to do
+      // Velocity constraints on general boundaries
+      // Compute inverse rotation matrix
+      const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
+          rotation_matrix_.inverse();
+      // Transform to local coordinate
+      Eigen::Matrix<double, Tdim, Tnphases> local_velocity =
+          inverse_rotation_matrix * this->velocity_;
+      Eigen::Matrix<double, Tdim, Tnphases> local_acceleration =
+          inverse_rotation_matrix * this->acceleration_;
+      // Apply boundary condition in local coordinate
+      local_velocity(direction, phase) = constraint.second;
+      local_acceleration(direction, phase) = 0.;
+      // Transform back to global coordinate
+      this->velocity_ = rotation_matrix_ * local_velocity;
+      this->acceleration_ = rotation_matrix_ * local_acceleration;
+    }
+  }
+}
+// //! Apply velocity constraints
+// template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+// void mpm::NodeXMPM<Tdim, Tdof, Tnphases>::self_contact_discontinuity(double dt) {
+
+//   if(!enrich_h_)
+//     return;
+  
+//   unsigned  phase = 0; 
+//   const double tolerance = 1.0E-15;
+
+//   auto mass_positive = mass_.col(phase) + mass_h_.col(phase);
+//   auto mass_negative = mass_.col(phase) - mass_h_.col(phase);
+
+//   if(mass_positive(phase) < tolerance || mass_negative(phase) < tolerance)
+//     return;
+
+//   auto velocity_positive = (momentum_.col(phase) + momentum_h_.col(phase)) / mass_positive(phase);
+//   auto velocity_negative = (momentum_.col(phase) - momentum_h_.col(phase)) / mass_negative(phase);
+
+//   if((velocity_positive - velocity_negative).col(phase).dot(direction_discontinuity_.col(phase)) >= 0)
+//     return;
+
+//   auto momentum_contact = (mass_h_(phase)*momentum_.col(phase) - mass_(phase)*momentum_h_.col(phase)) / mass_(phase);
+//   auto force_contact = momentum_contact/dt;
+
+//   //! frictional_coef < 0: move together without slide
+//   if(frictional_coef < 0)
+//   {
+//     momentum_h_.col(phase) = momentum_h_.col(phase) + momentum_contact.col(phase);
+//     internal_force_h_.col(phase) = internal_force_h_.col(phase) + force_contact.col(phase);
+//   }
+//   else
+//   {
+//     double momentum_contact_norm = momentum_contact.col(phase).dot(direction_discontinuity_.col(phase));
+//     double force_contact_norm = momentum_contact_norm/dt;
+
+//     double max_frictional_force = frictional_coef * abs(force_contact_norm);
+
+//     auto momentum_tangential = momentum_contact.col(phase) - momentum_contact_norm*direction_discontinuity_.col(phase);
+//     auto force_tangential = momentum_tangential/dt;
+
+//     double force_tangential_value = force_tangential.norm();
+
+//     double frictional_force = force_tangential_value < max_frictional_force? force_tangential_value : max_frictional_force;
+
+//     //!adjust the momentum and force
+//     momentum_h_.col(phase) = momentum_h_.col(phase) + momentum_contact_norm*direction_discontinuity_.col(phase);
+//     internal_force_h_.col(phase) = internal_force_h_.col(phase) + force_contact_norm*direction_discontinuity_.col(phase);
+
+//     momentum_h_.col(phase) = momentum_h_.col(phase) + frictional_force*force_tangential.col(phase).normalized()*dt;
+//     internal_force_h_.col(phase) = internal_force_h_.col(phase) + frictional_force*force_tangential.col(phase).normalized();
+
+//   }
+// }

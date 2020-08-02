@@ -200,6 +200,9 @@ class NodeBase {
   //! Apply velocity constraints
   virtual void apply_velocity_constraints() = 0;
 
+  //! Apply velocity constraints for discontinuity
+  virtual void apply_velocity_constraints_discontinuity() = 0;
+
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of friction constraint
@@ -277,6 +280,12 @@ class NodeBase {
   virtual void update_discontinuity_property(bool update, const std::string& property,
                        const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
                        unsigned nprops) noexcept = 0;
+
+  //! Compute momentum
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  virtual bool intergrate_momentum_discontinuity(
+      unsigned phase, double dt) noexcept = 0;
 };  // NodeBase class
 }  // namespace mpm
 
