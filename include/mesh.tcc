@@ -2302,7 +2302,8 @@ bool mpm::Mesh<Tdim>::assign_particles_pore_pressures(
       double pore_pressure = std::get<1>(particle_pore_pressure);
 
       if (map_particles_.find(pid) != map_particles_.end())
-        map_particles_[pid]->assign_pore_pressure(pore_pressure);
+        map_particles_[pid]->assign_pressure(pore_pressure,
+                                             mpm::ParticlePhase::Liquid);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());

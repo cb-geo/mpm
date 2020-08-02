@@ -99,13 +99,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Map drag force coefficient
   bool map_drag_force_coefficient() override;
 
-  //! Assign pore pressure
-  //! \param[in] pore pressure Initial pore pressure
-  void assign_pore_pressure(double pore_pressure) override {
-    this->assign_state_variable("pressure", pore_pressure,
-                                mpm::ParticlePhase::Liquid);
-  }
-
   //! Assign particles initial pore pressure by watertable
   bool initialise_pore_pressure_watertable(
       const unsigned dir_v, const unsigned dir_h,

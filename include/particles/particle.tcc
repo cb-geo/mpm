@@ -289,11 +289,8 @@ void mpm::Particle<Tdim>::assign_state_variable(const std::string& var,
                                                 double value, unsigned phase) {
   if (state_variables_[phase].find(var) != state_variables_[phase].end())
     state_variables_[phase].at(var) = value;
-  else {
-    state_variables_[phase].insert(std::make_pair(var, value));
-    console_->warn(var +
-                   " cannot be found in state variables! Initialise it now");
-  }
+  else
+    throw std::runtime_error(var + " cannot be found in state variables!");
 }
 
 // Assign a cell to particle

@@ -104,8 +104,8 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     REQUIRE(coordinates.size() == Dim);
   }
 
-  //! Test initialise particle stresses and pore pressure
-  SECTION("TwoPhase Particle with initial stress and pore pressure") {
+  //! Test initialise particle stresses
+  SECTION("TwoPhase Particle with initial stress") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
@@ -123,10 +123,6 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     auto pstress_data = particle->tensor_data("stresses");
     for (unsigned i = 0; i < pstress_data.size(); ++i)
       REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
-    //! Test initialise particle pore pressure
-    double pore_pressure = 100000;
-    particle->assign_pore_pressure(pore_pressure);
-    REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 
   //! Test particles velocity constraints
@@ -586,8 +582,8 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     REQUIRE(cell->nparticles() == 0);
   }
 
-  //! Test initialise particle stresses and pore pressure
-  SECTION("TwoPhase Particle with initial stress and pore pressure") {
+  //! Test initialise particle stresses
+  SECTION("TwoPhase Particle with initial stress") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
@@ -601,10 +597,6 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
-    //! Test initialise particle pore pressure
-    double pore_pressure = 100000;
-    particle->assign_pore_pressure(pore_pressure);
-    REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 
   //! Test particles velocity constraints
@@ -1206,8 +1198,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
           REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
-          REQUIRE_NOTHROW(particle->assign_pressure(1000));
-          REQUIRE(std::isnan(particle->pressure()) == false);
+          REQUIRE(std::isnan(particle->pressure()) == true);
         }
 
         SECTION("Assign state variables fail on state variables size") {
@@ -1871,8 +1862,8 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     REQUIRE(cell->nparticles() == 0);
   }
 
-  //! Test initialise twophase particle stresses and pore pressure
-  SECTION("TwoPhase Particle with initial stress and pore pressure") {
+  //! Test initialise twophase particle stresses
+  SECTION("TwoPhase Particle with initial stress") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     bool status = true;
@@ -1886,10 +1877,6 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
-    //! Test initialise particle pore pressure
-    double pore_pressure = 100000;
-    particle->assign_pore_pressure(pore_pressure);
-    REQUIRE(particle->pore_pressure() == pore_pressure);
   }
 
   //! Test twophase particles velocity constraints
@@ -2539,8 +2526,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
           REQUIRE_NOTHROW(particle->assign_state_variable("phi", 30.));
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
-          REQUIRE_NOTHROW(particle->assign_pressure(1000));
-          REQUIRE(std::isnan(particle->pressure()) == false);
+          REQUIRE(std::isnan(particle->pressure()) == true);
         }
 
         SECTION("Assign state variables fail on state variables size") {
