@@ -804,6 +804,14 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
 
+    REQUIRE_NOTHROW(particle->map_momentum_to_nodes());
+    // clang-format on
+    // Check nodal momentum
+    for (unsigned i = 0; i < nodal_momentum.rows(); ++i)
+      for (unsigned j = 0; j < nodal_momentum.cols(); ++j)
+        REQUIRE(nodes.at(i)->momentum(phase)(j) ==
+                Approx(2. * nodal_momentum(i, j)).epsilon(Tolerance));
+
     // Set momentum to get non-zero strain
     // clang-format off
     nodal_momentum << 0., 562.5 * 1.,
@@ -2071,6 +2079,14 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
       for (unsigned j = 0; j < nodal_velocity.cols(); ++j)
         REQUIRE(nodes.at(i)->velocity(phase)(j) ==
                 Approx(nodal_velocity(i, j)).epsilon(Tolerance));
+
+    REQUIRE_NOTHROW(particle->map_momentum_to_nodes());
+    // clang-format on
+    // Check nodal momentum
+    for (unsigned i = 0; i < nodal_momentum.rows(); ++i)
+      for (unsigned j = 0; j < nodal_momentum.cols(); ++j)
+        REQUIRE(nodes.at(i)->momentum(phase)(j) ==
+                Approx(2. * nodal_momentum(i, j)).epsilon(Tolerance));
 
     // Set momentum to get non-zero strain
     // clang-format off
