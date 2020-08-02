@@ -77,8 +77,10 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
   // Initialise particles
   bool particle_status = this->initialise_particles();
   if (!particle_status) {
-    status = false;initialise_property_handle
-
+    status = false;
+    throw std::runtime_error("Initialisation of particles failed");
+  }
+  
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
   if (!loading_status) {
@@ -168,12 +170,6 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
                     std::placeholders::_1));
     }
 
-    // Initialise nodal properties and append material ids to node
-    if (discontinuity_) {
-
-
-
-    }
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -198,10 +194,10 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
 #endif
 
     // Compute nodal velocity
-    mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
-                  std::placeholders::_1),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    // mesh_->iterate_over_nodes_predicate(
+    //     std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
+    //               std::placeholders::_1),
+    //     std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     if (interface_) {
       // Map multimaterial properties from particles to nodes

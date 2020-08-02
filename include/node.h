@@ -271,6 +271,18 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! Return whether the node is enriched
+  bool discontinuity_enrich() {return discontinuity_enrich_;};
+
+    //! Update nodal property at the nodes from particle for discontinuity
+  //! \param[in] update A boolean to update (true) or assign (false)
+  //! \param[in] property Property name
+  //! \param[in] property_value Property quantity from the particles in the cell
+  //! \param[in] discontinuity_id Id of the material within the property data
+  //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  void update_discontinuity_property(bool update, const std::string& property,
+                       const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
+                       unsigned nprops) noexcept override;
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -328,6 +340,8 @@ class Node : public NodeBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
+  //! discontinuity enrich
+  bool discontinuity_enrich_{true};
 };  // Node class
 }  // namespace mpm
 

@@ -560,6 +560,19 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
   node_mutex_.unlock();
 }
 
+//! Update nodal property at the nodes from particle for discontinuity
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::update_discontinuity_property(
+    bool update, const std::string& property,
+    const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
+    unsigned nprops) noexcept {
+  // Update/assign property
+  node_mutex_.lock();
+  property_handle_->update_property(property, discontinuity_prop_id_, discontinuity_id, property_value,
+                                    nprops);
+  node_mutex_.unlock();
+}
+
 //! Compute multimaterial change in momentum
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,

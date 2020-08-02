@@ -522,6 +522,16 @@ void mpm::ParticleXMPM<Tdim>::map_mass_momentum_to_nodes() noexcept {
                            mass_ * shapefn_[i]);
     nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
                                mass_ * shapefn_[i] * velocity_);
+    if(nodes_[i]->discontinuity_enrich()){
+        // Unit 1x1 Eigen matrix to be used with scalar quantities
+      Eigen::Matrix<double, 1, 1> nodal_mass;
+      nodal_mass(0, 0) = levelset_phi_ *  mass_ * shapefn_[i];
+       // Map enriched mass and momentum to nodes
+      nodes_[i]->update_discontinuity_property(true, "mass_enrich", nodal_mass, 0,
+                                1);
+      nodes_[i]->update_discontinuity_property(true, "momenta_enrich", velocity_ * nodal_mass,
+                                0, Tdim);
+    }
   }
 }
 
