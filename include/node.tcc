@@ -654,3 +654,14 @@ void mpm::Node<Tdim, Tdof,
   }
   node_mutex_.unlock();
 }
+
+// Return data in the nodal properties map at a specific index
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+Eigen::MatrixXd mpm::Node<Tdim, Tdof,
+               Tnphases>::discontinuity_property(const std::string& property,
+                                               unsigned nprops) {
+  // Const pointer to location of property: node_id * nprops x mat_id
+  auto property_value = property_handle_->property(property, discontinuity_prop_id_, 0, nprops);;
+  //mpm::MapProperty property_handle(position, nprops);
+  return property_value;
+}

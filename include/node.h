@@ -283,6 +283,12 @@ class Node : public NodeBase<Tdim> {
   void update_discontinuity_property(bool update, const std::string& property,
                        const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
                        unsigned nprops) noexcept override;
+
+    // Return data in the nodal discontinuity properties map at a specific index
+  // \param[in] property Property name
+  // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  Eigen::MatrixXd discontinuity_property(const std::string& property, unsigned nprops = 1) override;
+  
  private:
   //! Mutex
   SpinMutex node_mutex_;

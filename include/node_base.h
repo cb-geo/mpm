@@ -260,6 +260,11 @@ class NodeBase {
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
+    // Return data in the nodal discontinuity properties map at a specific index
+  // \param[in] property Property name
+  // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
+  virtual Eigen::MatrixXd discontinuity_property(const std::string& property,unsigned nprops = 1) = 0;
+
   //! Return whether the node is enriched
   virtual bool discontinuity_enrich() = 0;
 
