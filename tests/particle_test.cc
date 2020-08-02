@@ -1145,7 +1145,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
           REQUIRE_NOTHROW(particle->assign_pressure(1000));
-          REQUIRE(std::isnan(particle->pressure()) == true);
+          REQUIRE(std::isnan(particle->pressure()) == false);
         }
 
         SECTION("Assign state variables fail on state variables size") {
@@ -2403,7 +2403,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
           REQUIRE(particle->state_variable("phi") == 30.);
           // Assign and read pressure though MC does not contain pressure
           REQUIRE_NOTHROW(particle->assign_pressure(1000));
-          REQUIRE(std::isnan(particle->pressure()) == true);
+          REQUIRE(std::isnan(particle->pressure()) == false);
         }
 
         SECTION("Assign state variables fail on state variables size") {
