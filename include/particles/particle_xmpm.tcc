@@ -713,6 +713,8 @@ inline void mpm::ParticleXMPM<1>::map_internal_force() noexcept {
     force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+    if(nodes_[i]->discontinuity_enrich())
+      nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,1);
   }
 }
 
@@ -729,6 +731,8 @@ inline void mpm::ParticleXMPM<2>::map_internal_force() noexcept {
     force *= -1. * this->volume_;
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
+    if(nodes_[i]->discontinuity_enrich())
+       nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,2);
   }
 }
 
@@ -752,7 +756,7 @@ inline void mpm::ParticleXMPM<3>::map_internal_force() noexcept {
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
     if(nodes_[i]->discontinuity_enrich())
-       nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,Tdim);
+       nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,3);
   }
 }
 

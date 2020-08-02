@@ -286,18 +286,11 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
     }
 #endif
 
-    // Check if damping has been specified and accordingly Iterate over
-    // active nodes to compute acceleratation and velocity
-    if (damping_type_ == mpm::Damping::Cundall)
-      mesh_->iterate_over_nodes_predicate(
-          std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_cundall,
-                    std::placeholders::_1, phase, this->dt_, damping_factor_),
-          std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-    else
-      mesh_->iterate_over_nodes_predicate(
-          std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                    std::placeholders::_1, phase, this->dt_),
-          std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
+    //intergrate momentum Iterate over
+    mesh_->iterate_over_nodes_predicate(
+        std::bind(&mpm::NodeBase<Tdim>::intergrate_momentum_discontinuity,
+                  std::placeholders::_1, phase, this->dt_),
+        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Iterate over each particle to compute updated position
     mesh_->iterate_over_particles(

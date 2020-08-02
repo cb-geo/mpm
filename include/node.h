@@ -208,6 +208,9 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
+    //! Apply velocity constraints for discontinuity
+  void apply_velocity_constraints_discontinuity() override;
+
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
   //! \param[in] dir Direction of friction constraint
@@ -288,6 +291,12 @@ class Node : public NodeBase<Tdim> {
   // \param[in] property Property name
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   Eigen::MatrixXd discontinuity_property(const std::string& property, unsigned nprops = 1) override;
+
+    //! Compute momentum
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  virtual bool intergrate_momentum_discontinuity(
+      unsigned phase, double dt) noexcept override;
   
  private:
   //! Mutex
