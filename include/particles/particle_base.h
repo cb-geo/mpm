@@ -141,6 +141,9 @@ class ParticleBase {
   //! Map particle mass and momentum to nodes
   virtual void map_mass_momentum_to_nodes() noexcept = 0;
 
+  //! Map particle momentum to nodes
+  virtual void map_momentum_to_nodes() noexcept = 0;
+
   //! Map multimaterial properties to nodes
   virtual void map_multimaterial_mass_momentum_to_nodes() noexcept = 0;
 

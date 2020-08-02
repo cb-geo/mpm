@@ -523,6 +523,19 @@ void mpm::Particle<Tdim>::map_mass_momentum_to_nodes() noexcept {
   }
 }
 
+//! Map particle momentum to nodes
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::map_momentum_to_nodes() noexcept {
+  // Check if particle mass is set
+  assert(mass_ != std::numeric_limits<double>::max());
+
+  // Map momentum to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
+                               mass_ * shapefn_[i] * velocity_);
+  }
+}
+
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
 void mpm::Particle<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
