@@ -1956,9 +1956,45 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
   }
 }
 
+// Create the nodal properties' map for discontinuity
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::create_nodal_properties_discontinuity() {
+  // Initialise the shared pointer to nodal properties
+  if(nodal_properties_ == nullptr)
+    nodal_properties_ = std::make_shared<mpm::NodalProperties>();
+
+  // Check if nodes_ is empty and throw runtime error if they are
+  if (nodes_.size() != 0) {
+    // Compute number of rows in nodal properties for vector entities
+    const unsigned nrows = nodes_.size() * Tdim;
+    // Create pool data for each property in the nodal properties struct
+    // object. Properties must be named in the plural form
+    nodal_properties_->create_property("mass_enrich", nodes_.size(),1);
+    nodal_properties_->create_property("momenta_enrich", nrows, 1);
+    nodal_properties_->create_property("internal_force_enrich", nrows, 1);
+    nodal_properties_->create_property("external_force_enrich", nrows, 1);
+    nodal_properties_->create_property("normal_unit_vectors_discontinuity", nrows,1);
+
+    // Iterate over all nodes to initialise the property handle in each node
+    // and assign its node id as the prop id in the nodal property data pool
+    for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+      (*nitr)->initialise_discontinuity_property_handle((*nitr)->id(), nodal_properties_);
+  } else {
+    throw std::runtime_error("Number of nodes is zero");
+  }
+}
+
 // Initialise the nodal properties' map
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::initialise_nodal_properties() {
   // Call initialise_properties function from the nodal properties
   nodal_properties_->initialise_nodal_properties();
+}
+
+//! Set particles lsm values
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::assign_particle_levelset(std::vector<double>& phi_list)
+{
+  for(mpm::Index i = 0; i<nparticles();++i)
+    particles_[i]->assign_levelsetphi(phi_list[i]);
 }

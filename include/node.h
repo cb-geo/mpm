@@ -47,6 +47,13 @@ class Node : public NodeBase<Tdim> {
       unsigned prop_id,
       std::shared_ptr<mpm::NodalProperties> property_handle) noexcept override;
 
+  //! Initialise shared pointer to nodal properties pool for discontinuity
+  //! \param[in] prop_id Property id in the nodal property pool
+  //! \param[in] nodal_properties Shared pointer to nodal properties pool
+  void initialise_discontinuity_property_handle(
+      unsigned prop_id,
+      std::shared_ptr<mpm::NodalProperties> property_handle) noexcept override;
+
   //! Assign coordinates
   //! \param[in] coord Assign coord as coordinates of the nodebase
   void assign_coordinates(const VectorDim& coord) override {
@@ -271,6 +278,8 @@ class Node : public NodeBase<Tdim> {
   Index id_{std::numeric_limits<Index>::max()};
   //! nodal property id
   unsigned prop_id_{std::numeric_limits<unsigned>::max()};
+  //! nodal property id
+  unsigned discontinuity_prop_id_{std::numeric_limits<unsigned>::max()};
   //! shared ghost id
   Index ghost_id_{std::numeric_limits<Index>::max()};
   //! nodal coordinates

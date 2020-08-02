@@ -314,6 +314,8 @@ class ParticleBase {
   virtual void deserialize(
       const std::vector<uint8_t>& buffer,
       std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
+  //! set the level set function values
+  virtual void assign_levelsetphi(const double phivalue) {};
 
  protected:
   //! particleBase id

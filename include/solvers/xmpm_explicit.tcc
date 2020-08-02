@@ -77,9 +77,7 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
   // Initialise particles
   bool particle_status = this->initialise_particles();
   if (!particle_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of particles failed");
-  }
+    status = false;initialise_property_handle
 
   // Initialise loading conditions
   bool loading_status = this->initialise_loads();
@@ -91,6 +89,24 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
   // Create nodal properties
   if (interface_) mesh_->create_nodal_properties();
 
+    // Initialise discontinuity
+  bool discontinuity_status = this->initialise_discontinuities();
+  if (!discontinuity_status) {
+    status = false;
+    throw std::runtime_error("Initialisation of discontinuities failed");
+  }
+
+  //Initialise the levelset values for particles
+  if (discontinuity_){
+    bool initialise_lsm_status = this->initialise_levelset();
+    if (!initialise_lsm_status) {
+      status = false;
+      throw std::runtime_error("Initialisation of level set values failed");
+    }    
+  }
+
+  // Create nodal properties for discontinuity
+  if (discontinuity_)  mesh_->create_nodal_properties_discontinuity();
   // Compute mass
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_mass, std::placeholders::_1));
@@ -140,17 +156,24 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
       }
     }  // Wait to complete
 
-    // Initialise nodal properties and append material ids to node
-    if (interface_) {
+    // Initialise nodal properties
+    if (interface_ || discontinuity_) 
       // Initialise nodal properties
       mesh_->initialise_nodal_properties();
-
+    //append material ids to node
+    if (interface_) {
       // Append material ids to nodes
       mesh_->iterate_over_particles(
           std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
                     std::placeholders::_1));
     }
 
+    // Initialise nodal properties and append material ids to node
+    if (discontinuity_) {
+
+
+
+    }
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -329,5 +352,97 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
                                                             solver_begin)
           .count());
 
+  return status;
+}
+
+// Initialise discontinuities
+template <unsigned Tdim>
+bool mpm::XMPMExplicit<Tdim>::initialise_discontinuities() {
+  bool status = true;
+  try {
+      // Get discontinuities data
+    try {
+      auto json_discontinuities = io_->json_object("discontinuity");    
+      if(!json_discontinuities.empty())
+      {
+        discontinuity_ = true;
+        for (const auto discontinuity_props : json_discontinuities) {
+          // Get discontinuity type
+          const std::string discontunity_type =
+              discontinuity_props["type"].template get<std::string>();
+
+          // Get discontinuity id
+          auto discontinuity_id = discontinuity_props["id"].template get<unsigned>();
+
+            // Get discontinuity  input type
+          auto io_type = discontinuity_props["io_type"].template get<std::string>();
+
+          // discontinuity file
+          std::string discontinuity_file =
+              io_->file_name(discontinuity_props["file"].template get<std::string>());
+
+          auto discontinuity_frictional_coef = discontinuity_props["frictional_coefficient"].template get<double>();
+
+              // Create a mesh reader
+          auto discontunity_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+          
+          // Create a new discontinuity surface from JSON object
+          auto discontinuity =
+              Factory<mpm::DiscontinuityBase<Tdim>>::instance()
+                  ->create(discontunity_type);
+
+          bool status = 
+            discontinuity->initialize(discontunity_io->read_mesh_nodes(discontinuity_file),discontunity_io->read_mesh_cells(discontinuity_file));
+
+          discontinuity->set_frictional_coef(discontinuity_frictional_coef);
+          // Create points from file
+      
+          // Add discontinuity to list
+          auto result = discontinuities_.insert(std::make_pair(discontinuity_id, discontinuity));
+
+          // If insert discontinuity failed
+          if (!result.second) {
+            status = false;
+            throw std::runtime_error(
+                "New discontinuity cannot be added, insertion failed");
+          }
+        }
+      } 
+    }catch (std::exception& exception) {
+        console_->warn("{} #{}: No discontinuity is defined", __FILE__,
+                      __LINE__, exception.what());
+    }
+  }catch (std::exception& exception) {
+    console_->error("#{}: Reading discontinuities: {}", __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
+// Initialise particles
+template <unsigned Tdim>
+bool mpm::XMPMExplicit<Tdim>::initialise_levelset() {
+
+  bool status = true;
+
+  try {
+
+    for(mpm::Index i=0; i<ndiscontinuities();++i){
+
+      std::vector<double> phi_list(mesh_->nparticles());
+
+      discontinuities_[i]->compute_levelset(mesh_->particle_coordinates(),  phi_list);
+
+     mesh_->assign_particle_levelset(phi_list);      
+    }
+
+  } catch (std::exception& exception) {
+    console_->error("#{}: XMPM initialise particles levelset values: {}", __LINE__,
+                    exception.what());
+    status = false;
+  }
+
+  if (!status) throw std::runtime_error("Initialisation of particles LSM values failed");
+  
   return status;
 }

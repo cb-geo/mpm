@@ -461,6 +461,12 @@ class Mesh {
   // Initialise the nodal properties' map
   void initialise_nodal_properties();
 
+    //! Set particles lsm values
+  void assign_particle_levelset(std::vector<double>& phi_list);
+
+    // Create the nodal properties' map for discontinuity
+  void create_nodal_properties_discontinuity();
+
  private:
   // Read particles from file
   //! \param[in] pset_id Set ID of the particles
