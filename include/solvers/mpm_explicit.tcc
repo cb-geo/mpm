@@ -288,11 +288,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     // Apply particle velocity constraints
     mesh_->apply_particle_velocity_constraints();
 
-    // Update Stress Last
-    if (this->stress_update_ == mpm::StressUpdate::USL)
-      this->compute_stress_strain(phase);
     // Modified Update Stress Last
-    else if (this->stress_update_ == mpm::StressUpdate::MUSL) {
+    if (this->stress_update_ == mpm::StressUpdate::MUSL) {
 
 #pragma omp parallel sections
       {
@@ -334,6 +331,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
       // Compute stress and strain
       this->compute_stress_strain(phase);
     }
+    // Update Stress Last
+    else if (this->stress_update_ == mpm::StressUpdate::USL) {
+      // Compute stress and strain
+      this->compute_stress_strain(phase);
+    }
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
@@ -367,7 +369,9 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   auto solver_end = std::chrono::steady_clock::now();
   console_->info(
       "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-      (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
+      (this->stress_update_ == mpm::StressUpdate::USL
+           ? "USL"
+           : this->stress_update_ == mpm::StressUpdate::USF ? "USF" : "MUSL"),
       std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
                                                             solver_begin)
           .count());
