@@ -810,19 +810,58 @@ void mpm::ParticleXMPM<Tdim>::compute_updated_position(
   // Get interpolated nodal velocity
   Eigen::Matrix<double, Tdim, 1> nodal_velocity =
       Eigen::Matrix<double, Tdim, 1>::Zero();
-
+  const double tolerance = 1.E-16;
+  unsigned int phase = mpm::ParticlePhase::Solid;
   for (unsigned i = 0; i < nodes_.size(); ++i)
-    nodal_velocity +=
-        shapefn_[i] * nodes_[i]->velocity(mpm::ParticlePhase::Solid);
+  {
+    if(nodes_[i]->discontinuity_enrich())
+    {
+      double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0);
+      if (nodal_mass < tolerance)
+        continue;
 
+      nodal_velocity += shapefn_[i] *  
+        (nodes_[i]->momentum(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("momenta_enrich",3))/nodal_mass;
+    }
+    else
+    {
+      double nodal_mass = nodes_[i]->mass(phase);
+      if (nodal_mass < tolerance)
+        continue;
+      nodal_velocity +=
+        shapefn_[i] * nodes_[i]->momentum(phase)/nodal_mass;
+    }
+  }
   // Acceleration update
   if (!velocity_update) {
     // Get interpolated nodal acceleration
     Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
         Eigen::Matrix<double, Tdim, 1>::Zero();
     for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodal_acceleration +=
-          shapefn_[i] * nodes_[i]->acceleration(mpm::ParticlePhase::Solid);
+    {
+      if(nodes_[i]->discontinuity_enrich())
+      {
+        double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0);
+        if (nodal_mass < tolerance)
+          continue;
+
+        auto force = nodes_[i]->internal_force(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("internal_force_enrich",3) + 
+                     nodes_[i]->external_force(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("external_force_enrich",3);
+
+        nodal_acceleration += shapefn_[i] *  force / nodal_mass;
+      }
+      else
+      {
+        double nodal_mass = nodes_[i]->mass(phase);
+        if (nodal_mass < tolerance)
+          continue;
+
+        auto force = nodes_[i]->internal_force(phase) + nodes_[i]->external_force(phase);
+
+        nodal_acceleration +=
+          shapefn_[i] * force / nodal_mass;
+      }
+    }
 
     // Update particle velocity from interpolated nodal acceleration
     this->velocity_ += nodal_acceleration * dt;
