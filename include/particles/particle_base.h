@@ -321,14 +321,6 @@ class ParticleBase {
     return false;
   };
 
-  //! Assign pore pressure
-  virtual void assign_pore_pressure(double pore_pressure) {
-    throw std::runtime_error(
-        "Calling the base class function "
-        "(assign_pore_pressure) in "
-        "ParticleBase:: illegal operation!");
-  };
-
   //! Assign saturation degree
   virtual bool assign_saturation_degree() {
     throw std::runtime_error(
