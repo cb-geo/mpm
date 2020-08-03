@@ -454,15 +454,16 @@ void mpm::TwoPhaseParticle<Tdim>::compute_updated_position(
 
 //! Map particle pressure to nodes
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(
-    unsigned phase) noexcept {
+bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(unsigned phase,
+                                                        double dt,
+                                                        Index step) noexcept {
   // Mass is initialized
   assert(liquid_mass_ != std::numeric_limits<double>::max());
 
   bool status = false;
   // If phase is Solid, use the default map_pressure_to_nodes
   if (phase == mpm::ParticlePhase::Solid)
-    status = mpm::Particle<Tdim>::map_pressure_to_nodes(phase);
+    status = mpm::Particle<Tdim>::map_pressure_to_nodes(phase, dt, step);
   else {
     // Check if particle liquid mass is set and state variable pressure is found
     if (liquid_mass_ != std::numeric_limits<double>::max() &&
@@ -472,7 +473,8 @@ bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(
       for (unsigned i = 0; i < nodes_.size(); ++i)
         nodes_[i]->update_mass_pressure(
             phase,
-            shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"]);
+            shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"],
+            dt, step);
 
       status = true;
     }
@@ -680,15 +682,24 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
             ((h0_right - h0_left) / (right_boundary - left_boundary) *
                  (position - left_boundary) +
              h0_left - this->coordinates_(dir_v)) *
-            1000 * 9.81;
+            (this->material(mpm::ParticlePhase::Liquid))
+                ->template property<double>(std::string("density")) *
+            9.81;
       } else
         // Particle with only left boundary
-        pore_pressure = (h0_left - this->coordinates_(dir_v)) * 1000 * 9.81;
+        pore_pressure =
+            (h0_left - this->coordinates_(dir_v)) *
+            (this->material(mpm::ParticlePhase::Liquid))
+                ->template property<double>(std::string("density")) *
+            9.81;
 
     }
     // Particle with only right boundary
     else if (right_boundary != std::numeric_limits<double>::max())
-      pore_pressure = (h0_right - this->coordinates_(dir_v)) * 1000 * 9.81;
+      pore_pressure = (h0_right - this->coordinates_(dir_v)) *
+                      (this->material(mpm::ParticlePhase::Liquid))
+                          ->template property<double>(std::string("density")) *
+                      9.81;
     else
       throw std::runtime_error(
           "Particle pore pressure can not be initialised by water table");

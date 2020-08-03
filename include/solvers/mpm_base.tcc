@@ -185,7 +185,7 @@ bool mpm::MPMBase<Tdim>::initialise_mesh() {
     this->nodal_frictional_constraints(mesh_props, mesh_io);
 
     // Read and assign pore pressure constraints
-    this->nodal_pore_pressure_constraints(mesh_props, mesh_io);
+    this->nodal_pressure_constraints(mesh_props, mesh_io);
 
     // Initialise cell
     auto cells_begin = std::chrono::steady_clock::now();
@@ -911,31 +911,27 @@ void mpm::MPMBase<Tdim>::nodal_frictional_constraints(
   }
 }
 
-// Nodal pore pressure constraints (Coupled solid-fluid formulation)
+// Nodal pressure constraints
 template <unsigned Tdim>
-void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
+void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
     const Json& mesh_props, const std::shared_ptr<mpm::IOMesh<Tdim>>& mesh_io) {
   try {
-    // Water phase indice
-    const unsigned phase = mpm::ParticlePhase::Liquid;
-    // Total phase
+    // TODO: Get the total phases
     const unsigned Tnphases = 2;
-
     // Read and assign pore pressure constraints
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
-        mesh_props["boundary_conditions"].find("pore_pressure_constraints") !=
+        mesh_props["boundary_conditions"].find("pressure_constraints") !=
             mesh_props["boundary_conditions"].end()) {
 
       // Iterate over pore pressure constraints
       for (const auto& constraints :
-           mesh_props["boundary_conditions"]["pore_pressure_constraints"]) {
+           mesh_props["boundary_conditions"]["pressure_constraints"]) {
         // Pore pressure constraint phase indice
-        unsigned constraint_phase = phase;
+        unsigned constraint_phase = constraints["phase"];
 
-        // Check if it is pressure increment constraints
-        if (constraints.find("increment_boundary") != constraints.end() &&
-            constraints["increment_boundary"])
-          constraint_phase += Tnphases;
+        if (constraint_phase >= Tnphases)
+          throw std::runtime_error(
+              "Phase for nodal pressure constraints is not properly assigned");
 
         // Pore pressure constraints are specified in a file
         if (constraints.find("file") != constraints.end()) {
@@ -963,23 +959,14 @@ void mpm::MPMBase<Tdim>::nodal_pore_pressure_constraints(
           // Add pore pressure constraint to mesh
           constraints_->assign_nodal_pressure_constraint(
               pfunction, nset_id, constraint_phase, pore_pressure);
-          // if (constraint_phase >= Tnphases) {
-          //   // Reference step
-          //   const Index ref_step =
-          //       constraints.at("ref_step").template get<Index>();
-          //   // Add reference step to nodes
-          //   mesh_->assign_nodal_pressure_reference_step(nset_id, ref_step);
-          //   // Insert the ref_step to the vector
-          //   pore_pressure_ref_step_.emplace_back(ref_step);
-          // }
         }
       }
     } else
-      throw std::runtime_error("Pore pressure constraints JSON not found");
+      throw std::runtime_error("Pressure constraints JSON not found");
 
   } catch (std::exception& exception) {
-    console_->warn("#{}: Pore pressure constraints are undefined {} ", __LINE__,
-                   exception.what());
+    console_->warn("#{}: Nodal pressure constraints are undefined {} ",
+                   __LINE__, exception.what());
   }
 }
 
@@ -1305,7 +1292,7 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
-                std::placeholders::_1, phase));
+                std::placeholders::_1, phase, this->dt_, this->step_));
 
 #ifdef USE_MPI
   int mpi_size = 1;

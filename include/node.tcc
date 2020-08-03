@@ -162,7 +162,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
-    unsigned phase, double mass_pressure) noexcept {
+    unsigned phase, double mass_pressure, double dt, Index step) noexcept {
   // Assert
   assert(phase < Tnphases);
 
@@ -174,22 +174,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
     node_mutex_.unlock();
 
     if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
-      // const double scalar =
-      //     (pressure_function_.find(phase) != pressure_function_.end())
-      //         ? pressure_function_[phase]->value(step * dt)
-      //         : 1.0;
-      // this->pressure_(phase) = scalar * pressure_constraints_[phase];
-      this->pressure_(phase) = pressure_constraints_[phase];
-      // if (step > ref_step_ && pressure_constraints_.find(phase + Tnphases) !=
-      //                             pressure_constraints_.end()) {
-      //   const double scalar_increment =
-      //       (pressure_function_.find(phase + Tnphases) !=
-      //        pressure_function_.end())
-      //           ? pressure_function_[phase + Tnphases]->value(step * dt)
-      //           : 1.0;
-      //   this->pressure_(phase) +=
-      //       scalar_increment * pressure_constraints_[phase + Tnphases];
-      // }
+      const double scalar =
+          (pressure_function_.find(phase) != pressure_function_.end())
+              ? pressure_function_[phase]->value(step * dt)
+              : 1.0;
+      this->pressure_(phase) = scalar * pressure_constraints_[phase];
     }
   }
 }
