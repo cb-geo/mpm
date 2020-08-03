@@ -679,11 +679,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
   }
   // Apply velocity constraints, which also sets acceleration to 0,
   // when velocity is set.
-  this->apply_velocity_constraints();
+  this->apply_velocity_constraints_discontinuity();
 
   //this->self_contact_discontinuity(dt);
 
-  this->apply_velocity_constraints();
+  this->apply_velocity_constraints_discontinuity();
 
  
   return true;

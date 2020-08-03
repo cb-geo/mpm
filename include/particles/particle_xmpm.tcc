@@ -630,8 +630,8 @@ inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
   Eigen::Matrix<double, 6, 1> strain_rate = Eigen::Matrix<double, 6, 1>::Zero();
   const double tolerance = 1.E-16;
   Eigen::Vector3d vel;
+  vel.setZero();
   for (unsigned i = 0; i < this->nodes_.size(); ++i){
-    vel.setZero();
     if(nodes_[i]->discontinuity_enrich()){
       double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0) ;
       if(nodal_mass < tolerance)

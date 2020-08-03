@@ -305,8 +305,8 @@ class ParticleXMPM : public ParticleBase<Tdim> {
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
-      //! set the level set function values
-  virtual void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue; };
+  //! set the level set function values
+  void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue;};
 
     //! return 1 if x > 0, -1 if x < 0 and 0 if x = 0 
   inline double sgn(double x) noexcept {return (x > 0) ? 1. : ((x < 0) ? -1. : 0);};

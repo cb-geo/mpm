@@ -356,7 +356,7 @@ class Node : public NodeBase<Tdim> {
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
   //! discontinuity enrich
-  bool discontinuity_enrich_{true};
+  bool discontinuity_enrich_{false};
 };  // Node class
 }  // namespace mpm
 
