@@ -942,7 +942,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Compute pore_pressure
     REQUIRE_NOTHROW(particle->compute_pore_pressure(dt));
     // Check pore pressure
-    REQUIRE(particle->pore_pressure() ==
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
             Approx(-783333333.3333334923).epsilon(Tolerance));
 
     // Check body force
@@ -2275,7 +2275,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Compute pore_pressure
     REQUIRE_NOTHROW(particle->compute_pore_pressure(dt));
     // Check pore pressure
-    REQUIRE(particle->pore_pressure() ==
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
             Approx(-1608333333.3333332539).epsilon(Tolerance));
 
     // Check body force

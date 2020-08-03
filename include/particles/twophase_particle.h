@@ -102,7 +102,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Assign particles initial pore pressure by watertable
   bool initialise_pore_pressure_watertable(
       const unsigned dir_v, const unsigned dir_h,
-      std::map<double, double>& refernece_points);
+      std::map<double, double>& reference_points);
 
   //! Update porosity
   //! \param[in] dt Analysis time step
@@ -132,12 +132,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Return liquid mass
   //! \retval liquid mass Liquid phase mass
   double liquid_mass() const override { return liquid_mass_; }
-
-  //! Return liquid pore pressure
-  //! \retval pore pressure Pore liquid pressure
-  double pore_pressure() const override {
-    return this->state_variables_[mpm::ParticlePhase::Liquid].at("pressure");
-  }
 
   //! Reture porosity
   //! \retval porosity Porosity

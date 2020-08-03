@@ -358,7 +358,7 @@ class ParticleBase {
   //! Initialise particle pore pressure by watertable
   virtual bool initialise_pore_pressure_watertable(
       const unsigned dir_v, const unsigned dir_h,
-      std::map<double, double>& refernece_points) {
+      std::map<double, double>& reference_points) {
     throw std::runtime_error(
         "Calling the base class function "
         "(initial_pore_pressure_watertable) in "
@@ -401,15 +401,6 @@ class ParticleBase {
         "Calling the base class function (liquid_velocity) in "
         "ParticleBase:: illegal operation!");
     return error;
-  };
-
-  //! Return liquid pore pressure
-  //! \retval pore pressure Pore liquid pressure
-  virtual double pore_pressure() const {
-    throw std::runtime_error(
-        "Calling the base class function (pore_pressure) in "
-        "ParticleBase:: illegal operation!");
-    return 0;
   };
 
   //! Return porosity

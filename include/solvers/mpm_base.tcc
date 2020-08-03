@@ -1152,7 +1152,7 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
           throw std::runtime_error("Particle pore pressures JSON not found");
       } else if (type == "water_table") {
         // Initialise water tables
-        std::map<double, double> refernece_points;
+        std::map<double, double> reference_points;
         // Vertical direction
         const unsigned dir_v = mesh_props["particles_pore_pressures"]["dir_v"]
                                    .template get<unsigned>();
@@ -1167,13 +1167,13 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
           // Direction
           double h0 = water_table.at("h0").template get<double>();
           // Add refernece points to mesh
-          refernece_points.insert(std::make_pair<double, double>(
+          reference_points.insert(std::make_pair<double, double>(
               static_cast<double>(position), static_cast<double>(h0)));
         }
         // Initialise particles pore pressures by watertable
         mesh_->iterate_over_particles(std::bind(
             &mpm::ParticleBase<Tdim>::initialise_pore_pressure_watertable,
-            std::placeholders::_1, dir_v, dir_h, refernece_points));
+            std::placeholders::_1, dir_v, dir_h, reference_points));
       } else
         throw std::runtime_error(
             "Particle pore pressures generator type is not properly "

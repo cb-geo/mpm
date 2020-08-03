@@ -121,7 +121,7 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   this->properties_["liquid_velocities"] = [&]() { return liquid_velocity(); };
   this->properties_["pore_pressure"] = [&]() {
     Eigen::VectorXd vec_pressure = Eigen::VectorXd::Zero(3);
-    vec_pressure[0] = this->pore_pressure();
+    vec_pressure[0] = this->pressure(mpm::ParticlePhase::Liquid);
     return vec_pressure;
   };
 }
@@ -643,7 +643,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
     const unsigned dir_v, const unsigned dir_h,
-    std::map<double, double>& refernece_points) {
+    std::map<double, double>& reference_points) {
   bool status = true;
   try {
     // Initialise left boundary position (coordinate) and h0
@@ -654,8 +654,8 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
     double h0_right = 0.;
     // Position and h0 of particle (coordinate)
     const double position = this->coordinates_(dir_h);
-    // Iterate over each refernece_points
-    for (const auto& refernece_point : refernece_points) {
+    // Iterate over each reference_points
+    for (const auto& refernece_point : reference_points) {
       // Find boundary
       if (refernece_point.first > left_boundary &&
           refernece_point.first <= position) {
