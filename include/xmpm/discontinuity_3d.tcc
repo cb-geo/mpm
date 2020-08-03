@@ -91,6 +91,7 @@ void  mpm::Discontinuity_3D<Tdim>::compute_levelset(const std::vector<VectorDim>
     {
       double Vertical_distance_ = element.Vertical_distance(coor);// Vertical_distance(coor);
       distance = std::abs(distance) < std::abs(Vertical_distance_)? distance:Vertical_distance_;
+      if(!distance) distance = 1e-16;
     }
     
     phi_list[i] = distance;
