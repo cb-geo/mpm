@@ -8,7 +8,6 @@
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/SparseCholesky>
-#include <iostream>
 
 namespace mpm {
 

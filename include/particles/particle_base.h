@@ -290,8 +290,9 @@ class ParticleBase {
   //! Assign particle free surface
   virtual bool free_surface() = 0;
 
-  //! Compute free surface
-  virtual bool compute_free_surface() = 0;
+  //! Compute free surface in particle level by density ratio comparison
+  virtual bool compute_free_surface_by_density(
+      double density_ratio_tolerance = 0.70) = 0;
 
   //! Assign normal vector
   virtual void assign_normal(const VectorDim& normal) = 0;

@@ -132,8 +132,9 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1));
 
+    // FIXME: Find a way to deal with parallel free surface detection
     // Compute free surface cells, nodes, and particles
-    mesh_->compute_free_surface(volume_tolerance_);
+    // mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
 
     // Spawn a task for initializing pressure at free surface
 #pragma omp parallel sections

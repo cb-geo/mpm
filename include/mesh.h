@@ -453,8 +453,32 @@ class Mesh {
   void inject_particles(double current_time);
 
   //! Compute free surface
+  //! \param[in] method Type of method to use
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
   bool compute_free_surface(
-      double tolerance = std::numeric_limits<unsigned>::epsilon());
+      std::string method,
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! Compute free surface by density method
+  //! \details Using simple approach of volume fraction approach as (Kularathna
+  //! & Soga, 2017) and density ratio comparison (Hamad, 2015). This method is
+  //! fast, but less accurate.
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_density(
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
+
+  //! Compute free surface by geometry method
+  //! \details Using a more expensive approach using neighbouring particles and
+  //! current geometry. This method combine multiple checks in order to simplify
+  //! and fasten the process: (1) Volume fraction approach as (Kularathna & Soga
+  //! 2017), (2) Density comparison approach as (Hamad, 2015), and (3) Geometry
+  //! based approach as (Marrone et al. 2010)
+  //! \param[in] volume_tolerance for volume_fraction approach
+  //! \retval status Status of compute_free_surface
+  bool compute_free_surface_by_geometry(
+      double volume_tolerance = std::numeric_limits<unsigned>::epsilon());
 
   //! Get free surface node set
   std::set<mpm::Index> free_surface_nodes();
