@@ -208,21 +208,21 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
     ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usf_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpm_explicit_usl_unitcell_test.cc
-    ${mpm_SOURCE_DIR}/tests/nodal_properties_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_map_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_test.cc
-    ${mpm_SOURCE_DIR}/tests/twophase_node_test.cc
-    ${mpm_SOURCE_DIR}/tests/node_vector_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_cell_crossing_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/twophase_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_traction_test.cc
-    ${mpm_SOURCE_DIR}/tests/particle_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/twophase_node_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/twophase_particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usl_unitcell_test.cc
   )
   add_executable(mpmtest ${mpm_src} ${test_src})
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
