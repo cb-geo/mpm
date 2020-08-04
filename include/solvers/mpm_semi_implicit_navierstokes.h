@@ -24,7 +24,7 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
 
   //! Return matrix assembler pointer
   std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler() {
-    return matrix_assembler_;
+    return assembler_;
   }
 
   //! Solve
@@ -80,10 +80,12 @@ class MPMSemiImplicitNavierStokes : public MPMBase<Tdim> {
   bool pressure_smoothing_{false};
   // Projection method parameter (beta)
   double beta_{1};
-  //! Matrix assembler object
-  std::shared_ptr<mpm::AssemblerBase<Tdim>> matrix_assembler_;
-  //! Matrix solver object
-  std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>> matrix_solver_;
+  //! Assembler object
+  std::shared_ptr<mpm::AssemblerBase<Tdim>> assembler_;
+  //! Linear solver object
+  std::shared_ptr<mpm::SolverBase<Eigen::SparseMatrix<double>>> linear_solver_;
+  //! Method to detect free surface detection
+  std::string free_surface_detection_;
   //! Volume tolerance for free surface
   double volume_tolerance_{0};
 
