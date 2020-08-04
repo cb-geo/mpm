@@ -2290,7 +2290,7 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
       }
 
       // Check acceleration before constraints
-      acceleration << 5., 5.;
+      acceleration << 5., 5., 5.;
       for (unsigned i = 0; i < acceleration.size(); ++i) {
         REQUIRE(node->acceleration(mpm::NodePhase::nSolid)(i) ==
                 Approx(acceleration(i)).epsilon(Tolerance));
@@ -2307,7 +2307,7 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
         node->apply_velocity_constraints();
 
         // Check apply constraints
-        velocity << -12.5, 0.1;
+        velocity << -12.5, 0.1, 0.1;
         for (unsigned i = 0; i < velocity.size(); ++i) {
           REQUIRE(node->velocity(mpm::NodePhase::nSolid)(i) ==
                   Approx(velocity(i)).epsilon(Tolerance));
@@ -2315,7 +2315,7 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
                   Approx(velocity(i)).epsilon(Tolerance));
         }
 
-        acceleration << 0., 5.;
+        acceleration << 0., 5., 5.;
         for (unsigned i = 0; i < acceleration.size(); ++i) {
           REQUIRE(node->acceleration(mpm::NodePhase::nSolid)(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
@@ -2326,12 +2326,14 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
       SECTION("Check general velocity constraints in 2 directions") {
         // Apply velocity constraints
         REQUIRE(node->assign_velocity_constraint(0, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(1, 7.5) == true);
         REQUIRE(node->assign_velocity_constraint(3, -12.5) == true);
+        REQUIRE(node->assign_velocity_constraint(4, 7.5) == true);
 
         // Apply rotation matrix with Euler angles alpha = 10 deg, beta
         // = 30 deg
         Eigen::Matrix<double, Dim, 1> euler_angles;
-        euler_angles << 10. * M_PI / 180, 30. * M_PI / 180;
+        euler_angles << 10. * M_PI / 180, 20. * M_PI / 180, 30. * M_PI / 180;
         const auto rotation_matrix =
             mpm::geometry::rotation_matrix(euler_angles);
         node->assign_rotation_matrix(rotation_matrix);
@@ -2341,7 +2343,7 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
         node->apply_velocity_constraints();
 
         // Check apply constraints
-        velocity << -9.5834783355, -8.0254030998, 0.1;
+        velocity << -14.5068204271, -0.1432759442, 1.4260971922;
         for (unsigned i = 0; i < Dim; ++i) {
           REQUIRE(node->velocity(mpm::NodePhase::nSolid)(i) ==
                   Approx(velocity(i)).epsilon(Tolerance));
@@ -2354,11 +2356,17 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
                  node->velocity(mpm::NodePhase::nSolid))(0) ==
                 Approx(-12.5).epsilon(Tolerance));
         REQUIRE((inverse_rotation_matrix *
+                 node->velocity(mpm::NodePhase::nSolid))(1) ==
+                Approx(7.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix *
                  node->velocity(mpm::NodePhase::nLiquid))(0) ==
                 Approx(-12.5).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix *
+                 node->velocity(mpm::NodePhase::nLiquid))(1) ==
+                Approx(7.5).epsilon(Tolerance));
 
         // Check applied constraints on acceleration in the global coordinates
-        acceleration << -0.3961398267, 0.4721010616, 5.0;
+        acceleration << 0.1998888554, -1.1336260315, 1.9937880031;
         for (unsigned i = 0; i < Dim; ++i) {
           REQUIRE(node->acceleration(mpm::NodePhase::nSolid)(i) ==
                   Approx(acceleration(i)).epsilon(Tolerance));
@@ -2371,7 +2379,13 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
                  node->acceleration(mpm::NodePhase::nSolid))(0) ==
                 Approx(0).epsilon(Tolerance));
         REQUIRE((inverse_rotation_matrix *
+                 node->acceleration(mpm::NodePhase::nSolid))(1) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix *
                  node->acceleration(mpm::NodePhase::nLiquid))(0) ==
+                Approx(0).epsilon(Tolerance));
+        REQUIRE((inverse_rotation_matrix *
+                 node->acceleration(mpm::NodePhase::nLiquid))(1) ==
                 Approx(0).epsilon(Tolerance));
       }
 
