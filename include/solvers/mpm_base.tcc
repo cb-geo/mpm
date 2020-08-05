@@ -45,7 +45,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     } catch (std::exception& exception) {
       console_->warn(
           "{} #{}: {}. Stress update method is not specified, using USF as "
-          "default\n",
+          "default",
           __FILE__, __LINE__, exception.what());
     }
 
@@ -90,6 +90,33 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     console_->error("{} {} Get analysis object: {}", __FILE__, __LINE__,
                     domain_error.what());
     abort();
+  }
+
+  // VTK particle variables
+  try {
+    // Initialise container with empty vector
+    vtk_vars_.insert(
+        std::make_pair(mpm::VariableType::Scalar, std::vector<std::string>()));
+    vtk_vars_.insert(
+        std::make_pair(mpm::VariableType::Vector, std::vector<std::string>()));
+    vtk_vars_.insert(
+        std::make_pair(mpm::VariableType::Tensor, std::vector<std::string>()));
+
+    if (post_process_.at("vtk").is_array() &&
+        post_process_.at("vtk").size() > 0) {
+      // Iterate over vtk
+      for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
+        std::string attribute =
+            post_process_["vtk"][i].template get<std::string>();
+        mpm::VariableType var_type = mpm::variables.at(attribute);
+        vtk_vars_[var_type].emplace_back(attribute);
+      }
+    } else {
+      throw std::runtime_error(
+          "No VTK variables were specified, none will be generated");
+    }
+  } catch (std::exception& exception) {
+    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
   }
 
   // VTK state variables
@@ -506,10 +533,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 #endif
 
   //! VTK vector variables
-  std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
-
-  // Write VTK attributes
-  for (const auto& attribute : vtk_vector_data) {
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Vector)) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
@@ -530,10 +554,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   }
 
   //! VTK tensor variables
-  std::vector<std::string> vtk_tensor_data = {"stresses", "strains"};
-
-  // Write VTK attributes
-  for (const auto& attribute : vtk_tensor_data) {
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Tensor)) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
