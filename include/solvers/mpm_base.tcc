@@ -112,116 +112,104 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
 
 // Initialise mesh
 template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::initialise_mesh() {
-  bool status = true;
-  try {
-    // Initialise MPI rank and size
-    int mpi_rank = 0;
-    int mpi_size = 1;
+void mpm::MPMBase<Tdim>::initialise_mesh() {
+  // Initialise MPI rank and size
+  int mpi_rank = 0;
+  int mpi_size = 1;
 
 #ifdef USE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    // Get number of MPI ranks
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  // Get number of MPI ranks
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-    // Get mesh properties
-    auto mesh_props = io_->json_object("mesh");
-    // Get Mesh reader from JSON object
-    const std::string io_type =
-        mesh_props["io_type"].template get<std::string>();
+  // Get mesh properties
+  auto mesh_props = io_->json_object("mesh");
+  // Get Mesh reader from JSON object
+  const std::string io_type = mesh_props["io_type"].template get<std::string>();
 
-    bool check_duplicates = true;
-    try {
-      check_duplicates = mesh_props["check_duplicates"].template get<bool>();
-    } catch (std::exception& exception) {
-      console_->warn(
-          "{} #{}: Check duplicates, not specified setting default as true",
-          __FILE__, __LINE__, exception.what());
-      check_duplicates = true;
-    }
-
-    // Create a mesh reader
-    auto mesh_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
-
-    auto nodes_begin = std::chrono::steady_clock::now();
-    // Global Index
-    mpm::Index gid = 0;
-    // Node type
-    const auto node_type = mesh_props["node_type"].template get<std::string>();
-
-    // Mesh file
-    std::string mesh_file =
-        io_->file_name(mesh_props["mesh"].template get<std::string>());
-
-    // Create nodes from file
-    bool node_status =
-        mesh_->create_nodes(gid,                                  // global id
-                            node_type,                            // node type
-                            mesh_io->read_mesh_nodes(mesh_file),  // coordinates
-                            check_duplicates);                    // check dups
-
-    if (!node_status) {
-      status = false;
-      throw std::runtime_error("Addition of nodes to mesh failed");
-    }
-
-    auto nodes_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read nodes: {} ms", mpi_rank,
-                   std::chrono::duration_cast<std::chrono::milliseconds>(
-                       nodes_end - nodes_begin)
-                       .count());
-
-    // Read and assign node sets
-    this->node_entity_sets(mesh_props, check_duplicates);
-
-    // Read nodal euler angles and assign rotation matrices
-    this->node_euler_angles(mesh_props, mesh_io);
-
-    // Read and assign velocity constraints
-    this->nodal_velocity_constraints(mesh_props, mesh_io);
-
-    // Read and assign friction constraints
-    this->nodal_frictional_constraints(mesh_props, mesh_io);
-
-    // Initialise cell
-    auto cells_begin = std::chrono::steady_clock::now();
-    // Shape function name
-    const auto cell_type = mesh_props["cell_type"].template get<std::string>();
-    // Shape function
-    std::shared_ptr<mpm::Element<Tdim>> element =
-        Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
-
-    // Create cells from file
-    bool cell_status =
-        mesh_->create_cells(gid,      // global id
-                            element,  // element tyep
-                            mesh_io->read_mesh_cells(mesh_file),  // Node ids
-                            check_duplicates);                    // Check dups
-
-    if (!cell_status) {
-      status = false;
-      throw std::runtime_error("Addition of cells to mesh failed");
-    }
-
-    // Compute cell neighbours
-    mesh_->find_cell_neighbours();
-
-    // Read and assign cell sets
-    this->cell_entity_sets(mesh_props, check_duplicates);
-
-    auto cells_end = std::chrono::steady_clock::now();
-    console_->info("Rank {} Read cells: {} ms", mpi_rank,
-                   std::chrono::duration_cast<std::chrono::milliseconds>(
-                       cells_end - cells_begin)
-                       .count());
+  bool check_duplicates = true;
+  try {
+    check_duplicates = mesh_props["check_duplicates"].template get<bool>();
   } catch (std::exception& exception) {
-    console_->error("#{}: Reading mesh: {}", __LINE__, exception.what());
+    console_->warn(
+        "{} #{}: Check duplicates, not specified setting default as true",
+        __FILE__, __LINE__, exception.what());
+    check_duplicates = true;
   }
 
-  // Terminate if mesh creation failed
-  if (!status) throw std::runtime_error("Initialisation of mesh failed");
-  return status;
+  // Create a mesh reader
+  auto mesh_io = Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
+
+  auto nodes_begin = std::chrono::steady_clock::now();
+  // Global Index
+  mpm::Index gid = 0;
+  // Node type
+  const auto node_type = mesh_props["node_type"].template get<std::string>();
+
+  // Mesh file
+  std::string mesh_file =
+      io_->file_name(mesh_props["mesh"].template get<std::string>());
+
+  // Create nodes from file
+  bool node_status =
+      mesh_->create_nodes(gid,                                  // global id
+                          node_type,                            // node type
+                          mesh_io->read_mesh_nodes(mesh_file),  // coordinates
+                          check_duplicates);                    // check dups
+
+  if (!node_status)
+    throw std::runtime_error(
+        "mpm::base::init_mesh(): Addition of nodes to mesh failed");
+
+  auto nodes_end = std::chrono::steady_clock::now();
+  console_->info("Rank {} Read nodes: {} ms", mpi_rank,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     nodes_end - nodes_begin)
+                     .count());
+
+  // Read and assign node sets
+  this->node_entity_sets(mesh_props, check_duplicates);
+
+  // Read nodal euler angles and assign rotation matrices
+  this->node_euler_angles(mesh_props, mesh_io);
+
+  // Read and assign velocity constraints
+  this->nodal_velocity_constraints(mesh_props, mesh_io);
+
+  // Read and assign friction constraints
+  this->nodal_frictional_constraints(mesh_props, mesh_io);
+
+  // Initialise cell
+  auto cells_begin = std::chrono::steady_clock::now();
+  // Shape function name
+  const auto cell_type = mesh_props["cell_type"].template get<std::string>();
+  // Shape function
+  std::shared_ptr<mpm::Element<Tdim>> element =
+      Factory<mpm::Element<Tdim>>::instance()->create(cell_type);
+
+  // Create cells from file
+  bool cell_status =
+      mesh_->create_cells(gid,                                  // global id
+                          element,                              // element tyep
+                          mesh_io->read_mesh_cells(mesh_file),  // Node ids
+                          check_duplicates);                    // Check dups
+
+  if (!cell_status)
+    throw std::runtime_error(
+        "mpm::base::init_mesh(): Addition of cells to mesh failed");
+
+  // Compute cell neighbours
+  mesh_->find_cell_neighbours();
+
+  // Read and assign cell sets
+  this->cell_entity_sets(mesh_props, check_duplicates);
+
+  auto cells_end = std::chrono::steady_clock::now();
+  console_->info("Rank {} Read cells: {} ms", mpi_rank,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     cells_end - cells_begin)
+                     .count());
 }
 
 // Initialise particles

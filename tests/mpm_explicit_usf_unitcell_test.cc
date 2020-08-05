@@ -41,14 +41,17 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE_NOTHROW(mpm->initialise_materials());
+    REQUIRE(mpm->initialise_materials() == true);
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
     REQUIRE(mpm->initialise_particles() == true);
 
     // Initialise external loading
     REQUIRE(mpm->initialise_loads() == true);
+
+    // Renitialise materials
+    REQUIRE(mpm->initialise_materials() == false);
   }
 
   SECTION("Check solver") {
@@ -95,11 +98,14 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE_NOTHROW(mpm->initialise_materials());
+    REQUIRE(mpm->initialise_materials() == true);
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
     REQUIRE(mpm->initialise_particles() == true);
+
+    // Renitialise materials
+    REQUIRE(mpm->initialise_materials() == false);
   }
 
   SECTION("Check solver") {

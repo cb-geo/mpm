@@ -62,12 +62,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   this->initialise_materials();
 
   // Initialise mesh
-  bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of mesh failed");
-  }
-
+  this->initialise_mesh();
+  
   // Initialise particles
   bool particle_status = this->initialise_particles();
   if (!particle_status) {

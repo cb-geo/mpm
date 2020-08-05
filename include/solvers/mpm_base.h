@@ -47,7 +47,7 @@ class MPMBase : public MPM {
   MPMBase(const std::shared_ptr<IO>& io);
 
   //! Initialise mesh
-  bool initialise_mesh() override;
+  void initialise_mesh() override;
 
   //! Initialise particles
   bool initialise_particles() override;

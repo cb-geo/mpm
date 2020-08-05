@@ -44,7 +44,7 @@ class MPM {
   }
 
   // Initialise mesh and particles
-  virtual bool initialise_mesh() = 0;
+  virtual void initialise_mesh() = 0;
 
   // Initialise particles
   virtual bool initialise_particles() = 0;
