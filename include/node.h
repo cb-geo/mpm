@@ -297,7 +297,10 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Timestep in analysis
   virtual bool intergrate_momentum_discontinuity(
       unsigned phase, double dt) noexcept override;
-  
+
+  //! Apply self-contact of the discontinuity
+  //! \param[in] dt Time-step
+  void self_contact_discontinuity(double dt) override;
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -356,7 +359,8 @@ class Node : public NodeBase<Tdim> {
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
   //! discontinuity enrich
-  bool discontinuity_enrich_{false};
+  //need to be done
+  bool discontinuity_enrich_{true};
 };  // Node class
 }  // namespace mpm
 

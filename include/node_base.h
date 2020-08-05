@@ -286,6 +286,11 @@ class NodeBase {
   //! \param[in] dt Timestep in analysis
   virtual bool intergrate_momentum_discontinuity(
       unsigned phase, double dt) noexcept = 0;
+
+
+  //! Apply self-contact of the discontinuity
+  //! \param[in] dt Time-step
+  virtual void self_contact_discontinuity(double dt) = 0;
 };  // NodeBase class
 }  // namespace mpm
 
