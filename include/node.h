@@ -209,7 +209,7 @@ class Node : public NodeBase<Tdim> {
   void apply_velocity_constraints() override;
 
     //! Apply velocity constraints for discontinuity
-  void apply_velocity_constraints_discontinuity() override;
+  void apply_velocity_constraints_discontinuity() noexcept override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -275,7 +275,7 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   //! Return whether the node is enriched
-  bool discontinuity_enrich() {return discontinuity_enrich_;};
+  bool discontinuity_enrich() const override {return discontinuity_enrich_;};
 
     //! Update nodal property at the nodes from particle for discontinuity
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -290,7 +290,7 @@ class Node : public NodeBase<Tdim> {
     // Return data in the nodal discontinuity properties map at a specific index
   // \param[in] property Property name
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
-  Eigen::MatrixXd discontinuity_property(const std::string& property, unsigned nprops = 1) override;
+  Eigen::MatrixXd discontinuity_property(const std::string& property, unsigned nprops = 1) noexcept override;
 
     //! Compute momentum
   //! \param[in] phase Index corresponding to the phase
@@ -300,7 +300,7 @@ class Node : public NodeBase<Tdim> {
 
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
-  void self_contact_discontinuity(double dt) override;
+  void self_contact_discontinuity(double dt) noexcept override;
  private:
   //! Mutex
   SpinMutex node_mutex_;
