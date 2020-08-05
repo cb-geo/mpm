@@ -37,27 +37,29 @@ template <unsigned Tdim>
 mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   // Derive from particle
   auto particle_data = mpm::Particle<Tdim>::hdf5();
-  // // Particle liquid velocity
-  // Eigen::Vector3d liquid_velocity;
-  // liquid_velocity.setZero();
-  // for (unsigned j = 0; j < Tdim; ++j)
-  //   liquid_velocity[j] = this->liquid_velocity_[j];
   // // Particle liquid mass
   // particle_data.liquid_mass = this->liquid_mass_;
-  // Particle pore pressure
-  // particle_data.pressure = this->pore_pressure_;
+
   // // Particle liquid velocity
   // particle_data.liquid_velocity_x = liquid_velocity[0];
   // particle_data.liquid_velocity_y = liquid_velocity[1];
   // particle_data.liquid_velocity_z = liquid_velocity[2];
+
   // // Particle liquid material id
-  // particle_data.liquid_material_id = this->liquid_material_id_;
+  // particle_data.liquid_material_id =
+  // this->material_id_(mpm::ParticlePhase::Liquid);
+
   if (this->material(mpm::ParticlePhase::Liquid) != nullptr) {
-    particle_data.nstate_vars =
-        state_variables_[mpm::ParticlePhase::Liquid].size();
-    if (state_variables_[mpm::ParticlePhase::Liquid].size() > 20)
+    if ((state_variables_[mpm::ParticlePhase::Solid].size() +
+         state_variables_[mpm::ParticlePhase::Liquid].size()) > 20)
       throw std::runtime_error("# of state variables cannot be more than 20");
-    unsigned i = 0;
+    // Assign number of state variables
+    particle_data.nstate_vars =
+        state_variables_[mpm::ParticlePhase::Solid].size() +
+        state_variables_[mpm::ParticlePhase::Liquid].size();
+    // First id
+    unsigned i = state_variables_[mpm::ParticlePhase::Solid].size();
+    // Liquid state variables
     auto state_variables =
         (this->material(mpm::ParticlePhase::Liquid))->state_variables();
     for (const auto& state_var : state_variables) {
@@ -80,10 +82,7 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
   // // Liquid mass
   // this->liquid_mass_ = particle.liquid_mass;
   // // Liquid mass Density
-  // this->liquid_mass_density_ = particle.mass / particle.volume;
-
-  // // Pore pressure
-  // this->pore_pressure_ = particle.pore_pressure;
+  // this->liquid_mass_density_ = particle.liquid_mass / particle.volume;
 
   // // Liquid velocity
   // Eigen::Vector3d liquid_velocity;
