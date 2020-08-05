@@ -1200,7 +1200,8 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
         // Initialise particles pore pressures by watertable
         mesh_->iterate_over_particles(std::bind(
             &mpm::ParticleBase<Tdim>::initialise_pore_pressure_watertable,
-            std::placeholders::_1, dir_v, dir_h, reference_points));
+            std::placeholders::_1, dir_v, dir_h, this->gravity_,
+            reference_points));
       } else
         throw std::runtime_error(
             "Particle pore pressures generator type is not properly "

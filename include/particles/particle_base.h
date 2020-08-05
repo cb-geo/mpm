@@ -358,7 +358,7 @@ class ParticleBase {
 
   //! Initialise particle pore pressure by watertable
   virtual bool initialise_pore_pressure_watertable(
-      const unsigned dir_v, const unsigned dir_h,
+      const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
       std::map<double, double>& reference_points) {
     throw std::runtime_error(
         "Calling the base class function "

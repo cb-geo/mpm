@@ -644,7 +644,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_drag_force_coefficient() {
 //! Initial pore pressure
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
-    const unsigned dir_v, const unsigned dir_h,
+    const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
     std::map<double, double>& reference_points) {
   bool status = true;
   try {
@@ -684,14 +684,14 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
              h0_left - this->coordinates_(dir_v)) *
             (this->material(mpm::ParticlePhase::Liquid))
                 ->template property<double>(std::string("density")) *
-            9.81;
+            (-gravity(dir_v));
       } else
         // Particle with only left boundary
         pore_pressure =
             (h0_left - this->coordinates_(dir_v)) *
             (this->material(mpm::ParticlePhase::Liquid))
                 ->template property<double>(std::string("density")) *
-            9.81;
+            (-gravity(dir_v));
 
     }
     // Particle with only right boundary
@@ -699,10 +699,13 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
       pore_pressure = (h0_right - this->coordinates_(dir_v)) *
                       (this->material(mpm::ParticlePhase::Liquid))
                           ->template property<double>(std::string("density")) *
-                      9.81;
+                      (-gravity(dir_v));
     else
       throw std::runtime_error(
           "Particle pore pressure can not be initialised by water table");
+
+    // Check negative pore pressure
+    if (pore_pressure < 0) pore_pressure = 0;
 
     // Assign pore pressure
     this->assign_state_variable("pressure", pore_pressure,

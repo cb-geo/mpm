@@ -100,8 +100,13 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool map_drag_force_coefficient() override;
 
   //! Assign particles initial pore pressure by watertable
+  //! \param[in] dir_v Vertical direction (Gravity direction) of the watertable
+  //! \param[in] dir_h Horizontal direction of the watertable
+  //! \param[in] gravity Gravity vector
+  //! \param[in] reference_points
+  //! (Horizontal coordinate of borehole + height of 0 pore pressure)
   bool initialise_pore_pressure_watertable(
-      const unsigned dir_v, const unsigned dir_h,
+      const unsigned dir_v, const unsigned dir_h, VectorDim& gravity,
       std::map<double, double>& reference_points);
 
   //! Update porosity
