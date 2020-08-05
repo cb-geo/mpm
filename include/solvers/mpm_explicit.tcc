@@ -52,20 +52,14 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     resume = analysis_["resume"]["resume"].template get<bool>();
 
   // Pressure smoothing
-  if (analysis_.find("pressure_smoothing") != analysis_.end())
-    pressure_smoothing_ =
-        analysis_.at("pressure_smoothing").template get<bool>();
+  pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
   if (analysis_.find("interface") != analysis_.end())
     interface_ = analysis_.at("interface").template get<bool>();
 
   // Initialise material
-  bool mat_status = this->initialise_materials();
-  if (!mat_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of materials failed");
-  }
+  this->initialise_materials();
 
   // Initialise mesh
   bool mesh_status = this->initialise_mesh();

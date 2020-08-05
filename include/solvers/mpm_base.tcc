@@ -363,42 +363,33 @@ bool mpm::MPMBase<Tdim>::initialise_particles() {
 
 // Initialise materials
 template <unsigned Tdim>
-bool mpm::MPMBase<Tdim>::initialise_materials() {
-  bool status = true;
-  try {
-    // Get materials properties
-    auto materials = io_->json_object("materials");
+void mpm::MPMBase<Tdim>::initialise_materials() noexcept {
+  // Get materials properties
+  auto materials = io_->json_object("materials");
 
-    for (const auto material_props : materials) {
-      // Get material type
-      const std::string material_type =
-          material_props["type"].template get<std::string>();
+  for (const auto material_props : materials) {
+    // Get material type
+    const std::string material_type =
+        material_props["type"].template get<std::string>();
 
-      // Get material id
-      auto material_id = material_props["id"].template get<unsigned>();
+    // Get material id
+    auto material_id = material_props["id"].template get<unsigned>();
 
-      // Create a new material from JSON object
-      auto mat =
-          Factory<mpm::Material<Tdim>, unsigned, const Json&>::instance()
-              ->create(material_type, std::move(material_id), material_props);
+    // Create a new material from JSON object
+    auto mat =
+        Factory<mpm::Material<Tdim>, unsigned, const Json&>::instance()->create(
+            material_type, std::move(material_id), material_props);
 
-      // Add material to list
-      auto result = materials_.insert(std::make_pair(mat->id(), mat));
+    // Add material to list
+    auto result = materials_.insert(std::make_pair(mat->id(), mat));
 
-      // If insert material failed
-      if (!result.second) {
-        status = false;
-        throw std::runtime_error(
-            "New material cannot be added, insertion failed");
-      }
-    }
-    // Copy materials to mesh
-    mesh_->initialise_material_models(this->materials_);
-  } catch (std::exception& exception) {
-    console_->error("#{}: Reading materials: {}", __LINE__, exception.what());
-    status = false;
+    // If insert material failed
+    if (!result.second)
+      throw std::runtime_error(
+          "New material cannot be added, insertion failed");
   }
-  return status;
+  // Copy materials to mesh
+  mesh_->initialise_material_models(this->materials_);
 }
 
 //! Checkpoint resume

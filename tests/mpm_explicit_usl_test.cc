@@ -45,7 +45,7 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
@@ -53,9 +53,6 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
 
     // Initialise external loading
     REQUIRE(mpm->initialise_loads() == true);
-
-    // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
   }
 
   SECTION("Check solver") {
@@ -128,14 +125,11 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
     REQUIRE(mpm->initialise_mesh() == true);
     REQUIRE(mpm->initialise_particles() == true);
-
-    // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
   }
 
   SECTION("Check solver") {

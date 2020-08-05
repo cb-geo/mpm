@@ -53,7 +53,7 @@ class MPMBase : public MPM {
   bool initialise_particles() override;
 
   //! Initialise materials
-  bool initialise_materials() override;
+  void initialise_materials() noexcept override;
 
   //! Initialise loading
   bool initialise_loads() override;
