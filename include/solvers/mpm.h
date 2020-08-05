@@ -47,13 +47,13 @@ class MPM {
   virtual void initialise_mesh() = 0;
 
   // Initialise particles
-  virtual bool initialise_particles() = 0;
+  virtual void initialise_particles() = 0;
 
   // Initialise materials
-  virtual bool initialise_materials() = 0;
+  virtual void initialise_materials() = 0;
 
   // Initialise external loads
-  virtual bool initialise_loads() = 0;
+  virtual void initialise_loads() = 0;
 
   // Initialise math functions
   virtual bool initialise_math_functions(const Json&) = 0;

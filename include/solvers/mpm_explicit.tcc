@@ -63,20 +63,12 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Initialise mesh
   this->initialise_mesh();
-  
+
   // Initialise particles
-  bool particle_status = this->initialise_particles();
-  if (!particle_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of particles failed");
-  }
+  this->initialise_particles();
 
   // Initialise loading conditions
-  bool loading_status = this->initialise_loads();
-  if (!loading_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of loading failed");
-  }
+  this->initialise_loads();
 
   // Create nodal properties
   if (interface_) mesh_->create_nodal_properties();

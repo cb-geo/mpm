@@ -50,13 +50,13 @@ class MPMBase : public MPM {
   void initialise_mesh() override;
 
   //! Initialise particles
-  bool initialise_particles() override;
+  void initialise_particles() override;
 
   //! Initialise materials
-  bool initialise_materials() override;
+  void initialise_materials() override;
 
   //! Initialise loading
-  bool initialise_loads() override;
+  void initialise_loads() override;
 
   //! Initialise math functions
   bool initialise_math_functions(const Json&) override;

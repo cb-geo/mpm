@@ -49,10 +49,13 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked",
 
     // Initialise mesh and particles
     REQUIRE_NOTHROW(mpm->initialise_mesh());
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Initialise external loading
-    REQUIRE(mpm->initialise_loads() == true);
+    REQUIRE_NOTHROW(mpm->initialise_loads());
+
+    // Renitialise materials
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
@@ -129,7 +132,7 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked",
 
     // Initialise mesh and particles
     REQUIRE_NOTHROW(mpm->initialise_mesh());
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_particles());
   }
 
   SECTION("Check solver") {

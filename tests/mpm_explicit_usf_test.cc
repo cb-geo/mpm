@@ -45,17 +45,17 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
     // Initialise mesh
     REQUIRE_NOTHROW(mpm->initialise_mesh());
     // Initialise particles
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Initialise external loading
-    REQUIRE(mpm->initialise_loads() == true);
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
@@ -137,14 +137,14 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
     // Initialise mesh
     REQUIRE_NOTHROW(mpm->initialise_mesh());
     // Initialise particles
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
