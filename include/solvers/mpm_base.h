@@ -24,6 +24,13 @@
 
 namespace mpm {
 
+//! Variable type
+//! Scalar: boolean, unsigned, int, double
+//! Vector: Vector of size 3
+//! Tensor: Symmetric tensor arranged in voigt notation
+enum class VariableType { Scalar, Vector, Tensor };
+extern std::map<std::string, VariableType> variables;
+
 //! Stress update method
 //! USF: Update Stress First
 //! USL: Update Stress Last
