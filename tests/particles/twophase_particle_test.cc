@@ -599,6 +599,62 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
   }
 
+  // !Test initialise particle pore pressure
+  SECTION("TwoPhase Particle with initial pore pressure") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    coords << 0.1, 0.2;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords, status);
+    // Assign liquid material
+    unsigned liquid_mid = 0;
+    // Initialise material
+    Json jmaterial_liquid;
+    jmaterial_liquid["density"] = 1000.;
+    jmaterial_liquid["bulk_modulus"] = 1.0E+9;
+    jmaterial_liquid["mu"] = 0.3;
+    jmaterial_liquid["dynamic_viscosity"] = 0.;
+
+    auto liquid_material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Newtonian2D", std::move(liquid_mid), jmaterial_liquid);
+
+    REQUIRE(particle->assign_material(liquid_material,
+                                      mpm::ParticlePhase::Liquid) == true);
+
+    Eigen::Matrix<double, Dim, 1> gravity;
+    gravity << 0., -9.81;
+    // Test only lefe boundary
+    std::map<double, double> reference_points;
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(0.), static_cast<double>(0.5)));
+    //! Test initialise pore pressure by water table
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(2943).epsilon(Tolerance));
+
+    // Test only right boundary
+    reference_points.erase(0.);
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(1.), static_cast<double>(0.7)));
+    //! Test initialise pore pressure by water table
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(4905).epsilon(Tolerance));
+
+    // Test both left and right boundaries
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(0.), static_cast<double>(0.5)));
+    //! Test initialise pore pressure by water table
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(3139.2).epsilon(Tolerance));
+  }
+
   //! Test particles velocity constraints
   SECTION("TwoPhase Particle with velocity constraints") {
     mpm::Index id = 0;
@@ -1863,7 +1919,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     REQUIRE(cell->nparticles() == 0);
   }
 
-  //! Test initialise twophase particle stresses
+  //! Test initialise particle stresses
   SECTION("TwoPhase Particle with initial stress") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
@@ -1878,6 +1934,77 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
+  // !Test initialise particle pore pressure
+  SECTION("TwoPhase Particle with initial pore pressure") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    coords << 0.1, 0.2, 0.3;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords, status);
+    // Assign liquid material
+    unsigned liquid_mid = 0;
+    // Initialise material
+    Json jmaterial_liquid;
+    jmaterial_liquid["density"] = 1000.;
+    jmaterial_liquid["bulk_modulus"] = 1.0E+9;
+    jmaterial_liquid["mu"] = 0.3;
+    jmaterial_liquid["dynamic_viscosity"] = 0.;
+
+    auto liquid_material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "Newtonian3D", std::move(liquid_mid), jmaterial_liquid);
+
+    REQUIRE(particle->assign_material(liquid_material,
+                                      mpm::ParticlePhase::Liquid) == true);
+
+    Eigen::Matrix<double, Dim, 1> gravity;
+    gravity << 0., -9.81, 0;
+    // Test only lefe boundary
+    std::map<double, double> reference_points;
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(0.), static_cast<double>(0.5)));
+    //! Test initialise pore pressure by water table with x-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(2943).epsilon(Tolerance));
+    //! Test initialise pore pressure by water table with z-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 2, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(2943).epsilon(Tolerance));
+
+    // Test only right boundary
+    reference_points.erase(0.);
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(1.), static_cast<double>(0.7)));
+    //! Test initialise pore pressure by water table x-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(4905).epsilon(Tolerance));
+    //! Test initialise pore pressure by water table with z-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 2, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(4905).epsilon(Tolerance));
+
+    // Test both left and right boundaries
+    reference_points.insert(std::make_pair<double, double>(
+        static_cast<double>(0.), static_cast<double>(0.5)));
+    //! Test initialise pore pressure by water table x-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 0, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(3139.2).epsilon(Tolerance));
+    //! Test initialise pore pressure by water table with z-interpolation
+    REQUIRE(particle->initialise_pore_pressure_watertable(1, 2, gravity,
+                                                          reference_points));
+    REQUIRE(particle->pressure(mpm::ParticlePhase::Liquid) ==
+            Approx(3531.6).epsilon(Tolerance));
   }
 
   //! Test twophase particles velocity constraints
