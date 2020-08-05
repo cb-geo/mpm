@@ -195,7 +195,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     }
 
     // Check for incorrect direction
-    const unsigned wrong_dir = 4;
+    const unsigned wrong_dir = 2;
     REQUIRE(particle->assign_traction(wrong_dir, traction) == false);
 
     // Check again to ensure value hasn't been updated
@@ -2703,7 +2703,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     }
 
     // Check for incorrect direction
-    const unsigned wrong_dir = 4;
+    const unsigned wrong_dir = 6;
     REQUIRE(particle->assign_traction(wrong_dir, traction) == false);
 
     // Check again to ensure value hasn't been updated

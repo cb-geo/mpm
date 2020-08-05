@@ -111,7 +111,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Update porosity
   //! \param[in] dt Analysis time step
-  bool update_porosity(double dt) override;
+  void update_porosity(double dt) override;
 
   //! Assign particle permeability
   //! \retval status Assignment status
@@ -129,6 +129,12 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] velocity Applied particle velocity constraint
   void apply_particle_velocity_constraints(unsigned dir,
                                            double velocity) override;
+
+  //! Assign traction to the particle
+  //! \param[in] direction Index corresponding to the direction of traction
+  //! \param[in] traction Particle traction in specified direction
+  //! \retval status Assignment status
+  bool assign_traction(unsigned direction, double traction) override;
 
   //! Return velocity of the particle liquid phase
   //! \retval liquid velocity Liquid phase velocity
@@ -208,6 +214,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::set_traction_;
   //! Surface Traction (given as a stress; force/area)
   using Particle<Tdim>::traction_;
+  //! Size of particle
+  using Particle<Tdim>::size_;
   //! Particle velocity constraints
   using Particle<Tdim>::particle_velocity_constraints_;
 
@@ -219,6 +227,10 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   double liquid_saturation_{1.0};
   //! Material point porosity (volume of voids / total volume)
   double porosity_{0.0};
+  //! Set liquid traction
+  bool set_liquid_traction_{false};
+  //! Liquid traction
+  Eigen::Matrix<double, Tdim, 1> liquid_traction_;
   //! Liquid velocity
   Eigen::Matrix<double, Tdim, 1> liquid_velocity_;
   //! Pore pressure constraint

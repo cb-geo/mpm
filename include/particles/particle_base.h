@@ -315,11 +315,10 @@ class ParticleBase {
   //! TwoPhase functions--------------------------------------------------------
   //! Update porosity
   //! \param[in] dt Analysis time step
-  virtual bool update_porosity(double dt) {
+  virtual void update_porosity(double dt) {
     throw std::runtime_error(
         "Calling the base class function (update_porosity) in "
         "ParticleBase:: illegal operation!");
-    return false;
   };
 
   //! Assign saturation degree

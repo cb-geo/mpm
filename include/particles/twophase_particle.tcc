@@ -115,6 +115,8 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   mpm::Particle<Tdim>::initialise();
   liquid_mass_ = 0.;
   liquid_velocity_.setZero();
+  set_liquid_traction_ = false;
+  liquid_traction_.setZero();
   liquid_saturation_ = 1.;
 
   // Initialize vector data properties
@@ -263,30 +265,26 @@ void mpm::TwoPhaseParticle<Tdim>::map_mixture_body_force(
 //! Map traction force
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_traction_force() noexcept {
-  this->map_mixture_traction_force();
-  this->map_liquid_traction_force();
+  if (this->set_traction_) this->map_mixture_traction_force();
+  if (this->set_liquid_traction_) this->map_liquid_traction_force();
 }
 
 //! Map mixture traction force
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_mixture_traction_force() noexcept {
-  if (this->set_traction_) {
-    // Map particle traction forces to nodes
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-      nodes_[i]->update_external_force(true, mpm::ParticlePhase::Mixture,
-                                       (shapefn_[i] * traction_));
-  }
+  // Map particle traction forces to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Mixture,
+                                     (shapefn_[i] * traction_));
 }
 
 //! Map liquid traction force
 template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::map_liquid_traction_force() noexcept {
-  // if (this->set_traction_) {
-  //   // Map particle traction forces to nodes
-  //   for (unsigned i = 0; i < nodes_.size(); ++i)
-  //     nodes_[i]->update_external_force(true, mpm::ParticlePhase::Mixture,
-  //                                      (shapefn_[i] * traction_));
-  // }
+  // Map particle liquid traction forces to nodes
+  for (unsigned i = 0; i < nodes_.size(); ++i)
+    nodes_[i]->update_external_force(true, mpm::ParticlePhase::Liquid,
+                                     (shapefn_[i] * liquid_traction_));
 }
 
 //! Map both mixture and liquid internal force
@@ -714,19 +712,42 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
 
 // Update material point porosity
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::update_porosity(double dt) {
-  bool status = true;
-  try {
-    // Update particle porosity
-    const double porosity =
-        1 - (1 - this->porosity_) / (1 + dt * strain_rate_.head(Tdim).sum());
-    // Check if the value is valid
-    if (porosity > 0 && porosity < 1) this->porosity_ = porosity;
-    // Invalid value
-    else
-      throw std::runtime_error(
-          "Invalid porosity, less than zero or greater than one");
+void mpm::TwoPhaseParticle<Tdim>::update_porosity(double dt) {
+  // Update particle porosity
+  const double porosity =
+      1 - (1 - this->porosity_) / (1 + dt * strain_rate_.head(Tdim).sum());
+  // Check if the value is valid
+  if (porosity < 0.)
+    this->porosity_ = 1.E-5;
+  else if (porosity > 1.)
+    this->porosity_ = 1 - 1.E-5;
+  else
+    this->porosity_ = porosity;
+}
 
+// Assign traction to the particle
+template <unsigned Tdim>
+bool mpm::TwoPhaseParticle<Tdim>::assign_traction(unsigned direction,
+                                                  double traction) {
+  bool status = false;
+  try {
+    if (direction >= Tdim * 2 ||
+        this->volume_ == std::numeric_limits<double>::max()) {
+      throw std::runtime_error(
+          "Particle traction property: volume / direction is invalid");
+    }
+    // Assign mixture traction
+    if (direction < Tdim) {
+      this->set_traction_ = true;
+      traction_(direction) = traction * this->volume_ / this->size_(direction);
+    }
+    // Assign liquid traction
+    else {
+      this->set_liquid_traction_ = true;
+      liquid_traction_(direction - Tdim) =
+          traction * this->volume_ / this->size_(direction - Tdim);
+    }
+    status = true;
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
     status = false;
