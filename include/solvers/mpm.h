@@ -50,7 +50,7 @@ class MPM {
   virtual bool initialise_particles() = 0;
 
   // Initialise materials
-  virtual void initialise_materials() noexcept = 0;
+  virtual bool initialise_materials() = 0;
 
   // Initialise external loads
   virtual bool initialise_loads() = 0;
