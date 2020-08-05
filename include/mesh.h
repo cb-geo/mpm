@@ -266,7 +266,8 @@ class Mesh {
 
   //! Return particles scalar data
   //! \param[in] attribute Name of the scalar data attribute
-  std::vector<double> particles_statevars_data(const std::string& attribute);
+  std::vector<double> particles_statevars_data(
+      const std::string& attribute, unsigned phase = mpm::ParticlePhase::Solid);
 
   //! Compute and assign rotation matrix to nodes
   //! \param[in] euler_angles Map of node number and respective euler_angles
