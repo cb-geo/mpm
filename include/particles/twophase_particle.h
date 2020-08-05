@@ -121,8 +121,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   bool assign_porosity() override;
 
   //! Map particle pressure to nodes
-  bool map_pressure_to_nodes(unsigned phase = mpm::ParticlePhase::Solid,
-                             double dt = 0, Index step = 0) noexcept override;
+  bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint

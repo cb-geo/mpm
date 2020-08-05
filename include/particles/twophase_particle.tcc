@@ -447,16 +447,15 @@ void mpm::TwoPhaseParticle<Tdim>::compute_updated_position(
 
 //! Map particle pressure to nodes
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(unsigned phase,
-                                                        double dt,
-                                                        Index step) noexcept {
+bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(
+    unsigned phase) noexcept {
   // Mass is initialized
   assert(liquid_mass_ != std::numeric_limits<double>::max());
 
   bool status = false;
   // If phase is Solid, use the default map_pressure_to_nodes
   if (phase == mpm::ParticlePhase::Solid)
-    status = mpm::Particle<Tdim>::map_pressure_to_nodes(phase, dt, step);
+    status = mpm::Particle<Tdim>::map_pressure_to_nodes(phase);
   else {
     // Check if particle liquid mass is set and state variable pressure is found
     if (liquid_mass_ != std::numeric_limits<double>::max() &&
@@ -466,8 +465,7 @@ bool mpm::TwoPhaseParticle<Tdim>::map_pressure_to_nodes(unsigned phase,
       for (unsigned i = 0; i < nodes_.size(); ++i)
         nodes_[i]->update_mass_pressure(
             phase,
-            shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"],
-            dt, step);
+            shapefn_[i] * liquid_mass_ * state_variables_[phase]["pressure"]);
 
       status = true;
     }

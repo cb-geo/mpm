@@ -1333,7 +1333,13 @@ void mpm::MPMBase<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
-                std::placeholders::_1, phase, this->dt_, this->step_));
+                std::placeholders::_1, phase));
+
+  // Apply pressure constraint
+  mesh_->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::apply_pressure_constraint,
+                std::placeholders::_1, phase, this->dt_, this->step_),
+      std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
 #ifdef USE_MPI
   int mpi_size = 1;

@@ -162,7 +162,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_momentum(
 //! Update pressure at the nodes from particle
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
-    unsigned phase, double mass_pressure, double dt, Index step) noexcept {
+    unsigned phase, double mass_pressure) noexcept {
   // Assert
   assert(phase < Tnphases);
 
@@ -172,14 +172,22 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
     node_mutex_.lock();
     pressure_(phase) += mass_pressure / mass_(phase);
     node_mutex_.unlock();
+  }
+}
 
-    if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
-      const double scalar =
-          (pressure_function_.find(phase) != pressure_function_.end())
-              ? pressure_function_[phase]->value(step * dt)
-              : 1.0;
-      this->pressure_(phase) = scalar * pressure_constraints_[phase];
-    }
+//! Apply pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::apply_pressure_constraint(
+    unsigned phase, double dt, Index step) noexcept {
+  // Assert
+  assert(phase < Tnphases);
+
+  if (pressure_constraints_.find(phase) != pressure_constraints_.end()) {
+    const double scalar =
+        (pressure_function_.find(phase) != pressure_function_.end())
+            ? pressure_function_[phase]->value(step * dt)
+            : 1.0;
+    this->pressure_(phase) = scalar * pressure_constraints_[phase];
   }
 }
 
@@ -584,8 +592,8 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_property(
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_change_in_momentum() {
-  // iterate over all materials in the material_ids set and update the change in
-  // momentum
+  // iterate over all materials in the material_ids set and update the change
+  // in momentum
   node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const Eigen::Matrix<double, 1, 1> mass =
@@ -605,8 +613,8 @@ template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof,
                Tnphases>::compute_multimaterial_separation_vector() {
   // iterate over all materials in the material_ids set, update the
-  // displacements and calculate the displacement of the center of mass for this
-  // node
+  // displacements and calculate the displacement of the center of mass for
+  // this node
   node_mutex_.lock();
   for (auto mitr = material_ids_.begin(); mitr != material_ids_.end(); ++mitr) {
     const auto& material_displacement =
@@ -616,8 +624,8 @@ void mpm::Node<Tdim, Tdof,
 
     // displacement of the center of mass
     contact_displacement_ += material_displacement / mass_(0, 0);
-    // assign nodal-multimaterial displacement by dividing it by this material's
-    // mass
+    // assign nodal-multimaterial displacement by dividing it by this
+    // material's mass
     property_handle_->assign_property(
         "displacements", prop_id_, *mitr,
         material_displacement / material_mass(0, 0), Tdim);

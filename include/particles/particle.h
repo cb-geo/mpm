@@ -263,8 +263,8 @@ class Particle : public ParticleBase<Tdim> {
   }
 
   //! Map particle pressure to nodes
-  bool map_pressure_to_nodes(unsigned phase = mpm::ParticlePhase::Solid,
-                             double dt = 0, Index step = 0) noexcept override;
+  bool map_pressure_to_nodes(
+      unsigned phase = mpm::ParticlePhase::Solid) noexcept override;
 
   //! Compute pressure smoothing of the particle based on nodal pressure
   //! $$\hat{p}_p = \sum_{i = 1}^{n_n} N_i(x_p) p_i$$

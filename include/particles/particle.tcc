@@ -815,8 +815,7 @@ void mpm::Particle<Tdim>::compute_updated_position(
 
 //! Map particle pressure to nodes
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase, double dt,
-                                                Index step) noexcept {
+bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
   // Mass is initialized
   assert(mass_ != std::numeric_limits<double>::max());
 
@@ -828,8 +827,7 @@ bool mpm::Particle<Tdim>::map_pressure_to_nodes(unsigned phase, double dt,
     // Map particle pressure to nodes
     for (unsigned i = 0; i < nodes_.size(); ++i)
       nodes_[i]->update_mass_pressure(
-          phase, shapefn_[i] * mass_ * state_variables_[phase]["pressure"], dt,
-          step);
+          phase, shapefn_[i] * mass_ * state_variables_[phase]["pressure"]);
 
     status = true;
   }

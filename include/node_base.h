@@ -148,8 +148,15 @@ class NodeBase {
   //! Update pressure at the nodes from particle
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] mass_pressure Product of mass x pressure of a particle
-  virtual void update_mass_pressure(unsigned phase, double mass_pressure,
-                                    double dt = 0, Index step = 0) noexcept = 0;
+  virtual void update_mass_pressure(unsigned phase,
+                                    double mass_pressure) noexcept = 0;
+
+  //! Apply pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] dt Timestep in analysis
+  //! \param[in] step Step in analysis
+  virtual void apply_pressure_constraint(unsigned phase, double dt = 0,
+                                         Index step = 0) noexcept = 0;
 
   //! Assign pressure at the nodes from particle
   //! \param[in] update A boolean to update (true) or assign (false)
