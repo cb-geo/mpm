@@ -335,7 +335,7 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
   }
   auto solver_end = std::chrono::steady_clock::now();
   console_->info(
-      "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+      "Rank {}, XMPMExplicit {} solver duration: {} ms", mpi_rank,
       (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
       std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
                                                             solver_begin)
