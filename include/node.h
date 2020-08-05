@@ -365,5 +365,6 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
+#include "node_xmpm.tcc"
 
 #endif  // MPM_NODE_H_
