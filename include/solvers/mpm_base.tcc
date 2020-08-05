@@ -1193,7 +1193,7 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
           double position = water_table.at("position").template get<double>();
           // Direction
           double h0 = water_table.at("h0").template get<double>();
-          // Add refernece points to mesh
+          // Add reference points to mesh
           reference_points.insert(std::make_pair<double, double>(
               static_cast<double>(position), static_cast<double>(h0)));
         }

@@ -119,11 +119,6 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
 
   // Initialize vector data properties
   this->properties_["liquid_velocities"] = [&]() { return liquid_velocity(); };
-  this->properties_["pore_pressure"] = [&]() {
-    Eigen::VectorXd vec_pressure = Eigen::VectorXd::Zero(3);
-    vec_pressure[0] = this->pressure(mpm::ParticlePhase::Liquid);
-    return vec_pressure;
-  };
 }
 
 // Assign degree of saturation to the liquid phase
@@ -657,18 +652,18 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_pore_pressure_watertable(
     // Position and h0 of particle (coordinate)
     const double position = this->coordinates_(dir_h);
     // Iterate over each reference_points
-    for (const auto& refernece_point : reference_points) {
+    for (const auto& reference_point : reference_points) {
       // Find boundary
-      if (refernece_point.first > left_boundary &&
-          refernece_point.first <= position) {
+      if (reference_point.first > left_boundary &&
+          reference_point.first <= position) {
         // Left boundary position and h0
-        left_boundary = refernece_point.first;
-        h0_left = refernece_point.second;
-      } else if (refernece_point.first > position &&
-                 refernece_point.first <= right_boundary) {
+        left_boundary = reference_point.first;
+        h0_left = reference_point.second;
+      } else if (reference_point.first > position &&
+                 reference_point.first <= right_boundary) {
         // Right boundary position and h0
-        right_boundary = refernece_point.first;
-        h0_right = refernece_point.second;
+        right_boundary = reference_point.first;
+        h0_right = reference_point.second;
       }
     }
 
