@@ -47,6 +47,12 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
+  //! Stress update
+  using mpm::MPMBase<Tdim>::stress_update_;
+  //! Stress update scheme
+  using mpm::MPMBase<Tdim>::stress_update_scheme_;
+  //! Interface scheme
+  using mpm::MPMBase<Tdim>::interface_scheme_;
 
 #ifdef USE_GRAPH_PARTITIONING
   //! Graph

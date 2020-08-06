@@ -18,18 +18,16 @@
 #endif
 
 #include "constraints.h"
+#include "contact_interface.h"
+#include "interface.h"
 #include "mpm.h"
 #include "particle.h"
+#include "stress_update.h"
+#include "stress_update_usf.h"
+#include "stress_update_usl.h"
 #include "vector.h"
 
 namespace mpm {
-
-//! Stress update method
-//! USF: Update Stress First
-//! USL: Update Stress Last
-//! MUSL: Modified Stress Last
-enum class StressUpdate { USF, USL, MUSL };
-extern std::map<std::string, StressUpdate> stress_update;
 
 //! Damping type
 //! None: No damping is specified
@@ -178,8 +176,12 @@ class MPMBase : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
-  //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
-  mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
+  //! Stress update method
+  std::string stress_update_;
+  //! Stress update scheme
+  std::shared_ptr<mpm::StressUpdate<Tdim>> stress_update_scheme_{nullptr};
+  //! Interface scheme
+  std::shared_ptr<mpm::Interface<Tdim>> interface_scheme_{nullptr};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
