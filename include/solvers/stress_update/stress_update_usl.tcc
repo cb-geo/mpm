@@ -9,18 +9,18 @@ mpm::StressUpdateUSL<Tdim>::StressUpdateUSL(
 
 //! Precompute stresses and strains
 template <unsigned Tdim>
-void mpm::StressUpdateUSL<Tdim>::precompute_stress_strain(
+inline void mpm::StressUpdateUSL<Tdim>::precompute_stress_strain(
     unsigned phase, bool pressure_smoothing) {}
 
 //! Postcompute stresses and strains
 template <unsigned Tdim>
-void mpm::StressUpdateUSL<Tdim>::postcompute_stress_strain(
+inline void mpm::StressUpdateUSL<Tdim>::postcompute_stress_strain(
     unsigned phase, bool pressure_smoothing) {
   mpm::StressUpdate<Tdim>::compute_stress_strain(phase, pressure_smoothing);
 }
 
 //! Stress update scheme
 template <unsigned Tdim>
-std::string mpm::StressUpdateUSL<Tdim>::scheme() const {
+inline std::string mpm::StressUpdateUSL<Tdim>::scheme() const {
   return "USL";
 }

@@ -21,17 +21,17 @@ class StressUpdateUSL : public StressUpdate<Tdim> {
   //! Precompute stress
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
-  virtual void precompute_stress_strain(unsigned phase,
-                                        bool pressure_smoothing) override;
+  virtual inline void precompute_stress_strain(
+      unsigned phase, bool pressure_smoothing) override;
   //! Postcompute stress
   //! \param[in] phase Phase to smooth postssure
   //! \param[in] postssure_smoothing Enable or disable postssure smoothing
-  virtual void postcompute_stress_strain(unsigned phase,
-                                         bool pressure_smoothing) override;
+  virtual inline void postcompute_stress_strain(
+      unsigned phase, bool pressure_smoothing) override;
 
   //! Stress update scheme
   //! \retval scheme Stress update scheme
-  virtual std::string scheme() const override;
+  virtual inline std::string scheme() const override;
 
  protected:
   //! Mesh object

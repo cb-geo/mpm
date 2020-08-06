@@ -16,7 +16,7 @@ mpm::StressUpdate<Tdim>::StressUpdate(
 
 //! Initialize nodes, cells and shape functions
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::initialise() {
+inline void mpm::StressUpdate<Tdim>::initialise() {
 #pragma omp parallel sections
   {
     // Spawn a task for initialising nodes and cells
@@ -41,7 +41,7 @@ void mpm::StressUpdate<Tdim>::initialise() {
 
 //! Map mass and momentum to nodes
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::momentum_nodes(unsigned phase) {
+inline void mpm::StressUpdate<Tdim>::momentum_nodes(unsigned phase) {
   // Assign mass and momentum to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
@@ -71,8 +71,8 @@ void mpm::StressUpdate<Tdim>::momentum_nodes(unsigned phase) {
 
 //! Initialize nodes, cells and shape functions
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::compute_stress_strain(unsigned phase,
-                                                    bool pressure_smoothing) {
+inline void mpm::StressUpdate<Tdim>::compute_stress_strain(
+    unsigned phase, bool pressure_smoothing) {
 
   // Iterate over each particle to calculate strain
   mesh_->iterate_over_particles(std::bind(
@@ -92,7 +92,7 @@ void mpm::StressUpdate<Tdim>::compute_stress_strain(unsigned phase,
 
 //! Pressure smoothing
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::pressure_smoothing(unsigned phase) {
+inline void mpm::StressUpdate<Tdim>::pressure_smoothing(unsigned phase) {
   // Assign pressure to nodes
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::map_pressure_to_nodes,
@@ -116,7 +116,7 @@ void mpm::StressUpdate<Tdim>::pressure_smoothing(unsigned phase) {
 
 // Compute forces
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::compute_forces(
+inline void mpm::StressUpdate<Tdim>::compute_forces(
     const Eigen::Matrix<double, Tdim, 1>& gravity, unsigned phase,
     unsigned step, bool concentrated_nodal_forces) {
   // Spawn a task for external force
@@ -170,7 +170,7 @@ void mpm::StressUpdate<Tdim>::compute_forces(
 
 // Compute particle kinematics
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::compute_particle_kinematics(
+inline void mpm::StressUpdate<Tdim>::compute_particle_kinematics(
     bool velocity_update, unsigned phase, const std::string& damping_type,
     double damping_factor) {
 
@@ -198,7 +198,7 @@ void mpm::StressUpdate<Tdim>::compute_particle_kinematics(
 
 // Locate particles
 template <unsigned Tdim>
-void mpm::StressUpdate<Tdim>::locate_particles(bool locate_particles) {
+inline void mpm::StressUpdate<Tdim>::locate_particles(bool locate_particles) {
 
   auto unlocatable_particles = mesh_->locate_particles_mesh();
 
