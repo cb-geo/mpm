@@ -1101,7 +1101,7 @@ std::vector<Eigen::Matrix<double, Tsize, 1>>
   return tensor_data;
 }
 
-//! Return particle scalar data
+//! Return particle state variable data
 template <unsigned Tdim>
 std::vector<double> mpm::Mesh<Tdim>::particles_statevars_data(
     const std::string& attribute, unsigned phase) {
