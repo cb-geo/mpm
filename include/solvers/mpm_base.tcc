@@ -93,40 +93,31 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   }
 
   // VTK state variables
-  try {
-    if (post_process_.at("vtk_statevars").is_array() &&
-        post_process_.at("vtk_statevars").size() > 0) {
-      // Iterate over state_vars
-      for (const auto& svars : post_process_["vtk_statevars"]) {
-        // Phase id
-        unsigned phase_id = 0;
-        if (svars.contains("phase_id"))
-          phase_id = svars.at("phase_id").template get<unsigned>();
+  if (post_process_.at("vtk_statevars").is_array() &&
+      post_process_.at("vtk_statevars").size() > 0) {
+    // Iterate over state_vars
+    for (const auto& svars : post_process_["vtk_statevars"]) {
+      // Phase id
+      unsigned phase_id = 0;
+      if (svars.contains("phase_id"))
+        phase_id = svars.at("phase_id").template get<unsigned>();
 
-        // State variables
-        std::vector<std::string> state_var;
-        if (svars.at("statevars").is_array() &&
-            svars.at("statevars").size() > 0) {
-          for (unsigned i = 0; i < svars.at("statevars").size(); ++i) {
-            std::string attribute =
-                svars["statevars"][i].template get<std::string>();
-            state_var.emplace_back(attribute);
-          }
-        } else {
-          throw std::runtime_error(
-              "No VTK statevariable were specified, none will be generated");
-        }
-
+      // State variables
+      if (svars.at("statevars").is_array() &&
+          svars.at("statevars").size() > 0) {
         // Insert vtk_statevars_
+        const std::vector<std::string> state_var = svars["statevars"];
         vtk_statevars_.insert(std::make_pair(phase_id, state_var));
-      }
-    } else {
-      throw std::runtime_error(
-          "No VTK statevariable were specified, none will be generated");
+      } else
+        console_->warn(
+            "{} #{}: No VTK statevariable were specified, none will be "
+            "generated",
+            __FILE__, __LINE__);
     }
-  } catch (std::exception& exception) {
-    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
-  }
+  } else
+    console_->warn(
+        "{} #{}: No VTK statevariable were specified, none will be generated",
+        __FILE__, __LINE__);
 }
 
 // Initialise mesh
