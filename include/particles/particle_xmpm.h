@@ -306,10 +306,13 @@ class ParticleXMPM : public ParticleBase<Tdim> {
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
   //! set the level set function values
-  void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue;};
+  void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue; };
 
-    //! return 1 if x > 0, -1 if x < 0 and 0 if x = 0 
-  inline double sgn(double x) noexcept {return (x > 0) ? 1. : ((x < 0) ? -1. : 0);};
+  //! return 1 if x > 0, -1 if x < 0 and 0 if x = 0
+  inline double sgn(double x) noexcept {
+    return (x > 0) ? 1. : ((x < 0) ? -1. : 0);
+  };
+
  private:
   //! particle id
   using ParticleBase<Tdim>::id_;
@@ -375,7 +378,7 @@ class ParticleXMPM : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
-  //!level set values for discontinuity
+  //! level set values for discontinuity
   double levelset_phi_{0.};
 };  // ParticleXMPM class
 }  // namespace mpm
