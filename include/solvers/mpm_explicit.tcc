@@ -135,7 +135,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Particle kinematics
     stress_update_scheme_->compute_particle_kinematics(
-        dt_, velocity_update_, "Cundall", damping_factor_);
+        velocity_update_, phase, "Cundall", damping_factor_);
 
     // Update Stress Last
     stress_update_scheme_->postcompute_stress_strain(phase,
