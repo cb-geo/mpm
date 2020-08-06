@@ -76,3 +76,4 @@ configure.scan
 *missing
 *stamp-h1
 benchmarks/
+bin/

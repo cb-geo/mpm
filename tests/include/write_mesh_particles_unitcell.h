@@ -9,6 +9,11 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
                          const std::string& stress_update,
                          const std::string& file_name);
 
+// Write JSON Configuration file for two-phase
+bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
+                                  const std::string& stress_update,
+                                  const std::string& file_name);
+
 // Write Mesh file in 2D
 bool write_mesh_2d_unitcell();
 // Write particles file in 2D

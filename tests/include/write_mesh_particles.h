@@ -8,6 +8,11 @@ namespace mpm_test {
 bool write_json(unsigned dim, bool resume, const std::string& analysis,
                 const std::string& stress_update, const std::string& file_name);
 
+// Write JSON Configuration file for twophase
+bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
+                         const std::string& stress_update,
+                         const std::string& file_name);
+
 // Write JSON Entity Set
 bool write_entity_set();
 
