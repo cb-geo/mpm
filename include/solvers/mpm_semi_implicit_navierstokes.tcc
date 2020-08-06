@@ -132,24 +132,6 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
         std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
                   std::placeholders::_1));
 
-    // FIXME: Find a way to deal with parallel free surface detection
-    // Compute free surface cells, nodes, and particles
-    // mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
-
-    // Spawn a task for initializing pressure at free surface
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-        // Assign initial pressure for all free-surface particle
-        mesh_->iterate_over_particles_predicate(
-            std::bind(&mpm::ParticleBase<Tdim>::assign_pressure,
-                      std::placeholders::_1, 0.0, fluid),
-            std::bind(&mpm::ParticleBase<Tdim>::free_surface,
-                      std::placeholders::_1));
-      }
-    }  // Wait to complete
-
 #ifdef USE_MPI
     // Run if there is more than a single MPI task
     if (mpi_size > 1) {
@@ -165,15 +147,25 @@ bool mpm::MPMSemiImplicitNavierStokes<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
                     std::placeholders::_1, false, fluid,
                     std::placeholders::_2));
-      // // FIXME: Check if nodal free-surface condition needs all reduce
-      // // MPI all reduce nodal momentum
-      // mesh_->template nodal_halo_exchange<bool, Tdim>(
-      //     std::bind(&mpm::NodeBase<Tdim>::free_surface,
-      //     std::placeholders::_1),
-      //     std::bind(&mpm::NodeBase<Tdim>::assign_free_surface,
-      //               std::placeholders::_1, std::placeholders::_2));
     }
 #endif
+
+    // Compute free surface cells, nodes, and particles
+    mesh_->compute_free_surface(free_surface_detection_, volume_tolerance_);
+
+    // Spawn a task for initializing pressure at free surface
+#pragma omp parallel sections
+    {
+#pragma omp section
+      {
+        // Assign initial pressure for all free-surface particle
+        mesh_->iterate_over_particles_predicate(
+            std::bind(&mpm::ParticleBase<Tdim>::assign_pressure,
+                      std::placeholders::_1, 0.0, fluid),
+            std::bind(&mpm::ParticleBase<Tdim>::free_surface,
+                      std::placeholders::_1));
+      }
+    }  // Wait to complete
 
     // Compute nodal velocity at the begining of time step
     mesh_->iterate_over_nodes_predicate(

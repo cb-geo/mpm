@@ -384,7 +384,7 @@ class Node : public NodeBase<Tdim> {
   unsigned dof_{std::numeric_limits<unsigned>::max()};
   //! Status
   bool status_{false};
-  //! Solving tatus
+  //! Solving status
   bool solving_status_{false};
   //! Mass
   Eigen::Matrix<double, 1, Tnphases> mass_;
