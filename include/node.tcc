@@ -175,6 +175,33 @@ void mpm::Node<Tdim, Tdof, Tnphases>::update_mass_pressure(
   }
 }
 
+//! Assign pressure constraint
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+bool mpm::Node<Tdim, Tdof, Tnphases>::assign_pressure_constraint(
+    const unsigned phase, const double pressure,
+    const std::shared_ptr<FunctionBase>& function) {
+  bool status = true;
+  try {
+    // Constrain directions can take values between 0 and Tnphases
+    if (phase < Tnphases * 2) {
+      this->pressure_constraints_.insert(std::make_pair<unsigned, double>(
+          static_cast<unsigned>(phase), static_cast<double>(pressure)));
+      // Assign pressure function
+      if (function != nullptr)
+        this->pressure_function_.insert(
+            std::make_pair<unsigned, std::shared_ptr<FunctionBase>>(
+                static_cast<unsigned>(phase),
+                static_cast<std::shared_ptr<FunctionBase>>(function)));
+    } else
+      throw std::runtime_error("Pressure constraint phase is out of bounds");
+
+  } catch (std::exception& exception) {
+    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
+    status = false;
+  }
+  return status;
+}
+
 //! Apply pressure constraint
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
 void mpm::Node<Tdim, Tdof, Tnphases>::apply_pressure_constraint(

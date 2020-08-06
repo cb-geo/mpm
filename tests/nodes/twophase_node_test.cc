@@ -210,6 +210,24 @@ TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2P]") {
               Approx(1000.0).epsilon(Tolerance));
       REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
               Approx(2000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+                                                 nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nLiquid, 7000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nLiquid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+                Approx(8000).epsilon(Tolerance));
+        REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
+                Approx(7000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check external force") {
@@ -933,6 +951,24 @@ TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2P]") {
               Approx(1000.0).epsilon(Tolerance));
       REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
               Approx(2000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+                                                 nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nLiquid, 7000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nLiquid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+                Approx(8000).epsilon(Tolerance));
+        REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
+                Approx(7000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check volume") {
@@ -1828,6 +1864,24 @@ TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
               Approx(1000.0).epsilon(Tolerance));
       REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
               Approx(2000.0).epsilon(Tolerance));
+      // Check pressure constraints
+      SECTION("Check nodal pressure constraints") {
+        // Check assign pressure constraint
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nSolid, 8000,
+                                                 nullptr) == true);
+        REQUIRE(node->assign_pressure_constraint(mpm::NodePhase::nLiquid, 7000,
+                                                 nullptr) == true);
+        // Check apply pressure constraint
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nSolid));
+        REQUIRE_NOTHROW(
+            node->apply_pressure_constraint(mpm::NodePhase::nLiquid));
+        // Check pressure
+        REQUIRE(node->pressure(mpm::NodePhase::nSolid) ==
+                Approx(8000).epsilon(Tolerance));
+        REQUIRE(node->pressure(mpm::NodePhase::nLiquid) ==
+                Approx(7000).epsilon(Tolerance));
+      }
     }
 
     SECTION("Check external force") {

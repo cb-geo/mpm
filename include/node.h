@@ -134,6 +134,14 @@ class Node : public NodeBase<Tdim> {
   void update_mass_pressure(unsigned phase,
                             double mass_pressure) noexcept override;
 
+  //! Assign pressure constraint
+  //! \param[in] phase Index corresponding to the phase
+  //! \param[in] pressure Applied pressure constraint
+  //! \param[in] function math function
+  bool assign_pressure_constraint(
+      const unsigned phase, const double pressure,
+      const std::shared_ptr<FunctionBase>& function) override;
+
   //! Apply pressure constraint
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
@@ -304,14 +312,6 @@ class Node : public NodeBase<Tdim> {
   //! Damping factor
   bool compute_acceleration_velocity_twophase_explicit_cundall(
       double dt, double damping_factor) noexcept override;
-
-  //! Assign pressure constraint
-  //! \param[in] phase Index corresponding to the phase
-  //! \param[in] pressure Applied pressure constraint
-  //! \param[in] function math function
-  bool assign_pressure_constraint(
-      const unsigned phase, const double pressure,
-      const std::shared_ptr<FunctionBase>& function) override;
 
   //! Return drag force at a given node
   VectorDim drag_force_coefficient() const override {
