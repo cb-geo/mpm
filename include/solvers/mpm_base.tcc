@@ -93,36 +93,33 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   }
 
   // VTK particle variables
-  try {
-    // Initialise container with empty vector
-    vtk_vars_.insert(
-        std::make_pair(mpm::VariableType::Scalar, std::vector<std::string>()));
-    vtk_vars_.insert(
-        std::make_pair(mpm::VariableType::Vector, std::vector<std::string>()));
-    vtk_vars_.insert(
-        std::make_pair(mpm::VariableType::Tensor, std::vector<std::string>()));
+  // Initialise container with empty vector
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Scalar, std::vector<std::string>()));
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Vector, std::vector<std::string>()));
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Tensor, std::vector<std::string>()));
 
-    if (post_process_.at("vtk").is_array() &&
-        post_process_.at("vtk").size() > 0) {
-      // Iterate over vtk
-      for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
-        std::string attribute =
-            post_process_["vtk"][i].template get<std::string>();
-        if (mpm::variables.find(attribute) != mpm::variables.end())
-          vtk_vars_[mpm::variables.at(attribute)].emplace_back(attribute);
-        else {
-          console_->warn(
-              "{} #{}: VTK variable {} was specified, but is not available "
-              "in variable list",
-              __FILE__, __LINE__, attribute);
-        }
+  if (post_process_.at("vtk").is_array() &&
+      post_process_.at("vtk").size() > 0) {
+    // Iterate over vtk
+    for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
+      std::string attribute =
+          post_process_["vtk"][i].template get<std::string>();
+      if (mpm::variables.find(attribute) != mpm::variables.end())
+        vtk_vars_[mpm::variables.at(attribute)].emplace_back(attribute);
+      else {
+        console_->warn(
+            "{} #{}: VTK variable {} was specified, but is not available "
+            "in variable list",
+            __FILE__, __LINE__, attribute);
       }
-    } else {
-      throw std::runtime_error(
-          "No VTK variables were specified, none will be generated");
     }
-  } catch (std::exception& exception) {
-    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
+  } else {
+    console_->warn(
+        "{} #{}: No VTK variables were specified, none will be generated",
+        __FILE__, __LINE__);
   }
 
   // VTK state variables
