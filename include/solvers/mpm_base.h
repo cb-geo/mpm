@@ -177,7 +177,7 @@ class MPMBase : public MPM {
   using mpm::MPM::console_;
 
   //! Stress update method
-  std::string stress_update_;
+  std::string stress_update_{"usf"};
   //! Stress update scheme
   std::shared_ptr<mpm::StressUpdate<Tdim>> stress_update_scheme_{nullptr};
   //! Interface scheme

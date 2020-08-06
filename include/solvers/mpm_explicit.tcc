@@ -5,10 +5,10 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
   //! Logger
   console_ = spdlog::get("MPMExplicit");
   //! Stress update
-  if (this->stress_update_ == "USF")
+  if (this->stress_update_ == "usf")
     stress_update_scheme_ =
         std::make_shared<mpm::StressUpdateUSF<Tdim>>(mesh_, dt_);
-  else if (this->stress_update_ == "USL")
+  else if (this->stress_update_ == "usl")
     stress_update_scheme_ =
         std::make_shared<mpm::StressUpdateUSL<Tdim>>(mesh_, dt_);
 
@@ -138,7 +138,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
         dt_, velocity_update_, "Cundall", damping_factor_);
 
     // Update Stress Last
-    stress_update_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
+    stress_update_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
     stress_update_scheme_->locate_particles(this->locate_particles_);
