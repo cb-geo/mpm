@@ -73,6 +73,7 @@ void mpm::StressUpdate<Tdim>::momentum_nodes(unsigned phase) {
 template <unsigned Tdim>
 void mpm::StressUpdate<Tdim>::compute_stress_strain(unsigned phase,
                                                     bool pressure_smoothing) {
+
   // Iterate over each particle to calculate strain
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_strain, std::placeholders::_1, dt_));

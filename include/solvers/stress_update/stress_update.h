@@ -77,7 +77,7 @@ class StressUpdate {
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Time increment
-  double dt_{0.};
+  double dt_;
   //! MPI Size
   int mpi_size_ = 1;
   //! MPI rank

@@ -2,7 +2,10 @@
 template <unsigned Tdim>
 mpm::StressUpdateUSL<Tdim>::StressUpdateUSL(
     const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt)
-    : mpm::StressUpdate<Tdim>(mesh, dt) {}
+    : mpm::StressUpdate<Tdim>(mesh, dt) {
+  mesh_ = mesh;
+  dt_ = dt;
+}
 
 //! Precompute stresses and strains
 template <unsigned Tdim>
