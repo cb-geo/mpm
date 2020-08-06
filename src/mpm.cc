@@ -7,7 +7,7 @@
 
 namespace mpm {
 // Variable list
-std::map<std::string, VariableType> variables = {
+tsl::robin_map<std::string, VariableType> variables = {
     // Scalar variables
     {"mass", VariableType::Scalar},
     {"volume", VariableType::Scalar},

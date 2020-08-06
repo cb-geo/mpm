@@ -112,7 +112,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
           vtk_vars_[mpm::variables.at(attribute)].emplace_back(attribute);
         else {
           console_->warn(
-              "{} #{}: VTK variable \"{}\" was specified, but is not available "
+              "{} #{}: VTK variable {} was specified, but is not available "
               "in variable list",
               __FILE__, __LINE__, attribute);
         }

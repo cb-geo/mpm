@@ -29,7 +29,7 @@ namespace mpm {
 //! Vector: Vector of size 3
 //! Tensor: Symmetric tensor arranged in voigt notation
 enum class VariableType { Scalar, Vector, Tensor };
-extern std::map<std::string, VariableType> variables;
+extern tsl::robin_map<std::string, VariableType> variables;
 
 //! Stress update method
 //! USF: Update Stress First
@@ -200,7 +200,7 @@ class MPMBase : public MPM {
   //! Mathematical functions
   std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
   //! VTK particle variables
-  std::map<mpm::VariableType, std::vector<std::string>> vtk_vars_;
+  tsl::robin_map<mpm::VariableType, std::vector<std::string>> vtk_vars_;
   //! VTK state variables
   std::vector<std::string> vtk_statevars_;
   //! Set node concentrated force
