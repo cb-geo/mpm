@@ -42,7 +42,7 @@ struct Logger {
   // Create a logger for MPM Explicit USL
   static const std::shared_ptr<spdlog::logger> mpm_explicit_usl_logger;
 
-    // Create a logger for MPM Explicit
+  // Create a logger for MPM Explicit
   static const std::shared_ptr<spdlog::logger> xmpm_explicit_logger;
 };
 

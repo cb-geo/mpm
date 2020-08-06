@@ -17,7 +17,8 @@ mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord)
 
 //! Construct a particle with id, coordinates and status
 template <unsigned Tdim>
-mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord, bool status)
+mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord,
+                                      bool status)
     : mpm::ParticleBase<Tdim>(id, coord, status) {
   this->initialise();
   cell_ = nullptr;
@@ -32,7 +33,8 @@ mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord, bool sta
 
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::ParticleXMPM<Tdim>::initialise_particle(const HDF5Particle& particle) {
+bool mpm::ParticleXMPM<Tdim>::initialise_particle(
+    const HDF5Particle& particle) {
 
   // Assign id
   this->id_ = particle.id;
@@ -249,7 +251,6 @@ void mpm::ParticleXMPM<Tdim>::initialise() {
   this->properties_["strains"] = [&]() { return strain(); };
   this->properties_["velocities"] = [&]() { return velocity(); };
   this->properties_["displacements"] = [&]() { return displacement(); };
-  this->properties_["levelset"] = [&]() { Eigen::Matrix<double, Tdim, 1> levelset; levelset[0] = levelset_phi_ ; return levelset; };
 }
 
 //! Initialise particle material container
@@ -522,22 +523,23 @@ void mpm::ParticleXMPM<Tdim>::map_mass_momentum_to_nodes() noexcept {
                            mass_ * shapefn_[i]);
     nodes_[i]->update_momentum(true, mpm::ParticlePhase::Solid,
                                mass_ * shapefn_[i] * velocity_);
-    if(nodes_[i]->discontinuity_enrich()){
-        // Unit 1x1 Eigen matrix to be used with scalar quantities
+    if (nodes_[i]->discontinuity_enrich()) {
+      // Unit 1x1 Eigen matrix to be used with scalar quantities
       Eigen::Matrix<double, 1, 1> nodal_mass;
-      nodal_mass(0, 0) = sgn(levelset_phi_) *  mass_ * shapefn_[i];
-       // Map enriched mass and momentum to nodes
-      nodes_[i]->update_discontinuity_property(true, "mass_enrich", nodal_mass, 0,
-                                1);
-      nodes_[i]->update_discontinuity_property(true, "momenta_enrich", velocity_ * nodal_mass,
-                                0, Tdim);
+      nodal_mass(0, 0) = sgn(levelset_phi_) * mass_ * shapefn_[i];
+      // Map enriched mass and momentum to nodes
+      nodes_[i]->update_discontinuity_property(true, "mass_enrich", nodal_mass,
+                                               0, 1);
+      nodes_[i]->update_discontinuity_property(true, "momenta_enrich",
+                                               velocity_ * nodal_mass, 0, Tdim);
     }
   }
 }
 
 //! Map multimaterial properties to nodes
 template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
+void mpm::ParticleXMPM<
+    Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcept {
   // Check if particle mass is set
   assert(mass_ != std::numeric_limits<double>::max());
 
@@ -556,7 +558,8 @@ void mpm::ParticleXMPM<Tdim>::map_multimaterial_mass_momentum_to_nodes() noexcep
 
 //! Map multimaterial displacements to nodes
 template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
+void mpm::ParticleXMPM<
+    Tdim>::map_multimaterial_displacements_to_nodes() noexcept {
   // Check if particle mass is set
   assert(mass_ != std::numeric_limits<double>::max());
 
@@ -631,19 +634,23 @@ inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
   const double tolerance = 1.E-16;
   Eigen::Vector3d vel;
   vel.setZero();
-  for (unsigned i = 0; i < this->nodes_.size(); ++i){
-    if(nodes_[i]->discontinuity_enrich()){
-      double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0) ;
-      if(nodal_mass < tolerance)
-        continue;
+  for (unsigned i = 0; i < this->nodes_.size(); ++i) {
+    if (nodes_[i]->discontinuity_enrich()) {
+      double nodal_mass =
+          nodes_[i]->mass(phase) +
+          sgn(levelset_phi_) *
+              nodes_[i]->discontinuity_property("mass_enrich", 1)(0, 0);
+      if (nodal_mass < tolerance) continue;
 
-      vel = (nodes_[i]->momentum(phase) + sgn(levelset_phi_)*nodes_[i]->discontinuity_property("momenta_enrich",3).col(0))/nodal_mass;
-    }
-    else{
+      vel =
+          (nodes_[i]->momentum(phase) +
+           sgn(levelset_phi_) *
+               nodes_[i]->discontinuity_property("momenta_enrich", 3).col(0)) /
+          nodal_mass;
+    } else {
       double nodal_mass = nodes_[i]->mass(phase);
-      if(nodal_mass < tolerance)
-        continue;
-      vel = nodes_[i]->momentum(phase)/nodal_mass;
+      if (nodal_mass < tolerance) continue;
+      vel = nodes_[i]->momentum(phase) / nodal_mass;
     }
 
     strain_rate[0] += dn_dx(i, 0) * vel[0];
@@ -693,13 +700,16 @@ void mpm::ParticleXMPM<Tdim>::compute_stress() noexcept {
 
 //! Map body force
 template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::map_body_force(const VectorDim& pgravity) noexcept {
+void mpm::ParticleXMPM<Tdim>::map_body_force(
+    const VectorDim& pgravity) noexcept {
   // Compute nodal body forces
-  for (unsigned i = 0; i < nodes_.size(); ++i){
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
     nodes_[i]->update_external_force(true, mpm::ParticlePhase::Solid,
                                      (pgravity * mass_ * shapefn_(i)));
-     if(nodes_[i]->discontinuity_enrich())
-       nodes_[i]->update_discontinuity_property(true, "external_force_enrich", sgn(levelset_phi_)*pgravity * mass_ * shapefn_(i), 0,Tdim);
+    if (nodes_[i]->discontinuity_enrich())
+      nodes_[i]->update_discontinuity_property(
+          true, "external_force_enrich",
+          sgn(levelset_phi_) * pgravity * mass_ * shapefn_(i), 0, Tdim);
   }
 }
 
@@ -713,8 +723,9 @@ inline void mpm::ParticleXMPM<1>::map_internal_force() noexcept {
     force[0] = -1. * dn_dx_(i, 0) * volume_ * stress_[0];
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    if(nodes_[i]->discontinuity_enrich())
-      nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,1);
+    if (nodes_[i]->discontinuity_enrich())
+      nodes_[i]->update_discontinuity_property(
+          true, "internal_force_enrich", sgn(levelset_phi_) * force, 0, 1);
   }
 }
 
@@ -731,8 +742,9 @@ inline void mpm::ParticleXMPM<2>::map_internal_force() noexcept {
     force *= -1. * this->volume_;
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    if(nodes_[i]->discontinuity_enrich())
-       nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,2);
+    if (nodes_[i]->discontinuity_enrich())
+      nodes_[i]->update_discontinuity_property(
+          true, "internal_force_enrich", sgn(levelset_phi_) * force, 0, 2);
   }
 }
 
@@ -755,8 +767,9 @@ inline void mpm::ParticleXMPM<3>::map_internal_force() noexcept {
     force *= -1. * this->volume_;
 
     nodes_[i]->update_internal_force(true, mpm::ParticlePhase::Solid, force);
-    if(nodes_[i]->discontinuity_enrich())
-       nodes_[i]->update_discontinuity_property(true, "internal_force_enrich", sgn(levelset_phi_)*force, 0,3);
+    if (nodes_[i]->discontinuity_enrich())
+      nodes_[i]->update_discontinuity_property(
+          true, "internal_force_enrich", sgn(levelset_phi_) * force, 0, 3);
   }
 }
 
@@ -771,7 +784,8 @@ bool mpm::ParticleXMPM<Tdim>::assign_velocity(
 
 // Assign traction to the particle
 template <unsigned Tdim>
-bool mpm::ParticleXMPM<Tdim>::assign_traction(unsigned direction, double traction) {
+bool mpm::ParticleXMPM<Tdim>::assign_traction(unsigned direction,
+                                              double traction) {
   bool status = false;
   try {
     if (direction >= Tdim ||
@@ -812,24 +826,23 @@ void mpm::ParticleXMPM<Tdim>::compute_updated_position(
       Eigen::Matrix<double, Tdim, 1>::Zero();
   const double tolerance = 1.E-16;
   unsigned int phase = mpm::ParticlePhase::Solid;
-  for (unsigned i = 0; i < nodes_.size(); ++i)
-  {
-    if(nodes_[i]->discontinuity_enrich())
-    {
-      double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0);
-      if (nodal_mass < tolerance)
-        continue;
+  for (unsigned i = 0; i < nodes_.size(); ++i) {
+    if (nodes_[i]->discontinuity_enrich()) {
+      double nodal_mass =
+          nodes_[i]->mass(phase) +
+          sgn(levelset_phi_) *
+              nodes_[i]->discontinuity_property("mass_enrich", 1)(0, 0);
+      if (nodal_mass < tolerance) continue;
 
-      nodal_velocity += shapefn_[i] *  
-        (nodes_[i]->momentum(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("momenta_enrich",3))/nodal_mass;
-    }
-    else
-    {
+      nodal_velocity += shapefn_[i] *
+                        (nodes_[i]->momentum(phase) +
+                         sgn(levelset_phi_) * nodes_[i]->discontinuity_property(
+                                                  "momenta_enrich", 3)) /
+                        nodal_mass;
+    } else {
       double nodal_mass = nodes_[i]->mass(phase);
-      if (nodal_mass < tolerance)
-        continue;
-      nodal_velocity +=
-        shapefn_[i] * nodes_[i]->momentum(phase)/nodal_mass;
+      if (nodal_mass < tolerance) continue;
+      nodal_velocity += shapefn_[i] * nodes_[i]->momentum(phase) / nodal_mass;
     }
   }
   // Acceleration update
@@ -837,29 +850,30 @@ void mpm::ParticleXMPM<Tdim>::compute_updated_position(
     // Get interpolated nodal acceleration
     Eigen::Matrix<double, Tdim, 1> nodal_acceleration =
         Eigen::Matrix<double, Tdim, 1>::Zero();
-    for (unsigned i = 0; i < nodes_.size(); ++i)
-    {
-      if(nodes_[i]->discontinuity_enrich())
-      {
-        double nodal_mass = nodes_[i]->mass(phase) +  sgn(levelset_phi_)*nodes_[i]->discontinuity_property("mass_enrich",1)(0,0);
-        if (nodal_mass < tolerance)
-          continue;
+    for (unsigned i = 0; i < nodes_.size(); ++i) {
+      if (nodes_[i]->discontinuity_enrich()) {
+        double nodal_mass =
+            nodes_[i]->mass(phase) +
+            sgn(levelset_phi_) *
+                nodes_[i]->discontinuity_property("mass_enrich", 1)(0, 0);
+        if (nodal_mass < tolerance) continue;
 
-        auto force = nodes_[i]->internal_force(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("internal_force_enrich",3) + 
-                     nodes_[i]->external_force(phase)  + sgn(levelset_phi_) *  nodes_[i]->discontinuity_property("external_force_enrich",3);
+        auto force = nodes_[i]->internal_force(phase) +
+                     sgn(levelset_phi_) * nodes_[i]->discontinuity_property(
+                                              "internal_force_enrich", 3) +
+                     nodes_[i]->external_force(phase) +
+                     sgn(levelset_phi_) * nodes_[i]->discontinuity_property(
+                                              "external_force_enrich", 3);
 
-        nodal_acceleration += shapefn_[i] *  force / nodal_mass;
-      }
-      else
-      {
+        nodal_acceleration += shapefn_[i] * force / nodal_mass;
+      } else {
         double nodal_mass = nodes_[i]->mass(phase);
-        if (nodal_mass < tolerance)
-          continue;
+        if (nodal_mass < tolerance) continue;
 
-        auto force = nodes_[i]->internal_force(phase) + nodes_[i]->external_force(phase);
+        auto force =
+            nodes_[i]->internal_force(phase) + nodes_[i]->external_force(phase);
 
-        nodal_acceleration +=
-          shapefn_[i] * force / nodal_mass;
+        nodal_acceleration += shapefn_[i] * force / nodal_mass;
       }
     }
 
@@ -899,7 +913,8 @@ bool mpm::ParticleXMPM<Tdim>::map_pressure_to_nodes(unsigned phase) noexcept {
 
 // Compute pressure smoothing of the particle based on nodal pressure
 template <unsigned Tdim>
-bool mpm::ParticleXMPM<Tdim>::compute_pressure_smoothing(unsigned phase) noexcept {
+bool mpm::ParticleXMPM<Tdim>::compute_pressure_smoothing(
+    unsigned phase) noexcept {
   // Assert
   assert(cell_ != nullptr);
 
@@ -921,15 +936,16 @@ bool mpm::ParticleXMPM<Tdim>::compute_pressure_smoothing(unsigned phase) noexcep
 
 //! Apply particle velocity constraints
 template <unsigned Tdim>
-void mpm::ParticleXMPM<Tdim>::apply_particle_velocity_constraints(unsigned dir,
-                                                              double velocity) {
+void mpm::ParticleXMPM<Tdim>::apply_particle_velocity_constraints(
+    unsigned dir, double velocity) {
   // Set particle velocity constraint
   this->velocity_(dir) = velocity;
 }
 
 //! Return particle tensor data
 template <unsigned Tdim>
-Eigen::VectorXd mpm::ParticleXMPM<Tdim>::tensor_data(const std::string& property) {
+Eigen::VectorXd mpm::ParticleXMPM<Tdim>::tensor_data(
+    const std::string& property) {
   return this->properties_.at(property)();
 }
 

@@ -263,13 +263,14 @@ class NodeBase {
   //! Compute multimaterial normal unit vector
   virtual void compute_multimaterial_normal_unit_vector() = 0;
 
-    // Return data in the nodal discontinuity properties map at a specific index
+  // Return data in the nodal discontinuity properties map at a specific index
   // \param[in] property Property name
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
-  virtual Eigen::MatrixXd discontinuity_property(const std::string& property,unsigned nprops = 1) = 0;
+  virtual Eigen::MatrixXd discontinuity_property(
+      const std::string& property, unsigned nprops = 1) noexcept = 0;
 
   //! Return whether the node is enriched
-  virtual bool discontinuity_enrich() = 0;
+  virtual bool discontinuity_enrich() const = 0;
 
   //! Update nodal property at the nodes from particle for discontinuity
   //! \param[in] update A boolean to update (true) or assign (false)
@@ -277,20 +278,20 @@ class NodeBase {
   //! \param[in] property_value Property quantity from the particles in the cell
   //! \param[in] discontinuity_id Id of the material within the property data
   //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
-  virtual void update_discontinuity_property(bool update, const std::string& property,
-                       const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
-                       unsigned nprops) noexcept = 0;
+  virtual void update_discontinuity_property(
+      bool update, const std::string& property,
+      const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
+      unsigned nprops) noexcept = 0;
 
   //! Compute momentum
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  virtual bool intergrate_momentum_discontinuity(
-      unsigned phase, double dt) noexcept = 0;
-
+  virtual bool intergrate_momentum_discontinuity(unsigned phase,
+                                                 double dt) noexcept = 0;
 
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
-  virtual void self_contact_discontinuity(double dt) = 0;
+  virtual void self_contact_discontinuity(double dt) noexcept = 0;
 };  // NodeBase class
 }  // namespace mpm
 

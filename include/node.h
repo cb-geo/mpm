@@ -208,8 +208,8 @@ class Node : public NodeBase<Tdim> {
   //! Apply velocity constraints
   void apply_velocity_constraints() override;
 
-    //! Apply velocity constraints for discontinuity
-  void apply_velocity_constraints_discontinuity() noexcept override;
+  //! Apply velocity constraints for discontinuity
+  void apply_velocity_constraints_discontinuity() override;
 
   //! Assign friction constraint
   //! Directions can take values between 0 and Dim * Nphases
@@ -275,32 +275,35 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   //! Return whether the node is enriched
-  bool discontinuity_enrich() const override {return discontinuity_enrich_;};
+  bool discontinuity_enrich() const { return discontinuity_enrich_; };
 
-    //! Update nodal property at the nodes from particle for discontinuity
+  //! Update nodal property at the nodes from particle for discontinuity
   //! \param[in] update A boolean to update (true) or assign (false)
   //! \param[in] property Property name
   //! \param[in] property_value Property quantity from the particles in the cell
   //! \param[in] discontinuity_id Id of the material within the property data
   //! \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
   void update_discontinuity_property(bool update, const std::string& property,
-                       const Eigen::MatrixXd& property_value, unsigned discontinuity_id,
-                       unsigned nprops) noexcept override;
+                                     const Eigen::MatrixXd& property_value,
+                                     unsigned discontinuity_id,
+                                     unsigned nprops) noexcept override;
 
-    // Return data in the nodal discontinuity properties map at a specific index
+  // Return data in the nodal discontinuity properties map at a specific index
   // \param[in] property Property name
   // \param[in] nprops Dimension of property (1 if scalar, Tdim if vector)
-  Eigen::MatrixXd discontinuity_property(const std::string& property, unsigned nprops = 1) noexcept override;
+  Eigen::MatrixXd discontinuity_property(const std::string& property,
+                                         unsigned nprops = 1) noexcept override;
 
-    //! Compute momentum
+  //! Compute momentum
   //! \param[in] phase Index corresponding to the phase
   //! \param[in] dt Timestep in analysis
-  virtual bool intergrate_momentum_discontinuity(
-      unsigned phase, double dt) noexcept override;
+  virtual bool intergrate_momentum_discontinuity(unsigned phase,
+                                                 double dt) noexcept override;
 
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
   void self_contact_discontinuity(double dt) noexcept override;
+
  private:
   //! Mutex
   SpinMutex node_mutex_;
@@ -359,7 +362,7 @@ class Node : public NodeBase<Tdim> {
   //! MPI ranks
   std::set<unsigned> mpi_ranks_;
   //! discontinuity enrich
-  //need to be done
+  // need to be done
   bool discontinuity_enrich_{true};
 };  // Node class
 }  // namespace mpm
