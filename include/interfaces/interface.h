@@ -15,10 +15,10 @@ class Interface {
   Interface(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh);
 
   //! Intialize
-  virtual void initialise(){};
+  virtual inline void initialise(){};
 
   //! Compute contact forces
-  virtual void compute_contact_forces(){};
+  virtual inline void compute_contact_forces(){};
 
  protected:
   //! Mesh object

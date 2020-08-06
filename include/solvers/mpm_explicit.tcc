@@ -14,7 +14,7 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
 
   //! Interface scheme
   if (this->interface_)
-    interface_scheme_ = std::make_shared<mpm::ContactInterface<Tdim>>(mesh_);
+    interface_scheme_ = std::make_shared<mpm::InterfaceContact<Tdim>>(mesh_);
   else
     interface_scheme_ = std::make_shared<mpm::Interface<Tdim>>(mesh_);
 }

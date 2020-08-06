@@ -18,8 +18,8 @@
 #endif
 
 #include "constraints.h"
-#include "contact_interface.h"
 #include "interface.h"
+#include "interface_contact.h"
 #include "mpm.h"
 #include "particle.h"
 #include "stress_update.h"
