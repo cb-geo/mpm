@@ -1,18 +1,18 @@
-#ifndef _MPM_INTERFACE_
-#define _MPM_INTERFACE_
+#ifndef _MPM_CONTACT_
+#define _MPM_CONTACT_
 
 #include "mesh.h"
 
 namespace mpm {
 
-//! Interface class
-//! \brief Interface base class
+//! Contact class
+//! \brief Contact base class
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class Interface {
+class Contact {
  public:
   //! Default constructor with mesh class
-  Interface(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh);
+  Contact(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh);
 
   //! Intialize
   virtual inline void initialise(){};
@@ -27,9 +27,9 @@ class Interface {
   int mpi_size_ = 1;
   //! MPI rank
   int mpi_rank_ = 0;
-};  // Interface class
+};  // Contact class
 }  // namespace mpm
 
-#include "interface.tcc"
+#include "contact.tcc"
 
-#endif  // _MPM_INTERFACE_
+#endif  // _MPM_CONTACT_

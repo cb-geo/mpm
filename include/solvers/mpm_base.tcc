@@ -40,7 +40,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     // Stress update method (USF/USL/MUSL)
     try {
       if (analysis_.find("stress_update") != analysis_.end())
-        stress_update_ = analysis_["stress_update"].template get<std::string>();
+        stress_update_scheme_ =
+            analysis_["stress_update"].template get<std::string>();
     } catch (std::exception& exception) {
       console_->warn(
           "{} #{}: {}. Stress update method is not specified, using USF as "

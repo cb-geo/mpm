@@ -52,7 +52,7 @@ class MPMExplicit : public MPMBase<Tdim> {
   //! Stress update scheme
   using mpm::MPMBase<Tdim>::stress_update_scheme_;
   //! Interface scheme
-  using mpm::MPMBase<Tdim>::interface_scheme_;
+  using mpm::MPMBase<Tdim>::contact_;
 
 #ifdef USE_GRAPH_PARTITIONING
   //! Graph

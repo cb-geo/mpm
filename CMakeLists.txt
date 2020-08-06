@@ -138,7 +138,7 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
-  ${mpm_SOURCE_DIR}/include/interfaces/
+  ${mpm_SOURCE_DIR}/include/contacts/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/

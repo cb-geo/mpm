@@ -1,12 +1,12 @@
-//! Constructor of interface with mesh
+//! Constructor of contact with mesh
 template <unsigned Tdim>
-mpm::InterfaceContact<Tdim>::InterfaceContact(
+mpm::ContactFriction<Tdim>::ContactFriction(
     const std::shared_ptr<mpm::Mesh<Tdim>>& mesh)
-    : mpm::Interface<Tdim>(mesh) {}
+    : mpm::Contact<Tdim>(mesh) {}
 
 //! Initialize nodal properties
 template <unsigned Tdim>
-inline void mpm::InterfaceContact<Tdim>::initialise() {
+inline void mpm::ContactFriction<Tdim>::initialise() {
   // Initialise nodal properties
   mesh_->initialise_nodal_properties();
 
@@ -18,7 +18,7 @@ inline void mpm::InterfaceContact<Tdim>::initialise() {
 
 //! Compute contact forces
 template <unsigned Tdim>
-inline void mpm::InterfaceContact<Tdim>::compute_contact_forces() {
+inline void mpm::ContactFriction<Tdim>::compute_contact_forces() {
 
   // Map multimaterial properties from particles to nodes
   mesh_->iterate_over_particles(std::bind(

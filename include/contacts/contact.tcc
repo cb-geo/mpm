@@ -1,6 +1,6 @@
-//! Constructor of interface with mesh
+//! Constructor of contact with mesh
 template <unsigned Tdim>
-mpm::Interface<Tdim>::Interface(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
+mpm::Contact<Tdim>::Contact(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh) {
   // Assign mesh
   mesh_ = mesh;
   // Initialise MPI rank and size

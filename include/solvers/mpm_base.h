@@ -18,8 +18,8 @@
 #endif
 
 #include "constraints.h"
-#include "interface.h"
-#include "interface_contact.h"
+#include "contact.h"
+#include "contact_friction.h"
 #include "mpm.h"
 #include "particle.h"
 #include "stress_update.h"
@@ -177,11 +177,11 @@ class MPMBase : public MPM {
   using mpm::MPM::console_;
 
   //! Stress update method
-  std::string stress_update_{"usf"};
+  std::string stress_update_scheme_{"usf"};
   //! Stress update scheme
-  std::shared_ptr<mpm::StressUpdate<Tdim>> stress_update_scheme_{nullptr};
+  std::shared_ptr<mpm::StressUpdate<Tdim>> stress_update_{nullptr};
   //! Interface scheme
-  std::shared_ptr<mpm::Interface<Tdim>> interface_scheme_{nullptr};
+  std::shared_ptr<mpm::Contact<Tdim>> contact_{nullptr};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
