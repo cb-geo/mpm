@@ -96,6 +96,7 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
        {{"path", "results/"},
+        {"vtk", {}},
         {"vtk_statevars", {{"pdstrain"}}},
         {"output_steps", 10}}}};
 

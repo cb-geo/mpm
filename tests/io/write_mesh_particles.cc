@@ -100,7 +100,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
        {{"path", "results/"},
-        {"vtk", {{"stresses", "strains", "velocity"}}},
+        {"vtk", {"stresses", "strains", "velocities"}},
         {"vtk_statevars", {{"pdstrain"}}},
         {"output_steps", 5}}}};
 
