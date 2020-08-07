@@ -25,7 +25,8 @@
 #include "stress_update_usl.h"
 
 //! \brief Check stress update 3D case
-TEST_CASE("Stress update is checked for USF case", "[StressUpdate][USF][3D]") {
+TEST_CASE("Stress update is checked for USF and USL",
+          "[StressUpdate][USF][USL][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
