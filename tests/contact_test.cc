@@ -166,12 +166,33 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
 
     unsigned phase = 0;
 
-    auto le_material =
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+
+    auto material1 =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic3D", std::move(0), jmaterial);
-
+    auto material2 =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(1), jmaterial);
     std::map<unsigned, std::shared_ptr<mpm::Material<Dim>>> materials;
-    materials[mid] = le_material;
+    materials[0] = material1;
+    materials[1] = material2;
+
+    // Assign materials to particles
+    REQUIRE_NOTHROW(particle1->assign_material(material1));
+    REQUIRE_NOTHROW(particle2->assign_material(material2));
+
+    // Assign mass
+    REQUIRE_NOTHROW(particle1->assign_mass(2.0));
+    REQUIRE_NOTHROW(particle2->assign_mass(3.0));
+
+    // Assign volume
+    REQUIRE_NOTHROW(particle1->assign_volume(4.0));
+    REQUIRE_NOTHROW(particle2->assign_volume(3.0));
 
     auto stress_update =
         std::make_shared<mpm::StressUpdateUSF<Dim>>(mesh, 0.01);

@@ -162,6 +162,15 @@ TEST_CASE("Stress update is checked for USF and USL",
 
   REQUIRE_NOTHROW(mesh->locate_particles_mesh());
 
+  REQUIRE_NOTHROW(particle1->assign_cell_id(1));
+  REQUIRE_NOTHROW(particle2->assign_cell_id(1));
+  REQUIRE_NOTHROW(particle1->assign_cell(cell1));
+  REQUIRE_NOTHROW(particle2->assign_cell(cell1));
+
+  // Assign volume
+  REQUIRE_NOTHROW(particle1->assign_volume(4.0));
+  REQUIRE_NOTHROW(particle2->assign_volume(3.0));
+
   SECTION("Check USF") {
     auto stress_update =
         std::make_shared<mpm::StressUpdateUSF<Dim>>(mesh, 0.01);
