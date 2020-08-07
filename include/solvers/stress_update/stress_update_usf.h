@@ -1,5 +1,5 @@
-#ifndef _MPM_STRESS_UPDATE_USF_
-#define _MPM_STRESS_UPDATE_USF_
+#ifndef MPM_STRESS_UPDATE_USF_H_
+#define MPM_STRESS_UPDATE_USF_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -48,4 +48,4 @@ class StressUpdateUSF : public StressUpdate<Tdim> {
 
 #include "stress_update_usf.tcc"
 
-#endif  // _MPM_STRESS_UPDATE_USF_
+#endif  // MPM_STRESS_UPDATE_USF_H_

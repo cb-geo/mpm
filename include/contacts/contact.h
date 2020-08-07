@@ -1,5 +1,5 @@
-#ifndef _MPM_CONTACT_
-#define _MPM_CONTACT_
+#ifndef MPM_CONTACT_H_
+#define MPM_CONTACT_H_
 
 #include "mesh.h"
 
@@ -32,4 +32,4 @@ class Contact {
 
 #include "contact.tcc"
 
-#endif  // _MPM_CONTACT_
+#endif  // MPM_CONTACT_H_

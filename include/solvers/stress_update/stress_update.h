@@ -1,5 +1,5 @@
-#ifndef _MPM_STRESS_UPDATE_
-#define _MPM_STRESS_UPDATE_
+#ifndef MPM_STRESS_UPDATE_H_
+#define MPM_STRESS_UPDATE_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -88,4 +88,4 @@ class StressUpdate {
 
 #include "stress_update.tcc"
 
-#endif  // _MPM_STRESS_UPDATE_
+#endif  // MPM_STRESS_UPDATE_H_

@@ -1,5 +1,5 @@
-#ifndef _MPM_CONTACT_FRICTION_
-#define _MPM_CONTACT_FRICTION_
+#ifndef MPM_CONTACT_FRICTION_H_
+#define MPM_CONTACT_FRICTION_H_
 
 #include "contact.h"
 
@@ -32,4 +32,4 @@ class ContactFriction : public Contact<Tdim> {
 
 #include "contact_friction.tcc"
 
-#endif  // _MPM_CONTACT_FRICTION_
+#endif  // MPM_CONTACT_FRICTION_H_
