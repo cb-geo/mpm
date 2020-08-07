@@ -2409,6 +2409,60 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
       }
     }
 
+#ifdef USE_MPI
+    // Initialize vector of double for send and receive
+    std::vector<double> send_cell_vol_fraction;
+    send_cell_vol_fraction.resize(ncells());
+    std::vector<double> receive_cell_vol_fraction;
+    receive_cell_vol_fraction.resize(ncells());
+
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
+      if ((*citr)->status())
+        // Assign volume_fraction for MPI solver
+        send_cell_vol_fraction[(*citr)->id()] = (*citr)->volume_fraction();
+
+    MPI_Allreduce(send_cell_vol_fraction.data(),
+                  receive_cell_vol_fraction.data(), ncells(), MPI_DOUBLE,
+                  MPI_SUM, MPI_COMM_WORLD);
+
+    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr) {
+      // Assign volume_fraction for MPI solver
+      (*citr)->assign_volume_fraction(receive_cell_vol_fraction[(*citr)->id()]);
+    }
+
+    // if (mpi_size > 1) {
+    //   std::vector<MPI_Request> send_requests;
+    //   send_requests.reserve(local_ghost_cells_.size());
+    //   unsigned i = 0;
+
+    //   // Iterate through the local ghost cells and send boolean
+    //   for (auto citr = this->local_ghost_cells_.cbegin();
+    //        citr != this->local_ghost_cells_.cend(); ++citr, ++i) {
+    //     double vol_fraction = (*citr)->volume_fraction();
+    //     std::vector<unsigned> neighbour_ranks =
+    //         ghost_cells_neighbour_ranks_[(*citr)->id()];
+
+    //     for (unsigned j = 0; j < neighbour_ranks.size(); ++j) {
+    //       MPI_Isend(&vol_fraction, 1, MPI_DOUBLE, neighbour_ranks[j], 0,
+    //                 MPI_COMM_WORLD, &send_requests[i]);
+    //     }
+    //   }
+
+    //   // send complete
+    //   for (unsigned i = 0; i < local_ghost_cells_.size(); ++i)
+    //     MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    //   // Iterate through the ghost cells and receive boolean
+    //   for (auto citr = this->ghost_cells_.cbegin();
+    //        citr != this->ghost_cells_.cend(); ++citr) {
+    //     double recv_vol_fraction;
+    //     MPI_Recv(&recv_vol_fraction, 1, MPI_DOUBLE, (*citr)->rank(), 0,
+    //              MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //     (*citr)->assign_volume_fraction(recv_vol_fraction);
+    //   }
+    // }
+#endif
+
     // Compute boundary cells and nodes based on geometry
     for (auto citr = this->cells_.cbegin(); citr != this->cells_.cend();
          ++citr) {
@@ -2458,8 +2512,7 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
                 // Assign free surface nodes
                 if (!common_node_id.empty()) {
                   for (const auto common_id : common_node_id) {
-                    map_nodes_[common_id]->assign_free_surface(
-                        cell_at_interface);
+                    map_nodes_[common_id]->assign_free_surface(true);
                   }
                 }
               }
