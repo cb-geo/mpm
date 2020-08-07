@@ -2318,45 +2318,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
     this->iterate_over_cells(std::bind(&mpm::Cell<Tdim>::assign_solving_status,
                                        std::placeholders::_1, false));
 
-#if USE_HALO_EXCHANGE
-
-    for (auto citr = cells_.cbegin(); citr != cells_.cend(); ++citr)
-      if ((*citr)->status()) (*citr)->assign_solving_status(true);
-
-    if (mpi_size > 1) {
-      std::vector<MPI_Request> send_requests;
-      send_requests.reserve(local_ghost_cells_.size());
-      unsigned i = 0;
-
-      // Iterate through the local ghost cells and send boolean
-      for (auto citr = this->local_ghost_cells_.cbegin();
-           citr != this->local_ghost_cells_.cend(); ++citr, ++i) {
-        bool send_status = (*citr)->status();
-        std::vector<unsigned> neighbour_ranks =
-            ghost_cells_neighbour_ranks_[(*citr)->id()];
-
-        for (unsigned j = 0; j < neighbour_ranks.size(); ++j) {
-          MPI_Isend(&send_status, 1, MPI_CXX_BOOL, neighbour_ranks[j], 0,
-                    MPI_COMM_WORLD, &send_requests[i]);
-        }
-      }
-
-      // send complete
-      for (unsigned i = 0; i < local_ghost_cells_.size(); ++i)
-        MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
-
-      // Iterate through the ghost cells and receive boolean
-      for (auto citr = this->ghost_cells_.cbegin();
-           citr != this->ghost_cells_.cend(); ++citr) {
-        bool recv_status;
-        MPI_Recv(&recv_status, 1, MPI_CXX_BOOL, (*citr)->rank(), 0,
-                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        if (recv_status) (*citr)->assign_solving_status(true);
-      }
-    }
-
-#else
-
     // Initialize pointer of booleans for send and receive
     bool* send_cell_solving_status = new bool[ncells()];
     memset(send_cell_solving_status, 0, ncells() * sizeof(bool));
@@ -2379,7 +2340,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
 
     delete[] send_cell_solving_status;
     delete[] receive_cell_solving_status;
-#endif
 #endif
 
     // Reset free surface cell
@@ -2429,38 +2389,6 @@ bool mpm::Mesh<Tdim>::compute_free_surface_by_density(double volume_tolerance) {
       // Assign volume_fraction for MPI solver
       (*citr)->assign_volume_fraction(receive_cell_vol_fraction[(*citr)->id()]);
     }
-
-    // if (mpi_size > 1) {
-    //   std::vector<MPI_Request> send_requests;
-    //   send_requests.reserve(local_ghost_cells_.size());
-    //   unsigned i = 0;
-
-    //   // Iterate through the local ghost cells and send boolean
-    //   for (auto citr = this->local_ghost_cells_.cbegin();
-    //        citr != this->local_ghost_cells_.cend(); ++citr, ++i) {
-    //     double vol_fraction = (*citr)->volume_fraction();
-    //     std::vector<unsigned> neighbour_ranks =
-    //         ghost_cells_neighbour_ranks_[(*citr)->id()];
-
-    //     for (unsigned j = 0; j < neighbour_ranks.size(); ++j) {
-    //       MPI_Isend(&vol_fraction, 1, MPI_DOUBLE, neighbour_ranks[j], 0,
-    //                 MPI_COMM_WORLD, &send_requests[i]);
-    //     }
-    //   }
-
-    //   // send complete
-    //   for (unsigned i = 0; i < local_ghost_cells_.size(); ++i)
-    //     MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
-
-    //   // Iterate through the ghost cells and receive boolean
-    //   for (auto citr = this->ghost_cells_.cbegin();
-    //        citr != this->ghost_cells_.cend(); ++citr) {
-    //     double recv_vol_fraction;
-    //     MPI_Recv(&recv_vol_fraction, 1, MPI_DOUBLE, (*citr)->rank(), 0,
-    //              MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    //     (*citr)->assign_volume_fraction(recv_vol_fraction);
-    //   }
-    // }
 #endif
 
     // Compute boundary cells and nodes based on geometry
