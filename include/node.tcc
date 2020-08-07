@@ -36,6 +36,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   pressure_increment_ = 0.;
   correction_force_.setZero();
   status_ = false;
+  solving_status_ = false;
   material_ids_.clear();
 }
 
