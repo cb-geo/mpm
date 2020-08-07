@@ -266,6 +266,7 @@ class Mesh {
 
   //! Return particles state variable data
   //! \param[in] attribute Name of the state variable attribute
+  //! \param[in] phase Index corresponding to the phase
   std::vector<double> particles_statevars_data(
       const std::string& attribute, unsigned phase = mpm::ParticlePhase::Solid);
 
