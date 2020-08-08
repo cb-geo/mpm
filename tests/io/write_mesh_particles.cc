@@ -228,7 +228,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
       {"post_processing",
        {{"path", "results/"},
         {"vtk", {{"stresses", "strains", "velocity"}}},
-        {"vtk_statevars", {{"pdstrain"}}},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
         {"output_steps", 5}}}};
 
   // Dump JSON as an input file to be read

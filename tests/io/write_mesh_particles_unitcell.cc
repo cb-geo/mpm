@@ -216,7 +216,7 @@ bool write_json_unitcell_twophase(unsigned dim, const std::string& analysis,
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
        {{"path", "results/"},
-        {"vtk_statevars", {{"pdstrain"}}},
+        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", {"pdstrain"}}}}},
         {"output_steps", 10}}}};
 
   // Dump JSON as an input file to be read
