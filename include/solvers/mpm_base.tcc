@@ -93,55 +93,31 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   }
 
   // VTK state variables
-  try {
-    if (post_process_.at("vtk_statevars").is_array() &&
-        post_process_.at("vtk_statevars").size() > 0) {
-      // Iterate over state_vars
-      for (const auto& svars : post_process_["vtk_statevars"]) {
-        // Initial phase id and state vars
-        unsigned phase_id = 0;
-        std::vector<std::string> state_var;
+  if (post_process_.at("vtk_statevars").is_array() &&
+      post_process_.at("vtk_statevars").size() > 0) {
+    // Iterate over state_vars
+    for (const auto& svars : post_process_["vtk_statevars"]) {
+      // Phase id
+      unsigned phase_id = 0;
+      if (svars.contains("phase_id"))
+        phase_id = svars.at("phase_id").template get<unsigned>();
 
-        // If state variables are arranged as string
-        if (svars.is_string()) {
-          std::string attribute = svars.template get<std::string>();
-          state_var.emplace_back(attribute);
-        }
-        // If state variables are arranged as json object
-        else if (svars.is_object()) {
-          // Phase id
-          if (svars.contains("phase_id"))
-            phase_id = svars.at("phase_id").template get<unsigned>();
-
-          // State variables
-          if (svars.at("statevars").is_array() &&
-              svars.at("statevars").size() > 0) {
-            for (unsigned i = 0; i < svars.at("statevars").size(); ++i) {
-              std::string attribute =
-                  svars["statevars"][i].template get<std::string>();
-              state_var.emplace_back(attribute);
-            }
-          } else {
-            throw std::runtime_error(
-                "No VTK statevariable were specified, none will be generated");
-          }
-        }
-
-        // Check if vtk_statevars_ has the designated phase_id
-        if (vtk_statevars_.find(phase_id) != vtk_statevars_.end())
-          vtk_statevars_.at(phase_id).insert(vtk_statevars_.at(phase_id).end(),
-                                             state_var.begin(),
-                                             state_var.end());
-        else
-          vtk_statevars_.insert(std::make_pair(phase_id, state_var));
-      }
-    } else {
-      throw std::runtime_error(
-          "No VTK statevariable were specified, none will be generated");
+      // State variables
+      if (svars.at("statevars").is_array() &&
+          svars.at("statevars").size() > 0) {
+        // Insert vtk_statevars_
+        const std::vector<std::string> state_var = svars["statevars"];
+        vtk_statevars_.insert(std::make_pair(phase_id, state_var));
+      } else
+        console_->warn(
+            "{} #{}: No VTK statevariable were specified, none will be "
+            "generated",
+            __FILE__, __LINE__);
     }
-  } catch (std::exception& exception) {
-    console_->warn("{} {}: {}", __FILE__, __LINE__, exception.what());
-  }
+  } else
+    console_->warn(
+        "{} #{}: No VTK statevariable were specified, none will be generated",
+        __FILE__, __LINE__);
 }
 
 // Initialise mesh
@@ -598,7 +574,8 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   for (auto const& vtk_statevar : vtk_statevars_) {
     unsigned phase_id = vtk_statevar.first;
     for (const auto& attribute : vtk_statevar.second) {
-      std::string phase_attribute = "P" + std::to_string(phase_id) + attribute;
+      std::string phase_attribute =
+          "phase" + std::to_string(phase_id) + attribute;
       // Write state variables
       auto file =
           io_->output_file(phase_attribute, extension, uuid_, step, max_steps)
