@@ -247,6 +247,10 @@ void mpm::Particle<Tdim>::initialise() {
   this->scalar_properties_["mass"] = [&]() { return mass(); };
   this->scalar_properties_["volume"] = [&]() { return volume(); };
   this->scalar_properties_["mass_density"] = [&]() { return mass_density(); };
+  this->tensor_properties_["stresses"] = [&]() { return stress(); };
+  this->tensor_properties_["strains"] = [&]() { return strain(); };
+  this->tensor_properties_["velocities"] = [&]() { return velocity(); };
+  this->tensor_properties_["displacements"] = [&]() { return displacement(); };
 }
 
 //! Initialise particle material container
@@ -860,7 +864,7 @@ double mpm::Particle<Tdim>::scalar_data(const std::string& property) {
 //! Return particle tensor data
 template <unsigned Tdim>
 Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
-  return this->properties_.at(property)();
+  return this->tensor_properties_.at(property)();
 }
 
 //! Assign material id of this particle to nodes
