@@ -1075,6 +1075,18 @@ std::vector<Eigen::Matrix<double, 3, 1>>
   return particle_coordinates;
 }
 
+//! Return particle scalar data
+template <unsigned Tdim>
+std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
+    const std::string& attribute) {
+  std::vector<double> scalar_data;
+  scalar_data.reserve(particles_.size());
+  // Iterate over particles and add scalar value to data
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+    scalar_data.emplace_back((*pitr)->scalar_data(attribute));
+  return scalar_data;
+}
+
 //! Return particle tensor data
 template <unsigned Tdim>
 template <unsigned Tsize>

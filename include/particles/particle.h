@@ -264,6 +264,11 @@ class Particle : public ParticleBase<Tdim> {
                : std::numeric_limits<double>::quiet_NaN();
   }
 
+  //! Return scalar data of particles
+  //! \param[in] property Property string
+  //! \retval vecdata Scalar data of particle property
+  double scalar_data(const std::string& property) override;
+
   //! Return tensor data of particles
   //! \param[in] property Property string
   //! \retval vecdata Tensor data of particle property
@@ -369,8 +374,8 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::MatrixXd dn_dx_centroid_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
-  //! Map of vector properties
-  std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  //! Map of scalar properties
+  std::map<std::string, std::function<double()>> scalar_properties_;
 
 };  // Particle class
 }  // namespace mpm

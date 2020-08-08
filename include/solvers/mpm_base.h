@@ -168,6 +168,7 @@ class MPMBase : public MPM {
       // Scalar variables
       {"mass", VariableType::Scalar},
       {"volume", VariableType::Scalar},
+      {"mass_density", VariableType::Scalar},
       // Vector variables
       {"displacements", VariableType::Vector},
       {"velocities", VariableType::Vector},

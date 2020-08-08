@@ -243,11 +243,10 @@ void mpm::Particle<Tdim>::initialise() {
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
 
-  // Initialize vector data properties
-  this->properties_["stresses"] = [&]() { return stress(); };
-  this->properties_["strains"] = [&]() { return strain(); };
-  this->properties_["velocities"] = [&]() { return velocity(); };
-  this->properties_["displacements"] = [&]() { return displacement(); };
+  // Initialize scalar and tensor data properties
+  this->scalar_properties_["mass"] = [&]() { return mass(); };
+  this->scalar_properties_["volume"] = [&]() { return volume(); };
+  this->scalar_properties_["mass_density"] = [&]() { return mass_density(); };
 }
 
 //! Initialise particle material container
@@ -850,6 +849,12 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
                                                               double velocity) {
   // Set particle velocity constraint
   this->velocity_(dir) = velocity;
+}
+
+//! Return particle scalar data
+template <unsigned Tdim>
+double mpm::Particle<Tdim>::scalar_data(const std::string& property) {
+  return this->scalar_properties_.at(property)();
 }
 
 //! Return particle tensor data

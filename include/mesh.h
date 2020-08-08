@@ -258,6 +258,10 @@ class Mesh {
   //! Return coordinates of particles
   std::vector<Eigen::Matrix<double, 3, 1>> particle_coordinates();
 
+  //! Return particles scalar data
+  //! \param[in] attribute Name of the scalar data attribute
+  std::vector<double> particles_scalar_data(const std::string& attribute);
+
   //! Return particles tensor data
   //! \param[in] attribute Name of the tensor data attribute
   template <unsigned Tsize>

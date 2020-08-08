@@ -535,6 +535,27 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
+  //! VTK scalar variables
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Scalar)) {
+    // Write scalar
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_scalar_point_data(
+        file, mesh_->particles_scalar_data(attribute), attribute);
+
+    // Write a parallel MPI VTK container file
+#ifdef USE_MPI
+    if (mpi_rank == 0 && mpi_size > 1) {
+      auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                            max_steps, write_mpi_rank)
+                               .string();
+
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+    }
+#endif
+  }
+
   //! VTK vector variables
   for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Vector)) {
     // Write vector

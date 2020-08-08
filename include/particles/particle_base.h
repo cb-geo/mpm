@@ -257,6 +257,11 @@ class ParticleBase {
       const std::string& var,
       unsigned phase = mpm::ParticlePhase::Solid) const = 0;
 
+  //! Return scalar data of particles
+  //! \param[in] property Property string
+  //! \retval vecdata Scalar data of particle property
+  virtual double scalar_data(const std::string& property) = 0;
+
   //! Return tensor data of particles
   //! \param[in] property Property string
   //! \retval vecdata Tensor data of particle property
