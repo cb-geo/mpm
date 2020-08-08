@@ -96,8 +96,10 @@ bool write_json_unitcell(unsigned dim, const std::string& analysis,
         {"newmark", {{"newmark", true}, {"gamma", 0.5}, {"beta", 0.25}}}}},
       {"post_processing",
        {{"path", "results/"},
-        {"vtk", {"mass", "volume"}},
-        {"vtk_statevars", {{{"phase_id", 0}, {"statevars", "pdstrain"}}}},
+        {"vtk", {"mass", "volume", "test_variable"}},
+        {"vtk_statevars",
+         {{{"phase_id", 0}, {"statevars", "test_statevar"}},
+          {{"phase_id", 4}, {"statevars", {"test_statevar"}}}}},
         {"output_steps", 10}}}};
 
   // Dump JSON as an input file to be read

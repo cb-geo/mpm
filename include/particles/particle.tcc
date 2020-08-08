@@ -858,7 +858,10 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
 //! Return particle scalar data
 template <unsigned Tdim>
 double mpm::Particle<Tdim>::scalar_data(const std::string& property) {
-  return this->scalar_properties_.at(property)();
+  return (this->scalar_properties_.find(property) !=
+          this->scalar_properties_.end())
+             ? this->scalar_properties_.at(property)()
+             : std::numeric_limits<double>::quiet_NaN();
 }
 
 //! Return particle tensor data

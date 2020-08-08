@@ -241,8 +241,11 @@ class Particle : public ParticleBase<Tdim> {
   double state_variable(
       const std::string& var,
       unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (state_variables_[phase].find(var) != state_variables_[phase].end())
-               ? state_variables_[phase].at(var)
+    return (phase < state_variables_.size())
+               ? (state_variables_[phase].find(var) !=
+                  state_variables_[phase].end())
+                     ? state_variables_[phase].at(var)
+                     : std::numeric_limits<double>::quiet_NaN()
                : std::numeric_limits<double>::quiet_NaN();
   }
 
@@ -258,10 +261,7 @@ class Particle : public ParticleBase<Tdim> {
   //! Return pressure of the particles
   //! \param[in] phase Index to indicate phase
   double pressure(unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (state_variables_[phase].find("pressure") !=
-            state_variables_[phase].end())
-               ? state_variables_[phase].at("pressure")
-               : std::numeric_limits<double>::quiet_NaN();
+    return this->state_variable("pressure", phase);
   }
 
   //! Return scalar data of particles
