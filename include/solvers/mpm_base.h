@@ -215,7 +215,7 @@ class MPMBase : public MPM {
   //! VTK particle variables
   tsl::robin_map<mpm::VariableType, std::vector<std::string>> vtk_vars_;
   //! VTK state variables
-  std::vector<std::string> vtk_statevars_;
+  tsl::robin_map<unsigned, std::vector<std::string>> vtk_statevars_;
   //! Set node concentrated force
   bool set_node_concentrated_force_{false};
   //! Damping type
