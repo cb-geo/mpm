@@ -29,7 +29,6 @@ namespace mpm {
 //! Vector: Vector of size 3
 //! Tensor: Symmetric tensor arranged in voigt notation
 enum class VariableType { Scalar, Vector, Tensor };
-extern tsl::robin_map<std::string, VariableType> variables;
 
 //! Stress update method
 //! USF: Update Stress First
@@ -162,6 +161,19 @@ class MPMBase : public MPM {
   //! Initialise damping
   //! \param[in] damping_props Damping properties
   bool initialise_damping(const Json& damping_props);
+
+ protected:
+  // Variable list
+  tsl::robin_map<std::string, VariableType> variables_ = {
+      // Scalar variables
+      {"mass", VariableType::Scalar},
+      {"volume", VariableType::Scalar},
+      // Vector variables
+      {"displacements", VariableType::Vector},
+      {"velocities", VariableType::Vector},
+      // Tensor variables
+      {"strains", VariableType::Tensor},
+      {"stresses", VariableType::Tensor}};
 
  protected:
   // Generate a unique id for the analysis

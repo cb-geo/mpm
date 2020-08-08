@@ -107,8 +107,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
       std::string attribute =
           post_process_["vtk"][i].template get<std::string>();
-      if (mpm::variables.find(attribute) != mpm::variables.end())
-        vtk_vars_[mpm::variables.at(attribute)].emplace_back(attribute);
+      if (variables_.find(attribute) != variables_.end())
+        vtk_vars_[variables_.at(attribute)].emplace_back(attribute);
       else {
         console_->warn(
             "{} #{}: VTK variable {} was specified, but is not available "

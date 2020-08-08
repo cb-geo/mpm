@@ -6,17 +6,6 @@
 #include "mpm_explicit.h"
 
 namespace mpm {
-// Variable list
-tsl::robin_map<std::string, VariableType> variables = {
-    // Scalar variables
-    {"mass", VariableType::Scalar},
-    {"volume", VariableType::Scalar},
-    // Vector variables
-    {"displacements", VariableType::Vector},
-    {"velocities", VariableType::Vector},
-    // Tensor variables
-    {"strains", VariableType::Tensor},
-    {"stresses", VariableType::Tensor}};
 
 // Stress update method
 std::map<std::string, StressUpdate> stress_update = {
