@@ -241,11 +241,9 @@ class Particle : public ParticleBase<Tdim> {
   double state_variable(
       const std::string& var,
       unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (phase < state_variables_.size())
-               ? (state_variables_[phase].find(var) !=
-                  state_variables_[phase].end())
-                     ? state_variables_[phase].at(var)
-                     : std::numeric_limits<double>::quiet_NaN()
+    return (phase < state_variables_.size() &&
+            state_variables_[phase].find(var) != state_variables_[phase].end())
+               ? state_variables_[phase].at(var)
                : std::numeric_limits<double>::quiet_NaN();
   }
 
@@ -266,13 +264,14 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Return scalar data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Scalar data of particle property
-  double scalar_data(const std::string& property) override;
+  //! \retval data Scalar data of particle property
+  inline double scalar_data(const std::string& property) const override;
 
   //! Return tensor data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Tensor data of particle property
-  Eigen::VectorXd tensor_data(const std::string& property) override;
+  //! \retval data Tensor data of particle property
+  inline Eigen::VectorXd tensor_data(
+      const std::string& property) const override;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint

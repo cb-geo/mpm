@@ -259,13 +259,13 @@ class ParticleBase {
 
   //! Return scalar data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Scalar data of particle property
-  virtual double scalar_data(const std::string& property) = 0;
+  //! \retval data Scalar data of particle property
+  virtual double scalar_data(const std::string& property) const = 0;
 
   //! Return tensor data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Tensor data of particle property
-  virtual Eigen::VectorXd tensor_data(const std::string& property) = 0;
+  //! \retval data Tensor data of particle property
+  virtual Eigen::VectorXd tensor_data(const std::string& property) const = 0;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
