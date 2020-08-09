@@ -1101,16 +1101,16 @@ std::vector<Eigen::Matrix<double, Tsize, 1>>
   return tensor_data;
 }
 
-//! Return particle scalar data
+//! Return particle state variable data
 template <unsigned Tdim>
 std::vector<double> mpm::Mesh<Tdim>::particles_statevars_data(
-    const std::string& attribute) {
-  std::vector<double> scalar_data;
-  scalar_data.reserve(particles_.size());
+    const std::string& attribute, unsigned phase) {
+  std::vector<double> statevars_data;
+  statevars_data.reserve(particles_.size());
   // Iterate over particles and add scalar value to data
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    scalar_data.emplace_back((*pitr)->state_variable(attribute));
-  return scalar_data;
+    statevars_data.emplace_back((*pitr)->state_variable(attribute, phase));
+  return statevars_data;
 }
 
 //! Assign particles volumes
