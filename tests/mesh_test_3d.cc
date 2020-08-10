@@ -917,12 +917,15 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
+                    mesh->nparticles());
+            // Particle mass
+            attribute = "mass";
+            REQUIRE(mesh->particles_scalar_data(attribute).size() ==
                     mesh->nparticles());
             // Particle invalid data
             attribute = "invalid";
-            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
-                    0);
+            REQUIRE(mesh->particles_vector_data(attribute).size() == 0);
 
             // State variable
             attribute = "pdstrain";
