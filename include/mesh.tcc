@@ -1078,7 +1078,7 @@ std::vector<Eigen::Matrix<double, 3, 1>>
 //! Return particle scalar data
 template <unsigned Tdim>
 std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
-    const std::string& attribute) {
+    const std::string& attribute) const {
   std::vector<double> scalar_data;
   scalar_data.reserve(particles_.size());
   // Iterate over particles and add scalar value to data
@@ -1090,7 +1090,7 @@ std::vector<double> mpm::Mesh<Tdim>::particles_scalar_data(
 //! Return particle vector data
 template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
-    const std::string& attribute) {
+    const std::string& attribute) const {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
   // Iterate over particles
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
@@ -1110,7 +1110,7 @@ std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
 template <unsigned Tdim>
 template <unsigned Tsize>
 std::vector<Eigen::Matrix<double, Tsize, 1>>
-    mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) {
+    mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) const {
   std::vector<Eigen::Matrix<double, Tsize, 1>> tensor_data;
   // Iterate over particles
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {

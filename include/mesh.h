@@ -261,20 +261,20 @@ class Mesh {
   //! Return particles scalar data
   //! \param[in] attribute Name of the scalar data attribute
   //! \retval scalar_data Vector containing scalar properties from particles
-  std::vector<double> particles_scalar_data(const std::string& attribute);
+  std::vector<double> particles_scalar_data(const std::string& attribute) const;
 
   //! Return particles vector data
   //! \param[in] attribute Name of the tensor data attribute
   //! \retval vector_data Vector containing vector properties from particles
   std::vector<Eigen::Matrix<double, 3, 1>> particles_vector_data(
-      const std::string& attribute);
+      const std::string& attribute) const;
 
   //! Return particles tensor data
   //! \param[in] attribute Name of the tensor data attribute
   //! \retval tensor_data Vector containing tensor properties from particles
   template <unsigned Tsize>
   std::vector<Eigen::Matrix<double, Tsize, 1>> particles_tensor_data(
-      const std::string& attribute);
+      const std::string& attribute) const;
 
   //! Return particles state variable data
   //! \param[in] attribute Name of the state variable attribute

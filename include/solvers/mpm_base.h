@@ -176,7 +176,6 @@ class MPMBase : public MPM {
       {"strains", VariableType::Tensor},
       {"stresses", VariableType::Tensor}};
 
- protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
   //! Time step size

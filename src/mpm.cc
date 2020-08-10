@@ -6,7 +6,6 @@
 #include "mpm_explicit.h"
 
 namespace mpm {
-
 // Stress update method
 std::map<std::string, StressUpdate> stress_update = {
     {"usf", StressUpdate::USF},
