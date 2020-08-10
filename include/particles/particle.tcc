@@ -244,12 +244,15 @@ void mpm::Particle<Tdim>::initialise() {
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
 
-  // Initialize vector data properties
-  this->properties_["stresses"] = [&]() { return stress(); };
-  this->properties_["strains"] = [&]() { return strain(); };
-  this->properties_["velocities"] = [&]() { return velocity(); };
-  this->properties_["displacements"] = [&]() { return displacement(); };
-  this->properties_["normals"] = [&]() { return normal(); };
+  // Initialize scalar and tensor data properties
+  this->scalar_properties_["mass"] = [&]() { return mass(); };
+  this->scalar_properties_["volume"] = [&]() { return volume(); };
+  this->scalar_properties_["mass_density"] = [&]() { return mass_density(); };
+  this->vector_properties_["displacements"] = [&]() { return displacement(); };
+  this->vector_properties_["velocities"] = [&]() { return velocity(); };
+  this->vector_properties_["normals"] = [&]() { return normal(); };
+  this->tensor_properties_["stresses"] = [&]() { return stress(); };
+  this->tensor_properties_["strains"] = [&]() { return strain(); };
 }
 
 //! Initialise particle material container
@@ -868,10 +871,36 @@ void mpm::Particle<Tdim>::apply_particle_velocity_constraints(unsigned dir,
   this->velocity_(dir) = velocity;
 }
 
+//! Return particle scalar data
+template <unsigned Tdim>
+inline double mpm::Particle<Tdim>::scalar_data(
+    const std::string& property) const {
+  return (this->scalar_properties_.find(property) !=
+          this->scalar_properties_.end())
+             ? this->scalar_properties_.at(property)()
+             : std::numeric_limits<double>::quiet_NaN();
+}
+
+//! Return particle vector data
+template <unsigned Tdim>
+inline Eigen::Matrix<double, Tdim, 1> mpm::Particle<Tdim>::vector_data(
+    const std::string& property) const {
+  return (this->vector_properties_.find(property) !=
+          this->vector_properties_.end())
+             ? this->vector_properties_.at(property)()
+             : Eigen::Matrix<double, Tdim, 1>::Constant(
+                   std::numeric_limits<double>::quiet_NaN());
+}
+
 //! Return particle tensor data
 template <unsigned Tdim>
-Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(const std::string& property) {
-  return this->properties_.at(property)();
+inline Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(
+    const std::string& property) const {
+  return (this->tensor_properties_.find(property) !=
+          this->tensor_properties_.end())
+             ? this->tensor_properties_.at(property)()
+             : Eigen::Matrix<double, 6, 1>::Constant(
+                   std::numeric_limits<double>::quiet_NaN());
 }
 
 //! Assign material id of this particle to nodes

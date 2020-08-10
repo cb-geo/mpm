@@ -45,7 +45,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     } catch (std::exception& exception) {
       console_->warn(
           "{} #{}: {}. Stress update method is not specified, using USF as "
-          "default\n",
+          "default",
           __FILE__, __LINE__, exception.what());
     }
 
@@ -92,8 +92,39 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     abort();
   }
 
-  bool vtk_statevar = false;
+  // VTK particle variables
+  // Initialise container with empty vector
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Scalar, std::vector<std::string>()));
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Vector, std::vector<std::string>()));
+  vtk_vars_.insert(
+      std::make_pair(mpm::VariableType::Tensor, std::vector<std::string>()));
+
+  if ((post_process_.find("vtk") != post_process_.end()) &&
+      post_process_.at("vtk").is_array() &&
+      post_process_.at("vtk").size() > 0) {
+    // Iterate over vtk
+    for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
+      std::string attribute =
+          post_process_["vtk"][i].template get<std::string>();
+      if (variables_.find(attribute) != variables_.end())
+        vtk_vars_[variables_.at(attribute)].emplace_back(attribute);
+      else {
+        console_->warn(
+            "{} #{}: VTK variable '{}' was specified, but is not available "
+            "in variable list",
+            __FILE__, __LINE__, attribute);
+      }
+    }
+  } else {
+    console_->warn(
+        "{} #{}: No VTK variables were specified, none will be generated",
+        __FILE__, __LINE__);
+  }
+
   // VTK state variables
+  bool vtk_statevar = false;
   if ((post_process_.find("vtk_statevars") != post_process_.end()) &&
       post_process_.at("vtk_statevars").is_array() &&
       post_process_.at("vtk_statevars").size() > 0) {
@@ -525,16 +556,34 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 #endif
 
-  //! VTK vector variables
-  std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
+  //! VTK scalar variables
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Scalar)) {
+    // Write scalar
+    auto file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    vtk_writer->write_scalar_point_data(
+        file, mesh_->particles_scalar_data(attribute), attribute);
 
-  // Write VTK attributes
-  for (const auto& attribute : vtk_vector_data) {
+    // Write a parallel MPI VTK container file
+#ifdef USE_MPI
+    if (mpi_rank == 0 && mpi_size > 1) {
+      auto parallel_file = io_->output_file(attribute, ".pvtp", uuid_, step,
+                                            max_steps, write_mpi_rank)
+                               .string();
+
+      vtk_writer->write_parallel_vtk(parallel_file, attribute, mpi_size, step,
+                                     max_steps);
+    }
+#endif
+  }
+
+  //! VTK vector variables
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Vector)) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
-        file, mesh_->template particles_tensor_data<3>(attribute), attribute);
+        file, mesh_->particles_vector_data(attribute), attribute);
 
     // Write a parallel MPI VTK container file
 #ifdef USE_MPI
@@ -550,10 +599,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
   }
 
   //! VTK tensor variables
-  std::vector<std::string> vtk_tensor_data = {"stresses", "strains"};
-
-  // Write VTK attributes
-  for (const auto& attribute : vtk_tensor_data) {
+  for (const auto& attribute : vtk_vars_.at(mpm::VariableType::Tensor)) {
     // Write vector
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();

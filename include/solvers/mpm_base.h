@@ -24,6 +24,12 @@
 
 namespace mpm {
 
+//! Variable type
+//! Scalar: boolean, unsigned, int, double
+//! Vector: Vector of size 3
+//! Tensor: Symmetric tensor arranged in voigt notation
+enum class VariableType { Scalar, Vector, Tensor };
+
 //! Stress update method
 //! USF: Update Stress First
 //! USL: Update Stress Last
@@ -170,6 +176,22 @@ class MPMBase : public MPM {
   bool initialise_damping(const Json& damping_props);
 
  protected:
+  // Variable list
+  tsl::robin_map<std::string, VariableType> variables_ = {
+      // Scalar variables
+      {"mass", VariableType::Scalar},
+      {"volume", VariableType::Scalar},
+      {"mass_density", VariableType::Scalar},
+      // Vector variables
+      {"displacements", VariableType::Vector},
+      {"velocities", VariableType::Vector},
+      {"normals", VariableType::Vector},
+      {"liquid_velocities", VariableType::Vector},
+      // Tensor variables
+      {"strains", VariableType::Tensor},
+      {"stresses", VariableType::Tensor}};
+
+ protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
   //! Time step size
@@ -205,6 +227,8 @@ class MPMBase : public MPM {
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
   std::map<unsigned, std::shared_ptr<mpm::FunctionBase>> math_functions_;
+  //! VTK particle variables
+  tsl::robin_map<mpm::VariableType, std::vector<std::string>> vtk_vars_;
   //! VTK state variables
   tsl::robin_map<unsigned, std::vector<std::string>> vtk_statevars_;
   //! Set node concentrated force

@@ -119,7 +119,9 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   liquid_saturation_ = 1.;
 
   // Initialize vector data properties
-  this->properties_["liquid_velocities"] = [&]() { return liquid_velocity(); };
+  this->vector_properties_["liquid_velocities"] = [&]() {
+    return liquid_velocity();
+  };
 }
 
 // Assign degree of saturation to the liquid phase

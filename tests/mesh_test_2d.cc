@@ -857,12 +857,22 @@ TEST_CASE("Mesh is checked for 2D case", "[mesh][2D]") {
                     mesh->nparticles());
             // Particle velocities
             attribute = "velocities";
-            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
+            REQUIRE(mesh->particles_vector_data(attribute).size() ==
                     mesh->nparticles());
-            // Particle invalid data
+            // Particle mass
+            attribute = "mass";
+            REQUIRE(mesh->particles_scalar_data(attribute).size() ==
+                    mesh->nparticles());
+
+            // Particle invalid data for tensor, vector, scalar
             attribute = "invalid";
-            REQUIRE(mesh->template particles_tensor_data<3>(attribute).size() ==
-                    0);
+            const auto& invalid_tensor =
+                mesh->template particles_tensor_data<6>(attribute);
+            REQUIRE(invalid_tensor.size() == mesh->nparticles());
+            const auto& invalid_vector = mesh->particles_vector_data(attribute);
+            REQUIRE(invalid_vector.size() == mesh->nparticles());
+            const auto& invalid_scalar = mesh->particles_scalar_data(attribute);
+            REQUIRE(invalid_scalar.size() == mesh->nparticles());
 
             // State variable
             attribute = "pdstrain";

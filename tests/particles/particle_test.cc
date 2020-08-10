@@ -118,10 +118,62 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
 
-    auto pstress_data = particle->tensor_data("stresses");
-    for (unsigned i = 0; i < pstress_data.size(); ++i)
-      REQUIRE(pstress_data[i] == Approx(stress[i]).epsilon(Tolerance));
+  //! Test particles scalar, vector and tensor data
+  SECTION("Check particle scalar, vector, and tensor data") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+
+    // Check scalar data: mass
+    REQUIRE(particle->scalar_data("mass") == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(mass);
+    REQUIRE(particle->scalar_data("mass") == Approx(100.5).epsilon(Tolerance));
+
+    // Check scalar data: invalid
+    REQUIRE(std::isnan(particle->scalar_data("invalid")) == true);
+
+    // Check vector data: velocities
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
+
+    REQUIRE(particle->vector_data("velocities").size() == Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_velocity(velocity) == true);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check vector data: invalid
+    REQUIRE(particle->vector_data("invalid").size() == Dim);
+    for (unsigned i = 0; i < particle->vector_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->vector_data("invalid")(i)) == true);
+
+    // Check tensor data: stress
+    Eigen::Matrix<double, 6, 1> stress;
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 17.51;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->initial_stress(stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check tensor data: invalid
+    REQUIRE(particle->tensor_data("invalid").size() == 6);
+    for (unsigned i = 0; i < particle->tensor_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->tensor_data("invalid")(i)) == true);
   }
 
   //! Test particles velocity constraints
@@ -594,6 +646,62 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
+  //! Test particles scalar, vector and tensor data
+  SECTION("Check particle scalar, vector, and tensor data") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+
+    // Check scalar data: mass
+    REQUIRE(particle->scalar_data("mass") == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(mass);
+    REQUIRE(particle->scalar_data("mass") == Approx(100.5).epsilon(Tolerance));
+
+    // Check scalar data: invalid
+    REQUIRE(std::isnan(particle->scalar_data("invalid")) == true);
+
+    // Check vector data: velocities
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
+
+    REQUIRE(particle->vector_data("velocities").size() == Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_velocity(velocity) == true);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check vector data: invalid
+    REQUIRE(particle->vector_data("invalid").size() == Dim);
+    for (unsigned i = 0; i < particle->vector_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->vector_data("invalid")(i)) == true);
+
+    // Check tensor data: stress
+    Eigen::Matrix<double, 6, 1> stress;
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 17.51;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->initial_stress(stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check tensor data: invalid
+    REQUIRE(particle->tensor_data("invalid").size() == 6);
+    for (unsigned i = 0; i < particle->tensor_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->tensor_data("invalid")(i)) == true);
   }
 
   //! Test particles velocity constraints
@@ -1825,6 +1933,62 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     auto pstress = particle->stress();
     for (unsigned i = 0; i < pstress.size(); ++i)
       REQUIRE(pstress[i] == Approx(stress[i]).epsilon(Tolerance));
+  }
+
+  //! Test particles scalar, vector and tensor data
+  SECTION("Check particle scalar, vector, and tensor data") {
+    mpm::Index id = 0;
+    const double Tolerance = 1.E-7;
+    bool status = true;
+    std::shared_ptr<mpm::ParticleBase<Dim>> particle =
+        std::make_shared<mpm::Particle<Dim>>(id, coords, status);
+
+    // Check scalar data: mass
+    REQUIRE(particle->scalar_data("mass") == Approx(0.0).epsilon(Tolerance));
+    double mass = 100.5;
+    particle->assign_mass(mass);
+    REQUIRE(particle->scalar_data("mass") == Approx(100.5).epsilon(Tolerance));
+
+    // Check scalar data: invalid
+    REQUIRE(std::isnan(particle->scalar_data("invalid")) == true);
+
+    // Check vector data: velocities
+    Eigen::VectorXd velocity;
+    velocity.resize(Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i) velocity(i) = 17.51;
+
+    REQUIRE(particle->vector_data("velocities").size() == Dim);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    REQUIRE(particle->assign_velocity(velocity) == true);
+    for (unsigned i = 0; i < velocity.size(); ++i)
+      REQUIRE(particle->vector_data("velocities")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check vector data: invalid
+    REQUIRE(particle->vector_data("invalid").size() == Dim);
+    for (unsigned i = 0; i < particle->vector_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->vector_data("invalid")(i)) == true);
+
+    // Check tensor data: stress
+    Eigen::Matrix<double, 6, 1> stress;
+    for (unsigned i = 0; i < stress.size(); ++i) stress(i) = 17.51;
+
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(0.).epsilon(Tolerance));
+
+    particle->initial_stress(stress);
+    for (unsigned i = 0; i < stress.size(); ++i)
+      REQUIRE(particle->tensor_data("stresses")(i) ==
+              Approx(17.51).epsilon(Tolerance));
+
+    // Check tensor data: invalid
+    REQUIRE(particle->tensor_data("invalid").size() == 6);
+    for (unsigned i = 0; i < particle->tensor_data("invalid").size(); ++i)
+      REQUIRE(std::isnan(particle->tensor_data("invalid")(i)) == true);
   }
 
   //! Test particles velocity constraints
