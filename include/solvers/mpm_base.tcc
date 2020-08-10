@@ -101,7 +101,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   vtk_vars_.insert(
       std::make_pair(mpm::VariableType::Tensor, std::vector<std::string>()));
 
-  if (post_process_.at("vtk").is_array() &&
+  if ((post_process_.find("vtk") != post_process_.end()) &&
+      post_process_.at("vtk").is_array() &&
       post_process_.at("vtk").size() > 0) {
     // Iterate over vtk
     for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
@@ -111,7 +112,7 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
         vtk_vars_[variables_.at(attribute)].emplace_back(attribute);
       else {
         console_->warn(
-            "{} #{}: VTK variable {} was specified, but is not available "
+            "{} #{}: VTK variable '{}' was specified, but is not available "
             "in variable list",
             __FILE__, __LINE__, attribute);
       }
