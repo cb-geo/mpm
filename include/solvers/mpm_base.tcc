@@ -572,7 +572,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
     auto file =
         io_->output_file(attribute, extension, uuid_, step, max_steps).string();
     vtk_writer->write_vector_point_data(
-        file, mesh_->template particles_tensor_data<3>(attribute), attribute);
+        file, mesh_->particles_vector_data(attribute), attribute);
 
     // Write a parallel MPI VTK container file
 #ifdef USE_MPI

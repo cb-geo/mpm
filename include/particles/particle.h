@@ -267,6 +267,11 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval data Scalar data of particle property
   inline double scalar_data(const std::string& property) const override;
 
+  //! Return vector data of particles
+  //! \param[in] property Property string
+  //! \retval data Vector data of particle property
+  inline VectorDim vector_data(const std::string& property) const override;
+
   //! Return tensor data of particles
   //! \param[in] property Property string
   //! \retval data Tensor data of particle property
@@ -375,6 +380,8 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of scalar properties
   tsl::robin_map<std::string, std::function<double()>> scalar_properties_;
+  //! Map of vector properties
+  tsl::robin_map<std::string, std::function<VectorDim()>> vector_properties_;
   //! Map of tensor properties
   tsl::robin_map<std::string, std::function<Eigen::VectorXd()>>
       tensor_properties_;

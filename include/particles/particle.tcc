@@ -247,10 +247,10 @@ void mpm::Particle<Tdim>::initialise() {
   this->scalar_properties_["mass"] = [&]() { return mass(); };
   this->scalar_properties_["volume"] = [&]() { return volume(); };
   this->scalar_properties_["mass_density"] = [&]() { return mass_density(); };
+  this->vector_properties_["displacements"] = [&]() { return displacement(); };
+  this->vector_properties_["velocities"] = [&]() { return velocity(); };
   this->tensor_properties_["stresses"] = [&]() { return stress(); };
   this->tensor_properties_["strains"] = [&]() { return strain(); };
-  this->tensor_properties_["velocities"] = [&]() { return velocity(); };
-  this->tensor_properties_["displacements"] = [&]() { return displacement(); };
 }
 
 //! Initialise particle material container
@@ -863,6 +863,13 @@ inline double mpm::Particle<Tdim>::scalar_data(
           this->scalar_properties_.end())
              ? this->scalar_properties_.at(property)()
              : std::numeric_limits<double>::quiet_NaN();
+}
+
+//! Return particle vector data
+template <unsigned Tdim>
+inline Eigen::Matrix<double, Tdim, 1> mpm::Particle<Tdim>::vector_data(
+    const std::string& property) const {
+  return this->vector_properties_.at(property)();
 }
 
 //! Return particle tensor data

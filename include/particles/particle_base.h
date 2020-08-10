@@ -262,6 +262,11 @@ class ParticleBase {
   //! \retval data Scalar data of particle property
   virtual double scalar_data(const std::string& property) const = 0;
 
+  //! Return vector data of particles
+  //! \param[in] property Property string
+  //! \retval data Vector data of particle property
+  virtual VectorDim vector_data(const std::string& property) const = 0;
+
   //! Return tensor data of particles
   //! \param[in] property Property string
   //! \retval data Tensor data of particle property
