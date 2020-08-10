@@ -1092,22 +1092,16 @@ template <unsigned Tdim>
 std::vector<Eigen::Matrix<double, 3, 1>> mpm::Mesh<Tdim>::particles_vector_data(
     const std::string& attribute) {
   std::vector<Eigen::Matrix<double, 3, 1>> vector_data;
-  try {
-    // Iterate over particles
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      Eigen::Matrix<double, 3, 1> data;
-      data.setZero();
-      auto pdata = (*pitr)->vector_data(attribute);
-      // Fill vector_data to the size of dimensions
-      for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
+  // Iterate over particles
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    Eigen::Matrix<double, 3, 1> data;
+    data.setZero();
+    auto pdata = (*pitr)->vector_data(attribute);
+    // Fill vector_data to the size of dimensions
+    for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
 
-      // Add to a tensor of data
-      vector_data.emplace_back(data);
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
-                    attribute);
-    vector_data.clear();
+    // Add to a tensor of data
+    vector_data.emplace_back(data);
   }
   return vector_data;
 }
@@ -1118,22 +1112,16 @@ template <unsigned Tsize>
 std::vector<Eigen::Matrix<double, Tsize, 1>>
     mpm::Mesh<Tdim>::particles_tensor_data(const std::string& attribute) {
   std::vector<Eigen::Matrix<double, Tsize, 1>> tensor_data;
-  try {
-    // Iterate over particles
-    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-      Eigen::Matrix<double, Tsize, 1> data;
-      data.setZero();
-      auto pdata = (*pitr)->tensor_data(attribute);
-      // Fill tensor_data to the size of dimensions
-      for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
+  // Iterate over particles
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    Eigen::Matrix<double, Tsize, 1> data;
+    data.setZero();
+    auto pdata = (*pitr)->tensor_data(attribute);
+    // Fill tensor_data to the size of dimensions
+    for (unsigned i = 0; i < pdata.size(); ++i) data(i) = pdata(i);
 
-      // Add to a tensor of data
-      tensor_data.emplace_back(data);
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {} {}\n", __FILE__, __LINE__, exception.what(),
-                    attribute);
-    tensor_data.clear();
+    // Add to a tensor of data
+    tensor_data.emplace_back(data);
   }
   return tensor_data;
 }

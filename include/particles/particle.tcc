@@ -869,14 +869,22 @@ inline double mpm::Particle<Tdim>::scalar_data(
 template <unsigned Tdim>
 inline Eigen::Matrix<double, Tdim, 1> mpm::Particle<Tdim>::vector_data(
     const std::string& property) const {
-  return this->vector_properties_.at(property)();
+  return (this->vector_properties_.find(property) !=
+          this->vector_properties_.end())
+             ? this->vector_properties_.at(property)()
+             : Eigen::Matrix<double, Tdim, 1>::Constant(
+                   std::numeric_limits<double>::quiet_NaN());
 }
 
 //! Return particle tensor data
 template <unsigned Tdim>
 inline Eigen::VectorXd mpm::Particle<Tdim>::tensor_data(
     const std::string& property) const {
-  return this->tensor_properties_.at(property)();
+  return (this->tensor_properties_.find(property) !=
+          this->tensor_properties_.end())
+             ? this->tensor_properties_.at(property)()
+             : Eigen::Matrix<double, 6, 1>::Constant(
+                   std::numeric_limits<double>::quiet_NaN());
 }
 
 //! Assign material id of this particle to nodes
