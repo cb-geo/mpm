@@ -92,8 +92,10 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     abort();
   }
 
+  bool vtk_statevar = false;
   // VTK state variables
-  if (post_process_.at("vtk_statevars").is_array() &&
+  if ((post_process_.find("vtk_statevars") != post_process_.end()) &&
+      post_process_.at("vtk_statevars").is_array() &&
       post_process_.at("vtk_statevars").size() > 0) {
     // Iterate over state_vars
     for (const auto& svars : post_process_["vtk_statevars"]) {
@@ -108,13 +110,14 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
         // Insert vtk_statevars_
         const std::vector<std::string> state_var = svars["statevars"];
         vtk_statevars_.insert(std::make_pair(phase_id, state_var));
-      } else
-        console_->warn(
-            "{} #{}: No VTK statevariable were specified, none will be "
-            "generated",
-            __FILE__, __LINE__);
+        vtk_statevar = true;
+      } else {
+        vtk_statevar = false;
+        break;
+      }
     }
-  } else
+  }
+  if (!vtk_statevar)
     console_->warn(
         "{} #{}: No VTK statevariable were specified, none will be generated",
         __FILE__, __LINE__);
