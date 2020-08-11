@@ -984,16 +984,16 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
   try {
     // TODO: Get the total phases
     const unsigned Tnphases = 2;
-    // Read and assign pore pressure constraints
+    // Read and assign pressure constraints
     if (mesh_props.find("boundary_conditions") != mesh_props.end() &&
         mesh_props["boundary_conditions"].find("pressure_constraints") !=
             mesh_props["boundary_conditions"].end()) {
 
-      // Iterate over pore pressure constraints
+      // Iterate over pressure constraints
       for (const auto& constraints :
            mesh_props["boundary_conditions"]["pressure_constraints"]) {
         // Pore pressure constraint phase indice
-        unsigned constraint_phase = constraints["phase"];
+        unsigned constraint_phase = constraints["phase_id"];
 
         if (constraint_phase >= Tnphases)
           throw std::runtime_error(
@@ -1001,13 +1001,13 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
 
         // Pore pressure constraints are specified in a file
         if (constraints.find("file") != constraints.end()) {
-          std::string pore_pressure_constraints_file =
+          std::string pressure_constraints_file =
               constraints.at("file").template get<std::string>();
           bool ppressure_constraints =
               constraints_->assign_nodal_pressure_constraints(
                   constraint_phase,
                   mesh_io->read_pressure_constraints(
-                      io_->file_name(pore_pressure_constraints_file)));
+                      io_->file_name(pressure_constraints_file)));
           if (!ppressure_constraints)
             throw std::runtime_error(
                 "Pore pressure constraints are not properly assigned");
@@ -1019,12 +1019,11 @@ void mpm::MPMBase<Tdim>::nodal_pressure_constraints(
                 constraints.at("math_function_id").template get<unsigned>());
           // Set id
           int nset_id = constraints.at("nset_id").template get<int>();
-          // Pore Pressure
-          double pore_pressure =
-              constraints.at("pore_pressure").template get<double>();
-          // Add pore pressure constraint to mesh
+          // Pressure
+          double pressure = constraints.at("pressure").template get<double>();
+          // Add pressure constraint to mesh
           constraints_->assign_nodal_pressure_constraint(
-              pfunction, nset_id, constraint_phase, pore_pressure);
+              pfunction, nset_id, constraint_phase, pressure);
         }
       }
     } else
