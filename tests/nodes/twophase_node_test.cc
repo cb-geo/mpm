@@ -10,7 +10,7 @@
 #include "node.h"
 
 // Check node class for 1D case
-TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2P]") {
+TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2Phase]") {
   const unsigned Dim = 1;
   const unsigned Dof = 1;
   const unsigned Nphases = 2;
@@ -750,7 +750,7 @@ TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2P]") {
 }
 
 // \brief Check node class for 2D case
-TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2P]") {
+TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2Phase]") {
   const unsigned Dim = 2;
   const unsigned Dof = 2;
   const unsigned Nphases = 2;
@@ -1663,7 +1663,7 @@ TEST_CASE("Twophase Node is checked for 2D case", "[node][2D][2P]") {
 }
 
 // \brief Check node class for 3D case
-TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2P]") {
+TEST_CASE("Twophase Node is checked for 3D case", "[node][3D][2Phase]") {
   const unsigned Dim = 3;
   const unsigned Dof = 3;
   const unsigned Nphases = 2;

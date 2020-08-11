@@ -16,7 +16,7 @@
 
 //! \brief Check twophase particle class for 1D case
 TEST_CASE("TwoPhase Particle is checked for 1D case",
-          "[twophase_particle][1D]") {
+          "[particle][1D][2Phase]") {
   // Dimension
   const unsigned Dim = 1;
   // Dimension
@@ -389,7 +389,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
 
 //! \brief Check twophase particle class for 2D case
 TEST_CASE("TwoPhase Particle is checked for 2D case",
-          "[twophase_particle][2D]") {
+          "[particle][2D][2Phase]") {
   // Dimension
   const unsigned Dim = 2;
   // Degree of freedom
@@ -1672,7 +1672,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
 
 //! \brief Check twophase particle class for 3D case
 TEST_CASE("TwoPhase Particle is checked for 3D case",
-          "[twophase_particle][3D]") {
+          "[particle][3D][2Phase]") {
   // Dimension
   const unsigned Dim = 3;
   // Dimension
