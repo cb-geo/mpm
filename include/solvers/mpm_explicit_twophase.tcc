@@ -320,11 +320,10 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     // active nodes to compute acceleratation and velocity
     if (damping_type_ == mpm::Damping::Cundall)
       mesh_->iterate_over_nodes_predicate(
-          std::bind(&mpm::NodeBase<
-                        Tdim>::compute_acceleration_velocity_twophase_explicit,
-                    std::placeholders::_1, this->dt_),
+          std::bind(&mpm::NodeBase<Tdim>::
+                        compute_acceleration_velocity_twophase_explicit_cundall,
+                    std::placeholders::_1, this->dt_, damping_factor_),
           std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
     else
       mesh_->iterate_over_nodes_predicate(
           std::bind(&mpm::NodeBase<
