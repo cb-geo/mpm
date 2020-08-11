@@ -16,15 +16,15 @@ void mpm::MPMExplicitTwoPhase<Tdim>::compute_stress_strain() {
   // Iterate over each particle to update particle volume
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::update_volume, std::placeholders::_1));
-  // Iterate over each particle to update porosity
-  mesh_->iterate_over_particles(std::bind(
-      &mpm::ParticleBase<Tdim>::update_porosity, std::placeholders::_1, dt_));
   // Iterate over each particle to compute stress of soil skeleton
   mesh_->iterate_over_particles(std::bind(
       &mpm::ParticleBase<Tdim>::compute_stress, std::placeholders::_1));
   // Pressure smoothing
   if (pressure_smoothing_) this->pressure_smoothing(mpm::ParticlePhase::Solid);
 
+  // Iterate over each particle to update porosity
+  mesh_->iterate_over_particles(std::bind(
+      &mpm::ParticleBase<Tdim>::update_porosity, std::placeholders::_1, dt_));
   // Iterate over each particle to compute pore pressure
   mesh_->iterate_over_particles(
       std::bind(&mpm::ParticleBase<Tdim>::compute_pore_pressure,
@@ -199,7 +199,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
           std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
                     mpm::ParticlePhase::Liquid),
           std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, mpm::ParticlePhase::Solid,
+                    std::placeholders::_1, false, mpm::ParticlePhase::Liquid,
                     std::placeholders::_2));
     }
 #endif
