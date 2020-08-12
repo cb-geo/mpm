@@ -157,6 +157,7 @@ SET(mpm_src
   ${mpm_SOURCE_DIR}/src/functions/sin_function.cc
   ${mpm_SOURCE_DIR}/src/geometry.cc
   ${mpm_SOURCE_DIR}/src/hdf5_particle.cc
+  ${mpm_SOURCE_DIR}/src/hdf5_particle_twophase.cc
   ${mpm_SOURCE_DIR}/src/io/io.cc
   ${mpm_SOURCE_DIR}/src/io/io_mesh.cc
   ${mpm_SOURCE_DIR}/src/io/logger.cc
