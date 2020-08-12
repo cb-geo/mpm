@@ -1922,7 +1922,7 @@ void mpm::Mesh<Tdim>::create_nodal_properties() {
 
 //! Compute free surface cells, nodes, and particles
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::compute_free_surface(std::string method,
+bool mpm::Mesh<Tdim>::compute_free_surface(const std::string& method,
                                            double volume_tolerance) {
   if (method == "density") {
     return this->compute_free_surface_by_density(volume_tolerance);

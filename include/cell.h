@@ -223,21 +223,19 @@ class Cell {
 
   //! Return free surface bool
   //! \retval free_surface_ indicating free surface cell
-  bool free_surface() { return free_surface_; };
+  bool free_surface() const { return free_surface_; };
 
   //! Assign volume traction to node
   //! \param[in] volume_fraction cell volume fraction
-  void assign_volume_fraction(double volume_fraction) {
-    volume_fraction_ = volume_fraction;
-  };
+  void assign_volume_fraction(double volume_fraction);
 
   //! Return cell volume fraction
   //! \retval volume_fraction_ cell volume fraction
-  double volume_fraction() { return volume_fraction_; };
+  double volume_fraction() const { return volume_fraction_; };
 
   //! Map cell volume to the nodes
   //! \param[in] phase to map volume
-  bool map_cell_volume_to_nodes(unsigned phase);
+  void map_cell_volume_to_nodes(unsigned phase);
 
  private:
   //! Approximately check if a point is in a cell
