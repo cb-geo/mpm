@@ -83,8 +83,8 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
 
     // Unbalanced force of liquid phase
     auto unbalanced_force_liquid =
-        this->external_force(mpm::NodePhase::nLiquid) +
-        this->internal_force(mpm::NodePhase::nLiquid) - drag_force;
+        this->external_force_.col(mpm::NodePhase::nLiquid) +
+        this->internal_force_.col(mpm::NodePhase::nLiquid) - drag_force;
     // Acceleration of liquid phase (momentume balance of fluid phase)
     this->acceleration_.col(mpm::NodePhase::nLiquid) =
         (unbalanced_force_liquid -
@@ -94,10 +94,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::
 
     // Unbalanced force of solid phase
     auto unbalanced_force_solid =
-        this->external_force(mpm::NodePhase::nMixture) +
-        this->internal_force(mpm::NodePhase::nMixture) -
-        this->mass(mpm::NodePhase::nLiquid) *
-            this->acceleration(mpm::NodePhase::nLiquid);
+        this->external_force_.col(mpm::NodePhase::nMixture) +
+        this->internal_force_.col(mpm::NodePhase::nMixture) -
+        this->mass_(mpm::NodePhase::nLiquid) *
+            this->acceleration_.col(mpm::NodePhase::nLiquid);
     // Acceleration of solid phase (momentume balance of mixture)
     this->acceleration_.col(mpm::NodePhase::nSolid) =
         (unbalanced_force_solid -

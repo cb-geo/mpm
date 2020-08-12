@@ -425,6 +425,10 @@ TEST_CASE("Twophase Node is checked for 1D case", "[node][1D][2Phase]") {
           node->update_mass(false, mpm::NodePhase::nSolid, solid_mass));
       REQUIRE(node->mass(mpm::NodePhase::nSolid) ==
               Approx(solid_mass).epsilon(Tolerance));
+      REQUIRE_NOTHROW(
+          node->update_mass(false, mpm::NodePhase::nLiquid, liquid_mass));
+      REQUIRE(node->mass(mpm::NodePhase::nLiquid) ==
+              Approx(liquid_mass).epsilon(Tolerance));
 
       // Check internal force
       // Create a force vector
