@@ -292,17 +292,17 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         const auto h5_send = particle->hdf5();
 
         // Send MPI particle
-        MPI_Datatype paritcle_type = mpm::register_mpi_particle_type(h5_send);
-        MPI_Send(&h5_send, 1, paritcle_type, receiver, 0, MPI_COMM_WORLD);
-        mpm::deregister_mpi_particle_type(paritcle_type);
+        MPI_Datatype particle_type = mpm::register_mpi_particle_type(h5_send);
+        MPI_Send(&h5_send, 1, particle_type, receiver, 0, MPI_COMM_WORLD);
+        mpm::deregister_mpi_particle_type(particle_type);
       }
       if (mpi_rank == receiver) {
         // Receive the messid
         struct mpm::HDF5Particle received;
-        MPI_Datatype paritcle_type = mpm::register_mpi_particle_type(received);
-        MPI_Recv(&received, 1, paritcle_type, sender, 0, MPI_COMM_WORLD,
+        MPI_Datatype particle_type = mpm::register_mpi_particle_type(received);
+        MPI_Recv(&received, 1, particle_type, sender, 0, MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
-        mpm::deregister_mpi_particle_type(paritcle_type);
+        mpm::deregister_mpi_particle_type(particle_type);
 
         // Received particle
         std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
