@@ -1,5 +1,5 @@
-#ifndef MPM_TWOPHASE_PARTICLE_H_
-#define MPM_TWOPHASE_PARTICLE_H_
+#ifndef MPM_PARTICLE_TWOPHASE_H_
+#define MPM_PARTICLE_TWOPHASE_H_
 
 #include <array>
 #include <limits>
@@ -243,6 +243,6 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 };  // TwoPhaseParticle class
 }  // namespace mpm
 
-#include "twophase_particle.tcc"
+#include "particle_twophase.tcc"
 
-#endif  // MPM_TWOPHASE_PARTICLE_H__
+#endif  // MPM_PARTICLE_TWOPHASE_H__

@@ -388,6 +388,6 @@ class Node : public NodeBase<Tdim> {
 }  // namespace mpm
 
 #include "node.tcc"
-#include "twophase_node.tcc"
+#include "node_twophase.tcc"
 
 #endif  // MPM_NODE_H_

@@ -211,11 +211,11 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_test.cc
-    ${mpm_SOURCE_DIR}/tests/nodes/twophase_node_test.cc
+    ${mpm_SOURCE_DIR}/tests/nodes/node_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_cell_crossing_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/particles/twophase_particle_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc

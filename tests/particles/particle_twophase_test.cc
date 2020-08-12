@@ -11,8 +11,8 @@
 #include "material.h"
 #include "node.h"
 #include "particle.h"
+#include "particle_twophase.h"
 #include "quadrilateral_element.h"
-#include "twophase_particle.h"
 
 //! \brief Check twophase particle class for 1D case
 TEST_CASE("TwoPhase Particle is checked for 1D case",
