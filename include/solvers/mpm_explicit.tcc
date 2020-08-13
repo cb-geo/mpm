@@ -5,10 +5,10 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
   //! Logger
   console_ = spdlog::get("MPMExplicit");
   //! Stress update
-  if (this->stress_update_scheme_ == "usl")
-    stress_update_ = std::make_shared<mpm::StressUpdateUSL<Tdim>>(mesh_, dt_);
+  if (this->stress_update_ == "usl")
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSL<Tdim>>(mesh_, dt_);
   else
-    stress_update_ = std::make_shared<mpm::StressUpdateUSF<Tdim>>(mesh_, dt_);
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
 
   //! Interface scheme
   if (this->interface_)
@@ -66,9 +66,8 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
-  if (analysis_.find("interface") != analysis_.end())
-    interface_ = analysis_.at("interface").template get<bool>();
-
+  interface_ = io_->analysis_bool("interface");
+  
   // Initialise material
   this->initialise_materials();
 
@@ -113,33 +112,33 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     mesh_->inject_particles(step_ * dt_);
 
     // Initialise nodes, cells and shape functions
-    stress_update_->initialise();
+    mpm_scheme_->initialise();
 
     // Initialise nodal properties and append material ids to node
     contact_->initialise();
 
     // Mass momentum and compute velocity at nodes
-    stress_update_->momentum_nodes(phase);
+    mpm_scheme_->compute_nodal_kinematics(phase);
 
     // Map material properties to nodes
     contact_->compute_contact_forces();
 
     // Update stress first
-    stress_update_->precompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
 
     // Compute forces
-    stress_update_->compute_forces(gravity_, phase, step_,
+    mpm_scheme_->compute_forces(gravity_, phase, step_,
                                    set_node_concentrated_force_);
 
     // Particle kinematics
-    stress_update_->compute_particle_kinematics(velocity_update_, phase,
+    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase,
                                                 "Cundall", damping_factor_);
 
     // Update Stress Last
-    stress_update_->postcompute_stress_strain(phase, pressure_smoothing_);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
-    stress_update_->locate_particles(this->locate_particles_);
+    mpm_scheme_->locate_particles(this->locate_particles_);
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
@@ -162,7 +161,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
   }
   auto solver_end = std::chrono::steady_clock::now();
   console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-                 stress_update_->scheme(),
+                 mpm_scheme_->scheme(),
                  std::chrono::duration_cast<std::chrono::milliseconds>(
                      solver_end - solver_begin)
                      .count());

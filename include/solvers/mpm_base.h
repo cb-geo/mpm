@@ -22,9 +22,9 @@
 #include "contact_friction.h"
 #include "mpm.h"
 #include "particle.h"
-#include "stress_update.h"
-#include "stress_update_usf.h"
-#include "stress_update_usl.h"
+#include "mpm_scheme.h"
+#include "mpm_scheme_usf.h"
+#include "mpm_scheme_usl.h"
 #include "vector.h"
 
 namespace mpm {
@@ -177,9 +177,9 @@ class MPMBase : public MPM {
   using mpm::MPM::console_;
 
   //! Stress update method
-  std::string stress_update_scheme_{"usf"};
+  std::string stress_update_{"usf"};
   //! Stress update scheme
-  std::shared_ptr<mpm::StressUpdate<Tdim>> stress_update_{nullptr};
+  std::shared_ptr<mpm::MPMScheme<Tdim>> mpm_scheme_{nullptr};
   //! Interface scheme
   std::shared_ptr<mpm::Contact<Tdim>> contact_{nullptr};
   //! velocity update

@@ -23,7 +23,7 @@
 #include "node.h"
 #include "partio_writer.h"
 #include "quadrilateral_element.h"
-#include "stress_update_usf.h"
+#include "mpm_scheme_usf.h"
 
 //! \brief Check stress update 3D case
 TEST_CASE("Contact test case", "[contact][friction][3D]") {
@@ -194,8 +194,7 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
     REQUIRE_NOTHROW(particle1->assign_volume(4.0));
     REQUIRE_NOTHROW(particle2->assign_volume(3.0));
 
-    auto stress_update =
-        std::make_shared<mpm::StressUpdateUSF<Dim>>(mesh, 0.01);
+    auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSF<Dim>>(mesh, 0.01);
 
     auto contact = std::make_shared<mpm::ContactFriction<Dim>>(mesh);
 
@@ -205,12 +204,12 @@ TEST_CASE("Contact test case", "[contact][friction][3D]") {
     // Create nodal properties
     REQUIRE_NOTHROW(mesh->create_nodal_properties());
     // Initialise
-    REQUIRE_NOTHROW(stress_update->initialise());
+    REQUIRE_NOTHROW(mpm_scheme->initialise());
     // Contact initialize
     REQUIRE_NOTHROW(contact->initialise());
 
     // Mass momentum and compute velocity at nodes
-    REQUIRE_NOTHROW(stress_update->momentum_nodes(phase));
+    REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
     // Contact compute forces
     REQUIRE_NOTHROW(contact->compute_contact_forces());
   }

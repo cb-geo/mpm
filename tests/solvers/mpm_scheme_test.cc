@@ -20,13 +20,13 @@
 #include "node.h"
 #include "partio_writer.h"
 #include "quadrilateral_element.h"
-#include "stress_update.h"
-#include "stress_update_usf.h"
-#include "stress_update_usl.h"
+#include "mpm_scheme.h"
+#include "mpm_scheme_usf.h"
+#include "mpm_scheme_usl.h"
 
 //! \brief Check stress update 3D case
 TEST_CASE("Stress update is checked for USF and USL",
-          "[StressUpdate][USF][USL][3D]") {
+          "[MPMScheme][USF][USL][3D]") {
   // Dimension
   const unsigned Dim = 3;
   // Degrees of freedom
@@ -172,8 +172,7 @@ TEST_CASE("Stress update is checked for USF and USL",
   REQUIRE_NOTHROW(particle2->assign_volume(3.0));
 
   SECTION("Check USF") {
-    auto stress_update =
-        std::make_shared<mpm::StressUpdateUSF<Dim>>(mesh, 0.01);
+    auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSF<Dim>>(mesh, 0.01);
     // Phase
     unsigned phase = 0;
     // Step
@@ -181,41 +180,40 @@ TEST_CASE("Stress update is checked for USF and USL",
     // Gravity
     Eigen::Matrix<double, Dim, 1> gravity = {0., 0., 9.81};
     // Initialise
-    REQUIRE_NOTHROW(stress_update->initialise());
+    REQUIRE_NOTHROW(mpm_scheme->initialise());
 
     // Mass momentum and compute velocity at nodes
-    REQUIRE_NOTHROW(stress_update->momentum_nodes(phase));
+    REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
 
     // Update stress first
-    REQUIRE_NOTHROW(stress_update->precompute_stress_strain(phase, false));
-    REQUIRE_NOTHROW(stress_update->precompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true));
 
     // Compute forces
-    REQUIRE_NOTHROW(stress_update->compute_forces(gravity, phase, step, false));
-    REQUIRE_NOTHROW(stress_update->compute_forces(gravity, phase, step, true));
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, true));
 
     // Particle kinematics
-    REQUIRE_NOTHROW(stress_update->compute_particle_kinematics(
+    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
         true, phase, "Cundall", 0.02));
-    REQUIRE_NOTHROW(stress_update->compute_particle_kinematics(
+    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
         false, phase, "Cundall", 0.02));
     REQUIRE_NOTHROW(
-        stress_update->compute_particle_kinematics(true, phase, "None", 0.02));
+        mpm_scheme->compute_particle_kinematics(true, phase, "None", 0.02));
     REQUIRE_NOTHROW(
-        stress_update->compute_particle_kinematics(false, phase, "None", 0.02));
+        mpm_scheme->compute_particle_kinematics(false, phase, "None", 0.02));
 
     // Update Stress Last
-    REQUIRE_NOTHROW(stress_update->postcompute_stress_strain(phase, true));
-    REQUIRE_NOTHROW(stress_update->postcompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false));
 
     // Locate particles
-    REQUIRE_NOTHROW(stress_update->locate_particles(true));
-    REQUIRE_NOTHROW(stress_update->locate_particles(false));
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(true));
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(false));
   }
 
   SECTION("Check USL") {
-    auto stress_update =
-        std::make_shared<mpm::StressUpdateUSL<Dim>>(mesh, 0.01);
+    auto mpm_scheme = std::make_shared<mpm::MPMSchemeUSL<Dim>>(mesh, 0.01);
     // Phase
     unsigned phase = 0;
     // Step
@@ -223,35 +221,35 @@ TEST_CASE("Stress update is checked for USF and USL",
     // Gravity
     Eigen::Matrix<double, Dim, 1> gravity = {0., 0., 9.81};
     // Initialise
-    REQUIRE_NOTHROW(stress_update->initialise());
+    REQUIRE_NOTHROW(mpm_scheme->initialise());
 
     // Mass momentum and compute velocity at nodes
-    REQUIRE_NOTHROW(stress_update->momentum_nodes(phase));
+    REQUIRE_NOTHROW(mpm_scheme->compute_nodal_kinematics(phase));
 
     // Update stress first
-    REQUIRE_NOTHROW(stress_update->precompute_stress_strain(phase, false));
-    REQUIRE_NOTHROW(stress_update->precompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->precompute_stress_strain(phase, true));
 
     // Compute forces
-    REQUIRE_NOTHROW(stress_update->compute_forces(gravity, phase, step, false));
-    REQUIRE_NOTHROW(stress_update->compute_forces(gravity, phase, step, true));
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, false));
+    REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, true));
 
     // Particle kinematics
-    REQUIRE_NOTHROW(stress_update->compute_particle_kinematics(
+    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
         true, phase, "Cundall", 0.02));
-    REQUIRE_NOTHROW(stress_update->compute_particle_kinematics(
+    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
         false, phase, "Cundall", 0.02));
     REQUIRE_NOTHROW(
-        stress_update->compute_particle_kinematics(true, phase, "None", 0.02));
+        mpm_scheme->compute_particle_kinematics(true, phase, "None", 0.02));
     REQUIRE_NOTHROW(
-        stress_update->compute_particle_kinematics(false, phase, "None", 0.02));
+        mpm_scheme->compute_particle_kinematics(false, phase, "None", 0.02));
 
     // Update Stress Last
-    REQUIRE_NOTHROW(stress_update->postcompute_stress_strain(phase, true));
-    REQUIRE_NOTHROW(stress_update->postcompute_stress_strain(phase, false));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, true));
+    REQUIRE_NOTHROW(mpm_scheme->postcompute_stress_strain(phase, false));
 
     // Locate particles
-    REQUIRE_NOTHROW(stress_update->locate_particles(true));
-    REQUIRE_NOTHROW(stress_update->locate_particles(false));
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(true));
+    REQUIRE_NOTHROW(mpm_scheme->locate_particles(false));
   }
 }

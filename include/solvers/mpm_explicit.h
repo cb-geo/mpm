@@ -47,10 +47,10 @@ class MPMExplicit : public MPMBase<Tdim> {
   using mpm::MPMBase<Tdim>::post_process_;
   //! Logger
   using mpm::MPMBase<Tdim>::console_;
-  //! Stress update
+  //! MPM Scheme
+  using mpm::MPMBase<Tdim>::mpm_scheme_;
+  //! Stress update method
   using mpm::MPMBase<Tdim>::stress_update_;
-  //! Stress update scheme
-  using mpm::MPMBase<Tdim>::stress_update_scheme_;
   //! Interface scheme
   using mpm::MPMBase<Tdim>::contact_;
 

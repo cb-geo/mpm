@@ -7,17 +7,17 @@ using Json = nlohmann::json;
 #include "mpm_explicit.h"
 #include "write_mesh_particles_unitcell.h"
 
-// Check MPM Explicit USF
-TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
-          "[MPM][2D][USF][Explicit][1Phase][unitcell]") {
+// Check MPM Explicit USL
+TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
+          "[MPM][2D][USL][Explicit][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 2;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit-usf";
+  const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit2D";
-  const std::string stress_update = "usf";
-  REQUIRE(mpm_test::write_json_unitcell(2, analysis, stress_update, fname) ==
+  const std::string mpm_scheme = "usl";
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, mpm_scheme, fname) ==
           true);
 
   // Write Mesh
@@ -31,7 +31,7 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
   // clang-format off
   char* argv[] = {(char*)"./mpm",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-usf-2d-unitcell.json"};
+                  (char*)"-i",  (char*)"mpm-explicit-usl-2d-unitcell.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
@@ -65,16 +65,16 @@ TEST_CASE("MPM 2D Explicit USF implementation is checked in unitcells",
 }
 
 // Check MPM Explicit
-TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
-          "[MPM][3D][Explicit][USF][1Phase][unitcell]") {
+TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
+          "[MPM][3D][Explicit][USL][1Phase][unitcell]") {
   // Dimension
   const unsigned Dim = 3;
 
   // Write JSON file
-  const std::string fname = "mpm-explicit-usf";
+  const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit3D";
-  const std::string stress_update = "usf";
-  REQUIRE(mpm_test::write_json_unitcell(3, analysis, stress_update, fname) ==
+  const std::string mpm_scheme = "usl";
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, mpm_scheme, fname) ==
           true);
 
   // Write Mesh
@@ -88,7 +88,7 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
   // clang-format off
   char* argv[] = {(char*)"./mpm",
                   (char*)"-f",  (char*)"./",
-                  (char*)"-i",  (char*)"mpm-explicit-usf-3d-unitcell.json"};
+                  (char*)"-i",  (char*)"mpm-explicit-usl-3d-unitcell.json"};
   // clang-format on
 
   SECTION("Check initialisation") {
@@ -103,6 +103,9 @@ TEST_CASE("MPM 3D Explicit USF implementation is checked in unitcells",
     // Initialise mesh and particles
     REQUIRE_NOTHROW(mpm->initialise_mesh());
     REQUIRE_NOTHROW(mpm->initialise_particles());
+
+    // Initialise external loading
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
     REQUIRE_THROWS(mpm->initialise_materials());

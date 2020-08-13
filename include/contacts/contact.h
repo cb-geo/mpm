@@ -23,10 +23,6 @@ class Contact {
  protected:
   //! Mesh object
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
-  //! MPI Size
-  int mpi_size_ = 1;
-  //! MPI rank
-  int mpi_rank_ = 0;
 };  // Contact class
 }  // namespace mpm
 

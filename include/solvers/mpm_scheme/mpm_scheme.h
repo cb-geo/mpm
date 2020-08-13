@@ -1,5 +1,5 @@
-#ifndef MPM_STRESS_UPDATE_H_
-#define MPM_STRESS_UPDATE_H_
+#ifndef MPM_MPM_SCHEME_H_
+#define MPM_MPM_SCHEME_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
@@ -9,20 +9,21 @@
 
 namespace mpm {
 
-//! StressUpdate class
-//! \brief StressUpdate base class to support different stress update schemes
+//! MPMScheme class
+//! \brief Mpmscheme base class to support different stress update schemes
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class StressUpdate {
+class MPMScheme {
  public:
   //! Default constructor with mesh class
-  StressUpdate(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
+  MPMScheme(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
 
   //! Intialize
   virtual inline void initialise();
 
-  //! Map mass and momentum to nodes
-  virtual inline void momentum_nodes(unsigned phase);
+  //! Compute nodal kinematics - map mass and momentum to nodes
+  //! \param[in] phase Phase to smooth pressure  
+  virtual inline void compute_nodal_kinematics(unsigned phase);
 
   //! Compute stress and strain
   //! \param[in] phase Phase to smooth pressure
@@ -83,9 +84,9 @@ class StressUpdate {
   int mpi_size_ = 1;
   //! MPI rank
   int mpi_rank_ = 0;
-};  // StressUpdate class
+};  // MPMScheme class
 }  // namespace mpm
 
-#include "stress_update.tcc"
+#include "mpm_scheme.tcc"
 
-#endif  // MPM_STRESS_UPDATE_H_
+#endif  // MPM_MPM_SCHEME_H_

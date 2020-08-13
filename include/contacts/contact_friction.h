@@ -23,10 +23,6 @@ class ContactFriction : public Contact<Tdim> {
  protected:
   //! Mesh object
   using mpm::Contact<Tdim>::mesh_;
-  //! MPI Size
-  using mpm::Contact<Tdim>::mpi_size_;
-  //! MPI rank
-  using mpm::Contact<Tdim>::mpi_rank_;
 };  // Contactfriction class
 }  // namespace mpm
 

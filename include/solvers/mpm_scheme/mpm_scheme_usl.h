@@ -1,22 +1,22 @@
-#ifndef MPM_STRESS_UPDATE_USL_H_
-#define MPM_STRESS_UPDATE_USL_H_
+#ifndef MPM_MPM_SCHEME_USL_H_
+#define MPM_MPM_SCHEME_USL_H_
 
 #ifdef USE_GRAPH_PARTITIONING
 #include "graph.h"
 #endif
 
-#include "stress_update.h"
+#include "mpm_scheme.h"
 
 namespace mpm {
 
-//! StressUpdateUSL class
-//! \brief StressUpdateUSL Derived class for USL stress update scheme
+//! MPMSchemeUSL class
+//! \brief MPMSchemeUSL Derived class for USL stress update scheme
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
-class StressUpdateUSL : public StressUpdate<Tdim> {
+class MPMSchemeUSL : public MPMScheme<Tdim> {
  public:
   //! Default constructor with mesh class
-  StressUpdateUSL(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
+  MPMSchemeUSL(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt);
 
   //! Precompute stress
   //! \param[in] phase Phase to smooth postssure
@@ -35,17 +35,17 @@ class StressUpdateUSL : public StressUpdate<Tdim> {
 
  protected:
   //! Mesh object
-  using mpm::StressUpdate<Tdim>::mesh_;
+  using mpm::MPMScheme<Tdim>::mesh_;
   //! MPI Size
-  using mpm::StressUpdate<Tdim>::mpi_size_;
+  using mpm::MPMScheme<Tdim>::mpi_size_;
   //! MPI rank
-  using mpm::StressUpdate<Tdim>::mpi_rank_;
+  using mpm::MPMScheme<Tdim>::mpi_rank_;
   //! Time increment
-  using mpm::StressUpdate<Tdim>::dt_;
+  using mpm::MPMScheme<Tdim>::dt_;
 
-};  // StressUpdateUSL class
+};  // MPMSchemeUSL class
 }  // namespace mpm
 
-#include "stress_update_usl.tcc"
+#include "mpm_scheme_usl.tcc"
 
-#endif  // MPM_STRESS_UPDATE_USL_H_
+#endif  // MPM_MPM_SCHEME_USL_H_
