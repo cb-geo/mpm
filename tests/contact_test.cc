@@ -20,10 +20,10 @@
 #include "linear_function.h"
 #include "material.h"
 #include "mesh.h"
+#include "mpm_scheme_usf.h"
 #include "node.h"
 #include "partio_writer.h"
 #include "quadrilateral_element.h"
-#include "mpm_scheme_usf.h"
 
 //! \brief Check stress update 3D case
 TEST_CASE("Contact test case", "[contact][friction][3D]") {

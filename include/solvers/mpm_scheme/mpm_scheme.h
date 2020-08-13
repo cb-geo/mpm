@@ -22,7 +22,7 @@ class MPMScheme {
   virtual inline void initialise();
 
   //! Compute nodal kinematics - map mass and momentum to nodes
-  //! \param[in] phase Phase to smooth pressure  
+  //! \param[in] phase Phase to smooth pressure
   virtual inline void compute_nodal_kinematics(unsigned phase);
 
   //! Compute stress and strain

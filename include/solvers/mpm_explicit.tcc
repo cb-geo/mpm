@@ -67,7 +67,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
   // Interface
   interface_ = io_->analysis_bool("interface");
-  
+
   // Initialise material
   this->initialise_materials();
 
@@ -128,11 +128,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 
     // Compute forces
     mpm_scheme_->compute_forces(gravity_, phase, step_,
-                                   set_node_concentrated_force_);
+                                set_node_concentrated_force_);
 
     // Particle kinematics
-    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase,
-                                                "Cundall", damping_factor_);
+    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
+                                             damping_factor_);
 
     // Update Stress Last
     mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);

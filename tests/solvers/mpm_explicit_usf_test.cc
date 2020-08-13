@@ -18,8 +18,7 @@ TEST_CASE("MPM 2D Explicit implementation is checked",
   const std::string analysis = "MPMExplicit2D";
   const std::string mpm_scheme = "usf";
   bool resume = false;
-  REQUIRE(mpm_test::write_json(2, resume, analysis, mpm_scheme, fname) ==
-          true);
+  REQUIRE(mpm_test::write_json(2, resume, analysis, mpm_scheme, fname) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);
@@ -110,8 +109,7 @@ TEST_CASE("MPM 3D Explicit implementation is checked",
   const std::string analysis = "MPMExplicit3D";
   const std::string mpm_scheme = "usf";
   const bool resume = false;
-  REQUIRE(mpm_test::write_json(3, resume, analysis, mpm_scheme, fname) ==
-          true);
+  REQUIRE(mpm_test::write_json(3, resume, analysis, mpm_scheme, fname) == true);
 
   // Write JSON Entity Sets file
   REQUIRE(mpm_test::write_entity_set() == true);

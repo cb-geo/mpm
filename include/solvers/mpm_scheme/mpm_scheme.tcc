@@ -1,7 +1,7 @@
 //! Constructor of stress update with mesh
 template <unsigned Tdim>
-mpm::MPMScheme<Tdim>::MPMScheme(
-    const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt) {
+mpm::MPMScheme<Tdim>::MPMScheme(const std::shared_ptr<mpm::Mesh<Tdim>>& mesh,
+                                double dt) {
   // Assign mesh
   mesh_ = mesh;
   // Assign time increment

@@ -17,12 +17,12 @@
 #include "hexahedron_element.h"
 #include "linear_function.h"
 #include "mesh.h"
-#include "node.h"
-#include "partio_writer.h"
-#include "quadrilateral_element.h"
 #include "mpm_scheme.h"
 #include "mpm_scheme_usf.h"
 #include "mpm_scheme_usl.h"
+#include "node.h"
+#include "partio_writer.h"
+#include "quadrilateral_element.h"
 
 //! \brief Check stress update 3D case
 TEST_CASE("Stress update is checked for USF and USL",
@@ -194,10 +194,10 @@ TEST_CASE("Stress update is checked for USF and USL",
     REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, true));
 
     // Particle kinematics
-    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
-        true, phase, "Cundall", 0.02));
-    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
-        false, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(true, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(false, phase, "Cundall", 0.02));
     REQUIRE_NOTHROW(
         mpm_scheme->compute_particle_kinematics(true, phase, "None", 0.02));
     REQUIRE_NOTHROW(
@@ -235,10 +235,10 @@ TEST_CASE("Stress update is checked for USF and USL",
     REQUIRE_NOTHROW(mpm_scheme->compute_forces(gravity, phase, step, true));
 
     // Particle kinematics
-    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
-        true, phase, "Cundall", 0.02));
-    REQUIRE_NOTHROW(mpm_scheme->compute_particle_kinematics(
-        false, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(true, phase, "Cundall", 0.02));
+    REQUIRE_NOTHROW(
+        mpm_scheme->compute_particle_kinematics(false, phase, "Cundall", 0.02));
     REQUIRE_NOTHROW(
         mpm_scheme->compute_particle_kinematics(true, phase, "None", 0.02));
     REQUIRE_NOTHROW(
