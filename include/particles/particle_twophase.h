@@ -45,22 +45,24 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Initialise particle from HDF5 data
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
-  bool initialise_particle(const HDF5Particle& particle) override;
+  bool initialise_particle(const HDF5ParticleTwoPhase& particle) override;
 
   //! Initialise particle HDF5 data and material
   //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
+  //! \param[in] solid_material Solid material associated with the particle
+  //! \param[in] liquid_material Liquid material associated with the particle
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(
-      const HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& material) override;
+      const HDF5ParticleTwoPhase& particle,
+      const std::shared_ptr<Material<Tdim>>& solid_material,
+      const std::shared_ptr<Material<Tdim>>& liquid_material) override;
 
-  //! Initialise liquid phase
+  //! Initialise particle liquid phase on top of the regular solid phase
   void initialise() override;
 
-  //! Retrun particle data as HDF5
+  //! Retrun particle twophase data as HDF5
   //! \retval particle HDF5 data of the particle
-  HDF5Particle hdf5() const override;
+  HDF5ParticleTwoPhase hdf5_twophase() const override;
 
   //! Assign saturation degree
   bool assign_saturation_degree() override;

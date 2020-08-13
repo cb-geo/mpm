@@ -34,36 +34,44 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
 //! Return particle data in HDF5 format
 template <unsigned Tdim>
 // cppcheck-suppress *
-mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
+mpm::HDF5ParticleTwoPhase mpm::TwoPhaseParticle<Tdim>::hdf5_twophase() const {
   // Derive from particle
-  auto particle_data = mpm::Particle<Tdim>::hdf5();
-  // // Particle liquid mass
-  // particle_data.liquid_mass = this->liquid_mass_;
+  auto solid_particle_data = mpm::Particle<Tdim>::hdf5();
+  mpm::HDF5ParticleTwoPhase particle_data;
+  static_cast<mpm::HDF5Particle&>(particle_data) = solid_particle_data;
 
-  // // Particle liquid velocity
-  // particle_data.liquid_velocity_x = liquid_velocity[0];
-  // particle_data.liquid_velocity_y = liquid_velocity[1];
-  // particle_data.liquid_velocity_z = liquid_velocity[2];
+  // Particle liquid mass
+  particle_data.liquid_mass = this->liquid_mass_;
 
-  // // Particle liquid material id
-  // particle_data.liquid_material_id =
-  // this->material_id_(mpm::ParticlePhase::Liquid);
+  // Particle liquid velocity
+  Eigen::Vector3d liquid_velocity;
+  liquid_velocity.setZero();
+  for (unsigned j = 0; j < Tdim; ++j)
+    liquid_velocity[j] = this->liquid_velocity_[j];
 
+  particle_data.liquid_velocity_x = liquid_velocity[0];
+  particle_data.liquid_velocity_y = liquid_velocity[1];
+  particle_data.liquid_velocity_z = liquid_velocity[2];
+
+  // Particle porosity and saturation
+  particle_data.porosity = this->porosity_;
+  particle_data.liquid_saturation = this->liquid_saturation_;
+
+  // Particle liquid material id
+  particle_data.liquid_material_id =
+      this->material_id(mpm::ParticlePhase::Liquid);
+
+  // Write state variables
   if (this->material(mpm::ParticlePhase::Liquid) != nullptr) {
-    if ((state_variables_[mpm::ParticlePhase::Solid].size() +
-         state_variables_[mpm::ParticlePhase::Liquid].size()) > 20)
-      throw std::runtime_error("# of state variables cannot be more than 20");
-    // Assign number of state variables
-    particle_data.nstate_vars =
-        state_variables_[mpm::ParticlePhase::Solid].size() +
+    particle_data.nliquid_state_vars =
         state_variables_[mpm::ParticlePhase::Liquid].size();
-    // First id
-    unsigned i = state_variables_[mpm::ParticlePhase::Solid].size();
-    // Liquid state variables
+    if (state_variables_[mpm::ParticlePhase::Liquid].size() > 5)
+      throw std::runtime_error("# of state variables cannot be more than 5");
+    unsigned i = 0;
     auto state_variables =
         (this->material(mpm::ParticlePhase::Liquid))->state_variables();
     for (const auto& state_var : state_variables) {
-      particle_data.svars[i] =
+      particle_data.liquid_svars[i] =
           state_variables_[mpm::ParticlePhase::Liquid].at(state_var);
       ++i;
     }
@@ -75,36 +83,97 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
-    const HDF5Particle& particle) {
-  // Derive from particle
-  mpm::Particle<Tdim>::initialise_particle(particle);
+    const HDF5ParticleTwoPhase& particle) {
+  // Initialise solid phase
+  mpm::HDF5Particle solid_particle = particle;
+  bool status = mpm::Particle<Tdim>::initialise_particle(solid_particle);
 
-  // // Liquid mass
-  // this->liquid_mass_ = particle.liquid_mass;
-  // // Liquid mass Density
-  // this->liquid_mass_density_ = particle.liquid_mass / particle.volume;
+  // Liquid mass
+  this->liquid_mass_ = particle.liquid_mass;
+  // Liquid mass Density
+  this->liquid_mass_density_ = particle.liquid_mass / particle.volume;
 
-  // // Liquid velocity
-  // Eigen::Vector3d liquid_velocity;
-  // liquid_velocity << particle.liquid_velocity_x, particle.liquid_velocity_y,
-  //     particle.liquid_velocity_z;
-  // // Initialise velocity
-  // for (unsigned i = 0; i < Tdim; ++i)
-  //   this->liquid_velocity_(i) = liquid_velocity(i);
+  // Liquid velocity
+  Eigen::Vector3d liquid_velocity;
+  liquid_velocity << particle.liquid_velocity_x, particle.liquid_velocity_y,
+      particle.liquid_velocity_z;
+  // Initialise velocity
+  for (unsigned i = 0; i < Tdim; ++i)
+    this->liquid_velocity_(i) = liquid_velocity(i);
 
-  // // Liquid material id
-  // this->liquid_material_id_ = particle.liquid_material_id;
+  // Particle porosity and saturation
+  this->porosity_ = particle.porosity;
+  this->liquid_saturation_ = particle.liquid_saturation;
+  this->assign_permeability();
 
-  return true;
+  // Liquid material id
+  this->material_id_[mpm::ParticlePhase::Liquid] = particle.liquid_material_id;
+
+  return status;
 }
 
 //! Initialise particle data from HDF5
-//! TODO
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
-    const HDF5Particle& particle,
-    const std::shared_ptr<mpm::Material<Tdim>>& material) {
-  bool status = mpm::Particle<Tdim>::initialise_particle(particle, material);
+    const HDF5ParticleTwoPhase& particle,
+    const std::shared_ptr<mpm::Material<Tdim>>& solid_material,
+    const std::shared_ptr<mpm::Material<Tdim>>& liquid_material) {
+  bool status = this->initialise_particle(particle);
+
+  // Solid Phase
+  if (solid_material != nullptr) {
+    if (this->material_id(mpm::ParticlePhase::Solid) == solid_material->id() ||
+        this->material_id(mpm::ParticlePhase::Solid) ==
+            std::numeric_limits<unsigned>::max()) {
+      bool assign_mat =
+          this->assign_material(solid_material, mpm::ParticlePhase::Solid);
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
+      // Reinitialize state variables
+      auto mat_state_vars = (this->material(mpm::ParticlePhase::Solid))
+                                ->initialise_state_variables();
+      if (mat_state_vars.size() == particle.nstate_vars) {
+        unsigned i = 0;
+        auto state_variables =
+            (this->material(mpm::ParticlePhase::Solid))->state_variables();
+        for (const auto& state_var : state_variables) {
+          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+              particle.svars[i];
+          ++i;
+        }
+      }
+    } else {
+      status = false;
+      throw std::runtime_error("Material is invalid to assign to particle!");
+    }
+  }
+
+  // Fluid Phase
+  if (liquid_material != nullptr) {
+    if (this->material_id(mpm::ParticlePhase::Liquid) ==
+            liquid_material->id() ||
+        this->material_id(mpm::ParticlePhase::Liquid) ==
+            std::numeric_limits<unsigned>::max()) {
+      bool assign_mat =
+          this->assign_material(liquid_material, mpm::ParticlePhase::Liquid);
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
+      // Reinitialize state variables
+      auto mat_state_vars = (this->material(mpm::ParticlePhase::Liquid))
+                                ->initialise_state_variables();
+      if (mat_state_vars.size() == particle.nliquid_state_vars) {
+        unsigned i = 0;
+        auto state_variables =
+            (this->material(mpm::ParticlePhase::Liquid))->state_variables();
+        for (const auto& state_var : state_variables) {
+          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+              particle.liquid_svars[i];
+          ++i;
+        }
+      }
+    } else {
+      status = false;
+      throw std::runtime_error("Material is invalid to assign to particle!");
+    }
+  }
   return status;
 }
 

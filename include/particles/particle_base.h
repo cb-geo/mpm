@@ -10,6 +10,7 @@
 #include "data_types.h"
 #include "function_base.h"
 #include "hdf5_particle.h"
+#include "hdf5_particle_twophase.h"
 #include "material.h"
 
 namespace mpm {
@@ -322,6 +323,36 @@ class ParticleBase {
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
   //! TwoPhase functions--------------------------------------------------------
+  //! Initialise particle HDF5 data for twophase
+  //! \param[in] particle HDF5 data of twophase particle
+  //! \retval status Status of reading HDF5 twophase particle
+  virtual bool initialise_particle(const HDF5ParticleTwoPhase& particle) {
+    throw std::runtime_error(
+        "Calling the base class function (initialise_particle) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Initialise particle HDF5 data and material
+  //! \param[in] particle HDF5 data of particle
+  //! \param[in] material Material associated with the particle
+  //! \retval status Status of reading HDF5 particle
+  virtual bool initialise_particle(
+      const HDF5ParticleTwoPhase& particle,
+      const std::shared_ptr<Material<Tdim>>& solid_material,
+      const std::shared_ptr<Material<Tdim>>& liquid_material) {
+    throw std::runtime_error(
+        "Calling the base class function (initialise_particle) in "
+        "ParticleBase:: illegal operation!");
+  };
+
+  //! Return particle data as HDF5 for twophase particle
+  //! \retval particle HDF5 data of twophase particle
+  virtual HDF5ParticleTwoPhase hdf5_twophase() const {
+    throw std::runtime_error(
+        "Calling the base class function (hdf5) in "
+        "ParticleBase:: illegal operation!");
+  };
+
   //! Update porosity
   //! \param[in] dt Analysis time step
   virtual void update_porosity(double dt) {
