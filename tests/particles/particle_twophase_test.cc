@@ -213,7 +213,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::HDF5ParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -268,6 +268,20 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     h5_particle.volume = 2.;
 
     h5_particle.material_id = 1;
+
+    h5_particle.liquid_mass = 100.1;
+
+    Eigen::Vector3d liquid_velocity;
+    liquid_velocity << 5.5, 0., 0.;
+    h5_particle.liquid_velocity_x = liquid_velocity[0];
+    h5_particle.liquid_velocity_y = liquid_velocity[1];
+    h5_particle.liquid_velocity_z = liquid_velocity[2];
+
+    h5_particle.porosity = 0.33;
+
+    h5_particle.liquid_saturation = 1.;
+
+    h5_particle.liquid_material_id = 2;
 
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
@@ -328,8 +342,25 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
+    // Check liquid mass
+    REQUIRE(particle->liquid_mass() == h5_particle.liquid_mass);
+
+    // Check liquid velocity
+    auto pliquid_velocity = particle->liquid_velocity();
+    REQUIRE(pliquid_velocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pliquid_velocity(i) ==
+              Approx(liquid_velocity(i)).epsilon(Tolerance));
+
+    // Check porosity
+    REQUIRE(particle->porosity() == h5_particle.porosity);
+
+    // Check liquid material id
+    REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
+            h5_particle.liquid_material_id);
+
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5();
+    const auto h5_test = particle->hdf5_twophase();
 
     REQUIRE(h5_particle.id == h5_test.id);
     REQUIRE(h5_particle.mass == h5_test.mass);
@@ -384,6 +415,21 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
     REQUIRE(h5_particle.material_id == h5_test.material_id);
+
+    REQUIRE(h5_particle.liquid_mass ==
+            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_x ==
+            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_y ==
+            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_z ==
+            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.porosity ==
+            Approx(h5_test.porosity).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_saturation ==
+            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_material_id ==
+            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
   }
 }
 
@@ -1408,7 +1454,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::HDF5ParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -1463,6 +1509,20 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     h5_particle.volume = 2.;
 
     h5_particle.material_id = 1;
+
+    h5_particle.liquid_mass = 100.1;
+
+    Eigen::Vector3d liquid_velocity;
+    liquid_velocity << 5.5, 2.1, 0.;
+    h5_particle.liquid_velocity_x = liquid_velocity[0];
+    h5_particle.liquid_velocity_y = liquid_velocity[1];
+    h5_particle.liquid_velocity_z = liquid_velocity[2];
+
+    h5_particle.porosity = 0.33;
+
+    h5_particle.liquid_saturation = 1.;
+
+    h5_particle.liquid_material_id = 2;
 
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
@@ -1523,8 +1583,25 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
+    // Check liquid mass
+    REQUIRE(particle->liquid_mass() == h5_particle.liquid_mass);
+
+    // Check liquid velocity
+    auto pliquid_velocity = particle->liquid_velocity();
+    REQUIRE(pliquid_velocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pliquid_velocity(i) ==
+              Approx(liquid_velocity(i)).epsilon(Tolerance));
+
+    // Check porosity
+    REQUIRE(particle->porosity() == h5_particle.porosity);
+
+    // Check liquid material id
+    REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
+            h5_particle.liquid_material_id);
+
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5();
+    const auto h5_test = particle->hdf5_twophase();
 
     REQUIRE(h5_particle.id == h5_test.id);
     REQUIRE(h5_particle.mass == h5_test.mass);
@@ -1579,6 +1656,21 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
     REQUIRE(h5_particle.material_id == h5_test.material_id);
+
+    REQUIRE(h5_particle.liquid_mass ==
+            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_x ==
+            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_y ==
+            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_z ==
+            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.porosity ==
+            Approx(h5_test.porosity).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_saturation ==
+            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_material_id ==
+            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
   }
 
   // Check twophase particle's material id maping to nodes
@@ -2849,7 +2941,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::HDF5ParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -2904,6 +2996,20 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     h5_particle.volume = 2.;
 
     h5_particle.material_id = 1;
+
+    h5_particle.liquid_mass = 100.1;
+
+    Eigen::Vector3d liquid_velocity;
+    liquid_velocity << 5.5, 3.12, 2.1;
+    h5_particle.liquid_velocity_x = liquid_velocity[0];
+    h5_particle.liquid_velocity_y = liquid_velocity[1];
+    h5_particle.liquid_velocity_z = liquid_velocity[2];
+
+    h5_particle.porosity = 0.33;
+
+    h5_particle.liquid_saturation = 1.;
+
+    h5_particle.liquid_material_id = 2;
 
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
@@ -2965,8 +3071,25 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
+    // Check liquid mass
+    REQUIRE(particle->liquid_mass() == h5_particle.liquid_mass);
+
+    // Check liquid velocity
+    auto pliquid_velocity = particle->liquid_velocity();
+    REQUIRE(pliquid_velocity.size() == Dim);
+    for (unsigned i = 0; i < Dim; ++i)
+      REQUIRE(pliquid_velocity(i) ==
+              Approx(liquid_velocity(i)).epsilon(Tolerance));
+
+    // Check porosity
+    REQUIRE(particle->porosity() == h5_particle.porosity);
+
+    // Check liquid material id
+    REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
+            h5_particle.liquid_material_id);
+
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5();
+    const auto h5_test = particle->hdf5_twophase();
 
     REQUIRE(h5_particle.id == h5_test.id);
     REQUIRE(h5_particle.mass == h5_test.mass);
@@ -3021,6 +3144,21 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     REQUIRE(h5_particle.status == h5_test.status);
     REQUIRE(h5_particle.cell_id == h5_test.cell_id);
     REQUIRE(h5_particle.material_id == h5_test.material_id);
+
+    REQUIRE(h5_particle.liquid_mass ==
+            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_x ==
+            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_y ==
+            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_velocity_z ==
+            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.porosity ==
+            Approx(h5_test.porosity).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_saturation ==
+            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+    REQUIRE(h5_particle.liquid_material_id ==
+            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
   }
 
   // Check particle's material id maping to nodes
