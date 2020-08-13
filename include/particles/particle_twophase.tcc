@@ -546,9 +546,16 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_permeability() {
   try {
     // Check if material ptr is valid
     if (this->material() != nullptr) {
+      // Get initial porosity
+      double porosity =
+          this->material()->template property<double>(std::string("porosity"));
+      if (porosity < 0. || porosity > 1.)
+        throw std::runtime_error(
+            "Particle porosity is negative or larger than one, can not assign "
+            "permeability");
       // Porosity parameter
-      const double k_p =
-          std::pow(this->porosity_, 3) / std::pow((1. - this->porosity_), 2);
+      const double k_p = std::pow(porosity, 3) / std::pow((1. - porosity), 2);
+      // Initial permeability
       switch (Tdim) {
         case (1): {
           // Check if the permeability is valid
