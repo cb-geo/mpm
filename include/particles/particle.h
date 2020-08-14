@@ -289,6 +289,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Return neighbour ids
   std::vector<mpm::Index> neighbours() const override { return neighbours_; };
 
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  std::string serialize() const override;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  void deserialize(const std::string& buffer) override { return; }
+
  protected:
   //! Initialise particle material container
   //! \details This function allocate memory and initialise the material related

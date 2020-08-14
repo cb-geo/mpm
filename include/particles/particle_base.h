@@ -1,6 +1,11 @@
 #ifndef MPM_PARTICLEBASE_H_
 #define MPM_PARTICLEBASE_H_
 
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include <array>
 #include <limits>
 #include <memory>
@@ -281,6 +286,14 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  virtual std::string serialize() const = 0;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  virtual void deserialize(const std::string& buffer) = 0;
 
  protected:
   //! particleBase id
