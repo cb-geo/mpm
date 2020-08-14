@@ -254,7 +254,6 @@ std::vector<std::tuple<mpm::Index, double>>
 
   // Particles scalar properties
   std::vector<std::tuple<mpm::Index, double>> scalar_properties;
-  scalar_properties.clear();
 
   // input file stream
   std::fstream file;
