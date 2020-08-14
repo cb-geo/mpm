@@ -96,7 +96,7 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Serialize particle
-    std::string buffer = particle->serialize();
+    auto buffer = particle->serialize();
     REQUIRE(buffer.size() > 0);
 
     // Deserialize particle

@@ -874,7 +874,7 @@ void mpm::Particle<Tdim>::assign_neighbours(
                     neighbours_.end());
 }
 
-//! Serialize particle data
+//! Compute size of serialized particle data
 template <unsigned Tdim>
 int mpm::Particle<Tdim>::compute_pack_size() const {
   int total_size = 0;
@@ -924,12 +924,14 @@ int mpm::Particle<Tdim>::compute_pack_size() const {
 
 //! Serialize particle data
 template <unsigned Tdim>
-std::string mpm::Particle<Tdim>::serialize() {
+std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   // Compute pack size
   if (pack_size_ == 0) pack_size_ = compute_pack_size();
   // Initialize data buffer
-  std::string data(pack_size_, ' ');
-  char* data_ptr = &data[0];
+  // std::string data(pack_size_, ' ');
+  std::vector<uint8_t> data;
+  data.resize(pack_size_);
+  uint8_t* data_ptr = &data[0];
   int position = 0;
 
   // ID
@@ -1009,8 +1011,8 @@ std::string mpm::Particle<Tdim>::serialize() {
 
 //! Deserialize particle data
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::deserialize(const std::string& data) {
-  char* data_ptr = const_cast<char*>(&data[0]);
+void mpm::Particle<Tdim>::deserialize(const std::vector<uint8_t>& data) {
+  uint8_t* data_ptr = const_cast<uint8_t*>(&data[0]);
   int position = 0;
 
   // ID

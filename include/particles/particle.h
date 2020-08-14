@@ -291,11 +291,11 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Serialize
   //! \retval buffer Serialized buffer data
-  std::string serialize() override;
+  std::vector<uint8_t> serialize() override;
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data
-  void deserialize(const std::string& buffer) override;
+  void deserialize(const std::vector<uint8_t>& buffer) override;
 
  protected:
   //! Initialise particle material container

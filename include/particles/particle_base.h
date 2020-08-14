@@ -289,11 +289,11 @@ class ParticleBase {
 
   //! Serialize
   //! \retval buffer Serialized buffer data
-  virtual std::string serialize() = 0;
+  virtual std::vector<uint8_t> serialize() = 0;
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data
-  virtual void deserialize(const std::string& buffer) = 0;
+  virtual void deserialize(const std::vector<uint8_t>& buffer) = 0;
 
  protected:
   //! particleBase id
