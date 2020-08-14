@@ -9,7 +9,6 @@
 #include "mpi.h"
 
 #include "hdf5_particle_twophase.h"
-#include "mpi_datatypes.h"
 
 namespace mpm {
 //! Initialize MPI particle data types
@@ -128,11 +127,6 @@ inline MPI_Datatype register_mpi_particle_type(
   MPI_Type_create_struct(nblocks, lengths, displacements, types, &MPIParticle);
   MPI_Type_commit(&MPIParticle);
   return MPIParticle;
-}
-
-//! Deregister MPI particle data type
-inline void deregister_mpi_particle_type(MPI_Datatype& particle_type) {
-  MPI_Type_free(&particle_type);
 }
 }  // namespace mpm
 
