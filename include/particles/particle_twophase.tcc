@@ -164,7 +164,7 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
         auto state_variables =
             (this->material(mpm::ParticlePhase::Liquid))->state_variables();
         for (const auto& state_var : state_variables) {
-          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+          this->state_variables_[mpm::ParticlePhase::Liquid].at(state_var) =
               particle.liquid_svars[i];
           ++i;
         }
