@@ -1024,7 +1024,9 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
 
 //! Deserialize particle data
 template <unsigned Tdim>
-void mpm::Particle<Tdim>::deserialize(const std::vector<uint8_t>& data) {
+void mpm::Particle<Tdim>::deserialize(
+    const std::vector<uint8_t>& data,
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
   uint8_t* data_ptr = const_cast<uint8_t*>(&data[0]);
   int position = 0;
 
@@ -1088,6 +1090,31 @@ void mpm::Particle<Tdim>::deserialize(const std::vector<uint8_t>& data) {
   unsigned nstate_vars;
   MPI_Unpack(data_ptr, data.size(), &position, &nstate_vars, 1, MPI_UNSIGNED,
              MPI_COMM_WORLD);
+
+  if (nstate_vars > 0) {
+    std::vector<double> svars;
+    svars.reserve(nstate_vars);
+    MPI_Unpack(data_ptr, data.size(), &position, &svars, nstate_vars,
+               MPI_DOUBLE, MPI_COMM_WORLD);
+
+    if (material_id_[0] == materials.at(0)->id()) {
+      bool assign_mat = this->assign_material(materials.at(0));
+      if (!assign_mat) throw std::runtime_error("Material assignment failed");
+      // Reinitialize state variables
+      auto mat_state_vars = (this->material())->initialise_state_variables();
+      if (mat_state_vars.size() == nstate_vars) {
+        unsigned i = 0;
+        auto state_variables = (this->material())->state_variables();
+        for (const auto& state_var : state_variables) {
+          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+              svars[i];
+          ++i;
+        }
+      } else
+        throw std::runtime_error(
+            "Deserialize particle(): state_vars size mismatch");
+    }
+  }
 
 #endif
 }

@@ -299,7 +299,10 @@ class ParticleBase {
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data
-  virtual void deserialize(const std::vector<uint8_t>& buffer) = 0;
+  //! \param[in] material Particle material pointers
+  virtual void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
 
  protected:
   //! particleBase id

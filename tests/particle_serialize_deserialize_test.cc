@@ -99,11 +99,25 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     auto buffer = particle->serialize();
     REQUIRE(buffer.size() > 0);
 
+    // Initialise material
+    Json jmaterial;
+    jmaterial["density"] = 1000.;
+    jmaterial["youngs_modulus"] = 1.0E+7;
+    jmaterial["poisson_ratio"] = 0.3;
+    unsigned mid = 1;
+
+    auto material =
+        Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
+            "LinearElastic3D", std::move(mid), jmaterial);
+
     // Deserialize particle
     std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
         std::make_shared<mpm::Particle<Dim>>(id, pcoords);
 
-    REQUIRE_NOTHROW(rparticle->deserialize(buffer));
+    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+    materials.emplace_back(material);
+
+    REQUIRE_NOTHROW(rparticle->deserialize(buffer, materials));
 
     // Check particle id
     REQUIRE(particle->id() == particle->id());

@@ -298,7 +298,10 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data
-  void deserialize(const std::vector<uint8_t>& buffer) override;
+  //! \param[in] material Particle material pointers
+  void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
  protected:
   //! Initialise particle material container
