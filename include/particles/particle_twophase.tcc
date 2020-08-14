@@ -184,6 +184,7 @@ void mpm::TwoPhaseParticle<Tdim>::initialise() {
   liquid_mass_ = 0.;
   liquid_velocity_.setZero();
   set_liquid_traction_ = false;
+  permeability_.setZero();
   liquid_traction_.setZero();
   liquid_saturation_ = 1.;
 
@@ -236,12 +237,13 @@ template <unsigned Tdim>
 void mpm::TwoPhaseParticle<Tdim>::compute_mass() noexcept {
   // Check if particle volume is set and material ptr is valid
   assert(volume_ != std::numeric_limits<double>::max() &&
-         this->material() != nullptr &&
+         this->material(mpm::ParticlePhase::Solid) != nullptr &&
          this->material(mpm::ParticlePhase::Liquid) != nullptr);
   // Mass = volume of particle * mass_density
   // Solid mass
   this->mass_density_ =
-      (this->material())->template property<double>(std::string("density")) *
+      (this->material(mpm::ParticlePhase::Solid))
+          ->template property<double>(std::string("density")) *
       (1 - this->porosity_);
   this->mass_ = volume_ * mass_density_;
 
@@ -592,9 +594,10 @@ template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::assign_porosity() {
   bool status = true;
   try {
-    if (this->material() != nullptr) {
+    if (this->material(mpm::ParticlePhase::Solid) != nullptr) {
       this->porosity_ =
-          this->material()->template property<double>(std::string("porosity"));
+          this->material(mpm::ParticlePhase::Solid)
+              ->template property<double>(std::string("porosity"));
       if (porosity_ < 0. || porosity_ > 1.)
         throw std::runtime_error(
             "Particle porosity is negative or larger than one");
@@ -614,54 +617,44 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_permeability() {
   bool status = true;
   try {
     // Check if material ptr is valid
-    if (this->material() != nullptr) {
+    if (this->material(mpm::ParticlePhase::Solid) != nullptr) {
       // Get initial porosity
       double porosity =
-          this->material()->template property<double>(std::string("porosity"));
+          this->material(mpm::ParticlePhase::Solid)
+              ->template property<double>(std::string("porosity"));
       if (porosity < 0. || porosity > 1.)
         throw std::runtime_error(
             "Particle porosity is negative or larger than one, can not assign "
             "permeability");
       // Porosity parameter
       const double k_p = std::pow(porosity, 3) / std::pow((1. - porosity), 2);
-      // Initial permeability
+      // Assign permeability
       switch (Tdim) {
-        case (1): {
+        case (3):
           // Check if the permeability is valid
-          if (this->material()->template property<double>("k_x") < 0)
+          if (this->material(mpm::ParticlePhase::Solid)
+                  ->template property<double>("k_z") < 0)
+            throw std::runtime_error("Material's permeability is invalid");
+          permeability_(2) = this->material(mpm::ParticlePhase::Solid)
+                                 ->template property<double>("k_z") /
+                             k_p;
+        case (2):
+          // Check if the permeability is valid
+          if (this->material(mpm::ParticlePhase::Solid)
+                  ->template property<double>("k_y") < 0)
+            throw std::runtime_error("Material's permeability is invalid");
+          permeability_(1) = this->material(mpm::ParticlePhase::Solid)
+                                 ->template property<double>("k_y") /
+                             k_p;
+        case (1):
+          // Check if the permeability is valid
+          if (this->material(mpm::ParticlePhase::Solid)
+                  ->template property<double>("k_x") < 0)
             throw std::runtime_error("Material's permeability is invalid");
           // Assign permeability
-          permeability_(0) =
-              this->material()->template property<double>("k_x") / k_p;
-          break;
-        }
-        case (2): {
-          // Check if the permeability is valid
-          if (this->material()->template property<double>("k_x") < 0 ||
-              this->material()->template property<double>("k_y") < 0)
-            throw std::runtime_error("Material's permeability is invalid");
-          // Assign permeability
-          permeability_(0) =
-              this->material()->template property<double>("k_x") / k_p;
-          permeability_(1) =
-              this->material()->template property<double>("k_y") / k_p;
-          break;
-        }
-        default: {
-          // Check if the permeability is valid
-          if (this->material()->template property<double>("k_x") < 0 ||
-              this->material()->template property<double>("k_y") < 0 ||
-              this->material()->template property<double>("k_z") < 0)
-            throw std::runtime_error("Material's permeability is invalid");
-          // Assign permeability
-          permeability_(0) =
-              this->material()->template property<double>("k_x") / k_p;
-          permeability_(1) =
-              this->material()->template property<double>("k_y") / k_p;
-          permeability_(2) =
-              this->material()->template property<double>("k_z") / k_p;
-          break;
-        }
+          permeability_(0) = this->material(mpm::ParticlePhase::Solid)
+                                 ->template property<double>("k_x") /
+                             k_p;
       }
     } else {
       throw std::runtime_error("Material is invalid");
