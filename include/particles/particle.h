@@ -287,7 +287,10 @@ class Particle : public ParticleBase<Tdim> {
   void assign_neighbours(const std::vector<mpm::Index>& neighbours) override;
 
   //! Return neighbour ids
-  std::vector<mpm::Index> neighbours() const override { return neighbours_; };
+  std::vector<mpm::Index> neighbours() const override { return neighbours_; }
+
+  //! Type of particle
+  std::string type() const override { return (Tdim == 2) ? "P2D" : "P3D"; }
 
   //! Serialize
   //! \retval buffer Serialized buffer data

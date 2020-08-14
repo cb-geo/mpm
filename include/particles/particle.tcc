@@ -879,6 +879,16 @@ template <unsigned Tdim>
 int mpm::Particle<Tdim>::compute_pack_size() const {
   int total_size = 0;
   int partial_size;
+#ifdef USE_MPI
+  // Type
+  MPI_Pack_size(1, MPI_INT, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // nmaterials and material ids
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
 
   // ID
   MPI_Pack_size(1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD, &partial_size);
@@ -906,10 +916,6 @@ int mpm::Particle<Tdim>::compute_pack_size() const {
   MPI_Pack_size(1, MPI_C_BOOL, MPI_COMM_WORLD, &partial_size);
   total_size += partial_size;
 
-  // Material id
-  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
-  total_size += partial_size;
-
   // nstate variables
   unsigned nstate_vars = state_variables_[mpm::ParticlePhase::Solid].size();
   MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
@@ -918,7 +924,7 @@ int mpm::Particle<Tdim>::compute_pack_size() const {
   // state variables
   MPI_Pack_size(nstate_vars, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
   total_size += partial_size;
-
+#endif
   return total_size;
 }
 
@@ -928,11 +934,22 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   // Compute pack size
   if (pack_size_ == 0) pack_size_ = compute_pack_size();
   // Initialize data buffer
-  // std::string data(pack_size_, ' ');
   std::vector<uint8_t> data;
   data.resize(pack_size_);
   uint8_t* data_ptr = &data[0];
   int position = 0;
+
+#ifdef USE_MPI
+  // Type
+  int type = ParticleType.at(this->type());
+  MPI_Pack(&type, 1, MPI_INT, data_ptr, data.size(), &position, MPI_COMM_WORLD);
+
+  // Material id
+  unsigned nmaterials = material_id_.size();
+  MPI_Pack(&nmaterials, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  MPI_Pack(&material_id_[0], 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
 
   // ID
   MPI_Pack(&id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(), &position,
@@ -983,10 +1000,6 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   MPI_Pack(&status_, 1, MPI_C_BOOL, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
 
-  // Material id
-  MPI_Pack(&material_id_[0], 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
-           MPI_COMM_WORLD);
-
   // nstate variables
   unsigned nstate_vars = state_variables_[mpm::ParticlePhase::Solid].size();
   MPI_Pack(&nstate_vars, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
@@ -1005,7 +1018,7 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
     MPI_Pack(&svars[0], nstate_vars, MPI_DOUBLE, data_ptr, data.size(),
              &position, MPI_COMM_WORLD);
   }
-
+#endif
   return data;
 }
 
@@ -1014,6 +1027,19 @@ template <unsigned Tdim>
 void mpm::Particle<Tdim>::deserialize(const std::vector<uint8_t>& data) {
   uint8_t* data_ptr = const_cast<uint8_t*>(&data[0]);
   int position = 0;
+
+#ifdef USE_MPI
+  // Type
+  int type = ParticleType.at(this->type());
+  MPI_Unpack(data_ptr, data.size(), &position, &type, 1, MPI_INT,
+             MPI_COMM_WORLD);
+  // material id
+  int nmaterials = 0;
+  MPI_Unpack(data_ptr, data.size(), &position, &nmaterials, 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
+
+  MPI_Unpack(data_ptr, data.size(), &position, &material_id_[0], 1,
+             MPI_UNSIGNED, MPI_COMM_WORLD);
 
   // ID
   MPI_Unpack(data_ptr, data.size(), &position, &id_, 1, MPI_UNSIGNED_LONG_LONG,
@@ -1057,12 +1083,11 @@ void mpm::Particle<Tdim>::deserialize(const std::vector<uint8_t>& data) {
   // status
   MPI_Unpack(data_ptr, data.size(), &position, &status_, 1, MPI_C_BOOL,
              MPI_COMM_WORLD);
-  // material id
-  MPI_Unpack(data_ptr, data.size(), &position, &material_id_[0], 1,
-             MPI_UNSIGNED, MPI_COMM_WORLD);
 
   // nstate vars
   unsigned nstate_vars;
   MPI_Unpack(data_ptr, data.size(), &position, &nstate_vars, 1, MPI_UNSIGNED,
              MPI_COMM_WORLD);
+
+#endif
 }

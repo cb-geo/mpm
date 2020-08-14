@@ -26,6 +26,9 @@ class Material;
 //! Particle phases
 enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
 
+//! Particle type
+extern std::map<std::string, int> ParticleType;
+
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
 //! \details ParticleBase class: id_ and coordinates.
@@ -286,6 +289,9 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  //! Type of particle
+  virtual std::string type() const = 0;
 
   //! Serialize
   //! \retval buffer Serialized buffer data
