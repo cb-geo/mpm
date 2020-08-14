@@ -291,11 +291,11 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Serialize
   //! \retval buffer Serialized buffer data
-  std::string serialize() const override;
+  std::string serialize() override;
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data
-  void deserialize(const std::string& buffer) override { return; }
+  void deserialize(const std::string& buffer) override;
 
  protected:
   //! Initialise particle material container
@@ -313,6 +313,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+
+  //! Compute pack size
+  //! \retval pack size of serialized object
+  int compute_pack_size() const;
 
  private:
   //! particle id
@@ -379,6 +383,8 @@ class Particle : public ParticleBase<Tdim> {
   std::unique_ptr<spdlog::logger> console_;
   //! Map of vector properties
   std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  //! Pack size
+  unsigned pack_size_{0};
 
 };  // Particle class
 }  // namespace mpm

@@ -289,7 +289,7 @@ class ParticleBase {
 
   //! Serialize
   //! \retval buffer Serialized buffer data
-  virtual std::string serialize() const = 0;
+  virtual std::string serialize() = 0;
 
   //! Deserialize
   //! \param[in] buffer Serialized buffer data

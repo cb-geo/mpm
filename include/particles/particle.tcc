@@ -874,15 +874,67 @@ void mpm::Particle<Tdim>::assign_neighbours(
                     neighbours_.end());
 }
 
-//! Apply particle velocity constraints
+//! Serialize particle data
 template <unsigned Tdim>
-std::string mpm::Particle<Tdim>::serialize() const {
-  std::string data;
+int mpm::Particle<Tdim>::compute_pack_size() const {
+  int total_size = 0;
+  int partial_size;
+
+  // ID
+  MPI_Pack_size(1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+  // mass, volume, pressure
+  MPI_Pack_size(3 * 1, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // Coordinates, displacement, natural size, velocity
+  MPI_Pack_size(4 * Tdim, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+  // Stress & strain
+  MPI_Pack_size(6 * 2, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // epsv
+  MPI_Pack_size(1, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // Cell id
+  MPI_Pack_size(1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // Status
+  MPI_Pack_size(1, MPI_C_BOOL, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // Material id
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // nstate variables
+  unsigned nstate_vars = state_variables_[mpm::ParticlePhase::Solid].size();
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // state variables
+  MPI_Pack_size(nstate_vars, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  return total_size;
+}
+
+//! Serialize particle data
+template <unsigned Tdim>
+std::string mpm::Particle<Tdim>::serialize() {
+  // Compute pack size
+  if (pack_size_ == 0) pack_size_ = compute_pack_size();
+  // Initialize data buffer
+  std::string data(pack_size_, ' ');
   char* data_ptr = &data[0];
   int position = 0;
 
   // ID
-  MPI_Pack(&id_, 1, MPI_INT, data_ptr, data.size(), &position, MPI_COMM_WORLD);
+  MPI_Pack(&id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
   // Mass
   MPI_Pack(&mass_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
@@ -930,7 +982,7 @@ std::string mpm::Particle<Tdim>::serialize() const {
            MPI_COMM_WORLD);
 
   // Material id
-  MPI_Pack(&material_id_, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
+  MPI_Pack(&material_id_[0], 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
 
   // nstate variables
@@ -953,4 +1005,62 @@ std::string mpm::Particle<Tdim>::serialize() const {
   }
 
   return data;
+}
+
+//! Deserialize particle data
+template <unsigned Tdim>
+void mpm::Particle<Tdim>::deserialize(const std::string& data) {
+  char* data_ptr = const_cast<char*>(&data[0]);
+  int position = 0;
+
+  // ID
+  MPI_Unpack(data_ptr, data.size(), &position, &id_, 1, MPI_UNSIGNED_LONG_LONG,
+             MPI_COMM_WORLD);
+  // mass
+  MPI_Unpack(data_ptr, data.size(), &position, &mass_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // volume
+  MPI_Unpack(data_ptr, data.size(), &position, &volume_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // pressure
+  double pressure;
+  MPI_Unpack(data_ptr, data.size(), &position, &pressure, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+
+  // Coordinates
+  MPI_Unpack(data_ptr, data.size(), &position, coordinates_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Displacement
+  MPI_Unpack(data_ptr, data.size(), &position, displacement_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Natural size
+  MPI_Unpack(data_ptr, data.size(), &position, natural_size_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Velocity
+  MPI_Unpack(data_ptr, data.size(), &position, velocity_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Stress
+  MPI_Unpack(data_ptr, data.size(), &position, stress_.data(), 6, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // Strain
+  MPI_Unpack(data_ptr, data.size(), &position, strain_.data(), 6, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+
+  // epsv
+  MPI_Unpack(data_ptr, data.size(), &position, &volumetric_strain_centroid_, 1,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // cell id
+  MPI_Unpack(data_ptr, data.size(), &position, &cell_id_, 1,
+             MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+  // status
+  MPI_Unpack(data_ptr, data.size(), &position, &status_, 1, MPI_C_BOOL,
+             MPI_COMM_WORLD);
+  // material id
+  MPI_Unpack(data_ptr, data.size(), &position, &material_id_[0], 1,
+             MPI_UNSIGNED, MPI_COMM_WORLD);
+
+  // nstate vars
+  unsigned nstate_vars;
+  MPI_Unpack(data_ptr, data.size(), &position, &nstate_vars, 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
 }
