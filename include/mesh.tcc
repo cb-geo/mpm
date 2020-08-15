@@ -1999,3 +1999,51 @@ void mpm::Mesh<Tdim>::assign_particle_levelset(std::vector<double>& phi_list) {
   for (mpm::Index i = 0; i < nparticles(); ++i)
     particles_[i]->assign_levelsetphi(phi_list[i]);
 }
+
+//! Locate points in a cell
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::locate_discontinuity_mesh() {
+  for (unsigned i = 0; i < discontinuities_.size(); ++i) {
+    auto discontinuity = discontinuities_[i];
+    discontinuity->locate_discontinuity_mesh(cells_, map_cells_);
+  }
+}
+//! updated_position of discontinuity
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_updated_position_discontinuity(double dt) {
+  for (unsigned i = 0; i < discontinuities_.size(); ++i) {
+    auto discontinuity = discontinuities_[i];
+    discontinuity->compute_updated_position(dt);
+  }
+}
+
+//! compute shape function
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_shapefn_discontinuity() {
+  for (unsigned i = 0; i < discontinuities_.size(); ++i) {
+    auto discontinuity = discontinuities_[i];
+    discontinuity->compute_shapefn();
+  }
+}
+
+ // compute the normal vector of enriched nodes at the discontinuity
+template <unsigned Tdim>
+void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
+  //need to set
+  unsigned discontinuity_id = 0;
+
+  auto discontinuity = discontinuities_[discontinuity_id];
+
+  VectorDim normal;
+  normal.setZero();
+
+for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
+  {
+    
+    discontinuity->compute_normal((*nitr)->coordinates(),
+                                          normal);
+
+    nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
+                                  (*nitr)->discontinuity_prop_id(), 0, normal, Tdim);
+  }
+}

@@ -55,10 +55,10 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
   this->apply_velocity_constraints_discontinuity();
 
   // need to be done
-  Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
-                                     0.89442719147920724};
-  property_handle_->assign_property("normal_unit_vectors_discontinuity",
-                                    discontinuity_prop_id_, 0, normal, Tdim);
+  //Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
+  //                                   0.89442719147920724};
+  // property_handle_->assign_property("normal_unit_vectors_discontinuity",
+  //                                   discontinuity_prop_id_, 0, normal, Tdim);
 
   this->self_contact_discontinuity(dt);
 
@@ -164,11 +164,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
                           mass_(phase);
   auto force_contact = momentum_contact / dt;
 
-  //! frictional_coef < 0: move together without slide
+  //! friction_coef < 0: move together without slide
   // need to be done
-  double frictional_coef = 0;
+  double friction_coef = 0;
 
-  if (frictional_coef < 0) {
+  if (friction_coef < 0) {
     property_handle_->update_property("momenta_enrich", discontinuity_prop_id_,
                                       0, momentum_contact.col(phase), Tdim);
     property_handle_->update_property("external_force_enrich",
@@ -180,7 +180,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
     double force_contact_norm = momentum_contact_norm / dt;
 
     // the maximum frictional contact force
-    double max_frictional_force = frictional_coef * abs(force_contact_norm);
+    double max_frictional_force = friction_coef * abs(force_contact_norm);
 
     auto momentum_tangential =
         momentum_contact.col(phase) - momentum_contact_norm * normal_vector;
@@ -205,3 +205,10 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
         Tdim);
   }
 }
+
+  //! Compute normal direction of each enrich node
+  //! Apply velocity constraints
+template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_normal_vector() noexcept {
+  
+    }

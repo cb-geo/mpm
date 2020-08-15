@@ -25,6 +25,7 @@
 using Json = nlohmann::json;
 
 #include "cell.h"
+#include "discontinuity_base.h"
 #include "factory.h"
 #include "friction_constraint.h"
 #include "function_base.h"
@@ -467,6 +468,26 @@ class Mesh {
   // Create the nodal properties' map for discontinuity
   void create_nodal_properties_discontinuity();
 
+  //! Initialise discontinuities
+  //! \param[in] discontinuities
+  void initialise_discontinuities(
+      const std::map<unsigned, std::shared_ptr<mpm::DiscontinuityBase<Tdim>>>&
+          discontinuities) {
+    discontinuities_ = discontinuities;
+  }
+
+  //! Locate points of discontinuity in a cell
+  void locate_discontinuity_mesh();
+
+  // Update the discontinuity position
+  void compute_updated_position_discontinuity(double dt);
+
+  // Update the discontinuity position
+  void compute_shapefn_discontinuity();
+
+  // compute the normal vector of enriched nodes at the discontinuity
+  void compute_normal_vector_discontinuity();
+
  private:
   // Read particles from file
   //! \param[in] pset_id Set ID of the particles
@@ -535,6 +556,9 @@ class Mesh {
   unsigned nhalo_nodes_{0};
   //! Maximum number of halo nodes
   unsigned ncomms_{0};
+  //! discontinuities
+  std::map<unsigned, std::shared_ptr<mpm::DiscontinuityBase<Tdim>>>
+      discontinuities_;
 };  // Mesh class
 }  // namespace mpm
 

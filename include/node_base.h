@@ -269,6 +269,10 @@ class NodeBase {
   virtual Eigen::MatrixXd discontinuity_property(
       const std::string& property, unsigned nprops = 1) noexcept = 0;
 
+  //! Assign whether the node is enriched
+  //! \param[in] discontinuity_enrich: true or false
+  virtual void assign_discontinuity_enrich(bool discontinuity) = 0;
+
   //! Return whether the node is enriched
   virtual bool discontinuity_enrich() const = 0;
 
@@ -292,6 +296,12 @@ class NodeBase {
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
   virtual void self_contact_discontinuity(double dt) noexcept = 0;
+
+  //! Return the discontinuity_prop_id
+  virtual unsigned discontinuity_prop_id() const noexcept = 0;
+
+  //! Compute normal direction of each enrich node
+  virtual void compute_normal_vector() noexcept = 0;
 };  // NodeBase class
 }  // namespace mpm
 

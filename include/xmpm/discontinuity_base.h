@@ -1,30 +1,78 @@
 #ifndef MPM_DISCONTINUITY_H_
 #define MPM_DISCONTINUITY_H_
 
-
-#include "logger.h"
-
+#include "cell.h"
 #include "data_types.h"
+#include "io_mesh.h"
+#include "logger.h"
+#include "memory.h"
+#include "node_base.h"
+#include "vector.h"
 
 namespace mpm {
 
 template <unsigned Tdim>
-struct discontinuous_point {
+struct discontinuity_point {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  discontinuous_point(const VectorDim& coordinate) {
+  discontinuity_point(const VectorDim& coordinate) {
     coordinates_ = coordinate;
+    cell_ = nullptr;
+    //! Logger
+    console_ = spdlog::get("discontinuity_point");
   }
 
   //! Return coordinates
   //! \retval coordinates_ return coordinates of the nodebase
   VectorDim coordinates() const { return coordinates_; }
 
+  //! Return cell_id
+  Index cell_id() const { return cell_id_; }
+
+  //! Assign a cell to point
+  //! \param[in] cellptr Pointer to a cell
+  //! \param[in] xi Local coordinates of the point in reference cell
+  bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                      const Eigen::Matrix<double, Tdim, 1>& xi);
+
+  //! Return cell ptr status
+  bool cell_ptr() const { return cell_ != nullptr; }
+
+  //! Assign a cell to point
+  //! \param[in] cellptr Pointer to a cell
+  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+
+  //! Compute reference coordinates in a cell
+  bool compute_reference_location() noexcept;
+
+  //! Locate points in a cell
+  void locate_discontinuity_mesh(Vector<Cell<Tdim>>& cells,
+                                 Map<Cell<Tdim>>& map_cells) noexcept;
+
+  //! Compute updated position
+  void compute_updated_position(double dt) noexcept;
+
+  //! Compute shape function
+  void compute_shapefn() noexcept;
+
  private:
   //! point coordinates
   VectorDim coordinates_;
+  //! Cell id
+  Index cell_id_{std::numeric_limits<Index>::max()};
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Cell
+  std::shared_ptr<Cell<Tdim>> cell_;
+
+  //! Reference coordinates (in a cell)
+  Eigen::Matrix<double, Tdim, 1> xi_;
+  //! Vector of nodal pointers
+  std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
 };
 
 //! class for to describe the discontinuous surface
@@ -37,8 +85,9 @@ class DiscontinuityBase {
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  // Constructor
-  DiscontinuityBase();
+  //! Constructor with id
+  //! \param[in] discontinuity_properties discontinuity properties
+  DiscontinuityBase(unsigned id, const Json& discontinuity_props);
 
   //! Destructor
   virtual ~DiscontinuityBase(){};
@@ -68,25 +117,46 @@ class DiscontinuityBase {
   virtual void compute_levelset(const std::vector<VectorDim>& coordinates,
                                 std::vector<double>& phi_list) = 0;
 
+  // return the normal vectors of given coordinates
+//! \param[in] the coordinates
+virtual void compute_normal(
+  const  VectorDim& coordinates, VectorDim& normal_vector) = 0;
+
+  // return self_contact
   bool self_contact() { return self_contact_; };
 
-  void set_frictional_coef(double coef) { frictional_coef_ = coef; };
+  // return the friction coefficient
+  double friction_coef() { return friction_coef_; };
 
-  double frictional_coef() { return frictional_coef_; };
+  // return the number of the points
+  mpm::Index npoints() { return points_.size(); };
+
+  void points_list(std::vector<mpm::discontinuity_point<Tdim>>& points) {
+    points = points_;
+  }
+  //! Locate points in a cell
+  void locate_discontinuity_mesh(Vector<Cell<Tdim>>& cells,
+                                 Map<Cell<Tdim>>& map_cells) noexcept;
+
+  //! Compute updated position
+  void compute_updated_position(double dt) noexcept;
+
+  //! Compute shape function
+  void compute_shapefn() noexcept;
 
  protected:
-  std::vector<mpm::discontinuous_point<Tdim>> points_;
-
-  // number of points
-  mpm::Index numpoint_;
-
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+
+  std::vector<mpm::discontinuity_point<Tdim>> points_;
+
+  // number of points
+  mpm::Index numpoint_; //delete
 
   // self-contact
   bool self_contact_{true};
 
-  double frictional_coef_;
+  double friction_coef_;
 
 };  // DiscontinuityBase class
 
@@ -100,13 +170,14 @@ struct discontinuous_line {
   Eigen::Matrix<int, 2, 1> points_;
 };
 
+template <unsigned Tdim>
 struct discontinuous_element {
  public:
   //! Define a vector of size dimension
-  using VectorDim = Eigen::Matrix<double, 3, 1>;
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   discontinuous_element(const std::vector<mpm::Index>& points) {
-    for (int i = 0; i < 3; ++i) points_[i] = points[i];
+    for (int i = 0; i < points.size(); ++i) points_[i] = points[i];
   }
   //! Return points indices
   Eigen::Matrix<mpm::Index, 3, 1> points() const { return points_; }
@@ -114,6 +185,9 @@ struct discontinuous_element {
   inline void set_center(VectorDim& center) { center_ = center; }
 
   inline void set_normal(VectorDim& normal) { normal_ = normal; }
+  
+  //! Reture normal of the elements
+  VectorDim normal() const {return normal_;}
 
   double Vertical_distance(const VectorDim& coor) const {
     return (coor[0] - center_[0]) * normal_[0] +
@@ -134,38 +208,6 @@ struct discontinuous_element {
 
 }  // namespace mpm
 
-template <unsigned Tdim>
-mpm::DiscontinuityBase<Tdim>::DiscontinuityBase() {
-  numpoint_ = 0;
-
-  frictional_coef_ = -1;
-
-  std::string logger = "discontinuitybase";
-  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
-}
-
-//! create points from file
-template <unsigned Tdim>
-bool mpm::DiscontinuityBase<Tdim>::create_points(
-    const std::vector<VectorDim>& coordinates) {
-  bool status = true;
-  try {
-    // Check if point coordinates is empty
-    if (coordinates.empty())
-      throw std::runtime_error("List of coordinates is empty");
-    // Iterate over all coordinates
-    for (const auto& point_coordinates : coordinates) {
-
-      // Add point
-      mpm::discontinuous_point<Tdim> point(point_coordinates);
-
-      points_.emplace_back(point);  //
-    }
-  } catch (std::exception& exception) {
-    console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
-    status = false;
-  }
-  return status;
-}
+#include "discontinuity_base.tcc"
 
 #endif  // MPM_DiscontinuityBase_H_

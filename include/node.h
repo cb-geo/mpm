@@ -274,6 +274,11 @@ class Node : public NodeBase<Tdim> {
   //! Compute multimaterial normal unit vector
   void compute_multimaterial_normal_unit_vector() override;
 
+  //! Assign whether the node is enriched
+  //! \param[in] discontinuity_enrich: true or false
+  void assign_discontinuity_enrich(bool discontinuity) {
+    discontinuity_enrich_ = discontinuity;
+  };
   //! Return whether the node is enriched
   bool discontinuity_enrich() const { return discontinuity_enrich_; };
 
@@ -303,6 +308,12 @@ class Node : public NodeBase<Tdim> {
   //! Apply self-contact of the discontinuity
   //! \param[in] dt Time-step
   void self_contact_discontinuity(double dt) noexcept override;
+
+    //! Return the discontinuity_prop_id
+  virtual unsigned discontinuity_prop_id() const noexcept override{return discontinuity_prop_id_;};
+
+    //! Compute normal direction of each enrich node
+  void compute_normal_vector() noexcept override;
 
  private:
   //! Mutex
@@ -363,7 +374,7 @@ class Node : public NodeBase<Tdim> {
   std::set<unsigned> mpi_ranks_;
   //! discontinuity enrich
   // need to be done
-  bool discontinuity_enrich_{true};
+  bool discontinuity_enrich_{false};
 };  // Node class
 }  // namespace mpm
 
