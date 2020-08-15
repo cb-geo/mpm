@@ -169,6 +169,19 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
           std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
                     std::placeholders::_1));
     }
+    if (discontinuity_) {
+      // locate points of discontinuity
+      mesh_->locate_discontinuity_mesh();
+      // Iterate over each points to compute shapefn
+      mesh_->compute_shapefn_discontinuity();
+      // obtain the normal direction of each enrich nodes
+      mesh_->compute_normal_vector_discontinuity();
+      mesh_->iterate_over_nodes_predicate(
+      std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
+                std::placeholders::_1),
+      std::bind(&mpm::NodeBase<Tdim>::discontinuity_enrich, std::placeholders::_1));
+    }
+    
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
@@ -303,6 +316,9 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
     // Update Stress Last
     if (this->stress_update_ == mpm::StressUpdate::USL)
       this->compute_stress_strain(phase);
+    // Update the discontinuity position
+    if (discontinuity_)
+      mesh_->compute_updated_position_discontinuity(this->dt_);
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
@@ -363,34 +379,26 @@ bool mpm::XMPMExplicit<Tdim>::initialise_discontinuities() {
           auto discontinuity_id =
               discontinuity_props["id"].template get<unsigned>();
 
-          // Get discontinuity  input type
+          // Create a new discontinuity surface from JSON object
+          auto discontinuity =
+          Factory<mpm::DiscontinuityBase<Tdim>, unsigned, const Json&>::instance()->create(
+                  discontunity_type, std::move(discontinuity_id),
+                  discontinuity_props);
+
+              // Get discontinuity  input type
           auto io_type =
               discontinuity_props["io_type"].template get<std::string>();
 
           // discontinuity file
-          std::string discontinuity_file = io_->file_name(
-              discontinuity_props["file"].template get<std::string>());
-
-          auto discontinuity_frictional_coef =
-              discontinuity_props["frictional_coefficient"]
-                  .template get<double>();
-
+          std::string discontinuity_file =
+              io_->file_name(discontinuity_props["file"].template get<std::string>());
           // Create a mesh reader
           auto discontunity_io =
               Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
-          // Create a new discontinuity surface from JSON object
-          auto discontinuity =
-              Factory<mpm::DiscontinuityBase<Tdim>>::instance()->create(
-                  discontunity_type);
-
-          bool status = discontinuity->initialize(
-              discontunity_io->read_mesh_nodes(discontinuity_file),
-              discontunity_io->read_mesh_cells(discontinuity_file));
-
-          discontinuity->set_frictional_coef(discontinuity_frictional_coef);
-          // Create points from file
-
+          // Create points and cells from file
+          discontinuity->initialize(discontunity_io->read_mesh_nodes(discontinuity_file),
+                          discontunity_io->read_mesh_cells(discontinuity_file));
           // Add discontinuity to list
           auto result = discontinuities_.insert(
               std::make_pair(discontinuity_id, discontinuity));
@@ -407,11 +415,14 @@ bool mpm::XMPMExplicit<Tdim>::initialise_discontinuities() {
       console_->warn("{} #{}: No discontinuity is defined", __FILE__, __LINE__,
                      exception.what());
     }
+    // Copy discontinuities to mesh
+    mesh_->initialise_discontinuities(this->discontinuities_);
   } catch (std::exception& exception) {
     console_->error("#{}: Reading discontinuities: {}", __LINE__,
                     exception.what());
     status = false;
   }
+
   return status;
 }
 

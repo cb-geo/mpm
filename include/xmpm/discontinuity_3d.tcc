@@ -1,14 +1,55 @@
 template <unsigned Tdim>
-mpm::Discontinuity_3D<Tdim>::Discontinuity_3D() {
-  numelement_ = 0;
+mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
+                                            const Json& discontinuity_props)
+    : DiscontinuityBase<Tdim>(id, discontinuity_props) {
 
-  std::string logger = "discontinuity" + std::to_string(Tdim) + "d";
-  console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
+  numelement_ = 0;
+  try {
+    // assign friction_coef_ if it's given in input file
+    if (discontinuity_props.contains("friction_coefficient"))
+      friction_coef_ =
+          discontinuity_props.at("friction_coefficient").template get<double>();
+    else
+      friction_coef_ = 0;
+  } catch (Json::exception& except) {
+    console_->error("discontinuity parameter not set: {} {}\n", except.what(),
+                    except.id);
+  }
 }
+
+  // initialization
+  template <unsigned Tdim>
+  bool mpm::Discontinuity3D<Tdim>::initialize(
+      const std::vector<VectorDim>& coordinates,
+      const std::vector<std::vector<mpm::Index>>& pointsets) {
+    bool status = true;
+    // Create points from file
+    bool point_status = this->create_points(coordinates);
+    if (!point_status) {
+      status = false;
+      throw std::runtime_error(
+          "Addition of points in discontinuity to mesh failed");
+    }
+    // Create elements from file
+    bool element_status = create_elements(pointsets);
+    if (!element_status) {
+      status = false;
+      throw std::runtime_error(
+          "Addition of elements in discontinuity to mesh failed");
+    }
+
+    bool normal_status = initialize_center_normal();
+    if (!normal_status) {
+      status = false;
+      throw std::runtime_error(
+          "initialized the center and normal of the discontunity failed");
+    }
+    return status;
+  };
 
 //! create elements from file
 template <unsigned Tdim>
-bool mpm::Discontinuity_3D<Tdim>::create_elements(
+bool mpm::Discontinuity3D<Tdim>::create_elements(
     const std::vector<std::vector<mpm::Index>>& elements) {
 
   bool status = true;
@@ -18,7 +59,7 @@ bool mpm::Discontinuity_3D<Tdim>::create_elements(
     // Iterate over all elements
     for (const auto& points : elements) {
 
-      mpm::discontinuous_element element(points);
+      mpm::discontinuous_element<Tdim> element(points);
 
       elements_.emplace_back(element);  //
     }
@@ -30,8 +71,8 @@ bool mpm::Discontinuity_3D<Tdim>::create_elements(
 }
 
 // initialize the center and normal of the elements
-template <unsigned Tdim>
-bool mpm::Discontinuity_3D<Tdim>::initialize_center_normal() {
+template <>
+bool mpm::Discontinuity3D<3>::initialize_center_normal() {
   bool status = true;
   try {
     VectorDim center;
@@ -51,7 +92,7 @@ bool mpm::Discontinuity_3D<Tdim>::initialize_center_normal() {
       element.set_center(center);
 
       // the normal of the element
-      normal = ThreeCross(points_[points[0]].coordinates(),
+      normal = three_cross_product(points_[points[0]].coordinates(),
                           points_[points[1]].coordinates(),
                           points_[points[2]].coordinates());
       double det = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] +
@@ -69,7 +110,7 @@ bool mpm::Discontinuity_3D<Tdim>::initialize_center_normal() {
 
 // return the cross product of ab X bc
 template <unsigned Tdim>
-Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity_3D<Tdim>::ThreeCross(
+Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity3D<Tdim>::three_cross_product(
     const VectorDim& a, const VectorDim& b, const VectorDim& c) {
 
   VectorDim threecross;
@@ -79,10 +120,10 @@ Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity_3D<Tdim>::ThreeCross(
   return threecross;
 }
 
-// return the levelset values of each doordinates
+// return the levelset values of each coordinates
 //! \param[in] the vector of the coordinates
 template <unsigned Tdim>
-void mpm::Discontinuity_3D<Tdim>::compute_levelset(
+void mpm::Discontinuity3D<Tdim>::compute_levelset(
     const std::vector<VectorDim>& coordinates, std::vector<double>& phi_list) {
 
   mpm::Index i = 0;
@@ -91,15 +132,35 @@ void mpm::Discontinuity_3D<Tdim>::compute_levelset(
     // searching and local searching
     double distance = std::numeric_limits<double>::max();
     for (const auto& element : elements_) {
-      double Vertical_distance_ =
+      double Vertical_distance =
           element.Vertical_distance(coor);  // Vertical_distance(coor);
-      distance = std::abs(distance) < std::abs(Vertical_distance_)
+      distance = std::abs(distance) < std::abs(Vertical_distance)
                      ? distance
-                     : Vertical_distance_;
+                     : Vertical_distance;
       if (!distance) distance = 1e-16;
+      distance = 1;
     }
 
     phi_list[i] = distance;
     ++i;
   }
+}
+
+// return the normal vectors of given coordinates
+//! \param[in] the coordinates
+template <unsigned Tdim>
+void mpm::Discontinuity3D<Tdim>::compute_normal(
+   const VectorDim& coordinates, VectorDim& normal_vector) {
+    // find the nearest distance from particle to cell: need to do by global
+    // searching and local searching
+    double distance = std::numeric_limits<double>::max();
+    for (const auto& element : elements_) {
+      double Vertical_distance =
+          element.Vertical_distance(coordinates);  // Vertical_distance(coor);
+      if(std::abs(distance) > std::abs(Vertical_distance))
+      {
+        distance = Vertical_distance;
+        normal_vector = element.normal();
+      }
+    }
 }
