@@ -71,6 +71,7 @@ if (HDF5_FOUND)
   include_directories(${HDF5_INCLUDE_DIRS})
   link_libraries(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_HL_LIBRARIES})
   add_definitions(${HDF5_DEFINITIONS})
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 endif()
 
 # OpenMP
