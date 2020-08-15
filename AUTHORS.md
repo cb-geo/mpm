@@ -15,6 +15,7 @@
 * Wentao Xu,  UC Berkeley, USA.
 * Xinyi Qian, UC Berkeley, USA.
 * Joel Given, UC Berkeley, USA. [joelgiven@berkeley.edu](joelgiven@berkeley.edu)
+* Yong Liang, UC Berkeley, USA. [yliang_sn@berkeley.edu](yliang_sn@berkeley.edu)
 
 ## Generalized Interpolation Material Point Method
 * Christopher Wilkes
