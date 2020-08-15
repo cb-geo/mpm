@@ -7,7 +7,6 @@
 #include "mpm_explicit_twophase.h"
 
 namespace mpm {
-
 // Stress update method
 std::map<std::string, StressUpdate> stress_update = {
     {"usf", StressUpdate::USF},

@@ -244,7 +244,7 @@ void mpm::Particle<Tdim>::initialise() {
   volume_ = std::numeric_limits<double>::max();
   volumetric_strain_centroid_ = 0.;
 
-  // Initialize scalar and tensor data properties
+  // Initialize scalar, vector, and tensor data properties
   this->scalar_properties_["mass"] = [&]() { return mass(); };
   this->scalar_properties_["volume"] = [&]() { return volume(); };
   this->scalar_properties_["mass_density"] = [&]() { return mass_density(); };

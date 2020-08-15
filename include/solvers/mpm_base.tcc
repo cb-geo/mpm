@@ -21,6 +21,19 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
   // Empty all materials
   materials_.clear();
 
+  // Variable list
+  tsl::robin_map<std::string, VariableType> variables = {
+      // Scalar variables
+      {"mass", VariableType::Scalar},
+      {"volume", VariableType::Scalar},
+      {"mass_density", VariableType::Scalar},
+      // Vector variables
+      {"displacements", VariableType::Vector},
+      {"velocities", VariableType::Vector},
+      // Tensor variables
+      {"strains", VariableType::Tensor},
+      {"stresses", VariableType::Tensor}};
+
   try {
     analysis_ = io_->analysis();
     // Time-step size
@@ -108,8 +121,8 @@ mpm::MPMBase<Tdim>::MPMBase(const std::shared_ptr<IO>& io) : mpm::MPM(io) {
     for (unsigned i = 0; i < post_process_.at("vtk").size(); ++i) {
       std::string attribute =
           post_process_["vtk"][i].template get<std::string>();
-      if (variables_.find(attribute) != variables_.end())
-        vtk_vars_[variables_.at(attribute)].emplace_back(attribute);
+      if (variables.find(attribute) != variables.end())
+        vtk_vars_[variables.at(attribute)].emplace_back(attribute);
       else {
         console_->warn(
             "{} #{}: VTK variable '{}' was specified, but is not available "

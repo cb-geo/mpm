@@ -176,22 +176,6 @@ class MPMBase : public MPM {
   bool initialise_damping(const Json& damping_props);
 
  protected:
-  // Variable list
-  tsl::robin_map<std::string, VariableType> variables_ = {
-      // Scalar variables
-      {"mass", VariableType::Scalar},
-      {"volume", VariableType::Scalar},
-      {"mass_density", VariableType::Scalar},
-      // Vector variables
-      {"displacements", VariableType::Vector},
-      {"velocities", VariableType::Vector},
-      {"normals", VariableType::Vector},
-      {"liquid_velocities", VariableType::Vector},
-      // Tensor variables
-      {"strains", VariableType::Tensor},
-      {"stresses", VariableType::Tensor}};
-
- protected:
   // Generate a unique id for the analysis
   using mpm::MPM::uuid_;
   //! Time step size
