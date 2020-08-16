@@ -1,7 +1,7 @@
 template <unsigned Tdim>
 mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
                                             const Json& discontinuity_props)
-    : DiscontinuityBase<Tdim>(id, discontinuity_props) {
+    :DiscontinuityBase<Tdim>(id, discontinuity_props) {
 
   numelement_ = 0;
   try {

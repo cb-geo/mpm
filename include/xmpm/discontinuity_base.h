@@ -12,68 +12,7 @@
 namespace mpm {
 
 template <unsigned Tdim>
-struct discontinuity_point {
- public:
-  //! Define a vector of size dimension
-  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
-
-  discontinuity_point(const VectorDim& coordinate) {
-    coordinates_ = coordinate;
-    cell_ = nullptr;
-    //! Logger
-    console_ = spdlog::get("discontinuity_point");
-  }
-
-  //! Return coordinates
-  //! \retval coordinates_ return coordinates of the nodebase
-  VectorDim coordinates() const { return coordinates_; }
-
-  //! Return cell_id
-  Index cell_id() const { return cell_id_; }
-
-  //! Assign a cell to point
-  //! \param[in] cellptr Pointer to a cell
-  //! \param[in] xi Local coordinates of the point in reference cell
-  bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
-                      const Eigen::Matrix<double, Tdim, 1>& xi);
-
-  //! Return cell ptr status
-  bool cell_ptr() const { return cell_ != nullptr; }
-
-  //! Assign a cell to point
-  //! \param[in] cellptr Pointer to a cell
-  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
-
-  //! Compute reference coordinates in a cell
-  bool compute_reference_location() noexcept;
-
-  //! Locate points in a cell
-  void locate_discontinuity_mesh(Vector<Cell<Tdim>>& cells,
-                                 Map<Cell<Tdim>>& map_cells) noexcept;
-
-  //! Compute updated position
-  void compute_updated_position(double dt) noexcept;
-
-  //! Compute shape function
-  void compute_shapefn() noexcept;
-
- private:
-  //! point coordinates
-  VectorDim coordinates_;
-  //! Cell id
-  Index cell_id_{std::numeric_limits<Index>::max()};
-  //! Shape functions
-  Eigen::VectorXd shapefn_;
-  //! Cell
-  std::shared_ptr<Cell<Tdim>> cell_;
-
-  //! Reference coordinates (in a cell)
-  Eigen::Matrix<double, Tdim, 1> xi_;
-  //! Vector of nodal pointers
-  std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
-  //! Logger
-  std::shared_ptr<spdlog::logger> console_;
-};
+struct discontinuity_point;
 
 //! class for to describe the discontinuous surface
 //! \brief
@@ -160,6 +99,70 @@ virtual void compute_normal(
 
 };  // DiscontinuityBase class
 
+template <unsigned Tdim>
+struct discontinuity_point {
+ public:
+  //! Define a vector of size dimension
+  using VectorDim = Eigen::Matrix<double, Tdim, 1>;
+
+  discontinuity_point(const VectorDim& coordinate) {
+    coordinates_ = coordinate;
+    cell_ = nullptr;
+    //! Logger
+    console_ = spdlog::get("discontinuity_point");
+  }
+
+  //! Return coordinates
+  //! \retval coordinates_ return coordinates of the nodebase
+  VectorDim coordinates() const { return coordinates_; }
+
+  //! Return cell_id
+  Index cell_id() const { return cell_id_; }
+
+  //! Assign a cell to point
+  //! \param[in] cellptr Pointer to a cell
+  //! \param[in] xi Local coordinates of the point in reference cell
+  bool assign_cell_xi(const std::shared_ptr<Cell<Tdim>>& cellptr,
+                      const Eigen::Matrix<double, Tdim, 1>& xi);
+
+  //! Return cell ptr status
+  bool cell_ptr() const { return cell_ != nullptr; }
+
+  //! Assign a cell to point
+  //! \param[in] cellptr Pointer to a cell
+  bool assign_cell(const std::shared_ptr<Cell<Tdim>>& cellptr);
+
+  //! Compute reference coordinates in a cell
+  bool compute_reference_location() noexcept;
+
+  //! Locate points in a cell
+  void locate_discontinuity_mesh(Vector<Cell<Tdim>>& cells,
+                                 Map<Cell<Tdim>>& map_cells) noexcept;
+
+  //! Compute updated position
+  void compute_updated_position(double dt) noexcept;
+
+  //! Compute shape function
+  void compute_shapefn() noexcept;
+
+ private:
+  //! point coordinates
+  VectorDim coordinates_;
+  //! Cell id
+  Index cell_id_{std::numeric_limits<Index>::max()};
+  //! Shape functions
+  Eigen::VectorXd shapefn_;
+  //! Cell
+  std::shared_ptr<Cell<Tdim>> cell_;
+
+  //! Reference coordinates (in a cell)
+  Eigen::Matrix<double, Tdim, 1> xi_;
+  //! Vector of nodal pointers
+  std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
+  //! Logger
+  std::shared_ptr<spdlog::logger> console_;
+};
+
 struct discontinuity_line {
  public:
   //! Return points indices
@@ -209,5 +212,6 @@ struct discontinuity_element {
 }  // namespace mpm
 
 #include "discontinuity_base.tcc"
+#include "discontinuity_base_point.tcc"
 
 #endif  // MPM_DiscontinuityBase_H_
