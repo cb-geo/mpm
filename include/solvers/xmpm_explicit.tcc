@@ -317,8 +317,8 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
     if (this->stress_update_ == mpm::StressUpdate::USL)
       this->compute_stress_strain(phase);
     // Update the discontinuity position
-    if (discontinuity_)
-      mesh_->compute_updated_position_discontinuity(this->dt_);
+    // if (discontinuity_)
+    //   mesh_->compute_updated_position_discontinuity(this->dt_);
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();

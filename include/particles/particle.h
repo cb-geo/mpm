@@ -306,7 +306,7 @@ class Particle : public ParticleBase<Tdim> {
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates

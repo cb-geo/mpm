@@ -54,11 +54,11 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
   // when velocity is set.
   this->apply_velocity_constraints_discontinuity();
 
-  // need to be done
-  //Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
-  //                                   0.89442719147920724};
-  // property_handle_->assign_property("normal_unit_vectors_discontinuity",
-  //                                   discontinuity_prop_id_, 0, normal, Tdim);
+  //need to be done
+  Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
+                                    0.89442719147920724};
+  property_handle_->assign_property("normal_unit_vectors_discontinuity",
+                                    discontinuity_prop_id_, 0, normal, Tdim);
 
   this->self_contact_discontinuity(dt);
 
