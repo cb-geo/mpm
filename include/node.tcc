@@ -34,7 +34,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::initialise() noexcept {
   acceleration_.setZero();
   status_ = false;
   material_ids_.clear();
-  discontinuity_enrich_ = false;
+  discontinuity_enrich_ = true;
 }
 
 //! Initialise shared pointer to nodal properties pool

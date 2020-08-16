@@ -138,7 +138,6 @@ void mpm::Discontinuity3D<Tdim>::compute_levelset(
                      ? distance
                      : Vertical_distance;
       if (!distance) distance = 1e-16;
-      distance = 1;
     }
 
     phi_list[i] = distance;

@@ -333,7 +333,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval pack size of serialized object
   int compute_pack_size() const;
 
- private:
+ protected:
   //! particle id
   using ParticleBase<Tdim>::id_;
   //! coordinates
