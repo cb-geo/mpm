@@ -59,7 +59,7 @@ bool mpm::Discontinuity3D<Tdim>::create_elements(
     // Iterate over all elements
     for (const auto& points : elements) {
 
-      mpm::discontinuous_element<Tdim> element(points);
+      mpm::discontinuity_element<Tdim> element(points);
 
       elements_.emplace_back(element);  //
     }
