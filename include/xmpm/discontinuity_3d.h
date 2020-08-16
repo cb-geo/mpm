@@ -53,7 +53,7 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
 
  private:
   // vector of elements
-  std::vector<discontinuous_element<Tdim>> elements_;
+  std::vector<discontinuity_element<Tdim>> elements_;
 
   // number of elements //delete
   mpm::Index numelement_;

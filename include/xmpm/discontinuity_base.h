@@ -160,7 +160,7 @@ virtual void compute_normal(
 
 };  // DiscontinuityBase class
 
-struct discontinuous_line {
+struct discontinuity_line {
  public:
   //! Return points indices
   Eigen::Matrix<int, 2, 1> points() const { return points_; };
@@ -171,12 +171,12 @@ struct discontinuous_line {
 };
 
 template <unsigned Tdim>
-struct discontinuous_element {
+struct discontinuity_element {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  discontinuous_element(const std::vector<mpm::Index>& points) {
+  discontinuity_element(const std::vector<mpm::Index>& points) {
     for (int i = 0; i < points.size(); ++i) points_[i] = points[i];
   }
   //! Return points indices
