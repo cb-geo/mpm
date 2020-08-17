@@ -705,8 +705,6 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
   if (mpi_size > 1) {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ghost_cells_.size());
-    std::vector<MPI_Request> send_particle_requests;
-    send_particle_requests.reserve(ghost_cells_.size() * 100);
 
     unsigned i = 0;
     unsigned np = 0;
@@ -716,16 +714,23 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
 
       // Send number of particles to receiver rank
-      unsigned nparticles = (*citr)->nparticles();
+      auto particle_ids = (*citr)->particles();
+      unsigned nparticles = particle_ids.size();
       MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 1,
                 MPI_COMM_WORLD, &send_requests[i]);
+    }
 
+    // Iterate through the ghost cells and send particles
+    for (auto citr = this->ghost_cells_.cbegin();
+         citr != this->ghost_cells_.cend(); ++citr, ++i) {
+
+      // Send number of particles to receiver rank
       auto particle_ids = (*citr)->particles();
       for (auto& id : particle_ids) {
         // Create a vector of serialized particle
         std::vector<uint8_t> buffer = map_particles_[id]->serialize();
-        MPI_Isend(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(),
-                  mpi_rank, MPI_COMM_WORLD, &send_particle_requests[np]);
+        MPI_Send(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(), 0,
+                 MPI_COMM_WORLD);
         ++np;
         // Particles to be removed from the current rank
         remove_pids.emplace_back(id);
@@ -737,9 +742,7 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
     // Send complete
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
-    // Send particles complete
-    for (unsigned i = 0; i < np; ++i)
-      MPI_Wait(&send_particle_requests[i], MPI_STATUS_IGNORE);
+    console_->info("Rank: {} send complete!", mpi_rank);
 
     // Particle id
     mpm::Index pid = 0;
@@ -752,66 +755,73 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
          citr != this->local_ghost_cells_.cend(); ++citr) {
       std::vector<unsigned> neighbour_ranks =
           ghost_cells_neighbour_ranks_[(*citr)->id()];
-
-      for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
-        // Receive number of particles
-        unsigned nrecv_particles;
-        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 1,
+      // Total number of particles
+      std::vector<unsigned> nrank_particles(neighbour_ranks.size(), 0);
+      for (unsigned i = 0; i < neighbour_ranks.size(); ++i)
+        MPI_Recv(&nrank_particles[i], 1, MPI_UNSIGNED, neighbour_ranks[i], 1,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        for (unsigned j = 0; j < nrecv_particles; ++j) {
-          // Retrieve information about the incoming message
-          MPI_Status status;
-          MPI_Probe(neighbour_ranks[i], neighbour_ranks[i], MPI_COMM_WORLD,
-                    &status);
+      // Receive number of particles
+      unsigned nrecv_particles =
+          std::accumulate(nrank_particles.begin(), nrank_particles.end(), 0);
 
-          // Get buffer size
-          int size;
-          MPI_Get_count(&status, MPI_UINT8_T, &size);
+      if (nrecv_particles > 0)
+        console_->info("Rank: {} nparticles {}!", mpi_rank, nrecv_particles);
 
-          // Allocate the buffer now that we know how many elements there are
-          std::vector<uint8_t> buffer;
-          buffer.resize(size);
+      for (unsigned j = 0; j < nrecv_particles; ++j) {
+        // Retrieve information about the incoming message
+        MPI_Status status;
+        MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
-          // Finally receive the message
-          MPI_Recv(buffer.data(), size, MPI_UINT8_T, neighbour_ranks[i], 0,
-                   MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Get buffer size
+        int size;
+        MPI_Get_count(&status, MPI_UINT8_T, &size);
 
-          uint8_t* bufptr = const_cast<uint8_t*>(&buffer[0]);
-          int position = 0;
+        // Allocate the buffer now that we know how many elements there are
+        std::vector<uint8_t> buffer;
+        buffer.resize(size);
 
-          // Get particle type
-          int ptype;
-          MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
+        // Finally receive the message
+        MPI_Recv(buffer.data(), size, MPI_UINT8_T, MPI_ANY_SOURCE, 0,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        uint8_t* bufptr = const_cast<uint8_t*>(&buffer[0]);
+        int position = 0;
+
+        // Get particle type
+        int ptype;
+        MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
+                   MPI_COMM_WORLD);
+        console_->info("Rank: {} buffer size: {} and ptype {}!", mpi_rank,
+                       buffer.size(), ptype);
+        std::string particle_type = mpm::ParticleTypeName.at(ptype);
+
+        // Get materials material id
+        int nmaterials = 0;
+        MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
+                   MPI_UNSIGNED, MPI_COMM_WORLD);
+        std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+        materials.reserve(nmaterials);
+        for (unsigned k = 0; k < nmaterials; ++k) {
+          int mat_id;
+          MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1, MPI_UNSIGNED,
                      MPI_COMM_WORLD);
-          std::string particle_type = mpm::ParticleTypeName.at(ptype);
-
-          // Get materials material id
-          int nmaterials = 0;
-          MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
-                     MPI_UNSIGNED, MPI_COMM_WORLD);
-          std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
-          materials.reserve(nmaterials);
-          for (unsigned k = 0; k < nmaterials; ++k) {
-            int mat_id;
-            MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1,
-                       MPI_UNSIGNED, MPI_COMM_WORLD);
-            // Get material
-            materials.emplace_back(materials_.at(mat_id));
-          }
-
-          // Create particle
-          auto particle =
-              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
-                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
-                  ->create(particle_type, static_cast<mpm::Index>(pid),
-                           pcoordinates);
-          particle->deserialize(buffer, materials);
-          // Add particle to mesh
-          this->add_particle(particle, true);
+          // Get material
+          materials.emplace_back(materials_.at(mat_id));
         }
+
+        // Create particle
+        auto particle =
+            Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                    const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                ->create(particle_type, static_cast<mpm::Index>(pid),
+                         pcoordinates);
+        particle->deserialize(buffer, materials);
+        // Add particle to mesh
+        this->add_particle(particle, true);
       }
     }
+    console_->info("Rank: {} recv complete!", mpi_rank);
   }
 #endif
 }
