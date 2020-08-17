@@ -180,7 +180,6 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
       // obtain the normal direction of each enrich nodes
       mesh_->compute_normal_vector_discontinuity();
 
-      //
       // mesh_->iterate_over_nodes_predicate(
       // std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
       //           std::placeholders::_1),
