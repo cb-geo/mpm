@@ -705,45 +705,42 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
   if (mpi_size > 1) {
     std::vector<MPI_Request> send_requests;
     send_requests.reserve(ghost_cells_.size());
+
     unsigned i = 0;
 
     std::vector<mpm::Index> remove_pids;
     // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
-      // Create a vector of h5_particles
-      std::vector<mpm::HDF5Particle> h5_particles;
+
+      // Send number of particles to receiver rank
+      unsigned nparticles = (*citr)->nparticles();
+      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
+                MPI_COMM_WORLD, &send_requests[i]);
+
       auto particle_ids = (*citr)->particles();
-      // Create a vector of HDF5 data of particles to send
-      // delete particle
       for (auto& id : particle_ids) {
-        // Append to vector of particles
-        h5_particles.emplace_back(map_particles_[id]->hdf5());
+        // Create a vector of serialized particle
+        std::vector<uint8_t> buffer = map_particles_[id]->serialize();
+        MPI_Send(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(), 0,
+                 MPI_COMM_WORLD);
+
         // Particles to be removed from the current rank
         remove_pids.emplace_back(id);
       }
       (*citr)->clear_particle_ids();
-
-      // Send number of particles to receiver rank
-      unsigned nparticles = h5_particles.size();
-      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
-                MPI_COMM_WORLD, &send_requests[i]);
-      if (nparticles != 0) {
-        mpm::HDF5Particle h5_particle;
-        // Initialize MPI datatypes and send vector of particles
-        MPI_Datatype particle_type =
-            mpm::register_mpi_particle_type(h5_particle);
-        MPI_Send(h5_particles.data(), nparticles, particle_type,
-                 (*citr)->rank(), 0, MPI_COMM_WORLD);
-        mpm::deregister_mpi_particle_type(particle_type);
-      }
-      h5_particles.clear();
     }
     // Remove all sent particles
     this->remove_particles(remove_pids);
     // Send complete
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
+
+    // Create particle
+    mpm::Index pid = 0;
+    // Initial particle coordinates
+    Eigen::Matrix<double, Tdim, 1> pcoordinates =
+        Eigen::Matrix<double, Tdim, 1>::Zero();
 
     // Iterate through the local ghost cells and receive particles
     for (auto citr = this->local_ghost_cells_.cbegin();
@@ -757,35 +754,55 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
         MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        if (nrecv_particles != 0) {
-          std::vector<mpm::HDF5Particle> recv_particles;
-          recv_particles.resize(nrecv_particles);
-          // Receive the vector of particles
-          mpm::HDF5Particle received;
-          MPI_Datatype particle_type =
-              mpm::register_mpi_particle_type(received);
-          MPI_Recv(recv_particles.data(), nrecv_particles, particle_type,
-                   neighbour_ranks[i], 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-          mpm::deregister_mpi_particle_type(particle_type);
+        for (unsigned j = 0; j < nrecv_particles; ++j) {
+          // Retrieve information about the incoming message
+          MPI_Status status;
+          MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
 
-          // Iterate through n number of received particles
-          for (const auto& rparticle : recv_particles) {
-            mpm::Index id = 0;
-            // Initial particle coordinates
-            Eigen::Matrix<double, Tdim, 1> pcoordinates;
-            pcoordinates.setZero();
+          // Get buffer size
+          int size;
+          MPI_Get_count(&status, MPI_UINT8_T, &size);
 
-            // Received particle
-            auto received_particle =
-                std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
+          // Allocate the buffer now that we know how many elements there are
+          std::vector<uint8_t> buffer;
+          buffer.resize(size);
+
+          // Finally receive the message
+          MPI_Recv(buffer.data(), size, MPI_UINT8_T, neighbour_ranks[i], 0,
+                   MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+          uint8_t* bufptr = const_cast<uint8_t*>(&buffer[0]);
+          int position = 0;
+
+          // Get particle type
+          int ptype;
+          MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
+                     MPI_COMM_WORLD);
+          std::string particle_type = mpm::ParticleTypeName.at(ptype);
+
+          // Get materials material id
+          int nmaterials = 0;
+          MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
+                     MPI_UNSIGNED, MPI_COMM_WORLD);
+          std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+          materials.reserve(nmaterials);
+          for (unsigned k = 0; k < nmaterials; ++k) {
+            int mat_id;
+            MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1,
+                       MPI_UNSIGNED, MPI_COMM_WORLD);
             // Get material
-            auto material = materials_.at(rparticle.material_id);
-            // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(rparticle, material);
-
-            // Add particle to mesh
-            this->add_particle(received_particle, true);
+            materials.emplace_back(materials_.at(mat_id));
           }
+
+          // Create particle
+          auto particle =
+              Factory<mpm::ParticleBase<Tdim>, mpm::Index,
+                      const Eigen::Matrix<double, Tdim, 1>&>::instance()
+                  ->create(particle_type, static_cast<mpm::Index>(pid),
+                           pcoordinates);
+          particle->deserialize(buffer, materials);
+          // Add particle to mesh
+          this->add_particle(particle, true);
         }
       }
     }

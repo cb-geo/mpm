@@ -28,6 +28,7 @@ enum ParticlePhase : unsigned int { Solid = 0, Liquid = 1, Gas = 2 };
 
 //! Particle type
 extern std::map<std::string, int> ParticleType;
+extern std::map<int, std::string> ParticleTypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
