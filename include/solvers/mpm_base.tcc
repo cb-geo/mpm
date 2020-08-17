@@ -1231,7 +1231,9 @@ void mpm::MPMBase<Tdim>::particles_pore_pressures(
         throw std::runtime_error(
             "Particle pore pressures generator type is not properly "
             "specified");
-    }
+    } else
+      throw std::runtime_error("Particle pore pressure JSON not found");
+
   } catch (std::exception& exception) {
     console_->warn("#{}: Particle pore pressures are undefined {} ", __LINE__,
                    exception.what());
