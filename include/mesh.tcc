@@ -717,15 +717,15 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
 
       // Send number of particles to receiver rank
       unsigned nparticles = (*citr)->nparticles();
-      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 0,
+      MPI_Isend(&nparticles, 1, MPI_UNSIGNED, (*citr)->rank(), 1,
                 MPI_COMM_WORLD, &send_requests[i]);
 
       auto particle_ids = (*citr)->particles();
       for (auto& id : particle_ids) {
         // Create a vector of serialized particle
         std::vector<uint8_t> buffer = map_particles_[id]->serialize();
-        MPI_Isend(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(), 0,
-                  MPI_COMM_WORLD, &send_particle_requests[np]);
+        MPI_Isend(buffer.data(), buffer.size(), MPI_UINT8_T, (*citr)->rank(),
+                  mpi_rank, MPI_COMM_WORLD, &send_particle_requests[np]);
         ++np;
         // Particles to be removed from the current rank
         remove_pids.emplace_back(id);
@@ -756,13 +756,14 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
       for (unsigned i = 0; i < neighbour_ranks.size(); ++i) {
         // Receive number of particles
         unsigned nrecv_particles;
-        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 0,
+        MPI_Recv(&nrecv_particles, 1, MPI_UNSIGNED, neighbour_ranks[i], 1,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         for (unsigned j = 0; j < nrecv_particles; ++j) {
           // Retrieve information about the incoming message
           MPI_Status status;
-          MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
+          MPI_Probe(neighbour_ranks[i], neighbour_ranks[i], MPI_COMM_WORLD,
+                    &status);
 
           // Get buffer size
           int size;
