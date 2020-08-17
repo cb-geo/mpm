@@ -723,7 +723,6 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
     // Iterate through the ghost cells and send particles
     for (auto citr = this->ghost_cells_.cbegin();
          citr != this->ghost_cells_.cend(); ++citr, ++i) {
-
       // Send number of particles to receiver rank
       auto particle_ids = (*citr)->particles();
       for (auto& id : particle_ids) {
@@ -800,13 +799,13 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
         int nmaterials = 0;
         MPI_Unpack(bufptr, buffer.size(), &position, &nmaterials, 1,
                    MPI_UNSIGNED, MPI_COMM_WORLD);
+        // Vector of materials
         std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
         materials.reserve(nmaterials);
         for (unsigned k = 0; k < nmaterials; ++k) {
           int mat_id;
           MPI_Unpack(bufptr, buffer.size(), &position, &mat_id, 1, MPI_UNSIGNED,
                      MPI_COMM_WORLD);
-          // Get material
           materials.emplace_back(materials_.at(mat_id));
         }
 
@@ -817,6 +816,7 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
                 ->create(particle_type, static_cast<mpm::Index>(pid),
                          pcoordinates);
         particle->deserialize(buffer, materials);
+        console_->info("Rank: {} pid {}", mpi_rank, particle->id());
         // Add particle to mesh
         this->add_particle(particle, true);
       }

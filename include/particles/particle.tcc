@@ -1086,6 +1086,12 @@ void mpm::Particle<Tdim>::deserialize(
   MPI_Unpack(data_ptr, data.size(), &position, &status_, 1, MPI_C_BOOL,
              MPI_COMM_WORLD);
 
+  // Assign materials
+  if (material_id_[0] == materials.at(0)->id()) {
+    bool assign_mat = this->assign_material(materials.at(0));
+    if (!assign_mat) throw std::runtime_error("Material assignment failed");
+  }
+
   // nstate vars
   unsigned nstate_vars;
   MPI_Unpack(data_ptr, data.size(), &position, &nstate_vars, 1, MPI_UNSIGNED,
@@ -1097,23 +1103,19 @@ void mpm::Particle<Tdim>::deserialize(
     MPI_Unpack(data_ptr, data.size(), &position, &svars, nstate_vars,
                MPI_DOUBLE, MPI_COMM_WORLD);
 
-    if (material_id_[0] == materials.at(0)->id()) {
-      bool assign_mat = this->assign_material(materials.at(0));
-      if (!assign_mat) throw std::runtime_error("Material assignment failed");
-      // Reinitialize state variables
-      auto mat_state_vars = (this->material())->initialise_state_variables();
-      if (mat_state_vars.size() == nstate_vars) {
-        unsigned i = 0;
-        auto state_variables = (this->material())->state_variables();
-        for (const auto& state_var : state_variables) {
-          this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
-              svars[i];
-          ++i;
-        }
-      } else
-        throw std::runtime_error(
-            "Deserialize particle(): state_vars size mismatch");
-    }
+    // Reinitialize state variables
+    auto mat_state_vars = (this->material())->initialise_state_variables();
+    if (mat_state_vars.size() == nstate_vars) {
+      unsigned i = 0;
+      auto state_variables = (this->material())->state_variables();
+      for (const auto& state_var : state_variables) {
+        this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+            svars[i];
+        ++i;
+      }
+    } else
+      throw std::runtime_error(
+          "Deserialize particle(): state_vars size mismatch");
   }
 
 #endif
