@@ -88,6 +88,9 @@ class DiscontinuityBase {
   //! Compute shape function
   void compute_shapefn() noexcept;
 
+  //! Assign point friction coefficient
+  virtual void assign_point_friction_coef() noexcept = 0;
+
  protected:
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
@@ -113,6 +116,8 @@ struct discontinuity_point {
 
   //! construct with coordinate
   discontinuity_point(const VectorDim& coordinate) {
+
+    friction_coef_ = 0;
     coordinates_ = coordinate;
     cell_ = nullptr;
     //! Logger
@@ -155,6 +160,10 @@ struct discontinuity_point {
   //! Compute shape function
   void compute_shapefn() noexcept;
 
+  //! Assign point friction coefficient
+  //! \param[in] friction_coef
+  void assign_friction_coef(double friction_coef) noexcept {friction_coef_ = friction_coef;};
+
  private:
   //! point coordinates
   VectorDim coordinates_;
@@ -170,6 +179,8 @@ struct discontinuity_point {
   std::vector<std::shared_ptr<NodeBase<Tdim>>> nodes_;
   //! Logger
   std::shared_ptr<spdlog::logger> console_;
+  //! friction coefficient
+  double friction_coef_{0.};
 };
 
 //! struct of discontinuity line: for 2d, need to be done
@@ -230,6 +241,6 @@ struct discontinuity_surface {
 }  // namespace mpm
 
 #include "discontinuity_base.tcc"
-#include "discontinuity_base_point.tcc"
+#include "discontinuity_point.tcc"
 
 #endif  // MPM_DiscontinuityBase_H_

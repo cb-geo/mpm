@@ -465,13 +465,14 @@ class Mesh {
   //! Locate points of discontinuity in a cell
   void locate_discontinuity_mesh();
 
-  // Update the discontinuity position
+  //! Update the discontinuity position
+  //! \param[in] dt Analysis time step
   void compute_updated_position_discontinuity(double dt);
 
-  // Update the discontinuity position
+  //! Update the discontinuity position
   void compute_shapefn_discontinuity();
 
-  // compute the normal vector of enriched nodes at the discontinuity
+  //! compute the normal vector of enriched nodes at the discontinuity
   void compute_normal_vector_discontinuity();
 
  private:

@@ -1904,7 +1904,8 @@ void mpm::Mesh<Tdim>::create_nodal_properties_discontinuity() {
     nodal_properties_->create_property("external_force_enrich", nrows, 1);
     nodal_properties_->create_property("normal_unit_vectors_discontinuity",
                                        nrows, 1);
-
+    nodal_properties_->create_property("friction_coef",
+                                       nodes_.size(), 1);
     // Iterate over all nodes to initialise the property handle in each node
     // and assign its node id as the prop id in the nodal property data pool
     for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
@@ -1945,7 +1946,6 @@ void mpm::Mesh<Tdim>::compute_updated_position_discontinuity(double dt) {
     discontinuity->compute_updated_position(dt);
   }
 }
-
 //! compute shape function
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_shapefn_discontinuity() {
@@ -1958,9 +1958,8 @@ void mpm::Mesh<Tdim>::compute_shapefn_discontinuity() {
 // compute the normal vector of enriched nodes at the discontinuity
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
-  // need to set
+  // just compute for one discontinuity for now
   unsigned discontinuity_id = 0;
-
   auto discontinuity = discontinuities_[discontinuity_id];
 
   VectorDim normal;

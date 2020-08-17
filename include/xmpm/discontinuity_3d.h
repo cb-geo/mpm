@@ -48,6 +48,9 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
   void compute_normal(const VectorDim& coordinates,
                       VectorDim& normal_vector) override;
 
+  //! Assign point friction coefficient
+  void assign_point_friction_coef() noexcept override;
+
  protected:
   //! vector of points
   using mpm::DiscontinuityBase<Tdim>::points_;
