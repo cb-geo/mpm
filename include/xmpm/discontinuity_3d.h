@@ -18,29 +18,28 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
   Discontinuity3D(unsigned id, const Json& discontinuity_props);
 
   // initialization
-  virtual bool initialize(
-      const std::vector<VectorDim>& coordinates,
-      const std::vector<std::vector<mpm::Index>>& pointsets);
+  virtual bool initialize(const std::vector<VectorDim>& points,
+                          const std::vector<std::vector<mpm::Index>>& cells);
 
   //! create elements from file
-  virtual bool create_elements(
-      const std::vector<std::vector<mpm::Index>>& elements) override;
+  virtual bool create_areas(
+      const std::vector<std::vector<mpm::Index>>& cells) override;
 
   // initialize the center and normal of the triangular elements
   bool initialize_center_normal();
 
   // return the cross product of ab and bc
   VectorDim three_cross_product(const VectorDim& a, const VectorDim& b,
-                       const VectorDim& c);
+                                const VectorDim& c);
 
   // return the levelset values of each doordinates
   //! \param[in] the vector of the coordinates
- void compute_levelset(const std::vector<VectorDim>& coordinates,
-                                std::vector<double>& phi_list) override;
+  void compute_levelset(const std::vector<VectorDim>& coordinates,
+                        std::vector<double>& phi_list) override;
   // return the normal vectors of given coordinates
   //! \param[in] the coordinates
-  void compute_normal(
-   const VectorDim& coordinates, VectorDim& normal_vector) override;
+  void compute_normal(const VectorDim& coordinates,
+                      VectorDim& normal_vector) override;
 
  protected:
   using mpm::DiscontinuityBase<Tdim>::points_;
@@ -53,7 +52,7 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
 
  private:
   // vector of elements
-  std::vector<discontinuity_element<Tdim>> elements_;
+  std::vector<discontinuity_area<Tdim>> elements_;
 
   // number of elements //delete
   mpm::Index numelement_;

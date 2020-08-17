@@ -170,18 +170,23 @@ bool mpm::XMPMExplicit<Tdim>::solve() {
                     std::placeholders::_1));
     }
     if (discontinuity_) {
+
       // locate points of discontinuity
       mesh_->locate_discontinuity_mesh();
+
       // Iterate over each points to compute shapefn
       mesh_->compute_shapefn_discontinuity();
+
       // obtain the normal direction of each enrich nodes
       mesh_->compute_normal_vector_discontinuity();
-      mesh_->iterate_over_nodes_predicate(
-      std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
-                std::placeholders::_1),
-      std::bind(&mpm::NodeBase<Tdim>::discontinuity_enrich, std::placeholders::_1));
+
+      //
+      // mesh_->iterate_over_nodes_predicate(
+      // std::bind(&mpm::NodeBase<Tdim>::compute_normal_vector,
+      //           std::placeholders::_1),
+      // std::bind(&mpm::NodeBase<Tdim>::discontinuity_enrich,
+      // std::placeholders::_1));
     }
-    
 
     // Assign mass and momentum to nodes
     mesh_->iterate_over_particles(
@@ -381,24 +386,26 @@ bool mpm::XMPMExplicit<Tdim>::initialise_discontinuities() {
 
           // Create a new discontinuity surface from JSON object
           auto discontinuity =
-          Factory<mpm::DiscontinuityBase<Tdim>, unsigned, const Json&>::instance()->create(
-                  discontunity_type, std::move(discontinuity_id),
-                  discontinuity_props);
+              Factory<mpm::DiscontinuityBase<Tdim>, unsigned,
+                      const Json&>::instance()
+                  ->create(discontunity_type, std::move(discontinuity_id),
+                           discontinuity_props);
 
-              // Get discontinuity  input type
+          // Get discontinuity  input type
           auto io_type =
               discontinuity_props["io_type"].template get<std::string>();
 
           // discontinuity file
-          std::string discontinuity_file =
-              io_->file_name(discontinuity_props["file"].template get<std::string>());
+          std::string discontinuity_file = io_->file_name(
+              discontinuity_props["file"].template get<std::string>());
           // Create a mesh reader
           auto discontunity_io =
               Factory<mpm::IOMesh<Tdim>>::instance()->create(io_type);
 
           // Create points and cells from file
-          discontinuity->initialize(discontunity_io->read_mesh_nodes(discontinuity_file),
-                          discontunity_io->read_mesh_cells(discontinuity_file));
+          discontinuity->initialize(
+              discontunity_io->read_mesh_nodes(discontinuity_file),
+              discontunity_io->read_mesh_cells(discontinuity_file));
           // Add discontinuity to list
           auto result = discontinuities_.insert(
               std::make_pair(discontinuity_id, discontinuity));

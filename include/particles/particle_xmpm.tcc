@@ -22,18 +22,12 @@ mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord,
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
-
-
-
 // Initialise particle properties
 template <unsigned Tdim>
 void mpm::ParticleXMPM<Tdim>::initialise() {
   levelset_phi_ = 0.;
-
-  // Initialize vector data properties
-  this->properties_["levelset"] = [&]() { VectorDim levelset{levelset_phi_,0,0};return levelset; };
+  };
 }
-
 
 //! Map particle mass and momentum to nodes
 template <unsigned Tdim>
@@ -60,8 +54,6 @@ void mpm::ParticleXMPM<Tdim>::map_mass_momentum_to_nodes() noexcept {
   }
 }
 
-
-
 // Compute strain rate of the particle
 template <>
 inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
@@ -71,6 +63,7 @@ inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
   const double tolerance = 1.E-16;
   Eigen::Vector3d vel;
   vel.setZero();
+  // Compute corresponding nodal velocity
   for (unsigned i = 0; i < this->nodes_.size(); ++i) {
     if (nodes_[i]->discontinuity_enrich()) {
       double nodal_mass =
@@ -103,6 +96,25 @@ inline Eigen::Matrix<double, 6, 1> mpm::ParticleXMPM<3>::compute_strain_rate(
   return strain_rate;
 }
 
+// Compute strain of the particle
+template <unsigned Tdim>
+void mpm::ParticleXMPM<Tdim>::compute_strain(double dt) noexcept {
+  // Assign strain rate
+  strain_rate_ = this->compute_strain_rate(dn_dx_, mpm::ParticlePhase::Solid);
+  // Update dstrain
+  dstrain_ = strain_rate_ * dt;
+  // Update strain
+  strain_ += dstrain_;
+
+  // Compute at centroid
+  // Strain rate for reduced integration
+  const Eigen::Matrix<double, 6, 1> strain_rate_centroid =
+      this->compute_strain_rate(dn_dx_centroid_, mpm::ParticlePhase::Solid);
+
+  // Assign volumetric strain at centroid
+  dvolumetric_strain_ = dt * strain_rate_centroid.head(Tdim).sum();
+  volumetric_strain_centroid_ += dvolumetric_strain_;
+}
 
 //! Map body force
 template <unsigned Tdim>
@@ -179,8 +191,6 @@ inline void mpm::ParticleXMPM<3>::map_internal_force() noexcept {
   }
 }
 
-
-
 // Compute updated position of the particle
 template <unsigned Tdim>
 void mpm::ParticleXMPM<Tdim>::compute_updated_position(
@@ -255,5 +265,3 @@ void mpm::ParticleXMPM<Tdim>::compute_updated_position(
   // Update displacement (displacement is initialized from zero)
   this->displacement_ += nodal_velocity * dt;
 }
-
-
