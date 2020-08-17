@@ -275,10 +275,11 @@ class Node : public NodeBase<Tdim> {
   void compute_multimaterial_normal_unit_vector() override;
 
   //! Assign whether the node is enriched
-  //! \param[in] discontinuity_enrich: true or false
+  //! \param[in] discontinuity discontinuity_enrich: true or false
   void assign_discontinuity_enrich(bool discontinuity) {
     discontinuity_enrich_ = discontinuity;
   };
+  
   //! Return whether the node is enriched
   bool discontinuity_enrich() const { return discontinuity_enrich_; };
 
@@ -314,7 +315,7 @@ class Node : public NodeBase<Tdim> {
     return discontinuity_prop_id_;
   };
 
-  //! Compute normal direction of each enrich node
+  //! Compute normal direction for discontinuity
   void compute_normal_vector() noexcept override;
 
  private:

@@ -104,7 +104,7 @@ void mpm::Node<Tdim, Tdof,
       property_handle_->assign_property(
           "external_force_enrich", discontinuity_prop_id_ * Tdim + direction, 0,
           momentum, 1);
-    } else {  // need to do
+    } else {  // need to be done
       // Velocity constraints on general boundaries
       // Compute inverse rotation matrix
       const Eigen::Matrix<double, Tdim, Tdim> inverse_rotation_matrix =
@@ -129,10 +129,11 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
     double dt) noexcept {
 
   if (!discontinuity_enrich_) return;
-
+  //  single phase for solid
   unsigned phase = 0;
   const double tolerance = 1.0E-15;
-
+  
+  //obtain the enriched values of enriched nodes
   Eigen::Matrix<double, 1, 1> mass_enrich =
       property_handle_->property("mass_enrich", discontinuity_prop_id_, 0, 1);
   Eigen::Matrix<double, Tdim, 1> momenta_enrich = property_handle_->property(
@@ -158,13 +159,13 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
       0)
     return;
 
-  // the contact momentum for sticking contact
+  // the contact momentum, force vector for sticking contact
   auto momentum_contact = (mass_enrich(phase) * momentum_.col(phase) -
                            mass_(phase) * momenta_enrich) /
                           mass_(phase);
   auto force_contact = momentum_contact / dt;
 
-  //! friction_coef < 0: move together without slide
+  // friction_coef < 0: move together without slide
   // need to be done
   double friction_coef = 0;
 
@@ -175,33 +176,36 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
                                       discontinuity_prop_id_, 0,
                                       force_contact.col(phase), Tdim);
   } else {
+    //the contact momentum, force value for sticking contact at normal direction
     double momentum_contact_norm =
         momentum_contact.col(phase).dot(normal_vector);
     double force_contact_norm = momentum_contact_norm / dt;
 
-    // the maximum frictional contact force
-    double max_frictional_force = friction_coef * abs(force_contact_norm);
+    // the maximum friction contact force
+    double max_friction_force = friction_coef * abs(force_contact_norm);
 
+  // the contact momentum, force vector for sticking contact at tangential direction
     auto momentum_tangential =
         momentum_contact.col(phase) - momentum_contact_norm * normal_vector;
     auto force_tangential = momentum_tangential / dt;
 
+    //the friction force magnitude
     double force_tangential_value = force_tangential.norm();
 
-    double frictional_force = force_tangential_value < max_frictional_force
+    double force_friction = force_tangential_value < max_friction_force
                                   ? force_tangential_value
-                                  : max_frictional_force;
+                                  : max_friction_force;
 
-    //! adjust the momentum and force
+    // adjust the momentum and force
     property_handle_->update_property(
         "momenta_enrich", discontinuity_prop_id_, 0,
         momentum_contact_norm * normal_vector +
-            frictional_force * force_tangential.col(phase).normalized() * dt,
+            force_friction * force_tangential.col(phase).normalized() * dt,
         Tdim);
     property_handle_->update_property(
         "external_force_enrich", discontinuity_prop_id_, 0,
         force_contact_norm * normal_vector +
-            frictional_force * force_tangential.col(phase).normalized(),
+            force_friction * force_tangential.col(phase).normalized(),
         Tdim);
   }
 }

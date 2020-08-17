@@ -270,7 +270,7 @@ class NodeBase {
       const std::string& property, unsigned nprops = 1) noexcept = 0;
 
   //! Assign whether the node is enriched
-  //! \param[in] discontinuity_enrich: true or false
+  //! \param[in] discontinuity discontinuity_enrich: true or false
   virtual void assign_discontinuity_enrich(bool discontinuity) = 0;
 
   //! Return whether the node is enriched
@@ -300,7 +300,7 @@ class NodeBase {
   //! Return the discontinuity_prop_id
   virtual unsigned discontinuity_prop_id() const noexcept = 0;
 
-  //! Compute normal direction of each enrich node
+  //! Compute normal direction for discontinuity
   virtual void compute_normal_vector() noexcept = 0;
 };  // NodeBase class
 }  // namespace mpm
