@@ -1,6 +1,6 @@
 # CB-Geo Material Point Method contributors
 
-> ⚠ This document reflects the contributions of team members as of February 2020.
+> ⚠ This document reflects the contributions of team members as of August 2020.
 
 ## MPM Framework
 * Krishna Kumar, UT Austin, USA. [krishnak@utexas.edu](krishnak@utexas.edu)
@@ -14,6 +14,8 @@
 * Jeffrey Salmond, University of Cambridge, UK.
 * Wentao Xu,  UC Berkeley, USA.
 * Xinyi Qian, UC Berkeley, USA.
+* Joel Given, UC Berkeley, USA. [joelgiven@berkeley.edu](joelgiven@berkeley.edu)
+* Yong Liang, UC Berkeley, USA. [yliang_sn@berkeley.edu](yliang_sn@berkeley.edu)
 
 ## Generalized Interpolation Material Point Method
 * Christopher Wilkes
