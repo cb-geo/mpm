@@ -41,20 +41,20 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
   if (!normal_status) {
     status = false;
     throw std::runtime_error(
-        "initialized the center and normal of the discontunity failed");
+        "initialization of the center and normal vector of the discontunity failed");
   }
   return status;
 };
 
-//! create elements from file
+//! create surfaces from file
 template <unsigned Tdim>
 bool mpm::Discontinuity3D<Tdim>::create_surfaces(
     const std::vector<std::vector<mpm::Index>>& surfs) {
 
   bool status = true;
   try {
-    // Check if elements is empty
-    if (surfs.empty()) throw std::runtime_error("List of elements is empty");
+    // Check if surfs is empty
+    if (surfs.empty()) throw std::runtime_error("List of surfaces is empty");
     // Iterate over all elements
     for (const auto& points : surfs) {
 
@@ -111,7 +111,6 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
 template <unsigned Tdim>
 Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity3D<Tdim>::three_cross_product(
     const VectorDim& a, const VectorDim& b, const VectorDim& c) {
-
   VectorDim threecross;
   threecross[0] = (b[1] - a[1]) * (c[2] - b[2]) - (b[2] - a[2]) * (c[1] - b[1]);
   threecross[1] = (b[2] - a[2]) * (c[0] - b[0]) - (b[0] - a[0]) * (c[2] - b[2]);
@@ -120,7 +119,6 @@ Eigen::Matrix<double, Tdim, 1> mpm::Discontinuity3D<Tdim>::three_cross_product(
 }
 
 // return the levelset values of each coordinates
-//! \param[in] the vector of the coordinates
 template <unsigned Tdim>
 void mpm::Discontinuity3D<Tdim>::compute_levelset(
     const std::vector<VectorDim>& coordinates, std::vector<double>& phi_list) {
@@ -145,11 +143,10 @@ void mpm::Discontinuity3D<Tdim>::compute_levelset(
 }
 
 // return the normal vectors of given coordinates
-//! \param[in] the coordinates
 template <unsigned Tdim>
 void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
                                                 VectorDim& normal_vector) {
-  // find the nearest distance from particle to cell: need to do by global
+  // find the nearest distance from particle to cell: need to do better by global
   // searching and local searching
   double distance = std::numeric_limits<double>::max();
   for (const auto& element : surfaces_) {
