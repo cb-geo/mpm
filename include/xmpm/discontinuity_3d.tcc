@@ -3,7 +3,6 @@ mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
                                             const Json& discontinuity_props)
     : DiscontinuityBase<Tdim>(id, discontinuity_props) {
 
-  numelement_ = 0;
   try {
     // assign friction_coef_ if it's given in input file
     if (discontinuity_props.contains("friction_coefficient"))
@@ -21,7 +20,7 @@ mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
 template <unsigned Tdim>
 bool mpm::Discontinuity3D<Tdim>::initialize(
     const std::vector<VectorDim>& points,
-    const std::vector<std::vector<mpm::Index>>& cells) {
+    const std::vector<std::vector<mpm::Index>>& surfs) {
   bool status = true;
   // Create points from file
   bool point_status = this->create_points(points);
@@ -31,7 +30,7 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
         "Addition of points in discontinuity to mesh failed");
   }
   // Create elements from file
-  bool element_status = create_areas(cells);
+  bool element_status = create_surfaces(surfs);
   if (!element_status) {
     status = false;
     throw std::runtime_error(
@@ -49,19 +48,19 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
 
 //! create elements from file
 template <unsigned Tdim>
-bool mpm::Discontinuity3D<Tdim>::create_areas(
-    const std::vector<std::vector<mpm::Index>>& cells) {
+bool mpm::Discontinuity3D<Tdim>::create_surfaces(
+    const std::vector<std::vector<mpm::Index>>& surfs) {
 
   bool status = true;
   try {
     // Check if elements is empty
-    if (cells.empty()) throw std::runtime_error("List of elements is empty");
+    if (surfs.empty()) throw std::runtime_error("List of elements is empty");
     // Iterate over all elements
-    for (const auto& points : cells) {
+    for (const auto& points : surfs) {
 
-      mpm::discontinuity_area<Tdim> element(points);
+      mpm::discontinuity_surface<Tdim> element(points);
 
-      elements_.emplace_back(element);  //
+      surfaces_.emplace_back(element);  //
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -79,7 +78,7 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
     VectorDim normal;
     Eigen::Matrix<mpm::Index, 3, 1> points;
 
-    for (auto& element : elements_) {
+    for (auto& element : surfaces_) {
       points = element.points();
 
       // the center of the element
@@ -89,7 +88,7 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
                      points_[points[1]].coordinates()[i] +
                      points_[points[2]].coordinates()[i]);
 
-      element.set_center(center);
+      element.assign_center(center);
 
       // the normal of the element
       normal = three_cross_product(points_[points[0]].coordinates(),
@@ -99,7 +98,7 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
                              normal[2] * normal[2]);
       normal = 1.0 / det * normal;
 
-      element.set_normal(normal);
+      element.assign_normal(normal);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -131,12 +130,12 @@ void mpm::Discontinuity3D<Tdim>::compute_levelset(
     // find the nearest distance from particle to cell: need to do by global
     // searching and local searching
     double distance = std::numeric_limits<double>::max();
-    for (const auto& element : elements_) {
-      double Vertical_distance =
-          element.Vertical_distance(coor);  // Vertical_distance(coor);
-      distance = std::abs(distance) < std::abs(Vertical_distance)
+    for (const auto& element : surfaces_) {
+      double vertical_distance =
+          element.vertical_distance(coor);  // vertical_distance(coor);
+      distance = std::abs(distance) < std::abs(vertical_distance)
                      ? distance
-                     : Vertical_distance;
+                     : vertical_distance;
       if (!distance) distance = 1e-16;
     }
 
@@ -153,11 +152,11 @@ void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
   // find the nearest distance from particle to cell: need to do by global
   // searching and local searching
   double distance = std::numeric_limits<double>::max();
-  for (const auto& element : elements_) {
-    double Vertical_distance =
-        element.Vertical_distance(coordinates);  // Vertical_distance(coor);
-    if (std::abs(distance) > std::abs(Vertical_distance)) {
-      distance = Vertical_distance;
+  for (const auto& element : surfaces_) {
+    double vertical_distance =
+        element.vertical_distance(coordinates);  // vertical_distance(coor);
+    if (std::abs(distance) > std::abs(vertical_distance)) {
+      distance = vertical_distance;
       normal_vector = element.normal();
     }
   }

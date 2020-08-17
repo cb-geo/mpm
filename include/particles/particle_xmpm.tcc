@@ -26,7 +26,6 @@ mpm::ParticleXMPM<Tdim>::ParticleXMPM(Index id, const VectorDim& coord,
 template <unsigned Tdim>
 void mpm::ParticleXMPM<Tdim>::initialise() {
   levelset_phi_ = 0.;
-  };
 }
 
 //! Map particle mass and momentum to nodes

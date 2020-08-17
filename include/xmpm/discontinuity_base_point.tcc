@@ -79,9 +79,8 @@ bool mpm::discontinuity_point<Tdim>::compute_reference_location() noexcept {
 
 //! Locate points in a cell
 template <unsigned Tdim>
-void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(
-    Vector<Cell<Tdim>>& cells, Map<Cell<Tdim>>& map_cells) noexcept {
-
+void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(const
+    Vector<Cell<Tdim>>& cells, const Map<Cell<Tdim>>& map_cells) noexcept {
   // Check the current cell if it is not invalid
   if (cell_id() != std::numeric_limits<mpm::Index>::max()) {
     // If a cell id is present, but not a cell locate the cell from map
@@ -113,7 +112,7 @@ void mpm::discontinuity_point<Tdim>::locate_discontinuity_mesh(
 // Compute updated position of the particle
 template <unsigned Tdim>
 void mpm::discontinuity_point<Tdim>::compute_updated_position(
-    double dt) noexcept {
+ const double dt) noexcept {
   // Check if point has a valid cell ptr
   if (cell_ == nullptr) return;
   // Get interpolated nodal velocity

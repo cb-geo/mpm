@@ -19,11 +19,11 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
 
   // initialization
   virtual bool initialize(const std::vector<VectorDim>& points,
-                          const std::vector<std::vector<mpm::Index>>& cells);
+                          const std::vector<std::vector<mpm::Index>>& surfs);
 
   //! create elements from file
-  virtual bool create_areas(
-      const std::vector<std::vector<mpm::Index>>& cells) override;
+  virtual bool create_surfaces(
+      const std::vector<std::vector<mpm::Index>>& surfs) override;
 
   // initialize the center and normal of the triangular elements
   bool initialize_center_normal();
@@ -46,16 +46,12 @@ class Discontinuity3D : public DiscontinuityBase<Tdim> {
 
   using mpm::DiscontinuityBase<Tdim>::console_;
 
-  using mpm::DiscontinuityBase<Tdim>::numpoint_;
-
   using mpm::DiscontinuityBase<Tdim>::friction_coef_;
 
  private:
   // vector of elements
-  std::vector<discontinuity_area<Tdim>> elements_;
+  std::vector<discontinuity_surface<Tdim>> surfaces_;
 
-  // number of elements //delete
-  mpm::Index numelement_;
 };
 
 }  // namespace mpm
