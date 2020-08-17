@@ -1,14 +1,17 @@
+#include <chrono>
 #include <limits>
 
 #include "catch.hpp"
 
 #include "cell.h"
+#include "data_types.h"
 #include "element.h"
 #include "function_base.h"
 #include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "linear_function.h"
 #include "material.h"
+#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
@@ -95,10 +98,6 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     // Reinitialise particle from HDF5 data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
-    // Serialize particle
-    auto buffer = particle->serialize();
-    REQUIRE(buffer.size() > 0);
-
     // Initialise material
     Json jmaterial;
     jmaterial["density"] = 1000.;
@@ -109,13 +108,16 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     auto material =
         Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()->create(
             "LinearElastic3D", std::move(mid), jmaterial);
+    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+    materials.emplace_back(material);
+
+    // Serialize particle
+    auto buffer = particle->serialize();
+    REQUIRE(buffer.size() > 0);
 
     // Deserialize particle
     std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
         std::make_shared<mpm::Particle<Dim>>(id, pcoords);
-
-    std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
-    materials.emplace_back(material);
 
     REQUIRE_NOTHROW(rparticle->deserialize(buffer, materials));
 
@@ -173,5 +175,38 @@ TEST_CASE("Particle is checked for serialization and deserialization",
 
     // Check material id
     REQUIRE(particle->material_id() == rparticle->material_id());
+
+    SECTION("Performance benchmarks") {
+      // Number of iterations
+      unsigned niterations = 1000;
+
+      // Serialization benchmarks
+      auto serialize_start = std::chrono::steady_clock::now();
+      for (unsigned i = 0; i < niterations; ++i) {
+        // Serialize particle
+        auto buffer = particle->serialize();
+        // Deserialize particle
+        std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
+            std::make_shared<mpm::Particle<Dim>>(id, pcoords);
+
+        REQUIRE_NOTHROW(rparticle->deserialize(buffer, materials));
+      }
+      auto serialize_end = std::chrono::steady_clock::now();
+
+      // HDF5 serialization
+      auto hdf5_start = std::chrono::steady_clock::now();
+      for (unsigned i = 0; i < niterations; ++i) {
+        // Serialize particle as POD
+        auto hdf5 = particle->hdf5();
+        // Deserialize particle with POD
+        std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
+            std::make_shared<mpm::Particle<Dim>>(id, pcoords);
+        // Initialize MPI datatypes
+        MPI_Datatype particle_type = mpm::register_mpi_particle_type(hdf5);
+        REQUIRE_NOTHROW(rparticle->initialise_particle(hdf5, material));
+        mpm::deregister_mpi_particle_type(particle_type);
+      }
+      auto hdf5_end = std::chrono::steady_clock::now();
+    }
   }
 }
