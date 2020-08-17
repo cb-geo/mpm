@@ -29,12 +29,12 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
     throw std::runtime_error(
         "Addition of points in discontinuity to mesh failed");
   }
-  // Create elements from file
-  bool element_status = create_surfaces(surfs);
-  if (!element_status) {
+  // Create surfaces from file
+  bool surf_status = create_surfaces(surfs);
+  if (!surf_status) {
     status = false;
     throw std::runtime_error(
-        "Addition of elements in discontinuity to mesh failed");
+        "Addition of surfaces in discontinuity to mesh failed");
   }
 
   bool normal_status = initialize_center_normal();
@@ -43,6 +43,8 @@ bool mpm::Discontinuity3D<Tdim>::initialize(
     throw std::runtime_error(
         "initialization of the center and normal vector of the discontunity failed");
   }
+
+  this->assign_point_friction_coef();
   return status;
 };
 
@@ -55,12 +57,12 @@ bool mpm::Discontinuity3D<Tdim>::create_surfaces(
   try {
     // Check if surfs is empty
     if (surfs.empty()) throw std::runtime_error("List of surfaces is empty");
-    // Iterate over all elements
+    // Iterate over all surfaces
     for (const auto& points : surfs) {
 
-      mpm::discontinuity_surface<Tdim> element(points);
+      mpm::discontinuity_surface<Tdim> surf(points);
 
-      surfaces_.emplace_back(element);  //
+      surfaces_.emplace_back(surf);  //
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -69,7 +71,7 @@ bool mpm::Discontinuity3D<Tdim>::create_surfaces(
   return status;
 }
 
-// initialize the center and normal of the elements
+// initialize the center and normal of the surfaces
 template <>
 bool mpm::Discontinuity3D<3>::initialize_center_normal() {
   bool status = true;
@@ -78,19 +80,19 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
     VectorDim normal;
     Eigen::Matrix<mpm::Index, 3, 1> points;
 
-    for (auto& element : surfaces_) {
-      points = element.points();
+    for (auto& surf: surfaces_) {
+      points = surf.points();
 
-      // the center of the element
+      // the center of the surfaces
       for (int i = 0; i < 3; i++)
         center[i] = 1.0 / 3 *
                     (points_[points[0]].coordinates()[i] +
                      points_[points[1]].coordinates()[i] +
                      points_[points[2]].coordinates()[i]);
 
-      element.assign_center(center);
+      surf.assign_center(center);
 
-      // the normal of the element
+      // the normal of the surfaces
       normal = three_cross_product(points_[points[0]].coordinates(),
                                    points_[points[1]].coordinates(),
                                    points_[points[2]].coordinates());
@@ -98,7 +100,7 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
                              normal[2] * normal[2]);
       normal = 1.0 / det * normal;
 
-      element.assign_normal(normal);
+      surf.assign_normal(normal);
     }
   } catch (std::exception& exception) {
     console_->error("{} #{}: {}\n", __FILE__, __LINE__, exception.what());
@@ -128,9 +130,9 @@ void mpm::Discontinuity3D<Tdim>::compute_levelset(
     // find the nearest distance from particle to cell: need to do by global
     // searching and local searching
     double distance = std::numeric_limits<double>::max();
-    for (const auto& element : surfaces_) {
+    for (const auto& surf : surfaces_) {
       double vertical_distance =
-          element.vertical_distance(coor);  // vertical_distance(coor);
+          surf.vertical_distance(coor);  // vertical_distance(coor);
       distance = std::abs(distance) < std::abs(vertical_distance)
                      ? distance
                      : vertical_distance;
@@ -149,12 +151,19 @@ void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
   // find the nearest distance from particle to cell: need to do better by global
   // searching and local searching
   double distance = std::numeric_limits<double>::max();
-  for (const auto& element : surfaces_) {
+  for (const auto& surf : surfaces_) {
     double vertical_distance =
-        element.vertical_distance(coordinates);  // vertical_distance(coor);
+        surf.vertical_distance(coordinates);  // vertical_distance(coor);
     if (std::abs(distance) > std::abs(vertical_distance)) {
       distance = vertical_distance;
-      normal_vector = element.normal();
+      normal_vector = surf.normal();
     }
   }
+}
+
+//! Assign point friction coefficient
+template <unsigned Tdim>
+void mpm::Discontinuity3D<Tdim>::assign_point_friction_coef() noexcept{
+for(auto & point: points_)
+  point.assign_friction_coef(friction_coef_);
 }

@@ -54,12 +54,6 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
   // when velocity is set.
   this->apply_velocity_constraints_discontinuity();
 
-  // need to be done
-  Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
-                                     0.89442719147920724};
-  property_handle_->assign_property("normal_unit_vectors_discontinuity",
-                                    discontinuity_prop_id_, 0, normal, Tdim);
-
   this->self_contact_discontinuity(dt);
 
   this->apply_velocity_constraints_discontinuity();
@@ -81,9 +75,6 @@ void mpm::Node<Tdim, Tdof,
 
     if (!generic_boundary_constraints_) {
       // Velocity constraints are applied on Cartesian boundaries
-      // this->velocity_(direction, phase) = constraint.second;
-      // need to do for one direction
-
       this->momentum_(direction, phase) = this->mass(phase) * constraint.second;
       property_handle_->assign_property(
           "momenta_enrich", discontinuity_prop_id_ * Tdim + direction, 0,
@@ -92,7 +83,6 @@ void mpm::Node<Tdim, Tdof,
               constraint.second,
           1);
       // Set acceleration to 0 in direction of velocity constraint
-      // this->acceleration_(direction, phase) = 0.;
       this->internal_force_(direction, phase) = 0;
       this->external_force_(direction, phase) = 0;
 
@@ -167,7 +157,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
 
   // friction_coef < 0: move together without slide
   // need to be done
-  double friction_coef = 0;
+  double friction_coef = property_handle_->property("friction_coef", discontinuity_prop_id_, 0, 1)(0,0);
 
   if (friction_coef < 0) {
     property_handle_->update_property("momenta_enrich", discontinuity_prop_id_,
