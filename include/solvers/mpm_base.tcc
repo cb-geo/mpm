@@ -506,7 +506,7 @@ void mpm::MPMBase<Tdim>::write_vtk(mpm::Index step, mpm::Index max_steps) {
 #endif
 
   //! VTK vector variables
-  std::vector<std::string> vtk_vector_data = {"displacements", "velocities","levelset"};
+  std::vector<std::string> vtk_vector_data = {"displacements", "velocities"};
 
   // Write VTK attributes
   for (const auto& attribute : vtk_vector_data) {

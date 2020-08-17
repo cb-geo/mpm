@@ -14,17 +14,14 @@
 namespace mpm {
 
 //! ParticleXMPM class
-//! \brief Base class that stores the information about particles
-//! \details ParticleXMPM class: id_ and coordinates.
-//! \tparam Tdim Dimension
+//! \brief ParticleXMPM class derived from particle class, stores the
+//! information for XMPMExplicit solver \details ParticleXMPM class: id_ and
+//! coordinates. \tparam Tdim Dimension
 template <unsigned Tdim>
 class ParticleXMPM : public Particle<Tdim> {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
-
-  //! Define DOFs
-  static const unsigned Tdof = (Tdim == 1) ? 1 : 3 * (Tdim - 1);
 
   //! Construct a particle with id and coordinates
   //! \param[in] id Particle id
@@ -46,7 +43,7 @@ class ParticleXMPM : public Particle<Tdim> {
   //! Delete assignment operator
   ParticleXMPM& operator=(const ParticleXMPM<Tdim>&) = delete;
 
-    //! Initialise properties
+  //! Initialise properties
   void initialise() override;
 
   //! Map particle mass and momentum to nodes
@@ -65,14 +62,9 @@ class ParticleXMPM : public Particle<Tdim> {
   void compute_updated_position(double dt,
                                 bool velocity_update = false) noexcept override;
 
- protected:
-  //! Initialise particle material container
-  //! \details This function allocate memory and initialise the material related
-  //! containers according to the particle phase, i.e. solid or fluid particle
-  //! has phase_size = 1, whereas two-phase (solid-fluid) or three-phase
-  //! (solid-water-air) particle have phase_size = 2 and 3, respectively.
-  //! \param[in] phase_size The material phase size
-  void initialise_material(unsigned phase_size = 1);
+  //! Compute strain
+  //! \param[in] dt Analysis time step
+  void compute_strain(double dt) noexcept override;
 
  private:
   //! Compute strain rate
@@ -81,10 +73,13 @@ class ParticleXMPM : public Particle<Tdim> {
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
-  //! set the level set function values
+
+  //! Assign the level set function values
+  //! \param[in] phivalue The level set values
   void assign_levelsetphi(const double phivalue) { levelset_phi_ = phivalue; };
 
-  //! return 1 if x > 0, -1 if x < 0 and 0 if x = 0
+  //! Return 1 if x > 0, -1 if x < 0 and 0 if x = 0
+  //! \param[in] x double value
   inline double sgn(double x) noexcept {
     return (x > 0) ? 1. : ((x < 0) ? -1. : 0);
   };
@@ -119,44 +114,44 @@ class ParticleXMPM : public Particle<Tdim> {
   //! Volume
   using Particle<Tdim>::volume_;
   //! Size of particle
-  using Particle<Tdim>:: size_;
+  using Particle<Tdim>::size_;
   //! Size of particle in natural coordinates
-  using Particle<Tdim>:: natural_size_;
+  using Particle<Tdim>::natural_size_;
   //! Stresses
-  using Particle<Tdim>:: stress_;
+  using Particle<Tdim>::stress_;
   //! Strains
-  using Particle<Tdim>:: strain_;
+  using Particle<Tdim>::strain_;
   //! dvolumetric strain
   using Particle<Tdim>::dvolumetric_strain_;
   //! Volumetric strain at centroid
   using Particle<Tdim>::volumetric_strain_centroid_;
   //! Strain rate
-  using Particle<Tdim>:: strain_rate_;
+  using Particle<Tdim>::strain_rate_;
   //! dstrains
-  using Particle<Tdim>:: dstrain_;
+  using Particle<Tdim>::dstrain_;
   //! Velocity
-  using Particle<Tdim>:: velocity_;
+  using Particle<Tdim>::velocity_;
   //! Displacement
-  using Particle<Tdim>:: displacement_;
+  using Particle<Tdim>::displacement_;
   //! Particle velocity constraints
-  using Particle<Tdim>:: particle_velocity_constraints_;
+  using Particle<Tdim>::particle_velocity_constraints_;
   //! Set traction
-  using Particle<Tdim>:: set_traction_;
+  using Particle<Tdim>::set_traction_;
   //! Surface Traction (given as a stress; force/area)
-  using Particle<Tdim>:: traction_;
+  using Particle<Tdim>::traction_;
   //! Shape functions
-  using Particle<Tdim>:: shapefn_;
+  using Particle<Tdim>::shapefn_;
   //! dN/dX
-  using Particle<Tdim>:: dn_dx_;
+  using Particle<Tdim>::dn_dx_;
   //! dN/dX at cell centroid
-  using Particle<Tdim>:: dn_dx_centroid_;
+  using Particle<Tdim>::dn_dx_centroid_;
   //! Logger
-  using Particle<Tdim>:: console_;
+  using Particle<Tdim>::console_;
   //! Map of vector properties
-  using Particle<Tdim>:: properties_;
-  
-private:
-  //! level set values for discontinuity
+  using Particle<Tdim>::properties_;
+
+ private:
+  //! level set value： phi for discontinuity
   double levelset_phi_{0.};
 };  // ParticleXMPM class
 }  // namespace mpm

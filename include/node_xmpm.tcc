@@ -54,9 +54,9 @@ bool mpm::Node<Tdim, Tdof, Tnphases>::intergrate_momentum_discontinuity(
   // when velocity is set.
   this->apply_velocity_constraints_discontinuity();
 
-  //need to be done
+  // need to be done
   Eigen::Matrix<double, 3, 1> normal{0.44721359474414313, 0,
-                                    0.89442719147920724};
+                                     0.89442719147920724};
   property_handle_->assign_property("normal_unit_vectors_discontinuity",
                                     discontinuity_prop_id_, 0, normal, Tdim);
 
@@ -206,9 +206,7 @@ void mpm::Node<Tdim, Tdof, Tnphases>::self_contact_discontinuity(
   }
 }
 
-  //! Compute normal direction of each enrich node
-  //! Apply velocity constraints
+//! Compute normal direction of each enrich node
+//! Apply velocity constraints
 template <unsigned Tdim, unsigned Tdof, unsigned Tnphases>
-void mpm::Node<Tdim, Tdof, Tnphases>::compute_normal_vector() noexcept {
-  
-    }
+void mpm::Node<Tdim, Tdof, Tnphases>::compute_normal_vector() noexcept {}

@@ -1,7 +1,7 @@
 template <unsigned Tdim>
 mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
                                             const Json& discontinuity_props)
-    :DiscontinuityBase<Tdim>(id, discontinuity_props) {
+    : DiscontinuityBase<Tdim>(id, discontinuity_props) {
 
   numelement_ = 0;
   try {
@@ -17,49 +17,49 @@ mpm::Discontinuity3D<Tdim>::Discontinuity3D(unsigned id,
   }
 }
 
-  // initialization
-  template <unsigned Tdim>
-  bool mpm::Discontinuity3D<Tdim>::initialize(
-      const std::vector<VectorDim>& coordinates,
-      const std::vector<std::vector<mpm::Index>>& pointsets) {
-    bool status = true;
-    // Create points from file
-    bool point_status = this->create_points(coordinates);
-    if (!point_status) {
-      status = false;
-      throw std::runtime_error(
-          "Addition of points in discontinuity to mesh failed");
-    }
-    // Create elements from file
-    bool element_status = create_elements(pointsets);
-    if (!element_status) {
-      status = false;
-      throw std::runtime_error(
-          "Addition of elements in discontinuity to mesh failed");
-    }
+// initialization
+template <unsigned Tdim>
+bool mpm::Discontinuity3D<Tdim>::initialize(
+    const std::vector<VectorDim>& points,
+    const std::vector<std::vector<mpm::Index>>& cells) {
+  bool status = true;
+  // Create points from file
+  bool point_status = this->create_points(points);
+  if (!point_status) {
+    status = false;
+    throw std::runtime_error(
+        "Addition of points in discontinuity to mesh failed");
+  }
+  // Create elements from file
+  bool element_status = create_areas(cells);
+  if (!element_status) {
+    status = false;
+    throw std::runtime_error(
+        "Addition of elements in discontinuity to mesh failed");
+  }
 
-    bool normal_status = initialize_center_normal();
-    if (!normal_status) {
-      status = false;
-      throw std::runtime_error(
-          "initialized the center and normal of the discontunity failed");
-    }
-    return status;
-  };
+  bool normal_status = initialize_center_normal();
+  if (!normal_status) {
+    status = false;
+    throw std::runtime_error(
+        "initialized the center and normal of the discontunity failed");
+  }
+  return status;
+};
 
 //! create elements from file
 template <unsigned Tdim>
-bool mpm::Discontinuity3D<Tdim>::create_elements(
-    const std::vector<std::vector<mpm::Index>>& elements) {
+bool mpm::Discontinuity3D<Tdim>::create_areas(
+    const std::vector<std::vector<mpm::Index>>& cells) {
 
   bool status = true;
   try {
     // Check if elements is empty
-    if (elements.empty()) throw std::runtime_error("List of elements is empty");
+    if (cells.empty()) throw std::runtime_error("List of elements is empty");
     // Iterate over all elements
-    for (const auto& points : elements) {
+    for (const auto& points : cells) {
 
-      mpm::discontinuity_element<Tdim> element(points);
+      mpm::discontinuity_area<Tdim> element(points);
 
       elements_.emplace_back(element);  //
     }
@@ -93,8 +93,8 @@ bool mpm::Discontinuity3D<3>::initialize_center_normal() {
 
       // the normal of the element
       normal = three_cross_product(points_[points[0]].coordinates(),
-                          points_[points[1]].coordinates(),
-                          points_[points[2]].coordinates());
+                                   points_[points[1]].coordinates(),
+                                   points_[points[2]].coordinates());
       double det = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] +
                              normal[2] * normal[2]);
       normal = 1.0 / det * normal;
@@ -148,18 +148,17 @@ void mpm::Discontinuity3D<Tdim>::compute_levelset(
 // return the normal vectors of given coordinates
 //! \param[in] the coordinates
 template <unsigned Tdim>
-void mpm::Discontinuity3D<Tdim>::compute_normal(
-   const VectorDim& coordinates, VectorDim& normal_vector) {
-    // find the nearest distance from particle to cell: need to do by global
-    // searching and local searching
-    double distance = std::numeric_limits<double>::max();
-    for (const auto& element : elements_) {
-      double Vertical_distance =
-          element.Vertical_distance(coordinates);  // Vertical_distance(coor);
-      if(std::abs(distance) > std::abs(Vertical_distance))
-      {
-        distance = Vertical_distance;
-        normal_vector = element.normal();
-      }
+void mpm::Discontinuity3D<Tdim>::compute_normal(const VectorDim& coordinates,
+                                                VectorDim& normal_vector) {
+  // find the nearest distance from particle to cell: need to do by global
+  // searching and local searching
+  double distance = std::numeric_limits<double>::max();
+  for (const auto& element : elements_) {
+    double Vertical_distance =
+        element.Vertical_distance(coordinates);  // Vertical_distance(coor);
+    if (std::abs(distance) > std::abs(Vertical_distance)) {
+      distance = Vertical_distance;
+      normal_vector = element.normal();
     }
+  }
 }

@@ -309,10 +309,12 @@ class Node : public NodeBase<Tdim> {
   //! \param[in] dt Time-step
   void self_contact_discontinuity(double dt) noexcept override;
 
-    //! Return the discontinuity_prop_id
-  virtual unsigned discontinuity_prop_id() const noexcept override{return discontinuity_prop_id_;};
+  //! Return the discontinuity_prop_id
+  virtual unsigned discontinuity_prop_id() const noexcept override {
+    return discontinuity_prop_id_;
+  };
 
-    //! Compute normal direction of each enrich node
+  //! Compute normal direction of each enrich node
   void compute_normal_vector() noexcept override;
 
  private:

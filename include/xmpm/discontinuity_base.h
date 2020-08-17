@@ -16,7 +16,6 @@ struct discontinuity_point;
 
 //! class for to describe the discontinuous surface
 //! \brief
-//! \details nodes, lines and areas
 //! \tparam Tdim Dimension
 template <unsigned Tdim>
 class DiscontinuityBase {
@@ -25,7 +24,8 @@ class DiscontinuityBase {
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
   //! Constructor with id
-  //! \param[in] discontinuity_properties discontinuity properties
+  //! \param[in] discontinuity id
+  //! \param[in] discontinuity properties json
   DiscontinuityBase(unsigned id, const Json& discontinuity_props);
 
   //! Destructor
@@ -38,16 +38,17 @@ class DiscontinuityBase {
   DiscontinuityBase& operator=(const DiscontinuityBase<Tdim>&) = delete;
 
   // initialization
+  //! \param[in] the coordinates of all points
+  //! \param[in] the point index of each areas
   virtual bool initialize(
-      const std::vector<VectorDim>& coordinates,
-      const std::vector<std::vector<mpm::Index>>& pointsets) = 0;
+      const std::vector<VectorDim>& points,
+      const std::vector<std::vector<mpm::Index>>& cells) = 0;
 
   //! create points from file
-  bool create_points(const std::vector<VectorDim>& coordinates);
+  bool create_points(const std::vector<VectorDim>& points);
 
   //! create elements from file
-  virtual bool create_elements(
-      const std::vector<std::vector<mpm::Index>>& elements) {
+  virtual bool create_areas(const std::vector<std::vector<mpm::Index>>& cells) {
     return true;
   };
 
@@ -57,9 +58,9 @@ class DiscontinuityBase {
                                 std::vector<double>& phi_list) = 0;
 
   // return the normal vectors of given coordinates
-//! \param[in] the coordinates
-virtual void compute_normal(
-  const  VectorDim& coordinates, VectorDim& normal_vector) = 0;
+  //! \param[in] the coordinates
+  virtual void compute_normal(const VectorDim& coordinates,
+                              VectorDim& normal_vector) = 0;
 
   // return self_contact
   bool self_contact() { return self_contact_; };
@@ -90,7 +91,7 @@ virtual void compute_normal(
   std::vector<mpm::discontinuity_point<Tdim>> points_;
 
   // number of points
-  mpm::Index numpoint_; //delete
+  mpm::Index numpoint_;  // delete
 
   // self-contact
   bool self_contact_{true};
@@ -174,12 +175,12 @@ struct discontinuity_line {
 };
 
 template <unsigned Tdim>
-struct discontinuity_element {
+struct discontinuity_area {
  public:
   //! Define a vector of size dimension
   using VectorDim = Eigen::Matrix<double, Tdim, 1>;
 
-  discontinuity_element(const std::vector<mpm::Index>& points) {
+  discontinuity_area(const std::vector<mpm::Index>& points) {
     for (int i = 0; i < points.size(); ++i) points_[i] = points[i];
   }
   //! Return points indices
@@ -188,9 +189,9 @@ struct discontinuity_element {
   inline void set_center(VectorDim& center) { center_ = center; }
 
   inline void set_normal(VectorDim& normal) { normal_ = normal; }
-  
+
   //! Reture normal of the elements
-  VectorDim normal() const {return normal_;}
+  VectorDim normal() const { return normal_; }
 
   double Vertical_distance(const VectorDim& coor) const {
     return (coor[0] - center_[0]) * normal_[0] +

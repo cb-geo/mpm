@@ -1955,10 +1955,10 @@ void mpm::Mesh<Tdim>::compute_shapefn_discontinuity() {
   }
 }
 
- // compute the normal vector of enriched nodes at the discontinuity
+// compute the normal vector of enriched nodes at the discontinuity
 template <unsigned Tdim>
 void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
-  //need to set
+  // need to set
   unsigned discontinuity_id = 0;
 
   auto discontinuity = discontinuities_[discontinuity_id];
@@ -1966,13 +1966,12 @@ void mpm::Mesh<Tdim>::compute_normal_vector_discontinuity() {
   VectorDim normal;
   normal.setZero();
 
-for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr)
-  {
-    
-    discontinuity->compute_normal((*nitr)->coordinates(),
-                                          normal);
+  for (auto nitr = nodes_.cbegin(); nitr != nodes_.cend(); ++nitr) {
+
+    discontinuity->compute_normal((*nitr)->coordinates(), normal);
 
     nodal_properties_->assign_property("normal_unit_vectors_discontinuity",
-                                  (*nitr)->discontinuity_prop_id(), 0, normal, Tdim);
+                                       (*nitr)->discontinuity_prop_id(), 0,
+                                       normal, Tdim);
   }
 }
