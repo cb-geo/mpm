@@ -741,7 +741,6 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
     // Send complete
     for (unsigned i = 0; i < this->ghost_cells_.size(); ++i)
       MPI_Wait(&send_requests[i], MPI_STATUS_IGNORE);
-    console_->info("Rank: {} send complete!", mpi_rank);
 
     // Particle id
     mpm::Index pid = 0;
@@ -763,9 +762,6 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
       // Receive number of particles
       unsigned nrecv_particles =
           std::accumulate(nrank_particles.begin(), nrank_particles.end(), 0);
-
-      if (nrecv_particles > 0)
-        console_->info("Rank: {} nparticles {}!", mpi_rank, nrecv_particles);
 
       for (unsigned j = 0; j < nrecv_particles; ++j) {
         // Retrieve information about the incoming message
@@ -791,8 +787,6 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
         int ptype;
         MPI_Unpack(bufptr, buffer.size(), &position, &ptype, 1, MPI_INT,
                    MPI_COMM_WORLD);
-        console_->info("Rank: {} buffer size: {} and ptype {}!", mpi_rank,
-                       buffer.size(), ptype);
         std::string particle_type = mpm::ParticleTypeName.at(ptype);
 
         // Get materials material id
@@ -816,12 +810,10 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
                 ->create(particle_type, static_cast<mpm::Index>(pid),
                          pcoordinates);
         particle->deserialize(buffer, materials);
-        console_->info("Rank: {} pid {}", mpi_rank, particle->id());
         // Add particle to mesh
         this->add_particle(particle, true);
       }
     }
-    console_->info("Rank: {} recv complete!", mpi_rank);
   }
 #endif
 }
@@ -904,7 +896,7 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
         for (unsigned j = 0; j < nrecv_particles; ++j) {
           // Retrieve information about the incoming message
           MPI_Status status;
-          MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
+          MPI_Probe(cell->previous_mpirank(), 0, MPI_COMM_WORLD, &status);
 
           // Get buffer size
           int size;
