@@ -34,7 +34,7 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
 //! Return particle data in HDF5 format
 template <unsigned Tdim>
 // cppcheck-suppress *
-mpm::HDF5ParticleTwoPhase mpm::TwoPhaseParticle<Tdim>::hdf5_twophase() const {
+mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   // Derive from particle
   auto solid_particle_data = mpm::Particle<Tdim>::hdf5();
   mpm::HDF5ParticleTwoPhase particle_data;

@@ -360,76 +360,77 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5_twophase();
+    auto h5_test_temp = particle->hdf5();
+    auto h5_test = reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_test_temp);
 
-    REQUIRE(h5_particle.id == h5_test.id);
-    REQUIRE(h5_particle.mass == h5_test.mass);
+    REQUIRE(h5_particle.id == h5_test->id);
+    REQUIRE(h5_particle.mass == h5_test->mass);
 
-    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_x == Approx(h5_test->coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test->coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test->coord_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.displacement_x ==
-            Approx(h5_test.displacement_x).epsilon(Tolerance));
+            Approx(h5_test->displacement_x).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_y ==
-            Approx(h5_test.displacement_y).epsilon(Tolerance));
+            Approx(h5_test->displacement_y).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_z ==
-            Approx(h5_test.displacement_z).epsilon(Tolerance));
+            Approx(h5_test->displacement_z).epsilon(Tolerance));
 
-    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
-    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
-    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+    REQUIRE(h5_particle.nsize_x == h5_test->nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test->nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test->nsize_z);
 
     REQUIRE(h5_particle.velocity_x ==
-            Approx(h5_test.velocity_x).epsilon(Tolerance));
+            Approx(h5_test->velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_y ==
-            Approx(h5_test.velocity_y).epsilon(Tolerance));
+            Approx(h5_test->velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_z ==
-            Approx(h5_test.velocity_z).epsilon(Tolerance));
+            Approx(h5_test->velocity_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.stress_xx ==
-            Approx(h5_test.stress_xx).epsilon(Tolerance));
+            Approx(h5_test->stress_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_yy ==
-            Approx(h5_test.stress_yy).epsilon(Tolerance));
+            Approx(h5_test->stress_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_zz ==
-            Approx(h5_test.stress_zz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+            Approx(h5_test->stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test->tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test->tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test->tau_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.strain_xx ==
-            Approx(h5_test.strain_xx).epsilon(Tolerance));
+            Approx(h5_test->strain_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_yy ==
-            Approx(h5_test.strain_yy).epsilon(Tolerance));
+            Approx(h5_test->strain_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_zz ==
-            Approx(h5_test.strain_zz).epsilon(Tolerance));
+            Approx(h5_test->strain_zz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xy ==
-            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+            Approx(h5_test->gamma_xy).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_yz ==
-            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+            Approx(h5_test->gamma_yz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xz ==
-            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+            Approx(h5_test->gamma_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.epsilon_v ==
-            Approx(h5_test.epsilon_v).epsilon(Tolerance));
-    REQUIRE(h5_particle.status == h5_test.status);
-    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
-    REQUIRE(h5_particle.material_id == h5_test.material_id);
+            Approx(h5_test->epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test->status);
+    REQUIRE(h5_particle.cell_id == h5_test->cell_id);
+    REQUIRE(h5_particle.material_id == h5_test->material_id);
 
     REQUIRE(h5_particle.liquid_mass ==
-            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+            Approx(h5_test->liquid_mass).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_x ==
-            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_y ==
-            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_z ==
-            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_z).epsilon(Tolerance));
     REQUIRE(h5_particle.porosity ==
-            Approx(h5_test.porosity).epsilon(Tolerance));
+            Approx(h5_test->porosity).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_saturation ==
-            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+            Approx(h5_test->liquid_saturation).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_material_id ==
-            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
+            Approx(h5_test->liquid_material_id).epsilon(Tolerance));
   }
 }
 
@@ -1601,76 +1602,77 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5_twophase();
+    auto h5_test_temp = particle->hdf5();
+    auto h5_test = reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_test_temp);
 
-    REQUIRE(h5_particle.id == h5_test.id);
-    REQUIRE(h5_particle.mass == h5_test.mass);
+    REQUIRE(h5_particle.id == h5_test->id);
+    REQUIRE(h5_particle.mass == h5_test->mass);
 
-    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_x == Approx(h5_test->coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test->coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test->coord_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.displacement_x ==
-            Approx(h5_test.displacement_x).epsilon(Tolerance));
+            Approx(h5_test->displacement_x).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_y ==
-            Approx(h5_test.displacement_y).epsilon(Tolerance));
+            Approx(h5_test->displacement_y).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_z ==
-            Approx(h5_test.displacement_z).epsilon(Tolerance));
+            Approx(h5_test->displacement_z).epsilon(Tolerance));
 
-    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
-    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
-    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+    REQUIRE(h5_particle.nsize_x == h5_test->nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test->nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test->nsize_z);
 
     REQUIRE(h5_particle.velocity_x ==
-            Approx(h5_test.velocity_x).epsilon(Tolerance));
+            Approx(h5_test->velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_y ==
-            Approx(h5_test.velocity_y).epsilon(Tolerance));
+            Approx(h5_test->velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_z ==
-            Approx(h5_test.velocity_z).epsilon(Tolerance));
+            Approx(h5_test->velocity_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.stress_xx ==
-            Approx(h5_test.stress_xx).epsilon(Tolerance));
+            Approx(h5_test->stress_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_yy ==
-            Approx(h5_test.stress_yy).epsilon(Tolerance));
+            Approx(h5_test->stress_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_zz ==
-            Approx(h5_test.stress_zz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+            Approx(h5_test->stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test->tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test->tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test->tau_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.strain_xx ==
-            Approx(h5_test.strain_xx).epsilon(Tolerance));
+            Approx(h5_test->strain_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_yy ==
-            Approx(h5_test.strain_yy).epsilon(Tolerance));
+            Approx(h5_test->strain_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_zz ==
-            Approx(h5_test.strain_zz).epsilon(Tolerance));
+            Approx(h5_test->strain_zz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xy ==
-            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+            Approx(h5_test->gamma_xy).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_yz ==
-            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+            Approx(h5_test->gamma_yz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xz ==
-            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+            Approx(h5_test->gamma_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.epsilon_v ==
-            Approx(h5_test.epsilon_v).epsilon(Tolerance));
-    REQUIRE(h5_particle.status == h5_test.status);
-    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
-    REQUIRE(h5_particle.material_id == h5_test.material_id);
+            Approx(h5_test->epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test->status);
+    REQUIRE(h5_particle.cell_id == h5_test->cell_id);
+    REQUIRE(h5_particle.material_id == h5_test->material_id);
 
     REQUIRE(h5_particle.liquid_mass ==
-            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+            Approx(h5_test->liquid_mass).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_x ==
-            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_y ==
-            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_z ==
-            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_z).epsilon(Tolerance));
     REQUIRE(h5_particle.porosity ==
-            Approx(h5_test.porosity).epsilon(Tolerance));
+            Approx(h5_test->porosity).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_saturation ==
-            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+            Approx(h5_test->liquid_saturation).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_material_id ==
-            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
+            Approx(h5_test->liquid_material_id).epsilon(Tolerance));
   }
 
   // Check twophase particle's material id maping to nodes
@@ -3089,76 +3091,77 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    const auto h5_test = particle->hdf5_twophase();
+    auto h5_test_temp = particle->hdf5();
+    auto h5_test = reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_test_temp);
 
-    REQUIRE(h5_particle.id == h5_test.id);
-    REQUIRE(h5_particle.mass == h5_test.mass);
+    REQUIRE(h5_particle.id == h5_test->id);
+    REQUIRE(h5_particle.mass == h5_test->mass);
 
-    REQUIRE(h5_particle.coord_x == Approx(h5_test.coord_x).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_y == Approx(h5_test.coord_y).epsilon(Tolerance));
-    REQUIRE(h5_particle.coord_z == Approx(h5_test.coord_z).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_x == Approx(h5_test->coord_x).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_y == Approx(h5_test->coord_y).epsilon(Tolerance));
+    REQUIRE(h5_particle.coord_z == Approx(h5_test->coord_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.displacement_x ==
-            Approx(h5_test.displacement_x).epsilon(Tolerance));
+            Approx(h5_test->displacement_x).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_y ==
-            Approx(h5_test.displacement_y).epsilon(Tolerance));
+            Approx(h5_test->displacement_y).epsilon(Tolerance));
     REQUIRE(h5_particle.displacement_z ==
-            Approx(h5_test.displacement_z).epsilon(Tolerance));
+            Approx(h5_test->displacement_z).epsilon(Tolerance));
 
-    REQUIRE(h5_particle.nsize_x == h5_test.nsize_x);
-    REQUIRE(h5_particle.nsize_y == h5_test.nsize_y);
-    REQUIRE(h5_particle.nsize_z == h5_test.nsize_z);
+    REQUIRE(h5_particle.nsize_x == h5_test->nsize_x);
+    REQUIRE(h5_particle.nsize_y == h5_test->nsize_y);
+    REQUIRE(h5_particle.nsize_z == h5_test->nsize_z);
 
     REQUIRE(h5_particle.velocity_x ==
-            Approx(h5_test.velocity_x).epsilon(Tolerance));
+            Approx(h5_test->velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_y ==
-            Approx(h5_test.velocity_y).epsilon(Tolerance));
+            Approx(h5_test->velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.velocity_z ==
-            Approx(h5_test.velocity_z).epsilon(Tolerance));
+            Approx(h5_test->velocity_z).epsilon(Tolerance));
 
     REQUIRE(h5_particle.stress_xx ==
-            Approx(h5_test.stress_xx).epsilon(Tolerance));
+            Approx(h5_test->stress_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_yy ==
-            Approx(h5_test.stress_yy).epsilon(Tolerance));
+            Approx(h5_test->stress_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.stress_zz ==
-            Approx(h5_test.stress_zz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xy == Approx(h5_test.tau_xy).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_yz == Approx(h5_test.tau_yz).epsilon(Tolerance));
-    REQUIRE(h5_particle.tau_xz == Approx(h5_test.tau_xz).epsilon(Tolerance));
+            Approx(h5_test->stress_zz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xy == Approx(h5_test->tau_xy).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_yz == Approx(h5_test->tau_yz).epsilon(Tolerance));
+    REQUIRE(h5_particle.tau_xz == Approx(h5_test->tau_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.strain_xx ==
-            Approx(h5_test.strain_xx).epsilon(Tolerance));
+            Approx(h5_test->strain_xx).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_yy ==
-            Approx(h5_test.strain_yy).epsilon(Tolerance));
+            Approx(h5_test->strain_yy).epsilon(Tolerance));
     REQUIRE(h5_particle.strain_zz ==
-            Approx(h5_test.strain_zz).epsilon(Tolerance));
+            Approx(h5_test->strain_zz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xy ==
-            Approx(h5_test.gamma_xy).epsilon(Tolerance));
+            Approx(h5_test->gamma_xy).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_yz ==
-            Approx(h5_test.gamma_yz).epsilon(Tolerance));
+            Approx(h5_test->gamma_yz).epsilon(Tolerance));
     REQUIRE(h5_particle.gamma_xz ==
-            Approx(h5_test.gamma_xz).epsilon(Tolerance));
+            Approx(h5_test->gamma_xz).epsilon(Tolerance));
 
     REQUIRE(h5_particle.epsilon_v ==
-            Approx(h5_test.epsilon_v).epsilon(Tolerance));
-    REQUIRE(h5_particle.status == h5_test.status);
-    REQUIRE(h5_particle.cell_id == h5_test.cell_id);
-    REQUIRE(h5_particle.material_id == h5_test.material_id);
+            Approx(h5_test->epsilon_v).epsilon(Tolerance));
+    REQUIRE(h5_particle.status == h5_test->status);
+    REQUIRE(h5_particle.cell_id == h5_test->cell_id);
+    REQUIRE(h5_particle.material_id == h5_test->material_id);
 
     REQUIRE(h5_particle.liquid_mass ==
-            Approx(h5_test.liquid_mass).epsilon(Tolerance));
+            Approx(h5_test->liquid_mass).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_x ==
-            Approx(h5_test.liquid_velocity_x).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_x).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_y ==
-            Approx(h5_test.liquid_velocity_y).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_y).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_velocity_z ==
-            Approx(h5_test.liquid_velocity_z).epsilon(Tolerance));
+            Approx(h5_test->liquid_velocity_z).epsilon(Tolerance));
     REQUIRE(h5_particle.porosity ==
-            Approx(h5_test.porosity).epsilon(Tolerance));
+            Approx(h5_test->porosity).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_saturation ==
-            Approx(h5_test.liquid_saturation).epsilon(Tolerance));
+            Approx(h5_test->liquid_saturation).epsilon(Tolerance));
     REQUIRE(h5_particle.liquid_material_id ==
-            Approx(h5_test.liquid_material_id).epsilon(Tolerance));
+            Approx(h5_test->liquid_material_id).epsilon(Tolerance));
   }
 
   // Check particle's material id maping to nodes

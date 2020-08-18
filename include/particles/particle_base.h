@@ -345,14 +345,6 @@ class ParticleBase {
         "ParticleBase:: illegal operation!");
   };
 
-  //! Return particle data as HDF5 for twophase particle
-  //! \retval particle HDF5 data of twophase particle
-  virtual HDF5ParticleTwoPhase hdf5_twophase() const {
-    throw std::runtime_error(
-        "Calling the base class function (hdf5) in "
-        "ParticleBase:: illegal operation!");
-  };
-
   //! Update porosity
   //! \param[in] dt Analysis time step
   virtual void update_porosity(double dt) {
