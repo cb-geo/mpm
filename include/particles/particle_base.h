@@ -337,7 +337,7 @@ class ParticleBase {
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(
-      const HDF5ParticleTwoPhase& particle,
+      HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& solid_material,
       const std::shared_ptr<Material<Tdim>>& liquid_material) {
     throw std::runtime_error(

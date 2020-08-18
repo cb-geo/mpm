@@ -53,7 +53,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \param[in] liquid_material Liquid material associated with the particle
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(
-      const HDF5ParticleTwoPhase& particle,
+      HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& solid_material,
       const std::shared_ptr<Material<Tdim>>& liquid_material) override;
 

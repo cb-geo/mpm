@@ -115,10 +115,11 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
-    const HDF5ParticleTwoPhase& particle,
+    HDF5Particle& particle,
     const std::shared_ptr<mpm::Material<Tdim>>& solid_material,
     const std::shared_ptr<mpm::Material<Tdim>>& liquid_material) {
-  bool status = this->initialise_particle(particle);
+  auto twophase_particle = reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
+  bool status = this->initialise_particle(*twophase_particle);
 
   // Solid Phase
   if (solid_material != nullptr) {
@@ -131,13 +132,13 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
       // Reinitialize state variables
       auto mat_state_vars = (this->material(mpm::ParticlePhase::Solid))
                                 ->initialise_state_variables();
-      if (mat_state_vars.size() == particle.nstate_vars) {
+      if (mat_state_vars.size() == twophase_particle->nstate_vars) {
         unsigned i = 0;
         auto state_variables =
             (this->material(mpm::ParticlePhase::Solid))->state_variables();
         for (const auto& state_var : state_variables) {
           this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
-              particle.svars[i];
+              twophase_particle->svars[i];
           ++i;
         }
       }
@@ -159,13 +160,13 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
       // Reinitialize state variables
       auto mat_state_vars = (this->material(mpm::ParticlePhase::Liquid))
                                 ->initialise_state_variables();
-      if (mat_state_vars.size() == particle.nliquid_state_vars) {
+      if (mat_state_vars.size() == twophase_particle->nliquid_state_vars) {
         unsigned i = 0;
         auto state_variables =
             (this->material(mpm::ParticlePhase::Liquid))->state_variables();
         for (const auto& state_var : state_variables) {
           this->state_variables_[mpm::ParticlePhase::Liquid].at(state_var) =
-              particle.liquid_svars[i];
+              twophase_particle->liquid_svars[i];
           ++i;
         }
       }
