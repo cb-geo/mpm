@@ -2,10 +2,7 @@
 template <unsigned Tdim>
 mpm::MPMSchemeUSF<Tdim>::MPMSchemeUSF(
     const std::shared_ptr<mpm::Mesh<Tdim>>& mesh, double dt)
-    : mpm::MPMScheme<Tdim>(mesh, dt) {
-  mesh_ = mesh;
-  dt_ = dt;
-}
+    : mpm::MPMScheme<Tdim>(mesh, dt) {}
 
 //! Precompute stresses and strains
 template <unsigned Tdim>
