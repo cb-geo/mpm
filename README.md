@@ -179,7 +179,7 @@ For example:
 
 ```
 export OMP_SCHEDULE="static, 4"
-./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json -p 8
+./mpm -f /path/to/input-dir/ -i mpm-usf-3d.json
 ```
 
 Where:

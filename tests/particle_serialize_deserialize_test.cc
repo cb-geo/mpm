@@ -11,7 +11,6 @@
 #include "hexahedron_element.h"
 #include "linear_function.h"
 #include "material.h"
-#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"
@@ -192,21 +191,6 @@ TEST_CASE("Particle is checked for serialization and deserialization",
         REQUIRE_NOTHROW(rparticle->deserialize(buffer, materials));
       }
       auto serialize_end = std::chrono::steady_clock::now();
-
-      // HDF5 serialization
-      auto hdf5_start = std::chrono::steady_clock::now();
-      for (unsigned i = 0; i < niterations; ++i) {
-        // Serialize particle as POD
-        auto hdf5 = particle->hdf5();
-        // Deserialize particle with POD
-        std::shared_ptr<mpm::ParticleBase<Dim>> rparticle =
-            std::make_shared<mpm::Particle<Dim>>(id, pcoords);
-        // Initialize MPI datatypes
-        MPI_Datatype particle_type = mpm::register_mpi_particle_type(hdf5);
-        REQUIRE_NOTHROW(rparticle->initialise_particle(hdf5, material));
-        mpm::deregister_mpi_particle_type(particle_type);
-      }
-      auto hdf5_end = std::chrono::steady_clock::now();
     }
   }
 }
