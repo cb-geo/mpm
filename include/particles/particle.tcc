@@ -1037,7 +1037,6 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   // state variables
   if (this->material() != nullptr) {
     std::vector<double> svars;
-    unsigned i = 0;
     auto state_variables = (this->material())->state_variables();
     for (const auto& state_var : state_variables)
       svars.emplace_back(
