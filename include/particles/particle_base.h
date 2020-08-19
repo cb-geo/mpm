@@ -74,6 +74,10 @@ class ParticleBase {
   //! \retval particle HDF5 data of the particle
   virtual HDF5Particle hdf5() const = 0;
 
+  //! Retrun particle data as HDF5
+  //! \retval particle HDF5 data of the particle
+  virtual void* hdf5_ptr() = 0;
+
   //! Return id of the particleBase
   Index id() const { return id_; }
 

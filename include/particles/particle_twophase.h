@@ -64,6 +64,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \retval particle HDF5 data of the particle
   HDF5Particle hdf5() const override;
 
+  void* hdf5_ptr() override;
+
   //! Assign saturation degree
   bool assign_saturation_degree() override;
 

@@ -63,6 +63,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval particle HDF5 data of the particle
   HDF5Particle hdf5() const override;
 
+  //! Retrun particle data as HDF5
+  //! \retval particle HDF5 data of the particle
+  void* hdf5_ptr() override;
+
   //! Initialise properties
   void initialise() override;
 

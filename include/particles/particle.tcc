@@ -135,6 +135,14 @@ bool mpm::Particle<Tdim>::initialise_particle(
 //! Return particle data in HDF5 format
 template <unsigned Tdim>
 // cppcheck-suppress *
+void* mpm::Particle<Tdim>::hdf5_ptr() {
+  mpm::HDF5Particle particle_data;
+  return &particle_data;
+}
+
+//! Return particle data in HDF5 format
+template <unsigned Tdim>
+// cppcheck-suppress *
 mpm::HDF5Particle mpm::Particle<Tdim>::hdf5() const {
 
   mpm::HDF5Particle particle_data;

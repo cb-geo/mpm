@@ -360,8 +360,11 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    auto h5_test_temp = particle->hdf5();
-    auto h5_test = reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_test_temp);
+    // mpm::HDF5Particle h5_test_temp = particle->hdf5();
+    mpm::HDF5ParticleTwoPhase* h5_test =
+        reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(particle->hdf5_ptr());
+    // auto h5_test =
+    // reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_test_temp);
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);
