@@ -241,7 +241,8 @@ class Particle : public ParticleBase<Tdim> {
   double state_variable(
       const std::string& var,
       unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (state_variables_[phase].find(var) != state_variables_[phase].end())
+    return (phase < state_variables_.size() &&
+            state_variables_[phase].find(var) != state_variables_[phase].end())
                ? state_variables_[phase].at(var)
                : std::numeric_limits<double>::quiet_NaN();
   }
@@ -258,16 +259,24 @@ class Particle : public ParticleBase<Tdim> {
   //! Return pressure of the particles
   //! \param[in] phase Index to indicate phase
   double pressure(unsigned phase = mpm::ParticlePhase::Solid) const override {
-    return (state_variables_[phase].find("pressure") !=
-            state_variables_[phase].end())
-               ? state_variables_[phase].at("pressure")
-               : std::numeric_limits<double>::quiet_NaN();
+    return this->state_variable("pressure", phase);
   }
+
+  //! Return scalar data of particles
+  //! \param[in] property Property string
+  //! \retval data Scalar data of particle property
+  inline double scalar_data(const std::string& property) const override;
+
+  //! Return vector data of particles
+  //! \param[in] property Property string
+  //! \retval data Vector data of particle property
+  inline VectorDim vector_data(const std::string& property) const override;
 
   //! Return tensor data of particles
   //! \param[in] property Property string
-  //! \retval vecdata Tensor data of particle property
-  Eigen::VectorXd tensor_data(const std::string& property) override;
+  //! \retval data Tensor data of particle property
+  inline Eigen::VectorXd tensor_data(
+      const std::string& property) const override;
 
   //! Apply particle velocity constraints
   //! \param[in] dir Direction of particle velocity constraint
@@ -369,8 +378,13 @@ class Particle : public ParticleBase<Tdim> {
   Eigen::MatrixXd dn_dx_centroid_;
   //! Logger
   std::unique_ptr<spdlog::logger> console_;
+  //! Map of scalar properties
+  tsl::robin_map<std::string, std::function<double()>> scalar_properties_;
   //! Map of vector properties
-  std::map<std::string, std::function<Eigen::VectorXd()>> properties_;
+  tsl::robin_map<std::string, std::function<VectorDim()>> vector_properties_;
+  //! Map of tensor properties
+  tsl::robin_map<std::string, std::function<Eigen::VectorXd()>>
+      tensor_properties_;
 
 };  // Particle class
 }  // namespace mpm
