@@ -4,6 +4,17 @@ mpm::MPMExplicit<Tdim>::MPMExplicit(const std::shared_ptr<IO>& io)
     : mpm::MPMBase<Tdim>(io) {
   //! Logger
   console_ = spdlog::get("MPMExplicit");
+  //! Stress update
+  if (this->stress_update_ == "usl")
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSL<Tdim>>(mesh_, dt_);
+  else
+    mpm_scheme_ = std::make_shared<mpm::MPMSchemeUSF<Tdim>>(mesh_, dt_);
+
+  //! Interface scheme
+  if (this->interface_)
+    contact_ = std::make_shared<mpm::ContactFriction<Tdim>>(mesh_);
+  else
+    contact_ = std::make_shared<mpm::Contact<Tdim>>(mesh_);
 }
 
 //! MPM Explicit compute stress strain
@@ -52,41 +63,22 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     resume = analysis_["resume"]["resume"].template get<bool>();
 
   // Pressure smoothing
-  if (analysis_.find("pressure_smoothing") != analysis_.end())
-    pressure_smoothing_ =
-        analysis_.at("pressure_smoothing").template get<bool>();
+  pressure_smoothing_ = io_->analysis_bool("pressure_smoothing");
 
   // Interface
-  if (analysis_.find("interface") != analysis_.end())
-    interface_ = analysis_.at("interface").template get<bool>();
+  interface_ = io_->analysis_bool("interface");
 
   // Initialise material
-  bool mat_status = this->initialise_materials();
-  if (!mat_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of materials failed");
-  }
+  this->initialise_materials();
 
   // Initialise mesh
-  bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of mesh failed");
-  }
+  this->initialise_mesh();
 
   // Initialise particles
-  bool particle_status = this->initialise_particles();
-  if (!particle_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of particles failed");
-  }
+  this->initialise_particles();
 
   // Initialise loading conditions
-  bool loading_status = this->initialise_loads();
-  if (!loading_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of loading failed");
-  }
+  this->initialise_loads();
 
   // Create nodal properties
   if (interface_) mesh_->create_nodal_properties();
@@ -117,190 +109,36 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #endif
 
     // Inject particles
-    mesh_->inject_particles(this->step_ * this->dt_);
+    mesh_->inject_particles(step_ * dt_);
 
-#pragma omp parallel sections
-    {
-      // Spawn a task for initialising nodes and cells
-#pragma omp section
-      {
-        // Initialise nodes
-        mesh_->iterate_over_nodes(
-            std::bind(&mpm::NodeBase<Tdim>::initialise, std::placeholders::_1));
-
-        mesh_->iterate_over_cells(
-            std::bind(&mpm::Cell<Tdim>::activate_nodes, std::placeholders::_1));
-      }
-      // Spawn a task for particles
-#pragma omp section
-      {
-        // Iterate over each particle to compute shapefn
-        mesh_->iterate_over_particles(std::bind(
-            &mpm::ParticleBase<Tdim>::compute_shapefn, std::placeholders::_1));
-      }
-    }  // Wait to complete
+    // Initialise nodes, cells and shape functions
+    mpm_scheme_->initialise();
 
     // Initialise nodal properties and append material ids to node
-    if (interface_) {
-      // Initialise nodal properties
-      mesh_->initialise_nodal_properties();
+    contact_->initialise();
 
-      // Append material ids to nodes
-      mesh_->iterate_over_particles(
-          std::bind(&mpm::ParticleBase<Tdim>::append_material_id_to_nodes,
-                    std::placeholders::_1));
-    }
+    // Mass momentum and compute velocity at nodes
+    mpm_scheme_->compute_nodal_kinematics(phase);
 
-    // Assign mass and momentum to nodes
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::map_mass_momentum_to_nodes,
-                  std::placeholders::_1));
-
-#ifdef USE_MPI
-    // Run if there is more than a single MPI task
-    if (mpi_size > 1) {
-      // MPI all reduce nodal mass
-      mesh_->template nodal_halo_exchange<double, 1>(
-          std::bind(&mpm::NodeBase<Tdim>::mass, std::placeholders::_1, phase),
-          std::bind(&mpm::NodeBase<Tdim>::update_mass, std::placeholders::_1,
-                    false, phase, std::placeholders::_2));
-      // MPI all reduce nodal momentum
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::momentum, std::placeholders::_1,
-                    phase),
-          std::bind(&mpm::NodeBase<Tdim>::update_momentum,
-                    std::placeholders::_1, false, phase,
-                    std::placeholders::_2));
-    }
-#endif
-
-    // Compute nodal velocity
-    mesh_->iterate_over_nodes_predicate(
-        std::bind(&mpm::NodeBase<Tdim>::compute_velocity,
-                  std::placeholders::_1),
-        std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-    if (interface_) {
-      // Map multimaterial properties from particles to nodes
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_multimaterial_mass_momentum_to_nodes,
-          std::placeholders::_1));
-
-      // Map multimaterial displacements from particles to nodes
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_multimaterial_displacements_to_nodes,
-          std::placeholders::_1));
-
-      // Map multimaterial domain gradients from particles to nodes
-      mesh_->iterate_over_particles(std::bind(
-          &mpm::ParticleBase<Tdim>::map_multimaterial_domain_gradients_to_nodes,
-          std::placeholders::_1));
-
-      // Compute multimaterial change in momentum
-      mesh_->iterate_over_nodes(std::bind(
-          &mpm::NodeBase<Tdim>::compute_multimaterial_change_in_momentum,
-          std::placeholders::_1));
-
-      // Compute multimaterial separation vector
-      mesh_->iterate_over_nodes(std::bind(
-          &mpm::NodeBase<Tdim>::compute_multimaterial_separation_vector,
-          std::placeholders::_1));
-
-      // Compute multimaterial normal unit vector
-      mesh_->iterate_over_nodes(std::bind(
-          &mpm::NodeBase<Tdim>::compute_multimaterial_normal_unit_vector,
-          std::placeholders::_1));
-    }
+    // Map material properties to nodes
+    contact_->compute_contact_forces();
 
     // Update stress first
-    if (this->stress_update_ == mpm::StressUpdate::USF)
-      this->compute_stress_strain(phase);
+    mpm_scheme_->precompute_stress_strain(phase, pressure_smoothing_);
 
-      // Spawn a task for external force
-#pragma omp parallel sections
-    {
-#pragma omp section
-      {
-        // Iterate over each particle to compute nodal body force
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::map_body_force,
-                      std::placeholders::_1, this->gravity_));
+    // Compute forces
+    mpm_scheme_->compute_forces(gravity_, phase, step_,
+                                set_node_concentrated_force_);
 
-        // Apply particle traction and map to nodes
-        mesh_->apply_traction_on_particles(this->step_ * this->dt_);
-
-        // Iterate over each node to add concentrated node force to external
-        // force
-        if (set_node_concentrated_force_)
-          mesh_->iterate_over_nodes(std::bind(
-              &mpm::NodeBase<Tdim>::apply_concentrated_force,
-              std::placeholders::_1, phase, (this->step_ * this->dt_)));
-      }
-
-#pragma omp section
-      {
-        // Spawn a task for internal force
-        // Iterate over each particle to compute nodal internal force
-        mesh_->iterate_over_particles(
-            std::bind(&mpm::ParticleBase<Tdim>::map_internal_force,
-                      std::placeholders::_1));
-      }
-    }  // Wait for tasks to finish
-
-#ifdef USE_MPI
-    // Run if there is more than a single MPI task
-    if (mpi_size > 1) {
-      // MPI all reduce external force
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::external_force, std::placeholders::_1,
-                    phase),
-          std::bind(&mpm::NodeBase<Tdim>::update_external_force,
-                    std::placeholders::_1, false, phase,
-                    std::placeholders::_2));
-      // MPI all reduce internal force
-      mesh_->template nodal_halo_exchange<Eigen::Matrix<double, Tdim, 1>, Tdim>(
-          std::bind(&mpm::NodeBase<Tdim>::internal_force, std::placeholders::_1,
-                    phase),
-          std::bind(&mpm::NodeBase<Tdim>::update_internal_force,
-                    std::placeholders::_1, false, phase,
-                    std::placeholders::_2));
-    }
-#endif
-
-    // Check if damping has been specified and accordingly Iterate over
-    // active nodes to compute acceleratation and velocity
-    if (damping_type_ == mpm::Damping::Cundall)
-      mesh_->iterate_over_nodes_predicate(
-          std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity_cundall,
-                    std::placeholders::_1, phase, this->dt_, damping_factor_),
-          std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-    else
-      mesh_->iterate_over_nodes_predicate(
-          std::bind(&mpm::NodeBase<Tdim>::compute_acceleration_velocity,
-                    std::placeholders::_1, phase, this->dt_),
-          std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
-
-    // Iterate over each particle to compute updated position
-    mesh_->iterate_over_particles(
-        std::bind(&mpm::ParticleBase<Tdim>::compute_updated_position,
-                  std::placeholders::_1, this->dt_, this->velocity_update_));
-
-    // Apply particle velocity constraints
-    mesh_->apply_particle_velocity_constraints();
+    // Particle kinematics
+    mpm_scheme_->compute_particle_kinematics(velocity_update_, phase, "Cundall",
+                                             damping_factor_);
 
     // Update Stress Last
-    if (this->stress_update_ == mpm::StressUpdate::USL)
-      this->compute_stress_strain(phase);
+    mpm_scheme_->postcompute_stress_strain(phase, pressure_smoothing_);
 
     // Locate particles
-    auto unlocatable_particles = mesh_->locate_particles_mesh();
-
-    if (!unlocatable_particles.empty() && this->locate_particles_)
-      throw std::runtime_error("Particle outside the mesh domain");
-    // If unable to locate particles remove particles
-    if (!unlocatable_particles.empty() && !this->locate_particles_)
-      for (const auto& remove_particle : unlocatable_particles)
-        mesh_->remove_particle(remove_particle);
+    mpm_scheme_->locate_particles(this->locate_particles_);
 
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
@@ -322,12 +160,11 @@ bool mpm::MPMExplicit<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info(
-      "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-      (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
-      std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
-                                                            solver_begin)
-          .count());
+  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+                 mpm_scheme_->scheme(),
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     solver_end - solver_begin)
+                     .count());
 
   return status;
 }
