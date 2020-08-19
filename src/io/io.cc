@@ -216,5 +216,13 @@ Json mpm::IO::json_object(const std::string& key) const {
 //! Return post processing object
 Json mpm::IO::post_processing() const { return json_["post_processing"]; }
 
+//! Return JSON analysis boolean
+bool mpm::IO::analysis_bool(const std::string& key) const {
+  auto analysis = json_["analysis"];
+  return (analysis.find(key) != analysis.end())
+             ? analysis.at(key).template get<bool>()
+             : false;
+}
+
 //! Return number of threads
 unsigned mpm::IO::nthreads() const { return nthreads_; }

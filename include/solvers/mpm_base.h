@@ -18,7 +18,12 @@
 #endif
 
 #include "constraints.h"
+#include "contact.h"
+#include "contact_friction.h"
 #include "mpm.h"
+#include "mpm_scheme.h"
+#include "mpm_scheme_usf.h"
+#include "mpm_scheme_usl.h"
 #include "particle.h"
 #include "vector.h"
 
@@ -29,13 +34,6 @@ namespace mpm {
 //! Vector: Vector of size 3
 //! Tensor: Symmetric tensor arranged in voigt notation
 enum class VariableType { Scalar, Vector, Tensor };
-
-//! Stress update method
-//! USF: Update Stress First
-//! USL: Update Stress Last
-//! MUSL: Modified Stress Last
-enum class StressUpdate { USF, USL, MUSL };
-extern std::map<std::string, StressUpdate> stress_update;
 
 //! Damping type
 //! None: No damping is specified
@@ -53,16 +51,16 @@ class MPMBase : public MPM {
   MPMBase(const std::shared_ptr<IO>& io);
 
   //! Initialise mesh
-  bool initialise_mesh() override;
+  void initialise_mesh() override;
 
   //! Initialise particles
-  bool initialise_particles() override;
+  void initialise_particles() override;
 
   //! Initialise materials
-  bool initialise_materials() override;
+  void initialise_materials() override;
 
   //! Initialise loading
-  bool initialise_loads() override;
+  void initialise_loads() override;
 
   //! Initialise math functions
   bool initialise_math_functions(const Json&) override;
@@ -184,8 +182,12 @@ class MPMBase : public MPM {
   //! Logger
   using mpm::MPM::console_;
 
-  //! Stress update method (default USF = 0, USL = 1, MUSL = 2)
-  mpm::StressUpdate stress_update_{mpm::StressUpdate::USF};
+  //! Stress update method
+  std::string stress_update_{"usf"};
+  //! Stress update scheme
+  std::shared_ptr<mpm::MPMScheme<Tdim>> mpm_scheme_{nullptr};
+  //! Interface scheme
+  std::shared_ptr<mpm::Contact<Tdim>> contact_{nullptr};
   //! velocity update
   bool velocity_update_{false};
   //! Gravity
