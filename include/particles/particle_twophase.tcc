@@ -152,10 +152,10 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
 //! Return particle data in HDF5 format
 template <unsigned Tdim>
 // cppcheck-suppress *
-void* mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
+std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
   // Derive from particle
   // auto solid_particle_data = mpm::Particle<Tdim>::hdf5();
-  mpm::HDF5ParticleTwoPhase* particle_data = new HDF5ParticleTwoPhase();
+  auto particle_data = std::make_shared<mpm::HDF5ParticleTwoPhase>();
   // static_cast<mpm::HDF5Particle&>(particle_data) = solid_particle_data;
 
   Eigen::Vector3d coordinates;

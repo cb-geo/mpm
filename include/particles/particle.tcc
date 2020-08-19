@@ -135,9 +135,9 @@ bool mpm::Particle<Tdim>::initialise_particle(
 //! Return particle data in HDF5 format
 template <unsigned Tdim>
 // cppcheck-suppress *
-void* mpm::Particle<Tdim>::hdf5_ptr() {
-  mpm::HDF5Particle particle_data;
-  return &particle_data;
+std::shared_ptr<void> mpm::Particle<Tdim>::hdf5_ptr() {
+  auto particle_data = std::make_shared<mpm::HDF5Particle>();
+  return particle_data;
 }
 
 //! Return particle data in HDF5 format
