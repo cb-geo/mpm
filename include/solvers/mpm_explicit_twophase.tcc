@@ -82,32 +82,16 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
   }
 
   // Initialise material
-  bool mat_status = this->initialise_materials();
-  if (!mat_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of materials failed");
-  }
+  this->initialise_materials();
 
   // Initialise mesh
-  bool mesh_status = this->initialise_mesh();
-  if (!mesh_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of mesh failed");
-  }
+  this->initialise_mesh();
 
   // Initialise particles
-  bool particle_status = this->initialise_particles();
-  if (!particle_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of particles failed");
-  }
+  this->initialise_particles();
 
   // Initialise loading conditions
-  bool loading_status = this->initialise_loads();
-  if (!loading_status) {
-    status = false;
-    throw std::runtime_error("Initialisation of loading failed");
-  }
+  this->initialise_loads();
 
   // Assign porosity
   mesh_->iterate_over_particles(std::bind(
@@ -231,8 +215,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
         std::bind(&mpm::NodeBase<Tdim>::status, std::placeholders::_1));
 
     // Update stress first
-    if (this->stress_update_ == mpm::StressUpdate::USF)
-      this->compute_stress_strain();
+    if (this->stress_update_ == "usf") this->compute_stress_strain();
 
       // Spawn a task for external force
 #pragma omp parallel sections
@@ -340,8 +323,7 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     mesh_->apply_particle_velocity_constraints();
 
     // Update Stress Last
-    if (this->stress_update_ == mpm::StressUpdate::USL)
-      this->compute_stress_strain();
+    if (this->stress_update_ == "usl") this->compute_stress_strain();
 
     // Locate particles
     auto unlocatable_particles = mesh_->locate_particles_mesh();
@@ -373,12 +355,11 @@ bool mpm::MPMExplicitTwoPhase<Tdim>::solve() {
     }
   }
   auto solver_end = std::chrono::steady_clock::now();
-  console_->info(
-      "Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
-      (this->stress_update_ == mpm::StressUpdate::USL ? "USL" : "USF"),
-      std::chrono::duration_cast<std::chrono::milliseconds>(solver_end -
-                                                            solver_begin)
-          .count());
+  console_->info("Rank {}, Explicit {} solver duration: {} ms", mpi_rank,
+                 (this->stress_update_ == "usl" ? "USL" : "USF"),
+                 std::chrono::duration_cast<std::chrono::milliseconds>(
+                     solver_end - solver_begin)
+                     .count());
 
   return status;
 }

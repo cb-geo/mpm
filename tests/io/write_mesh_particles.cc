@@ -4,8 +4,7 @@ namespace mpm_test {
 
 // Write JSON Configuration file
 bool write_json(unsigned dim, bool resume, const std::string& analysis,
-                const std::string& stress_update,
-                const std::string& file_name) {
+                const std::string& mpm_scheme, const std::string& file_name) {
   // Make json object with input files
   // 2D
   std::string dimension = "2d";
@@ -86,7 +85,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
          {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
-        {"stress_update", stress_update},
+        {"mpm_scheme", mpm_scheme},
         {"locate_particles", true},
         {"dt", 0.001},
         {"uuid", file_name + "-" + dimension},
@@ -115,7 +114,7 @@ bool write_json(unsigned dim, bool resume, const std::string& analysis,
 
 // Write JSON Configuration file for twophase
 bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
-                         const std::string& stress_update,
+                         const std::string& mpm_scheme,
                          const std::string& file_name) {
   // Make json object with input files
   // 2D
@@ -213,7 +212,7 @@ bool write_json_twophase(unsigned dim, bool resume, const std::string& analysis,
          {"fxvalues", fxvalues}}}},
       {"analysis",
        {{"type", analysis},
-        {"stress_update", stress_update},
+        {"mpm_scheme", mpm_scheme},
         {"locate_particles", true},
         {"dt", 0.0001},
         {"uuid", file_name + "-" + dimension},

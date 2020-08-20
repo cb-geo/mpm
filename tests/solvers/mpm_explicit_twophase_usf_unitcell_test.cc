@@ -16,8 +16,8 @@ TEST_CASE("MPM 2D Explicit TwoPhase USF implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-twophase-usf";
   const std::string analysis = "MPMExplicitTwoPhase2D";
-  const std::string stress_update = "usf";
-  REQUIRE(mpm_test::write_json_unitcell_twophase(2, analysis, stress_update,
+  const std::string mpm_scheme = "usf";
+  REQUIRE(mpm_test::write_json_unitcell_twophase(2, analysis, mpm_scheme,
                                                  fname) == true);
 
   // Write Mesh
@@ -41,17 +41,17 @@ TEST_CASE("MPM 2D Explicit TwoPhase USF implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Initialise external loading
-    REQUIRE(mpm->initialise_loads() == true);
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
@@ -73,8 +73,8 @@ TEST_CASE("MPM 3D Explicit TwoPhase USF implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-twophase-usf";
   const std::string analysis = "MPMExplicitTwoPhase3D";
-  const std::string stress_update = "usf";
-  REQUIRE(mpm_test::write_json_unitcell_twophase(3, analysis, stress_update,
+  const std::string mpm_scheme = "usf";
+  REQUIRE(mpm_test::write_json_unitcell_twophase(3, analysis, mpm_scheme,
                                                  fname) == true);
 
   // Write Mesh
@@ -98,14 +98,14 @@ TEST_CASE("MPM 3D Explicit TwoPhase USF implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
