@@ -149,14 +149,12 @@ mpm::HDF5Particle mpm::TwoPhaseParticle<Tdim>::hdf5() const {
   return particle_data;
 }
 
-//! Return particle data in HDF5 format
+//! Return particle data as HDF5 pointer
 template <unsigned Tdim>
 // cppcheck-suppress *
 std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
-  // Derive from particle
-  // auto solid_particle_data = mpm::Particle<Tdim>::hdf5();
+  // Initialise particle_data
   auto particle_data = std::make_shared<mpm::HDF5ParticleTwoPhase>();
-  // static_cast<mpm::HDF5Particle&>(particle_data) = solid_particle_data;
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();
@@ -226,6 +224,21 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
   particle_data->cell_id = this->cell_id();
 
   particle_data->material_id = this->material_id();
+
+  // Write state variables
+  if (this->material() != nullptr) {
+    particle_data->nstate_vars =
+        state_variables_[mpm::ParticlePhase::Solid].size();
+    if (state_variables_[mpm::ParticlePhase::Solid].size() > 20)
+      throw std::runtime_error("# of state variables cannot be more than 20");
+    unsigned i = 0;
+    auto state_variables = (this->material())->state_variables();
+    for (const auto& state_var : state_variables) {
+      particle_data->svars[i] =
+          state_variables_[mpm::ParticlePhase::Solid].at(state_var);
+      ++i;
+    }
+  }
 
   // Particle liquid mass
   particle_data->liquid_mass = this->liquid_mass_;
