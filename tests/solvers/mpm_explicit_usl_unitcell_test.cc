@@ -16,8 +16,8 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit2D";
-  const std::string stress_update = "usl";
-  REQUIRE(mpm_test::write_json_unitcell(2, analysis, stress_update, fname) ==
+  const std::string mpm_scheme = "usl";
+  REQUIRE(mpm_test::write_json_unitcell(2, analysis, mpm_scheme, fname) ==
           true);
 
   // Write Mesh
@@ -41,17 +41,17 @@ TEST_CASE("MPM 2D Explicit USL implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
 
     // Initialise external loading
-    REQUIRE(mpm->initialise_loads() == true);
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {
@@ -73,8 +73,8 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
   // Write JSON file
   const std::string fname = "mpm-explicit-usl";
   const std::string analysis = "MPMExplicit3D";
-  const std::string stress_update = "usl";
-  REQUIRE(mpm_test::write_json_unitcell(3, analysis, stress_update, fname) ==
+  const std::string mpm_scheme = "usl";
+  REQUIRE(mpm_test::write_json_unitcell(3, analysis, mpm_scheme, fname) ==
           true);
 
   // Write Mesh
@@ -98,14 +98,17 @@ TEST_CASE("MPM 3D Explicit USL implementation is checked in unitcells",
     auto mpm = std::make_unique<mpm::MPMExplicit<Dim>>(std::move(io));
 
     // Initialise materials
-    REQUIRE(mpm->initialise_materials() == true);
+    REQUIRE_NOTHROW(mpm->initialise_materials());
 
     // Initialise mesh and particles
-    REQUIRE(mpm->initialise_mesh() == true);
-    REQUIRE(mpm->initialise_particles() == true);
+    REQUIRE_NOTHROW(mpm->initialise_mesh());
+    REQUIRE_NOTHROW(mpm->initialise_particles());
+
+    // Initialise external loading
+    REQUIRE_NOTHROW(mpm->initialise_loads());
 
     // Renitialise materials
-    REQUIRE(mpm->initialise_materials() == false);
+    REQUIRE_THROWS(mpm->initialise_materials());
   }
 
   SECTION("Check solver") {

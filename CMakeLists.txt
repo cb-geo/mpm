@@ -139,10 +139,12 @@ include_directories(BEFORE
   ${mpm_SOURCE_DIR}/include/functions/
   ${mpm_SOURCE_DIR}/include/generators/
   ${mpm_SOURCE_DIR}/include/io/
+  ${mpm_SOURCE_DIR}/include/contacts/
   ${mpm_SOURCE_DIR}/include/loads_bcs/
   ${mpm_SOURCE_DIR}/include/materials/
   ${mpm_SOURCE_DIR}/include/particles/
   ${mpm_SOURCE_DIR}/include/solvers/
+  ${mpm_SOURCE_DIR}/include/solvers/mpm_scheme/
   ${mpm_SOURCE_DIR}/include/utilities/
   ${mpm_SOURCE_DIR}/external/
   ${mpm_SOURCE_DIR}/tests/include/
@@ -179,6 +181,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/test_main.cc
     ${mpm_SOURCE_DIR}/tests/cell_test.cc
     ${mpm_SOURCE_DIR}/tests/cell_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/contact_test.cc
     ${mpm_SOURCE_DIR}/tests/factory_test.cc
     ${mpm_SOURCE_DIR}/tests/geometry_test.cc
     ${mpm_SOURCE_DIR}/tests/elements/hexahedron_element_test.cc
@@ -230,6 +233,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usf_unitcell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_twophase_usl_unitcell_test.cc
+    ${mpm_SOURCE_DIR}/tests/solvers/mpm_scheme_test.cc
   )
   add_executable(mpmtest ${mpm_src} ${test_src})
   add_test(NAME mpmtest COMMAND $<TARGET_FILE:mpmtest>)
