@@ -280,10 +280,12 @@ TEST_CASE("MPI HDF5 TwoPhase Particle is checked",
             Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
                 ->create("Newtonian3D", std::move(liquid_mid),
                          jliquid_material);
+        std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+        materials.emplace_back(solid_material);
+        materials.emplace_back(liquid_material);
 
         // Reinitialise particle from HDF5 data
-        REQUIRE(particle->initialise_particle(h5_particle, solid_material,
-                                              liquid_material) == true);
+        REQUIRE(particle->initialise_particle(h5_particle, materials) == true);
 
         // Check particle id
         REQUIRE(particle->id() == h5_particle.id);
@@ -411,10 +413,12 @@ TEST_CASE("MPI HDF5 TwoPhase Particle is checked",
             Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
                 ->create("Newtonian3D", std::move(liquid_mid),
                          jliquid_material);
+        std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+        materials.emplace_back(solid_material);
+        materials.emplace_back(liquid_material);
 
         // Reinitialise particle from HDF5 data
-        REQUIRE(rparticle->initialise_particle(received, solid_material,
-                                               liquid_material) == true);
+        REQUIRE(rparticle->initialise_particle(received, materials) == true);
 
         // Check particle id
         REQUIRE(rparticle->id() == h5_particle.id);

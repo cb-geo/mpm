@@ -164,32 +164,33 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
 
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
-    const HDF5ParticleTwoPhase& particle) {
+bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(HDF5Particle& particle) {
   // Initialise solid phase
-  mpm::HDF5Particle solid_particle = particle;
-  bool status = mpm::Particle<Tdim>::initialise_particle(solid_particle);
+  bool status = mpm::Particle<Tdim>::initialise_particle(particle);
+  auto twophase_particle = reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
 
   // Liquid mass
-  this->liquid_mass_ = particle.liquid_mass;
+  this->liquid_mass_ = twophase_particle->liquid_mass;
   // Liquid mass Density
-  this->liquid_mass_density_ = particle.liquid_mass / particle.volume;
+  this->liquid_mass_density_ = twophase_particle->liquid_mass / particle.volume;
 
   // Liquid velocity
   Eigen::Vector3d liquid_velocity;
-  liquid_velocity << particle.liquid_velocity_x, particle.liquid_velocity_y,
-      particle.liquid_velocity_z;
+  liquid_velocity << twophase_particle->liquid_velocity_x,
+      twophase_particle->liquid_velocity_y,
+      twophase_particle->liquid_velocity_z;
   // Initialise velocity
   for (unsigned i = 0; i < Tdim; ++i)
     this->liquid_velocity_(i) = liquid_velocity(i);
 
   // Particle porosity and saturation
-  this->porosity_ = particle.porosity;
-  this->liquid_saturation_ = particle.liquid_saturation;
+  this->porosity_ = twophase_particle->porosity;
+  this->liquid_saturation_ = twophase_particle->liquid_saturation;
   this->assign_permeability();
 
   // Liquid material id
-  this->material_id_[mpm::ParticlePhase::Liquid] = particle.liquid_material_id;
+  this->material_id_[mpm::ParticlePhase::Liquid] =
+      twophase_particle->liquid_material_id;
 
   return status;
 }
@@ -198,12 +199,14 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
     HDF5Particle& particle,
-    const std::shared_ptr<mpm::Material<Tdim>>& solid_material,
-    const std::shared_ptr<mpm::Material<Tdim>>& liquid_material) {
+    const std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
   auto twophase_particle = reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
   bool status = this->initialise_particle(*twophase_particle);
 
+  assert(materials.size() == 2);
+
   // Solid Phase
+  const auto& solid_material = materials.at(mpm::ParticlePhase::Solid);
   if (solid_material != nullptr) {
     if (this->material_id(mpm::ParticlePhase::Solid) == solid_material->id() ||
         this->material_id(mpm::ParticlePhase::Solid) ==
@@ -231,6 +234,7 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
   }
 
   // Fluid Phase
+  const auto& liquid_material = materials.at(mpm::ParticlePhase::Liquid);
   if (liquid_material != nullptr) {
     if (this->material_id(mpm::ParticlePhase::Liquid) ==
             liquid_material->id() ||

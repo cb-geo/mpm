@@ -771,7 +771,7 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
-          for (const auto& rparticle : recv_particles) {
+          for (auto& rparticle : recv_particles) {
             mpm::Index id = 0;
             // Initial particle coordinates
             Eigen::Matrix<double, Tdim, 1> pcoordinates;
@@ -781,9 +781,10 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
             auto received_particle =
                 std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
             // Get material
-            auto material = materials_.at(rparticle.material_id);
+            std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+            materials.emplace_back(materials_.at(rparticle.material_id));
             // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(rparticle, material);
+            received_particle->initialise_particle(rparticle, materials);
 
             // Add particle to mesh
             this->add_particle(received_particle, true);
@@ -883,7 +884,7 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
           mpm::deregister_mpi_particle_type(particle_type);
 
           // Iterate through n number of received particles
-          for (const auto& rparticle : recv_particles) {
+          for (auto& rparticle : recv_particles) {
             mpm::Index id = 0;
             // Initial particle coordinates
             Eigen::Matrix<double, Tdim, 1> pcoordinates;
@@ -893,9 +894,10 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
             auto received_particle =
                 std::make_shared<mpm::Particle<Tdim>>(id, pcoordinates);
             // Get material
-            auto material = materials_.at(rparticle.material_id);
+            std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+            materials.emplace_back(materials_.at(rparticle.material_id));
             // Reinitialise particle from HDF5 data
-            received_particle->initialise_particle(rparticle, material);
+            received_particle->initialise_particle(rparticle, materials);
 
             // Add particle to mesh
             this->add_particle(received_particle, true);
@@ -1469,9 +1471,10 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
     if (i < nrecords) {
       HDF5Particle particle = dst_buf[i];
       // Get particle's material from list of materials
-      auto material = materials_.at(particle.material_id);
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+      materials.emplace_back(materials_.at(particle.material_id));
       // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, material);
+      (*pitr)->initialise_particle(particle, materials);
       // Add particle to map
       map_particles_.insert(particle.id, *pitr);
       particles.add(*pitr);

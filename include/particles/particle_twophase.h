@@ -45,7 +45,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Initialise particle from HDF5 data
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
-  bool initialise_particle(const HDF5ParticleTwoPhase& particle) override;
+  bool initialise_particle(HDF5Particle& particle) override;
 
   //! Initialise particle HDF5 data and material
   //! \param[in] particle HDF5 data of particle
@@ -54,8 +54,7 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \retval status Status of reading HDF5 particle
   bool initialise_particle(
       HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& solid_material,
-      const std::shared_ptr<Material<Tdim>>& liquid_material) override;
+      const std::vector<std::shared_ptr<Material<Tdim>>>& materials) override;
 
   //! Initialise particle liquid phase on top of the regular solid phase
   void initialise() override;

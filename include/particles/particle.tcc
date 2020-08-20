@@ -32,7 +32,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
 
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
+bool mpm::Particle<Tdim>::initialise_particle(HDF5Particle& particle) {
 
   // Assign id
   this->id_ = particle.id;
@@ -105,13 +105,17 @@ bool mpm::Particle<Tdim>::initialise_particle(const HDF5Particle& particle) {
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(
-    const HDF5Particle& particle,
-    const std::shared_ptr<mpm::Material<Tdim>>& material) {
+    HDF5Particle& particle,
+    const std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
   bool status = this->initialise_particle(particle);
-  if (material != nullptr) {
-    if (this->material_id() == material->id() ||
+
+  assert(materials.size() == 1);
+
+  if (materials.at(mpm::ParticlePhase::Solid) != nullptr) {
+    if (this->material_id() == materials.at(mpm::ParticlePhase::Solid)->id() ||
         this->material_id() == std::numeric_limits<unsigned>::max()) {
-      bool assign_mat = this->assign_material(material);
+      bool assign_mat =
+          this->assign_material(materials.at(mpm::ParticlePhase::Solid));
       if (!assign_mat) throw std::runtime_error("Material assignment failed");
       // Reinitialize state variables
       auto mat_state_vars = (this->material())->initialise_state_variables();

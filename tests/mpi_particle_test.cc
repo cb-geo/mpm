@@ -224,9 +224,11 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         auto material =
             Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
                 ->create("LinearElastic3D", std::move(mid), jmaterial);
+        std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+        materials.emplace_back(material);
 
         // Reinitialise particle from HDF5 data
-        REQUIRE(particle->initialise_particle(h5_particle, material) == true);
+        REQUIRE(particle->initialise_particle(h5_particle, materials) == true);
 
         // Check particle id
         REQUIRE(particle->id() == h5_particle.id);
@@ -322,9 +324,11 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         auto material =
             Factory<mpm::Material<Dim>, unsigned, const Json&>::instance()
                 ->create("LinearElastic3D", std::move(mid), jmaterial);
+        std::vector<std::shared_ptr<mpm::Material<Dim>>> materials;
+        materials.emplace_back(material);
 
         // Reinitialise particle from HDF5 data
-        REQUIRE(rparticle->initialise_particle(received, material) == true);
+        REQUIRE(rparticle->initialise_particle(received, materials) == true);
 
         // Check particle id
         REQUIRE(rparticle->id() == h5_particle.id);

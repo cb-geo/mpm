@@ -60,15 +60,15 @@ class ParticleBase {
   //! Initialise particle HDF5 data
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(const HDF5Particle& particle) = 0;
+  virtual bool initialise_particle(HDF5Particle& particle) = 0;
 
   //! Initialise particle HDF5 data and material
   //! \param[in] particle HDF5 data of particle
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(
-      const HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& material) = 0;
+      HDF5Particle& particle,
+      const std::vector<std::shared_ptr<Material<Tdim>>>& materials) = 0;
 
   //! Return particle data as HDF5 pointer
   //! \retval particle HDF5 pointer of the particle
@@ -323,28 +323,6 @@ class ParticleBase {
   virtual std::vector<mpm::Index> neighbours() const = 0;
 
   //! TwoPhase functions--------------------------------------------------------
-  //! Initialise particle HDF5 data for twophase
-  //! \param[in] particle HDF5 data of twophase particle
-  //! \retval status Status of reading HDF5 twophase particle
-  virtual bool initialise_particle(const HDF5ParticleTwoPhase& particle) {
-    throw std::runtime_error(
-        "Calling the base class function (initialise_particle) in "
-        "ParticleBase:: illegal operation!");
-  };
-
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
-  //! \retval status Status of reading HDF5 particle
-  virtual bool initialise_particle(
-      HDF5Particle& particle,
-      const std::shared_ptr<Material<Tdim>>& solid_material,
-      const std::shared_ptr<Material<Tdim>>& liquid_material) {
-    throw std::runtime_error(
-        "Calling the base class function (initialise_particle) in "
-        "ParticleBase:: illegal operation!");
-  };
-
   //! Update porosity
   //! \param[in] dt Analysis time step
   virtual void update_porosity(double dt) {
