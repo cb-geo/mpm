@@ -1,6 +1,11 @@
 #ifndef MPM_PARTICLEBASE_H_
 #define MPM_PARTICLEBASE_H_
 
+// MPI
+#ifdef USE_MPI
+#include "mpi.h"
+#endif
+
 #include <array>
 #include <limits>
 #include <memory>
@@ -26,6 +31,10 @@ enum ParticlePhase : unsigned int {
   Gas = 2,
   Mixture = 0
 };
+
+//! Particle type
+extern std::map<std::string, int> ParticleType;
+extern std::map<int, std::string> ParticleTypeName;
 
 //! ParticleBase class
 //! \brief Base class that stores the information about particleBases
@@ -321,6 +330,20 @@ class ParticleBase {
 
   //! Return neighbour ids
   virtual std::vector<mpm::Index> neighbours() const = 0;
+
+  //! Type of particle
+  virtual std::string type() const = 0;
+
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  virtual std::vector<uint8_t> serialize() = 0;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  //! \param[in] material Particle material pointers
+  virtual void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) = 0;
 
   //! TwoPhase functions--------------------------------------------------------
   //! Update porosity

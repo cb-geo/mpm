@@ -15,7 +15,6 @@
 #include "hexahedron_element.h"
 #include "material.h"
 #include "mesh.h"
-#include "mpi_datatypes.h"
 #include "node.h"
 #include "particle.h"
 #include "quadrilateral_element.h"

@@ -211,8 +211,6 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/mesh_neighbours_test.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_2d.cc
     ${mpm_SOURCE_DIR}/tests/mesh_test_3d.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_particle_test.cc
-    ${mpm_SOURCE_DIR}/tests/mpi_particle_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/mpi_transfer_particle_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/nodal_properties_test.cc
     ${mpm_SOURCE_DIR}/tests/nodes/node_map_test.cc
@@ -224,6 +222,7 @@ if(MPM_BUILD_TESTING)
     ${mpm_SOURCE_DIR}/tests/particles/particle_twophase_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_traction_test.cc
     ${mpm_SOURCE_DIR}/tests/particles/particle_vector_test.cc
+    ${mpm_SOURCE_DIR}/tests/particles/particle_serialize_deserialize_test.cc
     ${mpm_SOURCE_DIR}/tests/point_in_cell_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_test.cc
     ${mpm_SOURCE_DIR}/tests/solvers/mpm_explicit_usf_unitcell_test.cc

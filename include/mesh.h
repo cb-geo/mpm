@@ -35,8 +35,6 @@ using Json = nlohmann::json;
 #include "io_mesh.h"
 #include "logger.h"
 #include "material.h"
-#include "mpi_datatypes.h"
-#include "mpi_datatypes_twophase.h"
 #include "nodal_properties.h"
 #include "node.h"
 #include "particle.h"
