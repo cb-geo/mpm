@@ -718,7 +718,9 @@ void mpm::Mesh<Tdim>::transfer_halo_particles() {
       // delete particle
       for (auto& id : particle_ids) {
         // Append to vector of particles
-        h5_particles.emplace_back(map_particles_[id]->hdf5());
+        auto hdf5_ptr = std::static_pointer_cast<mpm::HDF5Particle>(
+            map_particles_[id]->hdf5_ptr());
+        h5_particles.emplace_back(*hdf5_ptr);
         // Particles to be removed from the current rank
         remove_pids.emplace_back(id);
       }
@@ -825,7 +827,9 @@ void mpm::Mesh<Tdim>::transfer_nonrank_particles(
         // delete particle
         for (auto& id : particle_ids) {
           // Append to vector of particles
-          h5_particles.emplace_back(map_particles_[id]->hdf5());
+          auto hdf5_ptr = std::static_pointer_cast<mpm::HDF5Particle>(
+              map_particles_[id]->hdf5_ptr());
+          h5_particles.emplace_back(*hdf5_ptr);
           // Particles to be removed from the current rank
           remove_pids.emplace_back(id);
         }
@@ -1398,8 +1402,11 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
   std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
   particle_data.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particle_data.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto hdf5_ptr =
+        std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
+    particle_data.emplace_back(*hdf5_ptr);
+  }
 
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
@@ -1492,8 +1499,11 @@ std::vector<mpm::HDF5Particle> mpm::Mesh<Tdim>::particles_hdf5() const {
   std::vector<mpm::HDF5Particle> particles_hdf5;
   particles_hdf5.reserve(nparticles);
 
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
-    particles_hdf5.emplace_back((*pitr)->hdf5());
+  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+    auto hdf5_ptr =
+        std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
+    particles_hdf5.emplace_back(*hdf5_ptr);
+  }
 
   return particles_hdf5;
 }

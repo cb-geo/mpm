@@ -289,11 +289,14 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         REQUIRE(particle->material_id() == h5_particle.material_id);
 
         // Write Particle HDF5 data
-        const auto h5_send = particle->hdf5();
+        auto h5_send_ptr =
+            std::static_pointer_cast<mpm::HDF5Particle>(particle->hdf5_ptr());
 
         // Send MPI particle
-        MPI_Datatype particle_type = mpm::register_mpi_particle_type(h5_send);
-        MPI_Send(&h5_send, 1, particle_type, receiver, 0, MPI_COMM_WORLD);
+        MPI_Datatype particle_type =
+            mpm::register_mpi_particle_type(*h5_send_ptr);
+        MPI_Send(&(*h5_send_ptr), 1, particle_type, receiver, 0,
+                 MPI_COMM_WORLD);
         mpm::deregister_mpi_particle_type(particle_type);
       }
       if (mpi_rank == receiver) {
@@ -384,12 +387,13 @@ TEST_CASE("MPI HDF5 Particle is checked", "[particle][mpi][hdf5]") {
         REQUIRE(rparticle->material_id() == h5_particle.material_id);
 
         // Get Particle HDF5 data
-        const auto h5_received = rparticle->hdf5();
+        auto h5_received =
+            std::static_pointer_cast<mpm::HDF5Particle>(rparticle->hdf5_ptr());
         // State variables
-        REQUIRE(h5_received.nstate_vars == h5_particle.nstate_vars);
+        REQUIRE(h5_received->nstate_vars == h5_particle.nstate_vars);
         // State variables
         for (unsigned i = 0; i < h5_particle.nstate_vars; ++i)
-          REQUIRE(h5_received.svars[i] ==
+          REQUIRE(h5_received->svars[i] ==
                   Approx(h5_particle.svars[i]).epsilon(Tolerance));
       }
     }

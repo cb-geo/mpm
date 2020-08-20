@@ -70,10 +70,6 @@ class ParticleBase {
       const HDF5Particle& particle,
       const std::shared_ptr<Material<Tdim>>& material) = 0;
 
-  //! Retrun particle data as HDF5
-  //! \retval particle HDF5 data of the particle
-  virtual HDF5Particle hdf5() const = 0;
-
   //! Return particle data as HDF5 pointer
   //! \retval particle HDF5 pointer of the particle
   virtual std::shared_ptr<void> hdf5_ptr() = 0;

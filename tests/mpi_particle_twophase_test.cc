@@ -363,14 +363,14 @@ TEST_CASE("MPI HDF5 TwoPhase Particle is checked",
                 h5_particle.liquid_material_id);
 
         // Write Particle HDF5 data
-        auto h5_send = particle->hdf5();
-        auto h5_twophase_send =
-            reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_send);
+        auto h5_twophase_send_ptr =
+            std::static_pointer_cast<mpm::HDF5ParticleTwoPhase>(
+                particle->hdf5_ptr());
 
         // Send MPI particle
         MPI_Datatype particle_type =
-            mpm::register_mpi_particle_type(*h5_twophase_send);
-        MPI_Send(&(*h5_twophase_send), 1, particle_type, receiver, 0,
+            mpm::register_mpi_particle_type(*h5_twophase_send_ptr);
+        MPI_Send(&(*h5_twophase_send_ptr), 1, particle_type, receiver, 0,
                  MPI_COMM_WORLD);
         mpm::deregister_mpi_particle_type(particle_type);
       }
@@ -477,9 +477,9 @@ TEST_CASE("MPI HDF5 TwoPhase Particle is checked",
         REQUIRE(rparticle->material_id() == h5_particle.material_id);
 
         // Get Particle HDF5 data
-        auto h5_received = rparticle->hdf5();
         auto h5_twophase_received =
-            reinterpret_cast<mpm::HDF5ParticleTwoPhase*>(&h5_received);
+            std::static_pointer_cast<mpm::HDF5ParticleTwoPhase>(
+                rparticle->hdf5_ptr());
 
         // State variables
         REQUIRE(h5_twophase_received->nstate_vars == h5_particle.nstate_vars);
