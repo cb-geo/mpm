@@ -149,6 +149,27 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! \retval porosity Porosity
   double porosity() const override { return porosity_; }
 
+  //! Type of particle
+  std::string type() const override {
+    return (Tdim == 2) ? "P2D2PHASE" : "P3D2PHASE";
+  }
+
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  std::vector<uint8_t> serialize() override;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  //! \param[in] material Particle material pointers
+  void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
+
+ protected:
+  //! Compute pack size
+  //! \retval pack size of serialized object
+  int compute_pack_size() const override;
+
  private:
   //! Assign liquid mass and momentum to nodes
   virtual void map_liquid_mass_momentum_to_nodes() noexcept;
@@ -219,6 +240,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   using Particle<Tdim>::size_;
   //! Particle velocity constraints
   using Particle<Tdim>::particle_velocity_constraints_;
+  //! Size of particle
+  using Particle<Tdim>::pack_size_;
 
   //! Liquid mass
   double liquid_mass_;

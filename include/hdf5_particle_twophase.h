@@ -21,6 +21,8 @@ typedef struct HDF5ParticleTwoPhase : HDF5Particle {
   unsigned nliquid_state_vars;
   // State variables (init to zero)
   double liquid_svars[5] = {0};
+  // Destructor
+  virtual ~HDF5ParticleTwoPhase() = default;
 } HDF5ParticleTwoPhase;
 
 namespace hdf5 {

@@ -909,3 +909,340 @@ bool mpm::TwoPhaseParticle<Tdim>::assign_traction(unsigned direction,
   }
   return status;
 }
+
+//! Compute size of serialized particle data
+template <unsigned Tdim>
+int mpm::TwoPhaseParticle<Tdim>::compute_pack_size() const {
+  int total_size = mpm::Particle<Tdim>::compute_pack_size();
+  int partial_size;
+#ifdef USE_MPI
+  // material id for liquid phase
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // liquid mass
+  MPI_Pack_size(1, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // liquid velocity
+  MPI_Pack_size(Tdim, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // porosity, liquid saturation
+  MPI_Pack_size(2 * 1, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // nliquid state variables
+  unsigned nliquid_state_vars =
+      state_variables_[mpm::ParticlePhase::Liquid].size();
+  MPI_Pack_size(1, MPI_UNSIGNED, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+
+  // liquid state variables
+  MPI_Pack_size(nliquid_state_vars, MPI_DOUBLE, MPI_COMM_WORLD, &partial_size);
+  total_size += partial_size;
+#endif
+  return total_size;
+}
+
+//! Serialize particle data
+template <unsigned Tdim>
+std::vector<uint8_t> mpm::TwoPhaseParticle<Tdim>::serialize() {
+  // Compute pack size
+  if (pack_size_ == 0) pack_size_ = this->compute_pack_size();
+  // Initialize data buffer
+  std::vector<uint8_t> data;
+  data.resize(pack_size_);
+  uint8_t* data_ptr = &data[0];
+  int position = 0;
+
+#ifdef USE_MPI
+  // Type
+  int type = ParticleType.at(this->type());
+  MPI_Pack(&type, 1, MPI_INT, data_ptr, data.size(), &position, MPI_COMM_WORLD);
+
+  // Material ID
+  unsigned nmaterials = material_id_.size();
+  MPI_Pack(&nmaterials, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  MPI_Pack(&material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED, data_ptr,
+           data.size(), &position, MPI_COMM_WORLD);
+  MPI_Pack(&material_id_[mpm::ParticlePhase::Liquid], 1, MPI_UNSIGNED, data_ptr,
+           data.size(), &position, MPI_COMM_WORLD);
+
+  // ID
+  MPI_Pack(&this->id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+
+  // Solid Phase
+  // Mass
+  MPI_Pack(&mass_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  // Volume
+  MPI_Pack(&volume_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  // Pressure
+  double pressure =
+      (state_variables_[mpm::ParticlePhase::Solid].find("pressure") !=
+       state_variables_[mpm::ParticlePhase::Solid].end())
+          ? state_variables_[mpm::ParticlePhase::Solid].at("pressure")
+          : 0.;
+  MPI_Pack(&pressure, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+
+  // Coordinates
+  MPI_Pack(coordinates_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+  // Displacement
+  MPI_Pack(this->displacement_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+  // Natural size
+  MPI_Pack(this->natural_size_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+  // Velocity
+  MPI_Pack(this->velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+  // Stress
+  MPI_Pack(stress_.data(), 6, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  // Strain
+  MPI_Pack(this->strain_.data(), 6, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+
+  // epsv
+  MPI_Pack(&this->volumetric_strain_centroid_, 1, MPI_DOUBLE, data_ptr,
+           data.size(), &position, MPI_COMM_WORLD);
+
+  // Cell id
+  MPI_Pack(&this->cell_id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+
+  // Status
+  MPI_Pack(&this->status_, 1, MPI_C_BOOL, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+
+  // nstate variables
+  unsigned nstate_vars = state_variables_[mpm::ParticlePhase::Solid].size();
+  MPI_Pack(&nstate_vars, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+
+  // state variables
+  if (this->material(mpm::ParticlePhase::Solid) != nullptr) {
+    std::vector<double> svars;
+    auto state_variables =
+        (this->material(mpm::ParticlePhase::Solid))->state_variables();
+    for (const auto& state_var : state_variables)
+      svars.emplace_back(
+          state_variables_[mpm::ParticlePhase::Solid].at(state_var));
+
+    // Write state vars
+    MPI_Pack(&svars[0], nstate_vars, MPI_DOUBLE, data_ptr, data.size(),
+             &position, MPI_COMM_WORLD);
+  }
+
+  // Liquid Phase
+  // Mass
+  MPI_Pack(&liquid_mass_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  // Velocity
+  MPI_Pack(liquid_velocity_.data(), Tdim, MPI_DOUBLE, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+  // Porosity
+  MPI_Pack(&porosity_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+  // Liquid Saturation
+  MPI_Pack(&liquid_saturation_, 1, MPI_DOUBLE, data_ptr, data.size(), &position,
+           MPI_COMM_WORLD);
+
+  // nstate variables
+  unsigned nliquid_state_vars =
+      state_variables_[mpm::ParticlePhase::Liquid].size();
+  MPI_Pack(&nliquid_state_vars, 1, MPI_UNSIGNED, data_ptr, data.size(),
+           &position, MPI_COMM_WORLD);
+
+  // state variables
+  if (this->material(mpm::ParticlePhase::Liquid) != nullptr) {
+    std::vector<double> svars;
+    auto state_variables =
+        (this->material(mpm::ParticlePhase::Liquid))->state_variables();
+    for (const auto& state_var : state_variables)
+      svars.emplace_back(
+          state_variables_[mpm::ParticlePhase::Liquid].at(state_var));
+
+    // Write state vars
+    MPI_Pack(&svars[0], nliquid_state_vars, MPI_DOUBLE, data_ptr, data.size(),
+             &position, MPI_COMM_WORLD);
+  }
+#endif
+  return data;
+}
+
+//! Deserialize particle data
+template <unsigned Tdim>
+void mpm::TwoPhaseParticle<Tdim>::deserialize(
+    const std::vector<uint8_t>& data,
+    std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
+  uint8_t* data_ptr = const_cast<uint8_t*>(&data[0]);
+  int position = 0;
+
+#ifdef USE_MPI
+  // Type
+  int type;
+  MPI_Unpack(data_ptr, data.size(), &position, &type, 1, MPI_INT,
+             MPI_COMM_WORLD);
+  if (type != ParticleType.at(this->type()))
+    throw std::runtime_error("Deserialize particle(): particle type mismatch");
+
+  // nmaterials
+  int nmaterials = 0;
+  MPI_Unpack(data_ptr, data.size(), &position, &nmaterials, 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
+  if (nmaterials != materials.size())
+    throw std::runtime_error(
+        "Deserialize particle(): nmaterials mismatch with the input materials "
+        "size");
+
+  // Material ID
+  MPI_Unpack(data_ptr, data.size(), &position,
+             &material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position,
+             &material_id_[mpm::ParticlePhase::Liquid], 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
+
+  // ID
+  MPI_Unpack(data_ptr, data.size(), &position, &this->id_, 1,
+             MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+
+  // Solid Phase
+  // mass
+  MPI_Unpack(data_ptr, data.size(), &position, &mass_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // volume
+  MPI_Unpack(data_ptr, data.size(), &position, &volume_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // pressure
+  double pressure;
+  MPI_Unpack(data_ptr, data.size(), &position, &pressure, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  this->assign_pressure(pressure);
+
+  // Coordinates
+  MPI_Unpack(data_ptr, data.size(), &position, coordinates_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Displacement
+  MPI_Unpack(data_ptr, data.size(), &position, this->displacement_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Natural size
+  MPI_Unpack(data_ptr, data.size(), &position, this->natural_size_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Velocity
+  MPI_Unpack(data_ptr, data.size(), &position, this->velocity_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // Stress
+  MPI_Unpack(data_ptr, data.size(), &position, stress_.data(), 6, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // Strain
+  MPI_Unpack(data_ptr, data.size(), &position, this->strain_.data(), 6,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+
+  // epsv
+  MPI_Unpack(data_ptr, data.size(), &position,
+             &this->volumetric_strain_centroid_, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+  // cell id
+  MPI_Unpack(data_ptr, data.size(), &position, &this->cell_id_, 1,
+             MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+  // status
+  MPI_Unpack(data_ptr, data.size(), &position, &this->status_, 1, MPI_C_BOOL,
+             MPI_COMM_WORLD);
+
+  // Assign materials
+  if (material_id_[mpm::ParticlePhase::Solid] ==
+      materials.at(mpm::ParticlePhase::Solid)->id()) {
+    bool assign_mat =
+        this->assign_material(materials.at(mpm::ParticlePhase::Solid));
+    if (!assign_mat) throw std::runtime_error("Material assignment failed");
+  }
+
+  // nstate vars
+  unsigned nstate_vars;
+  MPI_Unpack(data_ptr, data.size(), &position, &nstate_vars, 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
+
+  if (nstate_vars > 0) {
+    std::vector<double> svars;
+    svars.reserve(nstate_vars);
+    MPI_Unpack(data_ptr, data.size(), &position, &svars, nstate_vars,
+               MPI_DOUBLE, MPI_COMM_WORLD);
+
+    // Reinitialize state variables
+    auto mat_state_vars = (this->material(mpm::ParticlePhase::Solid))
+                              ->initialise_state_variables();
+    if (mat_state_vars.size() == nstate_vars) {
+      unsigned i = 0;
+      auto state_variables =
+          (this->material(mpm::ParticlePhase::Solid))->state_variables();
+      for (const auto& state_var : state_variables) {
+        this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+            svars[i];
+        ++i;
+      }
+    } else
+      throw std::runtime_error(
+          "Deserialize particle(): state_vars size mismatch");
+  }
+
+  // Liquid Phase
+  // liquid mass
+  MPI_Unpack(data_ptr, data.size(), &position, &liquid_mass_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // Liquid velocity
+  MPI_Unpack(data_ptr, data.size(), &position, liquid_velocity_.data(), Tdim,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+  // porosity
+  MPI_Unpack(data_ptr, data.size(), &position, &porosity_, 1, MPI_DOUBLE,
+             MPI_COMM_WORLD);
+  // liquid Saturation
+  MPI_Unpack(data_ptr, data.size(), &position, &liquid_saturation_, 1,
+             MPI_DOUBLE, MPI_COMM_WORLD);
+
+  // Assign permeability
+  this->assign_permeability();
+
+  // Assign liquid materials
+  if (material_id_[mpm::ParticlePhase::Liquid] ==
+      materials.at(mpm::ParticlePhase::Liquid)->id()) {
+    bool assign_mat =
+        this->assign_material(materials.at(mpm::ParticlePhase::Liquid));
+    if (!assign_mat) throw std::runtime_error("Material assignment failed");
+  }
+
+  // nliquid state vars
+  unsigned nliquid_state_vars;
+  MPI_Unpack(data_ptr, data.size(), &position, &nliquid_state_vars, 1,
+             MPI_UNSIGNED, MPI_COMM_WORLD);
+
+  if (nliquid_state_vars > 0) {
+    std::vector<double> svars;
+    svars.reserve(nliquid_state_vars);
+    MPI_Unpack(data_ptr, data.size(), &position, &svars, nliquid_state_vars,
+               MPI_DOUBLE, MPI_COMM_WORLD);
+
+    // Reinitialize state variables
+    auto mat_state_vars = (this->material(mpm::ParticlePhase::Liquid))
+                              ->initialise_state_variables();
+    if (mat_state_vars.size() == nliquid_state_vars) {
+      unsigned i = 0;
+      auto state_variables =
+          (this->material(mpm::ParticlePhase::Liquid))->state_variables();
+      for (const auto& state_var : state_variables) {
+        this->state_variables_[mpm::ParticlePhase::Liquid].at(state_var) =
+            svars[i];
+        ++i;
+      }
+    } else
+      throw std::runtime_error(
+          "Deserialize particle(): liquid_state_vars size mismatch");
+  }
+#endif
+}
