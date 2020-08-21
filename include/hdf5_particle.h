@@ -44,6 +44,7 @@ typedef struct HDF5Particle {
   unsigned nstate_vars;
   // State variables (init to zero)
   double svars[20] = {0};
+  // Destructor
   virtual ~HDF5Particle() = default;
 } HDF5Particle;
 

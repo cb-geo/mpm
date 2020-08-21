@@ -1018,8 +1018,8 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
   unsigned nmaterials = material_id_.size();
   MPI_Pack(&nmaterials, 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
            MPI_COMM_WORLD);
-  MPI_Pack(&material_id_[0], 1, MPI_UNSIGNED, data_ptr, data.size(), &position,
-           MPI_COMM_WORLD);
+  MPI_Pack(&material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED, data_ptr,
+           data.size(), &position, MPI_COMM_WORLD);
 
   // ID
   MPI_Pack(&id_, 1, MPI_UNSIGNED_LONG_LONG, data_ptr, data.size(), &position,
@@ -1076,9 +1076,10 @@ std::vector<uint8_t> mpm::Particle<Tdim>::serialize() {
            MPI_COMM_WORLD);
 
   // state variables
-  if (this->material() != nullptr) {
+  if (this->material(mpm::ParticlePhase::Solid) != nullptr) {
     std::vector<double> svars;
-    auto state_variables = (this->material())->state_variables();
+    auto state_variables =
+        (this->material(mpm::ParticlePhase::Solid))->state_variables();
     for (const auto& state_var : state_variables)
       svars.emplace_back(
           state_variables_[mpm::ParticlePhase::Solid].at(state_var));
@@ -1101,16 +1102,24 @@ void mpm::Particle<Tdim>::deserialize(
 
 #ifdef USE_MPI
   // Type
-  int type = ParticleType.at(this->type());
+  int type;
   MPI_Unpack(data_ptr, data.size(), &position, &type, 1, MPI_INT,
              MPI_COMM_WORLD);
+  if (type != ParticleType.at(this->type()))
+    throw std::runtime_error("Deserialize particle(): particle type mismatch");
+
   // material id
   int nmaterials = 0;
   MPI_Unpack(data_ptr, data.size(), &position, &nmaterials, 1, MPI_UNSIGNED,
              MPI_COMM_WORLD);
+  if (nmaterials != materials.size())
+    throw std::runtime_error(
+        "Deserialize particle(): nmaterials mismatch with the input materials "
+        "size");
 
-  MPI_Unpack(data_ptr, data.size(), &position, &material_id_[0], 1,
-             MPI_UNSIGNED, MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position,
+             &material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
 
   // ID
   MPI_Unpack(data_ptr, data.size(), &position, &id_, 1, MPI_UNSIGNED_LONG_LONG,
@@ -1156,8 +1165,10 @@ void mpm::Particle<Tdim>::deserialize(
              MPI_COMM_WORLD);
 
   // Assign materials
-  if (material_id_[0] == materials.at(0)->id()) {
-    bool assign_mat = this->assign_material(materials.at(0));
+  if (material_id_[mpm::ParticlePhase::Solid] ==
+      materials.at(mpm::ParticlePhase::Solid)->id()) {
+    bool assign_mat =
+        this->assign_material(materials.at(mpm::ParticlePhase::Solid));
     if (!assign_mat) throw std::runtime_error("Material assignment failed");
   }
 
@@ -1173,10 +1184,12 @@ void mpm::Particle<Tdim>::deserialize(
                MPI_DOUBLE, MPI_COMM_WORLD);
 
     // Reinitialize state variables
-    auto mat_state_vars = (this->material())->initialise_state_variables();
+    auto mat_state_vars = (this->material(mpm::ParticlePhase::Solid))
+                              ->initialise_state_variables();
     if (mat_state_vars.size() == nstate_vars) {
       unsigned i = 0;
-      auto state_variables = (this->material())->state_variables();
+      auto state_variables =
+          (this->material(mpm::ParticlePhase::Solid))->state_variables();
       for (const auto& state_var : state_variables) {
         this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
             svars[i];

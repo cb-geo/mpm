@@ -374,7 +374,7 @@ class Particle : public ParticleBase<Tdim> {
 
   //! Compute pack size
   //! \retval pack size of serialized object
-  int compute_pack_size() const;
+  virtual int compute_pack_size() const;
 
  protected:
   //! particle id
