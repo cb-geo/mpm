@@ -1125,7 +1125,6 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   double pressure;
   MPI_Unpack(data_ptr, data.size(), &position, &pressure, 1, MPI_DOUBLE,
              MPI_COMM_WORLD);
-  this->assign_pressure(pressure);
 
   // Coordinates
   MPI_Unpack(data_ptr, data.size(), &position, coordinates_.data(), Tdim,
@@ -1159,8 +1158,8 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   // Assign materials
   if (material_id_[mpm::ParticlePhase::Solid] ==
       materials.at(mpm::ParticlePhase::Solid)->id()) {
-    bool assign_mat =
-        this->assign_material(materials.at(mpm::ParticlePhase::Solid));
+    bool assign_mat = this->assign_material(
+        materials.at(mpm::ParticlePhase::Solid), mpm::ParticlePhase::Solid);
     if (!assign_mat) throw std::runtime_error("Material assignment failed");
   }
 
@@ -1212,8 +1211,8 @@ void mpm::TwoPhaseParticle<Tdim>::deserialize(
   // Assign liquid materials
   if (material_id_[mpm::ParticlePhase::Liquid] ==
       materials.at(mpm::ParticlePhase::Liquid)->id()) {
-    bool assign_mat =
-        this->assign_material(materials.at(mpm::ParticlePhase::Liquid));
+    bool assign_mat = this->assign_material(
+        materials.at(mpm::ParticlePhase::Liquid), mpm::ParticlePhase::Liquid);
     if (!assign_mat) throw std::runtime_error("Material assignment failed");
   }
 
