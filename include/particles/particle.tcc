@@ -1063,16 +1063,16 @@ void mpm::Particle<Tdim>::deserialize(
   int type;
   MPI_Unpack(data_ptr, data.size(), &position, &type, 1, MPI_INT,
              MPI_COMM_WORLD);
-  if (type != ParticleType.at(this->type()))
-    throw std::runtime_error("Deserialize particle(): particle type mismatch");
+  assert(type != ParticleType.at(this->type()));
   // material id
   int nmaterials = 0;
   MPI_Unpack(data_ptr, data.size(), &position, &nmaterials, 1, MPI_UNSIGNED,
              MPI_COMM_WORLD);
+  MPI_Unpack(data_ptr, data.size(), &position,
+             &material_id_[mpm::ParticlePhase::Solid], 1, MPI_UNSIGNED,
+             MPI_COMM_WORLD);
 
-  MPI_Unpack(data_ptr, data.size(), &position, &material_id_[0], 1,
-             MPI_UNSIGNED, MPI_COMM_WORLD);
-
+  assert(nmaterials == materials.size());
   // ID
   MPI_Unpack(data_ptr, data.size(), &position, &id_, 1, MPI_UNSIGNED_LONG_LONG,
              MPI_COMM_WORLD);
@@ -1117,12 +1117,13 @@ void mpm::Particle<Tdim>::deserialize(
              MPI_COMM_WORLD);
 
   // Assign materials
-  if (material_id_[mpm::ParticlePhase::Solid] ==
-      materials.at(mpm::ParticlePhase::Solid)->id()) {
-    bool assign_mat =
-        this->assign_material(materials.at(mpm::ParticlePhase::Solid));
-    if (!assign_mat) throw std::runtime_error("Material assignment failed");
-  }
+  assert(material_id_[mpm::ParticlePhase::Solid] ==
+         materials.at(mpm::ParticlePhase::Solid)->id());
+  bool assign_mat =
+      this->assign_material(materials.at(mpm::ParticlePhase::Solid));
+  if (!assign_mat)
+    throw std::runtime_error(
+        "deserialize particle(): Material assignment failed");
 
   // nstate vars
   unsigned nstate_vars;
@@ -1137,17 +1138,16 @@ void mpm::Particle<Tdim>::deserialize(
 
     // Reinitialize state variables
     auto mat_state_vars = (this->material())->initialise_state_variables();
-    if (mat_state_vars.size() == nstate_vars) {
-      unsigned i = 0;
-      auto state_variables = (this->material())->state_variables();
-      for (const auto& state_var : state_variables) {
-        this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
-            svars[i];
-        ++i;
-      }
-    } else
+    if (mat_state_vars.size() != nstate_vars)
       throw std::runtime_error(
           "Deserialize particle(): state_vars size mismatch");
+    unsigned i = 0;
+    auto state_variables = (this->material())->state_variables();
+    for (const auto& state_var : state_variables) {
+      this->state_variables_[mpm::ParticlePhase::Solid].at(state_var) =
+          svars[i];
+      ++i;
+    }
   }
 
 #endif
