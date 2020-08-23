@@ -1063,7 +1063,7 @@ void mpm::Particle<Tdim>::deserialize(
   int type;
   MPI_Unpack(data_ptr, data.size(), &position, &type, 1, MPI_INT,
              MPI_COMM_WORLD);
-  assert(type != ParticleType.at(this->type()));
+  assert(type == ParticleType.at(this->type()));
   // material id
   int nmaterials = 0;
   MPI_Unpack(data_ptr, data.size(), &position, &nmaterials, 1, MPI_UNSIGNED,
