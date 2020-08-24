@@ -69,26 +69,25 @@ TEST_CASE("MPM 2D Explicit TwoPhase implementation is checked",
     REQUIRE(mpm->checkpoint_resume() == false);
   }
 
-  // SECTION("Check resume") {
-  //   // Write JSON file
-  //   const std::string fname = "mpm-explicit-twophase-usf";
-  //   const std::string analysis = "MPMExplicitTwoPhase2D";
-  //   const std::string mpm_scheme = "usf";
-  //   bool resume = true;
-  //   REQUIRE(mpm_test::write_json_twophase(2, resume, analysis, mpm_scheme,
-  //                                         fname) == true);
+  SECTION("Check resume") {
+    // Write JSON file
+    const std::string fname = "mpm-explicit-twophase-usf";
+    const std::string analysis = "MPMExplicitTwoPhase2D";
+    const std::string mpm_scheme = "usf";
+    bool resume = true;
+    REQUIRE(mpm_test::write_json_twophase(2, resume, analysis, mpm_scheme,
+                                          fname) == true);
 
-  //   // Create an IO object
-  //   auto io = std::make_unique<mpm::IO>(argc, argv);
-  //   // Run explicit MPM
-  //   auto mpm =
-  //   std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
-  //   // Test check point restart
-  //   REQUIRE(mpm->checkpoint_resume() == true);
-  //   // Solve
-  //   REQUIRE(mpm->solve() == true);
-  // }
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == true);
+    // Solve
+    REQUIRE(mpm->solve() == true);
+  }
 
   SECTION("Check pressure smoothing") {
     // Create an IO object
@@ -160,26 +159,25 @@ TEST_CASE("MPM 3D Explicit TwoPhase implementation is checked",
     REQUIRE(mpm->checkpoint_resume() == false);
   }
 
-  // SECTION("Check resume") {
-  //   // Write JSON file
-  //   const std::string fname = "mpm-explicit-twophase-usf";
-  //   const std::string analysis = "MPMExplicitTwoPhase3D";
-  //   const std::string mpm_scheme = "usf";
-  //   bool resume = true;
-  //   REQUIRE(mpm_test::write_json_twophase(3, resume, analysis, mpm_scheme,
-  //                                         fname) == true);
+  SECTION("Check resume") {
+    // Write JSON file
+    const std::string fname = "mpm-explicit-twophase-usf";
+    const std::string analysis = "MPMExplicitTwoPhase3D";
+    const std::string mpm_scheme = "usf";
+    bool resume = true;
+    REQUIRE(mpm_test::write_json_twophase(3, resume, analysis, mpm_scheme,
+                                          fname) == true);
 
-  //   // Create an IO object
-  //   auto io = std::make_unique<mpm::IO>(argc, argv);
-  //   // Run explicit MPM
-  //   auto mpm =
-  //   std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
+    // Create an IO object
+    auto io = std::make_unique<mpm::IO>(argc, argv);
+    // Run explicit MPM
+    auto mpm = std::make_unique<mpm::MPMExplicitTwoPhase<Dim>>(std::move(io));
 
-  //   // Test check point restart
-  //   REQUIRE(mpm->checkpoint_resume() == true);
-  //   // Solve
-  //   REQUIRE(mpm->solve() == true);
-  // }
+    // Test check point restart
+    REQUIRE(mpm->checkpoint_resume() == true);
+    // Solve
+    REQUIRE(mpm->solve() == true);
+  }
 
   SECTION("Check pressure smoothing") {
     // Create an IO object
