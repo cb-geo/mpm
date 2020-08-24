@@ -306,6 +306,10 @@ void mpm::MPMBase<Tdim>::initialise_particles() {
     if (!gen_status)
       std::runtime_error(
           "mpm::base::init_particles() Generate particles failed");
+    // Gather particle types
+    auto particle_type =
+        json_particle["generator"]["particle_type"].template get<std::string>();
+    particle_types_.insert(particle_type);
   }
 
   auto particles_gen_end = std::chrono::steady_clock::now();
@@ -487,15 +491,16 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
 //! Write HDF5 files
 template <unsigned Tdim>
 void mpm::MPMBase<Tdim>::write_hdf5(mpm::Index step, mpm::Index max_steps) {
-  // Write input geometry to vtk file
-  std::string attribute = "particles";
-  std::string extension = ".h5";
+  for (const std::string& p_type : particle_types_) {
+    // Write input geometry to vtk file
+    std::string attribute = "particles" + p_type;
+    std::string extension = ".h5";
 
-  auto particles_file =
-      io_->output_file(attribute, extension, uuid_, step, max_steps).string();
+    auto particles_file =
+        io_->output_file(attribute, extension, uuid_, step, max_steps).string();
 
-  const unsigned phase = 0;
-  mesh_->write_particles_hdf5(phase, particles_file);
+    mesh_->write_particles_hdf5(particles_file, p_type);
+  }
 }
 
 #ifdef USE_VTK

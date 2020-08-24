@@ -238,6 +238,15 @@ class Mesh {
   //! Number of particles in the mesh
   mpm::Index nparticles() const { return particles_.size(); }
 
+  //! Number of particles in the mesh with specific type
+  //! \param[in] particle particle_type A string denoting particle type
+  mpm::Index nparticles(const std::string& particle_type) const {
+    mpm::Index counter = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr)
+      if ((*pitr)->type() == particle_type) counter++;
+    return counter;
+  }
+
   //! Locate particles in a cell
   //! Iterate over all cells in a mesh to find the cell in which particles
   //! are located.
@@ -396,10 +405,11 @@ class Mesh {
   void find_ghost_boundary_cells();
 
   //! Write HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_type Name of particle type to write
   //! \retval status Status of writing HDF5 output
-  bool write_particles_hdf5(unsigned phase, const std::string& filename);
+  bool write_particles_hdf5(const std::string& filename,
+                            const std::string& particle_type);
 
   //! Read HDF5 particles
   //! \param[in] phase Index corresponding to the phase

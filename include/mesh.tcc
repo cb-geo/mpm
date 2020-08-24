@@ -1437,17 +1437,19 @@ std::vector<std::array<mpm::Index, 2>> mpm::Mesh<Tdim>::particles_cells()
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::write_particles_hdf5(unsigned phase,
-                                           const std::string& filename) {
-  const unsigned nparticles = this->nparticles();
+bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
+                                           const std::string& particle_type) {
+  const unsigned nparticles = this->nparticles(particle_type);
 
   std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    auto hdf5_ptr =
-        std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
-    particle_data.emplace_back(*hdf5_ptr);
+    if ((*pitr)->type() == particle_type) {
+      auto hdf5_ptr =
+          std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
+      particle_data.emplace_back(*hdf5_ptr);
+    }
   }
 
   // Calculate the size and the offsets of our struct members in memory

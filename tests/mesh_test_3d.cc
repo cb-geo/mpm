@@ -1001,7 +1001,8 @@ TEST_CASE("Mesh is checked for 3D case", "[mesh][3D]") {
             }
             // Test HDF5
             SECTION("Write particles HDF5") {
-              REQUIRE(mesh->write_particles_hdf5(0, "particles-3d.h5") == true);
+              REQUIRE(mesh->write_particles_hdf5("particles-3d.h5",
+                                                 particle_type) == true);
 
               auto phdf5 = mesh->particles_hdf5();
               REQUIRE(phdf5.size() == mesh->nparticles());

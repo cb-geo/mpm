@@ -209,6 +209,8 @@ class MPMBase : public MPM {
   std::shared_ptr<mpm::Mesh<Tdim>> mesh_;
   //! Constraints object
   std::shared_ptr<mpm::Constraints<Tdim>> constraints_;
+  //! Particle types
+  std::set<std::string> particle_types_;
   //! Materials
   std::map<unsigned, std::shared_ptr<mpm::Material<Tdim>>> materials_;
   //! Mathematical functions
