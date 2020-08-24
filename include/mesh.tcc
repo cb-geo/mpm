@@ -1455,8 +1455,6 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
   // Calculate the size and the offsets of our struct members in memory
   const hsize_t NRECORDS = nparticles;
 
-  const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
-
   hid_t file_id;
   hsize_t chunk_size = 10000;
   int* fill_data = NULL;
@@ -1466,12 +1464,24 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
   file_id =
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  // make a table
-  H5TBmake_table(
-      "Table Title", file_id, "table", NFIELDS, NRECORDS,
-      mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
-      mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
-      chunk_size, fill_data, compress, particle_data.data());
+  if (particle_type == "P2D" || particle_type == "P3D") {
+    const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+    // make a table
+    H5TBmake_table(
+        "Table Title", file_id, "table", NFIELDS, NRECORDS,
+        mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
+        mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
+        chunk_size, fill_data, compress, particle_data.data());
+  } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
+    const hsize_t NFIELDS = mpm::hdf5::particletwophase::NFIELDS;
+    // make a table
+    H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
+                   mpm::hdf5::particletwophase::dst_size,
+                   mpm::hdf5::particletwophase::field_names,
+                   mpm::hdf5::particletwophase::dst_offset,
+                   mpm::hdf5::particletwophase::field_type, chunk_size,
+                   fill_data, compress, particle_data.data());
+  }
 
   H5Fclose(file_id);
   return true;
@@ -1479,52 +1489,73 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-bool mpm::Mesh<Tdim>::read_particles_hdf5(unsigned phase,
-                                          const std::string& filename) {
-
-  // Create a new file using default properties.
-  hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-  // Throw an error if file can't be found
-  if (file_id < 0) throw std::runtime_error("HDF5 particle file is not found");
-
-  // Calculate the size and the offsets of our struct members in memory
-  hsize_t nrecords = 0;
-  hsize_t nfields = 0;
-  H5TBget_table_info(file_id, "table", &nfields, &nrecords);
-
-  if (nfields != mpm::hdf5::particle::NFIELDS)
-    throw std::runtime_error("HDF5 table has incorrect number of fields");
-
-  std::vector<HDF5Particle> dst_buf;
-  dst_buf.reserve(nrecords);
-  // Read the table
-  H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
-                 mpm::hdf5::particle::dst_offset,
-                 mpm::hdf5::particle::dst_sizes, dst_buf.data());
-
+bool mpm::Mesh<Tdim>::read_particles_hdf5(
+    const std::string& filename, const std::set<std::string>& particle_types) {
   // Vector of particles
   Vector<ParticleBase<Tdim>> particles;
 
   // Clear map of particles
   map_particles_.clear();
 
-  unsigned i = 0;
-  for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    if (i < nrecords) {
-      HDF5Particle particle = dst_buf[i];
-      // Get particle's material from list of materials
-      std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
-      materials.emplace_back(materials_.at(particle.material_id));
-      // Initialise particle with HDF5 data
-      (*pitr)->initialise_particle(particle, materials);
-      // Add particle to map
-      map_particles_.insert(particle.id, *pitr);
-      particles.add(*pitr);
-      ++i;
+  for (const std::string& particle_type : particle_types) {
+    // Create a new file using default properties.
+    const std::string new_file_name = filename + particle_type;
+    hid_t file_id = H5Fopen(new_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    // Throw an error if file can't be found
+    if (file_id < 0)
+      throw std::runtime_error("HDF5 particle file is not found");
+
+    // Calculate the size and the offsets of our struct members in memory
+    hsize_t nrecords = 0;
+    hsize_t nfields = 0;
+    H5TBget_table_info(file_id, "table", &nfields, &nrecords);
+
+    std::vector<HDF5Particle> dst_buf;
+    dst_buf.reserve(nrecords);
+
+    if (particle_type == "P2D" || particle_type == "P3D") {
+      if (nfields != mpm::hdf5::particle::NFIELDS)
+        throw std::runtime_error("HDF5 table has incorrect number of fields");
+      // Read the table
+      H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
+                     mpm::hdf5::particle::dst_offset,
+                     mpm::hdf5::particle::dst_sizes, dst_buf.data());
+    } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
+      if (nfields != mpm::hdf5::particletwophase::NFIELDS)
+        throw std::runtime_error("HDF5 table has incorrect number of fields");
+      // Read the table
+      H5TBread_table(file_id, "table", mpm::hdf5::particletwophase::dst_size,
+                     mpm::hdf5::particletwophase::dst_offset,
+                     mpm::hdf5::particletwophase::dst_sizes, dst_buf.data());
     }
+
+    unsigned i = 0;
+    for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
+      if (i < nrecords && (*pitr)->type() == particle_type) {
+        HDF5Particle particle = dst_buf[i];
+        // Get particle's material from list of materials
+        std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
+        materials.emplace_back(materials_.at(particle.material_id));
+
+        // Append more materials for twophase particles
+        if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
+          auto twophase_particle =
+              reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
+          materials.emplace_back(
+              materials_.at(twophase_particle->liquid_material_id));
+        }
+
+        // Initialise particle with HDF5 data
+        (*pitr)->initialise_particle(particle, materials);
+        // Add particle to map
+        map_particles_.insert(particle.id, *pitr);
+        particles.add(*pitr);
+        ++i;
+      }
+    }
+    // close the file
+    H5Fclose(file_id);
   }
-  // close the file
-  H5Fclose(file_id);
 
   // Overwrite particles container
   this->particles_ = particles;

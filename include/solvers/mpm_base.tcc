@@ -437,9 +437,6 @@ template <unsigned Tdim>
 bool mpm::MPMBase<Tdim>::checkpoint_resume() {
   bool checkpoint = true;
   try {
-    // TODO: Set phase
-    const unsigned phase = 0;
-
     int mpi_rank = 0;
 #ifdef USE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -462,7 +459,7 @@ bool mpm::MPMBase<Tdim>::checkpoint_resume() {
             .string();
 
     // Load particle information from file
-    mesh_->read_particles_hdf5(phase, particles_file);
+    mesh_->read_particles_hdf5(particles_file, particle_types_);
 
     // Clear all particle ids
     mesh_->iterate_over_cells(

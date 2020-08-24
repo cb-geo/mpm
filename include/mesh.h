@@ -412,10 +412,11 @@ class Mesh {
                             const std::string& particle_type);
 
   //! Read HDF5 particles
-  //! \param[in] phase Index corresponding to the phase
   //! \param[in] filename Name of HDF5 file to write particles data
+  //! \param[in] particle_types set of particle types to write
   //! \retval status Status of reading HDF5 output
-  bool read_particles_hdf5(unsigned phase, const std::string& filename);
+  bool read_particles_hdf5(const std::string& filename,
+                           const std::set<std::string>& particle_types);
 
   //! Return HDF5 particles
   //! \retval particles_hdf5 Vector of HDF5 particles
