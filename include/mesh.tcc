@@ -1446,9 +1446,15 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if ((*pitr)->type() == particle_type) {
-      auto hdf5_ptr =
-          std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
-      particle_data.emplace_back(*hdf5_ptr);
+      if (particle_type == "P2D" || particle_type == "P3D") {
+        auto hdf5_ptr =
+            std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
+        particle_data.emplace_back(*hdf5_ptr);
+      } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
+        auto hdf5_ptr = std::static_pointer_cast<mpm::PODParticleTwoPhase>(
+            (*pitr)->hdf5_ptr());
+        particle_data.emplace_back(*hdf5_ptr);
+      }
     }
   }
 
