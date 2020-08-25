@@ -6,7 +6,7 @@
 
 namespace mpm {
 // Define a struct of particle
-typedef struct HDF5ParticleTwoPhase : HDF5Particle {
+typedef struct PODParticleTwoPhase : PODParticle {
   // Liquid Mass
   double liquid_mass;
   // Liquid Velocity
@@ -22,14 +22,14 @@ typedef struct HDF5ParticleTwoPhase : HDF5Particle {
   // State variables (init to zero)
   double liquid_svars[5] = {0};
   // Destructor
-  virtual ~HDF5ParticleTwoPhase() = default;
-} HDF5ParticleTwoPhase;
+  virtual ~PODParticleTwoPhase() = default;
+} PODParticleTwoPhase;
 
 namespace hdf5 {
 namespace particletwophase {
 const hsize_t NFIELDS = 66;
 
-const size_t dst_size = sizeof(HDF5ParticleTwoPhase);
+const size_t dst_size = sizeof(PODParticleTwoPhase);
 
 // Destination offset
 extern const size_t dst_offset[NFIELDS];

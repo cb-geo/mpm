@@ -31,7 +31,7 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, pcoords);
 
-    mpm::HDF5ParticleTwoPhase h5_particle;
+    mpm::PODParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 

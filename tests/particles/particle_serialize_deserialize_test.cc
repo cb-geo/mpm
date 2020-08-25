@@ -38,7 +38,7 @@ TEST_CASE("Particle is checked for serialization and deserialization",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, pcoords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::PODParticle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 

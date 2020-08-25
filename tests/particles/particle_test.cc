@@ -262,7 +262,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::PODParticle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -379,7 +379,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     // Write Particle HDF5 data
     auto h5_test =
-        std::static_pointer_cast<mpm::HDF5Particle>(particle->hdf5_ptr());
+        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);
@@ -1407,7 +1407,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::PODParticle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -1524,7 +1524,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     // Write Particle HDF5 data
     auto h5_test =
-        std::static_pointer_cast<mpm::HDF5Particle>(particle->hdf5_ptr());
+        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);
@@ -2763,7 +2763,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::Particle<Dim>>(id, coords);
 
-    mpm::HDF5Particle h5_particle;
+    mpm::PODParticle h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -2881,7 +2881,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     // Write Particle HDF5 data
     auto h5_test =
-        std::static_pointer_cast<mpm::HDF5Particle>(particle->hdf5_ptr());
+        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);

@@ -32,7 +32,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
 
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::Particle<Tdim>::initialise_particle(HDF5Particle& particle) {
+bool mpm::Particle<Tdim>::initialise_particle(PODParticle& particle) {
 
   // Assign id
   this->id_ = particle.id;
@@ -105,7 +105,7 @@ bool mpm::Particle<Tdim>::initialise_particle(HDF5Particle& particle) {
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(
-    HDF5Particle& particle,
+    PODParticle& particle,
     const std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
   bool status = this->initialise_particle(particle);
 
@@ -141,7 +141,7 @@ template <unsigned Tdim>
 // cppcheck-suppress *
 std::shared_ptr<void> mpm::Particle<Tdim>::hdf5_ptr() {
   // Initialise particle data
-  auto particle_data = std::make_shared<mpm::HDF5Particle>();
+  auto particle_data = std::make_shared<mpm::PODParticle>();
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();

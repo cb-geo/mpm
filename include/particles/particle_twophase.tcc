@@ -36,7 +36,7 @@ template <unsigned Tdim>
 // cppcheck-suppress *
 std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
   // Initialise particle_data
-  auto particle_data = std::make_shared<mpm::HDF5ParticleTwoPhase>();
+  auto particle_data = std::make_shared<mpm::PODParticleTwoPhase>();
 
   Eigen::Vector3d coordinates;
   coordinates.setZero();
@@ -164,10 +164,10 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::hdf5_ptr() {
 
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
-bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(HDF5Particle& particle) {
+bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(PODParticle& particle) {
   // Initialise solid phase
   bool status = mpm::Particle<Tdim>::initialise_particle(particle);
-  auto twophase_particle = reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
+  auto twophase_particle = reinterpret_cast<PODParticleTwoPhase*>(&particle);
 
   // Liquid mass
   this->liquid_mass_ = twophase_particle->liquid_mass;
@@ -198,9 +198,9 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(HDF5Particle& particle) {
 //! Initialise particle data from HDF5
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
-    HDF5Particle& particle,
+    PODParticle& particle,
     const std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) {
-  auto twophase_particle = reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
+  auto twophase_particle = reinterpret_cast<PODParticleTwoPhase*>(&particle);
   bool status = this->initialise_particle(*twophase_particle);
 
   assert(materials.size() == 2);

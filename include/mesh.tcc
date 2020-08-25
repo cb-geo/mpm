@@ -1441,13 +1441,13 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
                                            const std::string& particle_type) {
   const unsigned nparticles = this->nparticles(particle_type);
 
-  std::vector<HDF5Particle> particle_data;  // = new HDF5Particle[nparticles];
+  std::vector<PODParticle> particle_data;  // = new PODParticle[nparticles];
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if ((*pitr)->type() == particle_type) {
       auto hdf5_ptr =
-          std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
+          std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
       particle_data.emplace_back(*hdf5_ptr);
     }
   }
@@ -1510,7 +1510,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
     hsize_t nfields = 0;
     H5TBget_table_info(file_id, "table", &nfields, &nrecords);
 
-    std::vector<HDF5Particle> dst_buf;
+    std::vector<PODParticle> dst_buf;
     dst_buf.reserve(nrecords);
 
     if (particle_type == "P2D" || particle_type == "P3D") {
@@ -1532,7 +1532,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
     unsigned i = 0;
     for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
       if (i < nrecords && (*pitr)->type() == particle_type) {
-        HDF5Particle particle = dst_buf[i];
+        PODParticle particle = dst_buf[i];
         // Get particle's material from list of materials
         std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
         materials.emplace_back(materials_.at(particle.material_id));
@@ -1540,7 +1540,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
         // Append more materials for twophase particles
         if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
           auto twophase_particle =
-              reinterpret_cast<HDF5ParticleTwoPhase*>(&particle);
+              reinterpret_cast<PODParticleTwoPhase*>(&particle);
           materials.emplace_back(
               materials_.at(twophase_particle->liquid_material_id));
         }
@@ -1569,15 +1569,15 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
 
 //! Write particles to HDF5
 template <unsigned Tdim>
-std::vector<mpm::HDF5Particle> mpm::Mesh<Tdim>::particles_hdf5() const {
+std::vector<mpm::PODParticle> mpm::Mesh<Tdim>::particles_hdf5() const {
   const unsigned nparticles = this->nparticles();
 
-  std::vector<mpm::HDF5Particle> particles_hdf5;
+  std::vector<mpm::PODParticle> particles_hdf5;
   particles_hdf5.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     auto hdf5_ptr =
-        std::static_pointer_cast<mpm::HDF5Particle>((*pitr)->hdf5_ptr());
+        std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
     particles_hdf5.emplace_back(*hdf5_ptr);
   }
 

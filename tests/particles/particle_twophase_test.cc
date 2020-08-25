@@ -213,7 +213,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5ParticleTwoPhase h5_particle;
+    mpm::PODParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -360,7 +360,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    auto h5_test = std::static_pointer_cast<mpm::HDF5ParticleTwoPhase>(
+    auto h5_test = std::static_pointer_cast<mpm::PODParticleTwoPhase>(
         particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);
@@ -1455,7 +1455,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5ParticleTwoPhase h5_particle;
+    mpm::PODParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -1602,7 +1602,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    auto h5_test = std::static_pointer_cast<mpm::HDF5ParticleTwoPhase>(
+    auto h5_test = std::static_pointer_cast<mpm::PODParticleTwoPhase>(
         particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);
@@ -2943,7 +2943,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
         std::make_shared<mpm::TwoPhaseParticle<Dim>>(id, coords);
 
-    mpm::HDF5ParticleTwoPhase h5_particle;
+    mpm::PODParticleTwoPhase h5_particle;
     h5_particle.id = 13;
     h5_particle.mass = 501.5;
 
@@ -3091,7 +3091,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
             h5_particle.liquid_material_id);
 
     // Write Particle HDF5 data
-    auto h5_test = std::static_pointer_cast<mpm::HDF5ParticleTwoPhase>(
+    auto h5_test = std::static_pointer_cast<mpm::PODParticleTwoPhase>(
         particle->hdf5_ptr());
 
     REQUIRE(h5_particle.id == h5_test->id);

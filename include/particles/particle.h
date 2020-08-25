@@ -49,14 +49,14 @@ class Particle : public ParticleBase<Tdim> {
   //! Initialise particle from HDF5 data
   //! \param[in] particle HDF5 data of particle
   //! \retval status Status of reading HDF5 particle
-  bool initialise_particle(HDF5Particle& particle) override;
+  bool initialise_particle(PODParticle& particle) override;
 
   //! Initialise particle HDF5 data and material
   //! \param[in] particle HDF5 data of particle
   //! \param[in] material Material associated with the particle
   //! \retval status Status of reading HDF5 particle
   virtual bool initialise_particle(
-      HDF5Particle& particle,
+      PODParticle& particle,
       const std::vector<std::shared_ptr<Material<Tdim>>>& materials) override;
 
   //! Return particle data as HDF5 pointer

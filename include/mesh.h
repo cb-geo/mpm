@@ -420,7 +420,7 @@ class Mesh {
 
   //! Return HDF5 particles
   //! \retval particles_hdf5 Vector of HDF5 particles
-  std::vector<mpm::HDF5Particle> particles_hdf5() const;
+  std::vector<mpm::PODParticle> particles_hdf5() const;
 
   //! Return nodal coordinates
   std::vector<Eigen::Matrix<double, 3, 1>> nodal_coordinates() const;
