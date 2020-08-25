@@ -49,7 +49,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
 
   //! Initialise particle POD data and material
   //! \param[in] particle POD data of particle
-  //! \param[in] materials Material associated with the particle arranged in vector
+  //! \param[in] materials Material associated with the particle arranged in a
+  //! vector
   //! \retval status Status of reading POD particle
   bool initialise_particle(
       PODParticle& particle,

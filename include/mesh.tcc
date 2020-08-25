@@ -1523,7 +1523,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
     std::vector<PODParticle> dst_buf;
     dst_buf.reserve(nrecords);
 
-  // TODO: Think a better way to access mpm::pod::particle namespaces
+    // TODO: Think a better way to access mpm::pod::particle namespaces
     if (particle_type == "P2D" || particle_type == "P3D") {
       if (nfields != mpm::pod::particle::NFIELDS)
         throw std::runtime_error("HDF5 table has incorrect number of fields");
