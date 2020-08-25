@@ -469,7 +469,7 @@ class Mesh {
   void create_nodal_properties_discontinuity();
 
   //! Initialise discontinuities
-  //! \param[in] discontinuities
+  //! \param[in] discontinuities List of discontinuities 
   void initialise_discontinuities(
       const std::map<unsigned, std::shared_ptr<mpm::DiscontinuityBase<Tdim>>>&
           discontinuities) {
