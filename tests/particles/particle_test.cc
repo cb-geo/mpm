@@ -5,12 +5,12 @@
 #include "cell.h"
 #include "element.h"
 #include "function_base.h"
-#include "hdf5_particle.h"
 #include "hexahedron_element.h"
 #include "linear_function.h"
 #include "material.h"
 #include "node.h"
 #include "particle.h"
+#include "pod_particle.h"
 #include "quadrilateral_element.h"
 
 //! \brief Check particle class for 1D case
@@ -378,8 +378,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
     // Write Particle HDF5 data
-    auto h5_test =
-        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
+    auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);
@@ -1523,8 +1522,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
     // Write Particle HDF5 data
-    auto h5_test =
-        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
+    auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);
@@ -2880,8 +2878,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
     // Write Particle HDF5 data
-    auto h5_test =
-        std::static_pointer_cast<mpm::PODParticle>(particle->hdf5_ptr());
+    auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);
     REQUIRE(h5_particle.mass == h5_test->mass);

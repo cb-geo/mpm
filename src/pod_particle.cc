@@ -1,6 +1,6 @@
-#include "hdf5_particle.h"
+#include "pod_particle.h"
 namespace mpm {
-namespace hdf5 {
+namespace pod {
 namespace particle {
 const size_t dst_offset[NFIELDS] = {
     HOFFSET(PODParticle, id),
@@ -190,5 +190,5 @@ const hid_t field_type[NFIELDS] = {
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE};
 }  // namespace particle
-}  // namespace hdf5
+}  // namespace pod
 }  // namespace mpm

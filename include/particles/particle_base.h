@@ -14,9 +14,9 @@
 #include "cell.h"
 #include "data_types.h"
 #include "function_base.h"
-#include "hdf5_particle.h"
-#include "hdf5_particle_twophase.h"
 #include "material.h"
+#include "pod_particle.h"
+#include "pod_particle_twophase.h"
 
 namespace mpm {
 
@@ -81,7 +81,7 @@ class ParticleBase {
 
   //! Return particle data as HDF5 pointer
   //! \retval particle HDF5 pointer of the particle
-  virtual std::shared_ptr<void> hdf5_ptr() = 0;
+  virtual std::shared_ptr<void> pod() = 0;
 
   //! Return id of the particleBase
   Index id() const { return id_; }

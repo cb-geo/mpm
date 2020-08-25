@@ -1,8 +1,8 @@
-#ifndef MPM_HDF5_TWOPHASE_H_
-#define MPM_HDF5_TWOPHASE_H_
+#ifndef MPM_POD_TWOPHASE_H_
+#define MPM_POD_TWOPHASE_H_
 
 // HDF5 Particle
-#include "hdf5_particle.h"
+#include "pod_particle.h"
 
 namespace mpm {
 // Define a struct of particle
@@ -25,7 +25,7 @@ typedef struct PODParticleTwoPhase : PODParticle {
   virtual ~PODParticleTwoPhase() = default;
 } PODParticleTwoPhase;
 
-namespace hdf5 {
+namespace pod {
 namespace particletwophase {
 const hsize_t NFIELDS = 66;
 
@@ -44,8 +44,8 @@ extern const char* field_names[NFIELDS];
 extern const hid_t field_type[NFIELDS];
 
 }  // namespace particletwophase
-}  // namespace hdf5
+}  // namespace pod
 
 }  // namespace mpm
 
-#endif  // MPM_HDF5_TWOPHASE_H_
+#endif  // MPM_POD_TWOPHASE_H_

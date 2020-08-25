@@ -1,5 +1,5 @@
-#ifndef MPM_HDF5_H_
-#define MPM_HDF5_H_
+#ifndef MPM_POD_H_
+#define MPM_POD_H_
 
 // HDF5
 #include "hdf5.h"
@@ -48,7 +48,7 @@ typedef struct PODParticle {
   virtual ~PODParticle() = default;
 } PODParticle;
 
-namespace hdf5 {
+namespace pod {
 namespace particle {
 const hsize_t NFIELDS = 53;
 
@@ -67,8 +67,8 @@ extern const char* field_names[NFIELDS];
 extern const hid_t field_type[NFIELDS];
 
 }  // namespace particle
-}  // namespace hdf5
+}  // namespace pod
 
 }  // namespace mpm
 
-#endif  // MPM_HDF5_H_
+#endif  // MPM_POD_H_

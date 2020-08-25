@@ -1441,19 +1441,21 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
                                            const std::string& particle_type) {
   const unsigned nparticles = this->nparticles(particle_type);
 
-  std::vector<PODParticle> particle_data;  // = new PODParticle[nparticles];
+  // FIXME: PODParticle type does not work for twophase particle
+  std::vector<PODParticle> particle_data;
   particle_data.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
     if ((*pitr)->type() == particle_type) {
+      // TODO: Think a better way to separate static_pointer_cast of PODParticle
+      // or PODParticleTwoPhase
       if (particle_type == "P2D" || particle_type == "P3D") {
-        auto hdf5_ptr =
-            std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
-        particle_data.emplace_back(*hdf5_ptr);
+        auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+        particle_data.emplace_back(*pod);
       } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
-        auto hdf5_ptr = std::static_pointer_cast<mpm::PODParticleTwoPhase>(
-            (*pitr)->hdf5_ptr());
-        particle_data.emplace_back(*hdf5_ptr);
+        auto pod =
+            std::static_pointer_cast<mpm::PODParticleTwoPhase>((*pitr)->pod());
+        particle_data.emplace_back(*pod);
       }
     }
   }
@@ -1470,22 +1472,23 @@ bool mpm::Mesh<Tdim>::write_particles_hdf5(const std::string& filename,
   file_id =
       H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
+  // TODO: Think a better way to access mpm::pod::particle namespaces
   if (particle_type == "P2D" || particle_type == "P3D") {
-    const hsize_t NFIELDS = mpm::hdf5::particle::NFIELDS;
+    const hsize_t NFIELDS = mpm::pod::particle::NFIELDS;
     // make a table
     H5TBmake_table(
         "Table Title", file_id, "table", NFIELDS, NRECORDS,
-        mpm::hdf5::particle::dst_size, mpm::hdf5::particle::field_names,
-        mpm::hdf5::particle::dst_offset, mpm::hdf5::particle::field_type,
+        mpm::pod::particle::dst_size, mpm::pod::particle::field_names,
+        mpm::pod::particle::dst_offset, mpm::pod::particle::field_type,
         chunk_size, fill_data, compress, particle_data.data());
   } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
-    const hsize_t NFIELDS = mpm::hdf5::particletwophase::NFIELDS;
+    const hsize_t NFIELDS = mpm::pod::particletwophase::NFIELDS;
     // make a table
     H5TBmake_table("Table Title", file_id, "table", NFIELDS, NRECORDS,
-                   mpm::hdf5::particletwophase::dst_size,
-                   mpm::hdf5::particletwophase::field_names,
-                   mpm::hdf5::particletwophase::dst_offset,
-                   mpm::hdf5::particletwophase::field_type, chunk_size,
+                   mpm::pod::particletwophase::dst_size,
+                   mpm::pod::particletwophase::field_names,
+                   mpm::pod::particletwophase::dst_offset,
+                   mpm::pod::particletwophase::field_type, chunk_size,
                    fill_data, compress, particle_data.data());
   }
 
@@ -1505,6 +1508,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
 
   for (const std::string& particle_type : particle_types) {
     // Create a new file using default properties.
+    // FIXME: new_file_name is not appropriate
     const std::string new_file_name = filename + particle_type;
     hid_t file_id = H5Fopen(new_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     // Throw an error if file can't be found
@@ -1519,20 +1523,21 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
     std::vector<PODParticle> dst_buf;
     dst_buf.reserve(nrecords);
 
+  // TODO: Think a better way to access mpm::pod::particle namespaces
     if (particle_type == "P2D" || particle_type == "P3D") {
-      if (nfields != mpm::hdf5::particle::NFIELDS)
+      if (nfields != mpm::pod::particle::NFIELDS)
         throw std::runtime_error("HDF5 table has incorrect number of fields");
       // Read the table
-      H5TBread_table(file_id, "table", mpm::hdf5::particle::dst_size,
-                     mpm::hdf5::particle::dst_offset,
-                     mpm::hdf5::particle::dst_sizes, dst_buf.data());
+      H5TBread_table(file_id, "table", mpm::pod::particle::dst_size,
+                     mpm::pod::particle::dst_offset,
+                     mpm::pod::particle::dst_sizes, dst_buf.data());
     } else if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
-      if (nfields != mpm::hdf5::particletwophase::NFIELDS)
+      if (nfields != mpm::pod::particletwophase::NFIELDS)
         throw std::runtime_error("HDF5 table has incorrect number of fields");
       // Read the table
-      H5TBread_table(file_id, "table", mpm::hdf5::particletwophase::dst_size,
-                     mpm::hdf5::particletwophase::dst_offset,
-                     mpm::hdf5::particletwophase::dst_sizes, dst_buf.data());
+      H5TBread_table(file_id, "table", mpm::pod::particletwophase::dst_size,
+                     mpm::pod::particletwophase::dst_offset,
+                     mpm::pod::particletwophase::dst_sizes, dst_buf.data());
     }
 
     unsigned i = 0;
@@ -1543,6 +1548,7 @@ bool mpm::Mesh<Tdim>::read_particles_hdf5(
         std::vector<std::shared_ptr<mpm::Material<Tdim>>> materials;
         materials.emplace_back(materials_.at(particle.material_id));
 
+        // TODO: Think a better way to access more than one material id
         // Append more materials for twophase particles
         if (particle_type == "P2D2PHASE" || particle_type == "P3D2PHASE") {
           auto twophase_particle =
@@ -1582,9 +1588,8 @@ std::vector<mpm::PODParticle> mpm::Mesh<Tdim>::particles_hdf5() const {
   particles_hdf5.reserve(nparticles);
 
   for (auto pitr = particles_.cbegin(); pitr != particles_.cend(); ++pitr) {
-    auto hdf5_ptr =
-        std::static_pointer_cast<mpm::PODParticle>((*pitr)->hdf5_ptr());
-    particles_hdf5.emplace_back(*hdf5_ptr);
+    auto pod = std::static_pointer_cast<mpm::PODParticle>((*pitr)->pod());
+    particles_hdf5.emplace_back(*pod);
   }
 
   return particles_hdf5;

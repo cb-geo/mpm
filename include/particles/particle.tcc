@@ -139,7 +139,7 @@ bool mpm::Particle<Tdim>::initialise_particle(
 //! Return particle data as HDF5 pointer
 template <unsigned Tdim>
 // cppcheck-suppress *
-std::shared_ptr<void> mpm::Particle<Tdim>::hdf5_ptr() {
+std::shared_ptr<void> mpm::Particle<Tdim>::pod() {
   // Initialise particle data
   auto particle_data = std::make_shared<mpm::PODParticle>();
 

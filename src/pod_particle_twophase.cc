@@ -1,6 +1,6 @@
-#include "hdf5_particle_twophase.h"
+#include "pod_particle_twophase.h"
 namespace mpm {
-namespace hdf5 {
+namespace pod {
 namespace particletwophase {
 const size_t dst_offset[NFIELDS] = {
     // Solid phase
@@ -238,5 +238,5 @@ const hid_t field_type[NFIELDS] = {
     H5T_NATIVE_UINT,   H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE,
     H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE};
 }  // namespace particletwophase
-}  // namespace hdf5
+}  // namespace pod
 }  // namespace mpm

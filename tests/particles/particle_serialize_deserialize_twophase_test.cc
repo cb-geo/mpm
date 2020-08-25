@@ -3,10 +3,10 @@
 #include "catch.hpp"
 
 #include "data_types.h"
-#include "hdf5_particle_twophase.h"
 #include "material.h"
 #include "particle.h"
 #include "particle_twophase.h"
+#include "pod_particle_twophase.h"
 
 //! \brief Check particle class for serialization and deserialization
 TEST_CASE("Twophase particle is checked for serialization and deserialization",

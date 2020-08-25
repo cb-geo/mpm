@@ -7,7 +7,7 @@
 #include <Partio.h>
 
 #include "data_types.h"
-#include "hdf5_particle.h"
+#include "pod_particle.h"
 
 namespace mpm::partio {
 
