@@ -27,8 +27,8 @@ TEST_CASE("Particle is checked for serialization and deserialization",
   // Phase
   const unsigned phase = 0;
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     // Coordinates
@@ -94,7 +94,7 @@ TEST_CASE("Particle is checked for serialization and deserialization",
 
     h5_particle.material_id = 1;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Initialise material

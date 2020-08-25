@@ -42,16 +42,15 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Delete assignment operator
   TwoPhaseParticle& operator=(const TwoPhaseParticle<Tdim>&) = delete;
 
-  //! Initialise particle from HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle from POD data
+  //! \param[in] particle POD data of particle
+  //! \retval status Status of reading POD particle
   bool initialise_particle(PODParticle& particle) override;
 
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] solid_material Solid material associated with the particle
-  //! \param[in] liquid_material Liquid material associated with the particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data and material
+  //! \param[in] particle POD data of particle
+  //! \param[in] materials Material associated with the particle arranged in vector
+  //! \retval status Status of reading POD particle
   bool initialise_particle(
       PODParticle& particle,
       const std::vector<std::shared_ptr<Material<Tdim>>>& materials) override;
@@ -59,8 +58,8 @@ class TwoPhaseParticle : public mpm::Particle<Tdim> {
   //! Initialise particle liquid phase on top of the regular solid phase
   void initialise() override;
 
-  //! Return particle data as HDF5 pointer
-  //! \retval particle HDF5 pointer of the particle
+  //! Return particle data as POD
+  //! \retval particle POD of the particle
   std::shared_ptr<void> pod() override;
 
   //! Assign saturation degree

@@ -256,7 +256,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     }
   }
 
-  SECTION("Check initialise particle HDF5") {
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -318,7 +318,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
 
     h5_particle.material_id = 1;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -377,7 +377,7 @@ TEST_CASE("Particle is checked for 1D case", "[particle][1D]") {
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);
@@ -1399,8 +1399,8 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     }
   }
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -1462,7 +1462,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
 
     h5_particle.material_id = 1;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -1521,7 +1521,7 @@ TEST_CASE("Particle is checked for 2D case", "[particle][2D]") {
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);
@@ -2754,8 +2754,8 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     }
   }
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -2817,7 +2817,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
 
     h5_particle.material_id = 1;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -2877,7 +2877,7 @@ TEST_CASE("Particle is checked for 3D case", "[particle][3D]") {
     // Check material id
     REQUIRE(particle->material_id() == h5_particle.material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test = std::static_pointer_cast<mpm::PODParticle>(particle->pod());
 
     REQUIRE(h5_particle.id == h5_test->id);

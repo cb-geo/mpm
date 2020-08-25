@@ -207,7 +207,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     }
   }
 
-  SECTION("Check initialise particle HDF5") {
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -283,7 +283,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
 
     h5_particle.liquid_material_id = 2;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -359,7 +359,7 @@ TEST_CASE("TwoPhase Particle is checked for 1D case",
     REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
             h5_particle.liquid_material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test =
         std::static_pointer_cast<mpm::PODParticleTwoPhase>(particle->pod());
 
@@ -1448,8 +1448,8 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     }
   }
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -1525,7 +1525,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
 
     h5_particle.liquid_material_id = 2;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -1601,7 +1601,7 @@ TEST_CASE("TwoPhase Particle is checked for 2D case",
     REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
             h5_particle.liquid_material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test =
         std::static_pointer_cast<mpm::PODParticleTwoPhase>(particle->pod());
 
@@ -2936,8 +2936,8 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     }
   }
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     std::shared_ptr<mpm::ParticleBase<Dim>> particle =
@@ -3013,7 +3013,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
 
     h5_particle.liquid_material_id = 2;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Check particle id
@@ -3090,7 +3090,7 @@ TEST_CASE("TwoPhase Particle is checked for 3D case",
     REQUIRE(particle->material_id(mpm::ParticlePhase::Liquid) ==
             h5_particle.liquid_material_id);
 
-    // Write Particle HDF5 data
+    // Write Particle POD data
     auto h5_test =
         std::static_pointer_cast<mpm::PODParticleTwoPhase>(particle->pod());
 

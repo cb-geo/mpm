@@ -20,8 +20,8 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
   // Phase
   const unsigned phase = 0;
 
-  // Check initialise particle from HDF5 file
-  SECTION("Check initialise particle HDF5") {
+  // Check initialise particle from POD file
+  SECTION("Check initialise particle POD") {
     mpm::Index id = 0;
     const double Tolerance = 1.E-7;
     // Coordinates
@@ -111,7 +111,7 @@ TEST_CASE("Twophase particle is checked for serialization and deserialization",
     for (unsigned i = 0; i < h5_particle.nliquid_state_vars; ++i)
       h5_particle.liquid_svars[i] = 0.;
 
-    // Reinitialise particle from HDF5 data
+    // Reinitialise particle from POD data
     REQUIRE(particle->initialise_particle(h5_particle) == true);
 
     // Assign material

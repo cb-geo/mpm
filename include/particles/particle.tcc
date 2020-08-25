@@ -30,7 +30,7 @@ mpm::Particle<Tdim>::Particle(Index id, const VectorDim& coord, bool status)
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(PODParticle& particle) {
 
@@ -102,7 +102,7 @@ bool mpm::Particle<Tdim>::initialise_particle(PODParticle& particle) {
   return true;
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
 bool mpm::Particle<Tdim>::initialise_particle(
     PODParticle& particle,
@@ -136,7 +136,7 @@ bool mpm::Particle<Tdim>::initialise_particle(
   return status;
 }
 
-//! Return particle data as HDF5 pointer
+//! Return particle data as POD
 template <unsigned Tdim>
 // cppcheck-suppress *
 std::shared_ptr<void> mpm::Particle<Tdim>::pod() {

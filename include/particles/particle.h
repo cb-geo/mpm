@@ -46,21 +46,21 @@ class Particle : public ParticleBase<Tdim> {
   //! Delete assignment operator
   Particle& operator=(const Particle<Tdim>&) = delete;
 
-  //! Initialise particle from HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle from POD data
+  //! \param[in] particle POD data of particle
+  //! \retval status Status of reading POD particle
   bool initialise_particle(PODParticle& particle) override;
 
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data and material
+  //! \param[in] particle POD data of particle
+  //! \param[in] materials Material associated with the particle arranged in vector
+  //! \retval status Status of reading POD particle
   virtual bool initialise_particle(
       PODParticle& particle,
       const std::vector<std::shared_ptr<Material<Tdim>>>& materials) override;
 
-  //! Return particle data as HDF5 pointer
-  //! \retval particle HDF5 pointer of the particle
+  //! Return particle data as POD
+  //! \retval particle POD of the particle
   std::shared_ptr<void> pod() override;
 
   //! Initialise properties
@@ -236,7 +236,7 @@ class Particle : public ParticleBase<Tdim> {
   //! \param[in] state_vars State variables
   //! \param[in] material Material associated with the particle
   //! \param[in] phase Index to indicate material phase
-  //! \retval status Status of cloning HDF5 particle
+  //! \retval status Status of assigning material state variables
   bool assign_material_state_vars(
       const mpm::dense_map& state_vars,
       const std::shared_ptr<mpm::Material<Tdim>>& material,

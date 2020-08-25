@@ -1,7 +1,7 @@
 #ifndef MPM_POD_TWOPHASE_H_
 #define MPM_POD_TWOPHASE_H_
 
-// HDF5 Particle
+// POD Particle
 #include "pod_particle.h"
 
 namespace mpm {

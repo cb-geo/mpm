@@ -66,21 +66,21 @@ class ParticleBase {
   //! Delete assignement operator
   ParticleBase& operator=(const ParticleBase<Tdim>&) = delete;
 
-  //! Initialise particle HDF5 data
-  //! \param[in] particle HDF5 data of particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data
+  //! \param[in] particle POD data of particle
+  //! \retval status Status of reading POD particle
   virtual bool initialise_particle(PODParticle& particle) = 0;
 
-  //! Initialise particle HDF5 data and material
-  //! \param[in] particle HDF5 data of particle
-  //! \param[in] material Material associated with the particle
-  //! \retval status Status of reading HDF5 particle
+  //! Initialise particle POD data and material
+  //! \param[in] particle POD data of particle
+  //! \param[in] materials Material associated with the particle arranged in vector
+  //! \retval status Status of reading POD particle
   virtual bool initialise_particle(
       PODParticle& particle,
       const std::vector<std::shared_ptr<Material<Tdim>>>& materials) = 0;
 
-  //! Return particle data as HDF5 pointer
-  //! \retval particle HDF5 pointer of the particle
+  //! Return particle data as POD
+  //! \retval particle POD of the particle
   virtual std::shared_ptr<void> pod() = 0;
 
   //! Return id of the particleBase

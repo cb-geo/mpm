@@ -31,7 +31,7 @@ mpm::TwoPhaseParticle<Tdim>::TwoPhaseParticle(Index id, const VectorDim& coord,
   console_ = std::make_unique<spdlog::logger>(logger, mpm::stdout_sink);
 }
 
-//! Return particle data as HDF5 pointer
+//! Return particle data as POD
 template <unsigned Tdim>
 // cppcheck-suppress *
 std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() {
@@ -162,7 +162,7 @@ std::shared_ptr<void> mpm::TwoPhaseParticle<Tdim>::pod() {
   return particle_data;
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(PODParticle& particle) {
   // Initialise solid phase
@@ -195,7 +195,7 @@ bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(PODParticle& particle) {
   return status;
 }
 
-//! Initialise particle data from HDF5
+//! Initialise particle data from POD
 template <unsigned Tdim>
 bool mpm::TwoPhaseParticle<Tdim>::initialise_particle(
     PODParticle& particle,
