@@ -143,6 +143,7 @@ bool mpm::MPMExplicit<Tdim>::solve() {
 #ifdef USE_MPI
 #ifdef USE_GRAPH_PARTITIONING
     mesh_->transfer_halo_particles();
+    MPI_Barrier(MPI_COMM_WORLD);
 #endif
 #endif
 

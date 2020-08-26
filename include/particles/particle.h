@@ -296,7 +296,21 @@ class Particle : public ParticleBase<Tdim> {
   void assign_neighbours(const std::vector<mpm::Index>& neighbours) override;
 
   //! Return neighbour ids
-  std::vector<mpm::Index> neighbours() const override { return neighbours_; };
+  std::vector<mpm::Index> neighbours() const override { return neighbours_; }
+
+  //! Type of particle
+  std::string type() const override { return (Tdim == 2) ? "P2D" : "P3D"; }
+
+  //! Serialize
+  //! \retval buffer Serialized buffer data
+  std::vector<uint8_t> serialize() override;
+
+  //! Deserialize
+  //! \param[in] buffer Serialized buffer data
+  //! \param[in] material Particle material pointers
+  void deserialize(
+      const std::vector<uint8_t>& buffer,
+      std::vector<std::shared_ptr<mpm::Material<Tdim>>>& materials) override;
 
  protected:
   //! Initialise particle material container
@@ -314,6 +328,10 @@ class Particle : public ParticleBase<Tdim> {
   //! \retval strain rate at particle inside a cell
   inline Eigen::Matrix<double, 6, 1> compute_strain_rate(
       const Eigen::MatrixXd& dn_dx, unsigned phase) noexcept;
+
+  //! Compute pack size
+  //! \retval pack size of serialized object
+  int compute_pack_size() const;
 
  private:
   //! particle id
@@ -385,6 +403,8 @@ class Particle : public ParticleBase<Tdim> {
   //! Map of tensor properties
   tsl::robin_map<std::string, std::function<Eigen::VectorXd()>>
       tensor_properties_;
+  //! Pack size
+  unsigned pack_size_{0};
 
 };  // Particle class
 }  // namespace mpm
